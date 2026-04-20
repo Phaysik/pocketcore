@@ -1,4 +1,4 @@
-# project-name
+# pocketcore
 
 ## Program Requirements
 
