@@ -1,11 +1,22 @@
 #include "Registry/typeRegistry.h"
 
+#include <array>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string_view>
 
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Types/typeEffectiveness.h"
+#include "Types/types.h"
+
 #include <gtest/gtest.h>
 
+#include <catch2/matchers/catch_matchers.hpp>
+
+using Pokemon::Configuration::MAX_TYPES;
+using Pokemon::Core::ub;
 using Pokemon::Registry::Types::TypeEntry;
 using Pokemon::Registry::Types::TypeRegistry;
 using Pokemon::Types::TypeEffectiveness;
@@ -34,13 +45,13 @@ namespace
 
 TEST_F(TypeRegistryTest, GivenDefaultConstructionWhenQueryingAmountRegisteredThenReturns19)
 {
-	auto amount = registry.getAmountRegistered();
+	ub amount{registry.getAmountRegistered()};
 	EXPECT_EQ(amount, 19);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultConstructionWhenQueryingNextTypeIdThenReturns19)
 {
-	auto nextId = registry.getNextTypeId();
+	ub nextId{registry.getNextTypeId()};
 	EXPECT_EQ(nextId, 19);
 }
 
@@ -50,15 +61,15 @@ TEST_F(TypeRegistryTest, GivenDefaultConstructionWhenQueryingNextTypeIdThenRetur
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingFirstEntryThenReturnsNormal)
 {
-	auto entry = registry.getEntry(0);
-	EXPECT_EQ(entry.typeId, static_cast<Pokemon::Core::ub>(Types::Normal));
+	TypeEntry entry{registry.getEntry(0)};
+	EXPECT_EQ(entry.typeId, static_cast<ub>(Types::Normal));
 	EXPECT_EQ(entry.name, "Normal");
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingLastBuiltinEntryThenReturnsStellar)
 {
-	auto entry = registry.getEntry(18);
-	EXPECT_EQ(entry.typeId, static_cast<Pokemon::Core::ub>(Types::Stellar));
+	TypeEntry entry{registry.getEntry(18)};
+	EXPECT_EQ(entry.typeId, static_cast<ub>(Types::Stellar));
 	EXPECT_EQ(entry.name, "Stellar");
 }
 
@@ -69,7 +80,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingLastBuiltinEntryThenRetu
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingNormalVsNormalThenReturnsEffective)
 {
 	// Normal (index 0) attacking Normal (index 0) => E
-	auto cell = registry.getTypeChartCell(0, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(0, 0)};
 	EXPECT_EQ(cell, E);
 }
 
@@ -77,21 +88,21 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingNormalVsRockThenReturns
 {
 	// Normal (index 0) attacking Rock (index 5) => NVE
 	// Rock is the 6th type registered (index 5 in mEntries)
-	auto cell = registry.getTypeChartCell(0, 5);
+	TypeEffectiveness cell{registry.getTypeChartCell(0, 5)};
 	EXPECT_EQ(cell, NVE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingNormalVsGhostThenReturnsNoEffect)
 {
 	// Normal (index 0) attacking Ghost (index 7) => NE
-	auto cell = registry.getTypeChartCell(0, 7);
+	TypeEffectiveness cell{registry.getTypeChartCell(0, 7)};
 	EXPECT_EQ(cell, NE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingFightingVsNormalThenReturnsSuperEffective)
 {
 	// Fighting (index 1) attacking Normal (index 0) => SE
-	auto cell = registry.getTypeChartCell(1, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(1, 0)};
 	EXPECT_EQ(cell, SE);
 }
 
@@ -101,7 +112,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingFightingVsNormalThenRet
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingNormalRowThenMatchesPredefinedMatchup)
 {
-	auto row = registry.getTypeChartRow(0);
+	std::array<TypeEffectiveness, MAX_TYPES> row{registry.getTypeChartRow(0)};
 
 	// Normal matchup has 18 values; remaining slots should be NOT_DEFINED
 	EXPECT_EQ(row.at(0), E);   // vs Normal
@@ -116,34 +127,40 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingNormalRowThenMatchesPred
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpNormalByNameThenReturnsCorrectId)
 {
-	auto result = registry.getTypeId("Normal");
+	std::optional<ub> result{registry.getTypeId("Normal")};
 	ASSERT_TRUE(result.has_value());
-	EXPECT_EQ(result.value(), static_cast<Pokemon::Core::ub>(Types::Normal));
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(result.value(), static_cast<ub>(Types::Normal));
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpFireByNameThenReturnsCorrectId)
 {
-	auto result = registry.getTypeId("Fire");
+	std::optional<ub> result{registry.getTypeId("Fire")};
 	ASSERT_TRUE(result.has_value());
-	EXPECT_EQ(result.value(), static_cast<Pokemon::Core::ub>(Types::Fire));
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(result.value(), static_cast<ub>(Types::Fire));
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpStellarByNameThenReturnsCorrectId)
 {
-	auto result = registry.getTypeId("Stellar");
+	std::optional<ub> result{registry.getTypeId("Stellar")};
 	ASSERT_TRUE(result.has_value());
-	EXPECT_EQ(result.value(), static_cast<Pokemon::Core::ub>(Types::Stellar));
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(result.value(), static_cast<ub>(Types::Stellar));
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpNonexistentNameThenReturnsNullopt)
 {
-	auto result = registry.getTypeId("Shadow");
+	std::optional<ub> result{registry.getTypeId("Shadow")};
 	EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpEmptyNameThenReturnsNullopt)
 {
-	auto result = registry.getTypeId("");
+	std::optional<ub> result{registry.getTypeId("")};
 	EXPECT_FALSE(result.has_value());
 }
 
@@ -153,21 +170,25 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpEmptyNameThenReturnsNu
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpNormalIdThenReturnsNormal)
 {
-	auto result = registry.getTypeName(static_cast<Pokemon::Core::ub>(Types::Normal));
+	std::optional<std::string_view> result{registry.getTypeName(static_cast<ub>(Types::Normal))};
 	ASSERT_TRUE(result.has_value());
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 	EXPECT_EQ(result.value(), "Normal");
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpFairyIdThenReturnsFairy)
 {
-	auto result = registry.getTypeName(static_cast<Pokemon::Core::ub>(Types::Fairy));
+	std::optional<std::string_view> result{registry.getTypeName(static_cast<ub>(Types::Fairy))};
 	ASSERT_TRUE(result.has_value());
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 	EXPECT_EQ(result.value(), "Fairy");
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpNonexistentIdThenReturnsNullopt)
 {
-	auto result = registry.getTypeName(255);
+	std::optional<std::string_view> result{registry.getTypeName(255)};
 	EXPECT_FALSE(result.has_value());
 }
 
@@ -177,20 +198,20 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpNonexistentIdThenRetur
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingRegisteredTypesThenSpanSizeEquals19)
 {
-	auto span = registry.getRegisteredTypes();
+	std::span<const TypeEntry> span{registry.getRegisteredTypes()};
 	EXPECT_EQ(span.size(), 19U);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingRegisteredTypesThenFirstEntryIsNormal)
 {
-	auto span = registry.getRegisteredTypes();
+	std::span<const TypeEntry> span{registry.getRegisteredTypes()};
 	ASSERT_FALSE(span.empty());
 	EXPECT_EQ(span.front().name, "Normal");
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingRegisteredTypesThenLastEntryIsStellar)
 {
-	auto span = registry.getRegisteredTypes();
+	std::span<const TypeEntry> span{registry.getRegisteredTypes()};
 	ASSERT_FALSE(span.empty());
 	EXPECT_EQ(span.back().name, "Stellar");
 }
@@ -204,7 +225,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingEntryThenEntryIsUpdated)
 	TypeEntry customEntry{.typeId = 99, .name = "Custom"};
 	registry.setEntry(0, customEntry);
 
-	auto entry = registry.getEntry(0);
+	TypeEntry entry{registry.getEntry(0)};
 	EXPECT_EQ(entry.typeId, 99);
 	EXPECT_EQ(entry.name, "Custom");
 }
@@ -216,7 +237,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingEntryThenEntryIsUpdated)
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingCellThenCellIsUpdated)
 {
 	registry.setTypeChartCell(0, 0, SE);
-	auto cell = registry.getTypeChartCell(0, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(0, 0)};
 	EXPECT_EQ(cell, SE);
 }
 
@@ -226,12 +247,12 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingCellThenCellIsUpdated)
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingRowThenRowIsUpdated)
 {
-	std::array<TypeEffectiveness, Pokemon::Configuration::MAX_TYPES> newRow{};
+	std::array<TypeEffectiveness, MAX_TYPES> newRow{};
 	newRow.fill(SE);
 	registry.setTypeChartRow(0, newRow);
 
-	auto row = registry.getTypeChartRow(0);
-	for (std::size_t idx = 0; idx < Pokemon::Configuration::MAX_TYPES; ++idx)
+	std::array<TypeEffectiveness, MAX_TYPES> row{registry.getTypeChartRow(0)};
+	for (std::size_t idx = 0; idx < MAX_TYPES; ++idx)
 	{
 		EXPECT_EQ(row.at(idx), SE);
 	}
@@ -244,14 +265,14 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingRowThenRowIsUpdated)
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingAmountRegisteredThenValueChanges)
 {
 	registry.setAmountRegistered(5);
-	auto amount = registry.getAmountRegistered();
+	ub amount{registry.getAmountRegistered()};
 	EXPECT_EQ(amount, 5);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingNextTypeIdThenValueChanges)
 {
 	registry.setNextTypeId(42);
-	auto nextId = registry.getNextTypeId();
+	ub nextId{registry.getNextTypeId()};
 	EXPECT_EQ(nextId, 42);
 }
 
@@ -261,21 +282,25 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenSettingNextTypeIdThenValueChang
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenFindingIndexByNormalIdThenReturnsZero)
 {
-	auto result = registry.findIndexByTypeId(static_cast<Pokemon::Core::ub>(Types::Normal));
+	std::optional<ub> result{registry.findIndexByTypeId(static_cast<ub>(Types::Normal))};
 	ASSERT_TRUE(result.has_value());
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 	EXPECT_EQ(result.value(), 0);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenFindingIndexByStellarIdThenReturns18)
 {
-	auto result = registry.findIndexByTypeId(static_cast<Pokemon::Core::ub>(Types::Stellar));
+	std::optional<ub> result{registry.findIndexByTypeId(static_cast<ub>(Types::Stellar))};
 	ASSERT_TRUE(result.has_value());
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 	EXPECT_EQ(result.value(), 18);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenFindingIndexByNonexistentIdThenReturnsNullopt)
 {
-	auto result = registry.findIndexByTypeId(200);
+	std::optional<ub> result{registry.findIndexByTypeId(200)};
 	EXPECT_FALSE(result.has_value());
 }
 
@@ -285,25 +310,25 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenFindingIndexByNonexistentIdThen
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByNameNormalThenReturnsTrue)
 {
-	auto result = registry.hasType(std::string_view{"Normal"});
+	bool result{registry.hasType(std::string_view{"Normal"})};
 	EXPECT_TRUE(result);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByNameStellarThenReturnsTrue)
 {
-	auto result = registry.hasType(std::string_view{"Stellar"});
+	bool result{registry.hasType(std::string_view{"Stellar"})};
 	EXPECT_TRUE(result);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByNameNonexistentThenReturnsFalse)
 {
-	auto result = registry.hasType(std::string_view{"Shadow"});
+	bool result{registry.hasType(std::string_view{"Shadow"})};
 	EXPECT_FALSE(result);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByEmptyNameThenReturnsFalse)
 {
-	auto result = registry.hasType(std::string_view{""});
+	bool result{registry.hasType(std::string_view{""})};
 	EXPECT_FALSE(result);
 }
 
@@ -313,20 +338,20 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByEmptyNameThenR
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByIdNormalThenReturnsTrue)
 {
-	auto result = registry.hasType(static_cast<Pokemon::Core::ub>(Types::Normal));
+	bool result{registry.hasType(static_cast<ub>(Types::Normal))};
 	EXPECT_TRUE(result);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByIdStellarThenReturnsTrue)
 {
-	auto result = registry.hasType(static_cast<Pokemon::Core::ub>(Types::Stellar));
+	bool result{registry.hasType(static_cast<ub>(Types::Stellar))};
 	EXPECT_TRUE(result);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByNonexistentIdThenReturnsFalse)
 {
-	Pokemon::Core::ub nonexistentId = 200;
-	auto result = registry.hasType(nonexistentId);
+	ub nonexistentId = 200;
+	bool result{registry.hasType(nonexistentId)};
 	EXPECT_FALSE(result);
 }
 
@@ -336,9 +361,9 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingHasTypeByNonexistentIdT
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenIncrementingNextTypeIdThenIncrementsBy1)
 {
-	auto before = registry.getNextTypeId();
+	ub before{registry.getNextTypeId()};
 	registry.incrementNextTypeId();
-	auto after = registry.getNextTypeId();
+	ub after{registry.getNextTypeId()};
 	EXPECT_EQ(after, before + 1);
 }
 
@@ -348,9 +373,9 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenIncrementingNextTypeIdThenIncre
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenIncrementingAmountRegisteredThenIncrementsBy1)
 {
-	auto before = registry.getAmountRegistered();
+	ub before{registry.getAmountRegistered()};
 	registry.incrementAmountRegistered();
-	auto after = registry.getAmountRegistered();
+	ub after{registry.getAmountRegistered()};
 	EXPECT_EQ(after, before + 1);
 }
 
@@ -360,9 +385,9 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenIncrementingAmountRegisteredThe
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenDecrementingAmountRegisteredThenDecrementsBy1)
 {
-	auto before = registry.getAmountRegistered();
+	ub before{registry.getAmountRegistered()};
 	registry.decrementAmountRegistered();
-	auto after = registry.getAmountRegistered();
+	ub after{registry.getAmountRegistered()};
 	EXPECT_EQ(after, before - 1);
 }
 
@@ -399,25 +424,35 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingAllBuiltinTypesThenAllA
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingBuiltinIdsThenTheyMatchEnumValues)
 {
-	auto normalId = registry.getTypeId("Normal");
+	std::optional<ub> normalId{registry.getTypeId("Normal")};
 	ASSERT_TRUE(normalId.has_value());
-	EXPECT_EQ(normalId.value(), static_cast<Pokemon::Core::ub>(Types::Normal));
 
-	auto fireId = registry.getTypeId("Fire");
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(normalId.value(), static_cast<ub>(Types::Normal));
+
+	std::optional<ub> fireId{registry.getTypeId("Fire")};
 	ASSERT_TRUE(fireId.has_value());
-	EXPECT_EQ(fireId.value(), static_cast<Pokemon::Core::ub>(Types::Fire));
 
-	auto fightingId = registry.getTypeId("Fighting");
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(fireId.value(), static_cast<ub>(Types::Fire));
+
+	std::optional<ub> fightingId{registry.getTypeId("Fighting")};
 	ASSERT_TRUE(fightingId.has_value());
-	EXPECT_EQ(fightingId.value(), static_cast<Pokemon::Core::ub>(Types::Fighting));
 
-	auto waterId = registry.getTypeId("Water");
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(fightingId.value(), static_cast<ub>(Types::Fighting));
+
+	std::optional<ub> waterId{registry.getTypeId("Water")};
 	ASSERT_TRUE(waterId.has_value());
-	EXPECT_EQ(waterId.value(), static_cast<Pokemon::Core::ub>(Types::Water));
 
-	auto stellarId = registry.getTypeId("Stellar");
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(waterId.value(), static_cast<ub>(Types::Water));
+
+	std::optional<ub> stellarId{registry.getTypeId("Stellar")};
 	ASSERT_TRUE(stellarId.has_value());
-	EXPECT_EQ(stellarId.value(), static_cast<Pokemon::Core::ub>(Types::Stellar));
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+	EXPECT_EQ(stellarId.value(), static_cast<ub>(Types::Stellar));
 }
 
 // ---------------------------------------------------------------------------
@@ -427,8 +462,8 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenCheckingBuiltinIdsThenTheyMatch
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingStellarRowThenAllNotDefined)
 {
 	// Stellar is registered at index 18 via the no-matchup overload
-	auto row = registry.getTypeChartRow(18);
-	for (std::size_t idx = 0; idx < Pokemon::Configuration::MAX_TYPES; ++idx)
+	std::array<TypeEffectiveness, MAX_TYPES> row{registry.getTypeChartRow(18)};
+	for (std::size_t idx = 0; idx < MAX_TYPES; ++idx)
 	{
 		EXPECT_EQ(row.at(idx), NOT_DEFINED);
 	}
@@ -441,7 +476,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenGettingStellarRowThenAllNotDefi
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingUnoccupiedSlotThenReturnsNotDefined)
 {
 	// Slot 19 is not used by any registered type (only indices 0-18 are populated)
-	auto cell = registry.getTypeChartCell(19, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(19, 0)};
 	EXPECT_EQ(cell, NOT_DEFINED);
 }
 
@@ -452,42 +487,42 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingUnoccupiedSlotThenRetur
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingFireVsGrassThenReturnsSuperEffective)
 {
 	// Fire is registered at index 9, Grass at index 11
-	auto cell = registry.getTypeChartCell(9, 11);
+	TypeEffectiveness cell{registry.getTypeChartCell(9, 11)};
 	EXPECT_EQ(cell, SE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingWaterVsFireThenReturnsSuperEffective)
 {
 	// Water is registered at index 10, Fire at index 9
-	auto cell = registry.getTypeChartCell(10, 9);
+	TypeEffectiveness cell{registry.getTypeChartCell(10, 9)};
 	EXPECT_EQ(cell, SE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingGrassVsWaterThenReturnsSuperEffective)
 {
 	// Grass is registered at index 11, Water at index 10
-	auto cell = registry.getTypeChartCell(11, 10);
+	TypeEffectiveness cell{registry.getTypeChartCell(11, 10)};
 	EXPECT_EQ(cell, SE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingGhostVsNormalThenReturnsNoEffect)
 {
 	// Ghost is registered at index 7, Normal at index 0
-	auto cell = registry.getTypeChartCell(7, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(7, 0)};
 	EXPECT_EQ(cell, NE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingElectricVsGroundThenReturnsNoEffect)
 {
 	// Electric is registered at index 12, Ground at index 4
-	auto cell = registry.getTypeChartCell(12, 4);
+	TypeEffectiveness cell{registry.getTypeChartCell(12, 4)};
 	EXPECT_EQ(cell, NE);
 }
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingDragonVsFairyThenReturnsNoEffect)
 {
 	// Dragon is registered at index 15, Fairy at index 17
-	auto cell = registry.getTypeChartCell(15, 17);
+	TypeEffectiveness cell{registry.getTypeChartCell(15, 17)};
 	EXPECT_EQ(cell, NE);
 }
 
@@ -498,7 +533,7 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenQueryingDragonVsFairyThenReturn
 TEST_F(TypeRegistryTest, GivenModifiedRegistryWhenSettingAndGettingCellThenRoundtrips)
 {
 	registry.setTypeChartCell(0, 0, NE);
-	auto cell = registry.getTypeChartCell(0, 0);
+	TypeEffectiveness cell{registry.getTypeChartCell(0, 0)};
 	EXPECT_EQ(cell, NE);
 
 	registry.setTypeChartCell(0, 0, SE);
@@ -511,12 +546,14 @@ TEST_F(TypeRegistryTest, GivenModifiedRegistryWhenSettingEntryThenLookupReflects
 	TypeEntry replacement{.typeId = 50, .name = "Cosmic"};
 	registry.setEntry(0, replacement);
 
-	auto idResult = registry.getTypeId("Cosmic");
+	std::optional<ub> idResult{registry.getTypeId("Cosmic")};
 	ASSERT_TRUE(idResult.has_value());
+
+	// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 	EXPECT_EQ(idResult.value(), 50);
 
 	// The old name should no longer resolve
-	auto oldResult = registry.getTypeId("Normal");
+	std::optional<ub> oldResult{registry.getTypeId("Normal")};
 	EXPECT_FALSE(oldResult.has_value());
 }
 
@@ -526,9 +563,9 @@ TEST_F(TypeRegistryTest, GivenModifiedRegistryWhenSettingEntryThenLookupReflects
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenDecrementingThenSpanShrinks)
 {
-	auto sizeBefore = registry.getRegisteredTypes().size();
+	std::size_t sizeBefore{registry.getRegisteredTypes().size()};
 	registry.decrementAmountRegistered();
-	auto sizeAfter = registry.getRegisteredTypes().size();
+	std::size_t sizeAfter{registry.getRegisteredTypes().size()};
 	EXPECT_EQ(sizeAfter, sizeBefore - 1);
 }
 
@@ -540,9 +577,9 @@ TEST_F(TypeRegistryTest, GivenRegistryWithRoomWhenIncrementingThenSpanGrows)
 {
 	// Decrement first so we have room to increment back
 	registry.decrementAmountRegistered();
-	auto sizeBefore = registry.getRegisteredTypes().size();
+	std::size_t sizeBefore{registry.getRegisteredTypes().size()};
 	registry.incrementAmountRegistered();
-	auto sizeAfter = registry.getRegisteredTypes().size();
+	std::size_t sizeAfter{registry.getRegisteredTypes().size()};
 	EXPECT_EQ(sizeAfter, sizeBefore + 1);
 }
 
@@ -552,7 +589,7 @@ TEST_F(TypeRegistryTest, GivenRegistryWithRoomWhenIncrementingThenSpanGrows)
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpIncorrectCaseNameThenReturnsNullopt)
 {
-	auto result = registry.getTypeId("normal");
+	std::optional<ub> result{registry.getTypeId("normal")};
 	EXPECT_FALSE(result.has_value());
 
 	result = registry.getTypeId("FIRE");
@@ -565,11 +602,11 @@ TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenLookingUpIncorrectCaseNameThenR
 
 TEST_F(TypeRegistryTest, GivenDefaultRegistryWhenIncrementingNextTypeIdMultipleTimesThenValuesAreMonotonic)
 {
-	auto first = registry.getNextTypeId();
+	ub first{registry.getNextTypeId()};
 	registry.incrementNextTypeId();
-	auto second = registry.getNextTypeId();
+	ub second{registry.getNextTypeId()};
 	registry.incrementNextTypeId();
-	auto third = registry.getNextTypeId();
+	ub third{registry.getNextTypeId()};
 
 	EXPECT_EQ(second, first + 1);
 	EXPECT_EQ(third, first + 2);

@@ -93,7 +93,7 @@ TEST_UNITS_SOURCES = $(shell find ${TEST_UNITS_FOLDER} ${SOURCE_FOLDER} -type f 
 TEST_MAIN_FOLDER = ${TEST_FOLDER}/main
 TEST_MAIN_INCLUDE_ARUGMENT = ${TEST_INCLUDE_ARGUMENT}
 TEST_MAIN_SOURCES = $(shell find ${TEST_MAIN_FOLDER} ${SOURCE_FOLDER} -type f ${TESTS_EXCLUDE_FILE_PATHS} ${TESTS_EXCLUDE_FOLDER_PATHS} -name '*.cpp')
-TEST_LIBRARIES = ${LIBRARIES} -lgcov -lgtest -lgmock -lpthread
+TEST_LIBRARIES = ${LIBRARIES} -lCatch2 -lgcov -lgtest -lgmock -lpthread
 TEST_RESOURCES = ${RESOURCES_FOLDER}
 TEST_REPEAT_COUNT = 1
 TEST_BREAK =
@@ -115,14 +115,15 @@ OBJECTS_BENCHMARK_ALL = $(OBJECTS_BENCHMARK_FULL) $(OBJECTS_BENCHMARK_SRC)
 DEPS_BENCHMARK_ALL = $(OBJECTS_BENCHMARK_ALL:.o=.d)
 
 BRANCH_COVERAGE = --rc branch_coverage=true
+LCOV_EXCLUDE_ASSERT = --rc 'lcov_excl_br_line=assert|LCOV_EXCL_BR'
 
 LCOV_FILES = $(shell find . -name '*.gcno' -o -name '*.gcda' -o -name '*.info')
-LCOV_FLAGS = --no-external -c ${BRANCH_COVERAGE} -d . --ignore-errors mismatch,mismatch
+LCOV_FLAGS = --no-external -c ${BRANCH_COVERAGE} ${LCOV_EXCLUDE_ASSERT} -d . --ignore-errors mismatch,mismatch
 OUTPUT_FOLDER_LCOV = ${OUTPUT_FOLDER_TEST}
 OUTPUT_FILE_LCOV = coverage.info
 LCOV_REMOVE_FILES = '*/${TEST_FOLDER}/*'
 
-GENHTML_OUTPUT_FOLDER = .\/coverage
+GENHTML_OUTPUT_FOLDER = coverage
 
 CLANG_SOURCES = ${SOURCES} ${TEST_SOURCES}
 TIDY_COMPILE_FLAGS = --config-file=.clang-tidy
@@ -132,7 +133,7 @@ FORMAT_COMPILE_FLAGS = -i -style=file:.clang-format
 CPPCHECK_FOLDER = cppcheck
 CPPCHECK_COMPILE_FLAGS = --cppcheck-build-dir=${CPPCHECK_FOLDER} --check-level=exhaustive
 
-PROFILE_FOLDER = .\/profiling
+PROFILE_FOLDER = profiling
 PROFILE_ANNOTATIONS_FOLDER = ${PROFILE_FOLDER}/annotations
 
 ANNOTATION_FILES = $(shell find . -maxdepth 1 -type f -name '*-ann')
@@ -293,14 +294,17 @@ build_tests: $(OBJECTS_TEST_USING)
 lcov: build_tests
 	mkdir -p ${OUTPUT_FOLDER_LCOV}
 	lcov ${LCOV_FLAGS} -o ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV}
-	lcov --remove ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV} ${LCOV_REMOVE_FILES} ${BRANCH_COVERAGE} -o ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV}
+	lcov --remove ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV} ${LCOV_REMOVE_FILES} ${BRANCH_COVERAGE} ${LCOV_EXCLUDE_ASSERT} -o ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV}
 
 genhtml: lcov
 	rm -rf ${GENHTML_OUTPUT_FOLDER}
 	mkdir -p ${GENHTML_OUTPUT_FOLDER}
-	genhtml ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV} ${BRANCH_COVERAGE} --output-directory ${GENHTML_OUTPUT_FOLDER}
+	genhtml ${OUTPUT_FOLDER_LCOV}/${OUTPUT_FILE_LCOV} ${BRANCH_COVERAGE} ${LCOV_EXCLUDE_ASSERT} --output-directory ${GENHTML_OUTPUT_FOLDER}
 
-coverage: genhtml
+clean_coverage:
+	find ${OUTPUT_FOLDER_TEST} -name '*.gcda' -delete
+
+coverage: genhtml clean_coverage
 	cp ${OUTPUT_FOLDER_TEST}/coverage.info ${GENHTML_OUTPUT_FOLDER}/lcov.info
 
 tidy: ${CLANG_SOURCES}
@@ -360,4 +364,4 @@ initialize_repo:
 	chmod +x .git/hooks/pre-commit
 	chmod +x .git/hooks/commit-msg
 
-.PHONY: tidy run_doxygen initialize_repo copy_and_run_test
+.PHONY: tidy run_doxygen initialize_repo copy_and_run_test clean_coverage

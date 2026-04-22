@@ -67,6 +67,8 @@ namespace Pokemon::Registry::Types
 			*/
 			explicit constexpr TypeRegistry()
 			{
+				// LCOV_EXCL_BR_START — Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
+				// is not applicable.
 				addBuiltin(Types::NORMAL_TYPE_MATCHUP, Types::Types::Normal, Types::NORMAL_NAME);
 				addBuiltin(Types::FIGHTING_TYPE_MATCHUP, Types::Types::Fighting, Types::FIGHTING_NAME);
 				addBuiltin(Types::FLYING_TYPE_MATCHUP, Types::Types::Flying, Types::FLYING_NAME);
@@ -86,6 +88,7 @@ namespace Pokemon::Registry::Types
 				addBuiltin(Types::DARK_TYPE_MATCHUP, Types::Types::Dark, Types::DARK_NAME);
 				addBuiltin(Types::FAIRY_TYPE_MATCHUP, Types::Types::Fairy, Types::FAIRY_NAME);
 				addBuiltin(Types::Types::Stellar, Types::STELLAR_NAME);
+				// LCOV_EXCL_BR_STOP
 
 				// Initialize next type ID to the first available ID after the built-in types. This ensures that custom types receive stable
 				// IDs that do not conflict with built-in ones, even if some built-in types are removed later.
@@ -100,7 +103,6 @@ namespace Pokemon::Registry::Types
 				@pre @p index < @ref MAX_TYPES.
 				@param[in] index The index into the entries array.
 				@return A copy of the @ref TypeEntry at that index.
-				@throws std::out_of_range If @p index is out of bounds.
 			*/
 			ATTR_NODISCARD constexpr TypeEntry getEntry(const ub index)
 			{
@@ -114,7 +116,6 @@ namespace Pokemon::Registry::Types
 				@param[in] row The attacking-type index.
 				@param[in] col The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
-				@throws std::out_of_range If @p row or @p col is out of bounds.
 			*/
 			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const ub row, const ub col)
 			{
@@ -128,7 +129,6 @@ namespace Pokemon::Registry::Types
 				@pre @p row < @ref MAX_TYPES.
 				@param[in] row The row index.
 				@return A copy of the full effectiveness row for the given type.
-				@throws std::out_of_range If @p row is out of bounds.
 			*/
 			ATTR_NODISCARD constexpr std::array<Types::TypeEffectiveness, MAX_TYPES> getTypeChartRow(const ub row)
 			{
@@ -153,7 +153,8 @@ namespace Pokemon::Registry::Types
 
 				assert(index < mEntries.size() && INDEX_OOB_GET_TYPE_ID.data());
 
-				return mEntries.at(index).typeId;
+				return mEntries.at(index).typeId; // LCOV_EXCL_BR_LINE — The .at() exception branch is unreachable; the preceding assert
+												  // already guarantees index < size.
 			}
 
 			/*! @brief Looks up a type's display name by its ID.
@@ -206,7 +207,6 @@ namespace Pokemon::Registry::Types
 				@pre @p index < @ref MAX_TYPES.
 				@param[in] index The index into the entries array.
 				@param[in] entry The @ref TypeEntry to store.
-				@throws std::out_of_range If @p index is out of bounds.
 			*/
 			constexpr void setEntry(const ub index, const TypeEntry &entry)
 			{
@@ -220,7 +220,6 @@ namespace Pokemon::Registry::Types
 				@param[in] row The attacking-type index.
 				@param[in] col The defending-type index.
 				@param[in] value The @ref TypeEffectiveness value to store.
-				@throws std::out_of_range If @p row or @p col is out of bounds.
 			*/
 			constexpr void setTypeChartCell(const ub row, const ub col, const Types::TypeEffectiveness value)
 			{
@@ -234,7 +233,6 @@ namespace Pokemon::Registry::Types
 				@pre @p row < @ref MAX_TYPES.
 				@param[in] row The row index.
 				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
-				@throws std::out_of_range If @p row is out of bounds.
 			*/
 			constexpr void setTypeChartRow(const ub row, const std::array<Types::TypeEffectiveness, MAX_TYPES> &chart)
 			{
@@ -268,7 +266,10 @@ namespace Pokemon::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeId(const ub typeId) const
 			{
+				// LCOV_EXCL_BR_START — The .at() exception branch inside findEntryIndexById is unreachable; the loop index is bounded by
+				// mAmountRegistered which is always < size.
 				const ub index{findEntryIndexById(typeId)};
+				// LCOV_EXCL_BR_STOP
 
 				if (index == mAmountRegistered)
 				{
