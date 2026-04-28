@@ -159,9 +159,14 @@ jobs:
           sudo cp -r /usr/lib/libgtest* ./cache/gtest/lib
           sudo cp -r /usr/include/gtest/* ./cache/gtest/include
 
+      - name: Find latest GCC
+        run: |
+          latest_gcc=$(find /usr/local -maxdepth 1 -type d -name 'gcc-*' | sort -V | tail -n1)
+          echo "LATEST_GCC=$latest_gcc" >> "$GITHUB_ENV"
+
       - name: Save GCC Cache
         run: |
-          sudo cp -r /usr/local/gcc-15/* ./cache/gcc-latest/
+          sudo cp -r "$LATEST_GCC"/* ./cache/gcc-latest
 
       - name: Give Read Access For Apt Folder
         run: sudo chown -R $USER:$USER ./cache/apt-packages/apt/archives/lock ./cache/apt-packages/apt/archives/partial ./cache/apt-lists/lists/lock ./cache/apt-lists/lists/partial

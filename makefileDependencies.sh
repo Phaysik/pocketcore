@@ -326,11 +326,8 @@ main() {
 
 		if [[ "$(command g++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${desired_version}" ]]; then
 			echo "g++-${desired_version} exists"
-		elif [[ ${1,,} != "a" ]] || [[ ${response,,} != "a" ]] && [[ ${response,,} != "n" ]]; then
-			setUpGCC "${desired_version}" "${gpp_priority}"
 		else
-			sudo apt-get install -y g++-13 # For automated running
-			sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 13
+			setUpGCC "${desired_version}" "${gpp_priority}"
 		fi
 
 		if [[ -f "/usr/lib/libgtest.a" ]] && [[ -f "/usr/lib/libgtest_main.a" ]]; then
