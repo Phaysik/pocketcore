@@ -326,8 +326,7 @@ main() {
 		if [[ "$(command g++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${desired_version}" ]]; then
 			echo "g++-${desired_version} exists"
 		else
-			# setUpGCC "${desired_version}" "${gpp_priority}"
-			sudo apt-get install g++-13
+			setUpGCC "${desired_version}" "${gpp_priority}"
 		fi
 
 		if [[ -f "/usr/lib/libconfigcat.a" ]]; then
@@ -337,45 +336,28 @@ main() {
 			setUpConfigCat
 		fi
 
-		# if [[ -f "/usr/lib/libgtest.a" ]] && [[ -f "/usr/lib/libgtest_main.a" ]]; then
-		# 	echo "Google Test already exists"
-		# else
-		# 	echo "Setting up Google Test"
-		# 	cd /usr/src/gtest || exit
-		# 	sudo cmake CMakeLists.txt
-		# 	sudo make
-		# 	sudo cp ./lib/libgtest*.a /usr/lib
-		# fi
-
-		# if [[ -f "/usr/lib/libbenchmark.a" ]] && [[ -f "/usr/lib/libbenchmark_main.a" ]]; then
-		# 	echo "Google Benchmark already exists"
-		# else
-		# 	echo "Setting up Google Benchmark"
-		# 	installBenchmark
-		# fi
-
-		# if [[ -f "/usr/lib/libspdlog.a" ]]; then
-		# 	echo "Spdlog already exists"
-		# else
-		# 	echo "Setting up Spdlog"
-		# 	installSpdlog
-		# fi
-
-		checkSphinx
-		status=$?
-
-		if [[ ${status} -eq 0 ]]; then
-			echo "All Sphinx packages are installed"
+		if [[ -f "/usr/lib/libgtest.a" ]] && [[ -f "/usr/lib/libgtest_main.a" ]]; then
+			echo "Google Test already exists"
 		else
-			echo "Installing Sphinx and it's dependencies for documentation"
-			pip3 install --upgrade pip --break-system-packages
-			pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
+			echo "Setting up Google Test"
+			cd /usr/src/gtest || exit
+			sudo cmake CMakeLists.txt
+			sudo make
+			sudo cp ./lib/libgtest*.a /usr/lib
 		fi
 
-		if [[ -x "$(command -v flawfinder || true)" ]]; then
-			echo "Flawfinder already exists"
+		if [[ -f "/usr/lib/libbenchmark.a" ]] && [[ -f "/usr/lib/libbenchmark_main.a" ]]; then
+			echo "Google Benchmark already exists"
 		else
-			pip3 install flawfinder --break-system-packages
+			echo "Setting up Google Benchmark"
+			installBenchmark
+		fi
+
+		if [[ -f "/usr/lib/libspdlog.a" ]]; then
+			echo "Spdlog already exists"
+		else
+			echo "Setting up Spdlog"
+			installSpdlog
 		fi
 
 		# If not 'a' or 'A', set up documentation, formatting, and linting tools
@@ -417,7 +399,22 @@ main() {
 				installDoxygen "${doxygen_desired_version}"
 			fi
 
+			checkSphinx
+			status=$?
 
+			if [[ ${status} -eq 0 ]]; then
+				echo "All Sphinx packages are installed"
+			else
+				echo "Installing Sphinx and it's dependencies for documentation"
+				pip3 install --upgrade pip --break-system-packages
+				pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
+			fi
+
+			if [[ -x "$(command -v flawfinder || true)" ]]; then
+				echo "Flawfinder already exists"
+			else
+				pip3 install flawfinder --break-system-packages
+			fi
 
 			if [[ -x "$(command -v tracy-profiler || true)" ]]; then
 				echo "tracy-profiler already exists"
