@@ -361,6 +361,23 @@ main() {
 		# 	installSpdlog
 		# fi
 
+		checkSphinx
+		status=$?
+
+		if [[ ${status} -eq 0 ]]; then
+			echo "All Sphinx packages are installed"
+		else
+			echo "Installing Sphinx and it's dependencies for documentation"
+			pip3 install --upgrade pip --break-system-packages
+			pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
+		fi
+
+		if [[ -x "$(command -v flawfinder || true)" ]]; then
+			echo "Flawfinder already exists"
+		else
+			pip3 install flawfinder --break-system-packages
+		fi
+
 		# If not 'a' or 'A', set up documentation, formatting, and linting tools
 		if [[ ${response,,} == "y" ]] || [[ ${1,,} == "y" ]]; then
 			sudo apt-get install binutils valgrind graphviz flex bison libpcre3 libpcre3-dev lcov cppcheck xterm -y
@@ -400,22 +417,7 @@ main() {
 				installDoxygen "${doxygen_desired_version}"
 			fi
 
-			checkSphinx
-			status=$?
 
-			if [[ ${status} -eq 0 ]]; then
-				echo "All Sphinx packages are installed"
-			else
-				echo "Installing Sphinx and it's dependencies for documentation"
-				pip3 install --upgrade pip --break-system-packages
-				pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
-			fi
-
-			if [[ -x "$(command -v flawfinder || true)" ]]; then
-				echo "Flawfinder already exists"
-			else
-				pip3 install flawfinder --break-system-packages
-			fi
 
 			if [[ -x "$(command -v tracy-profiler || true)" ]]; then
 				echo "tracy-profiler already exists"
