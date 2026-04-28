@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Cache Site
         run: mkdir -p ./cache
@@ -52,7 +52,7 @@ jobs:
 
       - name: Cache Apt Packages
         id: cache-apt-packages
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ./cache/apt-packages
           key: ${{ runner.os }}-apt-packages-${{ hashFiles('makefileDependencies.sh') }}
@@ -61,7 +61,7 @@ jobs:
 
       - name: Cache Apt Package Lists
         id: cache-apt-lists
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ./cache/apt-lists
           key: ${{ runner.os }}-apt-lists-${{ hashFiles('makefileDependencies.sh') }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Cache Google Test
         id: cache-google-tests
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
             ./cache/gtest
@@ -80,7 +80,7 @@ jobs:
 
       - name: Cache Config Cat
         id: cache-config-cat
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
             ./cache/configcat
@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache Curl
         id: cache-curl
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
             ./cache/curl
@@ -100,7 +100,7 @@ jobs:
 
       - name: Cache Hash Library
         id: cache-hash-library
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
             ./cache/hash-library
@@ -110,7 +110,7 @@ jobs:
 
       - name: Cache GCC
         id: cache-gcc-latest
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: |
             ./cache/gcc-latest
