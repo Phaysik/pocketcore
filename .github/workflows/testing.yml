@@ -164,11 +164,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcov gcov /usr/local/gcc-latest/bin/gcov 100
 
       - name: Install dependencies
-        if: steps.cache-apt-packages.outputs.cache-hit != 'true' || steps.cache-apt-lists.outputs.cache-hit != 'true' || steps.cache-google-tests.outputs.cache-hit != 'true' || steps.cache-config-cat.outputs.cache-hit != 'true' || steps.cache-curl.outputs.cache-hit != 'true' || steps.cache-hash-library.outputs.cache-hit != 'true'
+        if: steps.cache-apt-packages.outputs.cache-hit != 'true' || steps.cache-apt-lists.outputs.cache-hit != 'true' || steps.cache-google-tests.outputs.cache-hit != 'true' || steps.cache-config-cat.outputs.cache-hit != 'true' || steps.cache-curl.outputs.cache-hit != 'true' || steps.cache-hash-library.outputs.cache-hit != 'true' || steps.cache-gcc-latest.outputs.cache-hit != 'true'
         run: sudo bash $GITHUB_WORKSPACE/makefileDependencies.sh a
 
       - name: Install Google Mock
-        if: steps.cache-apt-packages.outputs.cache-hit == 'true' || steps.cache-apt-lists.outputs.cache-hit == 'true' || steps.cache-google-tests.outputs.cache-hit == 'true' || steps.cache-config-cat.outputs.cache-hit == 'true' || steps.cache-curl.outputs.cache-hit == 'true' || steps.cache-hash-library.outputs.cache-hit == 'true'
+        if: steps.cache-apt-packages.outputs.cache-hit == 'true' || steps.cache-apt-lists.outputs.cache-hit == 'true' || steps.cache-google-tests.outputs.cache-hit == 'true' || steps.cache-config-cat.outputs.cache-hit == 'true' || steps.cache-curl.outputs.cache-hit == 'true' || steps.cache-hash-library.outputs.cache-hit == 'true' || steps.cache-gcc-latest.outputs.cache-hit == 'true'
         run: sudo apt-get install libgmock-dev -y
 
       - name: Make project
