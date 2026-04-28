@@ -32,6 +32,7 @@ setUpGCC() {
 	sudo update-alternatives --install /usr/bin/g++ g++ "${directory}"/bin/g++ "$2"
 	sudo update-alternatives --install /usr/bin/gcc gcc "${directory}"/bin/gcc "$2"
 	sudo update-alternatives --install /usr/bin/gcov gcov "${directory}"/bin/gcov "$2"
+	sudo update-alternatives --install /usr/bin/c++ c++ "${directory}"/bin/c++ "$2"
 
 	cd ..
 
@@ -325,7 +326,8 @@ main() {
 		if [[ "$(command g++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${desired_version}" ]]; then
 			echo "g++-${desired_version} exists"
 		else
-			setUpGCC "${desired_version}" "${gpp_priority}"
+			# setUpGCC "${desired_version}" "${gpp_priority}"
+			sudo apt-get install g++-13
 		fi
 
 		if [[ -f "/usr/lib/libconfigcat.a" ]]; then
@@ -335,29 +337,29 @@ main() {
 			setUpConfigCat
 		fi
 
-		if [[ -f "/usr/lib/libgtest.a" ]] && [[ -f "/usr/lib/libgtest_main.a" ]]; then
-			echo "Google Test already exists"
-		else
-			echo "Setting up Google Test"
-			cd /usr/src/gtest || exit
-			sudo cmake CMakeLists.txt
-			sudo make
-			sudo cp ./lib/libgtest*.a /usr/lib
-		fi
+		# if [[ -f "/usr/lib/libgtest.a" ]] && [[ -f "/usr/lib/libgtest_main.a" ]]; then
+		# 	echo "Google Test already exists"
+		# else
+		# 	echo "Setting up Google Test"
+		# 	cd /usr/src/gtest || exit
+		# 	sudo cmake CMakeLists.txt
+		# 	sudo make
+		# 	sudo cp ./lib/libgtest*.a /usr/lib
+		# fi
 
-		if [[ -f "/usr/lib/libbenchmark.a" ]] && [[ -f "/usr/lib/libbenchmark_main.a" ]]; then
-			echo "Google Benchmark already exists"
-		else
-			echo "Setting up Google Benchmark"
-			installBenchmark
-		fi
+		# if [[ -f "/usr/lib/libbenchmark.a" ]] && [[ -f "/usr/lib/libbenchmark_main.a" ]]; then
+		# 	echo "Google Benchmark already exists"
+		# else
+		# 	echo "Setting up Google Benchmark"
+		# 	installBenchmark
+		# fi
 
-		if [[ -f "/usr/lib/libspdlog.a" ]]; then
-			echo "Spdlog already exists"
-		else
-			echo "Setting up Spdlog"
-			installSpdlog
-		fi
+		# if [[ -f "/usr/lib/libspdlog.a" ]]; then
+		# 	echo "Spdlog already exists"
+		# else
+		# 	echo "Setting up Spdlog"
+		# 	installSpdlog
+		# fi
 
 		# If not 'a' or 'A', set up documentation, formatting, and linting tools
 		if [[ ${response,,} == "y" ]] || [[ ${1,,} == "y" ]]; then
