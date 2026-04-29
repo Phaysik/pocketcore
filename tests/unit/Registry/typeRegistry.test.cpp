@@ -185,22 +185,32 @@ SCENARIO("TypeRegistry")
 		{
 			std::optional<ub> normalIdentifier{registry.getTypeId("Normal")};
 			REQUIRE(normalIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((normalIdentifier.value() == static_cast<ub>(Types::Normal)));
 
 			std::optional<ub> fireIdentifier{registry.getTypeId("Fire")};
 			REQUIRE(fireIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((fireIdentifier.value() == static_cast<ub>(Types::Fire)));
 
 			std::optional<ub> fightingIdentifier{registry.getTypeId("Fighting")};
 			REQUIRE(fightingIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((fightingIdentifier.value() == static_cast<ub>(Types::Fighting)));
 
 			std::optional<ub> waterIdentifier{registry.getTypeId("Water")};
 			REQUIRE(waterIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((waterIdentifier.value() == static_cast<ub>(Types::Water)));
 
 			std::optional<ub> stellarIdentifier{registry.getTypeId("Stellar")};
 			REQUIRE(stellarIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((stellarIdentifier.value() == static_cast<ub>(Types::Stellar)));
 		}
 
@@ -233,6 +243,7 @@ SCENARIO("TypeRegistry")
 			std::optional<std::string_view> typeName{registry.getTypeName(static_cast<ub>(Types::Normal))};
 			REQUIRE(typeName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((typeName.value() == "Normal"));
 		}
 
@@ -241,6 +252,7 @@ SCENARIO("TypeRegistry")
 			std::optional<std::string_view> typeName{registry.getTypeName(static_cast<ub>(Types::Fairy))};
 			REQUIRE(typeName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((typeName.value() == "Fairy"));
 		}
 
@@ -297,6 +309,8 @@ SCENARIO("TypeRegistry")
 
 			std::optional<ub> cosmicIdentifier{registry.getTypeId("Cosmic")};
 			REQUIRE(cosmicIdentifier.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((cosmicIdentifier.value() == 50));
 
 			std::optional<ub> formerIdentifier{registry.getTypeId("Normal")};
@@ -384,6 +398,7 @@ SCENARIO("TypeRegistry")
 			std::optional<ub> indexResult{registry.findIndexByTypeId(static_cast<ub>(Types::Normal))};
 			REQUIRE(indexResult.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((indexResult.value() == 0));
 		}
 
@@ -392,6 +407,7 @@ SCENARIO("TypeRegistry")
 			std::optional<ub> indexResult{registry.findIndexByTypeId(static_cast<ub>(Types::Stellar))};
 			REQUIRE(indexResult.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((indexResult.value() == 18));
 		}
 

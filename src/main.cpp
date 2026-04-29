@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "Configuration/configFlags.h"
-#include "Configuration/configuration.h"
+#include "Configuration/typeRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -47,7 +47,7 @@ int main()
 			return EXIT_FAILURE;
 		}
 
-		ATTR_MAYBE_UNUSED const Configuration::Configuration config{};
+		ATTR_MAYBE_UNUSED const Configuration::TypeRegistryConfiguration config{};
 	}
 
 	return EXIT_SUCCESS;

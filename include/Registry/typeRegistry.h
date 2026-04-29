@@ -257,7 +257,7 @@ namespace Pokemon::Registry::Types
 				mNextTypeId = nextId;
 			}
 
-			// MARK: Utility Functions
+			// MARK: Member Functions
 
 			/*! @brief Finds the internal array index of a type given its stable type ID.
 				@note Time complexity is O(n) where n is @ref getAmountRegistered.
@@ -318,7 +318,7 @@ namespace Pokemon::Registry::Types
 			}
 
 		private:
-			// MARK: Private Utility Functions
+			// MARK: Private Member Functions
 
 			/*! @brief Finds the raw array index of a type entry by display name.
 				@details Returns @ref mAmountRegistered as a sentinel when not found, avoiding @ref std::optional construction overhead.
