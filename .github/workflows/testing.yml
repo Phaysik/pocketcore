@@ -174,16 +174,16 @@ jobs:
       - name: Install Spdlog From Cache
         if: steps.cache-spdlog.outputs.cache-hit == 'true'
         run: |
-          sudo cp ./cache/spdlog/lib/libspdlog* /usr/lib
-          sudo cp -r ./cache/spdlog/lib/cmake/spdlog /usr/lib/cmake/
-          sudo cp ./cache/spdlog/lib/pkgconfig/spdlog* /usr/lib/pkgconfig/
-          sudo cp -r ./cache/spdlog/include/spdlog* /usr/include
+          sudo cp ./cache/spdlog/lib/libspdlog* /usr/local/lib
+          sudo cp -r ./cache/spdlog/lib/cmake/spdlog /usr/local/lib/cmake/
+          sudo cp ./cache/spdlog/lib/pkgconfig/spdlog* /usr/local/lib/pkgconfig/
+          sudo cp -r ./cache/spdlog/include/spdlog* /usr/local/include
 
       - name: Install GCC From Cache
         if: steps.cache-gcc-latest.outputs.cache-hit == 'true'
         run: |
           sudo mkdir -p /usr/local/gcc-latest
-          sudo cp ./cache/gcc-latest/* /usr/local/gcc-latest/
+          sudo cp -r ./cache/gcc-latest/* /usr/local/gcc-latest/
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/local/gcc-latest/bin/g++ 100
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/local/gcc-latest/bin/gcc 100
           sudo update-alternatives --install /usr/bin/gcov gcov /usr/local/gcc-latest/bin/gcov 100
