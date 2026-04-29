@@ -266,6 +266,18 @@ jobs:
       # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
       - name: Make project
         run: make
+        env:
+          LD_LIBRARY_PATH: /usr/local/gcc-latest/lib64
+          LIBRARY_PATH: /usr/local/gcc-latest/lib64
+          PATH: /usr/local/gcc-latest/bin:${{ env.PATH }}
+
+      - name: Ensure CodeQL TRAP directory exists
+        if: always()
+        run: |
+          CODEQL_DB="$RUNNER_TEMP/codeql_databases/cpp"
+          if [ -d "$CODEQL_DB" ]; then
+            mkdir -p "$CODEQL_DB/trap/cpp/tarballs"
+          fi
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
