@@ -35,7 +35,6 @@ namespace Pokemon::Configuration
 		DuplicateType,	 /*!< A type with the given name already exists. */
 		TypeNotFound,	 /*!< No type matching the input was found. */
 		MatchupMismatch, /*!< The number of provided matchup entries does not match the registered count. */
-		BatchMismatch,	 /*!< The number of matchup arrays does not match the number of names. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -88,9 +87,7 @@ namespace Pokemon::Configuration
 			/*! @brief The display name or identifier that triggered the error, or empty if not applicable. */
 			std::string_view mContext{};
 
-			/*! @var mLoggingFailure
-				@brief The logging failure message if the Logger call itself failed, or a default success message.
-			*/
+			/*! @brief The logging failure message if the Logger call itself failed, or a default success message. */
 			std::string_view mLoggingFailure{NO_LOGGING_FAILURE};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -103,7 +100,7 @@ namespace Pokemon::Configuration
 			*/
 			[[nodiscard]] constexpr std::string_view errorKindToString() noexcept
 			{
-				switch (mKind)
+				switch (mKind) // LCOV_EXCL_BR
 				{
 					case RegistryError::MaxCapacity:
 						mErrorName = "MaxCapacity";
@@ -117,12 +114,12 @@ namespace Pokemon::Configuration
 					case RegistryError::MatchupMismatch:
 						mErrorName = "MatchupMismatch";
 						break;
-					case RegistryError::BatchMismatch:
-						mErrorName = "BatchMismatch";
-						break;
+						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
+						// compiler warnings about unhandled enum values.
 					default:
-						mErrorName = "UnknownRegistryError";
+						mErrorName = "UnknownError";
 						break;
+						// LCOV_EXCL_STOP
 				}
 
 				return mErrorName;

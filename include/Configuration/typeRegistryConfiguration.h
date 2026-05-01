@@ -108,18 +108,18 @@ namespace Pokemon::Configuration
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ub> getTypeId(const std::string_view name) const
+			ATTR_NODISCARD constexpr std::optional<ub> getTypeID(const std::string_view name) const
 			{
-				return registry.getTypeId(name);
+				return registry.getTypeID(name);
 			}
 
 			/*! @brief Looks up a type's display name by its ID.
-				@param[in] typeId The type ID to search for.
+				@param[in] typeID The type ID to search for.
 				@return The name wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const ub typeId) const
+			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const ub typeID) const
 			{
-				return registry.getTypeName(typeId);
+				return registry.getTypeName(typeID);
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
@@ -239,10 +239,10 @@ namespace Pokemon::Configuration
 
 			/*! @brief Removes a type from the registry by its stable type ID.
 				@details Useful for removing custom types using the ID returned by @ref addType.
-				@param[in] typeId The stable type ID of the type to remove.
+				@param[in] typeID The stable type ID of the type to remove.
 				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
 			*/
-			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> removeType(ub typeId);
+			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> removeType(ub typeID);
 			/*! @brief Removes multiple types from the registry by name with atomic rollback.
 				@details Resolves and removes each named type sequentially. If any removal fails, the entire registry is restored
 			   to its state before the batch began, guaranteeing all-or-nothing semantics.
@@ -271,10 +271,10 @@ namespace Pokemon::Configuration
 			/*! @brief Resets all matchup data for a type identified by its stable type ID.
 				@details Clears the type's entire offensive row and defensive column to @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED
 			   without removing the type from the registry. The type's entry, stable ID, and array position are preserved.
-				@param[in] typeId The stable type ID of the type whose matchups will be cleared.
+				@param[in] typeID The stable type ID of the type whose matchups will be cleared.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(ub typeId);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(ub typeID);
 
 			/*! @brief Checks whether a type with the given name is registered.
 				@param[in] name The display name to check.
@@ -286,12 +286,12 @@ namespace Pokemon::Configuration
 			}
 
 			/*! @brief Checks whether a type with the given ID is registered.
-				@param[in] typeId The type ID to check.
+				@param[in] typeID The type ID to check.
 				@return True if a type with that ID exists in the registry, false otherwise.
 			*/
-			ATTR_NODISCARD constexpr bool hasType(const ub typeId) const
+			ATTR_NODISCARD constexpr bool hasType(const ub typeID) const
 			{
-				return registry.hasType(typeId);
+				return registry.hasType(typeID);
 			}
 
 		private:
@@ -301,9 +301,9 @@ namespace Pokemon::Configuration
 				@details Used internally to implement atomic rollback for batch operations. Resets the registry's entry count and
 			   next-type-ID counter to the values captured before the batch began.
 				@param[in] previousCount The number of registered entries to revert to.
-				@param[in] previousNextTypeId The next-type-ID value to restore.
+				@param[in] previousNextTypeID The next-type-ID value to restore.
 			*/
-			void rollbackEntries(ub previousCount, ub previousNextTypeId);
+			void rollbackEntries(ub previousCount, ub previousNextTypeID);
 
 			/*! @brief Removes a single entry from the registry by its internal array index.
 				@details Shifts subsequent entries down and clears the corresponding matchup row and column data.

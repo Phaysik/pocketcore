@@ -191,16 +191,15 @@ Place at the top of source/header files:
     @since The version or date since this file has been present.
     @author The author of the file.
 */
- namespace NamespaceName {
-     // namespace contents
- }
+namespace NamespaceName {
+    // namespace contents
+}
 ```
 
 ### For Member Variables
 
 ```cpp
-/*! @var memberVariable
-    @brief Short, one-line summary in sentence form.
+/*! @brief Short, one-line summary in sentence form.
     @details Optional longer description that explains behavior, constraints,
     and important usage notes.
     @showinitializer

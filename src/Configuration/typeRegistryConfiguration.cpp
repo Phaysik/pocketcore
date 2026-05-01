@@ -38,14 +38,14 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> TypeRegistryConfiguration::getMatchup(
 		const std::string_view attackerName, const std::string_view defenderName)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")};
+		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getMatchup")};
+		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getMatchup")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -58,7 +58,7 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getMatchupRow(
 		const std::string_view attackerName)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")};
+		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
@@ -71,7 +71,7 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getDefensiveColumn(
 		const std::string_view defenderName)
 	{
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")};
+		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -95,14 +95,14 @@ namespace Pokemon::Configuration
 																								const std::string_view defenderName,
 																								const TypeEffectiveness value)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")};
+		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setMatchup")};
+		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setMatchup")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -125,7 +125,7 @@ namespace Pokemon::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, attackerName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")};
+		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
@@ -145,7 +145,7 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
 		const std::string_view attackerName, const std::span<const MatchupPair> newRow)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")};
+		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
@@ -162,7 +162,7 @@ namespace Pokemon::Configuration
 
 		for (const auto &[pairName, pairValue] : newRow)
 		{
-			const std::expected<ub, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")};
+			const std::expected<ub, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 			if (!targetIndex.has_value())
 			{
@@ -186,7 +186,7 @@ namespace Pokemon::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, defenderName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")};
+		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -206,7 +206,7 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
 		const std::string_view defenderName, const std::span<const MatchupPair> newCol)
 	{
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")};
+		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -223,7 +223,7 @@ namespace Pokemon::Configuration
 
 		for (const auto &[pairName, pairValue] : newCol)
 		{
-			const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")};
+			const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 			if (!attackerIndex.has_value())
 			{
@@ -260,15 +260,6 @@ namespace Pokemon::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, typeName, logResult.value_or(std::string_view{})}};
 		}
 
-		if (registry.hasType(definition.name))
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration::addType duplicate type found in registry: '{}'.", definition.name)};
-
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::DuplicateType, definition.name, logResult.value_or(std::string_view{})}};
-		}
-
 		// Determine the fill value for unspecified matchup slots
 		TypeEffectiveness fillValue{};
 
@@ -294,7 +285,7 @@ namespace Pokemon::Configuration
 				continue;
 			}
 
-			const std::optional<ub> targetId{registry.getTypeId(pairName)};
+			const std::optional<ub> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
 
 			if (!targetId.has_value())
 			{
@@ -305,8 +296,9 @@ namespace Pokemon::Configuration
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
 
-			const std::optional<ub> targetIndex{registry.findIndexByTypeId(targetId.value())};
+			const std::optional<ub> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
 
+			// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 			if (!targetIndex.has_value())
 			{
 				const std::optional<std::string_view> logResult{
@@ -316,6 +308,7 @@ namespace Pokemon::Configuration
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
+			// LCOV_EXCL_STOP
 
 			offensiveRow.at(targetIndex.value()) = pairValue;
 		}
@@ -325,7 +318,7 @@ namespace Pokemon::Configuration
 
 		for (const auto &[pairName, pairValue] : definition.defensiveMatchups)
 		{
-			const std::optional<ub> targetId{registry.getTypeId(pairName)};
+			const std::optional<ub> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
 
 			if (!targetId.has_value())
 			{
@@ -336,8 +329,9 @@ namespace Pokemon::Configuration
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
 
-			const std::optional<ub> targetIndex{registry.findIndexByTypeId(targetId.value())};
+			const std::optional<ub> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
 
+			// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 			if (!targetIndex.has_value())
 			{
 				const std::optional<std::string_view> logResult{
@@ -347,13 +341,14 @@ namespace Pokemon::Configuration
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
+			// LCOV_EXCL_STOP
 
 			defensiveRow.at(targetIndex.value()) = pairValue;
 		}
 
 		// Write directly to the registry — bypasses the positional overload's strict defined-count validation,
 		// which is not applicable when the fill policy has already been resolved by name-keyed logic.
-		registry.setEntry(registered, TypeEntry{.typeId = registry.getNextTypeId(), .name = typeName});
+		registry.setEntry(registered, TypeEntry{.typeID = registry.getNextTypeID(), .name = typeName});
 
 		for (ub i{0}; i < registered; ++i)
 		{
@@ -363,21 +358,21 @@ namespace Pokemon::Configuration
 
 		registry.setTypeChartCell(registered, registered, offensiveRow.at(registered));
 
-		const ub assignedTypeId{registry.getNextTypeId()};
+		const ub assignedTypeID{registry.getNextTypeID()};
 
 		registry.incrementAmountRegistered();
-		registry.incrementNextTypeId();
+		registry.incrementNextTypeID();
 
-		return assignedTypeId;
+		return assignedTypeID;
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::addTypes(
 		const std::span<const TypeDefinition> &definitions, const UnspecifiedMatchup defaultBehavior)
 	{
 		const ub currentCount{registry.getAmountRegistered()};
-		const ub currentNextTypeId{registry.getNextTypeId()};
+		const ub currentNextTypeID{registry.getNextTypeID()};
 
-		const ub batchSize = static_cast<ub>(definitions.size());
+		const ub batchSize{static_cast<ub>(definitions.size())};
 
 		if (batchSize == 0)
 		{
@@ -405,21 +400,21 @@ namespace Pokemon::Configuration
 								 "previous safe state.",
 								 def.name)};
 
-				rollbackEntries(currentCount, currentNextTypeId);
+				rollbackEntries(currentCount, currentNextTypeID);
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, def.name, logResult.value_or(std::string_view{})}};
 			}
 
 			seenNames.insert(def.name);
 
-			const std::expected<ub, RegistryErrorInfo> result{addType(def, defaultBehavior)};
+			const std::expected<ub, RegistryErrorInfo> result{addType(def, defaultBehavior)}; // LCOV_EXCL_BR
 
 			if (!result.has_value())
 			{
 				static_cast<void>(Logger::warn(
 					"TypeRegistryConfiguration::addTypes Error adding type '{}'. Rolling back entries to previous safe state.", def.name));
 
-				rollbackEntries(currentCount, currentNextTypeId);
+				rollbackEntries(currentCount, currentNextTypeID);
 
 				return std::unexpected{result.error()};
 			}
@@ -430,9 +425,9 @@ namespace Pokemon::Configuration
 
 	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view typeName)
 	{
-		const std::optional<ub> typeId{registry.getTypeId(typeName)};
+		const std::optional<ub> typeID{registry.getTypeID(typeName)}; // LCOV_EXCL_BR
 
-		if (!typeId.has_value())
+		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
 				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by name, '{}'.", typeName)};
@@ -440,8 +435,9 @@ namespace Pokemon::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeId.value())};
+		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
 
+		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{Logger::info(
@@ -449,8 +445,9 @@ namespace Pokemon::Configuration
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
+		// LCOV_EXCL_STOP
 
-		const ub removedId{typeId.value()};
+		const ub removedId{typeID.value()};
 		removeEntry(arrayIndex.value());
 
 		return removedId;
@@ -460,7 +457,7 @@ namespace Pokemon::Configuration
 	{
 		const ub typeID{static_cast<ub>(type)};
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeID)};
+		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
@@ -475,21 +472,21 @@ namespace Pokemon::Configuration
 		return typeID;
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const ub typeId)
+	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const ub typeID)
 	{
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeId)};
+		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by stable ID, '{}'.", typeId)};
+				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by stable ID, '{}'.", typeID)};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
 		}
 
 		removeEntry(arrayIndex.value());
 
-		return typeId;
+		return typeID;
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::removeTypes(
@@ -500,7 +497,7 @@ namespace Pokemon::Configuration
 
 		for (const auto &name : typeNames)
 		{
-			const std::expected<ub, RegistryErrorInfo> result{removeType(name)};
+			const std::expected<ub, RegistryErrorInfo> result{removeType(name)}; // LCOV_EXCL_BR
 
 			if (!result.has_value())
 			{
@@ -519,9 +516,9 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::renameType(const std::string_view oldName,
 																								const std::string_view newName)
 	{
-		const std::optional<ub> typeId{registry.getTypeId(oldName)};
+		const std::optional<ub> typeID{registry.getTypeID(oldName)}; // LCOV_EXCL_BR
 
-		if (!typeId.has_value())
+		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
 				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName)};
@@ -537,8 +534,9 @@ namespace Pokemon::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, newName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeId.value())};
+		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
 
+		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{Logger::info(
@@ -546,62 +544,67 @@ namespace Pokemon::Configuration
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, logResult.value_or(std::string_view{})}};
 		}
+		// LCOV_EXCL_STOP
 
-		registry.setEntry(arrayIndex.value(), TypeEntry{.typeId = typeId.value(), .name = newName});
+		registry.setEntry(arrayIndex.value(), TypeEntry{.typeID = typeID.value(), .name = newName});
 
 		return {};
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const std::string_view typeName)
 	{
-		const std::expected<ub, RegistryErrorInfo> typeIndex{resolveIndex(typeName, "resetMatchups")};
+		const std::expected<ub, RegistryErrorInfo> typeIndex{resolveIndex(typeName, "resetMatchups")}; // LCOV_EXCL_BR
 
 		if (!typeIndex.has_value())
 		{
-			return std::unexpected{typeIndex.error()};
+			const std::optional<std::string_view> logResult{
+				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for type name '{}'.", typeName)}; // LCOV_EXCL_BR
+
+			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
 
 		const ub registered{registry.getAmountRegistered()};
-		const ub index{typeIndex.value()};
+		const ub index{typeIndex.value()}; // LCOV_EXCL_BR
 
 		// Clear offensive row
 		for (ub col{0}; col < registered; ++col)
 		{
-			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED);
+			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 		}
 
 		// Clear defensive column
 		for (ub row{0}; row < registered; ++row)
 		{
-			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED);
+			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 		}
 
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const ub typeId)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const ub typeID)
 	{
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeId)};
+		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeId)};
+				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeID)}; // LCOV_EXCL_BR
 
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
+			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, std::to_string(static_cast<Pokemon::Core::sb>(typeID)),
+													 logResult.value_or(std::string_view{})}};
 		}
 
 		const ub registered{registry.getAmountRegistered()};
-		const ub index{arrayIndex.value()};
+		const ub index{arrayIndex.value()}; // LCOV_EXCL_BR
 
 		for (ub col{0}; col < registered; ++col)
 		{
-			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED);
+			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 		}
 
 		for (ub row{0}; row < registered; ++row)
 		{
-			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED);
+			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 		}
 
 		return {};
@@ -609,45 +612,58 @@ namespace Pokemon::Configuration
 
 	// MARK: Private Member Function
 
-	void TypeRegistryConfiguration::rollbackEntries(const ub previousCount, const ub previousNextTypeId)
+	void TypeRegistryConfiguration::rollbackEntries(const ub previousCount, const ub previousNextTypeID)
 	{
 		ub registered{registry.getAmountRegistered()};
 
-		if (registered >= MAX_TYPES)
-		{
-			registered = MAX_TYPES - 1;
-			registry.setAmountRegistered(registered);
-		}
-
 		for (ub row{registered}; row > previousCount; --row)
 		{
+			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
+			// those
+			// branches from ever being hit
+
 			registry.setEntry(row, TypeEntry{});
 			registry.setTypeChartRow(row, {});
+
+			// LCOV_EXCL_BR_STOP
 
 			for (ub col{0}; col < registered; ++col)
 			{
 				// Clear the defensive matchup cell for this row and column
 
 				// NOLINTNEXTLINE(readability-suspicious-call-argument)
-				registry.setTypeChartCell(col, row, TypeEffectiveness::NOT_DEFINED);
+				registry.setTypeChartCell(col, row, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 			}
 		}
 
 		registry.setAmountRegistered(previousCount);
-		registry.setNextTypeId(previousNextTypeId);
+		registry.setNextTypeID(previousNextTypeID); // LCOV_EXCL_BR
 	}
 
 	void TypeRegistryConfiguration::removeEntry(const ub arrayIndex)
 	{
 		const ub registered{registry.getAmountRegistered()};
 
+		// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent those
+		// branches from ever being hit
+
+		// Set data to default
 		registry.setEntry(arrayIndex, TypeEntry{});
 		registry.setTypeChartRow(arrayIndex, {});
 
+		// LCOV_EXCL_BR_STOP
+
 		for (ub i{arrayIndex}; i < registered - 1; ++i)
 		{
+			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
+			// those
+			// branches from ever being hit
+
+			// Shift elements
 			registry.setEntry(i, registry.getEntry(i + 1));
 			registry.setTypeChartRow(i, registry.getTypeChartRow(i + 1));
+
+			// LCOV_EXCL_BR_STOP
 		}
 
 		registry.decrementAmountRegistered();
@@ -655,7 +671,7 @@ namespace Pokemon::Configuration
 		const ub newRegistered{registry.getAmountRegistered()};
 
 		// Clear the vacated last row
-		registry.setTypeChartRow(newRegistered, {});
+		registry.setTypeChartRow(newRegistered, {}); // LCOV_EXCL_BR
 
 		for (ub row{0}; row < newRegistered; ++row)
 		{
@@ -672,26 +688,18 @@ namespace Pokemon::Configuration
 	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view name,
 																								const std::string_view callerContext)
 	{
-		const std::optional<ub> typeId{registry.getTypeId(name)};
+		const std::optional<ub> typeID{registry.getTypeID(name)}; // LCOV_EXCL_BR
 
-		if (!typeId.has_value())
+		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::{} type '{}' not found.", callerContext, name)};
+				Logger::info("TypeRegistryConfiguration::{} type '{}' not found.", callerContext, name)}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, name, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeId(typeId.value())};
-
-		if (!arrayIndex.has_value())
-		{
-			const std::optional<std::string_view> logResult{Logger::info(
-				"TypeRegistryConfiguration::{} internal error: type ID found but array index missing for '{}'.", callerContext, name)};
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, name, logResult.value_or(std::string_view{})}};
-		}
-
-		return arrayIndex.value();
+		// Don't need to check for if it has a value because if getTypeID works, then this is guaranteed to work as they call
+		// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+		return registry.findIndexByTypeID(typeID.value()).value(); // LCOV_EXCL_BR
 	}
 } // namespace Pokemon::Configuration

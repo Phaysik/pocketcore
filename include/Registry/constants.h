@@ -17,7 +17,7 @@ namespace Pokemon::Registry::Types
 	constexpr std::string_view ROW_OOB_GET_TYPE_CHART_CELL{"Row index out of bounds in getTypeChartCell"};
 	constexpr std::string_view COL_OOB_GET_TYPE_CHART_CELL{"Column index out of bounds in getTypeChartCell"};
 	constexpr std::string_view ROW_OOB_GET_TYPE_CHART_ROW{"Row index out of bounds in getTypeChartRow"};
-	constexpr std::string_view INDEX_OOB_GET_TYPE_ID{"Index out of bounds in getTypeId"};
+	constexpr std::string_view INDEX_OOB_GET_TYPE_ID{"Index out of bounds in getTypeID"};
 	constexpr std::string_view INDEX_OOB_GET_TYPE_NAME{"Index out of bounds in getTypeName"};
 	constexpr std::string_view INDEX_OOB_SET_ENTRY{"Index out of bounds in setEntry"};
 	constexpr std::string_view ROW_OOB_SET_TYPE_CHART_CELL{"Row index out of bounds in setTypeChartCell"};

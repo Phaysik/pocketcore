@@ -37,14 +37,10 @@ namespace Pokemon::Registry::Types
 	*/
 	struct TypeEntry
 	{
-			/*! @var typeId
-				@brief The numeric type identifier.
-			*/
-			ub typeId{};
+			/*! @brief The numeric type identifier. */
+			ub typeID{};
 
-			/*! @var name
-				@brief The display name for the type.
-			*/
+			/*! @brief The display name for the type. */
 			std::string_view name{};
 	};
 
@@ -94,7 +90,7 @@ namespace Pokemon::Registry::Types
 				// IDs that do not conflict with built-in ones, even if some built-in types are removed later.
 
 				// NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-				mNextTypeId = mAmountRegistered;
+				mNextTypeID = mAmountRegistered;
 			}
 
 			// MARK: Getters
@@ -142,7 +138,7 @@ namespace Pokemon::Registry::Types
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 			*/
-			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<ub> getTypeId(const std::string_view name) const
+			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<ub> getTypeID(const std::string_view name) const
 			{
 				const ub index{findEntryIndexByName(name)};
 
@@ -153,18 +149,18 @@ namespace Pokemon::Registry::Types
 
 				assert(index < mEntries.size() && INDEX_OOB_GET_TYPE_ID.data());
 
-				return mEntries.at(index).typeId; // LCOV_EXCL_BR_LINE — The .at() exception branch is unreachable; the preceding assert
+				return mEntries.at(index).typeID; // LCOV_EXCL_BR_LINE — The .at() exception branch is unreachable; the preceding assert
 												  // already guarantees index < size.
 			}
 
 			/*! @brief Looks up a type's display name by its ID.
 				@note Time complexity is O(n) where n is @ref getAmountRegistered.
-				@param[in] typeId The type ID to search for.
+				@param[in] typeID The type ID to search for.
 				@return The name wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const ub typeId) const
+			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const ub typeID) const
 			{
-				const ub index{findEntryIndexById(typeId)};
+				const ub index{findEntryIndexById(typeID)};
 
 				if (index == mAmountRegistered)
 				{
@@ -187,9 +183,9 @@ namespace Pokemon::Registry::Types
 			/*! @brief Returns the next type ID that will be assigned to a newly registered type.
 				@return The next available stable type ID.
 			*/
-			ATTR_NODISCARD constexpr ub getNextTypeId() const noexcept
+			ATTR_NODISCARD constexpr ub getNextTypeID() const noexcept
 			{
-				return mNextTypeId;
+				return mNextTypeID;
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
@@ -252,24 +248,21 @@ namespace Pokemon::Registry::Types
 			/*! @brief Sets the next type ID counter.
 				@param[in] nextId The value to assign to the next-type-ID counter.
 			*/
-			constexpr void setNextTypeId(const ub nextId) noexcept
+			constexpr void setNextTypeID(const ub nextId) noexcept
 			{
-				mNextTypeId = nextId;
+				mNextTypeID = nextId;
 			}
 
 			// MARK: Member Functions
 
 			/*! @brief Finds the internal array index of a type given its stable type ID.
 				@note Time complexity is O(n) where n is @ref getAmountRegistered.
-				@param[in] typeId The stable type ID to search for.
+				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeId(const ub typeId) const
+			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeID(const ub typeID) const
 			{
-				// LCOV_EXCL_BR_START — The .at() exception branch inside findEntryIndexById is unreachable; the loop index is bounded by
-				// mAmountRegistered which is always < size.
-				const ub index{findEntryIndexById(typeId)};
-				// LCOV_EXCL_BR_STOP
+				const ub index{findEntryIndexById(typeID)}; // LCOV_EXCL_BR
 
 				if (index == mAmountRegistered)
 				{
@@ -291,18 +284,18 @@ namespace Pokemon::Registry::Types
 
 			/*! @brief Checks whether a type with the given ID is registered.
 				@note O(n) where n is @ref getAmountRegistered.
-				@param[in] typeId The type ID to check.
+				@param[in] typeID The type ID to check.
 				@return True if a type with that ID exists in the registry, false otherwise.
 			*/
-			ATTR_NODISCARD constexpr bool hasType(const ub typeId) const
+			ATTR_NODISCARD constexpr bool hasType(const ub typeID) const
 			{
-				return findEntryIndexById(typeId) != mAmountRegistered;
+				return findEntryIndexById(typeID) != mAmountRegistered;
 			}
 
 			/*! @brief Increments the next type ID counter by one. */
-			constexpr void incrementNextTypeId() noexcept
+			constexpr void incrementNextTypeID() noexcept
 			{
-				++mNextTypeId;
+				++mNextTypeID;
 			}
 
 			/*! @brief Increments the number of registered types by one. */
@@ -344,16 +337,16 @@ namespace Pokemon::Registry::Types
 			/*! @brief Finds the raw array index of a type entry by its stable type ID.
 				@details Returns @ref mAmountRegistered as a sentinel when not found, avoiding @ref std::optional construction overhead.
 				@note Time complexity is O(n) where n is @ref mAmountRegistered.
-				@param[in] typeId The stable type ID to search for.
-				@return The array index if found, or @ref mAmountRegistered if no type with tha,t ID is registered.
+				@param[in] typeID The stable type ID to search for.
+				@return The array index if found, or @ref mAmountRegistered if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr ub findEntryIndexById(const ub typeId) const
+			ATTR_NODISCARD constexpr ub findEntryIndexById(const ub typeID) const
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_ID.data());
 
 				for (ub i{0}; i < mAmountRegistered; ++i)
 				{
-					if (mEntries.at(i).typeId == typeId)
+					if (mEntries.at(i).typeID == typeID)
 					{
 						return i;
 					}
@@ -374,7 +367,7 @@ namespace Pokemon::Registry::Types
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_ADD_BUILTIN.data());
 
-				mEntries.at(mAmountRegistered) = TypeEntry{.typeId = static_cast<ub>(type), .name = name};
+				mEntries.at(mAmountRegistered) = TypeEntry{.typeID = static_cast<ub>(type), .name = name};
 				++mAmountRegistered;
 			}
 
@@ -419,7 +412,7 @@ namespace Pokemon::Registry::Types
 			/*! @brief Monotonically increasing counter for assigning stable type IDs.
 				@details Ensures that each type receives a unique ID that is never reused, even after removals.
 			*/
-			ub mNextTypeId{0};
+			ub mNextTypeID{0};
 	};
 } // namespace Pokemon::Registry::Types
 
