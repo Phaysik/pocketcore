@@ -63,10 +63,10 @@ namespace Pokemon::Utility::Clock
 			// Do not allow copies or moves for this class
 
 			Timer() = default;
-			Timer(const Timer &) = delete;
-			Timer(Timer &&) = delete;
-			Timer &operator=(const Timer &) = delete;
-			Timer &operator=(Timer &&) = delete;
+			Timer(const Timer &) = delete ("Timer is not copyable");
+			Timer(Timer &&) = delete ("Timer is not movable");
+			Timer &operator=(const Timer &) = delete ("Timer is not copyable");
+			Timer &operator=(Timer &&) = delete ("Timer is not movable");
 			~Timer() = default;
 
 			// MARK: Getters
@@ -275,7 +275,7 @@ namespace Pokemon::Utility::Clock
 				if (filename != nullptr || getFileName() != "null")
 				{
 					const std::scoped_lock lock(logMutex);
-					
+
 					if (!mLogFile.is_open())
 					{
 

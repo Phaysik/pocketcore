@@ -142,7 +142,7 @@ namespace Pokemon::Registry::Types
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ub> getTypeId(const std::string_view name) const
+			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<ub> getTypeId(const std::string_view name) const
 			{
 				const ub index{findEntryIndexByName(name)};
 

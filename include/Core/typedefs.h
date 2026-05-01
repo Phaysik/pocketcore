@@ -10,7 +10,7 @@
 #define INCLUDE_TYPEDEFS_H
 
 // WHEN clang supports reflection then we can uncomment this. It will compile will g++, but since clangd is the linter, it will error on
-// everything due to the flag `-frelection`
+// everything due to the flag `-freflection`
 
 #include <cstdint>
 // #include <meta>
@@ -29,7 +29,6 @@ namespace Pokemon::Core
 	using ss = int16_t;	 /*!< Shorthand for signed short */
 	using si = int32_t;	 /*!< Shorthand for signed int */
 	using sl = int64_t;	 /*!< Shorthand for signed long */
-	using sfloat = _Float16;
 
 	// template<typename E, bool Enumerable = std::meta::is_enumerable_type(^^E)>
 	//   requires IsEnum<E>
