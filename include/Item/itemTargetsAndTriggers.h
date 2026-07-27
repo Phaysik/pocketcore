@@ -36,8 +36,8 @@ namespace PocketCore::Item
 	struct ItemEffectTrigger
 	{
 		public:
-			ItemTriggerID mTrigger;
 			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
+			ItemTriggerID mTrigger;
 	};
 } // namespace PocketCore::Item
 

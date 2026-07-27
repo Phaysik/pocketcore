@@ -15,6 +15,8 @@
 
 namespace PocketCore::Ability
 {
+	using PocketCore::Core::ub;
+
 	/*! @enum BuiltinAbilityID
 		@showenumvalues
 		@brief Names the abilities provided by PocketCore itself.
@@ -26,7 +28,7 @@ namespace PocketCore::Ability
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	enum class BuiltinAbilityID : PocketCore::Core::ub
+	enum class BuiltinAbilityID : ub
 	{
 		None,
 		Stench,
@@ -39,7 +41,7 @@ namespace PocketCore::Ability
 	*/
 	ATTR_NODISCARD constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
 	{
-		return AbilityID{static_cast<PocketCore::Core::ub>(builtinAbilityID)};
+		return AbilityID{static_cast<ub>(builtinAbilityID)};
 	}
 } // namespace PocketCore::Ability
 

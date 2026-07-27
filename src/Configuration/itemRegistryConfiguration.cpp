@@ -27,41 +27,41 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> ItemRegistryConfiguration::addItem(const ItemDefinition &definition)
 	{
 		std::vector<ItemEffectTrigger> ownedTriggers{definition.triggers.begin(), definition.triggers.end()};
-		return addMetadata(ItemMeta{.mName = definition.name, .mTriggers = std::move(ownedTriggers)});
+		return addMetadata(ItemMeta{.mTriggers = std::move(ownedTriggers), .mName = definition.name});
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::addItems(
-		const std::span<const ItemDefinition> definitions)
+		const std::span<const ItemDefinition> &definitions)
 	{
 		return addMetadataBatch(definitions, [](const ItemDefinition &definition) {
 			return ItemMeta{
-				.mName = definition.name,
 				.mTriggers = std::vector<ItemEffectTrigger>{definition.triggers.begin(), definition.triggers.end()},
+				.mName = definition.name,
 			};
 		});
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTriggers(
-		const std::string_view itemName, const std::span<const ItemEffectTrigger> triggers)
+		const std::string_view &itemName, const std::span<const ItemEffectTrigger> &triggers)
 	{
 		return mutateMetadata(itemName, "setItemTriggers",
-							  [triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
+							  [&triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTriggers(
-		const ItemID itemID, const std::span<const ItemEffectTrigger> triggers)
+		const ItemID itemID, const std::span<const ItemEffectTrigger> &triggers)
 	{
 		return mutateMetadata(itemID, "setItemTriggers",
-							  [triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
+							  [&triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::renameItem(const std::string_view oldName,
-																								const std::string_view newName)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::renameItem(const std::string_view &oldName,
+																								const std::string_view &newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> ItemRegistryConfiguration::removeItem(const std::string_view itemName)
+	ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> ItemRegistryConfiguration::removeItem(const std::string_view &itemName)
 	{
 		return removeMetadata(itemName);
 	}

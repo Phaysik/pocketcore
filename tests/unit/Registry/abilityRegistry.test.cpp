@@ -52,11 +52,10 @@ SCENARIO("AbilityRegistry")
 
 		THEN("Stench retains its move-use flinch metadata")
 		{
-			auto metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Stench))};
-			REQUIRE(metadata.has_value());
+			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Stench))};
+			REQUIRE((metadata != nullptr));
 
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			const AbilityMeta &stench{metadata->get()};
+			const AbilityMeta stench{*metadata};
 			REQUIRE((stench.mTriggers.size() == 1U));
 			CHECK((stench.mTriggers.front().mTrigger == AbilityTriggerID::OnMoveUse));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
@@ -65,11 +64,10 @@ SCENARIO("AbilityRegistry")
 
 		THEN("Drizzle retains its switch-in rain metadata")
 		{
-			auto metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Drizzle))};
-			REQUIRE(metadata.has_value());
+			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Drizzle))};
+			REQUIRE((metadata != nullptr));
 
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			const AbilityMeta &drizzle{metadata->get()};
+			const AbilityMeta drizzle{*metadata};
 			REQUIRE((drizzle.mTriggers.size() == 1U));
 			CHECK((drizzle.mTriggers.front().mTrigger == AbilityTriggerID::OnSwitchIn));
 			CHECK((drizzle.mTriggers.front().mEffects.front() == EffectTypeID::SetRain));
@@ -78,7 +76,7 @@ SCENARIO("AbilityRegistry")
 		THEN("unknown names and IDs are absent")
 		{
 			CHECK_FALSE(registry.getAbilityID("Unknown").has_value());
-			CHECK_FALSE(registry.getAbilityMetadata(AbilityID{200}).has_value());
+			CHECK((registry.getAbilityMetadata(AbilityID{200}) == nullptr));
 			CHECK_FALSE(registry.getAbilityName(AbilityID{200}).has_value());
 		}
 

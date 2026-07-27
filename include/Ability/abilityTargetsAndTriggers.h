@@ -16,7 +16,9 @@
 
 namespace PocketCore::Ability
 {
-	enum class AbilityTriggerID : PocketCore::Core::ub
+	using PocketCore::Core::ub;
+
+	enum class AbilityTriggerID : ub
 	{
 		OnBattleStart,
 		OnSwitchIn,
@@ -28,7 +30,7 @@ namespace PocketCore::Ability
 		OnStatus,
 	};
 
-	enum class AbilityTargetID : PocketCore::Core::ub
+	enum class AbilityTargetID : ub
 	{
 		Self,
 		AllAllies,
@@ -39,8 +41,8 @@ namespace PocketCore::Ability
 	struct AbilityEffectTrigger
 	{
 		public:
-			AbilityTriggerID mTrigger;
 			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
+			AbilityTriggerID mTrigger;
 	};
 } // namespace PocketCore::Ability
 

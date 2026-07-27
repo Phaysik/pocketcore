@@ -75,16 +75,17 @@ namespace PocketCore::Effect
 			float mAbilityMultiplier{1.0F};
 			float mItemMultiplier{1.0F};
 			float mCriticalMultiplier{1.0F};
+			
+			TypeID mMoveTypeID{};
+			AbilityID mAbilityID{};
 
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
 			ub mMoveBasePower{0};
-			TypeID mMoveTypeID{};
 			ub moveAccuracy{0};
 
 			EffectSource mSourceType{EffectSource::None};
 			MoveID mMoveID{MoveID::None};
-			AbilityID mAbilityID{};
 			Side mUserSide{};
 			Side mTargetSide{};
 

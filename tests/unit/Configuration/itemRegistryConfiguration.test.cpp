@@ -22,6 +22,7 @@ using PocketCore::Effect::EffectTypeID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemEffectTrigger;
 using PocketCore::Item::ItemID;
+using PocketCore::Item::ItemMeta;
 using PocketCore::Item::ItemTriggerID;
 using PocketCore::Item::toItemID;
 using PocketCore::Utility::Debug::Logging::Logger;
@@ -49,7 +50,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 	GIVEN("a unique item definition")
 	{
 		std::vector<ItemEffectTrigger> triggers{
-			{.mTrigger = ItemTriggerID::OnMoveUse, .mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}},
+			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}, .mTrigger = ItemTriggerID::OnMoveUse},
 		};
 		ItemDefinition definition{.name = "Life Orb", .triggers = triggers};
 
@@ -64,14 +65,11 @@ SCENARIO("ItemRegistryConfiguration addItem")
 				CHECK((assignedIdentifier.getValue() == 3U));
 
 				triggers.clear();
-				auto metadata{configuration.getItemMetadata(assignedIdentifier)};
-				REQUIRE(metadata.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mName == "Life Orb"));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				REQUIRE((metadata->get().mTriggers.size() == 1U));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mEffects.size() == 2U));
+				const ItemMeta *metadata{configuration.getItemMetadata(assignedIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mName == "Life Orb"));
+				REQUIRE((metadata->mTriggers.size() == 1U));
+				CHECK((metadata->mTriggers.front().mEffects.size() == 2U));
 			}
 		}
 	}
@@ -136,36 +134,33 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by name")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mTrigger = ItemTriggerID::OnFaint, .mEffects = {EffectTypeID::StatusRemove}}},
+				{{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnFaint}},
 			};
 			auto setResult{configuration.setItemTriggers("Custom Item", replacement)};
 
 			THEN("the updated metadata is visible through its stable ID")
 			{
 				REQUIRE(setResult.has_value());
-				auto metadata{configuration.getItemMetadata(customIdentifier)};
-				REQUIRE(metadata.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mTrigger == ItemTriggerID::OnFaint));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
+				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnFaint));
+				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
 			}
 		}
 
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mTrigger = ItemTriggerID::OnSwitchIn, .mEffects = {EffectTypeID::Flinch}}},
+				{{.mEffects = {EffectTypeID::Flinch}, .mTrigger = ItemTriggerID::OnSwitchIn}},
 			};
 			auto setResult{configuration.setItemTriggers(customIdentifier, replacement)};
 
 			THEN("the updated metadata remains associated with the same ID")
 			{
 				REQUIRE(setResult.has_value());
-				auto metadata{configuration.getItemMetadata(customIdentifier)};
-				REQUIRE(metadata.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mTrigger == ItemTriggerID::OnSwitchIn));
+				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnSwitchIn));
 			}
 		}
 
@@ -196,7 +191,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 			{
 				REQUIRE(laterResult.has_value());
 				CHECK((laterResult.value() != customIdentifier));
-				CHECK_FALSE(configuration.getItemMetadata(customIdentifier).has_value());
+				CHECK((configuration.getItemMetadata(customIdentifier) == nullptr));
 			}
 		}
 	}

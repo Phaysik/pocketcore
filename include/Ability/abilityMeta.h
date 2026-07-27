@@ -29,14 +29,14 @@ namespace PocketCore::Ability
 	struct AbilityMeta
 	{
 		public:
-			/*! @brief The stable built-in or user-assigned identifier. */
-			AbilityID mAbilityID{};
+			/*! @brief The owned trigger and effect definitions for this ability. */
+			std::vector<AbilityEffectTrigger> mTriggers;
 
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
 
-			/*! @brief The owned trigger and effect definitions for this ability. */
-			std::vector<AbilityEffectTrigger> mTriggers;
+			/*! @brief The stable built-in or user-assigned identifier. */
+			AbilityID mAbilityID{};
 	};
 } // namespace PocketCore::Ability
 

@@ -297,7 +297,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("setting an entry updates that entry")
 		{
-			TypeEntry replacementEntry{.typeID = TypeID{99}, .name = "Custom"};
+			TypeEntry replacementEntry{.name = "Custom", .typeID = TypeID{99}};
 			registry.setEntry(0, replacementEntry);
 
 			TypeEntry updatedEntry{registry.getEntry(0)};
@@ -307,7 +307,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("setting an entry updates name lookups")
 		{
-			TypeEntry replacementEntry{.typeID = TypeID{50}, .name = "Cosmic"};
+			TypeEntry replacementEntry{.name = "Cosmic", .typeID = TypeID{50}};
 			registry.setEntry(0, replacementEntry);
 
 			std::optional<TypeID> cosmicIdentifier{registry.getTypeID("Cosmic")};

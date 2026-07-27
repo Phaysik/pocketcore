@@ -11,6 +11,7 @@
 
 #include <limits>
 
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "ID/idInterface.h"
 #include "Types/types.h"
@@ -39,7 +40,7 @@ namespace PocketCore::Types
 		@param[in] builtinType The built-in type to convert.
 		@return The corresponding open type identifier.
 	*/
-	[[nodiscard]] constexpr TypeID toTypeID(const Types builtinType) noexcept
+	ATTR_NODISCARD constexpr TypeID toTypeID(const Types builtinType) noexcept
 	{
 		return TypeID{static_cast<ub>(builtinType)};
 	}

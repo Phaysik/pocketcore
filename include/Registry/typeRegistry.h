@@ -40,11 +40,12 @@ namespace PocketCore::Registry::Types
 	*/
 	struct TypeEntry
 	{
-			/*! @brief The stable identifier for a built-in or user-defined type. */
-			TypeID typeID{};
-
+		public:
 			/*! @brief The display name for the type. */
 			std::string_view name{};
+
+			/*! @brief The stable identifier for a built-in or user-defined type. */
+			TypeID typeID{};
 	};
 
 	/*! @class TypeRegistry Registry/typeRegistry.h
@@ -64,7 +65,7 @@ namespace PocketCore::Registry::Types
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 			*/
-			explicit constexpr TypeRegistry()
+			explicit constexpr TypeRegistry() : mNextTypeID(static_cast<us>(toTypeID(Types::Types::Stellar).getValue() + 1U))
 			{
 				// LCOV_EXCL_BR_START — Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
 				// is not applicable.
@@ -88,12 +89,6 @@ namespace PocketCore::Registry::Types
 				addBuiltin(Types::FAIRY_TYPE_MATCHUP, Types::Types::Fairy, Types::FAIRY_NAME);
 				addBuiltin(Types::Types::Stellar, Types::STELLAR_NAME);
 				// LCOV_EXCL_BR_STOP
-
-				// Initialize next type ID to the first available ID after the built-in types. This ensures that custom types receive stable
-				// IDs that do not conflict with built-in ones, even if some built-in types are removed later.
-
-				// NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-				mNextTypeID = mAmountRegistered;
 			}
 
 			// MARK: Getters
@@ -103,7 +98,7 @@ namespace PocketCore::Registry::Types
 				@param[in] index The index into the entries array.
 				@return A copy of the @ref TypeEntry at that index.
 			*/
-			ATTR_NODISCARD constexpr TypeEntry getEntry(const us index)
+			ATTR_NODISCARD constexpr const TypeEntry &getEntry(const us index) const
 			{
 				assert(index < mEntries.size() && INDEX_OOB_GET_ENTRY.data());
 
@@ -116,7 +111,7 @@ namespace PocketCore::Registry::Types
 				@param[in] col The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
 			*/
-			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const us row, const us col)
+			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const us row, const us col) const
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_CELL.data());
 				assert(col < mTypeChart.at(row).size() && COL_OOB_GET_TYPE_CHART_CELL.data());
@@ -129,7 +124,7 @@ namespace PocketCore::Registry::Types
 				@param[in] row The row index.
 				@return A copy of the full effectiveness row for the given type.
 			*/
-			ATTR_NODISCARD constexpr std::array<Types::TypeEffectiveness, MAX_TYPES> getTypeChartRow(const us row)
+			ATTR_NODISCARD constexpr const std::array<Types::TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_ROW.data());
 
@@ -141,7 +136,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 			*/
-			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view name) const
+			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view &name) const
 			{
 				const us index{findEntryIndexByName(name)};
 
@@ -195,7 +190,7 @@ namespace PocketCore::Registry::Types
 				@details The returned span covers the first @ref getAmountRegistered elements of the internal entries array.
 				@return A span of @ref TypeEntry covering all valid registered entries.
 			*/
-			ATTR_NODISCARD constexpr std::span<const TypeEntry> getRegisteredTypes() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const TypeEntry> getRegisteredTypes() const noexcept
 			{
 				return {mEntries.data(), mAmountRegistered};
 			}
@@ -263,7 +258,7 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<us> findIndexByTypeID(const TypeID typeID) const
+			ATTR_NODISCARD constexpr const std::optional<us> findIndexByTypeID(const TypeID typeID) const
 			{
 				const us index{findEntryIndexById(typeID)}; // LCOV_EXCL_BR
 
@@ -280,7 +275,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name to check.
 				@return True if a type with that name exists in the registry, false otherwise.
 			*/
-			ATTR_NODISCARD constexpr bool hasType(const std::string_view name) const
+			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
 			{
 				return findEntryIndexByName(name) != mAmountRegistered;
 			}
@@ -322,7 +317,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name to search for.
 				@return The array index if found, or @ref mAmountRegistered if no type with that name is registered.
 			*/
-			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
+			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_NAME.data());
 
@@ -366,11 +361,11 @@ namespace PocketCore::Registry::Types
 				@param[in] type The built-in @ref Types enum value.
 				@param[in] name The display name for the type.
 			*/
-			constexpr void addBuiltin(const Types::Types type, std::string_view name)
+			constexpr void addBuiltin(const Types::Types type, const std::string_view &name)
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_ADD_BUILTIN.data());
 
-				mEntries.at(mAmountRegistered) = TypeEntry{.typeID = toTypeID(type), .name = name};
+				mEntries.at(mAmountRegistered) = TypeEntry{.name = name, .typeID = toTypeID(type)};
 				++mAmountRegistered;
 			}
 
@@ -384,7 +379,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name for the type.
 			*/
 			constexpr void addBuiltin(const std::span<const Types::TypeEffectiveness> &offensiveMatchups, const Types::Types type,
-									  std::string_view name)
+									  const std::string_view &name)
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_ADD_BUILTIN.data());
 				assert(offensiveMatchups.size() <= mTypeChart.at(mAmountRegistered).size() && MATCHUPS_EXCEED_COLUMNS_ADD_BUILTIN.data());

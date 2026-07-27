@@ -47,6 +47,9 @@ namespace PocketCore::Battle
 			float mSpeedBoost{1.0F};
 
 			us mCurrentHp{0};
+
+			ItemID mItemID{};
+
 			ub mSleepCounter{0};
 			ub mToxicCounter{0};
 			ub mProtectionCounter{0};
@@ -56,7 +59,6 @@ namespace PocketCore::Battle
 			bool mIsFlinched{false};
 			bool mItemConsumed{false};
 
-			ItemID mItemID{ItemID::None};
 			MoveID mChoiceLockedMove{MoveID::None};
 			StatusID mStatus{StatusID::None};
 	};

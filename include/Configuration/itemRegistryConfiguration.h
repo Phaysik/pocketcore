@@ -10,7 +10,6 @@
 #define INCLUDE_CONFIGURATION_ITEM_REGISTRY_CONFIGURATION_H
 
 #include <expected>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -35,6 +34,7 @@ namespace PocketCore::Configuration
 	{
 		struct ItemRegistryConfigurationPolicy
 		{
+			public:
 				static constexpr std::string_view configurationName{"ItemRegistryConfiguration"};
 				static constexpr std::string_view entityName{"item"};
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateItem};
@@ -53,6 +53,7 @@ namespace PocketCore::Configuration
 	*/
 	struct ItemDefinition
 	{
+		public:
 			/*! @brief The unique, case-sensitive display name with storage that outlives the registered item. */
 			std::string_view name{};
 
@@ -81,26 +82,29 @@ namespace PocketCore::Configuration
 			/*! @brief Constructs a configuration containing all built-in items. */
 			constexpr ItemRegistryConfiguration() = default;
 
-			/*! @brief Looks up complete item metadata by stable ID. */
-			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const ItemMeta>> getItemMetadata(const ItemID itemID) const
+			/*! @brief Looks up complete item metadata by stable ID.
+				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
+			   configuration destruction.
+			*/
+			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
 				return getMetadata(itemID);
 			}
 
 			/*! @brief Looks up a stable item ID by display name. */
-			ATTR_NODISCARD constexpr std::optional<ItemID> getItemID(const std::string_view name) const
+			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
 				return getID(name);
 			}
 
 			/*! @brief Looks up an item display name by stable ID. */
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getItemName(const ItemID itemID) const
+			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
 				return getName(itemID);
 			}
 
 			/*! @brief Returns all currently registered item definitions. */
-			ATTR_NODISCARD constexpr std::span<const ItemMeta> getRegisteredItems() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
 				return getRegisteredEntries();
 			}
@@ -112,7 +116,7 @@ namespace PocketCore::Configuration
 			}
 
 			/*! @brief Checks whether an item name is registered. */
-			ATTR_NODISCARD constexpr bool hasItem(const std::string_view name) const
+			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{
 				return hasEntry(name);
 			}
@@ -133,21 +137,22 @@ namespace PocketCore::Configuration
 				@param[in] definitions The item definitions to register in order.
 				@return Void on success, or the first registry error after rollback.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addItems(std::span<const ItemDefinition> definitions);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addItems(const std::span<const ItemDefinition> &definitions);
 
 			/*! @brief Replaces all trigger metadata for an item selected by name. */
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(std::string_view itemName,
-																				  std::span<const ItemEffectTrigger> triggers);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const std::string_view &itemName,
+																				  const std::span<const ItemEffectTrigger> &triggers);
 
 			/*! @brief Replaces all trigger metadata for an item selected by stable ID. */
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(ItemID itemID,
-																				  std::span<const ItemEffectTrigger> triggers);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const ItemID itemID,
+																				  const std::span<const ItemEffectTrigger> &triggers);
 
 			/*! @brief Renames an item without changing its stable ID or trigger metadata. */
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameItem(std::string_view oldName, std::string_view newName);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameItem(const std::string_view &oldName,
+																			 const std::string_view &newName);
 
 			/*! @brief Removes an item by display name. */
-			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(std::string_view itemName);
+			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const std::string_view &itemName);
 
 			/*! @brief Removes an item by stable ID. */
 			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(ItemID itemID);

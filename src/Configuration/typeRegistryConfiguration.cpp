@@ -39,7 +39,7 @@ namespace PocketCore::Configuration
 	// MARK: Getters
 
 	ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> TypeRegistryConfiguration::getMatchup(
-		const std::string_view attackerName, const std::string_view defenderName)
+		const std::string_view &attackerName, const std::string_view &defenderName)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")}; // LCOV_EXCL_BR
 
@@ -59,7 +59,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getMatchupRow(
-		const std::string_view attackerName)
+		const std::string_view &attackerName)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")}; // LCOV_EXCL_BR
 
@@ -72,7 +72,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getDefensiveColumn(
-		const std::string_view defenderName)
+		const std::string_view &defenderName)
 	{
 		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")}; // LCOV_EXCL_BR
 
@@ -94,8 +94,8 @@ namespace PocketCore::Configuration
 
 	// MARK: Setters
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchup(const std::string_view attackerName,
-																								const std::string_view defenderName,
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchup(const std::string_view &attackerName,
+																								const std::string_view &defenderName,
 																								const TypeEffectiveness value)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")}; // LCOV_EXCL_BR
@@ -118,7 +118,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
-		const std::string_view attackerName, const std::span<const TypeEffectiveness> newRow)
+		const std::string_view &attackerName, const std::span<const TypeEffectiveness> &newRow)
 	{
 		if (newRow.size() > MAX_TYPES)
 		{
@@ -148,7 +148,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
-		const std::string_view attackerName, const std::span<const MatchupPair> newRow)
+		const std::string_view &attackerName, const std::span<const MatchupPair> &newRow)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
@@ -181,7 +181,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
-		const std::string_view defenderName, const std::span<const TypeEffectiveness> newCol)
+		const std::string_view &defenderName, const std::span<const TypeEffectiveness> &newCol)
 	{
 		if (newCol.size() > MAX_TYPES)
 		{
@@ -211,7 +211,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
-		const std::string_view defenderName, const std::span<const MatchupPair> newCol)
+		const std::string_view &defenderName, const std::span<const MatchupPair> &newCol)
 	{
 		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
@@ -361,7 +361,7 @@ namespace PocketCore::Configuration
 
 		// Write directly to the registry — bypasses the positional overload's strict defined-count validation,
 		// which is not applicable when the fill policy has already been resolved by name-keyed logic.
-		registry.setEntry(registered, TypeEntry{.typeID = registry.getNextTypeID(), .name = typeName});
+		registry.setEntry(registered, TypeEntry{.name = typeName, .typeID = registry.getNextTypeID()});
 
 		for (us i{0}; i < registered; ++i)
 		{
@@ -439,7 +439,7 @@ namespace PocketCore::Configuration
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view typeName)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view &typeName)
 	{
 		const std::optional<TypeID> typeID{registry.getTypeID(typeName)}; // LCOV_EXCL_BR
 
@@ -512,7 +512,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::removeTypes(
-		const std::span<const std::string_view> typeNames)
+		const std::span<const std::string_view> &typeNames)
 	{
 		// Snapshot the entire registry for all-or-nothing rollback
 		const Registry::Types::TypeRegistry snapshot{registry};
@@ -536,8 +536,8 @@ namespace PocketCore::Configuration
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::renameType(const std::string_view oldName,
-																								const std::string_view newName)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::renameType(const std::string_view &oldName,
+																								const std::string_view &newName)
 	{
 		const std::optional<TypeID> typeID{registry.getTypeID(oldName)}; // LCOV_EXCL_BR
 
@@ -566,12 +566,12 @@ namespace PocketCore::Configuration
 			registry.findIndexByTypeID(typeValue).value(),
 		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
 
-		registry.setEntry(arrayIndex, TypeEntry{.typeID = typeValue, .name = newName}); // LCOV_EXCL_BR
+		registry.setEntry(arrayIndex, TypeEntry{.name = newName, .typeID = typeValue}); // LCOV_EXCL_BR
 
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const std::string_view typeName)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const std::string_view &typeName)
 	{
 		const std::expected<us, RegistryErrorInfo> typeIndex{resolveIndex(typeName, "resetMatchups")}; // LCOV_EXCL_BR
 
@@ -684,8 +684,8 @@ namespace PocketCore::Configuration
 		}
 	}
 
-	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view name,
-																								const std::string_view callerContext)
+	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view &name,
+																								const std::string_view &callerContext)
 	{
 		const std::optional<TypeID> typeID{registry.getTypeID(name)}; // LCOV_EXCL_BR
 

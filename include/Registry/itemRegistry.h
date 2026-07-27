@@ -9,7 +9,6 @@
 #ifndef INCLUDE_REGISTRY_ITEM_REGISTRY_H
 #define INCLUDE_REGISTRY_ITEM_REGISTRY_H
 
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -54,22 +53,23 @@ namespace PocketCore::Registry::Item
 
 		public:
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID. */
-			explicit constexpr ItemRegistry() : Base{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
 			{
-				addBuiltin({.mItemID = toItemID(BuiltinItemID::None), .mName = PocketCore::Item::ITEM_NAME_NONE, .mTriggers = {}});
+				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({
-					.mItemID = toItemID(BuiltinItemID::CheriBerry),
+					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
-					.mTriggers = {{.mTrigger = ItemTriggerID::OnTurnEnd, .mEffects = {EffectTypeID::StatusRemove}}},
+					.mItemID = toItemID(BuiltinItemID::CheriBerry),
 				});
 				addBuiltin({
-					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
+					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
-					.mTriggers = {{.mTrigger = ItemTriggerID::OnTurnEnd, .mEffects = {EffectTypeID::StatusRemove}}},
+					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 				});
 			}
 
 			using Base::decrementAmountRegistered;
+			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
 			using Base::getID;
@@ -77,7 +77,6 @@ namespace PocketCore::Registry::Item
 			using Base::getName;
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
-			using Base::findIndexByID;
 			using Base::hasEntry;
 			using Base::incrementAmountRegistered;
 			using Base::incrementNextID;
@@ -87,10 +86,10 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Looks up item metadata by stable ID.
 				@param[in] itemID The stable item identifier.
-				@return A reference to the metadata if registered, or std::nullopt otherwise. The reference remains valid until mutation or
-			   destruction.
+				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
+			   registry destruction.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const ItemMeta>> getItemMetadata(const ItemID itemID) const
+			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
 				return getMetadata(itemID);
 			}
@@ -99,7 +98,7 @@ namespace PocketCore::Registry::Item
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ItemID> getItemID(const std::string_view name) const
+			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
 				return getID(name);
 			}
@@ -108,7 +107,7 @@ namespace PocketCore::Registry::Item
 				@param[in] itemID The stable item identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getItemName(const ItemID itemID) const
+			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
 				return getName(itemID);
 			}
@@ -116,7 +115,7 @@ namespace PocketCore::Registry::Item
 			/*! @brief Returns all currently registered item definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
 			*/
-			ATTR_NODISCARD constexpr std::span<const ItemMeta> getRegisteredItems() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
 				return getRegisteredEntries();
 			}
@@ -133,7 +132,7 @@ namespace PocketCore::Registry::Item
 				@param[in] itemID The stable item identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<us> findIndexByItemID(const ItemID itemID) const
+			ATTR_NODISCARD constexpr const std::optional<us> findIndexByItemID(const ItemID itemID) const
 			{
 				return findIndexByID(itemID);
 			}
@@ -142,7 +141,7 @@ namespace PocketCore::Registry::Item
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 			*/
-			ATTR_NODISCARD constexpr bool hasItem(const std::string_view name) const
+			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{
 				return hasEntry(name);
 			}

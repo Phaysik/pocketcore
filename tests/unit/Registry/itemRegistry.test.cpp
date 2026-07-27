@@ -45,23 +45,19 @@ SCENARIO("ItemRegistry")
 
 		THEN("Chesto Berry retains its turn-end status removal metadata")
 		{
-			auto metadata{registry.getItemMetadata(toItemID(BuiltinItemID::ChestoBerry))};
-			REQUIRE(metadata.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			REQUIRE((metadata->get().mTriggers.size() == 1U));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((metadata->get().mTriggers.front().mTrigger == ItemTriggerID::OnTurnEnd));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			REQUIRE((metadata->get().mTriggers.front().mEffects.size() == 1U));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((metadata->get().mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
+			const ItemMeta *metadata{registry.getItemMetadata(toItemID(BuiltinItemID::ChestoBerry))};
+			REQUIRE((metadata != nullptr));
+			REQUIRE((metadata->mTriggers.size() == 1U));
+			CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnTurnEnd));
+			REQUIRE((metadata->mTriggers.front().mEffects.size() == 1U));
+			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
 		}
 
 		THEN("unknown item lookups are absent")
 		{
 			ItemID unknownIdentifier{200};
 			CHECK_FALSE(registry.getItemID("Unknown").has_value());
-			CHECK_FALSE(registry.getItemMetadata(unknownIdentifier).has_value());
+			CHECK((registry.getItemMetadata(unknownIdentifier) == nullptr));
 			CHECK_FALSE(registry.getItemName(unknownIdentifier).has_value());
 			CHECK_FALSE(registry.findIndexByItemID(unknownIdentifier).has_value());
 			CHECK_FALSE(registry.hasItem(unknownIdentifier));

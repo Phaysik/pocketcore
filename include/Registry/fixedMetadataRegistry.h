@@ -11,7 +11,6 @@
 
 #include <array>
 #include <cassert>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -55,25 +54,26 @@ namespace PocketCore::Registry
 
 			/*! @brief Looks up metadata by stable ID.
 				@param[in] stableID The stable identifier to find.
-				@return A reference to metadata if registered, or std::nullopt otherwise.
+				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until the entry is
+			   replaced or the registry is destroyed.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const Metadata>> getMetadata(const StableID stableID) const
+			ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
 				const us index{findEntryIndexByID(stableID)};
 
 				if (index == mAmountRegistered)
 				{
-					return std::nullopt;
+					return nullptr;
 				}
 
-				return std::cref(mEntries.at(index));
+				return &mEntries.at(index);
 			}
 
 			/*! @brief Looks up a stable ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<StableID> getID(const std::string_view name) const
+			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
 				const us index{findEntryIndexByName(name)};
 
@@ -89,22 +89,22 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The display name if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getName(const StableID stableID) const
+			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
-				const auto metadata{getMetadata(stableID)};
+				const Metadata *metadata{getMetadata(stableID)};
 
-				if (!metadata.has_value())
+				if (metadata == nullptr)
 				{
 					return std::nullopt;
 				}
 
-				return metadata->get().mName;
+				return metadata->mName;
 			}
 
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
 			*/
-			ATTR_NODISCARD constexpr std::span<const Metadata> getRegisteredEntries() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
 				return {mEntries.data(), mAmountRegistered};
 			}
@@ -129,7 +129,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<us> findIndexByID(const StableID stableID) const
+			ATTR_NODISCARD constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
 				const us index{findEntryIndexByID(stableID)};
 
@@ -145,7 +145,7 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 			*/
-			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view name) const
+			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
 				return findEntryIndexByName(name) != mAmountRegistered;
 			}
@@ -214,7 +214,7 @@ namespace PocketCore::Registry
 				@pre @ref getAmountRegistered() < Capacity.
 				@param[in] metadata The complete built-in metadata record to append.
 			*/
-			constexpr void addBuiltin(Metadata metadata)
+			constexpr void addBuiltin(Metadata &&metadata)
 			{
 				assert(mAmountRegistered < mEntries.size());
 				mEntries.at(mAmountRegistered) = std::move(metadata);
@@ -222,7 +222,7 @@ namespace PocketCore::Registry
 			}
 
 		private:
-			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
+			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
 				{

@@ -11,6 +11,7 @@
 
 #include <string_view>
 
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
 namespace PocketCore::Configuration
@@ -47,8 +48,8 @@ namespace PocketCore::Configuration
 		MatchupMismatch,  /*!< The number of provided matchup entries does not match the registered count. */
 		DuplicateAbility, /*!< An ability with the given name already exists. */
 		AbilityNotFound,  /*!< No ability matching the input was found. */
-		DuplicateItem,    /*!< An item with the given name already exists. */
-		ItemNotFound,     /*!< No item matching the input was found. */
+		DuplicateItem,	  /*!< An item with the given name already exists. */
+		ItemNotFound,	  /*!< No item matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -77,8 +78,8 @@ namespace PocketCore::Configuration
 				@param[in] errorKind The registry error category.
 				@param[in] errorContext The identifier or context associated with the failure.
 			*/
-			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view errorContext) noexcept
-				: mKind{errorKind}, mErrorName{errorKindToString()}, mContext{errorContext}
+			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view &errorContext) noexcept
+				: mErrorName{errorKindToString(errorKind)}, mContext{errorContext}, mKind{errorKind}
 			{}
 
 			/*! @brief Initializes error info with an error category, context, and logging failure reason.
@@ -86,15 +87,12 @@ namespace PocketCore::Configuration
 				@param[in] errorContext The identifier or context associated with the failure.
 				@param[in] logFailure A message describing why logging failed.
 			*/
-			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view errorContext,
-										const std::string_view logFailure) noexcept
-				: mKind{errorKind}, mErrorName{errorKindToString()}, mContext{errorContext}, mLoggingFailure{logFailure}
+			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view &errorContext,
+										const std::string_view &logFailure) noexcept
+				: mErrorName{errorKindToString(errorKind)}, mContext{errorContext}, mLoggingFailure{logFailure}, mKind{errorKind}
 			{}
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
-
-			/*! @brief The category of the error. */
-			RegistryError mKind{};
 
 			std::string_view mErrorName{};
 
@@ -104,6 +102,9 @@ namespace PocketCore::Configuration
 			/*! @brief The logging failure message if the Logger call itself failed, or a default success message. */
 			std::string_view mLoggingFailure{NO_LOGGING_FAILURE};
 
+			/*! @brief The category of the error. */
+			RegistryError mKind{};
+
 			// NOLINTEND(misc-non-private-member-variables-in-classes)
 
 		private:
@@ -112,9 +113,9 @@ namespace PocketCore::Configuration
 			/*! @brief Converts @ref mKind to a human-readable name.
 				@return A string view containing the enum name suitable for diagnostics and error messages.
 			*/
-			[[nodiscard]] constexpr std::string_view errorKindToString() noexcept
+			ATTR_NODISCARD constexpr std::string_view errorKindToString(const RegistryError errorKind) noexcept
 			{
-				switch (mKind) // LCOV_EXCL_BR
+				switch (errorKind) // LCOV_EXCL_BR
 				{
 					case RegistryError::MaxCapacity:
 						mErrorName = "MaxCapacity";

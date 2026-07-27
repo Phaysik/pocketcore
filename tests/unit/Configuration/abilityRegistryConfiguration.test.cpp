@@ -16,6 +16,7 @@
 
 using PocketCore::Ability::AbilityEffectTrigger;
 using PocketCore::Ability::AbilityID;
+using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::AbilityTriggerID;
 using PocketCore::Configuration::AbilityDefinition;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
@@ -46,7 +47,8 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 	GIVEN("a unique ability definition")
 	{
 		std::vector<AbilityEffectTrigger> triggers{
-			{.mTrigger = AbilityTriggerID::OnTurnEnd, .mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusTick}},};
+			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusTick}, .mTrigger = AbilityTriggerID::OnTurnEnd},
+		};
 		AbilityDefinition definition{.name = "Regenerator", .triggers = triggers};
 
 		WHEN("the ability is added")
@@ -60,14 +62,11 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 				CHECK((assignedIdentifier.getValue() == 3U));
 
 				triggers.clear();
-				auto metadata{configuration.getAbilityMetadata(assignedIdentifier)};
-				REQUIRE(metadata.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mName == "Regenerator"));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				REQUIRE((metadata->get().mTriggers.size() == 1U));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mEffects.size() == 2U));
+				const AbilityMeta *metadata{configuration.getAbilityMetadata(assignedIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mName == "Regenerator"));
+				REQUIRE((metadata->mTriggers.size() == 1U));
+				CHECK((metadata->mTriggers.front().mEffects.size() == 2U));
 			}
 		}
 	}
@@ -133,7 +132,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		{
 			std::array<AbilityEffectTrigger, 1> replacement{
 				{
-					{.mTrigger = AbilityTriggerID::OnStatus, .mEffects = {EffectTypeID::StatusApply}},
+					{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = AbilityTriggerID::OnStatus},
 				},
 			};
 			auto setResult{configuration.setAbilityTriggers("Custom Ability", replacement)};
@@ -141,12 +140,10 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 			THEN("the updated metadata is visible through its stable ID")
 			{
 				REQUIRE(setResult.has_value());
-				auto metadata{configuration.getAbilityMetadata(customIdentifier)};
-				REQUIRE(metadata.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mTrigger == AbilityTriggerID::OnStatus));
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((metadata->get().mTriggers.front().mEffects.front() == EffectTypeID::StatusApply));
+				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTriggers.front().mTrigger == AbilityTriggerID::OnStatus));
+				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusApply));
 			}
 		}
 
@@ -177,7 +174,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 			{
 				REQUIRE(laterResult.has_value());
 				CHECK((laterResult.value() != customIdentifier));
-				CHECK_FALSE(configuration.getAbilityMetadata(customIdentifier).has_value());
+				CHECK((configuration.getAbilityMetadata(customIdentifier) == nullptr));
 			}
 		}
 	}

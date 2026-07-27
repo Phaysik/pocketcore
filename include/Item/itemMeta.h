@@ -29,14 +29,14 @@ namespace PocketCore::Item
 	struct ItemMeta
 	{
 		public:
-			/*! @brief The stable built-in or user-assigned identifier. */
-			ItemID mItemID{};
+			/*! @brief The owned trigger and effect definitions for this item. */
+			std::vector<ItemEffectTrigger> mTriggers;
 
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
 
-			/*! @brief The owned trigger and effect definitions for this item. */
-			std::vector<ItemEffectTrigger> mTriggers;
+			/*! @brief The stable built-in or user-assigned identifier. */
+			ItemID mItemID{};
 	};
 } // namespace PocketCore::Item
 

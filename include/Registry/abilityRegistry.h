@@ -9,7 +9,6 @@
 #ifndef INCLUDE_REGISTRY_ABILITY_REGISTRY_H
 #define INCLUDE_REGISTRY_ABILITY_REGISTRY_H
 
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -55,23 +54,28 @@ namespace PocketCore::Registry::Ability
 
 		public:
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID. */
-			explicit constexpr AbilityRegistry() : Base{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr AbilityRegistry()
+				: Base{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
 			{
-				addBuiltin(
-					{.mAbilityID = toAbilityID(BuiltinAbilityID::None), .mName = PocketCore::Ability::ABILITY_NAME_NONE, .mTriggers = {}});
 				addBuiltin({
-					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
-					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
-					.mTriggers = {{.mTrigger = AbilityTriggerID::OnMoveUse, .mEffects = {EffectTypeID::Flinch}}},
+					.mTriggers = {},
+					.mName = PocketCore::Ability::ABILITY_NAME_NONE,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
+					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnMoveUse}},
+					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
+				});
+				addBuiltin({
+					.mTriggers = {{.mEffects = {EffectTypeID::SetRain}, .mTrigger = AbilityTriggerID::OnSwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
-					.mTriggers = {{.mTrigger = AbilityTriggerID::OnSwitchIn, .mEffects = {EffectTypeID::SetRain}}},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 				});
 			}
 
 			using Base::decrementAmountRegistered;
+			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
 			using Base::getID;
@@ -79,7 +83,6 @@ namespace PocketCore::Registry::Ability
 			using Base::getName;
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
-			using Base::findIndexByID;
 			using Base::hasEntry;
 			using Base::incrementAmountRegistered;
 			using Base::incrementNextID;
@@ -89,11 +92,10 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Looks up ability metadata by stable ID.
 				@param[in] abilityID The stable ability identifier.
-				@return A reference to the metadata if registered, or std::nullopt otherwise. The reference remains valid until mutation or
-			   destruction.
+				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
+			   registry destruction.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const AbilityMeta>> getAbilityMetadata(
-				const AbilityID abilityID) const
+			ATTR_NODISCARD constexpr const AbilityMeta *getAbilityMetadata(const AbilityID abilityID) const
 			{
 				return getMetadata(abilityID);
 			}
@@ -102,7 +104,7 @@ namespace PocketCore::Registry::Ability
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<AbilityID> getAbilityID(const std::string_view name) const
+			ATTR_NODISCARD constexpr const std::optional<AbilityID> getAbilityID(const std::string_view &name) const
 			{
 				return getID(name);
 			}
@@ -111,7 +113,7 @@ namespace PocketCore::Registry::Ability
 				@param[in] abilityID The stable ability identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
+			ATTR_NODISCARD constexpr const std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
 			{
 				return getName(abilityID);
 			}
@@ -119,7 +121,7 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Returns all currently registered ability definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
 			*/
-			ATTR_NODISCARD constexpr std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
 			{
 				return getRegisteredEntries();
 			}
@@ -136,7 +138,7 @@ namespace PocketCore::Registry::Ability
 				@param[in] abilityID The stable ability identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr std::optional<us> findIndexByAbilityID(const AbilityID abilityID) const
+			ATTR_NODISCARD constexpr const std::optional<us> findIndexByAbilityID(const AbilityID abilityID) const
 			{
 				return findIndexByID(abilityID);
 			}
@@ -145,7 +147,7 @@ namespace PocketCore::Registry::Ability
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 			*/
-			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view name) const
+			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view &name) const
 			{
 				return hasEntry(name);
 			}

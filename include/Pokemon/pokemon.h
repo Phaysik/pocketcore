@@ -40,8 +40,8 @@ namespace PocketCore::Pokemon
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const AbilityID abilityID, const ItemID itemID,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
-				  mSpDefense{spDefense}, mTypeIDs{typeIDs}, mAbilityID{abilityID}, mItemID{itemID}
+				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
+				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
 			{
 				mMoveIDs.fill(MoveID::None);
 				mMaxPP.fill(0);
@@ -53,8 +53,9 @@ namespace PocketCore::Pokemon
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
 									   const us health, const us speed, const us spAttack, const us spDefense, const AbilityID abilityID,
 									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mAttack{attack}, mDefense{defense}, mHealth{health},
-				  mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mTypeIDs{typeIDs}, mAbilityID{abilityID}, mItemID{itemID}
+				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAttack{attack},
+				  mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID},
+				  mItemID{itemID}
 			{}
 
 			// Getters
@@ -202,16 +203,19 @@ namespace PocketCore::Pokemon
 
 		private:
 			std::string_view mName{};
+			
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
+			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+			
 			us mAttack{};
 			us mDefense{};
 			us mHealth{};
 			us mSpeed{};
 			us mSpAttack{};
 			us mSpDefense{};
-			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+
 			AbilityID mAbilityID{};
 			ItemID mItemID{};
 	};
