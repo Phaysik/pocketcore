@@ -6,8 +6,8 @@
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_REGISTRY_CONSTANTS_H
-#define INCLUDE_REGISTRY_CONSTANTS_H
+#ifndef INCLUDE_ITEM_CONSTANTS_H
+#define INCLUDE_ITEM_CONSTANTS_H
 
 #include <string_view>
 

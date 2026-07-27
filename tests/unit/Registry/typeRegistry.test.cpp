@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MAX_TYPES;
-using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::Registry::Types::TypeEntry;
 using PocketCore::Registry::Types::TypeRegistry;
 using PocketCore::Types::toTypeID;
@@ -35,7 +35,7 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("amount registered is 19")
 		{
-			ub amountRegistered{registry.getAmountRegistered()};
+			us amountRegistered{registry.getAmountRegistered()};
 			CHECK((amountRegistered == 19));
 		}
 
@@ -363,7 +363,7 @@ SCENARIO("TypeRegistry")
 		THEN("setting amount registered changes the value")
 		{
 			registry.setAmountRegistered(5);
-			ub amountRegistered{registry.getAmountRegistered()};
+			us amountRegistered{registry.getAmountRegistered()};
 			CHECK((amountRegistered == 5));
 		}
 	}
@@ -398,7 +398,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Normal id returns zero")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(toTypeID(Types::Normal))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(Types::Normal))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -407,7 +407,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Stellar id returns eighteen")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(toTypeID(Types::Stellar))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(Types::Stellar))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -416,7 +416,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by nonexistent id returns nullopt")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(TypeID{200})};
+			std::optional<us> indexResult{registry.findIndexByTypeID(TypeID{200})};
 			CHECK_FALSE(indexResult.has_value());
 		}
 	}
@@ -486,9 +486,9 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("incrementing amount registered increases by one")
 		{
-			ub beforeIncrement{registry.getAmountRegistered()};
+			us beforeIncrement{registry.getAmountRegistered()};
 			registry.incrementAmountRegistered();
-			ub afterIncrement{registry.getAmountRegistered()};
+			us afterIncrement{registry.getAmountRegistered()};
 
 			CHECK((afterIncrement == beforeIncrement + 1));
 		}
@@ -498,9 +498,9 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("decrementing amount registered decreases by one")
 		{
-			ub beforeDecrement{registry.getAmountRegistered()};
+			us beforeDecrement{registry.getAmountRegistered()};
 			registry.decrementAmountRegistered();
-			ub afterDecrement{registry.getAmountRegistered()};
+			us afterDecrement{registry.getAmountRegistered()};
 
 			CHECK((afterDecrement == beforeDecrement - 1));
 		}

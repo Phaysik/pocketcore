@@ -22,7 +22,7 @@ using PocketCore::Configuration::RegistryErrorInfo;
 using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Configuration::UnspecifiedMatchup;
-using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::Types::NO_TYPE_ID;
 using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeEffectiveness;
@@ -216,7 +216,7 @@ SCENARIO("TypeRegistryConfiguration getRegisteredTypes and getAmountRegistered")
 	{
 		THEN("amount registered is 19")
 		{
-			ub count = config.getAmountRegistered();
+			us count = config.getAmountRegistered();
 			CHECK((count == 19));
 		}
 
@@ -285,8 +285,8 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 			auto rowResult = config.getMatchupRow("Normal");
 			REQUIRE(rowResult.has_value());
 
-			ub registered = config.getAmountRegistered();
-			for (ub idx{0}; idx < registered; ++idx)
+			us registered = config.getAmountRegistered();
+			for (us idx{0}; idx < registered; ++idx)
 			{
 				CHECK((rowResult.value().at(idx) == SE));
 			}
@@ -305,12 +305,12 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 			auto rowResult = config.getMatchupRow("Normal");
 			REQUIRE(rowResult.has_value());
 
-			ub registered = config.getAmountRegistered();
-			for (ub idx{0}; idx < 3; ++idx)
+			us registered = config.getAmountRegistered();
+			for (us idx{0}; idx < 3; ++idx)
 			{
 				CHECK((rowResult.value().at(idx) == shortRow.at(idx)));
 			}
-			for (ub idx{3}; idx < registered; ++idx)
+			for (us idx{3}; idx < registered; ++idx)
 			{
 				CHECK((rowResult.value().at(idx) == NOT_DEFINED));
 			}
@@ -410,8 +410,8 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 			auto colResult = config.getDefensiveColumn("Normal");
 			REQUIRE(colResult.has_value());
 
-			ub registered = config.getAmountRegistered();
-			for (ub idx{0}; idx < registered; ++idx)
+			us registered = config.getAmountRegistered();
+			for (us idx{0}; idx < registered; ++idx)
 			{
 				CHECK((colResult.value().at(idx) == NVE));
 			}
@@ -430,12 +430,12 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 			auto colResult = config.getDefensiveColumn("Normal");
 			REQUIRE(colResult.has_value());
 
-			ub registered = config.getAmountRegistered();
-			for (ub idx{0}; idx < 3; ++idx)
+			us registered = config.getAmountRegistered();
+			for (us idx{0}; idx < 3; ++idx)
 			{
 				CHECK((colResult.value().at(idx) == shortCol.at(idx)));
 			}
-			for (ub idx{3}; idx < registered; ++idx)
+			for (us idx{3}; idx < registered; ++idx)
 			{
 				CHECK((colResult.value().at(idx) == NOT_DEFINED));
 			}
@@ -727,7 +727,7 @@ SCENARIO("TypeRegistryConfiguration addTypes")
 			auto removeResult2 = config.removeType("Fairy");
 			REQUIRE(removeResult2.has_value());
 
-			ub countBefore = config.getAmountRegistered();
+			us countBefore = config.getAmountRegistered();
 
 			TypeDefinition def1{.name = "Dup", .offensiveMatchups = {}, .defensiveMatchups = {}};
 			TypeDefinition def2{.name = "Dup", .offensiveMatchups = {}, .defensiveMatchups = {}};
@@ -904,12 +904,12 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by name")
 			auto result = config.resetMatchups("Normal");
 			REQUIRE(result.has_value());
 
-			ub registered = config.getAmountRegistered();
+			us registered = config.getAmountRegistered();
 
 			// Check offensive row is cleared
 			auto row = config.getMatchupRow("Normal");
 			REQUIRE(row.has_value());
-			for (ub idx{0}; idx < registered; ++idx)
+			for (us idx{0}; idx < registered; ++idx)
 			{
 				CHECK((row.value().at(idx) == NOT_DEFINED));
 			}
@@ -917,7 +917,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by name")
 			// Check defensive column is cleared
 			auto col = config.getDefensiveColumn("Normal");
 			REQUIRE(col.has_value());
-			for (ub idx{0}; idx < registered; ++idx)
+			for (us idx{0}; idx < registered; ++idx)
 			{
 				CHECK((col.value().at(idx) == NOT_DEFINED));
 			}
@@ -954,8 +954,8 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 			auto row = config.getMatchupRow("Normal");
 			REQUIRE(row.has_value());
 
-			ub registered = config.getAmountRegistered();
-			for (ub idx{0}; idx < registered; ++idx)
+			us registered = config.getAmountRegistered();
+			for (us idx{0}; idx < registered; ++idx)
 			{
 				CHECK((row.value().at(idx) == NOT_DEFINED));
 			}
@@ -1160,7 +1160,7 @@ SCENARIO("TypeRegistryConfiguration addTypes with bad matchup reference")
 			auto removeResult2 = config.removeType("Fairy");
 			REQUIRE(removeResult2.has_value());
 
-			ub countBefore = config.getAmountRegistered();
+			us countBefore = config.getAmountRegistered();
 
 			std::array<MatchupPair, 1> badOffensive{{{.typeName = "NonExistent", .value = SE}}};
 

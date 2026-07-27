@@ -9,13 +9,10 @@
 #ifndef INCLUDE_REGISTRY_ABILITY_REGISTRY_H
 #define INCLUDE_REGISTRY_ABILITY_REGISTRY_H
 
-#include <array>
-#include <cassert>
 #include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
-#include <utility>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
@@ -26,6 +23,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
+#include "Registry/fixedMetadataRegistry.h"
 
 namespace PocketCore::Registry::Ability
 {
@@ -50,10 +48,14 @@ namespace PocketCore::Registry::Ability
 		@author Matthew Moore
 	*/
 	class AbilityRegistry
+		: private PocketCore::Registry::FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
 	{
+		private:
+			using Base = PocketCore::Registry::FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>;
+
 		public:
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID. */
-			explicit constexpr AbilityRegistry() : mNextAbilityID{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
+			explicit constexpr AbilityRegistry() : Base{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
 			{
 				addBuiltin(
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::None), .mName = PocketCore::Ability::ABILITY_NAME_NONE, .mTriggers = {}});
@@ -69,16 +71,21 @@ namespace PocketCore::Registry::Ability
 				});
 			}
 
-			/*! @brief Returns the metadata stored at an internal array index.
-				@pre @p index < @ref MAX_ABILITIES.
-				@param[in] index The internal array index.
-				@return A const reference to the stored metadata that remains valid until the registry is mutated or destroyed.
-			*/
-			ATTR_NODISCARD constexpr const AbilityMeta &getEntry(const us index) const
-			{
-				assert(index < mAbilities.size());
-				return mAbilities.at(index);
-			}
+			using Base::decrementAmountRegistered;
+			using Base::getAmountRegistered;
+			using Base::getEntry;
+			using Base::getID;
+			using Base::getMetadata;
+			using Base::getName;
+			using Base::getNextID;
+			using Base::getRegisteredEntries;
+			using Base::findIndexByID;
+			using Base::hasEntry;
+			using Base::incrementAmountRegistered;
+			using Base::incrementNextID;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+			using Base::setNextID;
 
 			/*! @brief Looks up ability metadata by stable ID.
 				@param[in] abilityID The stable ability identifier.
@@ -88,14 +95,7 @@ namespace PocketCore::Registry::Ability
 			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const AbilityMeta>> getAbilityMetadata(
 				const AbilityID abilityID) const
 			{
-				const us index{findEntryIndexByID(abilityID)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return std::cref(mAbilities.at(index));
+				return getMetadata(abilityID);
 			}
 
 			/*! @brief Looks up an ability ID by display name.
@@ -104,14 +104,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr std::optional<AbilityID> getAbilityID(const std::string_view name) const
 			{
-				const us index{findEntryIndexByName(name)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return mAbilities.at(index).mAbilityID;
+				return getID(name);
 			}
 
 			/*! @brief Looks up an ability display name by stable ID.
@@ -120,14 +113,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
 			{
-				const auto metadata{getAbilityMetadata(abilityID)};
-
-				if (!metadata.has_value())
-				{
-					return std::nullopt;
-				}
-
-				return metadata->get().mName;
+				return getName(abilityID);
 			}
 
 			/*! @brief Returns all currently registered ability definitions.
@@ -135,15 +121,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
 			{
-				return {mAbilities.data(), mAmountRegistered};
-			}
-
-			/*! @brief Returns the number of registered abilities.
-				@return The number of valid entries in the registry.
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return mAmountRegistered;
+				return getRegisteredEntries();
 			}
 
 			/*! @brief Returns the next stable ID assigned to a custom ability.
@@ -151,7 +129,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr us getNextAbilityID() const noexcept
 			{
-				return mNextAbilityID;
+				return getNextID();
 			}
 
 			/*! @brief Finds an internal array index by stable ability ID.
@@ -160,14 +138,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr std::optional<us> findIndexByAbilityID(const AbilityID abilityID) const
 			{
-				const us index{findEntryIndexByID(abilityID)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return index;
+				return findIndexByID(abilityID);
 			}
 
 			/*! @brief Checks whether an ability name is registered.
@@ -176,7 +147,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view name) const
 			{
-				return findEntryIndexByName(name) != mAmountRegistered;
+				return hasEntry(name);
 			}
 
 			/*! @brief Checks whether an ability ID is registered.
@@ -185,26 +156,7 @@ namespace PocketCore::Registry::Ability
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const AbilityID abilityID) const
 			{
-				return findEntryIndexByID(abilityID) != mAmountRegistered;
-			}
-
-			/*! @brief Replaces the metadata at an internal array index.
-				@pre @p index < @ref MAX_ABILITIES.
-				@param[in] index The internal array index.
-				@param[in] metadata The complete metadata to store.
-			*/
-			constexpr void setEntry(const us index, const AbilityMeta &metadata)
-			{
-				assert(index < mAbilities.size());
-				mAbilities.at(index) = metadata;
-			}
-
-			/*! @brief Sets the registered entry count.
-				@param[in] amount The new number of valid entries.
-			*/
-			constexpr void setAmountRegistered(const us amount) noexcept
-			{
-				mAmountRegistered = amount;
+				return hasEntry(abilityID);
 			}
 
 			/*! @brief Sets the next custom ability ID counter.
@@ -212,65 +164,14 @@ namespace PocketCore::Registry::Ability
 			*/
 			constexpr void setNextAbilityID(const us nextID) noexcept
 			{
-				mNextAbilityID = nextID;
-			}
-
-			/*! @brief Increments the registered entry count. */
-			constexpr void incrementAmountRegistered() noexcept
-			{
-				++mAmountRegistered;
-			}
-
-			/*! @brief Decrements the registered entry count. */
-			constexpr void decrementAmountRegistered() noexcept
-			{
-				--mAmountRegistered;
+				setNextID(nextID);
 			}
 
 			/*! @brief Increments the next custom ability ID counter. */
 			constexpr void incrementNextAbilityID() noexcept
 			{
-				++mNextAbilityID;
+				incrementNextID();
 			}
-
-		private:
-			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
-			{
-				for (us index{0}; index < mAmountRegistered; ++index)
-				{
-					if (mAbilities.at(index).mName == name)
-					{
-						return index;
-					}
-				}
-
-				return mAmountRegistered;
-			}
-
-			ATTR_NODISCARD constexpr us findEntryIndexByID(const AbilityID abilityID) const
-			{
-				for (us index{0}; index < mAmountRegistered; ++index)
-				{
-					if (mAbilities.at(index).mAbilityID == abilityID)
-					{
-						return index;
-					}
-				}
-
-				return mAmountRegistered;
-			}
-
-			constexpr void addBuiltin(AbilityMeta metadata)
-			{
-				assert(mAmountRegistered < mAbilities.size());
-				mAbilities.at(mAmountRegistered) = std::move(metadata);
-				++mAmountRegistered;
-			}
-
-		private:
-			std::array<AbilityMeta, MAX_ABILITIES> mAbilities{};
-			us mAmountRegistered{0};
-			us mNextAbilityID{0};
 	};
 } // namespace PocketCore::Registry::Ability
 

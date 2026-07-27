@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::ID::IDInterface;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
@@ -22,8 +22,8 @@ namespace
 	template <typename Left, typename Right>
 	concept EqualityComparableWith = requires(Left left, Right right) { left == right; };
 
-	static_assert(sizeof(FirstID) == sizeof(ub));
-	static_assert(sizeof(SecondID) == sizeof(ub));
+	static_assert(sizeof(FirstID) == sizeof(us));
+	static_assert(sizeof(SecondID) == sizeof(us));
 	static_assert(std::is_trivially_copyable_v<FirstID>);
 	static_assert(std::is_trivially_copyable_v<SecondID>);
 	static_assert(!EqualityComparableWith<FirstID, SecondID>);

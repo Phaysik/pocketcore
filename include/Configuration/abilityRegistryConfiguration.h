@@ -19,6 +19,7 @@
 #include "Ability/abilityMeta.h"
 #include "Ability/abilityTargetsAndTriggers.h"
 #include "Configuration/constants.h"
+#include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/abilityRegistry.h"
@@ -29,6 +30,17 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Core::us;
+
+	namespace Detail
+	{
+		struct AbilityRegistryConfigurationPolicy
+		{
+				static constexpr std::string_view configurationName{"AbilityRegistryConfiguration"};
+				static constexpr std::string_view entityName{"ability"};
+				static constexpr RegistryError duplicateError{RegistryError::DuplicateAbility};
+				static constexpr RegistryError notFoundError{RegistryError::AbilityNotFound};
+		};
+	} // namespace Detail
 
 	/*! @struct AbilityDefinition Configuration/abilityRegistryConfiguration.h
 		@brief Describes a user-defined ability before the registry assigns its stable ID.
@@ -58,7 +70,13 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class AbilityRegistryConfiguration
+		: private FixedMetadataRegistryConfiguration<Registry::Ability::AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES,
+													 &AbilityMeta::mAbilityID, Detail::AbilityRegistryConfigurationPolicy>
 	{
+		private:
+			using Base = FixedMetadataRegistryConfiguration<Registry::Ability::AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES,
+															&AbilityMeta::mAbilityID, Detail::AbilityRegistryConfigurationPolicy>;
+
 		public:
 			/*! @brief Constructs a configuration containing all built-in abilities. */
 			constexpr AbilityRegistryConfiguration() = default;
@@ -71,7 +89,7 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const AbilityMeta>> getAbilityMetadata(
 				const AbilityID abilityID) const
 			{
-				return registry.getAbilityMetadata(abilityID);
+				return getMetadata(abilityID);
 			}
 
 			/*! @brief Looks up a stable ability ID by display name.
@@ -80,7 +98,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr std::optional<AbilityID> getAbilityID(const std::string_view name) const
 			{
-				return registry.getAbilityID(name);
+				return getID(name);
 			}
 
 			/*! @brief Looks up a display name by stable ability ID.
@@ -89,7 +107,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
 			{
-				return registry.getAbilityName(abilityID);
+				return getName(abilityID);
 			}
 
 			/*! @brief Returns all currently registered ability definitions.
@@ -97,7 +115,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
 			{
-				return registry.getRegisteredAbilities();
+				return getRegisteredEntries();
 			}
 
 			/*! @brief Returns the number of registered built-in and custom abilities.
@@ -105,7 +123,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
-				return registry.getAmountRegistered();
+				return Base::getAmountRegistered();
 			}
 
 			/*! @brief Checks whether an ability name is registered.
@@ -114,7 +132,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view name) const
 			{
-				return registry.hasAbility(name);
+				return hasEntry(name);
 			}
 
 			/*! @brief Checks whether an ability ID is registered.
@@ -123,7 +141,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const AbilityID abilityID) const
 			{
-				return registry.hasAbility(abilityID);
+				return hasEntry(abilityID);
 			}
 
 			/*! @brief Registers one user-defined ability and assigns a stable ID.
@@ -176,30 +194,6 @@ namespace PocketCore::Configuration
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching ability exists.
 			*/
 			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> removeAbility(AbilityID abilityID);
-
-		private:
-			/*! @brief Resolves a registered name to its internal array index.
-				@param[in] name The display name to resolve.
-				@param[in] callerContext The calling operation used in diagnostics.
-				@return The internal index on success, or @ref RegistryErrorInfo if absent.
-			*/
-			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(std::string_view name, std::string_view callerContext);
-
-			/*! @brief Resolves a registered stable ID to its internal array index.
-				@param[in] abilityID The stable ID to resolve.
-				@param[in] callerContext The calling operation used in diagnostics.
-				@return The internal index on success, or @ref RegistryErrorInfo if absent.
-			*/
-			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(AbilityID abilityID, std::string_view callerContext);
-
-			/*! @brief Removes the entry at an already validated internal index.
-				@param[in] index The internal array index to erase and compact.
-			*/
-			void removeEntry(us index);
-
-		private:
-			/*! @brief Owns built-in and user-defined ability metadata behind the facade. */
-			Registry::Ability::AbilityRegistry registry{};
 	};
 } // namespace PocketCore::Configuration
 

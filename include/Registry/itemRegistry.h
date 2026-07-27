@@ -9,13 +9,10 @@
 #ifndef INCLUDE_REGISTRY_ITEM_REGISTRY_H
 #define INCLUDE_REGISTRY_ITEM_REGISTRY_H
 
-#include <array>
-#include <cassert>
 #include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
-#include <utility>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -26,6 +23,7 @@
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Item/itemTargetsAndTriggers.h"
+#include "Registry/fixedMetadataRegistry.h"
 
 namespace PocketCore::Registry::Item
 {
@@ -49,11 +47,14 @@ namespace PocketCore::Registry::Item
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class ItemRegistry
+	class ItemRegistry : private PocketCore::Registry::FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
 	{
+		private:
+			using Base = PocketCore::Registry::FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>;
+
 		public:
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID. */
-			explicit constexpr ItemRegistry() : mNextItemID{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
+			explicit constexpr ItemRegistry() : Base{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
 			{
 				addBuiltin({.mItemID = toItemID(BuiltinItemID::None), .mName = PocketCore::Item::ITEM_NAME_NONE, .mTriggers = {}});
 				addBuiltin({
@@ -68,16 +69,21 @@ namespace PocketCore::Registry::Item
 				});
 			}
 
-			/*! @brief Returns the metadata stored at an internal array index.
-				@pre @p index < @ref MAX_ITEMS.
-				@param[in] index The internal array index.
-				@return A const reference to the stored metadata that remains valid until the registry is mutated or destroyed.
-			*/
-			ATTR_NODISCARD constexpr const ItemMeta &getEntry(const us index) const
-			{
-				assert(index < mItems.size());
-				return mItems.at(index);
-			}
+			using Base::decrementAmountRegistered;
+			using Base::getAmountRegistered;
+			using Base::getEntry;
+			using Base::getID;
+			using Base::getMetadata;
+			using Base::getName;
+			using Base::getNextID;
+			using Base::getRegisteredEntries;
+			using Base::findIndexByID;
+			using Base::hasEntry;
+			using Base::incrementAmountRegistered;
+			using Base::incrementNextID;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+			using Base::setNextID;
 
 			/*! @brief Looks up item metadata by stable ID.
 				@param[in] itemID The stable item identifier.
@@ -86,14 +92,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const ItemMeta>> getItemMetadata(const ItemID itemID) const
 			{
-				const us index{findEntryIndexByID(itemID)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return std::cref(mItems.at(index));
+				return getMetadata(itemID);
 			}
 
 			/*! @brief Looks up an item ID by display name.
@@ -102,14 +101,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr std::optional<ItemID> getItemID(const std::string_view name) const
 			{
-				const us index{findEntryIndexByName(name)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return mItems.at(index).mItemID;
+				return getID(name);
 			}
 
 			/*! @brief Looks up an item display name by stable ID.
@@ -118,14 +110,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
-				const auto metadata{getItemMetadata(itemID)};
-
-				if (!metadata.has_value())
-				{
-					return std::nullopt;
-				}
-
-				return metadata->get().mName;
+				return getName(itemID);
 			}
 
 			/*! @brief Returns all currently registered item definitions.
@@ -133,15 +118,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
-				return {mItems.data(), mAmountRegistered};
-			}
-
-			/*! @brief Returns the number of registered items.
-				@return The number of valid entries in the registry.
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return mAmountRegistered;
+				return getRegisteredEntries();
 			}
 
 			/*! @brief Returns the next stable ID assigned to a custom item.
@@ -149,7 +126,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr us getNextItemID() const noexcept
 			{
-				return mNextItemID;
+				return getNextID();
 			}
 
 			/*! @brief Finds an internal array index by stable item ID.
@@ -158,14 +135,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr std::optional<us> findIndexByItemID(const ItemID itemID) const
 			{
-				const us index{findEntryIndexByID(itemID)};
-
-				if (index == mAmountRegistered)
-				{
-					return std::nullopt;
-				}
-
-				return index;
+				return findIndexByID(itemID);
 			}
 
 			/*! @brief Checks whether an item name is registered.
@@ -174,7 +144,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const std::string_view name) const
 			{
-				return findEntryIndexByName(name) != mAmountRegistered;
+				return hasEntry(name);
 			}
 
 			/*! @brief Checks whether an item ID is registered.
@@ -183,26 +153,7 @@ namespace PocketCore::Registry::Item
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const ItemID itemID) const
 			{
-				return findEntryIndexByID(itemID) != mAmountRegistered;
-			}
-
-			/*! @brief Replaces the metadata at an internal array index.
-				@pre @p index < @ref MAX_ITEMS.
-				@param[in] index The internal array index.
-				@param[in] metadata The complete metadata to store.
-			*/
-			constexpr void setEntry(const us index, const ItemMeta &metadata)
-			{
-				assert(index < mItems.size());
-				mItems.at(index) = metadata;
-			}
-
-			/*! @brief Sets the registered entry count.
-				@param[in] amount The new number of valid entries.
-			*/
-			constexpr void setAmountRegistered(const us amount) noexcept
-			{
-				mAmountRegistered = amount;
+				return hasEntry(itemID);
 			}
 
 			/*! @brief Sets the next custom item ID counter.
@@ -210,65 +161,14 @@ namespace PocketCore::Registry::Item
 			*/
 			constexpr void setNextItemID(const us nextID) noexcept
 			{
-				mNextItemID = nextID;
-			}
-
-			/*! @brief Increments the registered entry count. */
-			constexpr void incrementAmountRegistered() noexcept
-			{
-				++mAmountRegistered;
-			}
-
-			/*! @brief Decrements the registered entry count. */
-			constexpr void decrementAmountRegistered() noexcept
-			{
-				--mAmountRegistered;
+				setNextID(nextID);
 			}
 
 			/*! @brief Increments the next custom item ID counter. */
 			constexpr void incrementNextItemID() noexcept
 			{
-				++mNextItemID;
+				incrementNextID();
 			}
-
-		private:
-			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
-			{
-				for (us index{0}; index < mAmountRegistered; ++index)
-				{
-					if (mItems.at(index).mName == name)
-					{
-						return index;
-					}
-				}
-
-				return mAmountRegistered;
-			}
-
-			ATTR_NODISCARD constexpr us findEntryIndexByID(const ItemID itemID) const
-			{
-				for (us index{0}; index < mAmountRegistered; ++index)
-				{
-					if (mItems.at(index).mItemID == itemID)
-					{
-						return index;
-					}
-				}
-
-				return mAmountRegistered;
-			}
-
-			constexpr void addBuiltin(ItemMeta metadata)
-			{
-				assert(mAmountRegistered < mItems.size());
-				mItems.at(mAmountRegistered) = std::move(metadata);
-				++mAmountRegistered;
-			}
-
-		private:
-			std::array<ItemMeta, MAX_ITEMS> mItems{};
-			us mAmountRegistered{0};
-			us mNextItemID{0};
 	};
 } // namespace PocketCore::Registry::Item
 

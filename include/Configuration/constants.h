@@ -47,6 +47,8 @@ namespace PocketCore::Configuration
 		MatchupMismatch,  /*!< The number of provided matchup entries does not match the registered count. */
 		DuplicateAbility, /*!< An ability with the given name already exists. */
 		AbilityNotFound,  /*!< No ability matching the input was found. */
+		DuplicateItem,    /*!< An item with the given name already exists. */
+		ItemNotFound,     /*!< No item matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -131,6 +133,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::AbilityNotFound:
 						mErrorName = "AbilityNotFound";
+						break;
+					case RegistryError::DuplicateItem:
+						mErrorName = "DuplicateItem";
+						break;
+					case RegistryError::ItemNotFound:
+						mErrorName = "ItemNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.
