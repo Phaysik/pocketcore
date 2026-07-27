@@ -83,7 +83,8 @@ namespace PocketCore::Utility
 					randomDevice(),
 					randomDevice(),
 					randomDevice(),
-					randomDevice()};
+					randomDevice(),
+				};
 
 				return std::mt19937{seedSequence};
 			}

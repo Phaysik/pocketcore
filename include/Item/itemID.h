@@ -17,7 +17,7 @@ namespace PocketCore::Item
 	{
 		None,
 		CheriBerry,
-		ChestoBerry
+		ChestoBerry,
 	};
 } // namespace PocketCore::Item
 

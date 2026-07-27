@@ -24,7 +24,7 @@ namespace PocketCore::Status
 		ExtremelyHarshSunlight,
 		HeavyRain,
 		StrongWinds,
-		ShadowyAura
+		ShadowyAura,
 	};
 } // namespace PocketCore::Status
 

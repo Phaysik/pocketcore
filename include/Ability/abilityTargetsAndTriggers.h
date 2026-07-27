@@ -25,7 +25,7 @@ namespace PocketCore::Ability
 		OnMoveUse,
 		OnFaint,
 		OnWeather,
-		OnStatus
+		OnStatus,
 	};
 
 	enum class AbilityTargetID : PocketCore::Core::ub
@@ -33,7 +33,7 @@ namespace PocketCore::Ability
 		Self,
 		AllAllies,
 		AllOpponents,
-		AllExceptSelf
+		AllExceptSelf,
 	};
 
 	struct AbilityEffectTrigger

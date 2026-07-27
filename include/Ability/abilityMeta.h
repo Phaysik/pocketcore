@@ -1,5 +1,5 @@
 /*! @file abilityMeta.h
-	@brief Contains the ability targets and triggers
+	@brief Defines the metadata stored for built-in and user-defined abilities.
 	@date 07/24/2026
 	@version x.x.x
 	@since x.x.x
@@ -12,41 +12,32 @@
 #include <string_view>
 #include <vector>
 
-#include "Core/attributeMacros.h"
-#include "Effect/effectType.h"
-
 #include "abilityID.h"
 #include "abilityTargetsAndTriggers.h"
-#include "constants.h"
 
 namespace PocketCore::Ability
 {
-	using Ability::AbilityID;
-	using PocketCore::Effect::EffectTypeID;
-
+	/*! @struct AbilityMeta Ability/abilityMeta.h
+		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
+		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
+	   must remain valid while this metadata is registered.
+		@date 07/27/2026
+		@version x.x.x
+		@since x.x.x
+		@author Matthew Moore
+	*/
 	struct AbilityMeta
 	{
 		public:
+			/*! @brief The stable built-in or user-assigned identifier. */
+			AbilityID mAbilityID{};
+
+			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
+
+			/*! @brief The owned trigger and effect definitions for this ability. */
 			std::vector<AbilityEffectTrigger> mTriggers;
 	};
-
-	constexpr AbilityMeta getAbilityMetadata(const AbilityID abilityID)
-	{
-		switch (abilityID)
-		{
-			case AbilityID::Drizzle:
-				return {.mName = ABILITY_NAME_DRIZZLE,
-						.mTriggers = {{.mTrigger = AbilityTriggerID::OnSwitchIn, .mEffects = {EffectTypeID::SetRain}}}};
-			case AbilityID::Stench:
-				return {.mName = ABILITY_NAME_STENCH,
-						.mTriggers = {{.mTrigger = AbilityTriggerID::OnMoveUse, .mEffects = {EffectTypeID::Flinch}}}};
-			case AbilityID::None:
-				ATTR_FALLTHROUGH;
-			default:
-				return {.mName = ABILITY_NAME_NONE, .mTriggers = {}};
-		}
-	}
 } // namespace PocketCore::Ability
 
 #endif

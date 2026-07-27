@@ -8,14 +8,23 @@
 
 #include "Pokemon/pokemon.h"
 
+#include <array>
+#include <cassert>
+#include <string_view>
+
+#include "Configuration/constants.h"
+
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+
 	void Pokemon::setName(const std::string_view name)
 	{
 		mName = name;
 	}
 
-	void Pokemon::setMovesArray(const std::array<MoveID, 4> &moveIDs)
+	void Pokemon::setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
 	{
 		mMoveIDs = moveIDs;
 	}
@@ -27,7 +36,7 @@ namespace PocketCore::Pokemon
 		mMoveIDs.at(slotIndex) = moveID;
 	}
 
-	void Pokemon::setMaxPPArray(const std::array<ub, 4> &maxPP)
+	void Pokemon::setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP)
 	{
 		mMaxPP = maxPP;
 	}
@@ -39,7 +48,7 @@ namespace PocketCore::Pokemon
 		mMaxPP.at(slotIndex) = maxPP;
 	}
 
-	void Pokemon::setCurrentPPArray(const std::array<ub, 4> &currentPP)
+	void Pokemon::setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP)
 	{
 		mCurrentPP = currentPP;
 	}
@@ -49,6 +58,18 @@ namespace PocketCore::Pokemon
 		assert(slotIndex < mCurrentPP.size());
 
 		mCurrentPP.at(slotIndex) = currentPP;
+	}
+
+	void Pokemon::setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs)
+	{
+		mTypeIDs = typeIDs;
+	}
+
+	void Pokemon::setType(const ub slotIndex, const TypeID typeID)
+	{
+		assert(slotIndex < mTypeIDs.size());
+
+		mTypeIDs.at(slotIndex) = typeID;
 	}
 
 	void Pokemon::setAttack(const us attack)

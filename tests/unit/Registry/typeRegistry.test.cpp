@@ -9,6 +9,7 @@
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Types/typeEffectiveness.h"
+#include "Types/typeID.h"
 #include "Types/types.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -17,7 +18,9 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Core::ub;
 using PocketCore::Registry::Types::TypeEntry;
 using PocketCore::Registry::Types::TypeRegistry;
+using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::TypeID;
 using PocketCore::Types::Types;
 
 using enum TypeEffectiveness;
@@ -38,8 +41,8 @@ SCENARIO("TypeRegistry")
 
 		THEN("next type id is 19")
 		{
-			ub nextTypeIdentifier{registry.getNextTypeID()};
-			CHECK((nextTypeIdentifier == 19));
+			TypeID nextTypeIdentifier{registry.getNextTypeID()};
+			CHECK((nextTypeIdentifier.getValue() == 19));
 		}
 
 		THEN("all builtin type names are present")
@@ -80,14 +83,14 @@ SCENARIO("TypeRegistry")
 		THEN("the first entry is Normal")
 		{
 			TypeEntry firstEntry{registry.getEntry(0)};
-			CHECK((firstEntry.typeID == static_cast<ub>(Types::Normal)));
+			CHECK((firstEntry.typeID == toTypeID(Types::Normal)));
 			CHECK((firstEntry.name == "Normal"));
 		}
 
 		THEN("the last builtin entry is Stellar")
 		{
 			TypeEntry lastEntry{registry.getEntry(18)};
-			CHECK((lastEntry.typeID == static_cast<ub>(Types::Stellar)));
+			CHECK((lastEntry.typeID == toTypeID(Types::Stellar)));
 			CHECK((lastEntry.name == "Stellar"));
 		}
 	}
@@ -183,55 +186,55 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("selected builtin ids match enum values")
 		{
-			std::optional<ub> normalIdentifier{registry.getTypeID("Normal")};
+			std::optional<TypeID> normalIdentifier{registry.getTypeID("Normal")};
 			REQUIRE(normalIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((normalIdentifier.value() == static_cast<ub>(Types::Normal)));
+			CHECK((normalIdentifier.value() == toTypeID(Types::Normal)));
 
-			std::optional<ub> fireIdentifier{registry.getTypeID("Fire")};
+			std::optional<TypeID> fireIdentifier{registry.getTypeID("Fire")};
 			REQUIRE(fireIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fireIdentifier.value() == static_cast<ub>(Types::Fire)));
+			CHECK((fireIdentifier.value() == toTypeID(Types::Fire)));
 
-			std::optional<ub> fightingIdentifier{registry.getTypeID("Fighting")};
+			std::optional<TypeID> fightingIdentifier{registry.getTypeID("Fighting")};
 			REQUIRE(fightingIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fightingIdentifier.value() == static_cast<ub>(Types::Fighting)));
+			CHECK((fightingIdentifier.value() == toTypeID(Types::Fighting)));
 
-			std::optional<ub> waterIdentifier{registry.getTypeID("Water")};
+			std::optional<TypeID> waterIdentifier{registry.getTypeID("Water")};
 			REQUIRE(waterIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((waterIdentifier.value() == static_cast<ub>(Types::Water)));
+			CHECK((waterIdentifier.value() == toTypeID(Types::Water)));
 
-			std::optional<ub> stellarIdentifier{registry.getTypeID("Stellar")};
+			std::optional<TypeID> stellarIdentifier{registry.getTypeID("Stellar")};
 			REQUIRE(stellarIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((stellarIdentifier.value() == static_cast<ub>(Types::Stellar)));
+			CHECK((stellarIdentifier.value() == toTypeID(Types::Stellar)));
 		}
 
 		THEN("looking up a nonexistent name returns nullopt")
 		{
-			std::optional<ub> lookupResult{registry.getTypeID("Shadow")};
+			std::optional<TypeID> lookupResult{registry.getTypeID("Shadow")};
 			CHECK_FALSE(lookupResult.has_value());
 		}
 
 		THEN("looking up an empty name returns nullopt")
 		{
-			std::optional<ub> lookupResult{registry.getTypeID("")};
+			std::optional<TypeID> lookupResult{registry.getTypeID("")};
 			CHECK_FALSE(lookupResult.has_value());
 		}
 
 		THEN("name lookup is case-sensitive")
 		{
-			std::optional<ub> lowercaseResult{registry.getTypeID("normal")};
+			std::optional<TypeID> lowercaseResult{registry.getTypeID("normal")};
 			CHECK_FALSE(lowercaseResult.has_value());
 
-			std::optional<ub> uppercaseResult{registry.getTypeID("FIRE")};
+			std::optional<TypeID> uppercaseResult{registry.getTypeID("FIRE")};
 			CHECK_FALSE(uppercaseResult.has_value());
 		}
 	}
@@ -240,7 +243,7 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("looking up Normal id returns Normal")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(static_cast<ub>(Types::Normal))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(Types::Normal))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -249,7 +252,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("looking up Fairy id returns Fairy")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(static_cast<ub>(Types::Fairy))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(Types::Fairy))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -258,7 +261,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("looking up a nonexistent id returns nullopt")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(255)};
+			std::optional<std::string_view> typeName{registry.getTypeName(TypeID{255})};
 			CHECK_FALSE(typeName.has_value());
 		}
 	}
@@ -294,26 +297,26 @@ SCENARIO("TypeRegistry")
 
 		THEN("setting an entry updates that entry")
 		{
-			TypeEntry replacementEntry{.typeID = 99, .name = "Custom"};
+			TypeEntry replacementEntry{.typeID = TypeID{99}, .name = "Custom"};
 			registry.setEntry(0, replacementEntry);
 
 			TypeEntry updatedEntry{registry.getEntry(0)};
-			CHECK((updatedEntry.typeID == 99));
+			CHECK((updatedEntry.typeID == TypeID{99}));
 			CHECK((updatedEntry.name == "Custom"));
 		}
 
 		THEN("setting an entry updates name lookups")
 		{
-			TypeEntry replacementEntry{.typeID = 50, .name = "Cosmic"};
+			TypeEntry replacementEntry{.typeID = TypeID{50}, .name = "Cosmic"};
 			registry.setEntry(0, replacementEntry);
 
-			std::optional<ub> cosmicIdentifier{registry.getTypeID("Cosmic")};
+			std::optional<TypeID> cosmicIdentifier{registry.getTypeID("Cosmic")};
 			REQUIRE(cosmicIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((cosmicIdentifier.value() == 50));
+			CHECK((cosmicIdentifier.value() == TypeID{50}));
 
-			std::optional<ub> formerIdentifier{registry.getTypeID("Normal")};
+			std::optional<TypeID> formerIdentifier{registry.getTypeID("Normal")};
 			CHECK_FALSE(formerIdentifier.has_value());
 		}
 	}
@@ -369,14 +372,14 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("multiple next type id increments are monotonic")
 		{
-			ub firstValue{registry.getNextTypeID()};
+			TypeID firstValue{registry.getNextTypeID()};
 			registry.incrementNextTypeID();
-			ub secondValue{registry.getNextTypeID()};
+			TypeID secondValue{registry.getNextTypeID()};
 			registry.incrementNextTypeID();
-			ub thirdValue{registry.getNextTypeID()};
+			TypeID thirdValue{registry.getNextTypeID()};
 
-			CHECK((secondValue == firstValue + 1));
-			CHECK((thirdValue == firstValue + 2));
+			CHECK((secondValue.getValue() == firstValue.getValue() + 1));
+			CHECK((thirdValue.getValue() == firstValue.getValue() + 2));
 		}
 	}
 
@@ -384,9 +387,9 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("setting next type id changes the value")
 		{
-			registry.setNextTypeID(42);
-			ub nextTypeIdentifier{registry.getNextTypeID()};
-			CHECK((nextTypeIdentifier == 42));
+			registry.setNextTypeID(TypeID{42});
+			TypeID nextTypeIdentifier{registry.getNextTypeID()};
+			CHECK((nextTypeIdentifier == TypeID{42}));
 		}
 	}
 
@@ -395,7 +398,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Normal id returns zero")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(static_cast<ub>(Types::Normal))};
+			std::optional<ub> indexResult{registry.findIndexByTypeID(toTypeID(Types::Normal))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -404,7 +407,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Stellar id returns eighteen")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(static_cast<ub>(Types::Stellar))};
+			std::optional<ub> indexResult{registry.findIndexByTypeID(toTypeID(Types::Stellar))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -413,7 +416,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by nonexistent id returns nullopt")
 		{
-			std::optional<ub> indexResult{registry.findIndexByTypeID(200)};
+			std::optional<ub> indexResult{registry.findIndexByTypeID(TypeID{200})};
 			CHECK_FALSE(indexResult.has_value());
 		}
 	}
@@ -449,19 +452,19 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("hasType by id returns true for Normal")
 		{
-			bool hasTypeByIdentifier{registry.hasType(static_cast<ub>(Types::Normal))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(Types::Normal))};
 			CHECK(hasTypeByIdentifier);
 		}
 
 		THEN("hasType by id returns true for Stellar")
 		{
-			bool hasTypeByIdentifier{registry.hasType(static_cast<ub>(Types::Stellar))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(Types::Stellar))};
 			CHECK(hasTypeByIdentifier);
 		}
 
 		THEN("hasType by id returns false for nonexistent id")
 		{
-			ub nonexistentIdentifier{200};
+			TypeID nonexistentIdentifier{200};
 			bool hasTypeByIdentifier{registry.hasType(nonexistentIdentifier)};
 			CHECK_FALSE(hasTypeByIdentifier);
 		}
@@ -471,11 +474,11 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("incrementing next type id increases by one")
 		{
-			ub beforeIncrement{registry.getNextTypeID()};
+			TypeID beforeIncrement{registry.getNextTypeID()};
 			registry.incrementNextTypeID();
-			ub afterIncrement{registry.getNextTypeID()};
+			TypeID afterIncrement{registry.getNextTypeID()};
 
-			CHECK((afterIncrement == beforeIncrement + 1));
+			CHECK((afterIncrement.getValue() == beforeIncrement.getValue() + 1));
 		}
 	}
 

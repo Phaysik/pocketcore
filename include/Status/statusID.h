@@ -21,7 +21,7 @@ namespace PocketCore::Status
 		Sleep,
 		Freeze,
 		Poison,
-		Toxic
+		Toxic,
 	};
 } // namespace PocketCore::Status
 

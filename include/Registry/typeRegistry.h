@@ -20,6 +20,7 @@
 #include "Core/typedefs.h"
 #include "Types/constants.h"
 #include "Types/typeEffectiveness.h"
+#include "Types/typeID.h"
 #include "Types/types.h"
 
 #include "constants.h" // IWYU pragma: keep
@@ -29,6 +30,8 @@ namespace PocketCore::Registry::Types
 	using PocketCore::Core::ub;
 
 	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Types::TypeID;
+	using PocketCore::Types::toTypeID;
 
 	namespace Types = PocketCore::Types;
 
@@ -37,8 +40,8 @@ namespace PocketCore::Registry::Types
 	*/
 	struct TypeEntry
 	{
-			/*! @brief The numeric type identifier. */
-			ub typeID{};
+			/*! @brief The stable identifier for a built-in or user-defined type. */
+			TypeID typeID{};
 
 			/*! @brief The display name for the type. */
 			std::string_view name{};
@@ -138,7 +141,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 			*/
-			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<ub> getTypeID(const std::string_view name) const
+			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view name) const
 			{
 				const ub index{findEntryIndexByName(name)};
 
@@ -158,7 +161,7 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The type ID to search for.
 				@return The name wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const ub typeID) const
+			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
 				const ub index{findEntryIndexById(typeID)};
 
@@ -183,9 +186,9 @@ namespace PocketCore::Registry::Types
 			/*! @brief Returns the next type ID that will be assigned to a newly registered type.
 				@return The next available stable type ID.
 			*/
-			ATTR_NODISCARD constexpr ub getNextTypeID() const noexcept
+			ATTR_NODISCARD constexpr TypeID getNextTypeID() const noexcept
 			{
-				return mNextTypeID;
+				return TypeID{mNextTypeID};
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
@@ -248,9 +251,9 @@ namespace PocketCore::Registry::Types
 			/*! @brief Sets the next type ID counter.
 				@param[in] nextId The value to assign to the next-type-ID counter.
 			*/
-			constexpr void setNextTypeID(const ub nextId) noexcept
+			constexpr void setNextTypeID(const TypeID nextId) noexcept
 			{
-				mNextTypeID = nextId;
+				mNextTypeID = nextId.getValue();
 			}
 
 			// MARK: Member Functions
@@ -260,7 +263,7 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeID(const ub typeID) const
+			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeID(const TypeID typeID) const
 			{
 				const ub index{findEntryIndexById(typeID)}; // LCOV_EXCL_BR
 
@@ -287,7 +290,7 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The type ID to check.
 				@return True if a type with that ID exists in the registry, false otherwise.
 			*/
-			ATTR_NODISCARD constexpr bool hasType(const ub typeID) const
+			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
 				return findEntryIndexById(typeID) != mAmountRegistered;
 			}
@@ -340,7 +343,7 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The stable type ID to search for.
 				@return The array index if found, or @ref mAmountRegistered if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr ub findEntryIndexById(const ub typeID) const
+			ATTR_NODISCARD constexpr ub findEntryIndexById(const TypeID typeID) const
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_ID.data());
 
@@ -367,7 +370,7 @@ namespace PocketCore::Registry::Types
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_ADD_BUILTIN.data());
 
-				mEntries.at(mAmountRegistered) = TypeEntry{.typeID = static_cast<ub>(type), .name = name};
+				mEntries.at(mAmountRegistered) = TypeEntry{.typeID = toTypeID(type), .name = name};
 				++mAmountRegistered;
 			}
 

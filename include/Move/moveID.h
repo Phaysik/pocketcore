@@ -17,7 +17,7 @@ namespace PocketCore::Move
 	{
 		None,
 		Pound,
-		KarateChop
+		KarateChop,
 	};
 } // namespace PocketCore::Move
 

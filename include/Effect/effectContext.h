@@ -9,11 +9,13 @@
 #ifndef INCLUDE_EFFECT_EFFECTCONTEXT_H
 #define INCLUDE_EFFECT_EFFECTCONTEXT_H
 
+#include "Ability/abilityID.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
+#include "Types/typeID.h"
 
 namespace PocketCore::Effect
 {
@@ -24,11 +26,12 @@ namespace PocketCore::Effect
 	using PocketCore::Move::MoveID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Status::StatusID;
+	using PocketCore::Types::TypeID;
 
 	enum class Side : ub
 	{
 		A,
-		B
+		B,
 	};
 
 	enum class EffectSource : ub
@@ -37,7 +40,7 @@ namespace PocketCore::Effect
 		Move,
 		Ability,
 		Item,
-		Hazard
+		Hazard,
 	};
 
 	struct DamageContext
@@ -68,7 +71,7 @@ namespace PocketCore::Effect
 		public:
 			DamageContext mDamage{};
 			EffectResult mResult{};
-			
+
 			float mAbilityMultiplier{1.0F};
 			float mItemMultiplier{1.0F};
 			float mCriticalMultiplier{1.0F};
@@ -76,12 +79,12 @@ namespace PocketCore::Effect
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
 			ub mMoveBasePower{0};
-			ub mMoveTypeID{0};
+			TypeID mMoveTypeID{};
 			ub moveAccuracy{0};
 
 			EffectSource mSourceType{EffectSource::None};
 			MoveID mMoveID{MoveID::None};
-			AbilityID mAbilityID{AbilityID::None};
+			AbilityID mAbilityID{};
 			Side mUserSide{};
 			Side mTargetSide{};
 

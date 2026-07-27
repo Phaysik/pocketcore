@@ -14,18 +14,23 @@
 #include <string_view>
 
 #include "Ability/abilityID.h"
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Types/typeID.h"
 
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Types::TypeID;
 
 	class Pokemon
 	{
@@ -33,21 +38,23 @@ namespace PocketCore::Pokemon
 			// Constructors
 
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
-									   const us spAttack, const us spDefense, const AbilityID abilityID, const ItemID itemID)
+									   const us spAttack, const us spDefense, const AbilityID abilityID, const ItemID itemID,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
-				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
+				  mSpDefense{spDefense}, mTypeIDs{typeIDs}, mAbilityID{abilityID}, mItemID{itemID}
 			{
 				mMoveIDs.fill(MoveID::None);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
 			}
 
-			explicit constexpr Pokemon(const std::string_view name, const std::array<MoveID, 4> moveIDs, const std::array<ub, 4> maxPP,
-									   const std::array<ub, 4> currentPP, const us attack, const us defense, const us health,
-									   const us speed, const us spAttack, const us spDefense, const AbilityID abilityID,
-									   const ItemID itemID)
+			explicit constexpr Pokemon(const std::string_view name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
+									   const us health, const us speed, const us spAttack, const us spDefense, const AbilityID abilityID,
+									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mAttack{attack}, mDefense{defense}, mHealth{health},
-				  mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
+				  mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mTypeIDs{typeIDs}, mAbilityID{abilityID}, mItemID{itemID}
 			{}
 
 			// Getters
@@ -57,7 +64,7 @@ namespace PocketCore::Pokemon
 				return mName;
 			}
 
-			ATTR_NODISCARD constexpr const std::array<MoveID, 4> &getMovesArray() const
+			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMovesArray() const
 			{
 				return mMoveIDs;
 			}
@@ -69,7 +76,7 @@ namespace PocketCore::Pokemon
 				return mMoveIDs.at(index);
 			}
 
-			ATTR_NODISCARD constexpr const std::array<ub, 4> &getMaxPPArray() const
+			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getMaxPPArray() const
 			{
 				return mMaxPP;
 			}
@@ -81,7 +88,7 @@ namespace PocketCore::Pokemon
 				return mMaxPP.at(index);
 			}
 
-			ATTR_NODISCARD constexpr const std::array<ub, 4> &getCurrentPPArray() const
+			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getCurrentPPArray() const
 			{
 				return mCurrentPP;
 			}
@@ -91,6 +98,18 @@ namespace PocketCore::Pokemon
 				assert(index < mCurrentPP.size());
 
 				return mCurrentPP.at(index);
+			}
+
+			ATTR_NODISCARD constexpr const std::array<TypeID, MAX_TYPES_PER_POKEMON> &getTypesArray() const noexcept
+			{
+				return mTypeIDs;
+			}
+
+			ATTR_NODISCARD constexpr TypeID getTypeID(const ub index) const
+			{
+				assert(index < mTypeIDs.size());
+
+				return mTypeIDs.at(index);
 			}
 
 			ATTR_NODISCARD constexpr us getAttack() const
@@ -137,17 +156,21 @@ namespace PocketCore::Pokemon
 
 			void setName(const std::string_view name);
 
-			void setMovesArray(const std::array<MoveID, 4> &moveIDs);
+			void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs);
 
 			void setMove(const ub slotIndex, const MoveID moveID);
 
-			void setMaxPPArray(const std::array<ub, 4> &maxPP);
+			void setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP);
 
 			void setMaxPP(const ub slotIndex, const ub maxPP);
 
-			void setCurrentPPArray(const std::array<ub, 4> &currentPP);
+			void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP);
 
 			void setCurrentPP(const ub slotIndex, const ub currentPP);
+
+			void setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs);
+
+			void setType(ub slotIndex, TypeID typeID);
 
 			void setAttack(const us attack);
 
@@ -179,16 +202,17 @@ namespace PocketCore::Pokemon
 
 		private:
 			std::string_view mName{};
-			std::array<MoveID, 4> mMoveIDs{};
-			std::array<ub, 4> mMaxPP{};
-			std::array<ub, 4> mCurrentPP{};
+			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
+			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
+			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
 			us mAttack{};
 			us mDefense{};
 			us mHealth{};
 			us mSpeed{};
 			us mSpAttack{};
 			us mSpDefense{};
-			AbilityID mAbilityID{AbilityID::None};
+			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+			AbilityID mAbilityID{};
 			ItemID mItemID{ItemID::None};
 	};
 } // namespace PocketCore::Pokemon

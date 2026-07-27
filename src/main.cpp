@@ -27,6 +27,7 @@ int main()
 	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
 
+	// NOLINTNEXTLINE(readability-redundant-parentheses)
 	if constexpr ((Configuration::configFlags & Configuration::useCustomConfig) != Configuration::bitwiseANDEquals)
 	{
 		const bool initialized{Logging::Logger::initialize(Logging::LOGGING_LOGGER_NAME, Logging::LOGGING_FILE_NAME, true)};

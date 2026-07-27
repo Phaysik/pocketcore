@@ -19,22 +19,27 @@ namespace PocketCore::Configuration
 
 	// MARK: Constexpr statements
 
-	constexpr ub MAX_TYPES{20};
-	constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
+	inline constexpr ub MAX_TYPES_PER_POKEMON{2};
+	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
+	inline constexpr ub MAX_TYPES{20};
+	inline constexpr ub MAX_ABILITIES{64};
+	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums
 
 	/*! @enum RegistryError Configuration/constants.h
-		@brief Describes the kinds of errors that can occur when mutating the type registry.
+		@brief Describes the kinds of errors that can occur when mutating configurable registries.
 		@details Each value represents a distinct failure mode used by @ref RegistryErrorInfo for programmatic error handling.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 	*/
 	enum class RegistryError : ub
 	{
-		MaxCapacity,	 /*!< The registry has reached its maximum number of types. */
-		DuplicateType,	 /*!< A type with the given name already exists. */
-		TypeNotFound,	 /*!< No type matching the input was found. */
-		MatchupMismatch, /*!< The number of provided matchup entries does not match the registered count. */
+		MaxCapacity,	  /*!< The registry has reached its maximum number of entries. */
+		DuplicateType,	  /*!< A type with the given name already exists. */
+		TypeNotFound,	  /*!< No type matching the input was found. */
+		MatchupMismatch,  /*!< The number of provided matchup entries does not match the registered count. */
+		DuplicateAbility, /*!< An ability with the given name already exists. */
+		AbilityNotFound,  /*!< No ability matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -51,7 +56,7 @@ namespace PocketCore::Configuration
 
 	/*! @struct RegistryErrorInfo Configuration/constants.h
 		@brief A contextual error carrying both the error kind and the identifier that caused it.
-		@details Returned by @ref Configuration methods to provide programmatic access to the offending type name or the reason for failure
+		@details Returned by @ref Configuration methods to provide programmatic access to the offending entry name or the reason for failure
 		without requiring the caller to enable logging.
 		@note This type is a lightweight data carrier and stores non-owning string views.
 	*/
@@ -113,6 +118,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::MatchupMismatch:
 						mErrorName = "MatchupMismatch";
+						break;
+					case RegistryError::DuplicateAbility:
+						mErrorName = "DuplicateAbility";
+						break;
+					case RegistryError::AbilityNotFound:
+						mErrorName = "AbilityNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

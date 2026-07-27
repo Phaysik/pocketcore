@@ -8,6 +8,8 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Types/typeEffectiveness.h"
+#include "Types/typeID.h"
 #include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
@@ -21,7 +23,10 @@ using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Configuration::UnspecifiedMatchup;
 using PocketCore::Core::ub;
+using PocketCore::Types::NO_TYPE_ID;
+using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::TypeID;
 using PocketCore::Types::Types;
 using PocketCore::Utility::Debug::Logging::Logger;
 
@@ -173,13 +178,15 @@ SCENARIO("TypeRegistryConfiguration getTypeID and getTypeName")
 		{
 			auto result = config.getTypeID("Normal");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == static_cast<ub>(Types::Normal)));
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((result.value() == toTypeID(Types::Normal)));
 		}
 
 		THEN("getTypeName returns the correct name")
 		{
-			auto result = config.getTypeName(static_cast<ub>(Types::Fire));
+			auto result = config.getTypeName(toTypeID(Types::Fire));
 			REQUIRE(result.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((result.value() == "Fire"));
 		}
 	}
@@ -194,7 +201,7 @@ SCENARIO("TypeRegistryConfiguration getTypeID and getTypeName")
 
 		THEN("getTypeName returns nullopt for unknown id")
 		{
-			auto result = config.getTypeName(255);
+			auto result = config.getTypeName(TypeID{255});
 			CHECK_FALSE(result.has_value());
 		}
 	}
@@ -745,7 +752,7 @@ SCENARIO("TypeRegistryConfiguration removeType by name")
 		{
 			auto result = config.removeType("Normal");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == static_cast<ub>(Types::Normal)));
+			CHECK((result.value() == toTypeID(Types::Normal)));
 			CHECK((config.getAmountRegistered() == 18));
 			CHECK_FALSE(config.hasType("Normal"));
 		}
@@ -774,8 +781,8 @@ SCENARIO("TypeRegistryConfiguration removeType by enum")
 		{
 			auto result = config.removeType(Types::Fire);
 			REQUIRE(result.has_value());
-			CHECK((result.value() == static_cast<ub>(Types::Fire)));
-			CHECK_FALSE(config.hasType(static_cast<ub>(Types::Fire)));
+			CHECK((result.value() == toTypeID(Types::Fire)));
+			CHECK_FALSE(config.hasType(toTypeID(Types::Fire)));
 		}
 	}
 }
@@ -789,7 +796,7 @@ SCENARIO("TypeRegistryConfiguration removeType by stable id")
 	{
 		THEN("removes the type and returns its id")
 		{
-			ub normalId = static_cast<ub>(Types::Normal);
+			TypeID normalId = toTypeID(Types::Normal);
 			auto result = config.removeType(normalId);
 			REQUIRE(result.has_value());
 			CHECK((result.value() == normalId));
@@ -801,7 +808,7 @@ SCENARIO("TypeRegistryConfiguration removeType by stable id")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			ub invalidId = 200;
+			TypeID invalidId{200};
 			auto result = config.removeType(invalidId);
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -940,7 +947,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 	{
 		THEN("clears all matchups to NOT_DEFINED")
 		{
-			ub normalId = static_cast<ub>(Types::Normal);
+			TypeID normalId = toTypeID(Types::Normal);
 			auto result = config.resetMatchups(normalId);
 			REQUIRE(result.has_value());
 
@@ -959,7 +966,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			ub invalidId = 200;
+			TypeID invalidId{200};
 			auto result = config.resetMatchups(invalidId);
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -994,7 +1001,7 @@ SCENARIO("TypeRegistryConfiguration hasType")
 	{
 		THEN("hasType by id returns true")
 		{
-			bool found = config.hasType(static_cast<ub>(Types::Fire));
+			bool found = config.hasType(toTypeID(Types::Fire));
 			CHECK(found);
 		}
 	}
@@ -1003,7 +1010,7 @@ SCENARIO("TypeRegistryConfiguration hasType")
 	{
 		THEN("hasType by id returns false")
 		{
-			ub invalidId = 200;
+			TypeID invalidId{200};
 			bool found = config.hasType(invalidId);
 			CHECK_FALSE(found);
 		}
@@ -1035,6 +1042,39 @@ SCENARIO("TypeRegistryConfiguration addType then removeType roundtrip")
 				CHECK((config.getAmountRegistered() == 18));
 				CHECK_FALSE(config.hasType("Cosmic"));
 			}
+		}
+	}
+}
+
+SCENARIO("TypeRegistryConfiguration stable identifier exhaustion")
+{
+	ensureLoggerInitialized();
+	TypeRegistryConfiguration config{};
+
+	GIVEN("the custom identifier space is consumed through repeated registration")
+	{
+		auto stellarRemove = config.removeType("Stellar");
+		REQUIRE(stellarRemove.has_value());
+
+		for (unsigned int identifierValue{19}; identifierValue < NO_TYPE_ID.getValue(); ++identifierValue)
+		{
+			TypeDefinition definition{.name = "Transient", .offensiveMatchups = {}, .defensiveMatchups = {}};
+			auto addResult = config.addType(definition, UnspecifiedMatchup::Neutral);
+			REQUIRE(addResult.has_value());
+			CHECK((addResult->getValue() == identifierValue));
+
+			auto removeResult = config.removeType(addResult.value());
+			REQUIRE(removeResult.has_value());
+		}
+
+		THEN("the reserved unassigned identifier is never issued")
+		{
+			TypeDefinition definition{.name = "Overflow", .offensiveMatchups = {}, .defensiveMatchups = {}};
+			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
+
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error().mKind == RegistryError::MaxCapacity));
+			CHECK_FALSE(config.hasType("Overflow"));
 		}
 	}
 }

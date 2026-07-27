@@ -20,6 +20,8 @@ namespace PocketCore::Types
 
 	constexpr ub MAX_BUILT_IN_TYPE_COUNT{18}; // The number of built-in types with predefined matchups
 
+	// NOLINTBEGIN(readability-trailing-comma)
+
 	constexpr std::array<TypeEffectiveness, MAX_BUILT_IN_TYPE_COUNT> NORMAL_TYPE_MATCHUP{E, E, E, E, E, NVE, E, NE, NVE,
 																						 E, E, E, E, E, E,	 E, E,	E};
 	constexpr std::array<TypeEffectiveness, MAX_BUILT_IN_TYPE_COUNT> FIGHTING_TYPE_MATCHUP{SE, E, NVE, NVE, E,	 SE, NVE, NE, SE,
@@ -56,6 +58,9 @@ namespace PocketCore::Types
 																					   E, E,   E, E, SE, E, E, NVE, NVE};
 	constexpr std::array<TypeEffectiveness, MAX_BUILT_IN_TYPE_COUNT> FAIRY_TYPE_MATCHUP{E,	 SE, E, NVE, E, E, E,  E,  NVE,
 																						NVE, E,	 E, E,	 E, E, SE, SE, E};
+
+	// NOLINTEND(readability-trailing-comma)
+
 	constexpr std::string_view NORMAL_NAME{"Normal"};
 	constexpr std::string_view FIGHTING_NAME{"Fighting"};
 	constexpr std::string_view FLYING_NAME{"Flying"};

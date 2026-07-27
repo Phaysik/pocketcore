@@ -13,6 +13,7 @@
 #include <expected>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <unordered_set>
 
@@ -21,6 +22,7 @@
 #include "Core/typedefs.h"
 #include "Registry/typeRegistry.h"
 #include "Types/typeEffectiveness.h"
+#include "Types/typeID.h"
 #include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
@@ -31,6 +33,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Core::ub;
 	using PocketCore::Registry::Types::TypeEntry;
 	using PocketCore::Types::TypeEffectiveness;
+	using PocketCore::Types::TypeID;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
 	// MARK: Getters
@@ -119,8 +122,10 @@ namespace PocketCore::Configuration
 	{
 		if (newRow.size() > MAX_TYPES)
 		{
-			const std::optional<std::string_view> logResult{Logger::warn(
-				"TypeRegistryConfiguration::setMatchupRow row span size ({}) exceeds MAX_TYPES ({}).", newRow.size(), MAX_TYPES)};
+			const std::optional<std::string_view> logResult{
+				Logger::warn("TypeRegistryConfiguration::setMatchupRow row span size ({}) exceeds MAX_TYPES ({}).", newRow.size(),
+							 MAX_TYPES),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, attackerName, logResult.value_or(std::string_view{})}};
 		}
@@ -240,16 +245,17 @@ namespace PocketCore::Configuration
 
 	// MARK: Member Functions
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::addType(const TypeDefinition &definition,
-																						   const UnspecifiedMatchup defaultBehavior)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::addType(const TypeDefinition &definition,
+																							   const UnspecifiedMatchup defaultBehavior)
 	{
 		const ub registered{registry.getAmountRegistered()};
 		const std::string_view typeName{definition.name};
 
-		if (registered >= MAX_TYPES)
+		if (registered >= MAX_TYPES || registry.getNextTypeID() == PocketCore::Types::NO_TYPE_ID)
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration: registry capacity of {} reached. Cannot add type '{}'.", MAX_TYPES, typeName)};
+				Logger::warn("TypeRegistryConfiguration: registry capacity or type ID space exhausted. Cannot add type '{}'.", typeName),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, typeName, logResult.value_or(std::string_view{})}};
 		}
@@ -257,7 +263,8 @@ namespace PocketCore::Configuration
 		if (registry.hasType(typeName))
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration::addType duplicate type found. Cannot add type '{}'.", typeName)};
+				Logger::warn("TypeRegistryConfiguration::addType duplicate type found. Cannot add type '{}'.", typeName),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, typeName, logResult.value_or(std::string_view{})}};
 		}
@@ -287,13 +294,14 @@ namespace PocketCore::Configuration
 				continue;
 			}
 
-			const std::optional<ub> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
+			const std::optional<TypeID> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
 
 			if (!targetId.has_value())
 			{
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addType offensive matchup references unknown type '{}'. Cannot add type '{}'.",
-								 pairName, typeName)};
+								 pairName, typeName),
+				};
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
@@ -306,7 +314,8 @@ namespace PocketCore::Configuration
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addType internal error: type ID found but array index missing for '{}'. "
 								 "Cannot add type '{}'.",
-								 pairName, typeName)};
+								 pairName, typeName),
+				};
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
@@ -320,13 +329,14 @@ namespace PocketCore::Configuration
 
 		for (const auto &[pairName, pairValue] : definition.defensiveMatchups)
 		{
-			const std::optional<ub> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
+			const std::optional<TypeID> targetId{registry.getTypeID(pairName)}; // LCOV_EXCL_BR
 
 			if (!targetId.has_value())
 			{
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addType defensive matchup references unknown type '{}'. Cannot add type '{}'.",
-								 pairName, typeName)};
+								 pairName, typeName),
+				};
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
@@ -339,7 +349,8 @@ namespace PocketCore::Configuration
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addType internal error: type ID found but array index missing for '{}'. "
 								 "Cannot add type '{}'.",
-								 pairName, typeName)};
+								 pairName, typeName),
+				};
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
@@ -360,7 +371,7 @@ namespace PocketCore::Configuration
 
 		registry.setTypeChartCell(registered, registered, offensiveRow.at(registered));
 
-		const ub assignedTypeID{registry.getNextTypeID()};
+		const TypeID assignedTypeID{registry.getNextTypeID()};
 
 		registry.incrementAmountRegistered();
 		registry.incrementNextTypeID();
@@ -372,7 +383,7 @@ namespace PocketCore::Configuration
 		const std::span<const TypeDefinition> &definitions, const UnspecifiedMatchup defaultBehavior)
 	{
 		const ub currentCount{registry.getAmountRegistered()};
-		const ub currentNextTypeID{registry.getNextTypeID()};
+		const TypeID currentNextTypeID{registry.getNextTypeID()};
 
 		const ub batchSize{static_cast<ub>(definitions.size())};
 
@@ -383,8 +394,10 @@ namespace PocketCore::Configuration
 
 		if (currentCount + batchSize > MAX_TYPES)
 		{
-			const std::optional<std::string_view> logResult{Logger::warn(
-				"TypeRegistryConfiguration::addTypes registry capacity ({}) exceeded when adding {} types.", MAX_TYPES, batchSize)};
+			const std::optional<std::string_view> logResult{
+				Logger::warn("TypeRegistryConfiguration::addTypes registry capacity ({}) exceeded when adding {} types.", MAX_TYPES,
+							 batchSize),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, {}, logResult.value_or(std::string_view{})}};
 		}
@@ -400,7 +413,8 @@ namespace PocketCore::Configuration
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addTypes duplicate type '{}' found within batch. Rolling back entries to "
 								 "previous safe state.",
-								 def.name)};
+								 def.name),
+				};
 
 				rollbackEntries(currentCount, currentNextTypeID);
 
@@ -409,7 +423,7 @@ namespace PocketCore::Configuration
 
 			seenNames.insert(def.name);
 
-			const std::expected<ub, RegistryErrorInfo> result{addType(def, defaultBehavior)}; // LCOV_EXCL_BR
+			const std::expected<TypeID, RegistryErrorInfo> result{addType(def, defaultBehavior)}; // LCOV_EXCL_BR
 
 			if (!result.has_value())
 			{
@@ -425,14 +439,15 @@ namespace PocketCore::Configuration
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view typeName)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view typeName)
 	{
-		const std::optional<ub> typeID{registry.getTypeID(typeName)}; // LCOV_EXCL_BR
+		const std::optional<TypeID> typeID{registry.getTypeID(typeName)}; // LCOV_EXCL_BR
 
 		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by name, '{}'.", typeName)};
+				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by name, '{}'.", typeName),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
@@ -442,29 +457,32 @@ namespace PocketCore::Configuration
 		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 		if (!arrayIndex.has_value())
 		{
-			const std::optional<std::string_view> logResult{Logger::info(
-				"TypeRegistryConfiguration::removeType internal error: type ID found but array index missing for '{}'.", typeName)};
+			const std::optional<std::string_view> logResult{
+				Logger::info("TypeRegistryConfiguration::removeType internal error: type ID found but array index missing for '{}'.",
+							 typeName),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
 		// LCOV_EXCL_STOP
 
-		const ub removedId{typeID.value()};
+		const TypeID removedId{typeID.value()};
 		removeEntry(arrayIndex.value());
 
 		return removedId;
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const PocketCore::Types::Types type)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const PocketCore::Types::Types type)
 	{
-		const ub typeID{static_cast<ub>(type)};
+		const TypeID typeID{PocketCore::Types::toTypeID(type)};
 
 		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by ID, '{}'.", typeID)};
+				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by ID, '{}'.", typeID.getValue()),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
 		}
@@ -474,14 +492,16 @@ namespace PocketCore::Configuration
 		return typeID;
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const ub typeID)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const TypeID typeID)
 	{
 		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by stable ID, '{}'.", typeID)};
+				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by stable ID, '{}'.",
+							 typeID.getValue()),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
 		}
@@ -499,7 +519,7 @@ namespace PocketCore::Configuration
 
 		for (const auto &name : typeNames)
 		{
-			const std::expected<ub, RegistryErrorInfo> result{removeType(name)}; // LCOV_EXCL_BR
+			const std::expected<TypeID, RegistryErrorInfo> result{removeType(name)}; // LCOV_EXCL_BR
 
 			if (!result.has_value())
 			{
@@ -519,12 +539,13 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::renameType(const std::string_view oldName,
 																								const std::string_view newName)
 	{
-		const std::optional<ub> typeID{registry.getTypeID(oldName)}; // LCOV_EXCL_BR
+		const std::optional<TypeID> typeID{registry.getTypeID(oldName)}; // LCOV_EXCL_BR
 
 		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName)}; // LCOV_EXCL_BR
+				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName),
+			}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, logResult.value_or(std::string_view{})}};
 		}
@@ -532,15 +553,18 @@ namespace PocketCore::Configuration
 		if (registry.hasType(newName)) // LCOV_EXCL_BR
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration::renameType target name '{}' already exists.", newName)}; // LCOV_EXCL_BR
+				Logger::warn("TypeRegistryConfiguration::renameType target name '{}' already exists.", newName),
+			}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, newName, logResult.value_or(std::string_view{})}};
 		}
 
-		const ub typeValue{typeID.value()}; // LCOV_EXCL_BR
+		const TypeID typeValue{typeID.value()}; // LCOV_EXCL_BR
 
 		const ub arrayIndex{
-			registry.findIndexByTypeID(typeValue).value()}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			registry.findIndexByTypeID(typeValue).value(),
+		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
 
 		registry.setEntry(arrayIndex, TypeEntry{.typeID = typeValue, .name = newName}); // LCOV_EXCL_BR
 
@@ -554,7 +578,8 @@ namespace PocketCore::Configuration
 		if (!typeIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for type name '{}'.", typeName)}; // LCOV_EXCL_BR
+				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for type name '{}'.", typeName),
+			}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
@@ -564,16 +589,18 @@ namespace PocketCore::Configuration
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const ub typeID)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const TypeID typeID)
 	{
 		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeID)}; // LCOV_EXCL_BR
+				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeID.getValue()),
+			}; // LCOV_EXCL_BR
 
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, std::to_string(static_cast<PocketCore::Core::sb>(typeID)),
+			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound,
+													 std::to_string(static_cast<PocketCore::Core::sb>(typeID.getValue())),
 													 logResult.value_or(std::string_view{})}};
 		}
 
@@ -584,7 +611,7 @@ namespace PocketCore::Configuration
 
 	// MARK: Private Member Function
 
-	void TypeRegistryConfiguration::rollbackEntries(const ub previousCount, const ub previousNextTypeID)
+	void TypeRegistryConfiguration::rollbackEntries(const ub previousCount, const TypeID previousNextTypeID)
 	{
 		ub registered{registry.getAmountRegistered()};
 
@@ -660,12 +687,13 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view name,
 																								const std::string_view callerContext)
 	{
-		const std::optional<ub> typeID{registry.getTypeID(name)}; // LCOV_EXCL_BR
+		const std::optional<TypeID> typeID{registry.getTypeID(name)}; // LCOV_EXCL_BR
 
 		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::{} type '{}' not found.", callerContext, name)}; // LCOV_EXCL_BR
+				Logger::info("TypeRegistryConfiguration::{} type '{}' not found.", callerContext, name),
+			}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, name, logResult.value_or(std::string_view{})}};
 		}

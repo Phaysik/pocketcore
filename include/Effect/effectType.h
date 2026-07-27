@@ -32,7 +32,7 @@ namespace PocketCore::Effect
 		AccuracyCheck,
 		SetSandstorm,
 		SetSun,
-		SetRain
+		SetRain,
 	};
 } // namespace PocketCore::Effect
 
