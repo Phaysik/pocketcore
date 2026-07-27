@@ -43,7 +43,7 @@ namespace PocketCore::Pokemon
 				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
 				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
 			{
-				mMoveIDs.fill(MoveID::None);
+				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
 			}
@@ -203,12 +203,12 @@ namespace PocketCore::Pokemon
 
 		private:
 			std::string_view mName{};
-			
+
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
-			
+
 			us mAttack{};
 			us mDefense{};
 			us mHealth{};

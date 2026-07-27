@@ -9,16 +9,25 @@
 #ifndef INCLUDE_MOVE_MOVEID_H
 #define INCLUDE_MOVE_MOVEID_H
 
-#include "Core/typedefs.h"
+#include "ID/idInterface.h"
 
 namespace PocketCore::Move
 {
-	enum class MoveID : PocketCore::Core::ub
+	namespace Detail
 	{
-		None,
-		Pound,
-		KarateChop,
-	};
+		/*! @brief Distinguishes move identifiers from all other stable identifier domains. */
+		struct MoveIDTag;
+	} // namespace Detail
+
+	/*! @typedef MoveID
+		@brief A strongly typed stable identifier for any registered move.
+		@details Values are assigned by the move registry. Unlike @ref BuiltinMoveID, this type is open and can represent user-defined
+	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
+	*/
+	using MoveID = PocketCore::ID::IDInterface<Detail::MoveIDTag, 0>;
+
+	/*! @brief The stable identifier representing no move. */
+	inline constexpr MoveID NO_MOVE_ID{};
 } // namespace PocketCore::Move
 
 #endif
