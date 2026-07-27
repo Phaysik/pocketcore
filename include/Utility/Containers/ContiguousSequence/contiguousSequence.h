@@ -14,7 +14,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h"
 
-/*! @namespace Pokemon::Utility::Containers::ContiguousSequence
+/*! @namespace PocketCore::Utility::Containers::ContiguousSequence
 	@brief Utilities for working with contiguous sequence containers
 	@details
 	This namespace provides small, efficient helper routines that operate on
@@ -30,9 +30,9 @@
 	@since 0.0.1
 	@author Matthew Moore
 */
-namespace Pokemon::Utility::Containers::ContiguousSequence
+namespace PocketCore::Utility::Containers::ContiguousSequence
 {
-	using Pokemon::Core::Integral;
+	using PocketCore::Core::Integral;
 
 	/*! @brief Sum `length` elements from @p sequence starting at @p startIndex.
 		@details
@@ -86,6 +86,6 @@ namespace Pokemon::Utility::Containers::ContiguousSequence
 	{
 		return computeContiguousSequenceSum<Integral>(sequence, startIndex, static_cast<Integral>(sequence.size()));
 	}
-} // namespace Pokemon::Utility::Containers::ContiguousSequence
+} // namespace PocketCore::Utility::Containers::ContiguousSequence
 
 #endif

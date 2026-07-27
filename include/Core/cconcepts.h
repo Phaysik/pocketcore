@@ -12,14 +12,14 @@
 #include <string>
 #include <type_traits>
 
-/*! @namespace Pokemon::Core
+/*! @namespace PocketCore::Core
 	@brief Collection of common compile-time type concepts used across the codebase.
 	@details This namespace provides small, expressive concepts built on top of the standard
 	type-traits library. Use these concepts to constrain template parameters for integral,
 	unsigned, signed, floating-point, rational (integral or floating), and std::string-like types.
 	@note All concepts are compile-time predicates with no runtime cost.
 */
-namespace Pokemon::Core
+namespace PocketCore::Core
 {
 	/*! @concept Integral
 		@brief Tests whether a type is an integral type.
@@ -95,6 +95,6 @@ namespace Pokemon::Core
 	*/
 	template <typename T>
 	concept IsEnum = std::is_enum_v<T>;
-} // namespace Pokemon::Core
+} // namespace PocketCore::Core
 
 #endif

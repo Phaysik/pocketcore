@@ -13,12 +13,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Configuration::MAX_TYPES;
-using Pokemon::Core::ub;
-using Pokemon::Registry::Types::TypeEntry;
-using Pokemon::Registry::Types::TypeRegistry;
-using Pokemon::Types::TypeEffectiveness;
-using Pokemon::Types::Types;
+using PocketCore::Configuration::MAX_TYPES;
+using PocketCore::Core::ub;
+using PocketCore::Registry::Types::TypeEntry;
+using PocketCore::Registry::Types::TypeRegistry;
+using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::Types;
 
 using enum TypeEffectiveness;
 

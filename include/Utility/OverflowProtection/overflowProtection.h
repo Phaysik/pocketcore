@@ -14,16 +14,16 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h"
 
-/*! @namespace Pokemon::Utility::OverflowProtection
+/*! @namespace PocketCore::Utility::OverflowProtection
 	@brief Utilities for detecting and guarding against unsigned integer overflow.
 	@details Provides small, constexpr helpers to check for multiplication overflow and to perform
 	saturating multiplication when overflow would occur. These helpers are intended for use with
 	unsigned integral types and are constexpr so they can be evaluated at compile time when possible.
 	@note All functions are `noexcept` and return conservative values on overflow (e.g., `std::numeric_limits<Number>::max()`).
 */
-namespace Pokemon::Utility::OverflowProtection
+namespace PocketCore::Utility::OverflowProtection
 {
-	using Pokemon::Core::UnsignedIntegral;
+	using PocketCore::Core::UnsignedIntegral;
 
 	template <UnsignedIntegral Number>
 	/*! @brief Check if multiplication of two unsigned values will overflow.
@@ -62,6 +62,6 @@ namespace Pokemon::Utility::OverflowProtection
 	{
 		return WillMultiplyOverflow<Number>(num1, num2) ? std::numeric_limits<Number>::max() : static_cast<Number>(num1 * num2);
 	}
-} // namespace Pokemon::Utility::OverflowProtection
+} // namespace PocketCore::Utility::OverflowProtection
 
 #endif

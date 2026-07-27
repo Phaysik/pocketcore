@@ -11,7 +11,7 @@
 
 #include <string_view>
 
-namespace Pokemon::Registry::Types
+namespace PocketCore::Registry::Types
 {
 	constexpr std::string_view INDEX_OOB_GET_ENTRY{"Index out of bounds in getEntry"};
 	constexpr std::string_view ROW_OOB_GET_TYPE_CHART_CELL{"Row index out of bounds in getTypeChartCell"};
@@ -31,6 +31,6 @@ namespace Pokemon::Registry::Types
 		"The amount of registered types exceeds the amount of type entries in addBuiltin"};
 	constexpr std::string_view MATCHUPS_EXCEED_COLUMNS_ADD_BUILTIN{
 		"The size of the offensive matchups span exceeds the number of columns in the type chart in addBuiltin"};
-} // namespace Pokemon::Registry::Types
+} // namespace PocketCore::Registry::Types
 
 #endif

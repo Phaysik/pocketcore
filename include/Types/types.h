@@ -11,9 +11,9 @@
 
 #include "Core/typedefs.h"
 
-namespace Pokemon::Types
+namespace PocketCore::Types
 {
-	enum class Types : Pokemon::Core::ub
+	enum class Types : PocketCore::Core::ub
 	{
 		Normal,
 		Fire,
@@ -35,6 +35,6 @@ namespace Pokemon::Types
 		Fairy,
 		Stellar,
 	};
-} // namespace Pokemon::Types
+} // namespace PocketCore::Types
 
 #endif

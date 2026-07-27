@@ -15,7 +15,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h"
 
-/*! @namespace Pokemon::Utility::Math
+/*! @namespace PocketCore::Utility::Math
 	@brief Helper utilities and constants for robust floating-point comparisons.
 	@details This namespace provides lightweight, constexpr helpers intended for safe
 	comparison of floating-point values using both absolute and relative tolerances.
@@ -26,7 +26,7 @@
 	@note Constants represent conservative defaults; callers may override them by passing
 	explicit epsilon values to the functions.
 */
-namespace Pokemon::Utility::Math
+namespace PocketCore::Utility::Math
 {
 	/*! @brief Small absolute tolerance used when comparing values near zero.
 		@details Use this epsilon when the magnitudes of values under comparison are
@@ -59,7 +59,7 @@ namespace Pokemon::Utility::Math
 		@return `true` if the values are considered equal within the provided tolerances; otherwise `false`.
 		@note The function is `constexpr` and `noexcept`, suitable for compile-time evaluation when used with constexpr values.
 	*/
-	template <Pokemon::Core::FloatingPoint FloatingPoint>
+	template <PocketCore::Core::FloatingPoint FloatingPoint>
 	ATTR_NODISCARD constexpr bool approximatelyEqualAbsRel(const FloatingPoint lhs, const FloatingPoint rhs,
 														   const FloatingPoint absEpsilon = ABS_EPSILON,
 														   const FloatingPoint relEpsilon = REL_EPSILON) noexcept
@@ -73,6 +73,6 @@ namespace Pokemon::Utility::Math
 		// Otherwise fall back to Knuth's algorithm
 		return std::abs(lhs - rhs) <= (std::max(std::abs(lhs), std::abs(rhs)) * relEpsilon);
 	}
-} // namespace Pokemon::Utility::Math
+} // namespace PocketCore::Utility::Math
 
 #endif

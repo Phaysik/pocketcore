@@ -18,13 +18,13 @@
 
 #include "Core/cconcepts.h" // for Integral, String
 
-/*! @namespace Pokemon::Utility Holds any useful functionality that doesn't fit anywhere else
+/*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
 	@date --/--/----
 	@version x.x.x
 	@since x.x.x
 	@author Matthew Moore
 */
-namespace Pokemon::Utility
+namespace PocketCore::Utility
 {
 	/*! @class Input input.h "include/input.h"
 		@brief Will try and extract valid user input and clean up the input buffer as needed
@@ -105,7 +105,7 @@ namespace Pokemon::Utility
 				@since x.x.x
 				@author Matthew Moore
 			*/
-			template <Pokemon::Core::String T>
+			template <PocketCore::Core::String T>
 			static T getInput(std::string_view inputMessage = mInputMessage, std::string_view errorMessage = mErrorMessage,
 							  [[maybe_unused]] const bool ignoreExtraneous = true, std::istream &input = std::cin,
 							  const bool afterFailureOnly = false)
@@ -149,7 +149,7 @@ namespace Pokemon::Utility
 				@since x.x.x
 				@author Matthew Moore
 			*/
-			template <Pokemon::Core::Integral T>
+			template <PocketCore::Core::Integral T>
 			static T getInput(const T min, const T max, std::string_view inputMessage = mInputMessage,
 							  std::string_view errorMessage = mErrorMessage, const bool ignoreExtraneous = true,
 							  std::istream &input = std::cin, const bool afterFailureOnly = false)
@@ -227,7 +227,7 @@ namespace Pokemon::Utility
 				@author Matthew Moore
 			*/
 			template <typename T, typename Func>
-				requires Pokemon::Core::InvocableWithArgs<Func, T>
+				requires PocketCore::Core::InvocableWithArgs<Func, T>
 			static T getInput(Func &&func, std::string_view inputMessage = mInputMessage, std::string_view errorMessage = mErrorMessage,
 							  const bool ignoreExtraneous = true, std::istream &input = std::cin, const bool afterFailureOnly = false)
 			{
@@ -319,6 +319,6 @@ namespace Pokemon::Utility
 				}
 			}
 	};
-} // namespace Pokemon::Utility
+} // namespace PocketCore::Utility
 
 #endif

@@ -19,7 +19,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Utility::Clock::Timer;
+using PocketCore::Utility::Clock::Timer;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

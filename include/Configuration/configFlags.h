@@ -11,12 +11,12 @@
 
 #include <cstddef>
 
-namespace Pokemon::Configuration
+namespace PocketCore::Configuration
 {
 	constexpr std::byte bitwiseANDEquals{0b0000'0001};
 
 	constexpr std::byte useCustomConfig{true ? 0b0000'0001 : 0b0000'0000};
 	constexpr std::byte configFlags{useCustomConfig};
-} // namespace Pokemon::Configuration
+} // namespace PocketCore::Configuration
 
 #endif

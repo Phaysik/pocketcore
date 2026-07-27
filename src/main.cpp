@@ -24,8 +24,8 @@
 */
 int main()
 {
-	namespace Configuration = Pokemon::Configuration;
-	namespace Logging = Pokemon::Utility::Debug::Logging;
+	namespace Configuration = PocketCore::Configuration;
+	namespace Logging = PocketCore::Utility::Debug::Logging;
 
 	if constexpr ((Configuration::configFlags & Configuration::useCustomConfig) != Configuration::bitwiseANDEquals)
 	{
@@ -47,7 +47,7 @@ int main()
 			return EXIT_FAILURE;
 		}
 
-		ATTR_MAYBE_UNUSED const Configuration::TypeRegistryConfiguration config{};
+		ATTR_MAYBE_UNUSED const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
 	}
 
 	return EXIT_SUCCESS;

@@ -13,21 +13,19 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Configuration::MatchupPair;
-using Pokemon::Configuration::MAX_TYPES;
-using Pokemon::Configuration::RegistryError;
-using Pokemon::Configuration::RegistryErrorInfo;
-using Pokemon::Configuration::TypeDefinition;
-using Pokemon::Configuration::TypeRegistryConfiguration;
-using Pokemon::Configuration::UnspecifiedMatchup;
-using Pokemon::Core::ub;
-using Pokemon::Types::TypeEffectiveness;
-using Pokemon::Types::Types;
-using Pokemon::Utility::Debug::Logging::Logger;
+using PocketCore::Configuration::MatchupPair;
+using PocketCore::Configuration::MAX_TYPES;
+using PocketCore::Configuration::RegistryError;
+using PocketCore::Configuration::RegistryErrorInfo;
+using PocketCore::Configuration::TypeDefinition;
+using PocketCore::Configuration::TypeRegistryConfiguration;
+using PocketCore::Configuration::UnspecifiedMatchup;
+using PocketCore::Core::ub;
+using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::Types;
+using PocketCore::Utility::Debug::Logging::Logger;
 
 using enum TypeEffectiveness;
-
-// TODO: This is a dummy generated file and will be refined later
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

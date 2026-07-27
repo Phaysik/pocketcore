@@ -24,14 +24,14 @@
 #include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
-namespace Pokemon::Configuration
+namespace PocketCore::Configuration
 {
-	using Pokemon::Configuration::MatchupPair;
-	using Pokemon::Configuration::MAX_TYPES;
-	using Pokemon::Core::ub;
-	using Pokemon::Registry::Types::TypeEntry;
-	using Pokemon::Types::TypeEffectiveness;
-	using Pokemon::Utility::Debug::Logging::Logger;
+	using PocketCore::Configuration::MatchupPair;
+	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Core::ub;
+	using PocketCore::Registry::Types::TypeEntry;
+	using PocketCore::Types::TypeEffectiveness;
+	using PocketCore::Utility::Debug::Logging::Logger;
 
 	// MARK: Getters
 
@@ -453,7 +453,7 @@ namespace Pokemon::Configuration
 		return removedId;
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const Pokemon::Types::Types type)
+	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const PocketCore::Types::Types type)
 	{
 		const ub typeID{static_cast<ub>(type)};
 
@@ -590,7 +590,7 @@ namespace Pokemon::Configuration
 			const std::optional<std::string_view> logResult{
 				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeID)}; // LCOV_EXCL_BR
 
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, std::to_string(static_cast<Pokemon::Core::sb>(typeID)),
+			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, std::to_string(static_cast<PocketCore::Core::sb>(typeID)),
 													 logResult.value_or(std::string_view{})}};
 		}
 
@@ -702,4 +702,4 @@ namespace Pokemon::Configuration
 		// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 		return registry.findIndexByTypeID(typeID.value()).value(); // LCOV_EXCL_BR
 	}
-} // namespace Pokemon::Configuration
+} // namespace PocketCore::Configuration

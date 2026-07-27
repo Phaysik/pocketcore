@@ -11,7 +11,7 @@
 
 #include <string_view>
 
-namespace Pokemon::Utility::Debug::Logging
+namespace PocketCore::Utility::Debug::Logging
 {
 	/*! @brief The default logger name used for the static Logger wrapper. */
 	constexpr std::string_view LOGGING_LOGGER_NAME{"pokemon_logger"};
@@ -46,6 +46,6 @@ namespace Pokemon::Utility::Debug::Logging
 	/*! @brief Error message returned when a call to @ref Logger::critical fails. */
 	constexpr std::string_view CRITICAL_LOG_FAILURE{
 		"Failed to log the critical message. This likely indicates a severe issue with the logging system itself."};
-} // namespace Pokemon::Utility::Debug::Logging
+} // namespace PocketCore::Utility::Debug::Logging
 
 #endif

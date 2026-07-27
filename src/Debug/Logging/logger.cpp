@@ -20,7 +20,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
-namespace Pokemon::Utility::Debug::Logging
+namespace PocketCore::Utility::Debug::Logging
 {
 	// MARK: Getter
 
@@ -79,7 +79,7 @@ namespace Pokemon::Utility::Debug::Logging
 			// LCOV_EXCL_BR_START — uncovered branch is the compiler-generated throw edge from ofstream construction
 			std::ofstream ofs(convertedFileName, std::ofstream::out | std::ofstream::trunc);
 			// LCOV_EXCL_BR_STOP
-			
+
 			if (!ofs.is_open())
 			{
 				return false;
@@ -133,4 +133,4 @@ namespace Pokemon::Utility::Debug::Logging
 #if defined(ATTR_GCC) && !defined(ATTR_CLANG)
 	#pragma GCC diagnostic pop
 #endif
-} // namespace Pokemon::Utility::Debug::Logging
+} // namespace PocketCore::Utility::Debug::Logging

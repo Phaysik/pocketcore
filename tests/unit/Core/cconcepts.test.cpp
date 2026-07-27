@@ -15,18 +15,18 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Core::FloatingPoint;
-using Pokemon::Core::Integral;
-using Pokemon::Core::RationalNumber;
-using Pokemon::Core::sb;
-using Pokemon::Core::si;
-using Pokemon::Core::SignedIntegral;
-using Pokemon::Core::sl;
-using Pokemon::Core::String;
-using Pokemon::Core::ub;
-using Pokemon::Core::ui;
-using Pokemon::Core::ul;
-using Pokemon::Core::UnsignedIntegral;
+using PocketCore::Core::FloatingPoint;
+using PocketCore::Core::Integral;
+using PocketCore::Core::RationalNumber;
+using PocketCore::Core::sb;
+using PocketCore::Core::si;
+using PocketCore::Core::SignedIntegral;
+using PocketCore::Core::sl;
+using PocketCore::Core::String;
+using PocketCore::Core::ub;
+using PocketCore::Core::ui;
+using PocketCore::Core::ul;
+using PocketCore::Core::UnsignedIntegral;
 
 // Compile-time sanity checks (will fail to compile if concepts change unexpectedly)
 static_assert(Integral<si>);

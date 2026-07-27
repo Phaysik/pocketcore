@@ -16,9 +16,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Core::si;
-using Pokemon::Core::sl;
-using Pokemon::Utility::Containers::ContiguousSequence::computeContiguousSequenceSum;
+using PocketCore::Core::si;
+using PocketCore::Core::sl;
+using PocketCore::Utility::Containers::ContiguousSequence::computeContiguousSequenceSum;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

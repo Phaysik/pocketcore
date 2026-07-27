@@ -29,10 +29,10 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
-namespace Logging = Pokemon::Utility::Debug::Logging;
+namespace Logging = PocketCore::Utility::Debug::Logging;
 
 using Logging::Logger;
-using Pokemon::Core::ub;
+using PocketCore::Core::ub;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

@@ -14,7 +14,7 @@
 
 #include "typeEffectiveness.h"
 
-namespace Pokemon::Types
+namespace PocketCore::Types
 {
 	using enum TypeEffectiveness;
 
@@ -75,6 +75,6 @@ namespace Pokemon::Types
 	constexpr std::string_view DARK_NAME{"Dark"};
 	constexpr std::string_view FAIRY_NAME{"Fairy"};
 	constexpr std::string_view STELLAR_NAME{"Stellar"};
-} // namespace Pokemon::Types
+} // namespace PocketCore::Types
 
 #endif

@@ -14,10 +14,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Core::ui;
-using Pokemon::Core::ul;
-using Pokemon::Utility::OverflowProtection::SafeMultiply;
-using Pokemon::Utility::OverflowProtection::WillMultiplyOverflow;
+using PocketCore::Core::ui;
+using PocketCore::Core::ul;
+using PocketCore::Utility::OverflowProtection::SafeMultiply;
+using PocketCore::Utility::OverflowProtection::WillMultiplyOverflow;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

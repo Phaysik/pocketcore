@@ -15,7 +15,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using Pokemon::Utility::Math::approximatelyEqualAbsRel;
+using PocketCore::Utility::Math::approximatelyEqualAbsRel;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

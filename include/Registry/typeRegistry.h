@@ -24,13 +24,13 @@
 
 #include "constants.h" // IWYU pragma: keep
 
-namespace Pokemon::Registry::Types
+namespace PocketCore::Registry::Types
 {
-	using Pokemon::Core::ub;
+	using PocketCore::Core::ub;
 
-	using Pokemon::Configuration::MAX_TYPES;
+	using PocketCore::Configuration::MAX_TYPES;
 
-	namespace Types = Pokemon::Types;
+	namespace Types = PocketCore::Types;
 
 	/*! @struct TypeEntry Registry/typeRegistry.h
 		@brief A compile-time pair mapping a type ID to its display name.
@@ -48,7 +48,7 @@ namespace Pokemon::Registry::Types
 		@brief A constexpr registry storing Pokemon types with their effectiveness chart in fixed-capacity arrays.
 		@details Stores up to @ref MAX_TYPES entries in fixed-size arrays with no dynamic allocation. Built-in @ref Types enum values are
 	   pre-registered by the constructor. Custom type registration and removal are handled externally by
-	   @ref Pokemon::Configuration::Configuration, which mutates the registry through its public getters and setters.
+	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
 	*/
@@ -395,15 +395,15 @@ namespace Pokemon::Registry::Types
 			}
 
 		private:
-			/*! @brief Fixed-capacity 2-D array encoding the effectiveness of each type (row) attacking every other type (column).
-				@details Indexed as mTypeChart[attacker][defender]. Uninitialized slots contain @ref TypeEffectiveness::NOT_DEFINED.
-			*/
-			std::array<std::array<Types::TypeEffectiveness, MAX_TYPES>, MAX_TYPES> mTypeChart{};
-
 			/*! @brief Fixed-capacity array of type entries (ID + name pairs).
 				@details Only the first @ref mAmountRegistered elements are valid.
 			*/
 			std::array<TypeEntry, MAX_TYPES> mEntries{};
+
+			/*! @brief Fixed-capacity 2-D array encoding the effectiveness of each type (row) attacking every other type (column).
+				@details Indexed as mTypeChart[attacker][defender]. Uninitialized slots contain @ref TypeEffectiveness::NOT_DEFINED.
+			*/
+			std::array<std::array<Types::TypeEffectiveness, MAX_TYPES>, MAX_TYPES> mTypeChart{};
 
 			/*! @brief The number of currently registered types.
 			 */
@@ -414,6 +414,6 @@ namespace Pokemon::Registry::Types
 			*/
 			ub mNextTypeID{0};
 	};
-} // namespace Pokemon::Registry::Types
+} // namespace PocketCore::Registry::Types
 
 #endif

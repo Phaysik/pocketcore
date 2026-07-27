@@ -15,13 +15,13 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h" // for Integral
 
-/*! @namespace Pokemon::Utility Holds any useful functionality that doesn't fit anywhere else
+/*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
 	@date --/--/----
 	@version x.x.x
 	@since x.x.x
 	@author Matthew Moore
 */
-namespace Pokemon::Utility
+namespace PocketCore::Utility
 {
 	/*! @class Random random.h "include/random.h"
 		@brief Class for creating a random number generator
@@ -44,7 +44,7 @@ namespace Pokemon::Utility
 				@since x.x.x
 				@author Matthew Moore
 			*/
-			template <Pokemon::Core::Integral T>
+			template <PocketCore::Core::Integral T>
 			ATTR_NODISCARD static T get(const T min, const T max) noexcept
 			{
 				return std::uniform_int_distribution<T>{min, max}(mTwister);
@@ -90,6 +90,6 @@ namespace Pokemon::Utility
 
 			static inline std::mt19937 mTwister{generate()}; /*!< The global random number generator */
 	};
-} // namespace Pokemon::Utility
+} // namespace PocketCore::Utility
 
 #endif

@@ -11,9 +11,9 @@
 
 #include "Core/typedefs.h"
 
-namespace Pokemon::Types
+namespace PocketCore::Types
 {
-	using Pokemon::Core::ub;
+	using PocketCore::Core::ub;
 
 	/*! @enum TypeEffectiveness
 		@showenumvalues
@@ -29,6 +29,6 @@ namespace Pokemon::Types
 		E,			 /*!< Effective / neutral (1x multiplier). */
 		SE,			 /*!< Super effective (1.5x multiplier). */
 	};
-} // namespace Pokemon::Types
+} // namespace PocketCore::Types
 
 #endif

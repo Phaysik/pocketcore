@@ -21,15 +21,15 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
-/*! @namespace Pokemon::Utility::Clock Holds any useful functionality that doesn't fit anywhere else
+/*! @namespace PocketCore::Utility::Clock Holds any useful functionality that doesn't fit anywhere else
 	@date --/--/----
 	@version x.x.x
 	@since x.x.x
 	@author Matthew Moore
 */
-namespace Pokemon::Utility::Clock
+namespace PocketCore::Utility::Clock
 {
-	using Pokemon::Core::ub;
+	using PocketCore::Core::ub;
 
 	template <typename T>
 	concept Ratio = std::is_same_v<T, std::ratio<T::num, T::den>>; /*!< A concept to check if a type is a std::ratio */
@@ -40,7 +40,7 @@ namespace Pokemon::Utility::Clock
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	enum class TimeUnit : Pokemon::Core::ui
+	enum class TimeUnit : PocketCore::Core::ui
 	{
 		Seconds = 1,
 		Milliseconds = 1'000,
@@ -303,6 +303,6 @@ namespace Pokemon::Utility::Clock
 				return fileName;
 			}
 	};
-} // namespace Pokemon::Utility::Clock
+} // namespace PocketCore::Utility::Clock
 
 #endif

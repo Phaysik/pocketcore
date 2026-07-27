@@ -13,9 +13,9 @@
 
 #include "Core/typedefs.h"
 
-namespace Pokemon::Configuration
+namespace PocketCore::Configuration
 {
-	using Pokemon::Core::ub;
+	using PocketCore::Core::ub;
 
 	// MARK: Constexpr statements
 
@@ -43,8 +43,8 @@ namespace Pokemon::Configuration
 	*/
 	enum class UnspecifiedMatchup : ub
 	{
-		Neutral,	/*!< Fill unspecified matchups with @ref Pokemon::Types::TypeEffectiveness::E (neutral / 1x). */
-		NotDefined, /*!< Fill unspecified matchups with @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED. */
+		Neutral,	/*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::E (neutral / 1x). */
+		NotDefined, /*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. */
 	};
 
 	// MARK: RegistryErrorInfo
@@ -125,6 +125,6 @@ namespace Pokemon::Configuration
 				return mErrorName;
 			}
 	};
-} // namespace Pokemon::Configuration
+} // namespace PocketCore::Configuration
 
 #endif

@@ -15,7 +15,7 @@
 #include <configcat/configcatclient.h>
 #include <configcat/configcatoptions.h>
 
-namespace Pokemon::Core
+namespace PocketCore::Core
 {
 	/*! @class ConfigCat Core/configCat.h
 		@brief Wrapper for a process-global ConfigCat SDK client used for feature flag lookups.
@@ -116,6 +116,6 @@ namespace Pokemon::Core
 				return client;
 			}
 	};
-} // namespace Pokemon::Core
+} // namespace PocketCore::Core
 
 #endif

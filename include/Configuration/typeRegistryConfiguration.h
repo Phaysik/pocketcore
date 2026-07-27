@@ -20,10 +20,10 @@
 #include "Registry/typeRegistry.h"
 #include "Types/typeEffectiveness.h"
 
-namespace Pokemon::Configuration
+namespace PocketCore::Configuration
 {
-	using Pokemon::Core::ub;
-	using Pokemon::Types::TypeEffectiveness;
+	using PocketCore::Core::ub;
+	using PocketCore::Types::TypeEffectiveness;
 
 	// MARK: Helper Structs
 
@@ -81,7 +81,8 @@ namespace Pokemon::Configuration
 			   type chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@return The @ref Pokemon::Types::TypeEffectiveness value on success, or @ref RegistryErrorInfo if either type is not found.
+				@return The @ref PocketCore::Types::TypeEffectiveness value on success, or @ref RegistryErrorInfo if either type is not
+			   found.
 			*/
 			ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> getMatchup(std::string_view attackerName,
 																						  std::string_view defenderName);
@@ -89,8 +90,8 @@ namespace Pokemon::Configuration
 			/*! @brief Returns the full offensive matchup row for a type identified by display name.
 				@details Resolves the attacker name to its internal array index and returns a copy of the entire effectiveness row.
 				@param[in] attackerName The display name of the attacking type.
-				@return A copy of the full @ref Pokemon::Types::TypeEffectiveness row on success, or @ref RegistryErrorInfo if the type is
-			   not found.
+				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness row on success, or @ref RegistryErrorInfo if the type
+			   is not found.
 			*/
 			ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> getMatchupRow(
 				std::string_view attackerName);
@@ -98,8 +99,8 @@ namespace Pokemon::Configuration
 			/*! @brief Returns the full defensive matchup column for a type identified by display name.
 				@details Resolves the defender name to its internal array index and reads every attacker's effectiveness against it.
 				@param[in] defenderName The display name of the defending type.
-				@return A copy of the full @ref Pokemon::Types::TypeEffectiveness column on success, or @ref RegistryErrorInfo if the type
-			   is not found.
+				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness column on success, or @ref RegistryErrorInfo if the
+			   type is not found.
 			*/
 			ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> getDefensiveColumn(
 				std::string_view defenderName);
@@ -144,7 +145,7 @@ namespace Pokemon::Configuration
 				@details Looks up both type names, resolves their array indices, and writes the new effectiveness value into the chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@param[in] value The @ref Pokemon::Types::TypeEffectiveness value to assign.
+				@param[in] value The @ref PocketCore::Types::TypeEffectiveness value to assign.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if either type is not found, or void on success.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchup(std::string_view attackerName, std::string_view defenderName,
@@ -153,10 +154,10 @@ namespace Pokemon::Configuration
 			/*! @brief Replaces the entire offensive matchup row for a type identified by name.
 				@details Looks up the attacker by name, resolves its array index, and overwrites every column in that row. The caller only
 			   needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   Pokemon::Types::TypeEffectiveness::NOT_DEFINED.
+			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
 				@pre @p newRow.size() <= @ref MAX_TYPES.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
-				@param[in] newRow A span of @ref Pokemon::Types::TypeEffectiveness values for the new offensive matchup row.
+				@param[in] newRow A span of @ref PocketCore::Types::TypeEffectiveness values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 			*/
@@ -165,7 +166,7 @@ namespace Pokemon::Configuration
 
 			/*! @brief Replaces the entire offensive matchup row for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry. Types not mentioned default
-			   to @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
 				@param[in] newRow A span of @ref MatchupPair values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the attacker or any referenced type is not
@@ -177,10 +178,10 @@ namespace Pokemon::Configuration
 			/*! @brief Replaces the entire defensive matchup column for a type identified by name.
 				@details Looks up the defender by name, resolves its array index, and overwrites every row's cell in that column. The caller
 			   only needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   Pokemon::Types::TypeEffectiveness::NOT_DEFINED.
+			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
 				@pre @p newCol.size() <= @ref MAX_TYPES.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
-				@param[in] newCol A span of @ref Pokemon::Types::TypeEffectiveness values for the new defensive matchup column.
+				@param[in] newCol A span of @ref PocketCore::Types::TypeEffectiveness values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 			*/
@@ -189,7 +190,7 @@ namespace Pokemon::Configuration
 
 			/*! @brief Replaces the entire defensive matchup column for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced attacker type name in the registry. Types not mentioned
-			   default to @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   default to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
 				@param[in] newCol A span of @ref MatchupPair values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the defender or any referenced type is not
@@ -205,8 +206,8 @@ namespace Pokemon::Configuration
 			   This allows the caller to specify matchups in any order without knowing the internal registration sequence. The @p
 			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::NotDefined
 			   fails the call,
-			   @ref UnspecifiedMatchup::Neutral fills with @ref Pokemon::Types::TypeEffectiveness::E, and
-			   @ref UnspecifiedMatchup::NotDefined fills with @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED.
+			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Types::TypeEffectiveness::E, and
+			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
 				@param[in] definition A @ref TypeDefinition struct containing the display name and matchup pair spans for the new type.
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
@@ -232,10 +233,10 @@ namespace Pokemon::Configuration
 			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> removeType(std::string_view typeName);
 
 			/*! @brief Removes a type from the registry by its enum value.
-				@param[in] type The built-in @ref Pokemon::Types::Types enum value to remove.
+				@param[in] type The built-in @ref PocketCore::Types::Types enum value to remove.
 				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
 			*/
-			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> removeType(Pokemon::Types::Types type);
+			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> removeType(PocketCore::Types::Types type);
 
 			/*! @brief Removes a type from the registry by its stable type ID.
 				@details Useful for removing custom types using the ID returned by @ref addType.
@@ -261,16 +262,18 @@ namespace Pokemon::Configuration
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameType(std::string_view oldName, std::string_view newName);
 
 			/*! @brief Resets all matchup data for a type identified by display name.
-				@details Clears the type's entire offensive row and defensive column to @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED
-			   without removing the type from the registry. The type's entry, stable ID, and array position are preserved.
+				@details Clears the type's entire offensive row and defensive column to @ref
+			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   and array position are preserved.
 				@param[in] typeName The display name of the type whose matchups will be cleared.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(std::string_view typeName);
 
 			/*! @brief Resets all matchup data for a type identified by its stable type ID.
-				@details Clears the type's entire offensive row and defensive column to @ref Pokemon::Types::TypeEffectiveness::NOT_DEFINED
-			   without removing the type from the registry. The type's entry, stable ID, and array position are preserved.
+				@details Clears the type's entire offensive row and defensive column to @ref
+			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   and array position are preserved.
 				@param[in] typeID The stable type ID of the type whose matchups will be cleared.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
 			*/
@@ -322,6 +325,6 @@ namespace Pokemon::Configuration
 			/*! @brief The internal type registry storing all type entries and matchup data. */
 			Registry::Types::TypeRegistry registry{};
 	};
-} // namespace Pokemon::Configuration
+} // namespace PocketCore::Configuration
 
 #endif
