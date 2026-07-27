@@ -13,3 +13,4 @@
 /src/tracy/*
 *.spv
 gmon.out
+*.log

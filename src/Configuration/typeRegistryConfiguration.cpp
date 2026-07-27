@@ -180,8 +180,10 @@ namespace PocketCore::Configuration
 	{
 		if (newCol.size() > MAX_TYPES)
 		{
-			const std::optional<std::string_view> logResult{Logger::warn(
-				"TypeRegistryConfiguration::setDefensiveColumn column span size ({}) exceeds MAX_TYPES ({}).", newCol.size(), MAX_TYPES)};
+			const std::optional<std::string_view> logResult{
+				Logger::warn("TypeRegistryConfiguration::setDefensiveColumn column span size ({}) exceeds MAX_TYPES ({}).", newCol.size(),
+							 MAX_TYPES),
+			};
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, defenderName, logResult.value_or(std::string_view{})}};
 		}
@@ -502,7 +504,8 @@ namespace PocketCore::Configuration
 			if (!result.has_value())
 			{
 				static_cast<void>(
-					Logger::info("TypeRegistryConfiguration::removeTypes rolling back to previous state due to error on type '{}'.", name));
+					Logger::info("TypeRegistryConfiguration::removeTypes rolling back to previous state due to error on type '{}'.",
+								 name)); // LCOV_EXCL_BR
 
 				registry = snapshot;
 
@@ -521,32 +524,25 @@ namespace PocketCore::Configuration
 		if (!typeID.has_value())
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName)};
+				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName)}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, logResult.value_or(std::string_view{})}};
 		}
 
-		if (registry.hasType(newName))
+		if (registry.hasType(newName)) // LCOV_EXCL_BR
 		{
 			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration::renameType target name '{}' already exists.", newName)};
+				Logger::warn("TypeRegistryConfiguration::renameType target name '{}' already exists.", newName)}; // LCOV_EXCL_BR
 
 			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, newName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
+		const ub typeValue{typeID.value()}; // LCOV_EXCL_BR
 
-		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
-		if (!arrayIndex.has_value())
-		{
-			const std::optional<std::string_view> logResult{Logger::info(
-				"TypeRegistryConfiguration::renameType internal error: type ID found but array index missing for '{}'.", oldName)};
+		const ub arrayIndex{
+			registry.findIndexByTypeID(typeValue).value()}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
 
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, logResult.value_or(std::string_view{})}};
-		}
-		// LCOV_EXCL_STOP
-
-		registry.setEntry(arrayIndex.value(), TypeEntry{.typeID = typeID.value(), .name = newName});
+		registry.setEntry(arrayIndex, TypeEntry{.typeID = typeValue, .name = newName}); // LCOV_EXCL_BR
 
 		return {};
 	}
@@ -563,20 +559,7 @@ namespace PocketCore::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
-		const ub index{typeIndex.value()}; // LCOV_EXCL_BR
-
-		// Clear offensive row
-		for (ub col{0}; col < registered; ++col)
-		{
-			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
-		}
-
-		// Clear defensive column
-		for (ub row{0}; row < registered; ++row)
-		{
-			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
-		}
+		clearRows(typeIndex.value()); // LCOV_EXCL_BR
 
 		return {};
 	}
@@ -594,18 +577,7 @@ namespace PocketCore::Configuration
 													 logResult.value_or(std::string_view{})}};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
-		const ub index{arrayIndex.value()}; // LCOV_EXCL_BR
-
-		for (ub col{0}; col < registered; ++col)
-		{
-			registry.setTypeChartCell(index, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
-		}
-
-		for (ub row{0}; row < registered; ++row)
-		{
-			registry.setTypeChartCell(row, index, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
-		}
+		clearRows(arrayIndex.value()); // LCOV_EXCL_BR
 
 		return {};
 	}

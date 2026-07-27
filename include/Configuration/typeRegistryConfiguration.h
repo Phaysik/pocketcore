@@ -300,6 +300,23 @@ namespace PocketCore::Configuration
 		private:
 			// MARK: Private Member Functions
 
+			void constexpr clearRows(const ub typeIndex)
+			{
+				const ub registered{registry.getAmountRegistered()};
+
+				// Clear offensive row
+				for (ub col{0}; col < registered; ++col)
+				{
+					registry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+				}
+
+				// Clear defensive column
+				for (ub row{0}; row < registered; ++row)
+				{
+					registry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+				}
+			}
+
 			/*! @brief Restores the registry to a prior state by discarding entries added after @p previousCount.
 				@details Used internally to implement atomic rollback for batch operations. Resets the registry's entry count and
 			   next-type-ID counter to the values captured before the batch began.
