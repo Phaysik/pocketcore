@@ -28,7 +28,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
-	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 
 	/*! @struct AbilityDefinition Configuration/abilityRegistryConfiguration.h
 		@brief Describes a user-defined ability before the registry assigns its stable ID.
@@ -41,17 +41,17 @@ namespace PocketCore::Configuration
 	*/
 	struct AbilityDefinition
 	{
-		/*! @brief The unique, case-sensitive display name with storage that outlives the registered ability. */
-		std::string_view name{};
+			/*! @brief The unique, case-sensitive display name with storage that outlives the registered ability. */
+			std::string_view name{};
 
-		/*! @brief The trigger and effect definitions copied during registration. */
-		std::span<const AbilityEffectTrigger> triggers{};
+			/*! @brief The trigger and effect definitions copied during registration. */
+			std::span<const AbilityEffectTrigger> triggers{};
 	};
 
 	/*! @class AbilityRegistryConfiguration Configuration/abilityRegistryConfiguration.h
 		@brief Provides validated user customization over an internal ability registry.
-		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned monotonically
-	   and are not reused after removal. Batch additions provide all-or-nothing semantics.
+		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
+	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
 		@date 07/27/2026
 		@version x.x.x
 		@since x.x.x
@@ -65,7 +65,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Looks up complete metadata by stable ability ID.
 				@param[in] abilityID The built-in or custom stable identifier.
-				@return A reference to metadata if registered, or std::nullopt otherwise. The reference remains valid until mutation or destruction.
+				@return A reference to metadata if registered, or std::nullopt otherwise. The reference remains valid until mutation or
+			   destruction.
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::reference_wrapper<const AbilityMeta>> getAbilityMetadata(
 				const AbilityID abilityID) const
@@ -102,7 +103,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns the number of registered built-in and custom abilities.
 				@return The current registry entry count.
 			*/
-			ATTR_NODISCARD constexpr ub getAmountRegistered() const noexcept
+			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
 				return registry.getAmountRegistered();
 			}
@@ -144,7 +145,7 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(std::string_view abilityName,
-				std::span<const AbilityEffectTrigger> triggers);
+																					 std::span<const AbilityEffectTrigger> triggers);
 
 			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTriggers(AbilityID, std::span<const AbilityEffectTrigger>)
 				@brief Replaces all trigger metadata for an ability selected by stable ID.
@@ -153,7 +154,7 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(AbilityID abilityID,
-				std::span<const AbilityEffectTrigger> triggers);
+																					 std::span<const AbilityEffectTrigger> triggers);
 
 			/*! @brief Renames an ability without changing its stable ID or trigger metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
@@ -182,23 +183,23 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The calling operation used in diagnostics.
 				@return The internal index on success, or @ref RegistryErrorInfo if absent.
 			*/
-			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> resolveIndex(std::string_view name, std::string_view callerContext);
+			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(std::string_view name, std::string_view callerContext);
 
 			/*! @brief Resolves a registered stable ID to its internal array index.
 				@param[in] abilityID The stable ID to resolve.
 				@param[in] callerContext The calling operation used in diagnostics.
 				@return The internal index on success, or @ref RegistryErrorInfo if absent.
 			*/
-			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> resolveIndex(AbilityID abilityID, std::string_view callerContext);
+			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(AbilityID abilityID, std::string_view callerContext);
 
 			/*! @brief Removes the entry at an already validated internal index.
 				@param[in] index The internal array index to erase and compact.
 			*/
-			void removeEntry(ub index);
+			void removeEntry(us index);
 
 		private:
 			/*! @brief Owns built-in and user-defined ability metadata behind the facade. */
-			Registry::Abilities::AbilityRegistry registry{};
+			Registry::Ability::AbilityRegistry registry{};
 	};
 } // namespace PocketCore::Configuration
 

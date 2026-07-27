@@ -27,11 +27,11 @@
 
 namespace PocketCore::Registry::Types
 {
-	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
-	using PocketCore::Types::TypeID;
 	using PocketCore::Types::toTypeID;
+	using PocketCore::Types::TypeID;
 
 	namespace Types = PocketCore::Types;
 
@@ -103,7 +103,7 @@ namespace PocketCore::Registry::Types
 				@param[in] index The index into the entries array.
 				@return A copy of the @ref TypeEntry at that index.
 			*/
-			ATTR_NODISCARD constexpr TypeEntry getEntry(const ub index)
+			ATTR_NODISCARD constexpr TypeEntry getEntry(const us index)
 			{
 				assert(index < mEntries.size() && INDEX_OOB_GET_ENTRY.data());
 
@@ -116,7 +116,7 @@ namespace PocketCore::Registry::Types
 				@param[in] col The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
 			*/
-			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const ub row, const ub col)
+			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const us row, const us col)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_CELL.data());
 				assert(col < mTypeChart.at(row).size() && COL_OOB_GET_TYPE_CHART_CELL.data());
@@ -129,7 +129,7 @@ namespace PocketCore::Registry::Types
 				@param[in] row The row index.
 				@return A copy of the full effectiveness row for the given type.
 			*/
-			ATTR_NODISCARD constexpr std::array<Types::TypeEffectiveness, MAX_TYPES> getTypeChartRow(const ub row)
+			ATTR_NODISCARD constexpr std::array<Types::TypeEffectiveness, MAX_TYPES> getTypeChartRow(const us row)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_ROW.data());
 
@@ -143,7 +143,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view name) const
 			{
-				const ub index{findEntryIndexByName(name)};
+				const us index{findEntryIndexByName(name)};
 
 				if (index == mAmountRegistered)
 				{
@@ -163,7 +163,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
-				const ub index{findEntryIndexById(typeID)};
+				const us index{findEntryIndexById(typeID)};
 
 				if (index == mAmountRegistered)
 				{
@@ -178,7 +178,7 @@ namespace PocketCore::Registry::Types
 			/*! @brief Returns the total number of registered types (built-in + custom).
 				@return The count of registered types.
 			*/
-			ATTR_NODISCARD constexpr ub getAmountRegistered() const noexcept
+			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
 				return mAmountRegistered;
 			}
@@ -207,7 +207,7 @@ namespace PocketCore::Registry::Types
 				@param[in] index The index into the entries array.
 				@param[in] entry The @ref TypeEntry to store.
 			*/
-			constexpr void setEntry(const ub index, const TypeEntry &entry)
+			constexpr void setEntry(const us index, const TypeEntry &entry)
 			{
 				assert(index < mEntries.size() && INDEX_OOB_SET_ENTRY.data());
 
@@ -220,7 +220,7 @@ namespace PocketCore::Registry::Types
 				@param[in] col The defending-type index.
 				@param[in] value The @ref TypeEffectiveness value to store.
 			*/
-			constexpr void setTypeChartCell(const ub row, const ub col, const Types::TypeEffectiveness value)
+			constexpr void setTypeChartCell(const us row, const us col, const Types::TypeEffectiveness value)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_CELL.data());
 				assert(col < mTypeChart.at(row).size() && COL_OOB_SET_TYPE_CHART_CELL.data());
@@ -233,7 +233,7 @@ namespace PocketCore::Registry::Types
 				@param[in] row The row index.
 				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
 			*/
-			constexpr void setTypeChartRow(const ub row, const std::array<Types::TypeEffectiveness, MAX_TYPES> &chart)
+			constexpr void setTypeChartRow(const us row, const std::array<Types::TypeEffectiveness, MAX_TYPES> &chart)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_ROW.data());
 
@@ -243,7 +243,7 @@ namespace PocketCore::Registry::Types
 			/*! @brief Sets the number of registered types.
 				@param[in] amount The new count.
 			*/
-			constexpr void setAmountRegistered(const ub amount) noexcept
+			constexpr void setAmountRegistered(const us amount) noexcept
 			{
 				mAmountRegistered = amount;
 			}
@@ -263,9 +263,9 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr std::optional<ub> findIndexByTypeID(const TypeID typeID) const
+			ATTR_NODISCARD constexpr std::optional<us> findIndexByTypeID(const TypeID typeID) const
 			{
-				const ub index{findEntryIndexById(typeID)}; // LCOV_EXCL_BR
+				const us index{findEntryIndexById(typeID)}; // LCOV_EXCL_BR
 
 				if (index == mAmountRegistered)
 				{
@@ -322,11 +322,11 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name to search for.
 				@return The array index if found, or @ref mAmountRegistered if no type with that name is registered.
 			*/
-			ATTR_NODISCARD constexpr ub findEntryIndexByName(const std::string_view name) const
+			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_NAME.data());
 
-				for (ub i{0}; i < mAmountRegistered; ++i)
+				for (us i{0}; i < mAmountRegistered; ++i)
 				{
 					if (mEntries.at(i).name == name)
 					{
@@ -343,11 +343,11 @@ namespace PocketCore::Registry::Types
 				@param[in] typeID The stable type ID to search for.
 				@return The array index if found, or @ref mAmountRegistered if no type with that ID is registered.
 			*/
-			ATTR_NODISCARD constexpr ub findEntryIndexById(const TypeID typeID) const
+			ATTR_NODISCARD constexpr us findEntryIndexById(const TypeID typeID) const
 			{
 				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_ID.data());
 
-				for (ub i{0}; i < mAmountRegistered; ++i)
+				for (us i{0}; i < mAmountRegistered; ++i)
 				{
 					if (mEntries.at(i).typeID == typeID)
 					{
@@ -410,12 +410,12 @@ namespace PocketCore::Registry::Types
 
 			/*! @brief The number of currently registered types.
 			 */
-			ub mAmountRegistered{0};
+			us mAmountRegistered{0};
 
 			/*! @brief Monotonically increasing counter for assigning stable type IDs.
 				@details Ensures that each type receives a unique ID that is never reused, even after removals.
 			*/
-			ub mNextTypeID{0};
+			us mNextTypeID{0};
 	};
 } // namespace PocketCore::Registry::Types
 

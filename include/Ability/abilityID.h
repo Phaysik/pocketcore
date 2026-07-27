@@ -9,48 +9,22 @@
 #ifndef INCLUDE_ABILITY_ABILITYID_H
 #define INCLUDE_ABILITY_ABILITYID_H
 
-#include "Core/typedefs.h"
+#include "ID/idInterface.h"
 
 namespace PocketCore::Ability
 {
-	using PocketCore::Core::ub;
+	namespace Detail
+	{
+		/*! @brief Distinguishes ability identifiers from all other stable identifier domains. */
+		struct AbilityIDTag;
+	} // namespace Detail
 
-	/*! @class AbilityID Ability/abilityID.h
+	/*! @typedef AbilityID
 		@brief A strongly typed stable identifier for any registered ability.
 		@details Values are assigned by the ability registry. Unlike @ref BuiltinAbilityID, this type is open and can represent user-defined
-	   abilities without extending an enum.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
-		@author Matthew Moore
+	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
 	*/
-	class AbilityID
-	{
-		public:
-			/*! @brief Constructs the identifier reserved for no ability. */
-			constexpr AbilityID() noexcept = default;
-
-			/*! @brief Constructs an identifier from a registry-assigned value.
-				@param[in] value The stable numeric value assigned by the ability registry.
-			*/
-			explicit constexpr AbilityID(const ub value) noexcept : mValue{value}
-			{}
-
-			/*! @brief Returns the underlying registry-assigned value.
-				@return The stable numeric identifier.
-			*/
-			[[nodiscard]] constexpr ub getValue() const noexcept
-			{
-				return mValue;
-			}
-
-			/*! @brief Compares two stable ability identifiers for equality. */
-			constexpr bool operator==(const AbilityID &) const noexcept = default;
-
-		private:
-			/*! @brief The stable numeric value assigned by the ability registry. */
-			ub mValue{0};
-	};
+	using AbilityID = PocketCore::ID::IDInterface<Detail::AbilityIDTag, 0>;
 
 	/*! @brief The stable identifier representing no ability. */
 	inline constexpr AbilityID NO_ABILITY_ID{};

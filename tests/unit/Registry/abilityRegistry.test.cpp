@@ -20,7 +20,7 @@ using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Core::ub;
 using PocketCore::Effect::EffectTypeID;
-using PocketCore::Registry::Abilities::AbilityRegistry;
+using PocketCore::Registry::Ability::AbilityRegistry;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

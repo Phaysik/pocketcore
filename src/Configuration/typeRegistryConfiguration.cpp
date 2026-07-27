@@ -30,7 +30,7 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Configuration::MatchupPair;
 	using PocketCore::Configuration::MAX_TYPES;
-	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 	using PocketCore::Registry::Types::TypeEntry;
 	using PocketCore::Types::TypeEffectiveness;
 	using PocketCore::Types::TypeID;
@@ -41,14 +41,14 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> TypeRegistryConfiguration::getMatchup(
 		const std::string_view attackerName, const std::string_view defenderName)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getMatchup")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getMatchup")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -61,7 +61,7 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getMatchupRow(
 		const std::string_view attackerName)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
@@ -74,7 +74,7 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getDefensiveColumn(
 		const std::string_view defenderName)
 	{
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -82,9 +82,9 @@ namespace PocketCore::Configuration
 		}
 
 		std::array<TypeEffectiveness, MAX_TYPES> column{};
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
-		for (ub row{0}; row < registered; ++row)
+		for (us row{0}; row < registered; ++row)
 		{
 			column.at(row) = registry.getTypeChartCell(row, defenderIndex.value());
 		}
@@ -98,14 +98,14 @@ namespace PocketCore::Configuration
 																								const std::string_view defenderName,
 																								const TypeEffectiveness value)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setMatchup")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setMatchup")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
@@ -130,16 +130,16 @@ namespace PocketCore::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, attackerName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
-		for (ub col{0}; col < registered; ++col)
+		for (us col{0}; col < registered; ++col)
 		{
 			registry.setTypeChartCell(attackerIndex.value(), col, col < newRow.size() ? newRow.at(col) : TypeEffectiveness::NOT_DEFINED);
 		}
@@ -150,24 +150,24 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
 		const std::string_view attackerName, const std::span<const MatchupPair> newRow)
 	{
-		const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
 		{
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
 		// Reset the entire row to NOT_DEFINED, then fill from pairs
-		for (ub col{0}; col < registered; ++col)
+		for (us col{0}; col < registered; ++col)
 		{
 			registry.setTypeChartCell(attackerIndex.value(), col, TypeEffectiveness::NOT_DEFINED);
 		}
 
 		for (const auto &[pairName, pairValue] : newRow)
 		{
-			const std::expected<ub, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")}; // LCOV_EXCL_BR
+			const std::expected<us, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 			if (!targetIndex.has_value())
 			{
@@ -193,16 +193,16 @@ namespace PocketCore::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, defenderName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
 			return std::unexpected{defenderIndex.error()};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
-		for (ub row{0}; row < registered; ++row)
+		for (us row{0}; row < registered; ++row)
 		{
 			registry.setTypeChartCell(row, defenderIndex.value(), row < newCol.size() ? newCol.at(row) : TypeEffectiveness::NOT_DEFINED);
 		}
@@ -213,24 +213,24 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
 		const std::string_view defenderName, const std::span<const MatchupPair> newCol)
 	{
-		const std::expected<ub, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
 		{
 			return std::unexpected{defenderIndex.error()};
 		}
 
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
 		// Reset the entire column to NOT_DEFINED, then fill from pairs
-		for (ub row{0}; row < registered; ++row)
+		for (us row{0}; row < registered; ++row)
 		{
 			registry.setTypeChartCell(row, defenderIndex.value(), TypeEffectiveness::NOT_DEFINED);
 		}
 
 		for (const auto &[pairName, pairValue] : newCol)
 		{
-			const std::expected<ub, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")}; // LCOV_EXCL_BR
+			const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 			if (!attackerIndex.has_value())
 			{
@@ -248,7 +248,7 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::addType(const TypeDefinition &definition,
 																							   const UnspecifiedMatchup defaultBehavior)
 	{
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 		const std::string_view typeName{definition.name};
 
 		if (registered >= MAX_TYPES || registry.getNextTypeID() == PocketCore::Types::NO_TYPE_ID)
@@ -306,7 +306,7 @@ namespace PocketCore::Configuration
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
 
-			const std::optional<ub> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
+			const std::optional<us> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
 
 			// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 			if (!targetIndex.has_value())
@@ -341,7 +341,7 @@ namespace PocketCore::Configuration
 				return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, pairName, logResult.value_or(std::string_view{})}};
 			}
 
-			const std::optional<ub> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
+			const std::optional<us> targetIndex{registry.findIndexByTypeID(targetId.value())}; // LCOV_EXCL_BR
 
 			// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 			if (!targetIndex.has_value())
@@ -363,7 +363,7 @@ namespace PocketCore::Configuration
 		// which is not applicable when the fill policy has already been resolved by name-keyed logic.
 		registry.setEntry(registered, TypeEntry{.typeID = registry.getNextTypeID(), .name = typeName});
 
-		for (ub i{0}; i < registered; ++i)
+		for (us i{0}; i < registered; ++i)
 		{
 			registry.setTypeChartCell(registered, i, offensiveRow.at(i));
 			registry.setTypeChartCell(i, registered, defensiveRow.at(i));
@@ -382,10 +382,10 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::addTypes(
 		const std::span<const TypeDefinition> &definitions, const UnspecifiedMatchup defaultBehavior)
 	{
-		const ub currentCount{registry.getAmountRegistered()};
+		const us currentCount{registry.getAmountRegistered()};
 		const TypeID currentNextTypeID{registry.getNextTypeID()};
 
-		const ub batchSize{static_cast<ub>(definitions.size())};
+		const us batchSize{static_cast<us>(definitions.size())};
 
 		if (batchSize == 0)
 		{
@@ -452,7 +452,7 @@ namespace PocketCore::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
 		}
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
+		const std::optional<us> arrayIndex{registry.findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
 
 		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same registry.
 		if (!arrayIndex.has_value())
@@ -476,7 +476,7 @@ namespace PocketCore::Configuration
 	{
 		const TypeID typeID{PocketCore::Types::toTypeID(type)};
 
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
+		const std::optional<us> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
@@ -494,7 +494,7 @@ namespace PocketCore::Configuration
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const TypeID typeID)
 	{
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
+		const std::optional<us> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
@@ -561,7 +561,7 @@ namespace PocketCore::Configuration
 
 		const TypeID typeValue{typeID.value()}; // LCOV_EXCL_BR
 
-		const ub arrayIndex{
+		const us arrayIndex{
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			registry.findIndexByTypeID(typeValue).value(),
 		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
@@ -573,7 +573,7 @@ namespace PocketCore::Configuration
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const std::string_view typeName)
 	{
-		const std::expected<ub, RegistryErrorInfo> typeIndex{resolveIndex(typeName, "resetMatchups")}; // LCOV_EXCL_BR
+		const std::expected<us, RegistryErrorInfo> typeIndex{resolveIndex(typeName, "resetMatchups")}; // LCOV_EXCL_BR
 
 		if (!typeIndex.has_value())
 		{
@@ -591,7 +591,7 @@ namespace PocketCore::Configuration
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const TypeID typeID)
 	{
-		const std::optional<ub> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
+		const std::optional<us> arrayIndex{registry.findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
 		if (!arrayIndex.has_value())
 		{
@@ -611,11 +611,11 @@ namespace PocketCore::Configuration
 
 	// MARK: Private Member Function
 
-	void TypeRegistryConfiguration::rollbackEntries(const ub previousCount, const TypeID previousNextTypeID)
+	void TypeRegistryConfiguration::rollbackEntries(const us previousCount, const TypeID previousNextTypeID)
 	{
-		ub registered{registry.getAmountRegistered()};
+		us registered{registry.getAmountRegistered()};
 
-		for (ub row{registered}; row > previousCount; --row)
+		for (us row{registered}; row > previousCount; --row)
 		{
 			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
 			// those
@@ -626,7 +626,7 @@ namespace PocketCore::Configuration
 
 			// LCOV_EXCL_BR_STOP
 
-			for (ub col{0}; col < registered; ++col)
+			for (us col{0}; col < registered; ++col)
 			{
 				// Clear the defensive matchup cell for this row and column
 
@@ -639,9 +639,9 @@ namespace PocketCore::Configuration
 		registry.setNextTypeID(previousNextTypeID); // LCOV_EXCL_BR
 	}
 
-	void TypeRegistryConfiguration::removeEntry(const ub arrayIndex)
+	void TypeRegistryConfiguration::removeEntry(const us arrayIndex)
 	{
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
 		// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent those
 		// branches from ever being hit
@@ -652,7 +652,7 @@ namespace PocketCore::Configuration
 
 		// LCOV_EXCL_BR_STOP
 
-		for (ub i{arrayIndex}; i < registered - 1; ++i)
+		for (us i{arrayIndex}; i < registered - 1; ++i)
 		{
 			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
 			// those
@@ -667,14 +667,14 @@ namespace PocketCore::Configuration
 
 		registry.decrementAmountRegistered();
 
-		const ub newRegistered{registry.getAmountRegistered()};
+		const us newRegistered{registry.getAmountRegistered()};
 
 		// Clear the vacated last row
 		registry.setTypeChartRow(newRegistered, {}); // LCOV_EXCL_BR
 
-		for (ub row{0}; row < newRegistered; ++row)
+		for (us row{0}; row < newRegistered; ++row)
 		{
-			for (ub col{arrayIndex}; col < newRegistered; ++col)
+			for (us col{arrayIndex}; col < newRegistered; ++col)
 			{
 				registry.setTypeChartCell(row, col, registry.getTypeChartCell(row, col + 1));
 			}
@@ -684,7 +684,7 @@ namespace PocketCore::Configuration
 		}
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view name,
+	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view name,
 																								const std::string_view callerContext)
 	{
 		const std::optional<TypeID> typeID{registry.getTypeID(name)}; // LCOV_EXCL_BR

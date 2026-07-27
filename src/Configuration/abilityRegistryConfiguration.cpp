@@ -30,7 +30,7 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
-	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
 	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityDefinition &definition)
@@ -56,7 +56,7 @@ namespace PocketCore::Configuration
 				RegistryErrorInfo{RegistryError::DuplicateAbility, definition.name, logResult.value_or(std::string_view{})}};
 		}
 
-		const ub entryIndex{registry.getAmountRegistered()};
+		const us entryIndex{registry.getAmountRegistered()};
 		const AbilityID assignedID{registry.getNextAbilityID()};
 		std::vector<AbilityEffectTrigger> ownedTriggers{definition.triggers.begin(), definition.triggers.end()};
 
@@ -81,7 +81,7 @@ namespace PocketCore::Configuration
 			return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, {}, logResult.value_or(std::string_view{})}};
 		}
 
-		const Registry::Abilities::AbilityRegistry snapshot{registry};
+		const Registry::Ability::AbilityRegistry snapshot{registry};
 
 		for (const AbilityDefinition &definition : definitions)
 		{
@@ -191,7 +191,7 @@ namespace PocketCore::Configuration
 		return abilityID;
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> AbilityRegistryConfiguration::resolveIndex(const std::string_view name,
+	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> AbilityRegistryConfiguration::resolveIndex(const std::string_view name,
 																								   const std::string_view callerContext)
 	{
 		const std::optional<AbilityID> abilityID{registry.getAbilityID(name)};
@@ -210,10 +210,10 @@ namespace PocketCore::Configuration
 			.value(); // LCOV_EXCL_BR - Cannot fail when getAbilityID just succeeded on the same registry
 	}
 
-	ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> AbilityRegistryConfiguration::resolveIndex(const AbilityID abilityID,
+	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> AbilityRegistryConfiguration::resolveIndex(const AbilityID abilityID,
 																								   const std::string_view callerContext)
 	{
-		const std::optional<ub> index{registry.findIndexByAbilityID(abilityID)};
+		const std::optional<us> index{registry.findIndexByAbilityID(abilityID)};
 
 		if (!index.has_value())
 		{
@@ -227,16 +227,16 @@ namespace PocketCore::Configuration
 		return index.value();
 	}
 
-	void AbilityRegistryConfiguration::removeEntry(const ub index)
+	void AbilityRegistryConfiguration::removeEntry(const us index)
 	{
-		const ub registered{registry.getAmountRegistered()};
+		const us registered{registry.getAmountRegistered()};
 
-		for (ub current{index}; current + 1U < registered; ++current)
+		for (us current{index}; current + 1U < registered; ++current)
 		{
-			registry.setEntry(current, registry.getEntry(static_cast<ub>(current + 1U)));
+			registry.setEntry(current, registry.getEntry(static_cast<us>(current + 1U)));
 		}
 
-		registry.setEntry(static_cast<ub>(registered - 1U), AbilityMeta{});
+		registry.setEntry(static_cast<us>(registered - 1U), AbilityMeta{});
 		registry.decrementAmountRegistered();
 	}
 } // namespace PocketCore::Configuration

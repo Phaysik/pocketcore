@@ -27,6 +27,7 @@ namespace PocketCore::Effect
 		Recoil,
 		StatChange,
 		StatusApply,
+		StatusRemove,
 		StatusTurnSkip,
 		StatusTick,
 		AccuracyCheck,

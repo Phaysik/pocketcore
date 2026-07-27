@@ -23,7 +23,7 @@
 
 namespace PocketCore::Configuration
 {
-	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 	using PocketCore::Types::TypeEffectiveness;
 	using PocketCore::Types::TypeID;
 
@@ -136,7 +136,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns the total number of registered types (built-in + custom).
 				@return The count of registered types.
 			*/
-			ATTR_NODISCARD constexpr ub getAmountRegistered() const noexcept
+			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
 				return registry.getAmountRegistered();
 			}
@@ -214,8 +214,9 @@ namespace PocketCore::Configuration
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
 			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition, UnspecifiedMatchup defaultBehavior
-																										  = UnspecifiedMatchup::NotDefined);
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition,
+																			UnspecifiedMatchup defaultBehavior
+																			= UnspecifiedMatchup::NotDefined);
 
 			/*! @brief Adds multiple new custom types using self-contained name-keyed definitions.
 				@details Registers each @ref TypeDefinition sequentially by delegating to the name-keyed @ref addType overload.
@@ -302,18 +303,18 @@ namespace PocketCore::Configuration
 		private:
 			// MARK: Private Member Functions
 
-			void constexpr clearRows(const ub typeIndex)
+			void constexpr clearRows(const us typeIndex)
 			{
-				const ub registered{registry.getAmountRegistered()};
+				const us registered{registry.getAmountRegistered()};
 
 				// Clear offensive row
-				for (ub col{0}; col < registered; ++col)
+				for (us col{0}; col < registered; ++col)
 				{
 					registry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
 
 				// Clear defensive column
-				for (ub row{0}; row < registered; ++row)
+				for (us row{0}; row < registered; ++row)
 				{
 					registry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
@@ -325,20 +326,20 @@ namespace PocketCore::Configuration
 				@param[in] previousCount The number of registered entries to revert to.
 				@param[in] previousNextTypeID The next-type-ID value to restore.
 			*/
-			void rollbackEntries(ub previousCount, TypeID previousNextTypeID);
+			void rollbackEntries(us previousCount, TypeID previousNextTypeID);
 
 			/*! @brief Removes a single entry from the registry by its internal array index.
 				@details Shifts subsequent entries down and clears the corresponding matchup row and column data.
 				@param[in] arrayIndex The zero-based position of the entry to remove.
 			*/
-			void removeEntry(ub arrayIndex);
+			void removeEntry(us arrayIndex);
 
 			/*! @brief Resolves a type name to its internal array index, returning a @ref RegistryErrorInfo on failure.
 				@param[in] name The display name of the type.
 				@param[in] callerContext A string identifying the calling function for error messages.
 				@return The array index on success, or @ref RegistryErrorInfo if the type is not found.
 			*/
-			ATTR_NODISCARD std::expected<ub, RegistryErrorInfo> resolveIndex(std::string_view name, std::string_view callerContext);
+			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(std::string_view name, std::string_view callerContext);
 
 		private:
 			/*! @brief The internal type registry storing all type entries and matchup data. */

@@ -16,13 +16,20 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::ub;
+	using PocketCore::Core::us;
 
 	// MARK: Constexpr statements
 
-	inline constexpr ub MAX_TYPES_PER_POKEMON{2};
-	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
 	inline constexpr ub MAX_TYPES{20};
-	inline constexpr ub MAX_ABILITIES{64};
+	inline constexpr ub MAX_TYPES_PER_POKEMON{2};
+
+	inline constexpr us MAX_ABILITIES{1'000};
+	inline constexpr ub MAX_ABILITIES_PER_POKEMON{1};
+
+	inline constexpr us MAX_ITEMS{1'000};
+	inline constexpr ub MAX_ITEMS_PER_POKEMON{1};
+
+	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums

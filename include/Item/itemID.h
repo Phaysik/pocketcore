@@ -9,16 +9,25 @@
 #ifndef INCLUDE_ITEM_ITEMID_H
 #define INCLUDE_ITEM_ITEMID_H
 
-#include "Core/typedefs.h"
+#include "ID/idInterface.h"
 
 namespace PocketCore::Item
 {
-	enum class ItemID : PocketCore::Core::ub
+	namespace Detail
 	{
-		None,
-		CheriBerry,
-		ChestoBerry,
-	};
+		/*! @brief Distinguishes item identifiers from all other stable identifier domains. */
+		struct ItemIDTag;
+	} // namespace Detail
+
+	/*! @typedef ItemID
+		@brief A strongly typed stable identifier for any registered item.
+		@details Values are assigned by the item registry. Unlike @ref BuiltinItemID, this type is open and can represent user-defined
+	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
+	*/
+	using ItemID = PocketCore::ID::IDInterface<Detail::ItemIDTag, 0>;
+
+	/*! @brief The stable identifier representing no item. */
+	inline constexpr ItemID NO_ITEM_ID{};
 } // namespace PocketCore::Item
 
 #endif

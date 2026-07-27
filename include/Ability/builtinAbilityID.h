@@ -10,6 +10,7 @@
 #define INCLUDE_ABILITY_BUILTIN_ABILITY_ID_H
 
 #include "Ability/abilityID.h"
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
 namespace PocketCore::Ability
@@ -36,7 +37,7 @@ namespace PocketCore::Ability
 		@param[in] builtinAbilityID The built-in ability to convert.
 		@return The corresponding open ability identifier.
 	*/
-	[[nodiscard]] constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
+	ATTR_NODISCARD constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
 	{
 		return AbilityID{static_cast<PocketCore::Core::ub>(builtinAbilityID)};
 	}

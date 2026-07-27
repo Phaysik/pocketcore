@@ -213,7 +213,7 @@ namespace PocketCore::Pokemon
 			us mSpDefense{};
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
 			AbilityID mAbilityID{};
-			ItemID mItemID{ItemID::None};
+			ItemID mItemID{};
 	};
 } // namespace PocketCore::Pokemon
 
