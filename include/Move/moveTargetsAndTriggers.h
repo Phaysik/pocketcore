@@ -16,19 +16,27 @@
 
 namespace PocketCore::Move
 {
-	enum class MoveTriggerID : PocketCore::Core::ub
+	using PocketCore::Core::ub;
+
+	enum class MoveTriggerID : ub
 	{
 		OnUse,
 		OnHazardSwitchIn,
 	};
 
-	enum class MoveTargetID : PocketCore::Core::ub
+	enum class MoveTargetID : ub
 	{
 		SingleOpponent,
 		AllOpponents,
 		AllAllies,
 		Self,
-		AllExceptSelf
+		AllExceptSelf,
+	};
+
+	enum class MoveRangeID : ub
+	{
+		Unrestricted,
+		Adjacent,
 	};
 
 	struct MoveEffectTrigger

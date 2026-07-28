@@ -12,6 +12,7 @@
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/configFlags.h"
 #include "Configuration/itemRegistryConfiguration.h"
+#include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Utility/Debug/Logging/constants.h"
@@ -53,6 +54,7 @@ int main()
 		ATTR_MAYBE_UNUSED const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::AbilityRegistryConfiguration abilityRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
+		ATTR_MAYBE_UNUSED const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
 	}
 
 	return EXIT_SUCCESS;

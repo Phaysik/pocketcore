@@ -18,7 +18,6 @@ using PocketCore::Ability::AbilityEffectTrigger;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::AbilityTriggerID;
-using PocketCore::Configuration::AbilityDefinition;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
@@ -49,7 +48,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 		std::vector<AbilityEffectTrigger> triggers{
 			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusTick}, .mTrigger = AbilityTriggerID::OnTurnEnd},
 		};
-		AbilityDefinition definition{.name = "Regenerator", .triggers = triggers};
+		AbilityMeta definition{.mTriggers = triggers, .mName = "Regenerator"};
 
 		WHEN("the ability is added")
 		{
@@ -73,7 +72,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 
 	GIVEN("an ability whose name is already registered")
 	{
-		AbilityDefinition definition{.name = "Drizzle", .triggers = {}};
+		AbilityMeta definition{.mTriggers = {}, .mName = "Drizzle"};
 
 		THEN("registration reports a duplicate ability")
 		{
@@ -92,11 +91,11 @@ SCENARIO("AbilityRegistryConfiguration addAbilities")
 
 	GIVEN("a batch containing a duplicate name")
 	{
-		std::array<AbilityDefinition, 3> definitions{
+		std::array<AbilityMeta, 3> definitions{
 			{
-				{.name = "First Custom", .triggers = {}},
-				{.name = "Second Custom", .triggers = {}},
-				{.name = "First Custom", .triggers = {}},
+				{.mTriggers = {}, .mName = "First Custom"},
+				{.mTriggers = {}, .mName = "Second Custom"},
+				{.mTriggers = {}, .mName = "First Custom"},
 			},
 		};
 
@@ -123,7 +122,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 
 	GIVEN("a registered custom ability")
 	{
-		AbilityDefinition definition{.name = "Custom Ability", .triggers = {}};
+		AbilityMeta definition{.mTriggers = {}, .mName = "Custom Ability"};
 		auto addResult{configuration.addAbility(definition)};
 		REQUIRE(addResult.has_value());
 		AbilityID customIdentifier{addResult.value()};
@@ -167,7 +166,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 			auto removeResult{configuration.removeAbility(customIdentifier)};
 			REQUIRE(removeResult.has_value());
 
-			AbilityDefinition laterDefinition{.name = "Later Ability", .triggers = {}};
+			AbilityMeta laterDefinition{.mTriggers = {}, .mName = "Later Ability"};
 			auto laterResult{configuration.addAbility(laterDefinition)};
 
 			THEN("the removed ID is not reused")

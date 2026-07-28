@@ -18,16 +18,18 @@ namespace PocketCore::Move
 
 	std::vector<EffectTypeID> baseAttackEffects()
 	{
-		return {EffectTypeID::PsychicTerrainPriorityBlock,
-				EffectTypeID::AccuracyCheck,
-				EffectTypeID::BaseDamage,
-				EffectTypeID::CriticalHit,
-				EffectTypeID::StatStage,
-				EffectTypeID::BurnDamageReduction,
-				EffectTypeID::Weather,
-				EffectTypeID::Terrain,
-				EffectTypeID::TypeEffectiveness,
-				EffectTypeID::Randomization};
+		return {
+			EffectTypeID::PsychicTerrainPriorityBlock,
+			EffectTypeID::AccuracyCheck,
+			EffectTypeID::BaseDamage,
+			EffectTypeID::CriticalHit,
+			EffectTypeID::StatStage,
+			EffectTypeID::BurnDamageReduction,
+			EffectTypeID::Weather,
+			EffectTypeID::Terrain,
+			EffectTypeID::TypeEffectiveness,
+			EffectTypeID::Randomization,
+		};
 	}
 
 	std::vector<EffectTypeID> baseAttackWithRecoil()

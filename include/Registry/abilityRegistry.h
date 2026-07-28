@@ -29,6 +29,7 @@ namespace PocketCore::Registry::Ability
 	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
+	using PocketCore::Ability::AbilityTargetID;
 	using PocketCore::Ability::AbilityTriggerID;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
@@ -63,14 +64,16 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnMoveUse}},
+					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnDamageCalc}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
+					.mTargetID = AbilityTargetID::AllOpponents,
 				});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {EffectTypeID::SetRain}, .mTrigger = AbilityTriggerID::OnSwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
+					.mTargetID = AbilityTargetID::Self,
 				});
 			}
 

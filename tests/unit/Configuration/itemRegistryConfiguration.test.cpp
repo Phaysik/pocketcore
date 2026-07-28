@@ -15,7 +15,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Configuration::ItemDefinition;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
@@ -52,7 +51,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 		std::vector<ItemEffectTrigger> triggers{
 			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}, .mTrigger = ItemTriggerID::OnMoveUse},
 		};
-		ItemDefinition definition{.name = "Life Orb", .triggers = triggers};
+		ItemMeta definition{.mTriggers = triggers, .mName = "Life Orb"};
 
 		WHEN("the item is added")
 		{
@@ -76,7 +75,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 
 	GIVEN("an item whose name is already registered")
 	{
-		ItemDefinition definition{.name = "Cheri Berry", .triggers = {}};
+		ItemMeta definition{.mTriggers = {}, .mName = "Cheri Berry"};
 
 		THEN("registration reports a duplicate item")
 		{
@@ -95,11 +94,11 @@ SCENARIO("ItemRegistryConfiguration addItems")
 
 	GIVEN("a batch containing a duplicate name")
 	{
-		std::array<ItemDefinition, 3> definitions{
+		std::array<ItemMeta, 3> definitions{
 			{
-				{.name = "First Custom", .triggers = {}},
-				{.name = "Second Custom", .triggers = {}},
-				{.name = "First Custom", .triggers = {}},
+				{.mTriggers = {}, .mName = "First Custom"},
+				{.mTriggers = {}, .mName = "Second Custom"},
+				{.mTriggers = {}, .mName = "First Custom"},
 			},
 		};
 
@@ -126,7 +125,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 
 	GIVEN("a registered custom item")
 	{
-		ItemDefinition definition{.name = "Custom Item", .triggers = {}};
+		ItemMeta definition{.mTriggers = {}, .mName = "Custom Item"};
 		auto addResult{configuration.addItem(definition)};
 		REQUIRE(addResult.has_value());
 		ItemID customIdentifier{addResult.value()};
@@ -184,7 +183,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 			auto removeResult{configuration.removeItem(customIdentifier)};
 			REQUIRE(removeResult.has_value());
 
-			ItemDefinition laterDefinition{.name = "Later Item", .triggers = {}};
+			ItemMeta laterDefinition{.mTriggers = {}, .mName = "Later Item"};
 			auto laterResult{configuration.addItem(laterDefinition)};
 
 			THEN("the removed ID is not reused")

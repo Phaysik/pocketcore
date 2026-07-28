@@ -82,7 +82,8 @@ namespace PocketCore::Registry
 					return std::nullopt;
 				}
 
-				return mEntries.at(index).*IDMember;
+				return mEntries.at(index).*IDMember; // LCOV_EXCL_BR - Cannot fail when findEntryIndexByName is guaranteed to either be in
+													 // range or mAmountRegistered
 			}
 
 			/*! @brief Looks up a display name by stable ID.
@@ -131,7 +132,7 @@ namespace PocketCore::Registry
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
-				const us index{findEntryIndexByID(stableID)};
+				const us index{findEntryIndexByID(stableID)}; // LCOV_EXCL_BR (from possible .at() throw which can't happen by invariants)
 
 				if (index == mAmountRegistered)
 				{

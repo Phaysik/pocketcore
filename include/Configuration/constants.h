@@ -52,6 +52,8 @@ namespace PocketCore::Configuration
 		AbilityNotFound,  /*!< No ability matching the input was found. */
 		DuplicateItem,	  /*!< An item with the given name already exists. */
 		ItemNotFound,	  /*!< No item matching the input was found. */
+		DuplicateMove,	  /*!< A move with the given name already exists. */
+		MoveNotFound,	  /*!< No move matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -142,6 +144,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::ItemNotFound:
 						mErrorName = "ItemNotFound";
+						break;
+					case RegistryError::DuplicateMove:
+						mErrorName = "DuplicateMove";
+						break;
+					case RegistryError::MoveNotFound:
+						mErrorName = "MoveNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

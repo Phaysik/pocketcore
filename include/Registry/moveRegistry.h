@@ -23,6 +23,8 @@
 #include "Move/moveMeta.h"
 #include "Move/moveTargetsAndTriggers.h"
 #include "Registry/fixedMetadataRegistry.h"
+#include "Types/typeID.h"
+#include "Types/types.h"
 
 namespace PocketCore::Registry::Move
 {
@@ -34,13 +36,19 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
+	using PocketCore::Move::MoveRangeID;
+	using PocketCore::Move::MoveTargetID;
 	using PocketCore::Move::MoveTriggerID;
 	using PocketCore::Move::toMoveID;
+	using PocketCore::Types::toTypeID;
+
+	using PocketCore::Types::Types;
 
 	/*! @class MoveRegistry Registry/moveRegistry.h
 		@brief Stores built-in and user-defined move metadata in fixed-capacity storage.
 		@details Built-in moves are registered during construction with IDs derived from @ref BuiltinMoveID. Configuration code may
-	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
+	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
+	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
 		@date 07/27/2026
 		@version x.x.x
@@ -56,17 +64,35 @@ namespace PocketCore::Registry::Move
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID. */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{static_cast<us>(toMoveID(BuiltinMoveID::KarateChop).getValue() + 1U)}
 			{
+				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
+				//
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {Move::baseAttackEffects()}, .mTrigger = MoveTriggerID::OnUse}},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
+					.mTypeID = toTypeID(Types::Normal),
+					.mPower = 40,
+					.mTargetID = MoveTargetID::SingleOpponent,
+					.mRangeID = MoveRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mSpecial = false,
 				});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {Move::baseAttackEffects()}, .mTrigger = MoveTriggerID::OnUse}},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+					.mTypeID = toTypeID(Types::Fighting),
+					.mPower = 50,
+					.mTargetID = MoveTargetID::SingleOpponent,
+					.mRangeID = MoveRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mSpecial = false,
 				});
+
+				// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 			}
 
 			using Base::decrementAmountRegistered;

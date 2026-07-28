@@ -24,7 +24,7 @@ namespace PocketCore::Item
 		OnTurnEnd,
 		OnFaint,
 		OnMoveUse,
-		OnMoveUseTarget
+		OnMoveUseTarget,
 	};
 
 	enum class ItemTargetID : PocketCore::Core::ub
@@ -32,7 +32,7 @@ namespace PocketCore::Item
 		Self,
 		AllAllies,
 		AllOpponents,
-		SingleOpponent
+		SingleOpponent,
 	};
 
 	struct ItemEffectTrigger

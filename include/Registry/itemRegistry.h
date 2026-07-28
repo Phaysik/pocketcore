@@ -33,6 +33,7 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
+	using PocketCore::Item::ItemTargetID;
 	using PocketCore::Item::ItemTriggerID;
 	using PocketCore::Item::toItemID;
 
@@ -60,11 +61,13 @@ namespace PocketCore::Registry::Item
 					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
+					.mTargetID = ItemTargetID::Self,
 				});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
+					.mTargetID = ItemTargetID::Self,
 				});
 			}
 

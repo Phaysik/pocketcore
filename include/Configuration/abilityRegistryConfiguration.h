@@ -28,6 +28,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
+	using PocketCore::Ability::AbilityTargetID;
 	using PocketCore::Core::us;
 
 	namespace Detail
@@ -41,25 +42,6 @@ namespace PocketCore::Configuration
 				static constexpr RegistryError notFoundError{RegistryError::AbilityNotFound};
 		};
 	} // namespace Detail
-
-	/*! @struct AbilityDefinition Configuration/abilityRegistryConfiguration.h
-		@brief Describes a user-defined ability before the registry assigns its stable ID.
-		@details The trigger span is copied into registry-owned metadata during registration. The name is a non-owning view and its backing
-	   storage must outlive the configuration object or remain valid until the ability is removed.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
-		@author Matthew Moore
-	*/
-	struct AbilityDefinition
-	{
-		public:
-			/*! @brief The unique, case-sensitive display name with storage that outlives the registered ability. */
-			std::string_view name{};
-
-			/*! @brief The trigger and effect definitions copied during registration. */
-			std::span<const AbilityEffectTrigger> triggers{};
-	};
 
 	/*! @class AbilityRegistryConfiguration Configuration/abilityRegistryConfiguration.h
 		@brief Provides validated user customization over an internal ability registry.
@@ -145,17 +127,17 @@ namespace PocketCore::Configuration
 			}
 
 			/*! @brief Registers one user-defined ability and assigns a stable ID.
-				@param[in] definition The name and trigger metadata to copy into the registry.
+				@param[in] abilityMeta The name and trigger metadata to copy into the registry.
 				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
 			*/
-			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> addAbility(const AbilityDefinition &definition);
+			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> addAbility(const AbilityMeta &abilityMeta);
 
 			/*! @brief Registers multiple abilities atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
-				@param[in] definitions The ability definitions to register in order.
+				@param[in] abilityMetas The ability definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addAbilities(const std::span<const AbilityDefinition> &definitions);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addAbilities(const std::span<const AbilityMeta> &abilityMetas);
 
 			/*! @brief Replaces all trigger metadata for an ability selected by name.
 				@param[in] abilityName The registered display name.
@@ -174,7 +156,23 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const AbilityID abilityID,
 																					 const std::span<const AbilityEffectTrigger> &triggers);
 
-			/*! @brief Renames an ability without changing its stable ID or trigger metadata.
+			/*! @brief Replaces all trigger metadata for an ability selected by name.
+				@param[in] abilityName The registered display name.
+				@param[in] target The target to copy into the registry.
+				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const std::string_view &abilityName,
+																				   const AbilityTargetID target);
+
+			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTarget(AbilityID, const AbilityTargetID target)
+				@brief Replaces all trigger metadata for an ability selected by stable ID.
+				@param[in] abilityID The built-in or custom stable identifier.
+				@param[in] target The target to copy into the registry.
+				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const AbilityID abilityID, const AbilityTargetID target);
+
+			/*! @brief Renames an ability without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
@@ -182,6 +180,22 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameAbility(const std::string_view &oldName,
 																				const std::string_view &newName);
+
+			/*! @brief Replaces all ability metadata for an ability selected by stable ID.
+				@param[in] abilityName The registered display name.
+				@param[in] abilityMeta The metadata to copy into the registry.
+				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateAbility(const std::string_view &abilityName,
+																				const AbilityMeta &abilityMeta);
+
+			/*! @overload std::expected<void, RegistryErrorInfo> updateAbility(AbilityID, const AbilityMeta &abilityMeta)
+				@brief Replaces all ability metadata for an ability selected by stable ID.
+				@param[in] abilityID The built-in or custom stable identifier.
+				@param[in] abilityMeta The metadata to copy into the registry.
+				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateAbility(const AbilityID abilityID, const AbilityMeta &abilityMeta);
 
 			/*! @brief Removes an ability by display name.
 				@param[in] abilityName The registered display name.

@@ -54,7 +54,10 @@ namespace PocketCore::Move
 			us mPower{};
 
 			/*! @brief The stable built-in or user-assigned identifier for the move's target. */
-			MoveTargetID mMoveTargetID{};
+			MoveTargetID mTargetID{};
+
+			/*! @brief The stable built-in or user-assigned identifier for the move's range. */
+			MoveRangeID mRangeID{};
 
 			/*! @brief The move's accuracy. */
 			ub mAccuracy{};

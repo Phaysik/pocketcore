@@ -11,11 +11,11 @@
 #include <expected>
 #include <span>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
+#include "Ability/abilityTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 
@@ -23,22 +23,17 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
+	using PocketCore::Ability::AbilityTargetID;
 
-	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityDefinition &definition)
+	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
 	{
-		std::vector<AbilityEffectTrigger> ownedTriggers{definition.triggers.begin(), definition.triggers.end()};
-		return addMetadata(AbilityMeta{.mTriggers = std::move(ownedTriggers), .mName = definition.name});
+		return addMetadata(abilityMeta);
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::addAbilities(
-		const std::span<const AbilityDefinition> &definitions)
+		const std::span<const AbilityMeta> &abilityMetas)
 	{
-		return addMetadataBatch(definitions, [](const AbilityDefinition &definition) {
-			return AbilityMeta{
-				.mTriggers = std::vector<AbilityEffectTrigger>{definition.triggers.begin(), definition.triggers.end()},
-				.mName = definition.name,
-			};
-		});
+		return addMetadataBatch(abilityMetas, [](const AbilityMeta &definition) { return AbilityMeta{definition}; });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTriggers(
@@ -55,10 +50,34 @@ namespace PocketCore::Configuration
 							  [&triggers](AbilityMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(
+		const std::string_view &abilityName, const AbilityTargetID target)
+	{
+		return mutateMetadata(abilityName, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
+	}
+
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(const AbilityID abilityID,
+																										 const AbilityTargetID target)
+	{
+		return mutateMetadata(abilityID, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
+	}
+
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::renameAbility(const std::string_view &oldName,
 																									  const std::string_view &newName)
 	{
 		return renameMetadata(oldName, newName);
+	}
+
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::updateAbility(const std::string_view &abilityName,
+																									  const AbilityMeta &abilityMeta)
+	{
+		return mutateMetadata(abilityName, "updateAbility", [&abilityMeta](AbilityMeta &metadata) { metadata = abilityMeta; });
+	}
+
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::updateAbility(const AbilityID abilityID,
+																									  const AbilityMeta &abilityMeta)
+	{
+		return mutateMetadata(abilityID, "updateAbility", [&abilityMeta](AbilityMeta &metadata) { metadata = abilityMeta; });
 	}
 
 	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::removeAbility(
