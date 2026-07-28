@@ -13,13 +13,18 @@
 #include <vector>
 
 #include "Core/typedefs.h"
+#include "Effect/effectType.h"
+#include "Types/typeID.h"
 
 #include "moveID.h"
 #include "moveTargetsAndTriggers.h"
 
 namespace PocketCore::Move
 {
+	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Types::TypeID;
 
 	/*! @struct MoveMeta Move/moveMeta.h
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.
@@ -41,7 +46,34 @@ namespace PocketCore::Move
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			MoveID mMoveID{};
+
+			/*! @brief The move's type ID. */
+			TypeID mTypeID{};
+
+			/*! @brief The move's power level. */
+			us mPower{};
+
+			/*! @brief The stable built-in or user-assigned identifier for the move's target. */
+			MoveTargetID mMoveTargetID{};
+
+			/*! @brief The move's accuracy. */
+			ub mAccuracy{};
+
+			/*! @brief The move's priority. */
+			ub mPriority{};
+
+			/*! @brief Whether the move is a special move. */
+			bool mSpecial{};
 	};
+
+	std::vector<EffectTypeID> baseAttackEffects();
+
+	std::vector<EffectTypeID> baseAttackWithRecoil();
+	std::vector<EffectTypeID> baseAttackWithStatus();
+	std::vector<EffectTypeID> baseAttackWithFlinch();
+	std::vector<EffectTypeID> statusChangeEffects();
+	std::vector<EffectTypeID> protectEffects();
+	std::vector<EffectTypeID> fieldEffectEffects();
 } // namespace PocketCore::Move
 
 #endif

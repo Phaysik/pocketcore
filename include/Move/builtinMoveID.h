@@ -28,6 +28,7 @@ namespace PocketCore::Move
 	*/
 	enum class BuiltinMoveID : PocketCore::Core::ub
 	{
+		None,
 		Pound,
 		KarateChop,
 	};

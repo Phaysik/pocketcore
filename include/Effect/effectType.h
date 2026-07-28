@@ -34,6 +34,7 @@ namespace PocketCore::Effect
 		SetSandstorm,
 		SetSun,
 		SetRain,
+		PsychicTerrainPriorityBlock
 	};
 } // namespace PocketCore::Effect
 

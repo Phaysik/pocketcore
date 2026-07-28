@@ -37,6 +37,9 @@ namespace PocketCore::Ability
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			AbilityID mAbilityID{};
+
+			/*! @brief The target ID for this ability's effects. */
+			AbilityTargetID mTargetID{};
 	};
 } // namespace PocketCore::Ability
 

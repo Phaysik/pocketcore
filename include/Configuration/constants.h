@@ -30,7 +30,9 @@ namespace PocketCore::Configuration
 	inline constexpr us MAX_ITEMS{1'000};
 	inline constexpr ub MAX_ITEMS_PER_POKEMON{1};
 
+	inline constexpr us MAX_MOVES{1'000};
 	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
+
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums

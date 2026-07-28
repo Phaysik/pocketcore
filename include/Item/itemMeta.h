@@ -37,6 +37,9 @@ namespace PocketCore::Item
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			ItemID mItemID{};
+
+			/*! @brief The target ID for this item's effects. */
+			ItemTargetID mTargetID{};
 	};
 } // namespace PocketCore::Item
 
