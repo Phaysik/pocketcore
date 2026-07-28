@@ -50,7 +50,7 @@ SCENARIO("MoveRegistry")
 			REQUIRE((metadata->mTriggers.size() == 1U));
 			CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnUse));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 10U));
-			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
+			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
 		}
 
 		THEN("unknown move lookups are absent")
