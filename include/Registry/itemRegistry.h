@@ -53,6 +53,7 @@ namespace PocketCore::Registry::Item
 			using Base = PocketCore::Registry::FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>;
 
 		public:
+			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID. */
 			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
 			{
@@ -70,6 +71,8 @@ namespace PocketCore::Registry::Item
 					.mTargetID = ItemTargetID::Self,
 				});
 			}
+
+			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
 			using Base::findIndexByID;

@@ -54,6 +54,7 @@ namespace PocketCore::Registry::Ability
 			using Base = PocketCore::Registry::FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>;
 
 		public:
+			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID. */
 			ATTR_NOINLINE explicit constexpr AbilityRegistry()
 				: Base{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
@@ -76,6 +77,8 @@ namespace PocketCore::Registry::Ability
 					.mTargetID = AbilityTargetID::Self,
 				});
 			}
+
+			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
 			using Base::findIndexByID;

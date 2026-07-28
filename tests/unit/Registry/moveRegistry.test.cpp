@@ -6,6 +6,7 @@
 
 #include "Effect/effectType.h"
 #include "Move/builtinMoveID.h"
+#include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Move/moveTargetsAndTriggers.h"
@@ -14,6 +15,9 @@
 
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
+using PocketCore::Move::MOVE_NAME_NONE;
+using PocketCore::Move::MOVE_NAME_POUND;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Move::MoveTriggerID;
@@ -33,8 +37,8 @@ SCENARIO("MoveRegistry")
 			CHECK((registry.getAmountRegistered() == 3));
 			CHECK((registry.getNextMoveID() == 3));
 
-			std::optional<MoveID> poundIdentifier{registry.getMoveID("Pound")};
-			std::optional<MoveID> karateChopIdentifier{registry.getMoveID("Karate Chop")};
+			std::optional<MoveID> poundIdentifier{registry.getMoveID(MOVE_NAME_POUND)};
+			std::optional<MoveID> karateChopIdentifier{registry.getMoveID(MOVE_NAME_KARATE_CHOP)};
 			REQUIRE(poundIdentifier.has_value());
 			REQUIRE(karateChopIdentifier.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -43,7 +47,7 @@ SCENARIO("MoveRegistry")
 			CHECK((karateChopIdentifier.value() == toMoveID(BuiltinMoveID::KarateChop)));
 		}
 
-		THEN("Chesto Berry retains its turn-end status removal metadata")
+		THEN("Pound retains its psychic terrain priority block metadata")
 		{
 			const MoveMeta *metadata{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Pound))};
 			REQUIRE((metadata != nullptr));
@@ -63,12 +67,33 @@ SCENARIO("MoveRegistry")
 			CHECK_FALSE(registry.hasMove(unknownIdentifier));
 		}
 
-		THEN("registered entries are exposed through the domain API")
+		THEN("the registered span contains exactly the built-in entries")
 		{
 			std::span<const MoveMeta> moves{registry.getRegisteredMoves()};
 			REQUIRE((moves.size() == 3U));
-			CHECK((registry.getMoveName(toMoveID(BuiltinMoveID::Pound)) == "Pound"));
-			CHECK(registry.hasMove("Karate Chop"));
+			CHECK((moves.front().mName == MOVE_NAME_NONE));
+			CHECK((moves.back().mName == MOVE_NAME_KARATE_CHOP));
+			CHECK(registry.hasMove(toMoveID(BuiltinMoveID::Pound)));
+			CHECK(registry.hasMove(MOVE_NAME_KARATE_CHOP));
+		}
+
+		THEN("the registered amount can be restored directly")
+		{
+			registry.setAmountRegistered(2);
+			CHECK((registry.getAmountRegistered() == 2));
+		}
+
+		THEN("the next stable ID can be restored directly")
+		{
+			registry.setNextMoveID(42);
+			CHECK((registry.getNextMoveID() == 42));
+		}
+
+		THEN("the incrementNextMoveID() method increments the next stable ID")
+		{
+			registry.setNextMoveID(42);
+			registry.incrementNextMoveID();
+			CHECK((registry.getNextMoveID() == 43));
 		}
 	}
 }

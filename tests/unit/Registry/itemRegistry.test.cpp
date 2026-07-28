@@ -6,6 +6,7 @@
 
 #include "Effect/effectType.h"
 #include "Item/builtinItemID.h"
+#include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Item/itemTargetsAndTriggers.h"
@@ -14,6 +15,8 @@
 
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
+using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::ItemMeta;
 using PocketCore::Item::ItemTriggerID;
@@ -33,8 +36,8 @@ SCENARIO("ItemRegistry")
 			CHECK((registry.getAmountRegistered() == 3));
 			CHECK((registry.getNextItemID() == 3));
 
-			std::optional<ItemID> cheriIdentifier{registry.getItemID("Cheri Berry")};
-			std::optional<ItemID> chestoIdentifier{registry.getItemID("Chesto Berry")};
+			std::optional<ItemID> cheriIdentifier{registry.getItemID(ITEM_NAME_CHERI_BERRY)};
+			std::optional<ItemID> chestoIdentifier{registry.getItemID(ITEM_NAME_CHESTO_BERRY)};
 			REQUIRE(cheriIdentifier.has_value());
 			REQUIRE(chestoIdentifier.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -67,8 +70,28 @@ SCENARIO("ItemRegistry")
 		{
 			std::span<const ItemMeta> items{registry.getRegisteredItems()};
 			REQUIRE((items.size() == 3U));
-			CHECK((registry.getItemName(toItemID(BuiltinItemID::CheriBerry)) == "Cheri Berry"));
-			CHECK(registry.hasItem("Chesto Berry"));
+			CHECK((registry.getItemName(toItemID(BuiltinItemID::CheriBerry)) == ITEM_NAME_CHERI_BERRY));
+			CHECK(registry.hasItem(toItemID(BuiltinItemID::ChestoBerry)));
+			CHECK(registry.hasItem(ITEM_NAME_CHESTO_BERRY));
+		}
+
+		THEN("the registered amount can be restored directly")
+		{
+			registry.setAmountRegistered(2);
+			CHECK((registry.getAmountRegistered() == 2));
+		}
+
+		THEN("the next stable ID can be restored directly")
+		{
+			registry.setNextItemID(42);
+			CHECK((registry.getNextItemID() == 42));
+		}
+
+		THEN("the incrementNextItemID() method increments the next stable ID")
+		{
+			registry.setNextItemID(42);
+			registry.incrementNextItemID();
+			CHECK((registry.getNextItemID() == 43));
 		}
 	}
 }

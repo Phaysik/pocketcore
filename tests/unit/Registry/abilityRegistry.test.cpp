@@ -8,11 +8,15 @@
 #include "Ability/abilityMeta.h"
 #include "Ability/abilityTargetsAndTriggers.h"
 #include "Ability/builtinAbilityID.h"
+#include "Ability/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
+using PocketCore::Ability::ABILITY_NAME_NONE;
+using PocketCore::Ability::ABILITY_NAME_STENCH;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::AbilityTriggerID;
@@ -35,9 +39,9 @@ SCENARIO("AbilityRegistry")
 			CHECK((registry.getAmountRegistered() == 3));
 			CHECK((registry.getNextAbilityID() == 3));
 
-			std::optional<AbilityID> noneIdentifier{registry.getAbilityID("None")};
-			std::optional<AbilityID> stenchIdentifier{registry.getAbilityID("Stench")};
-			std::optional<AbilityID> drizzleIdentifier{registry.getAbilityID("Drizzle")};
+			std::optional<AbilityID> noneIdentifier{registry.getAbilityID(ABILITY_NAME_NONE)};
+			std::optional<AbilityID> stenchIdentifier{registry.getAbilityID(ABILITY_NAME_STENCH)};
+			std::optional<AbilityID> drizzleIdentifier{registry.getAbilityID(ABILITY_NAME_DRIZZLE)};
 
 			REQUIRE(noneIdentifier.has_value());
 			REQUIRE(stenchIdentifier.has_value());
@@ -55,7 +59,7 @@ SCENARIO("AbilityRegistry")
 			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Stench))};
 			REQUIRE((metadata != nullptr));
 
-			const AbilityMeta stench{*metadata};
+			AbilityMeta stench{*metadata};
 			REQUIRE((stench.mTriggers.size() == 1U));
 			CHECK((stench.mTriggers.front().mTrigger == AbilityTriggerID::OnDamageCalc));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
@@ -67,7 +71,7 @@ SCENARIO("AbilityRegistry")
 			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Drizzle))};
 			REQUIRE((metadata != nullptr));
 
-			const AbilityMeta drizzle{*metadata};
+			AbilityMeta drizzle{*metadata};
 			REQUIRE((drizzle.mTriggers.size() == 1U));
 			CHECK((drizzle.mTriggers.front().mTrigger == AbilityTriggerID::OnSwitchIn));
 			CHECK((drizzle.mTriggers.front().mEffects.front() == EffectTypeID::SetRain));
@@ -91,15 +95,36 @@ SCENARIO("AbilityRegistry")
 			std::optional<std::string_view> abilityName{registry.getAbilityName(toAbilityID(BuiltinAbilityID::Drizzle))};
 			REQUIRE(abilityName.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityName.value() == "Drizzle"));
+			CHECK((abilityName.value() == ABILITY_NAME_DRIZZLE));
 		}
 
 		THEN("the registered span contains exactly the built-in entries")
 		{
 			std::span<const AbilityMeta> abilities{registry.getRegisteredAbilities()};
 			REQUIRE((abilities.size() == 3U));
-			CHECK((abilities.front().mName == "None"));
-			CHECK((abilities.back().mName == "Drizzle"));
+			CHECK((abilities.front().mName == ABILITY_NAME_NONE));
+			CHECK((abilities.back().mName == ABILITY_NAME_DRIZZLE));
+			CHECK(registry.hasAbility(toAbilityID(BuiltinAbilityID::Stench)));
+			CHECK(registry.hasAbility(ABILITY_NAME_DRIZZLE));
+		}
+
+		THEN("the registered amount can be restored directly")
+		{
+			registry.setAmountRegistered(2);
+			CHECK((registry.getAmountRegistered() == 2));
+		}
+
+		THEN("the next stable ID can be restored directly")
+		{
+			registry.setNextAbilityID(42);
+			CHECK((registry.getNextAbilityID() == 42));
+		}
+
+		THEN("the incrementNextAbilityID() method increments the next stable ID")
+		{
+			registry.setNextAbilityID(42);
+			registry.incrementNextAbilityID();
+			CHECK((registry.getNextAbilityID() == 43));
 		}
 	}
 }

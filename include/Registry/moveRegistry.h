@@ -61,11 +61,12 @@ namespace PocketCore::Registry::Move
 			using Base = PocketCore::Registry::FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>;
 
 		public:
+			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID. */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{static_cast<us>(toMoveID(BuiltinMoveID::KarateChop).getValue() + 1U)}
 			{
 				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
-				//
+
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {Move::baseAttackEffects()}, .mTrigger = MoveTriggerID::OnUse}},
@@ -94,6 +95,8 @@ namespace PocketCore::Registry::Move
 
 				// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 			}
+
+			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
 			using Base::findIndexByID;
