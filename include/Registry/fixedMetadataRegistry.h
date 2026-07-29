@@ -165,7 +165,7 @@ namespace PocketCore::Registry
 				@param[in] index The internal array index.
 				@param[in] metadata The complete metadata record to store.
 			*/
-			constexpr void setEntry(const us index, const Metadata &metadata)
+			ATTR_NOINLINE constexpr void setEntry(const us index, const Metadata &metadata)
 			{
 				assert(index < mEntries.size());
 				mEntries.at(index) = metadata;
