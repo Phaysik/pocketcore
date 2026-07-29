@@ -59,11 +59,11 @@ namespace PocketCore::Effect
 	struct EffectResult
 	{
 		public:
+			StatusID mStatusToApply{};
+
 			ub mStatChangeAtk{0};
 			ub mStatChangeDef{0};
 			ub mSleepTurns{0};
-
-			StatusID mStatusToApply{StatusID::None};
 	};
 
 	struct EffectContext

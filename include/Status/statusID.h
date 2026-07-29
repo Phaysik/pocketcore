@@ -9,20 +9,25 @@
 #ifndef INCLUDE_STATUS_STATUSID_H
 #define INCLUDE_STATUS_STATUSID_H
 
-#include "Core/typedefs.h"
+#include "ID/idInterface.h"
 
 namespace PocketCore::Status
 {
-	enum class StatusID : PocketCore::Core::ub
+	namespace Detail
 	{
-		None,
-		Paralysis,
-		Burn,
-		Sleep,
-		Freeze,
-		Poison,
-		Toxic,
-	};
+		/*! @brief Distinguishes status identifiers from all other stable identifier domains. */
+		struct StatusIDTag;
+	} // namespace Detail
+
+	/*! @typedef StatusID
+		@brief A strongly typed stable identifier for any registered status.
+		@details Values are assigned by the status registry. Unlike @ref BuiltinStatusID, this type is open and can represent user-defined
+	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
+	*/
+	using StatusID = PocketCore::ID::IDInterface<Detail::StatusIDTag, 0>;
+
+	/*! @brief The stable identifier representing no status. */
+	inline constexpr StatusID NO_STATUS_ID{};
 } // namespace PocketCore::Status
 
 #endif

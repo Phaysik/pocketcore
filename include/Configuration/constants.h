@@ -33,6 +33,8 @@ namespace PocketCore::Configuration
 	inline constexpr us MAX_MOVES{1'000};
 	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
 
+	inline constexpr us MAX_STATUSES{1'000};
+
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums
@@ -54,6 +56,8 @@ namespace PocketCore::Configuration
 		ItemNotFound,	  /*!< No item matching the input was found. */
 		DuplicateMove,	  /*!< A move with the given name already exists. */
 		MoveNotFound,	  /*!< No move matching the input was found. */
+		DuplicateStatus,  /*!< A status with the given name already exists. */
+		StatusNotFound,	  /*!< No status matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -150,6 +154,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::MoveNotFound:
 						mErrorName = "MoveNotFound";
+						break;
+					case RegistryError::DuplicateStatus:
+						mErrorName = "DuplicateStatus";
+						break;
+					case RegistryError::StatusNotFound:
+						mErrorName = "StatusNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

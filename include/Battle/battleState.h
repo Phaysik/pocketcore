@@ -49,6 +49,8 @@ namespace PocketCore::Battle
 			us mCurrentHp{0};
 
 			ItemID mItemID{};
+			MoveID mChoiceLockedMove{};
+			StatusID mStatus{};
 
 			ub mSleepCounter{0};
 			ub mToxicCounter{0};
@@ -59,8 +61,6 @@ namespace PocketCore::Battle
 			bool mIsFlinched{false};
 			bool mItemConsumed{false};
 
-			MoveID mChoiceLockedMove{MoveID::None};
-			StatusID mStatus{StatusID::None};
 	};
 
 	struct BattleState
