@@ -9,10 +9,13 @@
 #ifndef INCLUDE_EFFECT_EFFECTCONTEXT_H
 #define INCLUDE_EFFECT_EFFECTCONTEXT_H
 
+#include <optional>
+
 #include "Ability/abilityID.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Move/moveTargetsAndTriggers.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
@@ -80,10 +83,12 @@ namespace PocketCore::Effect
 			AbilityID mAbilityID{};
 			MoveID mMoveID{};
 
+			std::optional<PocketCore::Move::MoveRangeID> mRangeOverride{};
+
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
 			ub mMoveBasePower{0};
-			ub moveAccuracy{0};
+			ub mMoveAccuracy{0};
 
 			EffectSource mSourceType{EffectSource::None};
 			Side mUserSide{};

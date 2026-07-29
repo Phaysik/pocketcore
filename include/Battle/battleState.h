@@ -19,6 +19,7 @@
 
 namespace PocketCore::Battle
 {
+	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
@@ -29,13 +30,13 @@ namespace PocketCore::Battle
 	struct StatStages
 	{
 		public:
-			us mAttack{0};
-			us mDefense{0};
-			us mSpAttack{0};
-			us mSpDefense{0};
-			us mSpeed{0};
-			us mAccuracy{0};
-			us mEvasion{0};
+			sb mAttack{0};
+			sb mDefense{0};
+			sb mSpAttack{0};
+			sb mSpDefense{0};
+			sb mSpeed{0};
+			sb mAccuracy{0};
+			sb mEvasion{0};
 	};
 
 	struct BattleSlot
@@ -55,12 +56,12 @@ namespace PocketCore::Battle
 			ub mSleepCounter{0};
 			ub mToxicCounter{0};
 			ub mProtectionCounter{0};
+			ub mPosition{0};
 
 			bool mIsProtected{false};
 			bool mIsFainted{false};
 			bool mIsFlinched{false};
 			bool mItemConsumed{false};
-
 	};
 
 	struct BattleState

@@ -22,7 +22,7 @@ namespace PocketCore::Status
 	/*! @typedef StatusID
 		@brief A strongly typed stable identifier for any registered status.
 		@details Values are assigned by the status registry. Unlike @ref BuiltinStatusID, this type is open and can represent user-defined
-	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
+	   statuses without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
 	*/
 	using StatusID = PocketCore::ID::IDInterface<Detail::StatusIDTag, 0>;
 

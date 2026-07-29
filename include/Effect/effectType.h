@@ -15,9 +15,8 @@ namespace PocketCore::Effect
 {
 	enum class EffectTypeID : PocketCore::Core::ub
 	{
-		BaseDamage,
 		CriticalHit,
-		StatStage,
+		BaseDamage,
 		BurnDamageReduction,
 		Weather,
 		Terrain,
