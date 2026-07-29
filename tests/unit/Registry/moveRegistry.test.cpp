@@ -95,6 +95,24 @@ SCENARIO("MoveRegistry")
 			registry.incrementNextMoveID();
 			CHECK((registry.getNextMoveID() == 43));
 		}
+
+		THEN("the shared registry mutators can update entries and counts")
+		{
+			CHECK((registry.getAmountRegistered() == 3));
+			registry.incrementAmountRegistered();
+			CHECK((registry.getAmountRegistered() == 4));
+
+			const MoveMeta &entry{registry.getEntry(0)};
+			CHECK((entry.mName == MOVE_NAME_NONE));
+
+			MoveMeta replacement{entry};
+			replacement.mName = "CustomMove";
+			registry.setEntry(0, replacement);
+			CHECK((registry.getEntry(0).mName == "CustomMove"));
+
+			registry.decrementAmountRegistered();
+			CHECK((registry.getAmountRegistered() == 3));
+		}
 	}
 }
 
