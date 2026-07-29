@@ -43,6 +43,12 @@ namespace PocketCore::Configuration
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
 
+	inline constexpr float BASE_ACCURACY_MULTIPLIER_NUMERATOR{3.0F};
+	inline constexpr float BASE_ACCURACY_MULTIPLIER_DENOMINATOR{3.0F};
+
+	inline constexpr ub MIN_ACCURACY_HIT_VALUE{1};
+	inline constexpr ub MAX_ACCURACY_HIT_VALUE{100};
+
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums

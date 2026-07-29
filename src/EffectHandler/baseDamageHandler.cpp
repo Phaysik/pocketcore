@@ -7,6 +7,8 @@
 
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
 #include "Pokemon/pokemon.h"
 
@@ -58,7 +60,7 @@ namespace PocketCore::Effect
 		}
 
 		const float userAttackMult{stageToMult(userAttackStage)};
-		const float targetDefenseMult{stageToMult(userAttackStage)};
+		const float targetDefenseMult{stageToMult(targetDefenseStage)};
 
 		const float attackStat{
 			static_cast<float>(context.mIsSpecial ? userPokemon->getSpAttack() : userPokemon->getAttack()) * userAttackMult,

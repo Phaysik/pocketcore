@@ -88,7 +88,7 @@ namespace PocketCore::Effect
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
 			ub mMoveBasePower{0};
-			ub moveAccuracy{0};
+			ub mMoveAccuracy{0};
 
 			EffectSource mSourceType{EffectSource::None};
 			Side mUserSide{};

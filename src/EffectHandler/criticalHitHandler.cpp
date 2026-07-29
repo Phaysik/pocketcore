@@ -5,6 +5,8 @@
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
+#include "Core/typedefs.h"
+#include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
 #include "Utility/random.h"
 
