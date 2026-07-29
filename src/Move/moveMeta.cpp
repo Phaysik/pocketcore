@@ -21,9 +21,8 @@ namespace PocketCore::Move
 		return {
 			EffectTypeID::PsychicTerrainPriorityBlock,
 			EffectTypeID::AccuracyCheck,
-			EffectTypeID::BaseDamage,
 			EffectTypeID::CriticalHit,
-			EffectTypeID::StatStage,
+			EffectTypeID::BaseDamage,
 			EffectTypeID::BurnDamageReduction,
 			EffectTypeID::Weather,
 			EffectTypeID::Terrain,

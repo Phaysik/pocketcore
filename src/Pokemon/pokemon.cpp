@@ -102,6 +102,11 @@ namespace PocketCore::Pokemon
 		mSpDefense = spDefense;
 	}
 
+	void Pokemon::setLevel(const us level)
+	{
+		mLevel = level;
+	}
+
 	void Pokemon::setAbility(const AbilityID abilityID)
 	{
 		mAbilityID = abilityID;

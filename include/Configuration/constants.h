@@ -35,6 +35,14 @@ namespace PocketCore::Configuration
 
 	inline constexpr us MAX_STATUSES{1'000};
 
+	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
+	inline constexpr ub MAX_CRITICAL_HIT_VALUE{100};
+	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5};
+	inline constexpr float CRITICAL_HIT_MULTIPLIER{1.5F};
+
+	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
+	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
+
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums

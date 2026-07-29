@@ -143,6 +143,11 @@ namespace PocketCore::Pokemon
 				return mSpDefense;
 			}
 
+			ATTR_NODISCARD constexpr us getLevel() const
+			{
+				return mLevel;
+			}
+
 			ATTR_NODISCARD constexpr AbilityID getAbilityID() const
 			{
 				return mAbilityID;
@@ -185,6 +190,8 @@ namespace PocketCore::Pokemon
 
 			void setSpDefense(const us spDefense);
 
+			void setLevel(const us level);
+
 			void setAbility(const AbilityID abilityID);
 
 			void setItem(const ItemID itemID);
@@ -215,6 +222,7 @@ namespace PocketCore::Pokemon
 			us mSpeed{};
 			us mSpAttack{};
 			us mSpDefense{};
+			us mLevel{};
 
 			AbilityID mAbilityID{};
 			ItemID mItemID{};

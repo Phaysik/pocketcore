@@ -9,10 +9,13 @@
 #ifndef INCLUDE_EFFECT_EFFECTCONTEXT_H
 #define INCLUDE_EFFECT_EFFECTCONTEXT_H
 
+#include <optional>
+
 #include "Ability/abilityID.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Move/moveTargetsAndTriggers.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
@@ -59,11 +62,11 @@ namespace PocketCore::Effect
 	struct EffectResult
 	{
 		public:
+			StatusID mStatusToApply{};
+
 			ub mStatChangeAtk{0};
 			ub mStatChangeDef{0};
 			ub mSleepTurns{0};
-
-			StatusID mStatusToApply{StatusID::None};
 	};
 
 	struct EffectContext
@@ -79,6 +82,8 @@ namespace PocketCore::Effect
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
 			MoveID mMoveID{};
+
+			std::optional<PocketCore::Move::MoveRangeID> mRangeOverride{};
 
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
