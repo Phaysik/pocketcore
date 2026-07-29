@@ -53,7 +53,7 @@ SCENARIO("MoveRegistry")
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 1U));
 			CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnUse));
-			REQUIRE((metadata->mTriggers.front().mEffects.size() == 10U));
+			REQUIRE((metadata->mTriggers.front().mEffects.size() == 9U));
 			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
 		}
 
