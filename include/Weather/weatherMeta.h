@@ -1,0 +1,38 @@
+/*! @file weatherMeta.h
+	@brief Defines the metadata stored for built-in and user-defined weathers.
+	@date 07/24/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
+*/
+
+#ifndef INCLUDE_WEATHER_WEATHERMETA_H
+#define INCLUDE_WEATHER_WEATHERMETA_H
+
+#include <string_view>
+
+#include "weatherID.h"
+
+namespace PocketCore::Weather
+{
+	/*! @struct WeatherMeta Weather/weatherMeta.h
+		@brief Stores one weather's stable ID, display name, and owned trigger definitions.
+		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
+	   must remain valid while this metadata is registered.
+		@date 07/27/2026
+		@version x.x.x
+		@since x.x.x
+		@author Matthew Moore
+	*/
+	struct WeatherMeta
+	{
+		public:
+			/*! @brief The case-sensitive display name stored as a non-owning view. */
+			std::string_view mName{};
+
+			/*! @brief The stable built-in or user-assigned identifier. */
+			WeatherID mWeatherID{};
+	};
+} // namespace PocketCore::Weather
+
+#endif

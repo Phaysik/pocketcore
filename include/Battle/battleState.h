@@ -16,6 +16,8 @@
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
+#include "Terrain/terrainID.h"
+#include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
 {
@@ -26,6 +28,8 @@ namespace PocketCore::Battle
 	using PocketCore::Move::MoveID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Status::StatusID;
+	using PocketCore::Terrain::TerrainID;
+	using PocketCore::Weather::WeatherID;
 
 	struct StatStages
 	{
@@ -73,6 +77,9 @@ namespace PocketCore::Battle
 			std::vector<const Pokemon *> mPartyA{};
 			std::vector<const Pokemon *> mPartyB{};
 
+			WeatherID mWeather{};
+			TerrainID mTerrain{};
+
 			// Spikes can have 0-3 layers
 
 			ub mSpikesPartyA{0};
@@ -87,15 +94,6 @@ namespace PocketCore::Battle
 			bool mStealthRockPartyB{false};
 
 			bool mBattleStarted{false};
-
-			bool mWeatherRain{false};
-			bool mWeatherSun{false};
-			bool mWeatherSandstorm{false};
-
-			bool mTerrainElectric{false};
-			bool mTerrainGrassy{false};
-			bool mTerrainMisty{false};
-			bool mTerrainPsychic{false};
 	};
 } // namespace PocketCore::Battle
 

@@ -34,6 +34,8 @@ namespace PocketCore::Configuration
 	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
 
 	inline constexpr us MAX_STATUSES{1'000};
+	inline constexpr us MAX_WEATHERS{1'000};
+	inline constexpr us MAX_TERRAINS{1'000};
 
 	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
 	inline constexpr ub MAX_CRITICAL_HIT_VALUE{100};
@@ -48,7 +50,7 @@ namespace PocketCore::Configuration
 
 	inline constexpr ub MIN_ACCURACY_HIT_VALUE{1};
 	inline constexpr ub MAX_ACCURACY_HIT_VALUE{100};
-	
+
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 
 	// MARK: Helper Enums
@@ -72,6 +74,10 @@ namespace PocketCore::Configuration
 		MoveNotFound,	  /*!< No move matching the input was found. */
 		DuplicateStatus,  /*!< A status with the given name already exists. */
 		StatusNotFound,	  /*!< No status matching the input was found. */
+		DuplicateWeather, /*!< A weather with the given name already exists. */
+		WeatherNotFound,  /*!< No weather matching the input was found. */
+		DuplicateTerrain, /*!< A terrain with the given name already exists. */
+		TerrainNotFound,  /*!< No terrain matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -174,6 +180,18 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::StatusNotFound:
 						mErrorName = "StatusNotFound";
+						break;
+					case RegistryError::DuplicateWeather:
+						mErrorName = "DuplicateWeather";
+						break;
+					case RegistryError::WeatherNotFound:
+						mErrorName = "WeatherNotFound";
+						break;
+					case RegistryError::DuplicateTerrain:
+						mErrorName = "DuplicateTerrain";
+						break;
+					case RegistryError::TerrainNotFound:
+						mErrorName = "TerrainNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

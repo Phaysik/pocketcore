@@ -14,7 +14,9 @@
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/statusRegistryConfiguration.h"
+#include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
+#include "Configuration/weatherRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -57,6 +59,8 @@ int main()
 		ATTR_MAYBE_UNUSED const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::StatusRegistryConfiguration statusRegistryConfig{};
+		ATTR_MAYBE_UNUSED const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
+		ATTR_MAYBE_UNUSED const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
 	}
 
 	return EXIT_SUCCESS;
