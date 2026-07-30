@@ -19,6 +19,7 @@
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Status/statusID.h"
 #include "Types/typeID.h"
 
 namespace PocketCore::Pokemon
@@ -30,6 +31,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Status::StatusID;
 	using PocketCore::Types::TypeID;
 
 	class Pokemon
@@ -158,6 +160,11 @@ namespace PocketCore::Pokemon
 				return mItemID;
 			}
 
+			ATTR_NODISCARD constexpr StatusID getStatusID() const
+			{
+				return mStatusID;
+			}
+
 			// Setters
 
 			void setName(const std::string_view name);
@@ -196,6 +203,8 @@ namespace PocketCore::Pokemon
 
 			void setItem(const ItemID itemID);
 
+			void setStatus(const StatusID statusID);
+
 			// Utility Functions
 
 			constexpr void usePP(const ub slotIndex)
@@ -206,6 +215,11 @@ namespace PocketCore::Pokemon
 				{
 					mCurrentPP.at(slotIndex)--;
 				}
+			}
+
+			ATTR_NODISCARD constexpr bool isFainted() const
+			{
+				return mHealth == 0;
 			}
 
 		private:
@@ -226,6 +240,7 @@ namespace PocketCore::Pokemon
 
 			AbilityID mAbilityID{};
 			ItemID mItemID{};
+			StatusID mStatusID{};
 	};
 } // namespace PocketCore::Pokemon
 

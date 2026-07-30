@@ -12,10 +12,8 @@
 #include <vector>
 
 #include "Core/typedefs.h"
-#include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
-#include "Status/statusID.h"
 #include "Terrain/terrainID.h"
 #include "Weather/weatherID.h"
 
@@ -24,10 +22,8 @@ namespace PocketCore::Battle
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
-	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Pokemon::Pokemon;
-	using PocketCore::Status::StatusID;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Weather::WeatherID;
 
@@ -46,16 +42,14 @@ namespace PocketCore::Battle
 	struct BattleSlot
 	{
 		public:
+			Pokemon *mPokemon{nullptr};
 			StatStages mStatStages{};
-			const Pokemon *mPokemon{nullptr};
 
 			float mSpeedBoost{1.0F};
 
 			us mCurrentHp{0};
 
-			ItemID mItemID{};
 			MoveID mChoiceLockedMove{};
-			StatusID mStatus{};
 
 			ub mSleepCounter{0};
 			ub mToxicCounter{0};
@@ -63,7 +57,6 @@ namespace PocketCore::Battle
 			ub mPosition{0};
 
 			bool mIsProtected{false};
-			bool mIsFainted{false};
 			bool mIsFlinched{false};
 			bool mItemConsumed{false};
 	};

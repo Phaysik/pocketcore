@@ -23,11 +23,13 @@ namespace PocketCore::Move
 			EffectTypeID::AccuracyCheck,
 			EffectTypeID::CriticalHit,
 			EffectTypeID::BaseDamage,
-			EffectTypeID::BurnDamageReduction,
+			EffectTypeID::Targets,
 			EffectTypeID::Weather,
 			EffectTypeID::Terrain,
-			EffectTypeID::TypeEffectiveness,
 			EffectTypeID::Randomization,
+			EffectTypeID::Stab,
+			EffectTypeID::TypeEffectiveness,
+			EffectTypeID::BurnDamageReduction,
 		};
 	}
 

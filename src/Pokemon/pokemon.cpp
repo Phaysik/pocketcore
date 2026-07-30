@@ -116,4 +116,9 @@ namespace PocketCore::Pokemon
 	{
 		mItemID = itemID;
 	}
+
+	void Pokemon::setStatus(const StatusID statusID)
+	{
+		mStatusID = statusID;
+	}
 } // namespace PocketCore::Pokemon

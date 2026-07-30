@@ -1,5 +1,5 @@
 /*! @file constants.h
-	@brief Contains constexpr assert message strings for the type registry.
+	@brief Contains constexpr assert message strings for the status registry.
 	@date 04/17/2026
 	@version x.x.x
 	@since x.x.x

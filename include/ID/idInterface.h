@@ -10,6 +10,7 @@
 #define INCLUDE_ID_IDINTERFACE_H
 
 #include <compare>
+#include <functional>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -57,5 +58,18 @@ namespace PocketCore::ID
 			us mValue{DefaultValue};
 	};
 } // namespace PocketCore::ID
+
+namespace std
+{
+	template <typename Tag, PocketCore::Core::us DefaultValue>
+	struct hash<PocketCore::ID::IDInterface<Tag, DefaultValue>>
+	{
+		public:
+			std::size_t operator()(const PocketCore::ID::IDInterface<Tag, DefaultValue> &identifier) const noexcept
+			{
+				return std::hash<PocketCore::Core::us>{}(identifier.getValue());
+			}
+	};
+} // namespace std
 
 #endif

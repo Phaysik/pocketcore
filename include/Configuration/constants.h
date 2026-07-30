@@ -36,11 +36,16 @@ namespace PocketCore::Configuration
 	inline constexpr us MAX_STATUSES{1'000};
 	inline constexpr us MAX_WEATHERS{1'000};
 	inline constexpr us MAX_TERRAINS{1'000};
+	inline constexpr us MAX_MULTIPLIERS{1'000};
 
 	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
 	inline constexpr ub MAX_CRITICAL_HIT_VALUE{100};
 	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5};
+
+	inline constexpr float BASE_MULTIPLIER_VALUE{1.0F};
 	inline constexpr float CRITICAL_HIT_MULTIPLIER{1.5F};
+	inline constexpr float STAB_HIT_MULTIPLIER{1.5F};
+	inline constexpr float TARGETS_HIT_MULTIPLIER{0.75F};
 
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
@@ -62,22 +67,24 @@ namespace PocketCore::Configuration
 	*/
 	enum class RegistryError : ub
 	{
-		MaxCapacity,	  /*!< The registry has reached its maximum number of entries. */
-		DuplicateType,	  /*!< A type with the given name already exists. */
-		TypeNotFound,	  /*!< No type matching the input was found. */
-		MatchupMismatch,  /*!< The number of provided matchup entries does not match the registered count. */
-		DuplicateAbility, /*!< An ability with the given name already exists. */
-		AbilityNotFound,  /*!< No ability matching the input was found. */
-		DuplicateItem,	  /*!< An item with the given name already exists. */
-		ItemNotFound,	  /*!< No item matching the input was found. */
-		DuplicateMove,	  /*!< A move with the given name already exists. */
-		MoveNotFound,	  /*!< No move matching the input was found. */
-		DuplicateStatus,  /*!< A status with the given name already exists. */
-		StatusNotFound,	  /*!< No status matching the input was found. */
-		DuplicateWeather, /*!< A weather with the given name already exists. */
-		WeatherNotFound,  /*!< No weather matching the input was found. */
-		DuplicateTerrain, /*!< A terrain with the given name already exists. */
-		TerrainNotFound,  /*!< No terrain matching the input was found. */
+		MaxCapacity,		 /*!< The registry has reached its maximum number of entries. */
+		DuplicateType,		 /*!< A type with the given name already exists. */
+		TypeNotFound,		 /*!< No type matching the input was found. */
+		MatchupMismatch,	 /*!< The number of provided matchup entries does not match the registered count. */
+		DuplicateAbility,	 /*!< An ability with the given name already exists. */
+		AbilityNotFound,	 /*!< No ability matching the input was found. */
+		DuplicateItem,		 /*!< An item with the given name already exists. */
+		ItemNotFound,		 /*!< No item matching the input was found. */
+		DuplicateMove,		 /*!< A move with the given name already exists. */
+		MoveNotFound,		 /*!< No move matching the input was found. */
+		DuplicateStatus,	 /*!< A status with the given name already exists. */
+		StatusNotFound,		 /*!< No status matching the input was found. */
+		DuplicateWeather,	 /*!< A weather with the given name already exists. */
+		WeatherNotFound,	 /*!< No weather matching the input was found. */
+		DuplicateTerrain,	 /*!< A terrain with the given name already exists. */
+		TerrainNotFound,	 /*!< No terrain matching the input was found. */
+		DuplicateMultiplier, /*!< A multiplier with the given name already exists. */
+		MultiplierNotFound,	 /*!< No multiplier matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -192,6 +199,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::TerrainNotFound:
 						mErrorName = "TerrainNotFound";
+						break;
+					case RegistryError::DuplicateMultiplier:
+						mErrorName = "DuplicateMultiplier";
+						break;
+					case RegistryError::MultiplierNotFound:
+						mErrorName = "MultiplierNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

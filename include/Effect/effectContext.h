@@ -10,12 +10,18 @@
 #define INCLUDE_EFFECT_EFFECTCONTEXT_H
 
 #include <optional>
+#include <span>
+#include <unordered_map>
 
 #include "Ability/abilityID.h"
+#include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Move/moveTargetsAndTriggers.h"
+#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/multiplierID.h"
+#include "Multiplier/multiplierMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
@@ -23,10 +29,16 @@
 namespace PocketCore::Effect
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Configuration::BASE_MULTIPLIER_VALUE;
+	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Multiplier::BuiltinMultiplierID;
+	using PocketCore::Multiplier::MultiplierID;
+	using PocketCore::Multiplier::MultiplierMeta;
+	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Types::TypeID;
@@ -71,13 +83,25 @@ namespace PocketCore::Effect
 
 	struct EffectContext
 	{
+
 		public:
+			explicit EffectContext()
+			{
+				const MultiplierRegistryConfiguration registry{};
+				const std::span<const MultiplierMeta> multiplierMetadatas{registry.getRegisteredMultipliers()};
+
+				for (const MultiplierMeta &metadata : multiplierMetadatas)
+				{
+					mMultiplierIDs[metadata.mMultiplierID] = BASE_MULTIPLIER_VALUE;
+				}
+			}
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+
 			DamageContext mDamage{};
 			EffectResult mResult{};
 
-			float mAbilityMultiplier{1.0F};
-			float mItemMultiplier{1.0F};
-			float mCriticalMultiplier{1.0F};
+			std::unordered_map<MultiplierID, float> mMultiplierIDs{};
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
@@ -95,6 +119,8 @@ namespace PocketCore::Effect
 			Side mTargetSide{};
 
 			bool mIsSpecial{false};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Effect
 

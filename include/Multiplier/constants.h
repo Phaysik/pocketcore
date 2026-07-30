@@ -1,0 +1,23 @@
+/*! @file constants.h
+	@brief Contains constexpr assert message strings for the multiplier registry.
+	@date 04/17/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
+*/
+
+#ifndef INCLUDE_MULTIPLIER_CONSTANTS_H
+#define INCLUDE_MULTIPLIER_CONSTANTS_H
+
+#include <string_view>
+
+namespace PocketCore::Multiplier
+{
+	constexpr std::string_view MULTIPLIER_NAME_NONE{"None"};
+	constexpr std::string_view MULTIPLIER_NAME_ABILITY{"Ability"};
+	constexpr std::string_view MULTIPLIER_NAME_ITEM{"Item"};
+	constexpr std::string_view MULTIPLIER_NAME_CRITICAL{"Critical"};
+	constexpr std::string_view MULTIPLIER_NAME_STAB{"Stab"};
+} // namespace PocketCore::Multiplier
+
+#endif
