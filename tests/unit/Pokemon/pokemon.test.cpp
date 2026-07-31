@@ -25,7 +25,7 @@ SCENARIO("Pokemon type identifiers")
 {
 	GIVEN("a Pokemon constructed without explicit types")
 	{
-		Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, AbilityID{}, ItemID{}};
+		Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}};
 
 		THEN("both type slots are unassigned")
 		{
@@ -40,7 +40,7 @@ SCENARIO("Pokemon type identifiers")
 		TypeID builtInTypeID{toTypeID(Types::Fire)};
 		TypeID customTypeID{42};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{builtInTypeID, customTypeID};
-		Pokemon pokemon{"Hybrid", 1, 1, 1, 1, 1, 1, AbilityID{}, ItemID{}, typeIDs};
+		Pokemon pokemon{"Hybrid", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}, typeIDs};
 
 		THEN("the constructor preserves both identifiers")
 		{

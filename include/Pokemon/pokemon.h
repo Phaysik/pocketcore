@@ -11,6 +11,7 @@
 
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <string_view>
 
 #include "Ability/abilityID.h"
@@ -25,6 +26,9 @@
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_DENOMINATOR;
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
@@ -176,43 +180,110 @@ namespace PocketCore::Pokemon
 
 			// Setters
 
-			void setName(const std::string_view name);
+			constexpr void setName(const std::string_view name)
+			{
+				mName = name;
+			}
 
-			void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs);
+			constexpr void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
+			{
+				mMoveIDs = moveIDs;
+			}
 
-			void setMove(const ub slotIndex, const MoveID moveID);
+			constexpr void setMove(const ub slotIndex, const MoveID moveID)
+			{
+				assert(slotIndex < mMoveIDs.size());
 
-			void setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP);
+				mMoveIDs.at(slotIndex) = moveID;
+			}
 
-			void setMaxPP(const ub slotIndex, const ub maxPP);
+			constexpr void setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP)
+			{
+				mMaxPP = maxPP;
+			}
 
-			void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP);
+			constexpr void setMaxPP(const ub slotIndex, const ub maxPP)
+			{
+				assert(slotIndex < mMaxPP.size());
 
-			void setCurrentPP(const ub slotIndex, const ub currentPP);
+				mMaxPP.at(slotIndex) = maxPP;
+			}
 
-			void setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs);
+			constexpr void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP)
+			{
+				mCurrentPP = currentPP;
+			}
 
-			void setType(ub slotIndex, TypeID typeID);
+			constexpr void setCurrentPP(const ub slotIndex, const ub currentPP)
+			{
+				assert(slotIndex < mCurrentPP.size());
 
-			void setAttack(const us attack);
+				mCurrentPP.at(slotIndex) = currentPP;
+			}
 
-			void setDefense(const us defense);
+			constexpr void setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs)
+			{
+				mTypeIDs = typeIDs;
+			}
 
-			void setHealth(const us health);
+			constexpr void setType(const ub slotIndex, const TypeID typeID)
+			{
+				assert(slotIndex < mTypeIDs.size());
 
-			void setSpeed(const us speed);
+				mTypeIDs.at(slotIndex) = typeID;
+			}
 
-			void setSpAttack(const us spAttack);
+			constexpr void setAttack(const us attack)
+			{
+				mAttack = attack;
+			}
 
-			void setSpDefense(const us spDefense);
+			constexpr void setDefense(const us defense)
+			{
+				mDefense = defense;
+			}
 
-			void setLevel(const us level);
+			constexpr void setHealth(const us health)
+			{
+				mHealth = health;
+			}
 
-			void setAbility(const AbilityID abilityID);
+			constexpr void setSpeed(const us speed)
+			{
+				mSpeed = speed;
+			}
 
-			void setItem(const ItemID itemID);
+			constexpr void setSpAttack(const us spAttack)
+			{
+				mSpAttack = spAttack;
+			}
 
-			void setStatus(const StatusID statusID);
+			constexpr void setSpDefense(const us spDefense)
+			{
+				mSpDefense = spDefense;
+			}
+
+			constexpr void setLevel(const us level)
+			{
+				mLevel = level;
+				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
+													 + LEVEL_DAMAGE_FACTOR_OFFSET);
+			}
+
+			constexpr void setAbility(const AbilityID abilityID)
+			{
+				mAbilityID = abilityID;
+			}
+
+			constexpr void setItem(const ItemID itemID)
+			{
+				mItemID = itemID;
+			}
+
+			constexpr void setStatus(const StatusID statusID)
+			{
+				mStatusID = statusID;
+			}
 
 			// Utility Functions
 
