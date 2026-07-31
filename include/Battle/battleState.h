@@ -39,9 +39,22 @@ namespace PocketCore::Battle
 			sb mEvasion{0};
 	};
 
+	struct DamageFormulaModifiers
+	{
+		public:
+			float mHealthModifier{1.0F};
+			float mAttackModifier{1.0F};
+			float mDefenseModifier{1.0F};
+			float mSpecialAttackModifier{1.0F};
+			float mSpecialDefenseModifier{1.0F};
+			float mSpeedModifier{1.0F};
+	};
+
 	struct BattleSlot
 	{
 		public:
+			DamageFormulaModifiers mDamageFormulaModifiers{};
+
 			Pokemon *mPokemon{nullptr};
 			StatStages mStatStages{};
 

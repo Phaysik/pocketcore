@@ -94,7 +94,7 @@ namespace PocketCore::Effect
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
 			// Sparse multiplier list
-			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers;
+			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers{};
 
 			DamageContext mDamage{};
 			EffectResult mResult{};

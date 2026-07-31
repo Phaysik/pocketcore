@@ -57,12 +57,24 @@ namespace PocketCore::Effect
 		const float userAttackMult{CACHE_STAT_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(userAttackStage))};
 		const float targetDefenseMult{CACHE_STAT_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(targetDefenseStage))};
 
+		const float userAttackModifier{
+			context.mIsSpecial ? user.mDamageFormulaModifiers.mSpecialAttackModifier : user.mDamageFormulaModifiers.mAttackModifier,
+		};
+
+		const float targetDefenseModifier{
+			context.mIsSpecial ? target.mDamageFormulaModifiers.mSpecialDefenseModifier : target.mDamageFormulaModifiers.mDefenseModifier,
+		};
+
 		const float attackStat{
-			static_cast<float>(context.mIsSpecial ? userPokemon->getSpAttack() : userPokemon->getAttack()) * userAttackMult,
+			static_cast<float>(context.mIsSpecial ? userPokemon->getSpAttack() : userPokemon->getAttack()) * userAttackMult
+				* userAttackModifier,
 		};
+
 		const float defenseStat{
-			static_cast<float>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense()) * targetDefenseMult,
+			static_cast<float>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense()) * targetDefenseMult
+				* targetDefenseModifier,
 		};
+
 		const us levelDamageFactor{userPokemon->getLevelDamageFactor()};
 
 		// Damage formula calcs
