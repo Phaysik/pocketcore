@@ -67,19 +67,8 @@ namespace PocketCore::Effect
 
 			bool mIsCritical{false};
 			bool mIsMiss{false};
-			bool mIsProtected{false};
 			bool mShouldApplyDamage{true};
 			bool mShouldContinue{true};
-	};
-
-	struct EffectResult
-	{
-		public:
-			StatusID mStatusToApply{};
-
-			ub mStatChangeAtk{0};
-			ub mStatChangeDef{0};
-			ub mSleepTurns{0};
 	};
 
 	struct EffectContext
@@ -91,13 +80,13 @@ namespace PocketCore::Effect
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage) const;
 
 			void resetMultipliers();
+			
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
 			// Sparse multiplier list
 			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers{};
 
 			DamageContext mDamage{};
-			EffectResult mResult{};
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
