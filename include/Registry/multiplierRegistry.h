@@ -70,6 +70,10 @@ namespace PocketCore::Registry::Multiplier
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Item),
 				});
 				addBuiltin({
+					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_WEATHER,
+					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Weather),
+				});
+				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_CRITICAL,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Critical),
 				});

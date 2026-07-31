@@ -65,6 +65,11 @@ namespace PocketCore::Configuration
 	inline constexpr ub LEVEL_DAMAGE_FACTOR_DENOMINATOR{5};
 	inline constexpr ub LEVEL_DAMAGE_FACTOR_OFFSET{2};
 
+	inline constexpr float FIXED_POINT_MULTIPLIER_NUMERATOR{4'096.0F};
+	inline constexpr float FIXED_POINT_MULTIPLIER_DENOMINATOR{4'096.0F};
+	inline constexpr double ROUND_DOWN_HALF_POINT{0.5};
+	inline constexpr double ROUND_DOWN_TOLERANCE{1e-9};
+
 	inline constexpr sb MAX_STAT_STAGES{6};
 	inline constexpr sb MAX_STAGE_CACHE{(MAX_STAT_STAGES * 2) + 1};
 

@@ -1,11 +1,20 @@
 #include "Effect/effectContext.h"
 
+#include <algorithm>
+#include <cmath>
+
 #include "Configuration/constants.h"
+#include "Core/attributeMacros.h"
+#include "Core/typedefs.h"
 #include "Multiplier/multiplierID.h"
 
 namespace PocketCore::Effect
 {
-	using PocketCore::Configuration::BASE_MULTIPLIER_VALUE;
+	using PocketCore::Configuration::FIXED_POINT_MULTIPLIER_DENOMINATOR;
+	using PocketCore::Configuration::FIXED_POINT_MULTIPLIER_NUMERATOR;
+	using PocketCore::Configuration::ROUND_DOWN_HALF_POINT;
+	using PocketCore::Configuration::ROUND_DOWN_TOLERANCE;
+	using PocketCore::Core::us;
 	using PocketCore::Multiplier::MultiplierID;
 
 	void EffectContext::setMultiplier(const MultiplierID multID, const float value)
@@ -15,20 +24,46 @@ namespace PocketCore::Effect
 		{
 			if (mid == multID)
 			{
-				mCombinedMultiplier /= val; // Remove old contribution
 				val = value;
-				mCombinedMultiplier *= val; // Add new contribution
 				return;
 			}
 		}
 
 		mActiveMultipliers.emplace_back(multID, value);
-		mCombinedMultiplier *= value;
+	}
+
+	ATTR_NODISCARD us EffectContext::applyMultiplier(const us baseDamage) const
+	{
+		us damage{baseDamage};
+
+		for (const auto &[multID, multiplier] : mActiveMultipliers)
+		{
+			const auto roundDownHalfSafe = [](const double value) -> double {
+				double integerPart{};
+				const double fractionalPart{std::modf(value, &integerPart)};
+
+				if (fractionalPart > ROUND_DOWN_HALF_POINT + ROUND_DOWN_TOLERANCE)
+				{
+					return integerPart + 1.0;
+				}
+
+				return integerPart;
+			};
+
+			const double fixedPointValue{
+				static_cast<double>((FIXED_POINT_MULTIPLIER_NUMERATOR * multiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR),
+			};
+
+			damage *= static_cast<us>(roundDownHalfSafe(fixedPointValue));
+
+			damage = std::max(damage, static_cast<us>(1));
+		}
+
+		return damage;
 	}
 
 	void EffectContext::resetMultipliers()
 	{
 		mActiveMultipliers.clear();
-		mCombinedMultiplier = BASE_MULTIPLIER_VALUE;
 	}
 } // namespace PocketCore::Effect

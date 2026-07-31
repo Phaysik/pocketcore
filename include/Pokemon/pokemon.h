@@ -40,25 +40,29 @@ namespace PocketCore::Pokemon
 			// Constructors
 
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
-									   const us spAttack, const us spDefense, const AbilityID abilityID, const ItemID itemID,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
+									   const us spAttack, const us spDefense, const us level, const AbilityID abilityID,
+									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
 				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
+				setLevel(level);
 			}
 
 			explicit constexpr Pokemon(const std::string_view name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
-									   const us health, const us speed, const us spAttack, const us spDefense, const AbilityID abilityID,
-									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
+									   const us health, const us speed, const us spAttack, const us spDefense, const us level,
+									   const AbilityID abilityID, const ItemID itemID,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAttack{attack},
 				  mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID},
 				  mItemID{itemID}
-			{}
+			{
+				setLevel(level);
+			}
 
 			// Getters
 

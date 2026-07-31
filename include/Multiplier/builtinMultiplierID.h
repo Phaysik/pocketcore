@@ -32,6 +32,7 @@ namespace PocketCore::Multiplier
 		Ability,
 		Item,
 		Targets,
+		Weather,
 		Critical,
 		Stab,
 	};

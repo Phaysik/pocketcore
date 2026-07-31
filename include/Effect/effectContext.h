@@ -88,6 +88,8 @@ namespace PocketCore::Effect
 		public:
 			void setMultiplier(const MultiplierID multID, const float value);
 
+			ATTR_NODISCARD us applyMultiplier(const us baseDamage) const;
+
 			void resetMultipliers();
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
@@ -96,8 +98,6 @@ namespace PocketCore::Effect
 
 			DamageContext mDamage{};
 			EffectResult mResult{};
-
-			float mCombinedMultiplier{BASE_MULTIPLIER_VALUE}; // product of all active values
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
