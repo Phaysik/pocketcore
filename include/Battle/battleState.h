@@ -47,8 +47,6 @@ namespace PocketCore::Battle
 
 			float mSpeedBoost{1.0F};
 
-			us mCurrentHp{0};
-
 			MoveID mChoiceLockedMove{};
 
 			ub mSleepCounter{0};
@@ -67,8 +65,8 @@ namespace PocketCore::Battle
 			std::vector<BattleSlot> mSideA{};
 			std::vector<BattleSlot> mSideB{};
 
-			std::vector<const Pokemon *> mPartyA{};
-			std::vector<const Pokemon *> mPartyB{};
+			std::vector<Pokemon *> mPartyA{};
+			std::vector<Pokemon *> mPartyB{};
 
 			WeatherID mWeather{};
 			TerrainID mTerrain{};

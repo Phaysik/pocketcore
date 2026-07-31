@@ -52,7 +52,7 @@ SCENARIO("MoveRegistry")
 			const MoveMeta *metadata{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Pound))};
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 1U));
-			CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnUse));
+			CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnTarget));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 11U));
 			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
 		}

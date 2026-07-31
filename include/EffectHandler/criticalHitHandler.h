@@ -10,7 +10,9 @@
 #define INCLUDE_EFFECT_CRITICALHITHANDLER_H
 
 #include "Battle/battleState.h"
+#include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
+#include "Registry/registryProvider.h"
 
 #include "effectHandlerInterface.h"
 
@@ -18,11 +20,13 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
+	using PocketCore::Registry::RegistryProvider;
 
 	class CriticalHitHandler : public IEffectHandler
 	{
 		public:
-			void apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context) const override;
+			void apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect
 

@@ -10,12 +10,16 @@
 
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <string_view>
 
 #include "Configuration/constants.h"
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_DENOMINATOR;
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
+	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 
@@ -105,6 +109,8 @@ namespace PocketCore::Pokemon
 	void Pokemon::setLevel(const us level)
 	{
 		mLevel = level;
+		mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
+											 + LEVEL_DAMAGE_FACTOR_OFFSET);
 	}
 
 	void Pokemon::setAbility(const AbilityID abilityID)

@@ -150,6 +150,11 @@ namespace PocketCore::Pokemon
 				return mLevel;
 			}
 
+			ATTR_NODISCARD constexpr us getLevelDamageFactor() const
+			{
+				return mLevelDamageFactor;
+			}
+
 			ATTR_NODISCARD constexpr AbilityID getAbilityID() const
 			{
 				return mAbilityID;
@@ -237,6 +242,7 @@ namespace PocketCore::Pokemon
 			us mSpAttack{};
 			us mSpDefense{};
 			us mLevel{};
+			us mLevelDamageFactor{};
 
 			AbilityID mAbilityID{};
 			ItemID mItemID{};

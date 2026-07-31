@@ -8,6 +8,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
+#include "Registry/registryProvider.h"
 #include "Utility/random.h"
 
 namespace PocketCore::Effect
@@ -18,14 +19,16 @@ namespace PocketCore::Effect
 	using PocketCore::Configuration::MAX_CRITICAL_HIT_VALUE;
 	using PocketCore::Configuration::MIN_CRITICAL_HIT_VALUE;
 	using PocketCore::Core::ub;
+	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Utility::Random;
 
-	void CriticalHitHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context) const
+	void CriticalHitHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+								   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		if (Random::get<ub>(MIN_CRITICAL_HIT_VALUE, MAX_CRITICAL_HIT_VALUE) <= CRITICAL_HIT_PERCENTAGE)
 		{
 			context.mDamage.mIsCritical = true;
-			context.mMultiplierIDs[toMultiplierID(BuiltinMultiplierID::Critical)] = CRITICAL_HIT_MULTIPLIER;
+			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Critical), CRITICAL_HIT_MULTIPLIER);
 		}
 	}
 } // namespace PocketCore::Effect

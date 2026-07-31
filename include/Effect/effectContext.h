@@ -14,6 +14,7 @@
 #include <unordered_map>
 
 #include "Ability/abilityID.h"
+#include "Configuration/constants.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
@@ -85,23 +86,18 @@ namespace PocketCore::Effect
 	{
 
 		public:
-			explicit EffectContext()
-			{
-				const MultiplierRegistryConfiguration registry{};
-				const std::span<const MultiplierMeta> multiplierMetadatas{registry.getRegisteredMultipliers()};
+			void setMultiplier(const MultiplierID multID, const float value);
 
-				for (const MultiplierMeta &metadata : multiplierMetadatas)
-				{
-					mMultiplierIDs[metadata.mMultiplierID] = BASE_MULTIPLIER_VALUE;
-				}
-			}
-
+			void resetMultipliers();
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+
+			// Sparse multiplier list
+			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers;
 
 			DamageContext mDamage{};
 			EffectResult mResult{};
 
-			std::unordered_map<MultiplierID, float> mMultiplierIDs{};
+			float mCombinedMultiplier{BASE_MULTIPLIER_VALUE}; // product of all active values
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};

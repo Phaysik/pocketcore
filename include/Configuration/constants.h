@@ -9,6 +9,8 @@
 #ifndef INCLUDE_CONFIGURATION_CONSTANTS_H
 #define INCLUDE_CONFIGURATION_CONSTANTS_H
 
+#include <array>
+#include <cstddef>
 #include <string_view>
 
 #include "Core/attributeMacros.h"
@@ -16,6 +18,7 @@
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 
@@ -52,9 +55,18 @@ namespace PocketCore::Configuration
 
 	inline constexpr float BASE_ACCURACY_MULTIPLIER_NUMERATOR{3.0F};
 	inline constexpr float BASE_ACCURACY_MULTIPLIER_DENOMINATOR{3.0F};
+	inline constexpr float BASE_EVASION_MULTIPLIER_NUMERATOR{3.0F};
+	inline constexpr float BASE_EVASION_MULTIPLIER_DENOMINATOR{3.0F};
 
 	inline constexpr ub MIN_ACCURACY_HIT_VALUE{1};
 	inline constexpr ub MAX_ACCURACY_HIT_VALUE{100};
+
+	inline constexpr ub LEVEL_DAMAGE_FACTOR_NUMERATOR{2};
+	inline constexpr ub LEVEL_DAMAGE_FACTOR_DENOMINATOR{5};
+	inline constexpr ub LEVEL_DAMAGE_FACTOR_OFFSET{2};
+
+	inline constexpr sb MAX_STAT_STAGES{6};
+	inline constexpr sb MAX_STAGE_CACHE{(MAX_STAT_STAGES * 2) + 1};
 
 	inline constexpr std::string_view NO_LOGGING_FAILURE{"There was no logging failure."};
 

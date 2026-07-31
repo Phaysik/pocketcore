@@ -11,9 +11,12 @@
 
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
+#include "Registry/registryProvider.h"
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Registry::RegistryProvider;
+
 	class IEffectHandler
 	{
 		public:
@@ -23,7 +26,8 @@ namespace PocketCore::Effect
 			IEffectHandler operator=(const IEffectHandler &) = delete;
 			IEffectHandler operator=(IEffectHandler &&) = delete;
 			virtual ~IEffectHandler() = default;
-			virtual void apply(const PocketCore::Battle::BattleState &state, EffectContext &context) const = 0;
+			virtual void apply(const PocketCore::Battle::BattleState &state, EffectContext &context, const RegistryProvider &provider) const
+				= 0;
 	};
 } // namespace PocketCore::Effect
 

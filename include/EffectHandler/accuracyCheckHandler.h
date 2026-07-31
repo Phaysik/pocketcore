@@ -10,7 +10,9 @@
 #define INCLUDE_EFFECT_ACCURACYCHECKHANDLER_H
 
 #include "Battle/battleState.h"
+#include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
+#include "Registry/registryProvider.h"
 
 #include "effectHandlerInterface.h"
 
@@ -18,11 +20,12 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
+	using PocketCore::Registry::RegistryProvider;
 
 	class AccuracyCheckHandler : public IEffectHandler
 	{
 		public:
-			void apply(const BattleState &state, EffectContext &context) const override;
+			void apply(const BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect
 

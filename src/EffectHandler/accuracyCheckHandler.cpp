@@ -2,28 +2,34 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <vector>
 
 #include "Battle/battleState.h"
+#include "Configuration/cache.h"
 #include "Configuration/constants.h"
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
+#include "Registry/registryProvider.h"
 #include "Utility/random.h"
 
 namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
-	using PocketCore::Configuration::BASE_ACCURACY_MULTIPLIER_DENOMINATOR;
-	using PocketCore::Configuration::BASE_ACCURACY_MULTIPLIER_NUMERATOR;
+	using PocketCore::Configuration::CACHE_ACCURACY_STAGE_MULTIPLIERS;
+	using PocketCore::Configuration::CACHE_EVASION_STAGE_MULTIPLIERS;
 	using PocketCore::Configuration::MAX_ACCURACY_HIT_VALUE;
 	using PocketCore::Configuration::MIN_ACCURACY_HIT_VALUE;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Utility::Random;
 
-	void AccuracyCheckHandler::apply(const BattleState &state, EffectContext &context) const
+	void AccuracyCheckHandler::apply(const BattleState &state, EffectContext &context,
+									 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		const std::vector<BattleSlot> &userTeam{getTeamConst(state, context.mUserSide)};
 		const std::vector<BattleSlot> &targetTeam{getTeamConst(state, context.mTargetSide)};
@@ -34,26 +40,10 @@ namespace PocketCore::Effect
 		const BattleSlot &user{userTeam.at(context.mUserIndex)};
 		const BattleSlot &target{targetTeam.at(context.mTargetIndex)};
 
-		const auto accuracyMult = [](sb stage) -> float {
-			if (stage >= 0)
-			{
-				return (BASE_ACCURACY_MULTIPLIER_NUMERATOR + static_cast<float>(stage)) / BASE_ACCURACY_MULTIPLIER_DENOMINATOR;
-			}
-
-			return BASE_ACCURACY_MULTIPLIER_NUMERATOR / (BASE_ACCURACY_MULTIPLIER_DENOMINATOR - static_cast<float>(stage));
-		};
-
-		const auto evasionMult = [](sb stage) -> float {
-			if (stage >= 0)
-			{
-				return BASE_ACCURACY_MULTIPLIER_DENOMINATOR / (BASE_ACCURACY_MULTIPLIER_NUMERATOR + static_cast<float>(stage));
-			}
-
-			return (BASE_ACCURACY_MULTIPLIER_DENOMINATOR - static_cast<float>(stage)) / BASE_ACCURACY_MULTIPLIER_NUMERATOR;
-		};
-
 		float accuracy{
-			static_cast<float>(context.mMoveAccuracy) * accuracyMult(user.mStatStages.mAccuracy) * evasionMult(target.mStatStages.mEvasion),
+			static_cast<float>(context.mMoveAccuracy)
+				* CACHE_ACCURACY_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(user.mStatStages.mAccuracy))
+				* CACHE_EVASION_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(target.mStatStages.mEvasion)),
 		};
 
 		accuracy = std::max(std::min(accuracy, 100.0F), 0.0F);
