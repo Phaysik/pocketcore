@@ -4,9 +4,12 @@
 #include <array>
 #include <string_view>
 
-#include <catch2/catch_test_macros.hpp>
-
+#include "Configuration/constants.h"
+#include "Terrain/terrainID.h"
+#include "Terrain/terrainMeta.h"
 #include "Utility/Debug/Logging/logger.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::TerrainRegistryConfiguration;
@@ -14,11 +17,11 @@ using PocketCore::Terrain::TerrainID;
 using PocketCore::Terrain::TerrainMeta;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureTerrainLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureTerrainLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -52,6 +55,7 @@ SCENARIO("TerrainRegistryConfiguration addTerrain")
 
 			auto nameResult{configuration.getTerrainName(customIdentifier)};
 			REQUIRE(nameResult.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((nameResult.value() == "Custom Terrain"));
 
 			const TerrainMeta *metadata{configuration.getTerrainMetadata(customIdentifier)};
@@ -81,11 +85,13 @@ SCENARIO("TerrainRegistryConfiguration addTerrains")
 
 	GIVEN("a batch with duplicate names")
 	{
-		std::array<TerrainMeta, 3> definitions{{
-			makeTerrain("Batch One"),
-			makeTerrain("Batch Two"),
-			makeTerrain("Batch One"),
-		}};
+		std::array<TerrainMeta, 3> definitions{
+			{
+				makeTerrain("Batch One"),
+				makeTerrain("Batch Two"),
+				makeTerrain("Batch One"),
+			},
+		};
 
 		WHEN("the batch is added")
 		{
@@ -125,6 +131,7 @@ SCENARIO("TerrainRegistryConfiguration metadata lifecycle")
 
 				auto idResult{configuration.getTerrainID("Renamed Terrain")};
 				REQUIRE(idResult.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((idResult.value() == customIdentifier));
 			}
 		}
@@ -211,11 +218,11 @@ SCENARIO("TerrainRegistryConfiguration registered span")
 		THEN("registered span contains the new name")
 		{
 			const auto registeredTerrains{configuration.getRegisteredTerrains()};
-			auto found = std::find_if(registeredTerrains.begin(), registeredTerrains.end(),
-				[](const TerrainMeta &metadata) { return metadata.mName == "Span Terrain"; });
+			auto found = std::ranges::find_if(registeredTerrains.begin(), registeredTerrains.end(),
+											  [](const TerrainMeta &metadata) { return metadata.mName == "Span Terrain"; });
 			CHECK((found != registeredTerrains.end()));
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

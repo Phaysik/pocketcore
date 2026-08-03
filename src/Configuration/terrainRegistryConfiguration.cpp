@@ -34,24 +34,25 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TerrainRegistryConfiguration::renameTerrain(const std::string_view &oldName,
-																									const std::string_view &newName)
+																									  const std::string_view &newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TerrainRegistryConfiguration::updateTerrain(const std::string_view &terrainName,
-																									const TerrainMeta &terrainMeta)
+																									  const TerrainMeta &terrainMeta)
 	{
 		return mutateMetadata(terrainName, "updateTerrain", [&terrainMeta](TerrainMeta &metadata) { metadata = terrainMeta; });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TerrainRegistryConfiguration::updateTerrain(const TerrainID terrainID,
-																									const TerrainMeta &terrainMeta)
+																									  const TerrainMeta &terrainMeta)
 	{
 		return mutateMetadata(terrainID, "updateTerrain", [&terrainMeta](TerrainMeta &metadata) { metadata = terrainMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<TerrainID, RegistryErrorInfo> TerrainRegistryConfiguration::removeTerrain(const std::string_view &terrainName)
+	ATTR_NODISCARD std::expected<TerrainID, RegistryErrorInfo> TerrainRegistryConfiguration::removeTerrain(
+		const std::string_view &terrainName)
 	{
 		return removeMetadata(terrainName);
 	}

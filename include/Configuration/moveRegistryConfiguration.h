@@ -30,6 +30,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::MoveTargetID;
+	using PocketCore::Registry::Move::MoveRegistry;
 
 	namespace Detail
 	{
@@ -53,11 +54,11 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class MoveRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Move::MoveRegistry, MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID,
+		: private FixedMetadataRegistryConfiguration<MoveRegistry, MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID,
 													 Detail::MoveRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Move::MoveRegistry, MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID,
+			using Base = FixedMetadataRegistryConfiguration<MoveRegistry, MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID,
 															Detail::MoveRegistryConfigurationPolicy>;
 
 		public:

@@ -25,6 +25,7 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Terrain::TerrainRegistry;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Terrain::TerrainMeta;
 
@@ -50,12 +51,12 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class TerrainRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Terrain::TerrainRegistry, TerrainMeta, TerrainID, MAX_TERRAINS,
-													 &TerrainMeta::mTerrainID, Detail::TerrainRegistryConfigurationPolicy>
+		: private FixedMetadataRegistryConfiguration<TerrainRegistry, TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID,
+													 Detail::TerrainRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Terrain::TerrainRegistry, TerrainMeta, TerrainID, MAX_TERRAINS,
-															&TerrainMeta::mTerrainID, Detail::TerrainRegistryConfigurationPolicy>;
+			using Base = FixedMetadataRegistryConfiguration<TerrainRegistry, TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID,
+															Detail::TerrainRegistryConfigurationPolicy>;
 
 		public:
 			/*! @brief Constructs a configuration containing all built-in terrains. */

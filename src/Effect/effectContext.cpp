@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <span>
+#include <utility>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -84,7 +87,7 @@ namespace PocketCore::Effect
 		return damage;
 	}
 
-	ATTR_NODISCARD std::span<const std::pair<MultiplierID, float>> EffectContext::getActiveMultipliers() const noexcept
+	ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, float>> EffectContext::getActiveMultipliers() const noexcept
 	{
 		return mActiveMultipliers;
 	}

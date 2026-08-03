@@ -83,15 +83,15 @@ SCENARIO("TypeRegistry")
 		THEN("the first entry is Normal")
 		{
 			TypeEntry firstEntry{registry.getEntry(0)};
-			CHECK((firstEntry.typeID == toTypeID(Types::Normal)));
-			CHECK((firstEntry.name == "Normal"));
+			CHECK((firstEntry.mTypeID == toTypeID(Types::Normal)));
+			CHECK((firstEntry.mName == "Normal"));
 		}
 
 		THEN("the last builtin entry is Stellar")
 		{
 			TypeEntry lastEntry{registry.getEntry(18)};
-			CHECK((lastEntry.typeID == toTypeID(Types::Stellar)));
-			CHECK((lastEntry.name == "Stellar"));
+			CHECK((lastEntry.mTypeID == toTypeID(Types::Stellar)));
+			CHECK((lastEntry.mName == "Stellar"));
 		}
 	}
 
@@ -187,7 +187,7 @@ SCENARIO("TypeRegistry")
 		THEN("lookups work when the registry is at maximum capacity")
 		{
 			TypeID finalIdentifier{registry.getNextTypeID()};
-			registry.setEntry(19, TypeEntry{.name = "Custom", .typeID = finalIdentifier});
+			registry.setEntry(19, TypeEntry{.mName = "Custom", .mTypeID = finalIdentifier});
 			registry.incrementAmountRegistered();
 
 			auto identifier{registry.getTypeID("Custom")};
@@ -195,7 +195,9 @@ SCENARIO("TypeRegistry")
 
 			REQUIRE(identifier.has_value());
 			REQUIRE(name.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((identifier.value() == finalIdentifier));
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((name.value() == "Custom"));
 		}
 
@@ -295,7 +297,7 @@ SCENARIO("TypeRegistry")
 			std::span<const TypeEntry> registeredTypes{registry.getRegisteredTypes()};
 			REQUIRE_FALSE(registeredTypes.empty());
 
-			CHECK((registeredTypes.front().name == "Normal"));
+			CHECK((registeredTypes.front().mName == "Normal"));
 		}
 
 		THEN("registered types last entry is Stellar")
@@ -303,7 +305,7 @@ SCENARIO("TypeRegistry")
 			std::span<const TypeEntry> registeredTypes{registry.getRegisteredTypes()};
 			REQUIRE_FALSE(registeredTypes.empty());
 
-			CHECK((registeredTypes.back().name == "Stellar"));
+			CHECK((registeredTypes.back().mName == "Stellar"));
 		}
 	}
 
@@ -312,17 +314,17 @@ SCENARIO("TypeRegistry")
 
 		THEN("setting an entry updates that entry")
 		{
-			TypeEntry replacementEntry{.name = "Custom", .typeID = TypeID{99}};
+			TypeEntry replacementEntry{.mName = "Custom", .mTypeID = TypeID{99}};
 			registry.setEntry(0, replacementEntry);
 
 			TypeEntry updatedEntry{registry.getEntry(0)};
-			CHECK((updatedEntry.typeID == TypeID{99}));
-			CHECK((updatedEntry.name == "Custom"));
+			CHECK((updatedEntry.mTypeID == TypeID{99}));
+			CHECK((updatedEntry.mName == "Custom"));
 		}
 
 		THEN("setting an entry updates name lookups")
 		{
-			TypeEntry replacementEntry{.name = "Cosmic", .typeID = TypeID{50}};
+			TypeEntry replacementEntry{.mName = "Cosmic", .mTypeID = TypeID{50}};
 			registry.setEntry(0, replacementEntry);
 
 			std::optional<TypeID> cosmicIdentifier{registry.getTypeID("Cosmic")};

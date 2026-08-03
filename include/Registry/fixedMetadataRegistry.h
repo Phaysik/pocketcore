@@ -38,7 +38,8 @@ namespace PocketCore::Registry
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember>
+	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
+			  std::string_view Metadata::*NameMember = &Metadata::mName>
 	class FixedMetadataRegistry
 	{
 		public:
@@ -100,7 +101,7 @@ namespace PocketCore::Registry
 					return std::nullopt;
 				}
 
-				return metadata->mName;
+				return metadata->*NameMember;
 			}
 
 			/*! @brief Returns all currently registered metadata records.
@@ -131,7 +132,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
 			*/
-			ATTR_NODISCARD constexpr const std::optional<us> findIndexByID(const StableID stableID) const
+			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
 				const us index{findEntryIndexByID(stableID)}; // LCOV_EXCL_BR (from possible .at() throw which can't happen by invariants)
 
@@ -181,7 +182,7 @@ namespace PocketCore::Registry
 				@pre @p index < getAmountRegistered().
 				@param[in] index The registered entry to remove.
 			*/
-			constexpr void eraseEntry(const us index)
+			ATTR_NOINLINE constexpr void eraseEntry(const us index)
 			{
 				assert(index < mAmountRegistered);
 
@@ -225,8 +226,7 @@ namespace PocketCore::Registry
 			constexpr void decrementAmountRegistered() noexcept
 			{
 				assert(mAmountRegistered > 0U);
-				removeIDIndex(mEntries.at(static_cast<us>(mAmountRegistered - 1U)).*IDMember,
-					static_cast<us>(mAmountRegistered - 1U));
+				removeIDIndex(mEntries.at(static_cast<us>(mAmountRegistered - 1U)).*IDMember, static_cast<us>(mAmountRegistered - 1U));
 				--mAmountRegistered;
 			}
 
@@ -256,15 +256,15 @@ namespace PocketCore::Registry
 		private:
 			struct IDIndexEntry
 			{
-				StableID stableID{};
-				us entryIndex{};
+					StableID stableID{};
+					us entryIndex{};
 			};
 
-			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
+			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
 				{
-					if (mEntries.at(index).mName == name)
+					if ((mEntries.at(index).*NameMember) == name)
 					{
 						return index;
 					}
@@ -273,13 +273,15 @@ namespace PocketCore::Registry
 				return mAmountRegistered;
 			}
 
-			ATTR_NODISCARD constexpr us findEntryIndexByID(const StableID stableID) const
+			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const
 			{
-				const auto end{mIDIndex.begin() + mIndexedAmount};
-				const auto found{std::lower_bound(mIDIndex.begin(), end, stableID,
-					[](const IDIndexEntry &entry, const StableID value) { return entry.stableID < value; })};
+				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
+				const auto found{
+					std::lower_bound(indexedEntries.begin(), indexedEntries.end(), stableID,
+									 [](const IDIndexEntry &entry, const StableID value) { return entry.stableID < value; }),
+				};
 
-				if (found != end && found->stableID == stableID)
+				if (found != indexedEntries.end() && found->stableID == stableID)
 				{
 					return found->entryIndex;
 				}
@@ -290,21 +292,34 @@ namespace PocketCore::Registry
 			constexpr void insertIDIndex(const StableID stableID, const us entryIndex)
 			{
 				assert(mIndexedAmount < Capacity);
-				const auto end{mIDIndex.begin() + mIndexedAmount};
 				const IDIndexEntry newEntry{.stableID = stableID, .entryIndex = entryIndex};
-				const auto position{std::lower_bound(mIDIndex.begin(), end, newEntry, idIndexEntryLess)};
-				std::move_backward(position, end, end + 1);
-				*position = newEntry;
+				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
+				const auto position{std::lower_bound(indexedEntries.begin(), indexedEntries.end(), newEntry, idIndexEntryLess)};
+				const us insertIndex{static_cast<us>(std::distance(indexedEntries.begin(), position))};
+
+				for (us index{mIndexedAmount}; index > insertIndex; --index)
+				{
+					mIDIndex.at(index) = std::move(mIDIndex.at(index - 1));
+				}
+
+				mIDIndex.at(insertIndex) = newEntry;
 				++mIndexedAmount;
 			}
 
 			constexpr void removeIDIndex(const StableID stableID, const us entryIndex)
 			{
-				const auto end{mIDIndex.begin() + mIndexedAmount};
+				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
 				const IDIndexEntry indexedEntry{.stableID = stableID, .entryIndex = entryIndex};
-				const auto position{std::lower_bound(mIDIndex.begin(), end, indexedEntry, idIndexEntryLess)};
-				assert(position != end && position->stableID == stableID && position->entryIndex == entryIndex);
-				std::move(position + 1, end, position);
+				const auto position{std::lower_bound(indexedEntries.begin(), indexedEntries.end(), indexedEntry, idIndexEntryLess)};
+				const us removeIndex{static_cast<us>(std::distance(indexedEntries.begin(), position))};
+				assert(removeIndex < mIndexedAmount && mIDIndex.at(removeIndex).stableID == stableID
+					   && mIDIndex.at(removeIndex).entryIndex == entryIndex);
+
+				for (us index{removeIndex}; (index + 1) < mIndexedAmount; ++index)
+				{
+					mIDIndex.at(index) = std::move(mIDIndex.at(index + 1));
+				}
+
 				--mIndexedAmount;
 			}
 
@@ -321,7 +336,8 @@ namespace PocketCore::Registry
 				}
 
 				mIndexedAmount = mAmountRegistered;
-				std::sort(mIDIndex.begin(), mIDIndex.begin() + mIndexedAmount, idIndexEntryLess);
+				auto indexedEntries{std::span<IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
+				std::sort(indexedEntries.begin(), indexedEntries.end(), idIndexEntryLess);
 			}
 
 		private:

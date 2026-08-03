@@ -30,6 +30,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::AbilityTargetID;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Ability::AbilityRegistry;
 
 	namespace Detail
 	{
@@ -53,11 +54,11 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class AbilityRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Ability::AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES,
-													 &AbilityMeta::mAbilityID, Detail::AbilityRegistryConfigurationPolicy>
+		: private FixedMetadataRegistryConfiguration<AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID,
+													 Detail::AbilityRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Ability::AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES,
+			using Base = FixedMetadataRegistryConfiguration<AbilityRegistry, AbilityMeta, AbilityID, MAX_ABILITIES,
 															&AbilityMeta::mAbilityID, Detail::AbilityRegistryConfigurationPolicy>;
 
 		public:

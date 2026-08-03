@@ -27,11 +27,11 @@ using PocketCore::Item::ItemTriggerID;
 using PocketCore::Item::toItemID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureItemLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureItemLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -310,4 +310,4 @@ SCENARIO("ItemRegistryConfiguration queries")
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

@@ -2,9 +2,10 @@
 
 #include <cmath>
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/multiplierID.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Effect::EffectContext;
 using PocketCore::Multiplier::BuiltinMultiplierID;

@@ -25,6 +25,7 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Weather::WeatherRegistry;
 	using PocketCore::Weather::WeatherID;
 	using PocketCore::Weather::WeatherMeta;
 
@@ -50,12 +51,12 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class WeatherRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Weather::WeatherRegistry, WeatherMeta, WeatherID, MAX_WEATHERS,
-													 &WeatherMeta::mWeatherID, Detail::WeatherRegistryConfigurationPolicy>
+		: private FixedMetadataRegistryConfiguration<WeatherRegistry, WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID,
+													 Detail::WeatherRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Weather::WeatherRegistry, WeatherMeta, WeatherID, MAX_WEATHERS,
-															&WeatherMeta::mWeatherID, Detail::WeatherRegistryConfigurationPolicy>;
+			using Base = FixedMetadataRegistryConfiguration<WeatherRegistry, WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID,
+															Detail::WeatherRegistryConfigurationPolicy>;
 
 		public:
 			/*! @brief Constructs a configuration containing all built-in weathers. */

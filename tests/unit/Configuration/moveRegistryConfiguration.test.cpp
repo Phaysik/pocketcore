@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Configuration/constants.h"
 #include "Effect/effectType.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
@@ -28,7 +29,7 @@ using PocketCore::Utility::Debug::Logging::Logger;
 
 namespace
 {
-	void ensureMoveLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureMoveLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -222,6 +223,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				REQUIRE(updateResult.has_value());
 				auto replacementIdentifier{configuration.getMoveID("Replacement")};
 				REQUIRE(replacementIdentifier.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((replacementIdentifier.value() == customIdentifier));
 
 				const auto registeredMoves{configuration.getRegisteredMoves()};
@@ -244,6 +246,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				REQUIRE(updateResult.has_value());
 				auto replacementIdentifier{configuration.getMoveID("Replacement By ID")};
 				REQUIRE(replacementIdentifier.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((replacementIdentifier.value() == customIdentifier));
 
 				const auto registeredMoves{configuration.getRegisteredMoves()};

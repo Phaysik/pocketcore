@@ -2,14 +2,17 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "Configuration/constants.h"
+#include "Multiplier/multiplierID.h"
+#include "Multiplier/multiplierMeta.h"
 #include "Utility/Debug/Logging/logger.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MAX_MULTIPLIERS;
 using PocketCore::Configuration::MultiplierRegistryConfiguration;
@@ -18,11 +21,11 @@ using PocketCore::Multiplier::MultiplierID;
 using PocketCore::Multiplier::MultiplierMeta;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureMultiplierLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureMultiplierLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -56,6 +59,7 @@ SCENARIO("MultiplierRegistryConfiguration addMultiplier")
 
 			auto nameResult{configuration.getMultiplierName(customIdentifier)};
 			REQUIRE(nameResult.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((nameResult.value() == "Custom Multiplier"));
 
 			const MultiplierMeta *metadata{configuration.getMultiplierMetadata(customIdentifier)};
@@ -85,11 +89,13 @@ SCENARIO("MultiplierRegistryConfiguration addMultipliers")
 
 	GIVEN("a batch with duplicate names")
 	{
-		std::array<MultiplierMeta, 3> definitions{{
-			makeMultiplier("Batch One"),
-			makeMultiplier("Batch Two"),
-			makeMultiplier("Batch One"),
-		}};
+		std::array<MultiplierMeta, 3> definitions{
+			{
+				makeMultiplier("Batch One"),
+				makeMultiplier("Batch Two"),
+				makeMultiplier("Batch One"),
+			},
+		};
 
 		WHEN("the batch is added")
 		{
@@ -154,6 +160,7 @@ SCENARIO("MultiplierRegistryConfiguration metadata lifecycle")
 
 				auto idResult{configuration.getMultiplierID("Renamed Multiplier")};
 				REQUIRE(idResult.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((idResult.value() == customIdentifier));
 			}
 		}
@@ -291,11 +298,11 @@ SCENARIO("MultiplierRegistryConfiguration registered span")
 		THEN("registered span contains the new name")
 		{
 			const auto registeredMultipliers{configuration.getRegisteredMultipliers()};
-			auto found = std::find_if(registeredMultipliers.begin(), registeredMultipliers.end(),
-				[](const MultiplierMeta &metadata) { return metadata.mName == "Span Multiplier"; });
+			auto found = std::ranges::find_if(registeredMultipliers.begin(), registeredMultipliers.end(),
+											  [](const MultiplierMeta &metadata) { return metadata.mName == "Span Multiplier"; });
 			CHECK((found != registeredMultipliers.end()));
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

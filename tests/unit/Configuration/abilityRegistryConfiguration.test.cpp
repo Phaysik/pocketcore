@@ -24,11 +24,11 @@ using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureAbilityLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureAbilityLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -289,4 +289,4 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

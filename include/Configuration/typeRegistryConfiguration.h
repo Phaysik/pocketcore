@@ -16,6 +16,7 @@
 #include <string_view>
 
 #include "Configuration/constants.h"
+#include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Registry/typeRegistry.h"
 #include "Types/typeEffectiveness.h"
@@ -24,8 +25,22 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Types::TypeEntry;
+	using PocketCore::Registry::Types::TypeRegistry;
 	using PocketCore::Types::TypeEffectiveness;
 	using PocketCore::Types::TypeID;
+
+	namespace Detail
+	{
+		struct TypeRegistryConfigurationPolicy
+		{
+			public:
+				static constexpr std::string_view configurationName{"TypeRegistryConfiguration"};
+				static constexpr std::string_view entityName{"type"};
+				static constexpr RegistryError duplicateError{RegistryError::DuplicateType};
+				static constexpr RegistryError notFoundError{RegistryError::TypeNotFound};
+		};
+	} // namespace Detail
 
 	// MARK: Helper Structs
 
@@ -71,7 +86,13 @@ namespace PocketCore::Configuration
 	   provide all-or-nothing (atomic rollback) semantics.
 	*/
 	class TypeRegistryConfiguration
+		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID,
+													 Detail::TypeRegistryConfigurationPolicy>
 	{
+		private:
+			using Base = FixedMetadataRegistryConfiguration<TypeRegistry, TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID,
+															Detail::TypeRegistryConfigurationPolicy>;
+
 		public:
 			// MARK: Constructor
 
@@ -115,7 +136,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const std::optional<TypeID> getTypeID(const std::string_view &name) const
 			{
-				return registry.getTypeID(name);
+				return getID(name);
 			}
 
 			/*! @brief Looks up a type's display name by its ID.
@@ -124,15 +145,15 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
-				return registry.getTypeName(typeID);
+				return getName(typeID);
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
-				@return A span of @ref Registry::Types::TypeEntry covering all valid registered entries.
+				@return A span of @ref TypeEntry covering all valid registered entries.
 			*/
-			ATTR_NODISCARD constexpr const std::span<const Registry::Types::TypeEntry> getRegisteredTypes() const
+			ATTR_NODISCARD constexpr const std::span<const TypeEntry> getRegisteredTypes() const
 			{
-				return registry.getRegisteredTypes();
+				return getRegisteredEntries();
 			}
 
 			/*! @brief Returns the total number of registered types (built-in + custom).
@@ -140,7 +161,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
-				return registry.getAmountRegistered();
+				return Base::getAmountRegistered();
 			}
 
 			// MARK: Setters
@@ -292,7 +313,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
 			{
-				return registry.hasType(name);
+				return hasEntry(name);
 			}
 
 			/*! @brief Checks whether a type with the given ID is registered.
@@ -301,7 +322,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
-				return registry.hasType(typeID);
+				return hasEntry(typeID);
 			}
 
 		private:
@@ -309,18 +330,19 @@ namespace PocketCore::Configuration
 
 			void constexpr clearRows(const us typeIndex)
 			{
-				const us registered{registry.getAmountRegistered()};
+				TypeRegistry &typeRegistry{getRegistry()};
+				const us registered{typeRegistry.getAmountRegistered()};
 
 				// Clear offensive row
 				for (us col{0}; col < registered; ++col)
 				{
-					registry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					typeRegistry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
 
 				// Clear defensive column
 				for (us row{0}; row < registered; ++row)
 				{
-					registry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					typeRegistry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
 			}
 
@@ -345,10 +367,6 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
 																			 const std::string_view &callerContext);
-
-		private:
-			/*! @brief The internal type registry storing all type entries and matchup data. */
-			Registry::Types::TypeRegistry registry{};
 	};
 } // namespace PocketCore::Configuration
 

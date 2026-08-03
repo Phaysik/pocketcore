@@ -4,10 +4,13 @@
 #include <cmath>
 
 #include "Ability/abilityID.h"
+#include "Battle/battleState.h"
 #include "Configuration/constants.h"
+#include "Effect/effectContext.h"
 #include "Item/itemID.h"
 #include "Multiplier/builtinMultiplierID.h"
 #include "Pokemon/pokemon.h"
+#include "Registry/registryProvider.h"
 #include "Types/typeID.h"
 #include "Types/types.h"
 
@@ -79,7 +82,7 @@ SCENARIO("StabHandler")
 			THEN("the STAB multiplier is recorded")
 			{
 				const auto activeMultipliers{effectContext.getActiveMultipliers()};
-				REQUIRE(activeMultipliers.size() == 1U);
+				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == toMultiplierID(BuiltinMultiplierID::Stab)));
 				CHECK((std::fabs(activeMultipliers.front().second - STAB_HIT_MULTIPLIER) < 0.0001F));
 			}

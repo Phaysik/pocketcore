@@ -32,13 +32,13 @@ using PocketCore::Utility::Debug::Logging::Logger;
 
 using enum TypeEffectiveness;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
 	constexpr std::string_view LOG_FILE{"typeRegistryConfiguration_test.log"};
 
-	void ensureLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -1194,4 +1194,4 @@ SCENARIO("TypeRegistryConfiguration addTypes with bad matchup reference")
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

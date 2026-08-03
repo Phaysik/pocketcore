@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
@@ -15,7 +15,7 @@ using PocketCore::Effect::IEffectHandler;
 using PocketCore::Effect::Side;
 using PocketCore::Registry::RegistryProvider;
 
-// NOLINTBEGIN(misc-const-correctness)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
 namespace
 {
@@ -24,7 +24,7 @@ namespace
 		public:
 			void apply(const BattleState & /*state*/, EffectContext & /*context*/, const RegistryProvider & /*provider*/) const override {}
 	};
-}
+} // namespace
 
 SCENARIO("IEffectHandler")
 {
@@ -62,4 +62,4 @@ SCENARIO("IEffectHandler")
 	}
 }
 
-// NOLINTEND(misc-const-correctness)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

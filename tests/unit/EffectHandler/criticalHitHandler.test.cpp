@@ -1,9 +1,12 @@
 #include "EffectHandler/criticalHitHandler.h"
 
+#include <algorithm>
 #include <cmath>
 #include <optional>
 
+#include "Battle/battleState.h"
 #include "Configuration/constants.h"
+#include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "Multiplier/builtinMultiplierID.h"
 #include "Registry/registryProvider.h"
@@ -24,7 +27,7 @@ using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Utility::Random;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace,readability-function-cognitive-complexity)
 
 namespace
 {
@@ -99,6 +102,7 @@ SCENARIO("CriticalHitHandler")
 			}
 
 			REQUIRE(forcedCriticalSeed.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			Random::getTwister().seed(forcedCriticalSeed.value());
 
 			criticalHitHandler.apply(battleState, effectContext, provider);
@@ -133,4 +137,4 @@ SCENARIO("CriticalHitHandler")
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace,readability-function-cognitive-complexity)

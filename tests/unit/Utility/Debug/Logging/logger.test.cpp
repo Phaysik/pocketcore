@@ -33,8 +33,9 @@ namespace Logging = PocketCore::Utility::Debug::Logging;
 
 using Logging::Logger;
 using PocketCore::Core::ub;
+using PocketCore::Core::us;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
@@ -42,7 +43,7 @@ namespace
 		@param fileName Optional path to a specific log file. If nullptr, uses the default test log file.
 		@return The file contents as a string.
 	*/
-	ATTR_NODISCARD std::string readLogFile(const std::string *fileName = nullptr) // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	ATTR_NODISCARD std::string readLogFile(const std::string *fileName = nullptr)
 	{
 		std::string defaultFileName{"logger_test_output.log"};
 		// Flush spdlog to ensure all output is written before reading
@@ -377,7 +378,7 @@ SCENARIO("Logger")
 		{
 			const std::string_view prefix{"prefix"};
 			const std::string_view suffix{"suffix"};
-			const unsigned short count{9U};
+			const us count{9U};
 			std::optional<std::string_view> result{Logger::warn("{} {} {} {}", prefix, 20UL, suffix, count)};
 			CHECK_FALSE(result.has_value());
 
@@ -859,4 +860,4 @@ SCENARIO("Logger")
 	REQUIRE(fileRemoved);
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

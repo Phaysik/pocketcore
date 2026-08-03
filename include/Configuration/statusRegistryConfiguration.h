@@ -25,6 +25,7 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 
@@ -50,12 +51,12 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class StatusRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Status::StatusRegistry, StatusMeta, StatusID, MAX_STATUSES,
-													 &StatusMeta::mStatusID, Detail::StatusRegistryConfigurationPolicy>
+		: private FixedMetadataRegistryConfiguration<StatusRegistry, StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID,
+													 Detail::StatusRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Status::StatusRegistry, StatusMeta, StatusID, MAX_STATUSES,
-															&StatusMeta::mStatusID, Detail::StatusRegistryConfigurationPolicy>;
+			using Base = FixedMetadataRegistryConfiguration<StatusRegistry, StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID,
+															Detail::StatusRegistryConfigurationPolicy>;
 
 		public:
 			/*! @brief Constructs a configuration containing all built-in statuses. */

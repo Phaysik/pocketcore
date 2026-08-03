@@ -4,9 +4,12 @@
 #include <array>
 #include <string_view>
 
-#include <catch2/catch_test_macros.hpp>
-
+#include "Configuration/constants.h"
+#include "Status/statusID.h"
+#include "Status/statusMeta.h"
 #include "Utility/Debug/Logging/logger.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::StatusRegistryConfiguration;
@@ -14,11 +17,11 @@ using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureStatusLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureStatusLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -52,6 +55,7 @@ SCENARIO("StatusRegistryConfiguration addStatus")
 
 			auto nameResult{configuration.getStatusName(customIdentifier)};
 			REQUIRE(nameResult.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((nameResult.value() == "Custom Status"));
 
 			const StatusMeta *metadata{configuration.getStatusMetadata(customIdentifier)};
@@ -81,11 +85,13 @@ SCENARIO("StatusRegistryConfiguration addStatuses")
 
 	GIVEN("a batch with duplicate names")
 	{
-		std::array<StatusMeta, 3> definitions{{
-			makeStatus("Batch One"),
-			makeStatus("Batch Two"),
-			makeStatus("Batch One"),
-		}};
+		std::array<StatusMeta, 3> definitions{
+			{
+				makeStatus("Batch One"),
+				makeStatus("Batch Two"),
+				makeStatus("Batch One"),
+			},
+		};
 
 		WHEN("the batch is added")
 		{
@@ -125,6 +131,7 @@ SCENARIO("StatusRegistryConfiguration metadata lifecycle")
 
 				auto idResult{configuration.getStatusID("Renamed Status")};
 				REQUIRE(idResult.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((idResult.value() == customIdentifier));
 			}
 		}
@@ -211,11 +218,11 @@ SCENARIO("StatusRegistryConfiguration registered span")
 		THEN("registered span contains the new name")
 		{
 			const auto registeredStatuses{configuration.getRegisteredStatuses()};
-			auto found = std::find_if(registeredStatuses.begin(), registeredStatuses.end(),
-				[](const StatusMeta &metadata) { return metadata.mName == "Span Status"; });
+			auto found = std::ranges::find_if(registeredStatuses.begin(), registeredStatuses.end(),
+											  [](const StatusMeta &metadata) { return metadata.mName == "Span Status"; });
 			CHECK((found != registeredStatuses.end()));
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

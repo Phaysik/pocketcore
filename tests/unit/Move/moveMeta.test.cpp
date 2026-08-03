@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "Effect/effectType.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Move::baseAttackEffects;

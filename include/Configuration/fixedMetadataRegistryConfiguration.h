@@ -53,6 +53,22 @@ namespace PocketCore::Configuration
 			/*! @brief Constructs a configuration containing the concrete registry's built-in metadata. */
 			constexpr FixedMetadataRegistryConfiguration() = default;
 
+			/*! @brief Returns mutable access to the owned concrete registry.
+				@return A mutable reference to the underlying registry instance.
+			*/
+			ATTR_NODISCARD constexpr Registry &getRegistry() noexcept
+			{
+				return registry;
+			}
+
+			/*! @brief Returns read-only access to the owned concrete registry.
+				@return A const reference to the underlying registry instance.
+			*/
+			ATTR_NODISCARD constexpr const Registry &getRegistry() const noexcept
+			{
+				return registry;
+			}
+
 			/*! @brief Looks up complete metadata by stable ID.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or

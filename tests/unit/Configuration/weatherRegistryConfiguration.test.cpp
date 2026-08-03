@@ -4,9 +4,12 @@
 #include <array>
 #include <string_view>
 
-#include <catch2/catch_test_macros.hpp>
-
+#include "Configuration/constants.h"
 #include "Utility/Debug/Logging/logger.h"
+#include "Weather/weatherID.h"
+#include "Weather/weatherMeta.h"
+
+#include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::WeatherRegistryConfiguration;
@@ -14,11 +17,11 @@ using PocketCore::Utility::Debug::Logging::Logger;
 using PocketCore::Weather::WeatherID;
 using PocketCore::Weather::WeatherMeta;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
 namespace
 {
-	void ensureWeatherLoggerInitialized() // NOLINT(llvm-prefer-static-over-anonymous-namespace)
+	void ensureWeatherLoggerInitialized()
 	{
 		static bool initialized{false};
 
@@ -52,6 +55,7 @@ SCENARIO("WeatherRegistryConfiguration addWeather")
 
 			auto nameResult{configuration.getWeatherName(customIdentifier)};
 			REQUIRE(nameResult.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((nameResult.value() == "Custom Weather"));
 
 			const WeatherMeta *metadata{configuration.getWeatherMetadata(customIdentifier)};
@@ -81,11 +85,13 @@ SCENARIO("WeatherRegistryConfiguration addWeathers")
 
 	GIVEN("a batch with duplicate names")
 	{
-		std::array<WeatherMeta, 3> definitions{{
-			makeWeather("Batch One"),
-			makeWeather("Batch Two"),
-			makeWeather("Batch One"),
-		}};
+		std::array<WeatherMeta, 3> definitions{
+			{
+				makeWeather("Batch One"),
+				makeWeather("Batch Two"),
+				makeWeather("Batch One"),
+			},
+		};
 
 		WHEN("the batch is added")
 		{
@@ -125,6 +131,7 @@ SCENARIO("WeatherRegistryConfiguration metadata lifecycle")
 
 				auto idResult{configuration.getWeatherID("Renamed Weather")};
 				REQUIRE(idResult.has_value());
+				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((idResult.value() == customIdentifier));
 			}
 		}
@@ -211,11 +218,11 @@ SCENARIO("WeatherRegistryConfiguration registered span")
 		THEN("registered span contains the new name")
 		{
 			const auto registeredWeathers{configuration.getRegisteredWeathers()};
-			auto found = std::find_if(registeredWeathers.begin(), registeredWeathers.end(),
-				[](const WeatherMeta &metadata) { return metadata.mName == "Span Weather"; });
+			auto found = std::ranges::find_if(registeredWeathers.begin(), registeredWeathers.end(),
+											  [](const WeatherMeta &metadata) { return metadata.mName == "Span Weather"; });
 			CHECK((found != registeredWeathers.end()));
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)

@@ -10,6 +10,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
+#include "EffectHandler/effectHandlerInterface.h"
 #include "Registry/registryProvider.h"
 #include "Utility/random.h"
 

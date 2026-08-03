@@ -30,6 +30,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::ItemTargetID;
+	using PocketCore::Registry::Item::ItemRegistry;
 
 	namespace Detail
 	{
@@ -53,11 +54,11 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Item::ItemRegistry, ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID,
+		: private FixedMetadataRegistryConfiguration<ItemRegistry, ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID,
 													 Detail::ItemRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Item::ItemRegistry, ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID,
+			using Base = FixedMetadataRegistryConfiguration<ItemRegistry, ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID,
 															Detail::ItemRegistryConfigurationPolicy>;
 
 		public:

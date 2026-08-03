@@ -18,7 +18,7 @@
 
 namespace PocketCore::Configuration
 {
-	ATTR_NODISCARD constexpr std::size_t statStageCacheIndex(const sb statStage) noexcept
+	ATTR_NODISCARD ATTR_PURE constexpr std::size_t statStageCacheIndex(const sb statStage) noexcept
 	{
 		const sb clampedStage{std::clamp(statStage, static_cast<sb>(-MAX_STAT_STAGES), MAX_STAT_STAGES)};
 		return static_cast<std::size_t>(clampedStage + MAX_STAT_STAGES);

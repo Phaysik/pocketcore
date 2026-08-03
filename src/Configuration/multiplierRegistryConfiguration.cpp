@@ -22,7 +22,8 @@ namespace PocketCore::Configuration
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
 
-	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::addMultiplier(const MultiplierMeta &multiplierMeta)
+	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::addMultiplier(
+		const MultiplierMeta &multiplierMeta)
 	{
 		return addMetadata(multiplierMeta);
 	}
@@ -34,29 +35,32 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MultiplierRegistryConfiguration::renameMultiplier(const std::string_view &oldName,
-																									const std::string_view &newName)
+																											const std::string_view &newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MultiplierRegistryConfiguration::updateMultiplier(const std::string_view &multiplierName,
-																									const MultiplierMeta &multiplierMeta)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MultiplierRegistryConfiguration::updateMultiplier(
+		const std::string_view &multiplierName, const MultiplierMeta &multiplierMeta)
 	{
-		return mutateMetadata(multiplierName, "updateMultiplier", [&multiplierMeta](MultiplierMeta &metadata) { metadata = multiplierMeta; });
+		return mutateMetadata(multiplierName, "updateMultiplier",
+							  [&multiplierMeta](MultiplierMeta &metadata) { metadata = multiplierMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MultiplierRegistryConfiguration::updateMultiplier(const MultiplierID multiplierID,
-																									const MultiplierMeta &multiplierMeta)
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MultiplierRegistryConfiguration::updateMultiplier(
+		const MultiplierID multiplierID, const MultiplierMeta &multiplierMeta)
 	{
 		return mutateMetadata(multiplierID, "updateMultiplier", [&multiplierMeta](MultiplierMeta &metadata) { metadata = multiplierMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::removeMultiplier(const std::string_view &multiplierName)
+	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::removeMultiplier(
+		const std::string_view &multiplierName)
 	{
 		return removeMetadata(multiplierName);
 	}
 
-	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::removeMultiplier(const MultiplierID multiplierID)
+	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::removeMultiplier(
+		const MultiplierID multiplierID)
 	{
 		return removeMetadata(multiplierID);
 	}

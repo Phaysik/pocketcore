@@ -11,6 +11,7 @@
 #include <array>
 #include <span>
 
+#include "Core/attributeMacros.h"
 #include "Effect/effectType.h"
 
 namespace PocketCore::Move
