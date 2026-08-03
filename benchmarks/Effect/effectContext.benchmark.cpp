@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 
 #include <benchmark/benchmark.h>
 

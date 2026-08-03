@@ -24,6 +24,7 @@ namespace PocketCore::Configuration
 
 	inline constexpr ub MAX_TYPES{20};
 	inline constexpr ub MAX_TYPES_PER_POKEMON{2};
+	inline constexpr ub TYPE_EFFECTIVENESS_MAX_AMOUNT{MAX_TYPES_PER_POKEMON * 2};
 
 	inline constexpr us MAX_ABILITIES{1'000};
 	inline constexpr ub MAX_ABILITIES_PER_POKEMON{1};
@@ -82,24 +83,26 @@ namespace PocketCore::Configuration
 	*/
 	enum class RegistryError : ub
 	{
-		MaxCapacity,		 /*!< The registry has reached its maximum number of entries. */
-		DuplicateType,		 /*!< A type with the given name already exists. */
-		TypeNotFound,		 /*!< No type matching the input was found. */
-		MatchupMismatch,	 /*!< The number of provided matchup entries does not match the registered count. */
-		DuplicateAbility,	 /*!< An ability with the given name already exists. */
-		AbilityNotFound,	 /*!< No ability matching the input was found. */
-		DuplicateItem,		 /*!< An item with the given name already exists. */
-		ItemNotFound,		 /*!< No item matching the input was found. */
-		DuplicateMove,		 /*!< A move with the given name already exists. */
-		MoveNotFound,		 /*!< No move matching the input was found. */
-		DuplicateStatus,	 /*!< A status with the given name already exists. */
-		StatusNotFound,		 /*!< No status matching the input was found. */
-		DuplicateWeather,	 /*!< A weather with the given name already exists. */
-		WeatherNotFound,	 /*!< No weather matching the input was found. */
-		DuplicateTerrain,	 /*!< A terrain with the given name already exists. */
-		TerrainNotFound,	 /*!< No terrain matching the input was found. */
-		DuplicateMultiplier, /*!< A multiplier with the given name already exists. */
-		MultiplierNotFound,	 /*!< No multiplier matching the input was found. */
+		MaxCapacity,				/*!< The registry has reached its maximum number of entries. */
+		DuplicateType,				/*!< A type with the given name already exists. */
+		TypeNotFound,				/*!< No type matching the input was found. */
+		MatchupMismatch,			/*!< The number of provided matchup entries does not match the registered count. */
+		DuplicateAbility,			/*!< An ability with the given name already exists. */
+		AbilityNotFound,			/*!< No ability matching the input was found. */
+		DuplicateItem,				/*!< An item with the given name already exists. */
+		ItemNotFound,				/*!< No item matching the input was found. */
+		DuplicateMove,				/*!< A move with the given name already exists. */
+		MoveNotFound,				/*!< No move matching the input was found. */
+		DuplicateStatus,			/*!< A status with the given name already exists. */
+		StatusNotFound,				/*!< No status matching the input was found. */
+		DuplicateWeather,			/*!< A weather with the given name already exists. */
+		WeatherNotFound,			/*!< No weather matching the input was found. */
+		DuplicateTerrain,			/*!< A terrain with the given name already exists. */
+		TerrainNotFound,			/*!< No terrain matching the input was found. */
+		DuplicateMultiplier,		/*!< A multiplier with the given name already exists. */
+		MultiplierNotFound,			/*!< No multiplier matching the input was found. */
+		DuplicateTypeEffectiveness, /*!< A type effectiveness entry with the given name already exists. */
+		TypeEffectivenessNotFound,	/*!< No type effectiveness entry matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -108,8 +111,8 @@ namespace PocketCore::Configuration
 	*/
 	enum class UnspecifiedMatchup : ub
 	{
-		Neutral,	/*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::E (neutral / 1x). */
-		NotDefined, /*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. */
+		Neutral,	/*!< Fill unspecified matchups with @ref PocketCore::Types::BuiltInTypeEffectivenessID::E (neutral / 1x). */
+		NotDefined, /*!< Fill unspecified matchups with @ref PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID. */
 	};
 
 	// MARK: RegistryErrorInfo
@@ -220,6 +223,12 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::MultiplierNotFound:
 						mErrorName = "MultiplierNotFound";
+						break;
+					case RegistryError::DuplicateTypeEffectiveness:
+						mErrorName = "DuplicateTypeEffectiveness";
+						break;
+					case RegistryError::TypeEffectivenessNotFound:
+						mErrorName = "TypeEffectivenessNotFound";
 						break;
 						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
 						// compiler warnings about unhandled enum values.

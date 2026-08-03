@@ -17,9 +17,10 @@
 
 #include "Configuration/constants.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
+#include "Configuration/typeEffectivenessRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Registry/typeRegistry.h"
-#include "Types/typeEffectiveness.h"
+#include "Types/typeEffectivenessID.h"
 #include "Types/typeID.h"
 
 namespace PocketCore::Configuration
@@ -27,7 +28,8 @@ namespace PocketCore::Configuration
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Types::TypeEntry;
 	using PocketCore::Registry::Types::TypeRegistry;
-	using PocketCore::Types::TypeEffectiveness;
+	using PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID;
+	using PocketCore::Types::TypeEffectivenessID;
 	using PocketCore::Types::TypeID;
 
 	namespace Detail
@@ -55,8 +57,8 @@ namespace PocketCore::Configuration
 			/*! @brief The display name of the target type. */
 			std::string_view typeName{};
 
-			/*! @brief The effectiveness multiplier for this matchup. */
-			TypeEffectiveness value;
+			/*! @brief The type-effectiveness identifier for this matchup cell. */
+			TypeEffectivenessID value;
 	};
 
 	/*! @struct TypeDefinition Configuration/typeRegistryConfiguration.h
@@ -101,33 +103,33 @@ namespace PocketCore::Configuration
 
 			// MARK: Getters
 
-			/*! @brief Returns the effectiveness of one type attacking another, looked up by display name.
+			/*! @brief Returns the effectiveness ID of one type attacking another, looked up by display name.
 				@details Resolves both attacker and defender names to their internal array indices and reads the corresponding cell from the
 			   type chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@return The @ref PocketCore::Types::TypeEffectiveness value on success, or @ref RegistryErrorInfo if either type is not
+				@return The @ref PocketCore::Types::TypeEffectivenessID value on success, or @ref RegistryErrorInfo if either type is not
 			   found.
 			*/
-			ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> getMatchup(const std::string_view &attackerName,
-																						  const std::string_view &defenderName);
+			ATTR_NODISCARD std::expected<TypeEffectivenessID, RegistryErrorInfo> getMatchup(const std::string_view &attackerName,
+																							const std::string_view &defenderName);
 
-			/*! @brief Returns the full offensive matchup row for a type identified by display name.
+			/*! @brief Returns the full offensive matchup row of effectiveness IDs for a type identified by display name.
 				@details Resolves the attacker name to its internal array index and returns a copy of the entire effectiveness row.
 				@param[in] attackerName The display name of the attacking type.
-				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness row on success, or @ref RegistryErrorInfo if the type
+				@return A copy of the full @ref PocketCore::Types::TypeEffectivenessID row on success, or @ref RegistryErrorInfo if the type
 			   is not found.
 			*/
-			ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> getMatchupRow(
+			ATTR_NODISCARD std::expected<std::array<TypeEffectivenessID, MAX_TYPES>, RegistryErrorInfo> getMatchupRow(
 				const std::string_view &attackerName);
 
-			/*! @brief Returns the full defensive matchup column for a type identified by display name.
+			/*! @brief Returns the full defensive matchup column of effectiveness IDs for a type identified by display name.
 				@details Resolves the defender name to its internal array index and reads every attacker's effectiveness against it.
 				@param[in] defenderName The display name of the defending type.
-				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness column on success, or @ref RegistryErrorInfo if the
+				@return A copy of the full @ref PocketCore::Types::TypeEffectivenessID column on success, or @ref RegistryErrorInfo if the
 			   type is not found.
 			*/
-			ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> getDefensiveColumn(
+			ATTR_NODISCARD std::expected<std::array<TypeEffectivenessID, MAX_TYPES>, RegistryErrorInfo> getDefensiveColumn(
 				const std::string_view &defenderName);
 
 			/*! @brief Looks up a type ID by its display name.
@@ -170,29 +172,29 @@ namespace PocketCore::Configuration
 				@details Looks up both type names, resolves their array indices, and writes the new effectiveness value into the chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@param[in] value The @ref PocketCore::Types::TypeEffectiveness value to assign.
+				@param[in] value The @ref PocketCore::Types::TypeEffectivenessID value to assign.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if either type is not found, or void on success.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchup(const std::string_view &attackerName,
 																			 const std::string_view &defenderName,
-																			 const TypeEffectiveness value);
+																			 const TypeEffectivenessID value);
 
 			/*! @brief Replaces the entire offensive matchup row for a type identified by name.
 				@details Looks up the attacker by name, resolves its array index, and overwrites every column in that row. The caller only
-			   needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   needs to provide entries for the currently registered types. Any indices beyond the span's size are set to
+			   @ref NO_TYPE_EFFECTIVENESS_ID.
 				@pre @p newRow.size() <= @ref MAX_TYPES.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
-				@param[in] newRow A span of @ref PocketCore::Types::TypeEffectiveness values for the new offensive matchup row.
+				@param[in] newRow A span of @ref PocketCore::Types::TypeEffectivenessID values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchupRow(const std::string_view &attackerName,
-																				const std::span<const TypeEffectiveness> &newRow);
+																				const std::span<const TypeEffectivenessID> &newRow);
 
 			/*! @brief Replaces the entire offensive matchup row for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry. Types not mentioned default
-			   to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   to @ref NO_TYPE_EFFECTIVENESS_ID. This allows the caller to specify matchups in any order.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
 				@param[in] newRow A span of @ref MatchupPair values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the attacker or any referenced type is not
@@ -203,20 +205,20 @@ namespace PocketCore::Configuration
 
 			/*! @brief Replaces the entire defensive matchup column for a type identified by name.
 				@details Looks up the defender by name, resolves its array index, and overwrites every row's cell in that column. The caller
-			   only needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   only needs to provide entries for the currently registered types. Any indices beyond the span's size are set to
+			   @ref NO_TYPE_EFFECTIVENESS_ID.
 				@pre @p newCol.size() <= @ref MAX_TYPES.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
-				@param[in] newCol A span of @ref PocketCore::Types::TypeEffectiveness values for the new defensive matchup column.
+				@param[in] newCol A span of @ref PocketCore::Types::TypeEffectivenessID values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setDefensiveColumn(const std::string_view &defenderName,
-																					 const std::span<const TypeEffectiveness> &newCol);
+																					 const std::span<const TypeEffectivenessID> &newCol);
 
 			/*! @brief Replaces the entire defensive matchup column for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced attacker type name in the registry. Types not mentioned
-			   default to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   default to @ref NO_TYPE_EFFECTIVENESS_ID. This allows the caller to specify matchups in any order.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
 				@param[in] newCol A span of @ref MatchupPair values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the defender or any referenced type is not
@@ -230,10 +232,9 @@ namespace PocketCore::Configuration
 			/*! @brief Adds a new custom type using name-keyed matchup pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry to determine its array index.
 			   This allows the caller to specify matchups in any order without knowing the internal registration sequence. The @p
-			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::NotDefined
-			   fails the call,
-			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Types::TypeEffectiveness::E, and
-			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::Neutral
+			   fills with the built-in neutral effectiveness ID, and @ref UnspecifiedMatchup::NotDefined fills with
+			   @ref NO_TYPE_EFFECTIVENESS_ID.
 				@param[in] definition A @ref TypeDefinition struct containing the display name and matchup pair spans for the new type.
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
@@ -325,7 +326,21 @@ namespace PocketCore::Configuration
 				return hasEntry(typeID);
 			}
 
+			/*! @brief Returns read-only access to the type-effectiveness registry configuration used for ID/value lookups.
+				@return A const reference to the owned type-effectiveness registry configuration.
+			*/
+			ATTR_NODISCARD constexpr const TypeEffectivenessRegistryConfiguration &getTypeEffectivenessRegistryConfiguration()
+				const noexcept
+			{
+				return mTypeEffectivenessRegistryConfiguration;
+			}
+
 		private:
+			/*! @brief Helper facade used to validate and resolve type-effectiveness IDs and values.
+				@showinitializer
+			*/
+			TypeEffectivenessRegistryConfiguration mTypeEffectivenessRegistryConfiguration{};
+
 			// MARK: Private Member Functions
 
 			void constexpr clearRows(const us typeIndex)
@@ -336,13 +351,13 @@ namespace PocketCore::Configuration
 				// Clear offensive row
 				for (us col{0}; col < registered; ++col)
 				{
-					typeRegistry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					typeRegistry.setTypeChartCell(typeIndex, col, NO_TYPE_EFFECTIVENESS_ID); // LCOV_EXCL_BR
 				}
 
 				// Clear defensive column
 				for (us row{0}; row < registered; ++row)
 				{
-					typeRegistry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					typeRegistry.setTypeChartCell(row, typeIndex, NO_TYPE_EFFECTIVENESS_ID); // LCOV_EXCL_BR
 				}
 			}
 

@@ -8,9 +8,9 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Types/typeEffectiveness.h"
+#include "Types/builtInTypeEffectivenessID.h"
+#include "Types/typeEffectivenessID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -18,12 +18,15 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Core::us;
 using PocketCore::Registry::Types::TypeEntry;
 using PocketCore::Registry::Types::TypeRegistry;
+using PocketCore::Types::BuiltInTypeEffectivenessID;
+using PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID;
+using PocketCore::Types::toTypeEffectivenessID;
 using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::TypeEffectivenessID;
 using PocketCore::Types::TypeID;
 using PocketCore::Types::Types;
 
-using enum TypeEffectiveness;
+using enum BuiltInTypeEffectivenessID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -68,12 +71,12 @@ SCENARIO("TypeRegistry")
 			CHECK(registry.hasType(std::string_view{"Stellar"}));
 		}
 
-		THEN("the Stellar row is all NOT_DEFINED")
+		THEN("the Stellar row is all NO_TYPE_EFFECTIVENESS_ID")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(18)};
+			std::array<TypeEffectivenessID, MAX_TYPES> typeChartRow{registry.getTypeChartRow(18)};
 			for (std::size_t indexValue{0}; indexValue < MAX_TYPES; ++indexValue)
 			{
-				CHECK((typeChartRow.at(indexValue) == NOT_DEFINED));
+				CHECK((typeChartRow.at(indexValue) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 		}
 	}
@@ -100,72 +103,72 @@ SCENARIO("TypeRegistry")
 		THEN("Normal versus Normal is effective")
 		{
 			// Normal (index 0) attacking Normal (index 0) => E
-			TypeEffectiveness chartCell{registry.getTypeChartCell(0, 0)};
-			CHECK((chartCell == E));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(0, 0)};
+			CHECK((chartCell == toTypeEffectivenessID(E)));
 		}
 
 		THEN("Normal versus Rock is not very effective")
 		{
 			// Normal (index 0) attacking Rock (index 5) => NVE
 			// Rock is the 6th type registered (index 5 in mEntries)
-			TypeEffectiveness chartCell{registry.getTypeChartCell(0, 5)};
-			CHECK((chartCell == NVE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(0, 5)};
+			CHECK((chartCell == toTypeEffectivenessID(NVE)));
 		}
 
 		THEN("Normal versus Ghost has no effect")
 		{
 			// Normal (index 0) attacking Ghost (index 7) => NE
-			TypeEffectiveness chartCell{registry.getTypeChartCell(0, 7)};
-			CHECK((chartCell == NE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(0, 7)};
+			CHECK((chartCell == toTypeEffectivenessID(NE)));
 		}
 
 		THEN("Fighting versus Normal is super effective")
 		{
 			// Fighting (index 1) attacking Normal (index 0) => SE
-			TypeEffectiveness chartCell{registry.getTypeChartCell(1, 0)};
-			CHECK((chartCell == SE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(1, 0)};
+			CHECK((chartCell == toTypeEffectivenessID(SE)));
 		}
 
-		THEN("an unoccupied slot defaults to NOT_DEFINED")
+		THEN("an unoccupied slot defaults to NO_TYPE_EFFECTIVENESS_ID")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(19, 0)};
-			CHECK((chartCell == NOT_DEFINED));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(19, 0)};
+			CHECK((chartCell == NO_TYPE_EFFECTIVENESS_ID));
 		}
 
 		THEN("Fire versus Grass is super effective")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(9, 11)};
-			CHECK((chartCell == SE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(9, 11)};
+			CHECK((chartCell == toTypeEffectivenessID(SE)));
 		}
 
 		THEN("Water versus Fire is super effective")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(10, 9)};
-			CHECK((chartCell == SE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(10, 9)};
+			CHECK((chartCell == toTypeEffectivenessID(SE)));
 		}
 
 		THEN("Grass versus Water is super effective")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(11, 10)};
-			CHECK((chartCell == SE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(11, 10)};
+			CHECK((chartCell == toTypeEffectivenessID(SE)));
 		}
 
 		THEN("Ghost versus Normal has no effect")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(7, 0)};
-			CHECK((chartCell == NE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(7, 0)};
+			CHECK((chartCell == toTypeEffectivenessID(NE)));
 		}
 
 		THEN("Electric versus Ground has no effect")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(12, 4)};
-			CHECK((chartCell == NE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(12, 4)};
+			CHECK((chartCell == toTypeEffectivenessID(NE)));
 		}
 
 		THEN("Dragon versus Fairy has no effect")
 		{
-			TypeEffectiveness chartCell{registry.getTypeChartCell(15, 17)};
-			CHECK((chartCell == NE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(15, 17)};
+			CHECK((chartCell == toTypeEffectivenessID(NE)));
 		}
 	}
 
@@ -174,11 +177,11 @@ SCENARIO("TypeRegistry")
 
 		THEN("the Normal row matches known matchups")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(0)};
-			CHECK((typeChartRow.at(0) == E));
-			CHECK((typeChartRow.at(5) == NVE));
-			CHECK((typeChartRow.at(7) == NE));
-			CHECK((typeChartRow.at(8) == NVE));
+			std::array<TypeEffectivenessID, MAX_TYPES> typeChartRow{registry.getTypeChartRow(0)};
+			CHECK((typeChartRow.at(0) == toTypeEffectivenessID(E)));
+			CHECK((typeChartRow.at(5) == toTypeEffectivenessID(NVE)));
+			CHECK((typeChartRow.at(7) == toTypeEffectivenessID(NE)));
+			CHECK((typeChartRow.at(8) == toTypeEffectivenessID(NVE)));
 		}
 	}
 
@@ -342,20 +345,20 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("setting a chart cell updates the value")
 		{
-			registry.setTypeChartCell(0, 0, SE);
-			TypeEffectiveness chartCell{registry.getTypeChartCell(0, 0)};
-			CHECK((chartCell == SE));
+			registry.setTypeChartCell(0, 0, toTypeEffectivenessID(SE));
+			TypeEffectivenessID chartCell{registry.getTypeChartCell(0, 0)};
+			CHECK((chartCell == toTypeEffectivenessID(SE)));
 		}
 
 		THEN("setting and getting one cell roundtrips")
 		{
-			registry.setTypeChartCell(0, 0, NE);
-			TypeEffectiveness firstReadback{registry.getTypeChartCell(0, 0)};
-			CHECK((firstReadback == NE));
+			registry.setTypeChartCell(0, 0, toTypeEffectivenessID(NE));
+			TypeEffectivenessID firstReadback{registry.getTypeChartCell(0, 0)};
+			CHECK((firstReadback == toTypeEffectivenessID(NE)));
 
-			registry.setTypeChartCell(0, 0, SE);
-			TypeEffectiveness secondReadback{registry.getTypeChartCell(0, 0)};
-			CHECK((secondReadback == SE));
+			registry.setTypeChartCell(0, 0, toTypeEffectivenessID(SE));
+			TypeEffectivenessID secondReadback{registry.getTypeChartCell(0, 0)};
+			CHECK((secondReadback == toTypeEffectivenessID(SE)));
 		}
 	}
 
@@ -363,14 +366,14 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("setting a chart row updates all values")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES> replacementRow{};
-			replacementRow.fill(SE);
+			std::array<TypeEffectivenessID, MAX_TYPES> replacementRow{};
+			replacementRow.fill(toTypeEffectivenessID(SE));
 			registry.setTypeChartRow(0, replacementRow);
 
-			std::array<TypeEffectiveness, MAX_TYPES> updatedRow{registry.getTypeChartRow(0)};
+			std::array<TypeEffectivenessID, MAX_TYPES> updatedRow{registry.getTypeChartRow(0)};
 			for (std::size_t indexValue = 0; indexValue < MAX_TYPES; ++indexValue)
 			{
-				CHECK((updatedRow.at(indexValue) == SE));
+				CHECK((updatedRow.at(indexValue) == toTypeEffectivenessID(SE)));
 			}
 		}
 	}

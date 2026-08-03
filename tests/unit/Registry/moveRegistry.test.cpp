@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "Effect/effectType.h"
-#include "Move/builtinMoveID.h"
+#include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"

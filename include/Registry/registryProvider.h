@@ -15,6 +15,7 @@
 #include "multiplierRegistry.h"
 #include "statusRegistry.h"
 #include "terrainRegistry.h"
+#include "typeEffectivenessRegistry.h"
 #include "typeRegistry.h"
 #include "weatherRegistry.h"
 
@@ -52,6 +53,11 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref Types::TypeRegistry instance for type metadata queries.
 			*/
 			const Types::TypeRegistry *typeRegistry;
+
+			/*! @brief Non-owning pointer to the type-effectiveness metadata registry.
+				@details Must point to a valid @ref Types::TypeEffectivenessRegistry instance for type-effectiveness value queries.
+			*/
+			const Types::TypeEffectivenessRegistry *typeEffectivenessRegistry;
 
 			/*! @brief Non-owning pointer to the status metadata registry.
 				@details Must point to a valid @ref Status::StatusRegistry instance for status metadata queries.

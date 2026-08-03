@@ -7,7 +7,7 @@
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Ability/abilityTargetsAndTriggers.h"
-#include "Ability/builtinAbilityID.h"
+#include "Ability/builtInAbilityID.h"
 #include "Ability/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"

@@ -6,11 +6,11 @@
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Effect/effectContext.h"
-#include "Move/builtinMoveID.h"
+#include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Move/moveTargetsAndTriggers.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
 
@@ -74,6 +74,7 @@ SCENARIO("TargetsHandler")
 		.moveRegistry = &moveRegistry,
 		.itemRegistry = nullptr,
 		.typeRegistry = nullptr,
+		.typeEffectivenessRegistry = nullptr,
 		.statusRegistry = nullptr,
 		.weatherRegistry = nullptr,
 		.terrainRegistry = nullptr,

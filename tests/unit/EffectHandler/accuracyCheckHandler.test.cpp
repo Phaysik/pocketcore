@@ -40,6 +40,7 @@ namespace
 			.moveRegistry = nullptr,
 			.itemRegistry = nullptr,
 			.typeRegistry = nullptr,
+			.typeEffectivenessRegistry = nullptr,
 			.statusRegistry = nullptr,
 			.weatherRegistry = nullptr,
 			.terrainRegistry = nullptr,

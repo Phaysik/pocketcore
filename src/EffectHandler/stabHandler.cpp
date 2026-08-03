@@ -9,7 +9,7 @@
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
 #include "EffectHandler/effectHandlerInterface.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Registry/registryProvider.h"
 
 namespace PocketCore::Effect

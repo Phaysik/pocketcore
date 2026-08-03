@@ -20,9 +20,10 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/typeRegistry.h"
-#include "Types/typeEffectiveness.h"
+#include "Types/builtInTypeEffectivenessID.h"
+#include "Types/builtInTypeID.h"
+#include "Types/typeEffectivenessID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
 namespace PocketCore::Configuration
@@ -31,13 +32,16 @@ namespace PocketCore::Configuration
 	using PocketCore::Configuration::MAX_TYPES;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Types::TypeEntry;
-	using PocketCore::Types::TypeEffectiveness;
+	using PocketCore::Types::BuiltInTypeEffectivenessID;
+	using PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID;
+	using PocketCore::Types::toTypeEffectivenessID;
+	using PocketCore::Types::TypeEffectivenessID;
 	using PocketCore::Types::TypeID;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
 	// MARK: Getters
 
-	ATTR_NODISCARD std::expected<TypeEffectiveness, RegistryErrorInfo> TypeRegistryConfiguration::getMatchup(
+	ATTR_NODISCARD std::expected<TypeEffectivenessID, RegistryErrorInfo> TypeRegistryConfiguration::getMatchup(
 		const std::string_view &attackerName, const std::string_view &defenderName)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchup")}; // LCOV_EXCL_BR
@@ -57,7 +61,7 @@ namespace PocketCore::Configuration
 		return getRegistry().getTypeChartCell(attackerIndex.value(), defenderIndex.value());
 	}
 
-	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getMatchupRow(
+	ATTR_NODISCARD std::expected<std::array<TypeEffectivenessID, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getMatchupRow(
 		const std::string_view &attackerName)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "getMatchupRow")}; // LCOV_EXCL_BR
@@ -70,8 +74,8 @@ namespace PocketCore::Configuration
 		return getRegistry().getTypeChartRow(attackerIndex.value());
 	}
 
-	ATTR_NODISCARD std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::getDefensiveColumn(
-		const std::string_view &defenderName)
+	ATTR_NODISCARD std::expected<std::array<TypeEffectivenessID, MAX_TYPES>, RegistryErrorInfo> TypeRegistryConfiguration::
+		getDefensiveColumn(const std::string_view &defenderName)
 	{
 		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "getDefensiveColumn")}; // LCOV_EXCL_BR
 
@@ -80,7 +84,7 @@ namespace PocketCore::Configuration
 			return std::unexpected{defenderIndex.error()};
 		}
 
-		std::array<TypeEffectiveness, MAX_TYPES> column{};
+		std::array<TypeEffectivenessID, MAX_TYPES> column{};
 		const us registered{getRegistry().getAmountRegistered()};
 
 		for (us row{0}; row < registered; ++row)
@@ -95,7 +99,7 @@ namespace PocketCore::Configuration
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchup(const std::string_view &attackerName,
 																								const std::string_view &defenderName,
-																								const TypeEffectiveness value)
+																								const TypeEffectivenessID value)
 	{
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchup")}; // LCOV_EXCL_BR
 
@@ -117,7 +121,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
-		const std::string_view &attackerName, const std::span<const TypeEffectiveness> &newRow)
+		const std::string_view &attackerName, const std::span<const TypeEffectivenessID> &newRow)
 	{
 		if (newRow.size() > MAX_TYPES)
 		{
@@ -140,8 +144,7 @@ namespace PocketCore::Configuration
 
 		for (us col{0}; col < registered; ++col)
 		{
-			getRegistry().setTypeChartCell(attackerIndex.value(), col,
-										   col < newRow.size() ? newRow.at(col) : TypeEffectiveness::NOT_DEFINED);
+			getRegistry().setTypeChartCell(attackerIndex.value(), col, col < newRow.size() ? newRow.at(col) : NO_TYPE_EFFECTIVENESS_ID);
 		}
 
 		return {};
@@ -158,8 +161,8 @@ namespace PocketCore::Configuration
 		}
 
 		const us registered{getRegistry().getAmountRegistered()};
-		std::array<TypeEffectiveness, MAX_TYPES> replacementRow{};
-		replacementRow.fill(TypeEffectiveness::NOT_DEFINED);
+		std::array<TypeEffectivenessID, MAX_TYPES> replacementRow{};
+		replacementRow.fill(NO_TYPE_EFFECTIVENESS_ID);
 
 		for (const auto &[pairName, pairValue] : newRow)
 		{
@@ -182,7 +185,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
-		const std::string_view &defenderName, const std::span<const TypeEffectiveness> &newCol)
+		const std::string_view &defenderName, const std::span<const TypeEffectivenessID> &newCol)
 	{
 		if (newCol.size() > MAX_TYPES)
 		{
@@ -205,8 +208,7 @@ namespace PocketCore::Configuration
 
 		for (us row{0}; row < registered; ++row)
 		{
-			getRegistry().setTypeChartCell(row, defenderIndex.value(),
-										   row < newCol.size() ? newCol.at(row) : TypeEffectiveness::NOT_DEFINED);
+			getRegistry().setTypeChartCell(row, defenderIndex.value(), row < newCol.size() ? newCol.at(row) : NO_TYPE_EFFECTIVENESS_ID);
 		}
 
 		return {};
@@ -223,8 +225,8 @@ namespace PocketCore::Configuration
 		}
 
 		const us registered{getRegistry().getAmountRegistered()};
-		std::array<TypeEffectiveness, MAX_TYPES> replacementColumn{};
-		replacementColumn.fill(TypeEffectiveness::NOT_DEFINED);
+		std::array<TypeEffectivenessID, MAX_TYPES> replacementColumn{};
+		replacementColumn.fill(NO_TYPE_EFFECTIVENESS_ID);
 
 		for (const auto &[pairName, pairValue] : newCol)
 		{
@@ -273,19 +275,19 @@ namespace PocketCore::Configuration
 		}
 
 		// Determine the fill value for unspecified matchup slots
-		TypeEffectiveness fillValue{};
+		TypeEffectivenessID fillValue{NO_TYPE_EFFECTIVENESS_ID};
 
 		if (defaultBehavior == UnspecifiedMatchup::Neutral)
 		{
-			fillValue = TypeEffectiveness::E;
+			fillValue = toTypeEffectivenessID(BuiltInTypeEffectivenessID::E);
 		}
 		else if (defaultBehavior == UnspecifiedMatchup::NotDefined)
 		{
-			fillValue = TypeEffectiveness::NOT_DEFINED;
+			fillValue = NO_TYPE_EFFECTIVENESS_ID;
 		}
 
 		// Build positional arrays from name-keyed pairs
-		std::array<TypeEffectiveness, MAX_TYPES> offensiveRow{};
+		std::array<TypeEffectivenessID, MAX_TYPES> offensiveRow{};
 		offensiveRow.fill(fillValue);
 
 		for (const auto &[pairName, pairValue] : definition.offensiveMatchups)
@@ -327,7 +329,7 @@ namespace PocketCore::Configuration
 			offensiveRow.at(targetIndex.value()) = pairValue;
 		}
 
-		std::array<TypeEffectiveness, MAX_TYPES> defensiveRow{};
+		std::array<TypeEffectivenessID, MAX_TYPES> defensiveRow{};
 		defensiveRow.fill(fillValue);
 
 		for (const auto &[pairName, pairValue] : definition.defensiveMatchups)
@@ -634,7 +636,7 @@ namespace PocketCore::Configuration
 				// Clear the defensive matchup cell for this row and column
 
 				// NOLINTNEXTLINE(readability-suspicious-call-argument)
-				getRegistry().setTypeChartCell(col, row, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+				getRegistry().setTypeChartCell(col, row, NO_TYPE_EFFECTIVENESS_ID); // LCOV_EXCL_BR
 			}
 		}
 
@@ -683,7 +685,7 @@ namespace PocketCore::Configuration
 			}
 
 			// Clear the vacated last column cell for this row
-			getRegistry().setTypeChartCell(row, newRegistered, TypeEffectiveness::NOT_DEFINED);
+			getRegistry().setTypeChartCell(row, newRegistered, NO_TYPE_EFFECTIVENESS_ID);
 		}
 	}
 

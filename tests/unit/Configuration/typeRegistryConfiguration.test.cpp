@@ -8,9 +8,9 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Types/typeEffectiveness.h"
+#include "Types/builtInTypeEffectivenessID.h"
+#include "Types/typeEffectivenessID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -23,14 +23,17 @@ using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Configuration::UnspecifiedMatchup;
 using PocketCore::Core::us;
+using PocketCore::Types::BuiltInTypeEffectivenessID;
+using PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID;
 using PocketCore::Types::NO_TYPE_ID;
+using PocketCore::Types::toTypeEffectivenessID;
 using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeEffectiveness;
+using PocketCore::Types::TypeEffectivenessID;
 using PocketCore::Types::TypeID;
 using PocketCore::Types::Types;
 using PocketCore::Utility::Debug::Logging::Logger;
 
-using enum TypeEffectiveness;
+using enum BuiltInTypeEffectivenessID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
 
@@ -60,28 +63,28 @@ SCENARIO("TypeRegistryConfiguration getMatchup")
 		{
 			auto result = config.getMatchup("Normal", "Normal");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == E));
+			CHECK((result.value() == toTypeEffectivenessID(E)));
 		}
 
 		THEN("Normal versus Ghost has no effect")
 		{
 			auto result = config.getMatchup("Normal", "Ghost");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == NE));
+			CHECK((result.value() == toTypeEffectivenessID(NE)));
 		}
 
 		THEN("Fire versus Grass is super effective")
 		{
 			auto result = config.getMatchup("Fire", "Grass");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == SE));
+			CHECK((result.value() == toTypeEffectivenessID(SE)));
 		}
 
 		THEN("Water versus Fire is super effective")
 		{
 			auto result = config.getMatchup("Water", "Fire");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == SE));
+			CHECK((result.value() == toTypeEffectivenessID(SE)));
 		}
 	}
 
@@ -120,9 +123,9 @@ SCENARIO("TypeRegistryConfiguration getMatchupRow")
 			auto result = config.getMatchupRow("Normal");
 			REQUIRE(result.has_value());
 			auto row = result.value();
-			CHECK((row.at(0) == E));   // Normal vs Normal
-			CHECK((row.at(5) == NVE)); // Normal vs Rock
-			CHECK((row.at(7) == NE));  // Normal vs Ghost
+			CHECK((row.at(0) == toTypeEffectivenessID(E)));	  // Normal vs Normal
+			CHECK((row.at(5) == toTypeEffectivenessID(NVE))); // Normal vs Rock
+			CHECK((row.at(7) == toTypeEffectivenessID(NE)));  // Normal vs Ghost
 		}
 	}
 
@@ -150,9 +153,9 @@ SCENARIO("TypeRegistryConfiguration getDefensiveColumn")
 			REQUIRE(result.has_value());
 			auto column = result.value();
 			// Fighting (index 1) vs Normal => SE
-			CHECK((column.at(1) == SE));
+			CHECK((column.at(1) == toTypeEffectivenessID(SE)));
 			// Ghost (index 7) vs Normal => NE
-			CHECK((column.at(7) == NE));
+			CHECK((column.at(7) == toTypeEffectivenessID(NE)));
 		}
 	}
 
@@ -237,12 +240,12 @@ SCENARIO("TypeRegistryConfiguration setMatchup")
 	{
 		THEN("updates the effectiveness value")
 		{
-			auto setResult = config.setMatchup("Normal", "Normal", SE);
+			auto setResult = config.setMatchup("Normal", "Normal", toTypeEffectivenessID(SE));
 			REQUIRE(setResult.has_value());
 
 			auto getResult = config.getMatchup("Normal", "Normal");
 			REQUIRE(getResult.has_value());
-			CHECK((getResult.value() == SE));
+			CHECK((getResult.value() == toTypeEffectivenessID(SE)));
 		}
 	}
 
@@ -250,7 +253,7 @@ SCENARIO("TypeRegistryConfiguration setMatchup")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			auto result = config.setMatchup("Shadow", "Normal", SE);
+			auto result = config.setMatchup("Shadow", "Normal", toTypeEffectivenessID(SE));
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
 		}
@@ -260,7 +263,7 @@ SCENARIO("TypeRegistryConfiguration setMatchup")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			auto result = config.setMatchup("Normal", "Shadow", SE);
+			auto result = config.setMatchup("Normal", "Shadow", toTypeEffectivenessID(SE));
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
 		}
@@ -276,10 +279,10 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 	{
 		THEN("updates all values in the row")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES> newRow{};
-			newRow.fill(SE);
+			std::array<TypeEffectivenessID, MAX_TYPES> newRow{};
+			newRow.fill(toTypeEffectivenessID(SE));
 
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{newRow});
+			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectivenessID>{newRow});
 			REQUIRE(result.has_value());
 
 			auto rowResult = config.getMatchupRow("Normal");
@@ -288,18 +291,18 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 			us registered = config.getAmountRegistered();
 			for (us idx{0}; idx < registered; ++idx)
 			{
-				CHECK((rowResult.value().at(idx) == SE));
+				CHECK((rowResult.value().at(idx) == toTypeEffectivenessID(SE)));
 			}
 		}
 	}
 
 	GIVEN("a span shorter than the registered count")
 	{
-		THEN("fills remaining columns with NOT_DEFINED")
+		THEN("fills remaining columns with NO_TYPE_EFFECTIVENESS_ID")
 		{
-			std::array<TypeEffectiveness, 3> shortRow{SE, NVE, E};
+			std::array<TypeEffectivenessID, 3> shortRow{toTypeEffectivenessID(SE), toTypeEffectivenessID(NVE), toTypeEffectivenessID(E)};
 
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{shortRow});
+			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectivenessID>{shortRow});
 			REQUIRE(result.has_value());
 
 			auto rowResult = config.getMatchupRow("Normal");
@@ -312,7 +315,7 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 			}
 			for (us idx{3}; idx < registered; ++idx)
 			{
-				CHECK((rowResult.value().at(idx) == NOT_DEFINED));
+				CHECK((rowResult.value().at(idx) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 		}
 	}
@@ -321,8 +324,8 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 	{
 		THEN("returns MatchupMismatch error")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES + 1> oversized{};
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{oversized});
+			std::array<TypeEffectivenessID, MAX_TYPES + 1> oversized{};
+			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectivenessID>{oversized});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::MatchupMismatch));
 		}
@@ -332,8 +335,8 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<TypeEffectiveness, 1> smallRow{E};
-			auto result = config.setMatchupRow("Shadow", std::span<const TypeEffectiveness>{smallRow});
+			std::array<TypeEffectivenessID, 1> smallRow{toTypeEffectivenessID(E)};
+			auto result = config.setMatchupRow("Shadow", std::span<const TypeEffectivenessID>{smallRow});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
 		}
@@ -347,25 +350,30 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with MatchupPair span")
 
 	GIVEN("valid name-keyed pairs")
 	{
-		THEN("updates the specified matchups and resets others to NOT_DEFINED")
+		THEN("updates the specified matchups and resets others to NO_TYPE_EFFECTIVENESS_ID")
 		{
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
+			std::array<MatchupPair, 2> pairs{
+				{
+					{.typeName = "Fire", .value = toTypeEffectivenessID(SE)},
+					{.typeName = "Water", .value = toTypeEffectivenessID(NVE)},
+				},
+			};
 
 			auto result = config.setMatchupRow("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE(result.has_value());
 
 			auto fireMatchup = config.getMatchup("Normal", "Fire");
 			REQUIRE(fireMatchup.has_value());
-			CHECK((fireMatchup.value() == SE));
+			CHECK((fireMatchup.value() == toTypeEffectivenessID(SE)));
 
 			auto waterMatchup = config.getMatchup("Normal", "Water");
 			REQUIRE(waterMatchup.has_value());
-			CHECK((waterMatchup.value() == NVE));
+			CHECK((waterMatchup.value() == toTypeEffectivenessID(NVE)));
 
-			// Unspecified matchups should be NOT_DEFINED
+			// Unspecified matchups should be NO_TYPE_EFFECTIVENESS_ID
 			auto grassMatchup = config.getMatchup("Normal", "Grass");
 			REQUIRE(grassMatchup.has_value());
-			CHECK((grassMatchup.value() == NOT_DEFINED));
+			CHECK((grassMatchup.value() == NO_TYPE_EFFECTIVENESS_ID));
 		}
 	}
 
@@ -376,7 +384,12 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with MatchupPair span")
 			auto originalFireMatchup = config.getMatchup("Normal", "Fire");
 			REQUIRE(originalFireMatchup.has_value());
 
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Shadow", .value = SE}}};
+			std::array<MatchupPair, 2> pairs{
+				{
+					{.typeName = "Fire", .value = toTypeEffectivenessID(SE)},
+					{.typeName = "Shadow", .value = toTypeEffectivenessID(SE)},
+				},
+			};
 			auto result = config.setMatchupRow("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -391,7 +404,7 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with MatchupPair span")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = SE}}};
+			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = toTypeEffectivenessID(SE)}}};
 			auto result = config.setMatchupRow("Shadow", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -408,10 +421,10 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 	{
 		THEN("updates all values in the column")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES> newCol{};
-			newCol.fill(NVE);
+			std::array<TypeEffectivenessID, MAX_TYPES> newCol{};
+			newCol.fill(toTypeEffectivenessID(NVE));
 
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{newCol});
+			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectivenessID>{newCol});
 			REQUIRE(result.has_value());
 
 			auto colResult = config.getDefensiveColumn("Normal");
@@ -420,18 +433,18 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 			us registered = config.getAmountRegistered();
 			for (us idx{0}; idx < registered; ++idx)
 			{
-				CHECK((colResult.value().at(idx) == NVE));
+				CHECK((colResult.value().at(idx) == toTypeEffectivenessID(NVE)));
 			}
 		}
 	}
 
 	GIVEN("a span shorter than the registered count")
 	{
-		THEN("fills remaining rows with NOT_DEFINED")
+		THEN("fills remaining rows with NO_TYPE_EFFECTIVENESS_ID")
 		{
-			std::array<TypeEffectiveness, 3> shortCol{SE, NVE, E};
+			std::array<TypeEffectivenessID, 3> shortCol{toTypeEffectivenessID(SE), toTypeEffectivenessID(NVE), toTypeEffectivenessID(E)};
 
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{shortCol});
+			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectivenessID>{shortCol});
 			REQUIRE(result.has_value());
 
 			auto colResult = config.getDefensiveColumn("Normal");
@@ -444,7 +457,7 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 			}
 			for (us idx{3}; idx < registered; ++idx)
 			{
-				CHECK((colResult.value().at(idx) == NOT_DEFINED));
+				CHECK((colResult.value().at(idx) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 		}
 	}
@@ -453,8 +466,8 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 	{
 		THEN("returns MatchupMismatch error")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES + 1> oversized{};
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{oversized});
+			std::array<TypeEffectivenessID, MAX_TYPES + 1> oversized{};
+			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectivenessID>{oversized});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::MatchupMismatch));
 		}
@@ -464,8 +477,8 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<TypeEffectiveness, 1> smallCol{E};
-			auto result = config.setDefensiveColumn("Shadow", std::span<const TypeEffectiveness>{smallCol});
+			std::array<TypeEffectivenessID, 1> smallCol{toTypeEffectivenessID(E)};
+			auto result = config.setDefensiveColumn("Shadow", std::span<const TypeEffectivenessID>{smallCol});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
 		}
@@ -479,9 +492,14 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
 
 	GIVEN("valid name-keyed pairs")
 	{
-		THEN("updates the specified matchups and resets others to NOT_DEFINED")
+		THEN("updates the specified matchups and resets others to NO_TYPE_EFFECTIVENESS_ID")
 		{
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
+			std::array<MatchupPair, 2> pairs{
+				{
+					{.typeName = "Fire", .value = toTypeEffectivenessID(SE)},
+					{.typeName = "Water", .value = toTypeEffectivenessID(NVE)},
+				},
+			};
 
 			auto result = config.setDefensiveColumn("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE(result.has_value());
@@ -489,17 +507,17 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
 			// Fire attacking Normal should be SE
 			auto fireVsNormal = config.getMatchup("Fire", "Normal");
 			REQUIRE(fireVsNormal.has_value());
-			CHECK((fireVsNormal.value() == SE));
+			CHECK((fireVsNormal.value() == toTypeEffectivenessID(SE)));
 
 			// Water attacking Normal should be NVE
 			auto waterVsNormal = config.getMatchup("Water", "Normal");
 			REQUIRE(waterVsNormal.has_value());
-			CHECK((waterVsNormal.value() == NVE));
+			CHECK((waterVsNormal.value() == toTypeEffectivenessID(NVE)));
 
-			// Unspecified attackers should be NOT_DEFINED
+			// Unspecified attackers should be NO_TYPE_EFFECTIVENESS_ID
 			auto grassVsNormal = config.getMatchup("Grass", "Normal");
 			REQUIRE(grassVsNormal.has_value());
-			CHECK((grassVsNormal.value() == NOT_DEFINED));
+			CHECK((grassVsNormal.value() == NO_TYPE_EFFECTIVENESS_ID));
 		}
 	}
 
@@ -510,7 +528,12 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
 			auto originalFireMatchup = config.getMatchup("Fire", "Normal");
 			REQUIRE(originalFireMatchup.has_value());
 
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = NVE}, {.typeName = "Shadow", .value = SE}}};
+			std::array<MatchupPair, 2> pairs{
+				{
+					{.typeName = "Fire", .value = toTypeEffectivenessID(NVE)},
+					{.typeName = "Shadow", .value = toTypeEffectivenessID(SE)},
+				},
+			};
 			auto result = config.setDefensiveColumn("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -525,7 +548,7 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = SE}}};
+			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = toTypeEffectivenessID(SE)}}};
 			auto result = config.setDefensiveColumn("Shadow", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
@@ -546,8 +569,13 @@ SCENARIO("TypeRegistryConfiguration addType")
 			auto removeResult = config.removeType("Stellar");
 			REQUIRE(removeResult.has_value());
 
-			std::array<MatchupPair, 2> offensive{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
-			std::array<MatchupPair, 1> defensive{{{.typeName = "Fire", .value = NVE}}};
+			std::array<MatchupPair, 2> offensive{
+				{
+					{.typeName = "Fire", .value = toTypeEffectivenessID(SE)},
+					{.typeName = "Water", .value = toTypeEffectivenessID(NVE)},
+				},
+			};
+			std::array<MatchupPair, 1> defensive{{{.typeName = "Fire", .value = toTypeEffectivenessID(NVE)}}};
 
 			TypeDefinition definition{.name = "Custom", .offensiveMatchups = offensive, .defensiveMatchups = defensive};
 
@@ -560,29 +588,29 @@ SCENARIO("TypeRegistryConfiguration addType")
 			// Check specified offensive matchup
 			auto customVsFire = config.getMatchup("Custom", "Fire");
 			REQUIRE(customVsFire.has_value());
-			CHECK((customVsFire.value() == SE));
+			CHECK((customVsFire.value() == toTypeEffectivenessID(SE)));
 
 			// Check unspecified offensive matchup filled with Neutral (E)
 			auto customVsGrass = config.getMatchup("Custom", "Grass");
 			REQUIRE(customVsGrass.has_value());
-			CHECK((customVsGrass.value() == E));
+			CHECK((customVsGrass.value() == toTypeEffectivenessID(E)));
 
 			// Check specified defensive matchup
 			auto fireVsCustom = config.getMatchup("Fire", "Custom");
 			REQUIRE(fireVsCustom.has_value());
-			CHECK((fireVsCustom.value() == NVE));
+			CHECK((fireVsCustom.value() == toTypeEffectivenessID(NVE)));
 		}
 	}
 
 	GIVEN("a valid type definition with NotDefined default behavior")
 	{
-		THEN("fills unspecified matchups with NOT_DEFINED")
+		THEN("fills unspecified matchups with NO_TYPE_EFFECTIVENESS_ID")
 		{
 			// Remove Stellar to make room
 			auto removeResult = config.removeType("Stellar");
 			REQUIRE(removeResult.has_value());
 
-			std::array<MatchupPair, 1> offensive{{{.typeName = "Fire", .value = SE}}};
+			std::array<MatchupPair, 1> offensive{{{.typeName = "Fire", .value = toTypeEffectivenessID(SE)}}};
 
 			TypeDefinition definition{.name = "Void", .offensiveMatchups = offensive, .defensiveMatchups = {}};
 
@@ -591,11 +619,11 @@ SCENARIO("TypeRegistryConfiguration addType")
 
 			auto voidVsGrass = config.getMatchup("Void", "Grass");
 			REQUIRE(voidVsGrass.has_value());
-			CHECK((voidVsGrass.value() == NOT_DEFINED));
+			CHECK((voidVsGrass.value() == NO_TYPE_EFFECTIVENESS_ID));
 
 			auto voidVsFire = config.getMatchup("Void", "Fire");
 			REQUIRE(voidVsFire.has_value());
-			CHECK((voidVsFire.value() == SE));
+			CHECK((voidVsFire.value() == toTypeEffectivenessID(SE)));
 		}
 	}
 
@@ -607,7 +635,7 @@ SCENARIO("TypeRegistryConfiguration addType")
 			auto removeResult = config.removeType("Stellar");
 			REQUIRE(removeResult.has_value());
 
-			std::array<MatchupPair, 1> offensive{{{.typeName = "SelfRef", .value = NVE}}};
+			std::array<MatchupPair, 1> offensive{{{.typeName = "SelfRef", .value = toTypeEffectivenessID(NVE)}}};
 
 			TypeDefinition definition{.name = "SelfRef", .offensiveMatchups = offensive, .defensiveMatchups = {}};
 
@@ -616,7 +644,7 @@ SCENARIO("TypeRegistryConfiguration addType")
 
 			auto selfMatchup = config.getMatchup("SelfRef", "SelfRef");
 			REQUIRE(selfMatchup.has_value());
-			CHECK((selfMatchup.value() == NVE));
+			CHECK((selfMatchup.value() == toTypeEffectivenessID(NVE)));
 		}
 	}
 
@@ -637,7 +665,7 @@ SCENARIO("TypeRegistryConfiguration addType")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<MatchupPair, 1> offensive{{{.typeName = "Shadow", .value = SE}}};
+			std::array<MatchupPair, 1> offensive{{{.typeName = "Shadow", .value = toTypeEffectivenessID(SE)}}};
 
 			TypeDefinition definition{.name = "NewType", .offensiveMatchups = offensive, .defensiveMatchups = {}};
 
@@ -652,7 +680,7 @@ SCENARIO("TypeRegistryConfiguration addType")
 	{
 		THEN("returns TypeNotFound error")
 		{
-			std::array<MatchupPair, 1> defensive{{{.typeName = "Shadow", .value = SE}}};
+			std::array<MatchupPair, 1> defensive{{{.typeName = "Shadow", .value = toTypeEffectivenessID(SE)}}};
 
 			TypeDefinition definition{.name = "NewType", .offensiveMatchups = {}, .defensiveMatchups = defensive};
 
@@ -881,7 +909,7 @@ SCENARIO("TypeRegistryConfiguration renameType")
 			// Matchup data should still work via new name
 			auto matchup = config.getMatchup("Typeless", "Typeless");
 			REQUIRE(matchup.has_value());
-			CHECK((matchup.value() == E));
+			CHECK((matchup.value() == toTypeEffectivenessID(E)));
 		}
 	}
 
@@ -914,7 +942,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by name")
 
 	GIVEN("a valid type name")
 	{
-		THEN("clears all offensive and defensive matchups to NOT_DEFINED")
+		THEN("clears all offensive and defensive matchups to NO_TYPE_EFFECTIVENESS_ID")
 		{
 			auto result = config.resetMatchups("Normal");
 			REQUIRE(result.has_value());
@@ -926,7 +954,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by name")
 			REQUIRE(row.has_value());
 			for (us idx{0}; idx < registered; ++idx)
 			{
-				CHECK((row.value().at(idx) == NOT_DEFINED));
+				CHECK((row.value().at(idx) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 
 			// Check defensive column is cleared
@@ -934,7 +962,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by name")
 			REQUIRE(col.has_value());
 			for (us idx{0}; idx < registered; ++idx)
 			{
-				CHECK((col.value().at(idx) == NOT_DEFINED));
+				CHECK((col.value().at(idx) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 
 			// Type should still exist
@@ -960,7 +988,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 
 	GIVEN("a valid stable type id")
 	{
-		THEN("clears all matchups to NOT_DEFINED")
+		THEN("clears all matchups to NO_TYPE_EFFECTIVENESS_ID")
 		{
 			TypeID normalId = toTypeID(Types::Normal);
 			auto result = config.resetMatchups(normalId);
@@ -972,7 +1000,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 			us registered = config.getAmountRegistered();
 			for (us idx{0}; idx < registered; ++idx)
 			{
-				CHECK((row.value().at(idx) == NOT_DEFINED));
+				CHECK((row.value().at(idx) == NO_TYPE_EFFECTIVENESS_ID));
 			}
 		}
 	}
@@ -1178,7 +1206,7 @@ SCENARIO("TypeRegistryConfiguration addTypes with bad matchup reference")
 
 			us countBefore = config.getAmountRegistered();
 
-			std::array<MatchupPair, 1> badOffensive{{{.typeName = "NonExistent", .value = SE}}};
+			std::array<MatchupPair, 1> badOffensive{{{.typeName = "NonExistent", .value = toTypeEffectivenessID(SE)}}};
 
 			TypeDefinition goodDef{.name = "Good", .offensiveMatchups = {}, .defensiveMatchups = {}};
 			TypeDefinition badDef{.name = "Bad", .offensiveMatchups = badOffensive, .defensiveMatchups = {}};

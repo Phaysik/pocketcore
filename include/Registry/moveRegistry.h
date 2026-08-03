@@ -17,14 +17,13 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
-#include "Move/builtinMoveID.h"
+#include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Move/moveTargetsAndTriggers.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Types/typeID.h"
-#include "Types/types.h"
+#include "Types/builtInTypeID.h"
 
 namespace PocketCore::Registry::Move
 {

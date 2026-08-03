@@ -19,10 +19,10 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.h"
+#include "Types/builtInTypeID.h"
 #include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
+#include "Types/typeEffectivenessID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 
 #include "constants.h" // IWYU pragma: keep
 
@@ -31,6 +31,8 @@ namespace PocketCore::Registry::Types
 	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Types::NO_TYPE_EFFECTIVENESS_ID;
+	using PocketCore::Types::TypeEffectivenessID;
 	using PocketCore::Types::toTypeID;
 	using PocketCore::Types::TypeID;
 
@@ -128,9 +130,9 @@ namespace PocketCore::Registry::Types
 				@pre @p row < @ref MAX_TYPES and @p col < @ref MAX_TYPES.
 				@param[in] row The attacking-type index.
 				@param[in] col The defending-type index.
-				@return The @ref TypeEffectiveness value at that cell.
+				@return The @ref TypeEffectivenessID value at that cell.
 			*/
-			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const us row, const us col) const
+			ATTR_NODISCARD constexpr TypeEffectivenessID getTypeChartCell(const us row, const us col) const
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_CELL.data());
 				assert(col < mTypeChart.at(row).size() && COL_OOB_GET_TYPE_CHART_CELL.data());
@@ -141,9 +143,9 @@ namespace PocketCore::Registry::Types
 			/*! @brief Returns an entire row from the type chart.
 				@pre @p row < @ref MAX_TYPES.
 				@param[in] row The row index.
-				@return A copy of the full effectiveness row for the given type.
+				@return A copy of the full effectiveness-ID row for the given type.
 			*/
-			ATTR_NODISCARD constexpr const std::array<Types::TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
+			ATTR_NODISCARD constexpr const std::array<TypeEffectivenessID, MAX_TYPES> &getTypeChartRow(const us row) const
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_ROW.data());
 
@@ -211,9 +213,9 @@ namespace PocketCore::Registry::Types
 				@pre @p row < @ref MAX_TYPES and @p col < @ref MAX_TYPES.
 				@param[in] row The attacking-type index.
 				@param[in] col The defending-type index.
-				@param[in] value The @ref TypeEffectiveness value to store.
+				@param[in] value The @ref TypeEffectivenessID value to store.
 			*/
-			constexpr void setTypeChartCell(const us row, const us col, const Types::TypeEffectiveness value)
+			constexpr void setTypeChartCell(const us row, const us col, const TypeEffectivenessID value)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_CELL.data());
 				assert(col < mTypeChart.at(row).size() && COL_OOB_SET_TYPE_CHART_CELL.data());
@@ -224,9 +226,9 @@ namespace PocketCore::Registry::Types
 			/*! @brief Replaces an entire row in the type chart.
 				@pre @p row < @ref MAX_TYPES.
 				@param[in] row The row index.
-				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
+				@param[in] chart The full row of @ref TypeEffectivenessID values to assign.
 			*/
-			constexpr void setTypeChartRow(const us row, const std::array<Types::TypeEffectiveness, MAX_TYPES> &chart)
+			constexpr void setTypeChartRow(const us row, const std::array<TypeEffectivenessID, MAX_TYPES> &chart)
 			{
 				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_ROW.data());
 
@@ -317,11 +319,11 @@ namespace PocketCore::Registry::Types
 				@details Stores the type chart row in @ref mTypeChart then delegates to the name-only overload.
 				@pre @ref getAmountRegistered() < @ref MAX_TYPES.
 				@post @ref getAmountRegistered() is incremented by one and the corresponding @ref mTypeChart row is populated.
-				@param[in] offensiveMatchups The full row of effectiveness values for this type against all others.
+				@param[in] offensiveMatchups The full row of effectiveness-ID values for this type against all others.
 				@param[in] type The built-in @ref Types enum value.
 				@param[in] name The display name for the type.
 			*/
-			ATTR_NOINLINE constexpr void addBuiltin(const std::span<const Types::TypeEffectiveness> &offensiveMatchups,
+			ATTR_NOINLINE constexpr void addBuiltin(const std::span<const TypeEffectivenessID> &offensiveMatchups,
 													const Types::Types type, const std::string_view &name)
 			{
 				const us amountRegistered{Base::getAmountRegistered()};
@@ -337,9 +339,9 @@ namespace PocketCore::Registry::Types
 
 		private:
 			/*! @brief Fixed-capacity 2-D array encoding the effectiveness of each type (row) attacking every other type (column).
-				@details Indexed as mTypeChart[attacker][defender]. Uninitialized slots contain @ref TypeEffectiveness::NOT_DEFINED.
+				@details Indexed as mTypeChart[attacker][defender]. Uninitialized slots contain @ref NO_TYPE_EFFECTIVENESS_ID.
 			*/
-			std::array<std::array<Types::TypeEffectiveness, MAX_TYPES>, MAX_TYPES> mTypeChart{};
+			std::array<std::array<TypeEffectivenessID, MAX_TYPES>, MAX_TYPES> mTypeChart{};
 	};
 } // namespace PocketCore::Registry::Types
 

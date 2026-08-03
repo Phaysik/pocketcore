@@ -5,8 +5,8 @@
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Item/itemID.h"
+#include "Types/builtInTypeID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 
 #include <catch2/catch_test_macros.hpp>
 

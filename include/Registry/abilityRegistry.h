@@ -16,7 +16,7 @@
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Ability/abilityTargetsAndTriggers.h"
-#include "Ability/builtinAbilityID.h"
+#include "Ability/builtInAbilityID.h"
 #include "Ability/constants.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"

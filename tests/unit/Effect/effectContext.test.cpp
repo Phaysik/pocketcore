@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/multiplierID.h"
 
 #include <catch2/catch_test_macros.hpp>
