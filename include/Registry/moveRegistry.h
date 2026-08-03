@@ -69,7 +69,8 @@ namespace PocketCore::Registry::Move
 
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {Move::baseAttackEffects()}, .mTrigger = MoveTriggerID::OnTarget}},
+					.mTriggers = {{.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+									.mTrigger = MoveTriggerID::OnTarget}},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
 					.mTypeID = toTypeID(Types::Normal),
@@ -81,7 +82,8 @@ namespace PocketCore::Registry::Move
 					.mSpecial = false,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {Move::baseAttackEffects()}, .mTrigger = MoveTriggerID::OnTarget}},
+					.mTriggers = {{.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+									.mTrigger = MoveTriggerID::OnTarget}},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 					.mTypeID = toTypeID(Types::Fighting),
@@ -99,6 +101,7 @@ namespace PocketCore::Registry::Move
 			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
+			using Base::eraseEntry;
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;

@@ -9,6 +9,7 @@
 #ifndef INCLUDE_MOVE_MOVEMETA_H
 #define INCLUDE_MOVE_MOVEMETA_H
 
+#include <span>
 #include <string_view>
 #include <vector>
 
@@ -69,14 +70,14 @@ namespace PocketCore::Move
 			bool mSpecial{};
 	};
 
-	std::vector<EffectTypeID> baseAttackEffects();
+	ATTR_CONST std::span<const EffectTypeID> baseAttackEffects() noexcept;
 
-	std::vector<EffectTypeID> baseAttackWithRecoil();
-	std::vector<EffectTypeID> baseAttackWithStatus();
-	std::vector<EffectTypeID> baseAttackWithFlinch();
-	std::vector<EffectTypeID> statusChangeEffects();
-	std::vector<EffectTypeID> protectEffects();
-	std::vector<EffectTypeID> fieldEffectEffects();
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithRecoil() noexcept;
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithStatus() noexcept;
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithFlinch() noexcept;
+	ATTR_CONST std::span<const EffectTypeID> statusChangeEffects() noexcept;
+	ATTR_CONST std::span<const EffectTypeID> protectEffects() noexcept;
+	ATTR_CONST std::span<const EffectTypeID> fieldEffectEffects() noexcept;
 } // namespace PocketCore::Move
 
 #endif

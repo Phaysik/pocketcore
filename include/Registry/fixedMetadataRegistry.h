@@ -9,6 +9,7 @@
 #ifndef INCLUDE_REGISTRY_FIXED_METADATA_REGISTRY_H
 #define INCLUDE_REGISTRY_FIXED_METADATA_REGISTRY_H
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <optional>
@@ -31,7 +32,7 @@ namespace PocketCore::Registry
 		@tparam StableID The strongly typed stable identifier stored by each metadata record.
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
-		@note Lookup operations are O(n), where n is the number of registered entries. Storage operations do not allocate.
+		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
 		@date 07/27/2026
 		@version x.x.x
 		@since x.x.x
@@ -169,6 +170,29 @@ namespace PocketCore::Registry
 			{
 				assert(index < mEntries.size());
 				mEntries.at(index) = metadata;
+
+				if (index < mAmountRegistered)
+				{
+					rebuildIDIndex();
+				}
+			}
+
+			/*! @brief Removes metadata at an internal index and compacts later entries with move assignment.
+				@pre @p index < getAmountRegistered().
+				@param[in] index The registered entry to remove.
+			*/
+			constexpr void eraseEntry(const us index)
+			{
+				assert(index < mAmountRegistered);
+
+				for (us current{index}; current + 1U < mAmountRegistered; ++current)
+				{
+					mEntries.at(current) = std::move(mEntries.at(static_cast<us>(current + 1U)));
+				}
+
+				mEntries.at(static_cast<us>(mAmountRegistered - 1U)) = Metadata{};
+				--mAmountRegistered;
+				rebuildIDIndex();
 			}
 
 			/*! @brief Sets the number of valid entries.
@@ -176,7 +200,9 @@ namespace PocketCore::Registry
 			*/
 			constexpr void setAmountRegistered(const us amount) noexcept
 			{
+				assert(amount <= mEntries.size());
 				mAmountRegistered = amount;
+				rebuildIDIndex();
 			}
 
 			/*! @brief Sets the next numeric stable ID counter.
@@ -190,12 +216,17 @@ namespace PocketCore::Registry
 			/*! @brief Increments the registered count. */
 			constexpr void incrementAmountRegistered() noexcept
 			{
+				assert(mAmountRegistered < mEntries.size());
+				insertIDIndex(mEntries.at(mAmountRegistered).*IDMember, mAmountRegistered);
 				++mAmountRegistered;
 			}
 
 			/*! @brief Decrements the registered count. */
 			constexpr void decrementAmountRegistered() noexcept
 			{
+				assert(mAmountRegistered > 0U);
+				removeIDIndex(mEntries.at(static_cast<us>(mAmountRegistered - 1U)).*IDMember,
+					static_cast<us>(mAmountRegistered - 1U));
 				--mAmountRegistered;
 			}
 
@@ -219,10 +250,16 @@ namespace PocketCore::Registry
 			{
 				assert(mAmountRegistered < mEntries.size());
 				mEntries.at(mAmountRegistered) = std::move(metadata);
-				++mAmountRegistered;
+				incrementAmountRegistered();
 			}
 
 		private:
+			struct IDIndexEntry
+			{
+				StableID stableID{};
+				us entryIndex{};
+			};
+
 			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
@@ -238,20 +275,60 @@ namespace PocketCore::Registry
 
 			ATTR_NODISCARD constexpr us findEntryIndexByID(const StableID stableID) const
 			{
-				for (us index{0}; index < mAmountRegistered; ++index)
+				const auto end{mIDIndex.begin() + mIndexedAmount};
+				const auto found{std::lower_bound(mIDIndex.begin(), end, stableID,
+					[](const IDIndexEntry &entry, const StableID value) { return entry.stableID < value; })};
+
+				if (found != end && found->stableID == stableID)
 				{
-					if (mEntries.at(index).*IDMember == stableID)
-					{
-						return index;
-					}
+					return found->entryIndex;
 				}
 
 				return mAmountRegistered;
 			}
 
+			constexpr void insertIDIndex(const StableID stableID, const us entryIndex)
+			{
+				assert(mIndexedAmount < Capacity);
+				const auto end{mIDIndex.begin() + mIndexedAmount};
+				const IDIndexEntry newEntry{.stableID = stableID, .entryIndex = entryIndex};
+				const auto position{std::lower_bound(mIDIndex.begin(), end, newEntry, idIndexEntryLess)};
+				std::move_backward(position, end, end + 1);
+				*position = newEntry;
+				++mIndexedAmount;
+			}
+
+			constexpr void removeIDIndex(const StableID stableID, const us entryIndex)
+			{
+				const auto end{mIDIndex.begin() + mIndexedAmount};
+				const IDIndexEntry indexedEntry{.stableID = stableID, .entryIndex = entryIndex};
+				const auto position{std::lower_bound(mIDIndex.begin(), end, indexedEntry, idIndexEntryLess)};
+				assert(position != end && position->stableID == stableID && position->entryIndex == entryIndex);
+				std::move(position + 1, end, position);
+				--mIndexedAmount;
+			}
+
+			ATTR_NODISCARD static constexpr bool idIndexEntryLess(const IDIndexEntry &lhs, const IDIndexEntry &rhs) noexcept
+			{
+				return lhs.stableID < rhs.stableID || (lhs.stableID == rhs.stableID && lhs.entryIndex < rhs.entryIndex);
+			}
+
+			constexpr void rebuildIDIndex() noexcept
+			{
+				for (us index{0}; index < mAmountRegistered; ++index)
+				{
+					mIDIndex.at(index) = IDIndexEntry{.stableID = mEntries.at(index).*IDMember, .entryIndex = index};
+				}
+
+				mIndexedAmount = mAmountRegistered;
+				std::sort(mIDIndex.begin(), mIDIndex.begin() + mIndexedAmount, idIndexEntryLess);
+			}
+
 		private:
 			std::array<Metadata, Capacity> mEntries{};
+			std::array<IDIndexEntry, Capacity> mIDIndex{};
 			us mAmountRegistered{0};
+			us mIndexedAmount{0};
 			us mNextID{0};
 	};
 } // namespace PocketCore::Registry

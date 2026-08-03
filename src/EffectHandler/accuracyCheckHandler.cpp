@@ -2,8 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
-#include <vector>
 
 #include "Battle/battleState.h"
 #include "Configuration/cache.h"
@@ -23,6 +21,7 @@ namespace PocketCore::Effect
 	using PocketCore::Configuration::CACHE_EVASION_STAGE_MULTIPLIERS;
 	using PocketCore::Configuration::MAX_ACCURACY_HIT_VALUE;
 	using PocketCore::Configuration::MIN_ACCURACY_HIT_VALUE;
+	using PocketCore::Configuration::statStageCacheIndex;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::RegistryProvider;
@@ -31,19 +30,12 @@ namespace PocketCore::Effect
 	void AccuracyCheckHandler::apply(const BattleState &state, EffectContext &context,
 									 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const std::vector<BattleSlot> &userTeam{getTeamConst(state, context.mUserSide)};
-		const std::vector<BattleSlot> &targetTeam{getTeamConst(state, context.mTargetSide)};
-
-		assert(context.mUserIndex < userTeam.size());
-		assert(context.mTargetIndex < targetTeam.size());
-
-		const BattleSlot &user{userTeam.at(context.mUserIndex)};
-		const BattleSlot &target{targetTeam.at(context.mTargetIndex)};
+		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
+		const BattleSlot &target{IEffectHandler::getTargetBattleSlot(state, context)};
 
 		float accuracy{
-			static_cast<float>(context.mMoveAccuracy)
-				* CACHE_ACCURACY_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(user.mStatStages.mAccuracy))
-				* CACHE_EVASION_STAGE_MULTIPLIERS.at(static_cast<std::size_t>(target.mStatStages.mEvasion)),
+			static_cast<float>(context.mMoveAccuracy) * CACHE_ACCURACY_STAGE_MULTIPLIERS.at(statStageCacheIndex(user.mStatStages.mAccuracy))
+				* CACHE_EVASION_STAGE_MULTIPLIERS.at(statStageCacheIndex(target.mStatStages.mEvasion)),
 		};
 
 		accuracy = std::max(std::min(accuracy, 100.0F), 0.0F);

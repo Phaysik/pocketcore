@@ -319,7 +319,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
-				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_NAME.data());
+				assert(mAmountRegistered <= mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_NAME.data());
 
 				for (us i{0}; i < mAmountRegistered; ++i)
 				{
@@ -340,7 +340,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr us findEntryIndexById(const TypeID typeID) const
 			{
-				assert(mAmountRegistered < mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_ID.data());
+				assert(mAmountRegistered <= mEntries.size() && REGISTERED_EXCEEDS_ENTRIES_FIND_BY_ID.data());
 
 				for (us i{0}; i < mAmountRegistered; ++i)
 				{

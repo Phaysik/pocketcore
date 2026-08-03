@@ -9,9 +9,11 @@
 #ifndef INCLUDE_EFFECT_EFFECTCONTEXT_H
 #define INCLUDE_EFFECT_EFFECTCONTEXT_H
 
+#include <array>
 #include <optional>
 #include <span>
-#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
@@ -80,11 +82,13 @@ namespace PocketCore::Effect
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage) const;
 
 			void resetMultipliers();
-			
-			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
-			// Sparse multiplier list
-			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers{};
+			/*! @brief Returns active multipliers in application order.
+				@return A read-only view that remains valid until the next multiplier mutation.
+			*/
+			ATTR_NODISCARD std::span<const std::pair<MultiplierID, float>> getActiveMultipliers() const noexcept;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
 			DamageContext mDamage{};
 
@@ -105,7 +109,13 @@ namespace PocketCore::Effect
 
 			bool mIsSpecial{false};
 
-			// NOLINTEND(misc-non-private-member-variables-in-classes)
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+		private:
+			static constexpr std::size_t BUILTIN_MULTIPLIER_COUNT{static_cast<std::size_t>(BuiltinMultiplierID::Stab) + 1U};
+
+			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers{};
+			std::array<us, BUILTIN_MULTIPLIER_COUNT> mBuiltinMultiplierPositions{};
 	};
 } // namespace PocketCore::Effect
 

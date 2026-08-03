@@ -8,7 +8,8 @@
 
 #include "Move/moveMeta.h"
 
-#include <vector>
+#include <array>
+#include <span>
 
 #include "Effect/effectType.h"
 
@@ -16,56 +17,106 @@ namespace PocketCore::Move
 {
 	using PocketCore::Effect::EffectTypeID;
 
-	std::vector<EffectTypeID> baseAttackEffects()
+	constexpr std::array BASE_ATTACK_EFFECTS{
+		EffectTypeID::PsychicTerrainPriorityBlock,
+		EffectTypeID::AccuracyCheck,
+		EffectTypeID::CriticalHit,
+		EffectTypeID::BaseDamage,
+		EffectTypeID::Targets,
+		EffectTypeID::Weather,
+		EffectTypeID::Terrain,
+		EffectTypeID::Randomization,
+		EffectTypeID::Stab,
+		EffectTypeID::TypeEffectiveness,
+		EffectTypeID::BurnDamageReduction,
+	};
+
+	constexpr std::array BASE_ATTACK_WITH_RECOIL{
+		EffectTypeID::PsychicTerrainPriorityBlock,
+		EffectTypeID::AccuracyCheck,
+		EffectTypeID::CriticalHit,
+		EffectTypeID::BaseDamage,
+		EffectTypeID::Targets,
+		EffectTypeID::Weather,
+		EffectTypeID::Terrain,
+		EffectTypeID::Randomization,
+		EffectTypeID::Stab,
+		EffectTypeID::TypeEffectiveness,
+		EffectTypeID::BurnDamageReduction,
+		EffectTypeID::Recoil,
+	};
+
+	constexpr std::array BASE_ATTACK_WITH_STATUS{
+		EffectTypeID::PsychicTerrainPriorityBlock,
+		EffectTypeID::AccuracyCheck,
+		EffectTypeID::CriticalHit,
+		EffectTypeID::BaseDamage,
+		EffectTypeID::Targets,
+		EffectTypeID::Weather,
+		EffectTypeID::Terrain,
+		EffectTypeID::Randomization,
+		EffectTypeID::Stab,
+		EffectTypeID::TypeEffectiveness,
+		EffectTypeID::BurnDamageReduction,
+		EffectTypeID::StatusApply,
+	};
+
+	constexpr std::array BASE_ATTACK_WITH_FLINCH{
+		EffectTypeID::PsychicTerrainPriorityBlock,
+		EffectTypeID::AccuracyCheck,
+		EffectTypeID::CriticalHit,
+		EffectTypeID::BaseDamage,
+		EffectTypeID::Targets,
+		EffectTypeID::Weather,
+		EffectTypeID::Terrain,
+		EffectTypeID::Randomization,
+		EffectTypeID::Stab,
+		EffectTypeID::TypeEffectiveness,
+		EffectTypeID::BurnDamageReduction,
+		EffectTypeID::Flinch,
+	};
+
+	constexpr std::array STATUS_CHANGE_EFFECTS{
+		EffectTypeID::PsychicTerrainPriorityBlock,
+		EffectTypeID::AccuracyCheck,
+		EffectTypeID::StatChange,
+	};
+
+	constexpr std::array PROTECT_EFFECTS{EffectTypeID::PsychicTerrainPriorityBlock};
+	constexpr std::array FIELD_EFFECT_EFFECTS{EffectTypeID::PsychicTerrainPriorityBlock, EffectTypeID::AccuracyCheck};
+
+	ATTR_CONST std::span<const EffectTypeID> baseAttackEffects() noexcept
 	{
-		return {
-			EffectTypeID::PsychicTerrainPriorityBlock,
-			EffectTypeID::AccuracyCheck,
-			EffectTypeID::CriticalHit,
-			EffectTypeID::BaseDamage,
-			EffectTypeID::Targets,
-			EffectTypeID::Weather,
-			EffectTypeID::Terrain,
-			EffectTypeID::Randomization,
-			EffectTypeID::Stab,
-			EffectTypeID::TypeEffectiveness,
-			EffectTypeID::BurnDamageReduction,
-		};
+		return BASE_ATTACK_EFFECTS;
 	}
 
-	std::vector<EffectTypeID> baseAttackWithRecoil()
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithRecoil() noexcept
 	{
-		std::vector<EffectTypeID> baseAttackEffectsVector{baseAttackEffects()};
-		baseAttackEffectsVector.push_back(EffectTypeID::Recoil);
-		return baseAttackEffectsVector;
+		return BASE_ATTACK_WITH_RECOIL;
 	}
 
-	std::vector<EffectTypeID> baseAttackWithStatus()
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithStatus() noexcept
 	{
-		std::vector<EffectTypeID> baseAttackEffectsVector{baseAttackEffects()};
-		baseAttackEffectsVector.push_back(EffectTypeID::StatusApply);
-		return baseAttackEffectsVector;
+		return BASE_ATTACK_WITH_STATUS;
 	}
 
-	std::vector<EffectTypeID> baseAttackWithFlinch()
+	ATTR_CONST std::span<const EffectTypeID> baseAttackWithFlinch() noexcept
 	{
-		std::vector<EffectTypeID> baseAttackEffectsVector{baseAttackEffects()};
-		baseAttackEffectsVector.push_back(EffectTypeID::Flinch);
-		return baseAttackEffectsVector;
+		return BASE_ATTACK_WITH_FLINCH;
 	}
 
-	std::vector<EffectTypeID> statusChangeEffects()
+	ATTR_CONST std::span<const EffectTypeID> statusChangeEffects() noexcept
 	{
-		return {EffectTypeID::PsychicTerrainPriorityBlock, EffectTypeID::AccuracyCheck, EffectTypeID::StatChange};
+		return STATUS_CHANGE_EFFECTS;
 	}
 
-	std::vector<EffectTypeID> protectEffects()
+	ATTR_CONST std::span<const EffectTypeID> protectEffects() noexcept
 	{
-		return {EffectTypeID::PsychicTerrainPriorityBlock};
+		return PROTECT_EFFECTS;
 	}
 
-	std::vector<EffectTypeID> fieldEffectEffects()
+	ATTR_CONST std::span<const EffectTypeID> fieldEffectEffects() noexcept
 	{
-		return {EffectTypeID::PsychicTerrainPriorityBlock, EffectTypeID::AccuracyCheck};
+		return FIELD_EFFECT_EFFECTS;
 	}
 } // namespace PocketCore::Move

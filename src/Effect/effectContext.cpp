@@ -19,7 +19,29 @@ namespace PocketCore::Effect
 
 	void EffectContext::setMultiplier(const MultiplierID multID, const float value)
 	{
-		// Find if already present
+		const us multiplierValue{multID.getValue()};
+		const bool isBuiltin{multiplierValue < BUILTIN_MULTIPLIER_COUNT};
+
+		if (isBuiltin)
+		{
+			us &storedPosition{mBuiltinMultiplierPositions.at(multiplierValue)};
+
+			if (storedPosition != 0U)
+			{
+				mActiveMultipliers.at(static_cast<std::size_t>(storedPosition - 1U)).second = value;
+				return;
+			}
+
+			if (mActiveMultipliers.empty())
+			{
+				mActiveMultipliers.reserve(BUILTIN_MULTIPLIER_COUNT);
+			}
+
+			mActiveMultipliers.emplace_back(multID, value);
+			storedPosition = static_cast<us>(mActiveMultipliers.size());
+			return;
+		}
+
 		for (auto &[mid, val] : mActiveMultipliers)
 		{
 			if (mid == multID)
@@ -54,7 +76,7 @@ namespace PocketCore::Effect
 				static_cast<double>((FIXED_POINT_MULTIPLIER_NUMERATOR * multiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR),
 			};
 
-			damage *= static_cast<us>(roundDownHalfSafe(fixedPointValue));
+			damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));
 
 			damage = std::max(damage, static_cast<us>(1));
 		}
@@ -62,8 +84,14 @@ namespace PocketCore::Effect
 		return damage;
 	}
 
+	ATTR_NODISCARD std::span<const std::pair<MultiplierID, float>> EffectContext::getActiveMultipliers() const noexcept
+	{
+		return mActiveMultipliers;
+	}
+
 	void EffectContext::resetMultipliers()
 	{
 		mActiveMultipliers.clear();
+		mBuiltinMultiplierPositions.fill(0U);
 	}
 } // namespace PocketCore::Effect

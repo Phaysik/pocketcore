@@ -9,8 +9,6 @@
 #ifndef INCLUDE_CONFIGURATION_CONSTANTS_H
 #define INCLUDE_CONFIGURATION_CONSTANTS_H
 
-#include <array>
-#include <cstddef>
 #include <string_view>
 
 #include "Core/attributeMacros.h"
@@ -42,7 +40,7 @@ namespace PocketCore::Configuration
 	inline constexpr us MAX_MULTIPLIERS{1'000};
 
 	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
-	inline constexpr ub MAX_CRITICAL_HIT_VALUE{100};
+	inline constexpr ub MAX_CRITICAL_HIT_VALUE{99};
 	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5};
 
 	inline constexpr float BASE_MULTIPLIER_VALUE{1.0F};

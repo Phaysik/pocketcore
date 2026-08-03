@@ -9,13 +9,21 @@
 #ifndef INCLUDE_CONFIGURATION_CACHE_H
 #define INCLUDE_CONFIGURATION_CACHE_H
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 
 namespace PocketCore::Configuration
 {
+	ATTR_NODISCARD constexpr std::size_t statStageCacheIndex(const sb statStage) noexcept
+	{
+		const sb clampedStage{std::clamp(statStage, static_cast<sb>(-MAX_STAT_STAGES), MAX_STAT_STAGES)};
+		return static_cast<std::size_t>(clampedStage + MAX_STAT_STAGES);
+	}
+
 	ATTR_NODISCARD constexpr std::array<float, MAX_STAGE_CACHE> STAT_STAGE_MULTIPLIERS() noexcept
 	{
 		std::array<float, MAX_STAGE_CACHE> table{};
@@ -25,7 +33,7 @@ namespace PocketCore::Configuration
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
-			const auto index{static_cast<std::size_t>(statStage + MAX_STAT_STAGES)};
+			const std::size_t index{statStageCacheIndex(statStage)};
 
 			if (statStage >= 0)
 			{
@@ -49,7 +57,7 @@ namespace PocketCore::Configuration
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
-			const auto index{static_cast<std::size_t>(statStage + MAX_STAT_STAGES)};
+			const std::size_t index{statStageCacheIndex(statStage)};
 
 			if (statStage >= 0)
 			{
@@ -73,7 +81,7 @@ namespace PocketCore::Configuration
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
-			const auto index{static_cast<std::size_t>(statStage + MAX_STAT_STAGES)};
+			const std::size_t index{statStageCacheIndex(statStage)};
 
 			if (statStage >= 0)
 			{

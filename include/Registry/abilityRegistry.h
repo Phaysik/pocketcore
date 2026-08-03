@@ -81,6 +81,7 @@ namespace PocketCore::Registry::Ability
 			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
+			using Base::eraseEntry;
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;

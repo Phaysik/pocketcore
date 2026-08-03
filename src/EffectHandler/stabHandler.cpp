@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <vector>
 
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
@@ -23,11 +22,7 @@ namespace PocketCore::Effect
 
 	void StabHandler::apply(const BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const std::vector<BattleSlot> &userTeam{getTeamConst(state, context.mUserSide)};
-
-		assert(context.mUserIndex < userTeam.size());
-
-		const BattleSlot &user{userTeam.at(context.mUserIndex)};
+		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
 
 		if (std::ranges::contains(user.mPokemon->getTypesArray(), context.mMoveTypeID))
 		{

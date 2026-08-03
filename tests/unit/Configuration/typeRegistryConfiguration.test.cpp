@@ -371,12 +371,19 @@ SCENARIO("TypeRegistryConfiguration setMatchupRow with MatchupPair span")
 
 	GIVEN("a pair referencing an unknown type")
 	{
-		THEN("returns TypeNotFound error")
+		THEN("returns TypeNotFound without changing the existing row")
 		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Shadow", .value = SE}}};
+			auto originalFireMatchup = config.getMatchup("Normal", "Fire");
+			REQUIRE(originalFireMatchup.has_value());
+
+			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Shadow", .value = SE}}};
 			auto result = config.setMatchupRow("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
+
+			auto fireMatchup = config.getMatchup("Normal", "Fire");
+			REQUIRE(fireMatchup.has_value());
+			CHECK((fireMatchup.value() == originalFireMatchup.value()));
 		}
 	}
 
@@ -498,12 +505,19 @@ SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
 
 	GIVEN("a pair referencing an unknown type")
 	{
-		THEN("returns TypeNotFound error")
+		THEN("returns TypeNotFound without changing the existing column")
 		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Shadow", .value = SE}}};
+			auto originalFireMatchup = config.getMatchup("Fire", "Normal");
+			REQUIRE(originalFireMatchup.has_value());
+
+			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = NVE}, {.typeName = "Shadow", .value = SE}}};
 			auto result = config.setDefensiveColumn("Normal", std::span<const MatchupPair>{pairs});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
+
+			auto fireMatchup = config.getMatchup("Fire", "Normal");
+			REQUIRE(fireMatchup.has_value());
+			CHECK((fireMatchup.value() == originalFireMatchup.value()));
 		}
 	}
 
@@ -842,6 +856,7 @@ SCENARIO("TypeRegistryConfiguration removeTypes")
 			auto result = config.removeTypes(std::span<const std::string_view>{names});
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			CHECK((result.error().mContext == "Shadow"));
 			// Rollback: Normal should still be present
 			CHECK(config.hasType("Normal"));
 			CHECK((config.getAmountRegistered() == 19));
@@ -970,6 +985,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 			auto result = config.resetMatchups(invalidId);
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			CHECK(result.error().mContext.empty());
 		}
 	}
 }

@@ -22,6 +22,7 @@ using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemEffectTrigger;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::ItemMeta;
+using PocketCore::Item::ItemTargetID;
 using PocketCore::Item::ItemTriggerID;
 using PocketCore::Item::toItemID;
 using PocketCore::Utility::Debug::Logging::Logger;
@@ -163,6 +164,32 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 			}
 		}
 
+		WHEN("its target is replaced by name")
+		{
+			auto setResult{configuration.setItemTarget("Custom Item", ItemTargetID::AllOpponents)};
+
+			THEN("target metadata changes")
+			{
+				REQUIRE(setResult.has_value());
+				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTargetID == ItemTargetID::AllOpponents));
+			}
+		}
+
+		WHEN("its target is replaced by stable ID")
+		{
+			auto setResult{configuration.setItemTarget(customIdentifier, ItemTargetID::SingleOpponent)};
+
+			THEN("target metadata changes")
+			{
+				REQUIRE(setResult.has_value());
+				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTargetID == ItemTargetID::SingleOpponent));
+			}
+		}
+
 		WHEN("it is renamed")
 		{
 			auto renameResult{configuration.renameItem("Custom Item", "Renamed Item")};
@@ -175,6 +202,51 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 				REQUIRE(renamedIdentifier.has_value());
 				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((renamedIdentifier.value() == customIdentifier));
+			}
+		}
+
+		WHEN("it is updated by name")
+		{
+			ItemMeta replacement{
+				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = ItemTriggerID::OnTurnEnd}},
+				.mName = "Replacement Item",
+				.mTargetID = ItemTargetID::Self,
+			};
+			auto updateResult{configuration.updateItem("Custom Item", replacement)};
+
+			THEN("stored metadata is replaced")
+			{
+				REQUIRE(updateResult.has_value());
+				CHECK(configuration.hasItem("Replacement Item"));
+				CHECK_FALSE(configuration.hasItem("Custom Item"));
+			}
+		}
+
+		WHEN("it is updated by stable ID")
+		{
+			ItemMeta replacement{
+				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = ItemTriggerID::OnMoveUse}},
+				.mName = "Replacement Item By ID",
+				.mTargetID = ItemTargetID::AllAllies,
+			};
+			auto updateResult{configuration.updateItem(customIdentifier, replacement)};
+
+			THEN("stored metadata is replaced")
+			{
+				REQUIRE(updateResult.has_value());
+				CHECK(configuration.hasItem("Replacement Item By ID"));
+			}
+		}
+
+		WHEN("it is removed by name")
+		{
+			auto removeResult{configuration.removeItem("Custom Item")};
+
+			THEN("the removed stable ID is returned")
+			{
+				REQUIRE(removeResult.has_value());
+				CHECK((removeResult.value() == customIdentifier));
+				CHECK_FALSE(configuration.hasItem(customIdentifier));
 			}
 		}
 
@@ -200,11 +272,17 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		THEN("metadata mutation and removal report ItemNotFound")
 		{
 			auto setResult{configuration.setItemTriggers("Missing", {})};
+			auto setTargetResult{configuration.setItemTarget("Missing", ItemTargetID::Self)};
+			auto updateResult{configuration.updateItem("Missing", {.mTriggers = {}, .mName = "Updated"})};
 			auto removeResult{configuration.removeItem("Missing")};
 
 			REQUIRE_FALSE(setResult.has_value());
+			REQUIRE_FALSE(setTargetResult.has_value());
+			REQUIRE_FALSE(updateResult.has_value());
 			REQUIRE_FALSE(removeResult.has_value());
 			CHECK((setResult.error().mKind == RegistryError::ItemNotFound));
+			CHECK((setTargetResult.error().mKind == RegistryError::ItemNotFound));
+			CHECK((updateResult.error().mKind == RegistryError::ItemNotFound));
 			CHECK((removeResult.error().mKind == RegistryError::ItemNotFound));
 		}
 	}

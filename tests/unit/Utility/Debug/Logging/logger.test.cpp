@@ -372,6 +372,18 @@ SCENARIO("Logger")
 			const std::string contents{readLogFile()};
 			CHECK(contents.contains("expected != actual"));
 		}
+
+		THEN("warn with string_view unsigned long string_view and unsigned short arguments")
+		{
+			const std::string_view prefix{"prefix"};
+			const std::string_view suffix{"suffix"};
+			const unsigned short count{9U};
+			std::optional<std::string_view> result{Logger::warn("{} {} {} {}", prefix, 20UL, suffix, count)};
+			CHECK_FALSE(result.has_value());
+
+			const std::string contents{readLogFile()};
+			CHECK(contents.contains("prefix 20 suffix 9"));
+		}
 	}
 
 	GIVEN("Template instantiations with unsigned char arguments")

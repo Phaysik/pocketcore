@@ -25,7 +25,7 @@ namespace PocketCore::Effect
 	void CriticalHitHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
 								   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		if (Random::get<ub>(MIN_CRITICAL_HIT_VALUE, MAX_CRITICAL_HIT_VALUE) <= CRITICAL_HIT_PERCENTAGE)
+		if (Random::get<ub>(MIN_CRITICAL_HIT_VALUE, MAX_CRITICAL_HIT_VALUE) < CRITICAL_HIT_PERCENTAGE)
 		{
 			context.mDamage.mIsCritical = true;
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Critical), CRITICAL_HIT_MULTIPLIER);

@@ -17,6 +17,7 @@
 using PocketCore::Ability::AbilityEffectTrigger;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
+using PocketCore::Ability::AbilityTargetID;
 using PocketCore::Ability::AbilityTriggerID;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
@@ -146,6 +147,50 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 			}
 		}
 
+		WHEN("its triggers are replaced by stable ID")
+		{
+			std::array<AbilityEffectTrigger, 1> replacement{
+				{
+					{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = AbilityTriggerID::OnFaint},
+				},
+			};
+			auto setResult{configuration.setAbilityTriggers(customIdentifier, replacement)};
+
+			THEN("the trigger update remains associated with the same ID")
+			{
+				REQUIRE(setResult.has_value());
+				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTriggers.front().mTrigger == AbilityTriggerID::OnFaint));
+			}
+		}
+
+		WHEN("its target is replaced by name")
+		{
+			auto setResult{configuration.setAbilityTarget("Custom Ability", AbilityTargetID::AllOpponents)};
+
+			THEN("target metadata changes")
+			{
+				REQUIRE(setResult.has_value());
+				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTargetID == AbilityTargetID::AllOpponents));
+			}
+		}
+
+		WHEN("its target is replaced by stable ID")
+		{
+			auto setResult{configuration.setAbilityTarget(customIdentifier, AbilityTargetID::AllAllies)};
+
+			THEN("target metadata changes")
+			{
+				REQUIRE(setResult.has_value());
+				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mTargetID == AbilityTargetID::AllAllies));
+			}
+		}
+
 		WHEN("it is renamed")
 		{
 			auto renameResult{configuration.renameAbility("Custom Ability", "Renamed Ability")};
@@ -158,6 +203,51 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 				REQUIRE(renamedIdentifier.has_value());
 				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 				CHECK((renamedIdentifier.value() == customIdentifier));
+			}
+		}
+
+		WHEN("it is updated by name")
+		{
+			AbilityMeta replacement{
+				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = AbilityTriggerID::OnStatus}},
+				.mName = "Replacement Ability",
+				.mTargetID = AbilityTargetID::AllExceptSelf,
+			};
+			auto updateResult{configuration.updateAbility("Custom Ability", replacement)};
+
+			THEN("stored metadata is replaced")
+			{
+				REQUIRE(updateResult.has_value());
+				CHECK(configuration.hasAbility("Replacement Ability"));
+				CHECK_FALSE(configuration.hasAbility("Custom Ability"));
+			}
+		}
+
+		WHEN("it is updated by stable ID")
+		{
+			AbilityMeta replacement{
+				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = AbilityTriggerID::OnMoveUse}},
+				.mName = "Replacement Ability By ID",
+				.mTargetID = AbilityTargetID::Self,
+			};
+			auto updateResult{configuration.updateAbility(customIdentifier, replacement)};
+
+			THEN("stored metadata is replaced")
+			{
+				REQUIRE(updateResult.has_value());
+				CHECK(configuration.hasAbility("Replacement Ability By ID"));
+			}
+		}
+
+		WHEN("it is removed by name")
+		{
+			auto removeResult{configuration.removeAbility("Custom Ability")};
+
+			THEN("the removed stable ID is returned")
+			{
+				REQUIRE(removeResult.has_value());
+				CHECK((removeResult.value() == customIdentifier));
+				CHECK_FALSE(configuration.hasAbility(customIdentifier));
 			}
 		}
 
@@ -183,11 +273,17 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		THEN("metadata mutation and removal report AbilityNotFound")
 		{
 			auto setResult{configuration.setAbilityTriggers("Missing", {})};
+			auto setTargetResult{configuration.setAbilityTarget("Missing", AbilityTargetID::Self)};
+			auto updateResult{configuration.updateAbility("Missing", {.mTriggers = {}, .mName = "Updated"})};
 			auto removeResult{configuration.removeAbility("Missing")};
 
 			REQUIRE_FALSE(setResult.has_value());
+			REQUIRE_FALSE(setTargetResult.has_value());
+			REQUIRE_FALSE(updateResult.has_value());
 			REQUIRE_FALSE(removeResult.has_value());
 			CHECK((setResult.error().mKind == RegistryError::AbilityNotFound));
+			CHECK((setTargetResult.error().mKind == RegistryError::AbilityNotFound));
+			CHECK((updateResult.error().mKind == RegistryError::AbilityNotFound));
 			CHECK((removeResult.error().mKind == RegistryError::AbilityNotFound));
 		}
 	}

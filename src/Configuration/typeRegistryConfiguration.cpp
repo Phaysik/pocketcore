@@ -13,7 +13,6 @@
 #include <expected>
 #include <optional>
 #include <span>
-#include <string>
 #include <string_view>
 #include <unordered_set>
 
@@ -158,12 +157,8 @@ namespace PocketCore::Configuration
 		}
 
 		const us registered{registry.getAmountRegistered()};
-
-		// Reset the entire row to NOT_DEFINED, then fill from pairs
-		for (us col{0}; col < registered; ++col)
-		{
-			registry.setTypeChartCell(attackerIndex.value(), col, TypeEffectiveness::NOT_DEFINED);
-		}
+		std::array<TypeEffectiveness, MAX_TYPES> replacementRow{};
+		replacementRow.fill(TypeEffectiveness::NOT_DEFINED);
 
 		for (const auto &[pairName, pairValue] : newRow)
 		{
@@ -174,7 +169,12 @@ namespace PocketCore::Configuration
 				return std::unexpected{targetIndex.error()};
 			}
 
-			registry.setTypeChartCell(attackerIndex.value(), targetIndex.value(), pairValue);
+			replacementRow.at(targetIndex.value()) = pairValue;
+		}
+
+		for (us col{0}; col < registered; ++col)
+		{
+			registry.setTypeChartCell(attackerIndex.value(), col, replacementRow.at(col));
 		}
 
 		return {};
@@ -221,12 +221,8 @@ namespace PocketCore::Configuration
 		}
 
 		const us registered{registry.getAmountRegistered()};
-
-		// Reset the entire column to NOT_DEFINED, then fill from pairs
-		for (us row{0}; row < registered; ++row)
-		{
-			registry.setTypeChartCell(row, defenderIndex.value(), TypeEffectiveness::NOT_DEFINED);
-		}
+		std::array<TypeEffectiveness, MAX_TYPES> replacementColumn{};
+		replacementColumn.fill(TypeEffectiveness::NOT_DEFINED);
 
 		for (const auto &[pairName, pairValue] : newCol)
 		{
@@ -237,7 +233,12 @@ namespace PocketCore::Configuration
 				return std::unexpected{attackerIndex.error()};
 			}
 
-			registry.setTypeChartCell(attackerIndex.value(), defenderIndex.value(), pairValue);
+			replacementColumn.at(attackerIndex.value()) = pairValue;
+		}
+
+		for (us row{0}; row < registered; ++row)
+		{
+			registry.setTypeChartCell(row, defenderIndex.value(), replacementColumn.at(row));
 		}
 
 		return {};
@@ -523,9 +524,9 @@ namespace PocketCore::Configuration
 
 			if (!result.has_value())
 			{
-				static_cast<void>(
+				static_cast<void>( // LCOV_EXCL_LINE
 					Logger::info("TypeRegistryConfiguration::removeTypes rolling back to previous state due to error on type '{}'.",
-								 name)); // LCOV_EXCL_BR
+								 name)); // LCOV_EXCL_BR_LINE
 
 				registry = snapshot;
 
@@ -599,9 +600,9 @@ namespace PocketCore::Configuration
 				Logger::info("TypeRegistryConfiguration::resetMatchups type not found for stable ID '{}'.", typeID.getValue()),
 			}; // LCOV_EXCL_BR
 
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound,
-													 std::to_string(static_cast<PocketCore::Core::sb>(typeID.getValue())),
-													 logResult.value_or(std::string_view{})}};
+			return std::unexpected{
+				RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})},
+			};
 		}
 
 		clearRows(arrayIndex.value()); // LCOV_EXCL_BR

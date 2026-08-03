@@ -175,7 +175,8 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, {}, logResult.value_or(std::string_view{})}};
 				}
 
-				const Registry snapshot{registry};
+				const us previousAmountRegistered{registry.getAmountRegistered()};
+				const us previousNextID{registry.getNextID()};
 
 				const auto forwardedFactory{std::forward<Factory>(factory)};
 
@@ -187,12 +188,17 @@ namespace PocketCore::Configuration
 
 					if (!result.has_value())
 					{
-						registry = snapshot;
+						while (registry.getAmountRegistered() > previousAmountRegistered)
+						{
+							registry.eraseEntry(static_cast<us>(registry.getAmountRegistered() - 1U));
+						}
+
+						registry.setNextID(previousNextID);
 						return std::unexpected{result.error()};
 					}
 				}
 
-				return {};
+				return {}; // LCOV_EXCL_LINE
 			}
 
 			/*! @brief Mutates a copy of registered metadata selected by name and writes it back.
@@ -215,8 +221,23 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				Metadata metadata{registry.getEntry(index.value())};
+				const Metadata &currentMetadata{registry.getEntry(index.value())};
+				Metadata metadata{currentMetadata};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
+				metadata.*IDMember = currentMetadata.*IDMember;
+
+				if (metadata.mName != currentMetadata.mName && registry.hasEntry(metadata.mName))
+				{
+					const std::optional<std::string_view> logResult{
+						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
+									 Policy::entityName, metadata.mName),
+					};
+
+					return std::unexpected{
+						RegistryErrorInfo{Policy::duplicateError, metadata.mName, logResult.value_or(std::string_view{})},
+					};
+				}
+
 				registry.setEntry(index.value(), metadata);
 
 				return {};
@@ -238,8 +259,23 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				Metadata metadata{registry.getEntry(index.value())};
+				const Metadata &currentMetadata{registry.getEntry(index.value())};
+				Metadata metadata{currentMetadata};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
+				metadata.*IDMember = currentMetadata.*IDMember;
+
+				if (metadata.mName != currentMetadata.mName && registry.hasEntry(metadata.mName))
+				{
+					const std::optional<std::string_view> logResult{
+						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
+									 Policy::entityName, metadata.mName),
+					};
+
+					return std::unexpected{
+						RegistryErrorInfo{Policy::duplicateError, metadata.mName, logResult.value_or(std::string_view{})},
+					};
+				}
+
 				registry.setEntry(index.value(), metadata);
 
 				return {};
@@ -355,15 +391,7 @@ namespace PocketCore::Configuration
 
 			void removeEntry(const us index)
 			{
-				const us registered{registry.getAmountRegistered()};
-
-				for (us current{index}; current + 1U < registered; ++current)
-				{
-					registry.setEntry(current, registry.getEntry(static_cast<us>(current + 1U)));
-				}
-
-				registry.setEntry(static_cast<us>(registered - 1U), Metadata{});
-				registry.decrementAmountRegistered();
+				registry.eraseEntry(index);
 			}
 
 		private:

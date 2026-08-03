@@ -184,6 +184,21 @@ SCENARIO("TypeRegistry")
 
 	GIVEN("getTypeID")
 	{
+		THEN("lookups work when the registry is at maximum capacity")
+		{
+			TypeID finalIdentifier{registry.getNextTypeID()};
+			registry.setEntry(19, TypeEntry{.name = "Custom", .typeID = finalIdentifier});
+			registry.incrementAmountRegistered();
+
+			auto identifier{registry.getTypeID("Custom")};
+			auto name{registry.getTypeName(finalIdentifier)};
+
+			REQUIRE(identifier.has_value());
+			REQUIRE(name.has_value());
+			CHECK((identifier.value() == finalIdentifier));
+			CHECK((name.value() == "Custom"));
+		}
+
 		THEN("selected builtin ids match enum values")
 		{
 			std::optional<TypeID> normalIdentifier{registry.getTypeID("Normal")};
