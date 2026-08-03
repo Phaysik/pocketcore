@@ -10,7 +10,6 @@
 #include "Core/typedefs.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>

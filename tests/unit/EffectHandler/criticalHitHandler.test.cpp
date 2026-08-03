@@ -8,7 +8,7 @@
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Registry/registryProvider.h"
 #include "Utility/random.h"
 

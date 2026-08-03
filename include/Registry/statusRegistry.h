@@ -18,7 +18,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Status/builtinStatusID.h"
+#include "Status/builtInStatusID.h"
 #include "Status/constants.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"

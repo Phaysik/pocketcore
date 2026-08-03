@@ -8,11 +8,11 @@
 #include "Configuration/constants.h"
 #include "Effect/effectContext.h"
 #include "Item/itemID.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
+#include "Types/builtInTypeID.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 
 #include <catch2/catch_test_macros.hpp>
 

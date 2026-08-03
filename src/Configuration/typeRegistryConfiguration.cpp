@@ -22,7 +22,6 @@
 #include "Registry/typeRegistry.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 #include "Utility/Debug/Logging/logger.h"
 
 namespace PocketCore::Configuration

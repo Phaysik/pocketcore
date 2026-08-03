@@ -19,10 +19,10 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.h"
+#include "Types/builtInTypeID.h"
 #include "Types/constants.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
-#include "Types/types.h"
 
 #include "constants.h" // IWYU pragma: keep
 

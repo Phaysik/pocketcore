@@ -18,7 +18,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Terrain/builtinTerrainID.h"
+#include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"

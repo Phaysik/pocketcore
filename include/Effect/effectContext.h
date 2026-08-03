@@ -22,7 +22,7 @@
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Move/moveTargetsAndTriggers.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Pokemon/pokemon.h"

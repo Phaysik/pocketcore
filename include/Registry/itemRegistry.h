@@ -17,7 +17,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
-#include "Item/builtinItemID.h"
+#include "Item/builtInItemID.h"
 #include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"

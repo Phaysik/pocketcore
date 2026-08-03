@@ -7,7 +7,7 @@
 
 #include "Configuration/constants.h"
 #include "Effect/effectType.h"
-#include "Item/builtinItemID.h"
+#include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Item/itemTargetsAndTriggers.h"

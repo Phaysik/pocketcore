@@ -9,7 +9,10 @@
 #ifndef INCLUDE_TYPES_TYPES_H
 #define INCLUDE_TYPES_TYPES_H
 
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+
+#include "typeID.h"
 
 namespace PocketCore::Types
 {
@@ -45,6 +48,15 @@ namespace PocketCore::Types
 		Fairy,
 		Stellar,
 	};
+
+	/*! @brief Converts a built-in type catalog value to its stable registry identifier.
+		@param[in] builtinType The built-in type to convert.
+		@return The corresponding open type identifier.
+	*/
+	ATTR_NODISCARD constexpr TypeID toTypeID(const Types builtinType) noexcept
+	{
+		return TypeID{static_cast<ub>(builtinType)};
+	}
 } // namespace PocketCore::Types
 
 #endif

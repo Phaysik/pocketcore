@@ -19,6 +19,7 @@ namespace PocketCore::Multiplier
 	constexpr std::string_view MULTIPLIER_NAME_WEATHER{"Weather"};
 	constexpr std::string_view MULTIPLIER_NAME_CRITICAL{"Critical"};
 	constexpr std::string_view MULTIPLIER_NAME_STAB{"Stab"};
+	constexpr std::string_view MULTIPLIER_NAME_TYPE_EFFECTIVENESS{"Type Effectiveness"};
 } // namespace PocketCore::Multiplier
 
 #endif

@@ -17,7 +17,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
-#include "Multiplier/builtinMultiplierID.h"
+#include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
@@ -55,7 +55,7 @@ namespace PocketCore::Registry::Multiplier
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID. */
 			ATTR_NOINLINE explicit constexpr MultiplierRegistry()
-				: Base{static_cast<us>(toMultiplierID(BuiltinMultiplierID::Stab).getValue() + 1U)}
+				: Base{static_cast<us>(toMultiplierID(BuiltinMultiplierID::TypeEffectiveness).getValue() + 1U)}
 			{
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_NONE,
@@ -80,6 +80,10 @@ namespace PocketCore::Registry::Multiplier
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_STAB,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Stab),
+				});
+				addBuiltin({
+					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TYPE_EFFECTIVENESS,
+					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::TypeEffectiveness),
 				});
 			}
 

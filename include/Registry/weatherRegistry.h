@@ -18,7 +18,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Weather/builtinWeatherID.h"
+#include "Weather/builtInWeatherID.h"
 #include "Weather/constants.h"
 #include "Weather/weatherID.h"
 #include "Weather/weatherMeta.h"
