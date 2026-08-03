@@ -43,10 +43,15 @@ namespace PocketCore::Configuration
 	inline constexpr ub MAX_CRITICAL_HIT_VALUE{99};
 	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5};
 
-	inline constexpr float BASE_MULTIPLIER_VALUE{1.0F};
-	inline constexpr float CRITICAL_HIT_MULTIPLIER{1.5F};
-	inline constexpr float STAB_HIT_MULTIPLIER{1.5F};
-	inline constexpr float TARGETS_HIT_MULTIPLIER{0.75F};
+	inline constexpr double BASE_MULTIPLIER_VALUE{1.0};
+	inline constexpr double CRITICAL_HIT_MULTIPLIER{1.5};
+	inline constexpr double STAB_HIT_MULTIPLIER{1.5};
+	inline constexpr double TARGETS_HIT_MULTIPLIER{0.75};
+
+	inline constexpr double NOT_VERY_EFFECTIVE_VALUE{0.5};
+	inline constexpr double EFFECTIVE_VALUE{1.0};
+	inline constexpr double SUPER_EFFECTIVE_VALUE{2.0};
+	inline constexpr double NO_EFFECTIVE_VALUE{0.0};
 
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
@@ -63,8 +68,8 @@ namespace PocketCore::Configuration
 	inline constexpr ub LEVEL_DAMAGE_FACTOR_DENOMINATOR{5};
 	inline constexpr ub LEVEL_DAMAGE_FACTOR_OFFSET{2};
 
-	inline constexpr float FIXED_POINT_MULTIPLIER_NUMERATOR{4'096.0F};
-	inline constexpr float FIXED_POINT_MULTIPLIER_DENOMINATOR{4'096.0F};
+	inline constexpr double FIXED_POINT_MULTIPLIER_NUMERATOR{4'096.0};
+	inline constexpr double FIXED_POINT_MULTIPLIER_DENOMINATOR{4'096.0};
 	inline constexpr double ROUND_DOWN_HALF_POINT{0.5};
 	inline constexpr double ROUND_DOWN_TOLERANCE{1e-9};
 

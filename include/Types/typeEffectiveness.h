@@ -9,10 +9,16 @@
 #ifndef INCLUDE_REGISTRY_TYPEEFFECTIVENESS_H
 #define INCLUDE_REGISTRY_TYPEEFFECTIVENESS_H
 
+#include "Configuration/constants.h"
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
 namespace PocketCore::Types
 {
+	using PocketCore::Configuration::EFFECTIVE_VALUE;
+	using PocketCore::Configuration::NO_EFFECTIVE_VALUE;
+	using PocketCore::Configuration::NOT_VERY_EFFECTIVE_VALUE;
+	using PocketCore::Configuration::SUPER_EFFECTIVE_VALUE;
 	using PocketCore::Core::ub;
 
 	/*! @enum TypeEffectiveness
@@ -29,6 +35,27 @@ namespace PocketCore::Types
 		E,			 /*!< Effective / neutral (1x multiplier). */
 		SE,			 /*!< Super effective (1.5x multiplier). */
 	};
+
+	ATTR_NODISCARD constexpr double getEffectivenessValue(const TypeEffectiveness effectiveNess)
+	{
+		using enum TypeEffectiveness;
+
+		switch (effectiveNess)
+		{
+			case NVE:
+				return NOT_VERY_EFFECTIVE_VALUE;
+			case E:
+				return EFFECTIVE_VALUE;
+			case SE:
+				return SUPER_EFFECTIVE_VALUE;
+			case NE:
+				ATTR_FALLTHROUGH;
+			case NOT_DEFINED:
+				ATTR_FALLTHROUGH;
+			default:
+				return NO_EFFECTIVE_VALUE;
+		}
+	}
 } // namespace PocketCore::Types
 
 #endif

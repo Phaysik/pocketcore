@@ -20,6 +20,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/typeRegistry.h"
+#include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
 #include "Utility/Debug/Logging/logger.h"

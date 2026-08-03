@@ -49,7 +49,7 @@ namespace
 	{
 		return std::ranges::any_of(effectContext.getActiveMultipliers(), [](const auto &multiplierPair) {
 			return multiplierPair.first == toMultiplierID(BuiltinMultiplierID::Critical)
-				&& std::fabs(multiplierPair.second - CRITICAL_HIT_MULTIPLIER) < 0.0001F;
+				&& std::fabs(multiplierPair.second - CRITICAL_HIT_MULTIPLIER) < 0.0001;
 		});
 	}
 } // namespace

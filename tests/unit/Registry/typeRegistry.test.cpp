@@ -8,6 +8,7 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
 

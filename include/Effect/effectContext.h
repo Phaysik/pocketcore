@@ -77,7 +77,7 @@ namespace PocketCore::Effect
 	{
 
 		public:
-			void setMultiplier(const MultiplierID multID, const float value);
+			void setMultiplier(const MultiplierID multID, const double value);
 
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage) const;
 
@@ -86,7 +86,7 @@ namespace PocketCore::Effect
 			/*! @brief Returns active multipliers in application order.
 				@return A read-only view that remains valid until the next multiplier mutation.
 			*/
-			ATTR_NODISCARD std::span<const std::pair<MultiplierID, float>> getActiveMultipliers() const noexcept;
+			ATTR_NODISCARD std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
@@ -114,7 +114,7 @@ namespace PocketCore::Effect
 		private:
 			static constexpr std::size_t BUILTIN_MULTIPLIER_COUNT{static_cast<std::size_t>(BuiltinMultiplierID::Stab) + 1U};
 
-			std::vector<std::pair<MultiplierID, float>> mActiveMultipliers{};
+			std::vector<std::pair<MultiplierID, double>> mActiveMultipliers{};
 			std::array<us, BUILTIN_MULTIPLIER_COUNT> mBuiltinMultiplierPositions{};
 	};
 } // namespace PocketCore::Effect

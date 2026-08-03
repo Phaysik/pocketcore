@@ -20,7 +20,7 @@ namespace PocketCore::Effect
 	using PocketCore::Core::us;
 	using PocketCore::Multiplier::MultiplierID;
 
-	void EffectContext::setMultiplier(const MultiplierID multID, const float value)
+	void EffectContext::setMultiplier(const MultiplierID multID, const double value)
 	{
 		const us multiplierValue{multID.getValue()};
 		const bool isBuiltin{multiplierValue < BUILTIN_MULTIPLIER_COUNT};
@@ -76,7 +76,7 @@ namespace PocketCore::Effect
 			};
 
 			const double fixedPointValue{
-				static_cast<double>((FIXED_POINT_MULTIPLIER_NUMERATOR * multiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR),
+				(FIXED_POINT_MULTIPLIER_NUMERATOR * multiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
 			};
 
 			damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));
@@ -87,7 +87,7 @@ namespace PocketCore::Effect
 		return damage;
 	}
 
-	ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, float>> EffectContext::getActiveMultipliers() const noexcept
+	ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> EffectContext::getActiveMultipliers() const noexcept
 	{
 		return mActiveMultipliers;
 	}

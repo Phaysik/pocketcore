@@ -58,7 +58,7 @@ namespace
 	{
 		return std::ranges::any_of(effectContext.getActiveMultipliers(), [](const auto &multiplierPair) {
 			return multiplierPair.first == toMultiplierID(BuiltinMultiplierID::Targets)
-				&& std::fabs(multiplierPair.second - TARGETS_HIT_MULTIPLIER) < 0.0001F;
+				&& std::fabs(multiplierPair.second - TARGETS_HIT_MULTIPLIER) < 0.0001;
 		});
 	}
 } // namespace
@@ -142,7 +142,7 @@ SCENARIO("TargetsHandler")
 				const auto activeMultipliers{effectContext.getActiveMultipliers()};
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == toMultiplierID(BuiltinMultiplierID::Targets)));
-				CHECK((std::fabs(activeMultipliers.front().second - TARGETS_HIT_MULTIPLIER) < 0.0001F));
+				CHECK((std::fabs(activeMultipliers.front().second - TARGETS_HIT_MULTIPLIER) < 0.0001));
 			}
 		}
 	}

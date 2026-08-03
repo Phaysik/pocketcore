@@ -24,27 +24,27 @@ SCENARIO("EffectContext setMultiplier")
 
 		WHEN("a multiplier is added")
 		{
-			context.setMultiplier(abilityMultiplierID, 2.0F);
+			context.setMultiplier(abilityMultiplierID, 2.0);
 			const auto activeMultipliers{context.getActiveMultipliers()};
 
 			THEN("the multiplier list stores one entry")
 			{
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == abilityMultiplierID));
-				CHECK((std::fabs(activeMultipliers.front().second - 2.0F) < 1e-6F));
+				CHECK((std::fabs(activeMultipliers.front().second - 2.0) < 1e-6));
 			}
 		}
 
 		WHEN("the same multiplier is set again")
 		{
-			context.setMultiplier(abilityMultiplierID, 2.0F);
-			context.setMultiplier(abilityMultiplierID, 3.0F);
+			context.setMultiplier(abilityMultiplierID, 2.0);
+			context.setMultiplier(abilityMultiplierID, 3.0);
 			const auto activeMultipliers{context.getActiveMultipliers()};
 
 			THEN("the existing entry is updated without duplication")
 			{
 				REQUIRE((activeMultipliers.size() == 1U));
-				CHECK((std::fabs(activeMultipliers.front().second - 3.0F) < 1e-6F));
+				CHECK((std::fabs(activeMultipliers.front().second - 3.0) < 1e-6));
 			}
 		}
 	}
@@ -55,27 +55,27 @@ SCENARIO("EffectContext setMultiplier")
 
 		WHEN("a non-builtin multiplier is added")
 		{
-			context.setMultiplier(customID, 2.0F);
+			context.setMultiplier(customID, 2.0);
 			const auto activeMultipliers{context.getActiveMultipliers()};
 
 			THEN("the multiplier list stores one entry")
 			{
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == customID));
-				CHECK((std::fabs(activeMultipliers.front().second - 2.0F) < 1e-6F));
+				CHECK((std::fabs(activeMultipliers.front().second - 2.0) < 1e-6));
 			}
 		}
 
 		WHEN("the same non-builtin multiplier is set again")
 		{
-			context.setMultiplier(customID, 2.0F);
-			context.setMultiplier(customID, 3.0F);
+			context.setMultiplier(customID, 2.0);
+			context.setMultiplier(customID, 3.0);
 			const auto activeMultipliers{context.getActiveMultipliers()};
 
 			THEN("the existing entry is updated without duplication")
 			{
 				REQUIRE((activeMultipliers.size() == 1U));
-				CHECK((std::fabs(activeMultipliers.front().second - 3.0F) < 1e-6F));
+				CHECK((std::fabs(activeMultipliers.front().second - 3.0) < 1e-6));
 			}
 		}
 	}
@@ -96,7 +96,7 @@ SCENARIO("EffectContext applyMultiplier")
 	GIVEN("a multiplier with a fractional value over one half")
 	{
 		EffectContext context{};
-		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 1.6F);
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 1.6);
 
 		THEN("the multiplied damage rounds up")
 		{
@@ -107,7 +107,7 @@ SCENARIO("EffectContext applyMultiplier")
 	GIVEN("a multiplier that produces an exact half fractional part")
 	{
 		EffectContext context{};
-		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 1.5F);
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 1.5);
 
 		THEN("the multiplied damage rounds down")
 		{
@@ -118,8 +118,8 @@ SCENARIO("EffectContext applyMultiplier")
 	GIVEN("multiple multipliers")
 	{
 		EffectContext context{};
-		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 2.0F);
-		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Item), 2.0F);
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 2.0);
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Item), 2.0);
 
 		THEN("all multipliers are applied in order")
 		{
@@ -130,7 +130,7 @@ SCENARIO("EffectContext applyMultiplier")
 	GIVEN("a zero multiplier")
 	{
 		EffectContext context{};
-		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 0.0F);
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 0.0);
 
 		THEN("damage is clamped to at least one")
 		{
@@ -142,8 +142,8 @@ SCENARIO("EffectContext applyMultiplier")
 SCENARIO("EffectContext resetMultipliers")
 {
 	EffectContext context{};
-	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 2.0F);
-	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Item), 2.0F);
+	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 2.0);
+	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Item), 2.0);
 	REQUIRE((context.getActiveMultipliers().size() == 2U));
 
 	WHEN("active multipliers are reset")

@@ -24,6 +24,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Types::getEffectivenessValue;
 	using PocketCore::Types::NO_TYPE_ID;
 	using PocketCore::Types::TypeID;
 
@@ -54,7 +55,7 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		float typeEffectivenessValue{1.0F};
+		double typeEffectivenessValue{1.0};
 
 		for (const TypeID &type : targetPokemon->getTypesArray())
 		{
@@ -79,14 +80,7 @@ namespace PocketCore::Effect
 				continue;
 			}
 
-			// const auto *effectivenessMetadata{provider.typeEffectivenessRegistry->getTypeEffectivenessMetadata(effectiveness)};
-
-			// if (effectivenessMetadata == nullptr)
-			// {
-			// 	continue;
-			// }
-
-			// typeEffectivenessValue *= effectivenessMetadata->mTypeEffectivenessValue;
+			typeEffectivenessValue *= getEffectivenessValue(effectiveness);
 		}
 
 		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::TypeEffectiveness), typeEffectivenessValue);

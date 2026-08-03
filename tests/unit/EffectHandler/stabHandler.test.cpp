@@ -84,7 +84,7 @@ SCENARIO("StabHandler")
 				const auto activeMultipliers{effectContext.getActiveMultipliers()};
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == toMultiplierID(BuiltinMultiplierID::Stab)));
-				CHECK((std::fabs(activeMultipliers.front().second - STAB_HIT_MULTIPLIER) < 0.0001F));
+				CHECK((std::fabs(activeMultipliers.front().second - STAB_HIT_MULTIPLIER) < 0.0001));
 			}
 		}
 	}
