@@ -1,9 +1,9 @@
-/*! \file overflowProtection.h
-	\brief Contains the function declarations for creating and guarding against overflow with integral values
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file overflowProtection.h
+	@brief Declares constexpr helpers for overflow-safe unsigned multiplication.
+	@date 08/03/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
 */
 
 #ifndef INCLUDE_OVERFLOWPROTECTION_H

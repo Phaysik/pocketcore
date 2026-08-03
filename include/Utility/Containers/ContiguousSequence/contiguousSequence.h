@@ -1,9 +1,9 @@
-/*! \file contiguousSequence.h
-	\brief Contains the function declarations for creating helper utilities for contiguous sequence containers.
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file contiguousSequence.h
+	@brief Declares helper algorithms for contiguous sequence containers.
+	@date 08/03/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
 */
 
 #ifndef INCLUDE_UTILITY_CONTAINERS_CONTIGUOUSSEQUENCE_CONTIGUOUSSEQUENCE_H

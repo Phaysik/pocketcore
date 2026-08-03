@@ -1,9 +1,9 @@
-/*! \file attributeMacros.h
-	\brief Contains the attribute macros for creating portable C++ code
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file attributeMacros.h
+	@brief Declares portable compiler-attribute macros used across PocketCore.
+	@date 08/03/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
 */
 
 #ifndef INCLUDE_ATTRIBUTEMACROS_H

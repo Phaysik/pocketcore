@@ -254,12 +254,29 @@ namespace PocketCore::Registry
 			}
 
 		private:
+			/*! @struct IDIndexEntry Registry/fixedMetadataRegistry.h
+				@brief Stores one searchable stable-ID to entry-index mapping.
+				@details `mIDIndex` stores these entries sorted by stable ID, enabling binary-search lookup from stable ID to
+				internal storage index without scanning all registered metadata.
+				@date 08/03/2026
+				@version x.x.x
+				@since x.x.x
+				@author Matthew Moore
+			*/
 			struct IDIndexEntry
 			{
+					/*! @brief Stable identifier used as the binary-search key. */
 					StableID stableID{};
+
+					/*! @brief Internal index into @ref mEntries for the keyed metadata record. */
 					us entryIndex{};
 			};
 
+			/*! @brief Performs linear name lookup over registered entries.
+				@param[in] name The case-sensitive metadata display name.
+				@return The matching internal index, or @ref mAmountRegistered when not found.
+				@note Time complexity is O(n), where n is @ref mAmountRegistered.
+			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
@@ -273,6 +290,11 @@ namespace PocketCore::Registry
 				return mAmountRegistered;
 			}
 
+			/*! @brief Performs binary-search lookup over the sorted stable-ID index.
+				@param[in] stableID The stable identifier to locate.
+				@return The matching internal index, or @ref mAmountRegistered when not found.
+				@note Time complexity is O(log n), where n is @ref mIndexedAmount.
+			*/
 			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const
 			{
 				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
@@ -289,6 +311,11 @@ namespace PocketCore::Registry
 				return mAmountRegistered;
 			}
 
+			/*! @brief Inserts one ID-index mapping while preserving sorted order.
+				@pre @ref mIndexedAmount < Capacity.
+				@param[in] stableID The stable identifier key.
+				@param[in] entryIndex The corresponding internal entry index.
+			*/
 			constexpr void insertIDIndex(const StableID stableID, const us entryIndex)
 			{
 				assert(mIndexedAmount < Capacity);
@@ -306,6 +333,11 @@ namespace PocketCore::Registry
 				++mIndexedAmount;
 			}
 
+			/*! @brief Removes one ID-index mapping and compacts remaining mappings.
+				@param[in] stableID The stable identifier key.
+				@param[in] entryIndex The corresponding internal entry index.
+				@pre The mapping identified by @p stableID and @p entryIndex exists in @ref mIDIndex.
+			*/
 			constexpr void removeIDIndex(const StableID stableID, const us entryIndex)
 			{
 				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
@@ -323,11 +355,20 @@ namespace PocketCore::Registry
 				--mIndexedAmount;
 			}
 
+			/*! @brief Orders two ID-index entries by stable ID then by entry index.
+				@param[in] lhs Left-hand index entry.
+				@param[in] rhs Right-hand index entry.
+				@return True when @p lhs is ordered before @p rhs.
+			*/
 			ATTR_NODISCARD static constexpr bool idIndexEntryLess(const IDIndexEntry &lhs, const IDIndexEntry &rhs) noexcept
 			{
 				return lhs.stableID < rhs.stableID || (lhs.stableID == rhs.stableID && lhs.entryIndex < rhs.entryIndex);
 			}
 
+			/*! @brief Rebuilds and resorts the stable-ID index from registered entries.
+				@details Regenerates @ref mIDIndex from @ref mEntries for all indices in [0, @ref mAmountRegistered),
+				then sorts the generated entries with @ref idIndexEntryLess.
+			*/
 			constexpr void rebuildIDIndex() noexcept
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
@@ -341,10 +382,23 @@ namespace PocketCore::Registry
 			}
 
 		private:
+			/*! @brief Fixed-capacity contiguous storage for metadata records.
+				@details Entries in [0, @ref mAmountRegistered) are valid registered metadata.
+			*/
 			std::array<Metadata, Capacity> mEntries{};
+
+			/*! @brief Sorted stable-ID index used for O(log n) stable-ID lookups.
+				@details Entries in [0, @ref mIndexedAmount) are valid index mappings.
+			*/
 			std::array<IDIndexEntry, Capacity> mIDIndex{};
+
+			/*! @brief Number of registered metadata entries in @ref mEntries. */
 			us mAmountRegistered{0};
+
+			/*! @brief Number of valid mappings currently populated in @ref mIDIndex. */
 			us mIndexedAmount{0};
+
+			/*! @brief Next numeric stable ID for caller-managed custom entry registration. */
 			us mNextID{0};
 	};
 } // namespace PocketCore::Registry

@@ -1,9 +1,9 @@
-/*! \file configCat.h
-	\brief Contains the function declarations for creating initializing ConfigCat
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file configCat.h
+	@brief Declares a process-global wrapper for ConfigCat feature-flag access.
+	@date 08/03/2026
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
 */
 
 #ifndef INCLUDE_CORE_CONFIGCAT_H
