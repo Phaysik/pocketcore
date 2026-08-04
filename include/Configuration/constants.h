@@ -47,6 +47,7 @@ namespace PocketCore::Configuration
 	inline constexpr double CRITICAL_HIT_MULTIPLIER{1.5};
 	inline constexpr double STAB_HIT_MULTIPLIER{1.5};
 	inline constexpr double TARGETS_HIT_MULTIPLIER{0.75};
+	inline constexpr double BURN_MULTIPLIER_VALUE{0.5};
 
 	inline constexpr double NOT_VERY_EFFECTIVE_VALUE{0.5};
 	inline constexpr double EFFECTIVE_VALUE{1.0};

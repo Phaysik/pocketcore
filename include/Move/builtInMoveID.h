@@ -31,6 +31,8 @@ namespace PocketCore::Move
 		None,
 		Pound,
 		KarateChop,
+
+		Facade,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

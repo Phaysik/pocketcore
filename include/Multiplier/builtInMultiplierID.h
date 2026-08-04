@@ -36,6 +36,7 @@ namespace PocketCore::Multiplier
 		Critical,
 		Stab,
 		TypeEffectiveness,
+		Burn,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

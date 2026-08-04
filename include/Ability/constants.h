@@ -16,6 +16,7 @@ namespace PocketCore::Ability
 	constexpr std::string_view ABILITY_NAME_NONE{"None"};
 	constexpr std::string_view ABILITY_NAME_DRIZZLE{"Drizzle"};
 	constexpr std::string_view ABILITY_NAME_STENCH{"Stench"};
+	constexpr std::string_view ABILITY_NAME_GUTS{"Guts"};
 } // namespace PocketCore::Ability
 
 #endif

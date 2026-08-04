@@ -55,7 +55,7 @@ namespace PocketCore::Registry::Multiplier
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID. */
 			ATTR_NOINLINE explicit constexpr MultiplierRegistry()
-				: Base{static_cast<us>(toMultiplierID(BuiltinMultiplierID::TypeEffectiveness).getValue() + 1U)}
+				: Base{static_cast<us>(toMultiplierID(BuiltinMultiplierID::Burn).getValue() + 1U)}
 			{
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_NONE,
@@ -84,6 +84,10 @@ namespace PocketCore::Registry::Multiplier
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TYPE_EFFECTIVENESS,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::TypeEffectiveness),
+				});
+				addBuiltin({
+					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_BURN,
+					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Burn),
 				});
 			}
 

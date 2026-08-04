@@ -33,6 +33,8 @@ namespace PocketCore::Ability
 		None,
 		Stench,
 		Drizzle,
+
+		Guts,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
