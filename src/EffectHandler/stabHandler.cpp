@@ -21,9 +21,9 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 
-	void StabHandler::apply(const BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void StabHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
+		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 
 		if (std::ranges::contains(user.mPokemon->getTypesArray(), context.mMoveTypeID))
 		{

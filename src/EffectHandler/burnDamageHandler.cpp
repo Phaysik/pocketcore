@@ -31,10 +31,9 @@ namespace PocketCore::Effect
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::toStatusID;
 
-	void BurnDamageHandler::apply(const BattleState &state, EffectContext &context,
-								  ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void BurnDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
+		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 
 		const Pokemon *userPokemon{user.mPokemon};
 

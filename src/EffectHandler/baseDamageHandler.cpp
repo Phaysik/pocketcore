@@ -26,11 +26,10 @@ namespace PocketCore::Effect
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
 
-	void BaseDamageHandler::apply(const BattleState &state, EffectContext &context,
-								  ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void BaseDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
-		const BattleSlot &target{IEffectHandler::getTargetBattleSlot(state, context)};
+		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
+		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};
 
 		const Pokemon *userPokemon{user.mPokemon};
 		const Pokemon *targetPokemon{target.mPokemon};
@@ -56,11 +55,11 @@ namespace PocketCore::Effect
 			CACHE_STAT_STAGE_MULTIPLIERS.at(statStageCacheIndex(targetDefenseStage)),
 		};
 
-		const float userAttackModifier{
+		const double userAttackModifier{
 			context.mIsSpecial ? user.mDamageFormulaModifiers.mSpecialAttackModifier : user.mDamageFormulaModifiers.mAttackModifier,
 		};
 
-		const float targetDefenseModifier{
+		const double targetDefenseModifier{
 			context.mIsSpecial ? target.mDamageFormulaModifiers.mSpecialDefenseModifier : target.mDamageFormulaModifiers.mDefenseModifier,
 		};
 

@@ -25,7 +25,7 @@ namespace PocketCore::Effect
 	class TargetsHandler : public IEffectHandler
 	{
 		public:
-			void apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
+			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect
 

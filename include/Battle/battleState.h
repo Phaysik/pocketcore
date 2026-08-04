@@ -42,12 +42,12 @@ namespace PocketCore::Battle
 	struct DamageFormulaModifiers
 	{
 		public:
-			float mHealthModifier{1.0F};
-			float mAttackModifier{1.0F};
-			float mDefenseModifier{1.0F};
-			float mSpecialAttackModifier{1.0F};
-			float mSpecialDefenseModifier{1.0F};
-			float mSpeedModifier{1.0F};
+			double mHealthModifier{1.0};
+			double mAttackModifier{1.0};
+			double mDefenseModifier{1.0};
+			double mSpecialAttackModifier{1.0};
+			double mSpecialDefenseModifier{1.0};
+			double mSpeedModifier{1.0};
 	};
 
 	struct BattleSlot
@@ -70,6 +70,7 @@ namespace PocketCore::Battle
 			bool mIsProtected{false};
 			bool mIsFlinched{false};
 			bool mItemConsumed{false};
+			bool mForceGrounded{false};
 	};
 
 	struct BattleState

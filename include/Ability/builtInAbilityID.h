@@ -35,6 +35,8 @@ namespace PocketCore::Ability
 		Drizzle,
 
 		Guts,
+		Levitate,
+		Elevate,
 		AirLock,
 		CloudNine,
 	};

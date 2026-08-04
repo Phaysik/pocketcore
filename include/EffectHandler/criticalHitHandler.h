@@ -25,7 +25,7 @@ namespace PocketCore::Effect
 	class CriticalHitHandler : public IEffectHandler
 	{
 		public:
-			void apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect

@@ -23,7 +23,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 
-	void TargetsHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context, const RegistryProvider &provider) const
+	void TargetsHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const
 	{
 		const MoveMeta *moveMeta{provider.moveRegistry->getMoveMetadata(context.mMoveID)};
 

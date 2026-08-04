@@ -38,7 +38,7 @@ namespace PocketCore::Effect
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
 
-	void WeatherHandler::apply(const BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void WeatherHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		const std::vector<Pokemon *> partyA{state.mPartyA};
 

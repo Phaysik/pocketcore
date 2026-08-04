@@ -25,7 +25,7 @@ namespace PocketCore::Effect
 	class AccuracyCheckHandler : public IEffectHandler
 	{
 		public:
-			void apply(const BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
+			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect
 

@@ -27,10 +27,10 @@ namespace PocketCore::Effect
 	using PocketCore::Types::NO_TYPE_ID;
 	using PocketCore::Types::TypeID;
 
-	void TypeEffectivenessHandler::apply(const BattleState &state, EffectContext &context, const RegistryProvider &provider) const
+	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const
 	{
-		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
-		const BattleSlot &target{IEffectHandler::getTargetBattleSlot(state, context)};
+		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
+		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};
 
 		const Pokemon *userPokemon{user.mPokemon};
 		const Pokemon *targetPokemon{target.mPokemon};

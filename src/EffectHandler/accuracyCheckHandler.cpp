@@ -28,11 +28,10 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Utility::Random;
 
-	void AccuracyCheckHandler::apply(const BattleState &state, EffectContext &context,
-									 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void AccuracyCheckHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
-		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
-		const BattleSlot &target{IEffectHandler::getTargetBattleSlot(state, context)};
+		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
+		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};
 
 		float accuracy{
 			static_cast<float>(context.mMoveAccuracy) * CACHE_ACCURACY_STAGE_MULTIPLIERS.at(statStageCacheIndex(user.mStatStages.mAccuracy))

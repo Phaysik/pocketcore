@@ -67,6 +67,11 @@ namespace PocketCore::Configuration
 	inline constexpr double FIRE_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
 	inline constexpr double WATER_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.5};
 
+	inline constexpr double ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};
+	inline constexpr double GRASS_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};
+	inline constexpr double PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};
+	inline constexpr double DRAGON_DEBUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{0.5};
+
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
 

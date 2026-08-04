@@ -20,7 +20,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 
-	void PopulationBombHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+	void PopulationBombHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 									  ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		if (context.mHitAttemptIndex > 1)

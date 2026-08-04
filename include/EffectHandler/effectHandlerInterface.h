@@ -30,9 +30,17 @@ namespace PocketCore::Effect
 			IEffectHandler operator=(IEffectHandler &&) = delete;
 
 			virtual ~IEffectHandler() = default; // LCOV_EXCL_LINE
-			virtual void apply(const BattleState &state, EffectContext &context, const RegistryProvider &provider) const = 0;
+			virtual void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const = 0;
 
-			static const BattleSlot &getUserBattleSlot(const BattleState &state, EffectContext &context)
+			static BattleSlot &getUserBattleSlot(BattleState &state, EffectContext &context)
+			{
+				std::vector<BattleSlot> &userTeam{getTeam(state, context.mUserSide)};
+				assert(context.mUserIndex < userTeam.size());
+
+				return userTeam.at(context.mUserIndex);
+			}
+
+			static const BattleSlot &getConstUserBattleSlot(BattleState &state, EffectContext &context)
 			{
 				const std::vector<BattleSlot> &userTeam{getTeamConst(state, context.mUserSide)};
 				assert(context.mUserIndex < userTeam.size());
@@ -40,7 +48,15 @@ namespace PocketCore::Effect
 				return userTeam.at(context.mUserIndex);
 			}
 
-			static const BattleSlot &getTargetBattleSlot(const BattleState &state, EffectContext &context)
+			static BattleSlot &getTargetBattleSlot(BattleState &state, EffectContext &context)
+			{
+				std::vector<BattleSlot> &targetTeam{getTeam(state, context.mTargetSide)};
+				assert(context.mTargetIndex < targetTeam.size());
+
+				return targetTeam.at(context.mUserIndex);
+			}
+
+			static const BattleSlot &getConstTargetBattleSlot(BattleState &state, EffectContext &context)
 			{
 				const std::vector<BattleSlot> &targetTeam{getTeamConst(state, context.mTargetSide)};
 				assert(context.mTargetIndex < targetTeam.size());

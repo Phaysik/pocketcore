@@ -22,7 +22,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Utility::Random;
 
-	void CriticalHitHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+	void CriticalHitHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 								   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		if (Random::get<ub>(MIN_CRITICAL_HIT_VALUE, MAX_CRITICAL_HIT_VALUE) < CRITICAL_HIT_PERCENTAGE)

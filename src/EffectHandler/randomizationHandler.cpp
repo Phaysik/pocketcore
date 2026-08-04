@@ -22,7 +22,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using Utility::Random;
 
-	void RandomizationHandler::apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+	void RandomizationHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 									 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		const double randomizationMultiplier{
