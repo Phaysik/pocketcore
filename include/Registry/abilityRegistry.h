@@ -65,7 +65,7 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnDamageCalc}},
+					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnSuccessfulHit}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
 					.mTargetID = AbilityTargetID::AllOpponents,

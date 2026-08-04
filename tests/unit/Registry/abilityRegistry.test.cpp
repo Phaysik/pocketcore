@@ -61,7 +61,7 @@ SCENARIO("AbilityRegistry")
 
 			AbilityMeta stench{*metadata};
 			REQUIRE((stench.mTriggers.size() == 1U));
-			CHECK((stench.mTriggers.front().mTrigger == AbilityTriggerID::OnDamageCalc));
+			CHECK((stench.mTriggers.front().mTrigger == AbilityTriggerID::OnSuccessfulHit));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
 			CHECK((stench.mTriggers.front().mEffects.front() == EffectTypeID::Flinch));
 		}

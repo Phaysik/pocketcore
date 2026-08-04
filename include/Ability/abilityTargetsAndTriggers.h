@@ -25,6 +25,7 @@ namespace PocketCore::Ability
 		OnTurnEnd,
 		OnDamageCalc,
 		OnMoveUse,
+		OnSuccessfulHit,
 		OnFaint,
 		OnWeather,
 		OnStatus,
