@@ -63,12 +63,14 @@ namespace PocketCore::Registry::Item
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
 					.mTargetID = ItemTargetID::Self,
+					.mIsConsumable = true,
 				});
 				addBuiltin({
 					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 					.mTargetID = ItemTargetID::Self,
+					.mIsConsumable = true,
 				});
 			}
 

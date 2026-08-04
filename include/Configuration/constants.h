@@ -35,6 +35,8 @@ namespace PocketCore::Configuration
 	inline constexpr ub MAX_MOVES_PER_POKEMON{4};
 
 	inline constexpr us MAX_STATUSES{1'000};
+	inline constexpr us MAX_STATUSES_PER_POKEMON{5};
+
 	inline constexpr us MAX_WEATHERS{1'000};
 	inline constexpr us MAX_TERRAINS{1'000};
 	inline constexpr us MAX_MULTIPLIERS{1'000};

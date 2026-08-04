@@ -62,15 +62,15 @@ namespace PocketCore::Battle
 
 			MoveID mChoiceLockedMove{};
 
+			ub mPosition{0};
+
 			ub mSleepCounter{0};
 			ub mToxicCounter{0};
 			ub mProtectionCounter{0};
-			ub mPosition{0};
 
 			bool mIsProtected{false};
 			bool mIsFlinched{false};
-			bool mItemConsumed{false};
-			bool mForceGrounded{false};
+			bool mIsGrounded{false};
 	};
 
 	struct BattleState

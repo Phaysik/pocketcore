@@ -30,6 +30,7 @@ namespace PocketCore::Registry::Status
 	using PocketCore::Effect::EffectTypeID;
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::StatusID;
+	using PocketCore::Status::StatusInteractionAction;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Status::toStatusID;
 
@@ -58,26 +59,42 @@ namespace PocketCore::Registry::Status
 					.mStatusID = toStatusID(BuiltinStatusID::None),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Freeze), .mAction = StatusInteractionAction::BlockIncoming}},
 					.mName = PocketCore::Status::STATUS_NAME_PARALYSIS,
 					.mStatusID = toStatusID(BuiltinStatusID::Paralysis),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Freeze), .mAction = StatusInteractionAction::BlockIncoming}},
 					.mName = PocketCore::Status::STATUS_NAME_BURN,
 					.mStatusID = toStatusID(BuiltinStatusID::Burn),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Freeze), .mAction = StatusInteractionAction::BlockIncoming}},
 					.mName = PocketCore::Status::STATUS_NAME_SLEEP,
 					.mStatusID = toStatusID(BuiltinStatusID::Sleep),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Burn), .mAction = StatusInteractionAction::RemoveCurrent},
+					   {.mExistingStatusID = toStatusID(BuiltinStatusID::Sleep), .mAction = StatusInteractionAction::RemoveCurrent},
+					   {.mExistingStatusID = toStatusID(BuiltinStatusID::Paralysis), .mAction = StatusInteractionAction::RemoveCurrent},
+					},
 					.mName = PocketCore::Status::STATUS_NAME_FREEZE,
 					.mStatusID = toStatusID(BuiltinStatusID::Freeze),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Freeze), .mAction = StatusInteractionAction::BlockIncoming}},
 					.mName = PocketCore::Status::STATUS_NAME_POISON,
 					.mStatusID = toStatusID(BuiltinStatusID::Poison),
 				});
 				addBuiltin({
+					.mStatusInteractions
+					= {{.mExistingStatusID = toStatusID(BuiltinStatusID::Freeze), .mAction = StatusInteractionAction::BlockIncoming},
+					   {.mExistingStatusID = toStatusID(BuiltinStatusID::Poison), .mAction = StatusInteractionAction::ReplaceCurrent},},
 					.mName = PocketCore::Status::STATUS_NAME_TOXIC,
 					.mStatusID = toStatusID(BuiltinStatusID::Toxic),
 				});
@@ -86,6 +103,7 @@ namespace PocketCore::Registry::Status
 			// LCOV_EXCL_STOP
 
 			using Base::decrementAmountRegistered;
+
 			using Base::eraseEntry;
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;

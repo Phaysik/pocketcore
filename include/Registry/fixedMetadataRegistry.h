@@ -246,7 +246,7 @@ namespace PocketCore::Registry
 				@pre @ref getAmountRegistered() < Capacity.
 				@param[in] metadata The complete built-in metadata record to append.
 			*/
-			constexpr void addBuiltin(Metadata &&metadata)
+			ATTR_NOINLINE constexpr void addBuiltin(Metadata &&metadata)
 			{
 				assert(mAmountRegistered < mEntries.size());
 				mEntries.at(mAmountRegistered) = std::move(metadata);

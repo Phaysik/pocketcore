@@ -107,7 +107,7 @@ namespace PocketCore::Effect
 
 	ATTR_NODISCARD static inline bool isBattleSlotUngrounded(const BattleSlot &battleSlot)
 	{
-		if (battleSlot.mForceGrounded)
+		if (battleSlot.mIsGrounded)
 		{
 			return false;
 		}

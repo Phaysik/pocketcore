@@ -188,7 +188,7 @@ SCENARIO("TerrainHandler")
 		BattleState battleState{};
 		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Electric);
 		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &flyingTarget, .mForceGrounded = true});
+		battleState.mSideB.push_back(BattleSlot{.mPokemon = &flyingTarget, .mIsGrounded = true});
 
 		EffectContext effectContext{};
 		effectContext.mUserSide = Side::A;

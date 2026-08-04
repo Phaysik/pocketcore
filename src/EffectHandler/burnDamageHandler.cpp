@@ -14,6 +14,7 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
 #include "Status/builtInStatusID.h"
+#include "Status/statusHelpers.h"
 
 namespace PocketCore::Effect
 {
@@ -42,7 +43,7 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		const bool isBurned{userPokemon->getStatusID() == toStatusID(BuiltinStatusID::Burn)};
+		const bool isBurned{Status::statusAlreadyExists(toStatusID(BuiltinStatusID::Burn), userPokemon->getStatusesArray())};
 		const bool abilityIsntGuts{userPokemon->getAbilityID() != toAbilityID(BuiltinAbilityID::Guts)};
 		const bool moveIsntFacade{context.mMoveID != toMoveID(BuiltinMoveID::Facade)};
 

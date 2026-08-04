@@ -12,6 +12,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <string_view>
 
 #include "Ability/abilityID.h"
@@ -20,6 +21,8 @@
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Registry/statusRegistry.h"
+#include "Status/statusHelpers.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
 
@@ -30,12 +33,22 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Registry::Status::StatusRegistry;
+	using PocketCore::Status::hasInteraction;
+	using PocketCore::Status::NO_STATUS_ID;
+	using PocketCore::Status::shiftAndGetNextAvailableStatus;
+	using PocketCore::Status::statusAlreadyExists;
 	using PocketCore::Status::StatusID;
+	using PocketCore::Status::StatusInteractionAction;
+	using PocketCore::Status::statusRemoveHandler;
+	using PocketCore::Status::statusReplaceHandler;
+	using PocketCore::Status::willBlockIncoming;
 	using PocketCore::Types::TypeID;
 
 	class Pokemon
@@ -73,6 +86,11 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr const std::string_view &getName() const
 			{
 				return mName;
+			}
+
+			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &getStatusesArray() const
+			{
+				return mStatusIDs;
 			}
 
 			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMovesArray() const
@@ -173,9 +191,11 @@ namespace PocketCore::Pokemon
 				return mItemID;
 			}
 
-			ATTR_NODISCARD constexpr StatusID getStatusID() const
+			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
 			{
-				return mStatusID;
+				assert(index < mStatusIDs.size());
+
+				return mStatusIDs.at(index);
 			}
 
 			// Setters
@@ -183,6 +203,11 @@ namespace PocketCore::Pokemon
 			constexpr void setName(const std::string_view name)
 			{
 				mName = name;
+			}
+
+			constexpr void setStatusesArray(const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &statusIDs)
+			{
+				mStatusIDs = statusIDs;
 			}
 
 			constexpr void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
@@ -280,11 +305,6 @@ namespace PocketCore::Pokemon
 				mItemID = itemID;
 			}
 
-			constexpr void setStatus(const StatusID statusID)
-			{
-				mStatusID = statusID;
-			}
-
 			// Utility Functions
 
 			constexpr void usePP(const ub slotIndex)
@@ -302,9 +322,57 @@ namespace PocketCore::Pokemon
 				return mHealth == 0;
 			}
 
+			/*! @brief Applies a registered status according to its interactions with the current statuses.
+				@details Blocking interactions leave the array unchanged. Replacement interactions store the incoming status in place, while
+			   removal interactions clear matching statuses and compact the remaining active statuses before insertion.
+				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
+				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
+			*/
+			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry)
+			{
+				if (statusID == NO_STATUS_ID)
+				{
+					return;
+				}
+
+				if (statusAlreadyExists(statusID, mStatusIDs))
+				{
+					return;
+				}
+
+				if (willBlockIncoming(statusID, statusRegistry, mStatusIDs))
+				{
+					return;
+				}
+
+				const bool replacedCurrentStatus{statusReplaceHandler(statusID, statusRegistry, mStatusIDs)};
+
+				statusRemoveHandler(statusID, statusRegistry, mStatusIDs);
+
+				const std::size_t nextActiveStatusIndex{shiftAndGetNextAvailableStatus(mStatusIDs)};
+
+				for (std::size_t index{nextActiveStatusIndex}; index < mStatusIDs.size(); index++)
+				{
+					mStatusIDs.at(index) = NO_STATUS_ID;
+				}
+
+				if (replacedCurrentStatus)
+				{
+					return;
+				}
+
+				if (nextActiveStatusIndex >= mStatusIDs.size())
+				{
+					return;
+				}
+
+				mStatusIDs.at(nextActiveStatusIndex) = statusID;
+			}
+
 		private:
 			std::string_view mName{};
 
+			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{};
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
@@ -321,7 +389,6 @@ namespace PocketCore::Pokemon
 
 			AbilityID mAbilityID{};
 			ItemID mItemID{};
-			StatusID mStatusID{};
 	};
 } // namespace PocketCore::Pokemon
 

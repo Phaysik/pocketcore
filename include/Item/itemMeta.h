@@ -40,6 +40,9 @@ namespace PocketCore::Item
 
 			/*! @brief The target ID for this item's effects. */
 			ItemTargetID mTargetID{};
+
+			/*! @brief If the item can be consumed in battle. If it gets consumed, the item is removed from the holder. */
+			bool mIsConsumable{};
 	};
 } // namespace PocketCore::Item
 

@@ -10,11 +10,29 @@
 #define INCLUDE_STATUS_STATUSMETA_H
 
 #include <string_view>
+#include <vector>
+
+#include "Core/typedefs.h"
 
 #include "statusID.h"
 
 namespace PocketCore::Status
 {
+	enum class StatusInteractionAction : PocketCore::Core::ub
+	{
+		Coexist,
+		ReplaceCurrent,
+		RemoveCurrent,
+		BlockIncoming,
+	};
+
+	struct StatusInteraction
+	{
+		public:
+			StatusID mExistingStatusID{};
+			StatusInteractionAction mAction{StatusInteractionAction::Coexist};
+	};
+
 	/*! @struct StatusMeta Status/statusMeta.h
 		@brief Stores one status's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
@@ -27,6 +45,9 @@ namespace PocketCore::Status
 	struct StatusMeta
 	{
 		public:
+			/*! @brief The statuses this one interacts with and the corresponding actions. */
+			std::vector<StatusInteraction> mStatusInteractions{};
+
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
 
