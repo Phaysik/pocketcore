@@ -1,6 +1,7 @@
 #include "EffectHandler/weatherHandler.h"
 
 #include <cassert>
+#include <vector>
 
 #include "Ability/builtInAbilityID.h"
 #include "Battle/battleState.h"
