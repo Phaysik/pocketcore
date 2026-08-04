@@ -34,6 +34,7 @@ namespace PocketCore::Multiplier
 		Targets,
 		Weather,
 		Critical,
+		Randomization,
 		Stab,
 		TypeEffectiveness,
 		Burn,

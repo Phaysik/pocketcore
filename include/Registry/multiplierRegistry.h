@@ -78,6 +78,10 @@ namespace PocketCore::Registry::Multiplier
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Critical),
 				});
 				addBuiltin({
+					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_RANDOMIZATION,
+					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Randomization),
+				});
+				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_STAB,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Stab),
 				});

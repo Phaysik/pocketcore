@@ -4,7 +4,6 @@
 #include <optional>
 
 #include "Battle/battleState.h"
-#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
@@ -28,8 +27,7 @@ namespace PocketCore::Effect
 	using PocketCore::Types::NO_TYPE_ID;
 	using PocketCore::Types::TypeID;
 
-	void TypeEffectivenessHandler::apply(const BattleState &state, EffectContext &context,
-										 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void TypeEffectivenessHandler::apply(const BattleState &state, EffectContext &context, const RegistryProvider &provider) const
 	{
 		const BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getTargetBattleSlot(state, context)};

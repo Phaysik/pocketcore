@@ -20,7 +20,7 @@ using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
-using PocketCore::Configuration::STAB_HIT_MULTIPLIER;
+using PocketCore::Configuration::STAB_HIT_MULTIPLIER_VALUE;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
 using PocketCore::Effect::StabHandler;
@@ -84,7 +84,7 @@ SCENARIO("StabHandler")
 				const auto activeMultipliers{effectContext.getActiveMultipliers()};
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == toMultiplierID(BuiltinMultiplierID::Stab)));
-				CHECK((std::fabs(activeMultipliers.front().second - STAB_HIT_MULTIPLIER) < 0.0001));
+				CHECK((std::fabs(activeMultipliers.front().second - STAB_HIT_MULTIPLIER_VALUE) < 0.0001));
 			}
 		}
 	}

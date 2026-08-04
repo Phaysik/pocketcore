@@ -41,13 +41,18 @@ namespace PocketCore::Configuration
 
 	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
 	inline constexpr ub MAX_CRITICAL_HIT_VALUE{99};
-	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5};
+	inline constexpr ub CRITICAL_HIT_PERCENTAGE{5}; // Out of 100 i.e 5 = 5%
 
 	inline constexpr double BASE_MULTIPLIER_VALUE{1.0};
-	inline constexpr double CRITICAL_HIT_MULTIPLIER{1.5};
-	inline constexpr double STAB_HIT_MULTIPLIER{1.5};
-	inline constexpr double TARGETS_HIT_MULTIPLIER{0.75};
+	inline constexpr double CRITICAL_HIT_MULTIPLIER_VALUE{1.5};
+	inline constexpr double STAB_HIT_MULTIPLIER_VALUE{1.5};
+	inline constexpr double TARGETS_HIT_MULTIPLIER_VALUE{0.75};
 	inline constexpr double BURN_MULTIPLIER_VALUE{0.5};
+
+	// These should ideally be within [0, 100] since the randomly grabbed value will be between them and then divided by 100
+	// i.e [85, 100] could generate 93 = 0.93
+	inline constexpr ub RANDOMIZATION_MULTIPLIER_MIN_VALUE{85};
+	inline constexpr ub RANDOMIZATION_MULTIPLIER_MAX_VALUE{100};
 
 	inline constexpr double NOT_VERY_EFFECTIVE_VALUE{0.5};
 	inline constexpr double EFFECTIVE_VALUE{1.0};

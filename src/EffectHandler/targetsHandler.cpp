@@ -15,7 +15,7 @@
 namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleState;
-	using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER;
+	using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER_VALUE;
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::MoveTargetID;
@@ -36,7 +36,7 @@ namespace PocketCore::Effect
 
 		if (moveTarget != MoveTargetID::SingleOpponent && moveTarget != MoveTargetID::Self)
 		{
-			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Targets), TARGETS_HIT_MULTIPLIER);
+			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Targets), TARGETS_HIT_MULTIPLIER_VALUE);
 		}
 	}
 } // namespace PocketCore::Effect

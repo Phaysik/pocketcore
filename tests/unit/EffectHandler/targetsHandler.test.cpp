@@ -17,7 +17,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
-using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER;
+using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER_VALUE;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::TargetsHandler;
 using PocketCore::Move::BuiltinMoveID;
@@ -58,7 +58,7 @@ namespace
 	{
 		return std::ranges::any_of(effectContext.getActiveMultipliers(), [](const auto &multiplierPair) {
 			return multiplierPair.first == toMultiplierID(BuiltinMultiplierID::Targets)
-				&& std::fabs(multiplierPair.second - TARGETS_HIT_MULTIPLIER) < 0.0001;
+				&& std::fabs(multiplierPair.second - TARGETS_HIT_MULTIPLIER_VALUE) < 0.0001;
 		});
 	}
 } // namespace
@@ -142,7 +142,7 @@ SCENARIO("TargetsHandler")
 				const auto activeMultipliers{effectContext.getActiveMultipliers()};
 				REQUIRE((activeMultipliers.size() == 1U));
 				CHECK((activeMultipliers.front().first == toMultiplierID(BuiltinMultiplierID::Targets)));
-				CHECK((std::fabs(activeMultipliers.front().second - TARGETS_HIT_MULTIPLIER) < 0.0001));
+				CHECK((std::fabs(activeMultipliers.front().second - TARGETS_HIT_MULTIPLIER_VALUE) < 0.0001));
 			}
 		}
 	}

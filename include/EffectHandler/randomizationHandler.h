@@ -1,15 +1,16 @@
-/*! @file typeEffectivenessHandler.h
-	@brief Contains the type effectiveness handler
+/*! @file randomizationHandler.h
+	@brief Contains the randomization effect handler
 	@date 07/24/2026
 	@version x.x.x
 	@since x.x.x
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_EFFECT_TYPEEFFECTIVENESSHANDLER_H
-#define INCLUDE_EFFECT_TYPEEFFECTIVENESSHANDLER_H
+#ifndef INCLUDE_EFFECT_RANDOMIZATIONHANDLER_H
+#define INCLUDE_EFFECT_RANDOMIZATIONHANDLER_H
 
 #include "Battle/battleState.h"
+#include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
 
@@ -21,10 +22,11 @@ namespace PocketCore::Effect
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
 
-	class TypeEffectivenessHandler : public IEffectHandler
+	class RandomizationHandler : public IEffectHandler
 	{
 		public:
-			void apply(const BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
+			void apply(ATTR_MAYBE_UNUSED const BattleState &state, EffectContext &context,
+					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 } // namespace PocketCore::Effect
 

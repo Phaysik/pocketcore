@@ -15,7 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
-using PocketCore::Configuration::CRITICAL_HIT_MULTIPLIER;
+using PocketCore::Configuration::CRITICAL_HIT_MULTIPLIER_VALUE;
 using PocketCore::Configuration::CRITICAL_HIT_PERCENTAGE;
 using PocketCore::Configuration::MAX_CRITICAL_HIT_VALUE;
 using PocketCore::Configuration::MIN_CRITICAL_HIT_VALUE;
@@ -49,7 +49,7 @@ namespace
 	{
 		return std::ranges::any_of(effectContext.getActiveMultipliers(), [](const auto &multiplierPair) {
 			return multiplierPair.first == toMultiplierID(BuiltinMultiplierID::Critical)
-				&& std::fabs(multiplierPair.second - CRITICAL_HIT_MULTIPLIER) < 0.0001;
+				&& std::fabs(multiplierPair.second - CRITICAL_HIT_MULTIPLIER_VALUE) < 0.0001;
 		});
 	}
 } // namespace

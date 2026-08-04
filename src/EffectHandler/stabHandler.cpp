@@ -16,7 +16,7 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
-	using PocketCore::Configuration::STAB_HIT_MULTIPLIER;
+	using PocketCore::Configuration::STAB_HIT_MULTIPLIER_VALUE;
 	using PocketCore::Multiplier::BuiltinMultiplierID;
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
@@ -27,7 +27,7 @@ namespace PocketCore::Effect
 
 		if (std::ranges::contains(user.mPokemon->getTypesArray(), context.mMoveTypeID))
 		{
-			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Stab), STAB_HIT_MULTIPLIER);
+			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Stab), STAB_HIT_MULTIPLIER_VALUE);
 		}
 	}
 } // namespace PocketCore::Effect
