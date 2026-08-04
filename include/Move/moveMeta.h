@@ -11,6 +11,7 @@
 
 #include <span>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Core/typedefs.h"
@@ -39,8 +40,11 @@ namespace PocketCore::Move
 	struct MoveMeta
 	{
 		public:
+			/*! @brief The move's hit distribution. */
+			std::vector<std::pair<ub, float>> mHitDistribution{{1, 1.0F}};
+
 			/*! @brief The owned trigger and effect definitions for this move. */
-			std::vector<MoveEffectTrigger> mTriggers;
+			std::vector<MoveEffectTrigger> mTriggers{};
 
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
