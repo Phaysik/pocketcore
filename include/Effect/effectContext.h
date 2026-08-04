@@ -103,9 +103,7 @@ namespace PocketCore::Effect
 			ub mMoveBasePower{0};
 			ub mMoveAccuracy{0};
 
-			// For multi hit moves
-			ub mTotalHits{0};
-			ub mCurrentHit{0};
+			ub mHitAttemptIndex{0};
 
 			EffectSource mSourceType{EffectSource::None};
 			Side mUserSide{};

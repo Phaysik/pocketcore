@@ -32,6 +32,7 @@ namespace PocketCore::Multiplier
 		Ability,
 		Item,
 		Targets,
+		PopulationBomb,
 		Weather,
 		Critical,
 		Randomization,

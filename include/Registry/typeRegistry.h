@@ -31,6 +31,7 @@ namespace PocketCore::Registry::Types
 	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Types::BuiltInTypeID;
 	using PocketCore::Types::toTypeID;
 	using PocketCore::Types::TypeID;
 
@@ -69,29 +70,29 @@ namespace PocketCore::Registry::Types
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 			*/
-			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{static_cast<us>(toTypeID(Types::Types::Stellar).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{static_cast<us>(toTypeID(BuiltInTypeID::Stellar).getValue() + 1U)}
 			{
 				// LCOV_EXCL_BR_START — Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
 				// is not applicable.
-				addBuiltin(Types::NORMAL_TYPE_MATCHUP, Types::Types::Normal, Types::NORMAL_NAME);
-				addBuiltin(Types::FIGHTING_TYPE_MATCHUP, Types::Types::Fighting, Types::FIGHTING_NAME);
-				addBuiltin(Types::FLYING_TYPE_MATCHUP, Types::Types::Flying, Types::FLYING_NAME);
-				addBuiltin(Types::POISON_TYPE_MATCHUP, Types::Types::Poison, Types::POISON_NAME);
-				addBuiltin(Types::GROUND_TYPE_MATCHUP, Types::Types::Ground, Types::GROUND_NAME);
-				addBuiltin(Types::ROCK_TYPE_MATCHUP, Types::Types::Rock, Types::ROCK_NAME);
-				addBuiltin(Types::BUG_TYPE_MATCHUP, Types::Types::Bug, Types::BUG_NAME);
-				addBuiltin(Types::GHOST_TYPE_MATCHUP, Types::Types::Ghost, Types::GHOST_NAME);
-				addBuiltin(Types::STEEL_TYPE_MATCHUP, Types::Types::Steel, Types::STEEL_NAME);
-				addBuiltin(Types::FIRE_TYPE_MATCHUP, Types::Types::Fire, Types::FIRE_NAME);
-				addBuiltin(Types::WATER_TYPE_MATCHUP, Types::Types::Water, Types::WATER_NAME);
-				addBuiltin(Types::GRASS_TYPE_MATCHUP, Types::Types::Grass, Types::GRASS_NAME);
-				addBuiltin(Types::ELECTRIC_TYPE_MATCHUP, Types::Types::Electric, Types::ELECTRIC_NAME);
-				addBuiltin(Types::PSYCHIC_TYPE_MATCHUP, Types::Types::Psychic, Types::PSYCHIC_NAME);
-				addBuiltin(Types::ICE_TYPE_MATCHUP, Types::Types::Ice, Types::ICE_NAME);
-				addBuiltin(Types::DRAGON_TYPE_MATCHUP, Types::Types::Dragon, Types::DRAGON_NAME);
-				addBuiltin(Types::DARK_TYPE_MATCHUP, Types::Types::Dark, Types::DARK_NAME);
-				addBuiltin(Types::FAIRY_TYPE_MATCHUP, Types::Types::Fairy, Types::FAIRY_NAME);
-				addBuiltin(Types::Types::Stellar, Types::STELLAR_NAME);
+				addBuiltin(Types::NORMAL_TYPE_MATCHUP, BuiltInTypeID::Normal, Types::NORMAL_NAME);
+				addBuiltin(Types::FIGHTING_TYPE_MATCHUP, BuiltInTypeID::Fighting, Types::FIGHTING_NAME);
+				addBuiltin(Types::FLYING_TYPE_MATCHUP, BuiltInTypeID::Flying, Types::FLYING_NAME);
+				addBuiltin(Types::POISON_TYPE_MATCHUP, BuiltInTypeID::Poison, Types::POISON_NAME);
+				addBuiltin(Types::GROUND_TYPE_MATCHUP, BuiltInTypeID::Ground, Types::GROUND_NAME);
+				addBuiltin(Types::ROCK_TYPE_MATCHUP, BuiltInTypeID::Rock, Types::ROCK_NAME);
+				addBuiltin(Types::BUG_TYPE_MATCHUP, BuiltInTypeID::Bug, Types::BUG_NAME);
+				addBuiltin(Types::GHOST_TYPE_MATCHUP, BuiltInTypeID::Ghost, Types::GHOST_NAME);
+				addBuiltin(Types::STEEL_TYPE_MATCHUP, BuiltInTypeID::Steel, Types::STEEL_NAME);
+				addBuiltin(Types::FIRE_TYPE_MATCHUP, BuiltInTypeID::Fire, Types::FIRE_NAME);
+				addBuiltin(Types::WATER_TYPE_MATCHUP, BuiltInTypeID::Water, Types::WATER_NAME);
+				addBuiltin(Types::GRASS_TYPE_MATCHUP, BuiltInTypeID::Grass, Types::GRASS_NAME);
+				addBuiltin(Types::ELECTRIC_TYPE_MATCHUP, BuiltInTypeID::Electric, Types::ELECTRIC_NAME);
+				addBuiltin(Types::PSYCHIC_TYPE_MATCHUP, BuiltInTypeID::Psychic, Types::PSYCHIC_NAME);
+				addBuiltin(Types::ICE_TYPE_MATCHUP, BuiltInTypeID::Ice, Types::ICE_NAME);
+				addBuiltin(Types::DRAGON_TYPE_MATCHUP, BuiltInTypeID::Dragon, Types::DRAGON_NAME);
+				addBuiltin(Types::DARK_TYPE_MATCHUP, BuiltInTypeID::Dark, Types::DARK_NAME);
+				addBuiltin(Types::FAIRY_TYPE_MATCHUP, BuiltInTypeID::Fairy, Types::FAIRY_NAME);
+				addBuiltin(BuiltInTypeID::Stellar, Types::STELLAR_NAME);
 				// LCOV_EXCL_BR_STOP
 			}
 
@@ -307,7 +308,7 @@ namespace PocketCore::Registry::Types
 				@param[in] type The built-in @ref Types enum value.
 				@param[in] name The display name for the type.
 			*/
-			constexpr void addBuiltin(const Types::Types type, const std::string_view &name)
+			constexpr void addBuiltin(const BuiltInTypeID type, const std::string_view &name)
 			{
 				Base::addBuiltin(TypeEntry{.mName = name, .mTypeID = toTypeID(type)});
 			}
@@ -322,7 +323,7 @@ namespace PocketCore::Registry::Types
 				@param[in] name The display name for the type.
 			*/
 			ATTR_NOINLINE constexpr void addBuiltin(const std::span<const Types::TypeEffectiveness> &offensiveMatchups,
-													const Types::Types type, const std::string_view &name)
+													const Types::BuiltInTypeID type, const std::string_view &name)
 			{
 				const us amountRegistered{Base::getAmountRegistered()};
 				assert(offensiveMatchups.size() <= mTypeChart.at(amountRegistered).size() && MATCHUPS_EXCEED_COLUMNS_ADD_BUILTIN.data());

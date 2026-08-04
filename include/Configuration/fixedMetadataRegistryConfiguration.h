@@ -30,6 +30,15 @@ namespace PocketCore::Configuration
 	using PocketCore::Core::us;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
+	namespace Detail
+	{
+		template <typename Metadata>
+		ATTR_NOINLINE constexpr Metadata cloneMetadata(const Metadata &metadata)
+		{
+			return metadata;
+		}
+	} // namespace Detail
+
 	/*! @class FixedMetadataRegistryConfiguration Configuration/fixedMetadataRegistryConfiguration.h
 		@brief Implements validated lifecycle operations shared by named metadata registry facades.
 		@details Owns one registry and centralizes lookup, monotonic ID assignment, duplicate and capacity validation, atomic batch
@@ -238,7 +247,7 @@ namespace PocketCore::Configuration
 				}
 
 				const Metadata &currentMetadata{registry.getEntry(index.value())};
-				Metadata metadata{currentMetadata};
+				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
 				metadata.*IDMember = currentMetadata.*IDMember;
 
@@ -276,7 +285,7 @@ namespace PocketCore::Configuration
 				}
 
 				const Metadata &currentMetadata{registry.getEntry(index.value())};
-				Metadata metadata{currentMetadata};
+				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
 				metadata.*IDMember = currentMetadata.*IDMember;
 
@@ -322,7 +331,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, newName, logResult.value_or(std::string_view{})}};
 				}
 
-				Metadata metadata{registry.getEntry(index.value())};
+				Metadata metadata{Detail::cloneMetadata(registry.getEntry(index.value()))};
 				metadata.mName = newName;
 				registry.setEntry(index.value(), metadata);
 

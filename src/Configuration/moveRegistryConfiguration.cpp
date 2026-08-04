@@ -70,13 +70,37 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::updateMove(const std::string_view &moveName,
 																								const MoveMeta &moveMeta)
 	{
-		return mutateMetadata(moveName, "updateMove", [&moveMeta](MoveMeta &metadata) { metadata = moveMeta; });
+		return mutateMetadata(moveName, "updateMove", [&moveMeta](MoveMeta &metadata) {
+			metadata.mHitCountPolicy = moveMeta.mHitCountPolicy;
+			metadata.mTriggers = moveMeta.mTriggers;
+			metadata.mName = moveMeta.mName;
+			metadata.mMoveID = moveMeta.mMoveID;
+			metadata.mTypeID = moveMeta.mTypeID;
+			metadata.mPower = moveMeta.mPower;
+			metadata.mTargetID = moveMeta.mTargetID;
+			metadata.mRangeID = moveMeta.mRangeID;
+			metadata.mAccuracy = moveMeta.mAccuracy;
+			metadata.mPriority = moveMeta.mPriority;
+			metadata.mSpecial = moveMeta.mSpecial;
+		});
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::updateMove(const MoveID moveID,
 																								const MoveMeta &moveMeta)
 	{
-		return mutateMetadata(moveID, "updateMove", [&moveMeta](MoveMeta &metadata) { metadata = moveMeta; });
+		return mutateMetadata(moveID, "updateMove", [&moveMeta](MoveMeta &metadata) {
+			metadata.mHitCountPolicy = moveMeta.mHitCountPolicy;
+			metadata.mTriggers = moveMeta.mTriggers;
+			metadata.mName = moveMeta.mName;
+			metadata.mMoveID = moveMeta.mMoveID;
+			metadata.mTypeID = moveMeta.mTypeID;
+			metadata.mPower = moveMeta.mPower;
+			metadata.mTargetID = moveMeta.mTargetID;
+			metadata.mRangeID = moveMeta.mRangeID;
+			metadata.mAccuracy = moveMeta.mAccuracy;
+			metadata.mPriority = moveMeta.mPriority;
+			metadata.mSpecial = moveMeta.mSpecial;
+		});
 	}
 
 	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::removeMove(const std::string_view &moveName)

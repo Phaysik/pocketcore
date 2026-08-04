@@ -29,10 +29,10 @@ using PocketCore::Multiplier::BuiltinMultiplierID;
 using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
+using PocketCore::Types::BuiltInTypeID;
 using PocketCore::Types::NO_TYPE_ID;
 using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeID;
-using PocketCore::Types::Types;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
 
@@ -65,7 +65,7 @@ SCENARIO("StabHandler")
 
 	GIVEN("a user Pokemon with a matching move type")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(Types::Fire), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Fire), NO_TYPE_ID})};
 
 		BattleState battleState{};
 		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
@@ -73,7 +73,7 @@ SCENARIO("StabHandler")
 		EffectContext effectContext{};
 		effectContext.mUserSide = Side::A;
 		effectContext.mUserIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(Types::Fire);
+		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Fire);
 
 		WHEN("applying STAB handling")
 		{
@@ -91,7 +91,7 @@ SCENARIO("StabHandler")
 
 	GIVEN("a user Pokemon without a matching move type")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(Types::Water), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Water), NO_TYPE_ID})};
 
 		BattleState battleState{};
 		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
@@ -99,7 +99,7 @@ SCENARIO("StabHandler")
 		EffectContext effectContext{};
 		effectContext.mUserSide = Side::A;
 		effectContext.mUserIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(Types::Fire);
+		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Fire);
 
 		WHEN("applying STAB handling")
 		{

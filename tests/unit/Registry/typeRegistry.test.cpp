@@ -18,10 +18,10 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Core::us;
 using PocketCore::Registry::Types::TypeEntry;
 using PocketCore::Registry::Types::TypeRegistry;
+using PocketCore::Types::BuiltInTypeID;
 using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeEffectiveness;
 using PocketCore::Types::TypeID;
-using PocketCore::Types::Types;
 
 using enum TypeEffectiveness;
 
@@ -83,14 +83,14 @@ SCENARIO("TypeRegistry")
 		THEN("the first entry is Normal")
 		{
 			TypeEntry firstEntry{registry.getEntry(0)};
-			CHECK((firstEntry.mTypeID == toTypeID(Types::Normal)));
+			CHECK((firstEntry.mTypeID == toTypeID(BuiltInTypeID::Normal)));
 			CHECK((firstEntry.mName == "Normal"));
 		}
 
 		THEN("the last builtin entry is Stellar")
 		{
 			TypeEntry lastEntry{registry.getEntry(18)};
-			CHECK((lastEntry.mTypeID == toTypeID(Types::Stellar)));
+			CHECK((lastEntry.mTypeID == toTypeID(BuiltInTypeID::Stellar)));
 			CHECK((lastEntry.mName == "Stellar"));
 		}
 	}
@@ -207,31 +207,31 @@ SCENARIO("TypeRegistry")
 			REQUIRE(normalIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((normalIdentifier.value() == toTypeID(Types::Normal)));
+			CHECK((normalIdentifier.value() == toTypeID(BuiltInTypeID::Normal)));
 
 			std::optional<TypeID> fireIdentifier{registry.getTypeID("Fire")};
 			REQUIRE(fireIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fireIdentifier.value() == toTypeID(Types::Fire)));
+			CHECK((fireIdentifier.value() == toTypeID(BuiltInTypeID::Fire)));
 
 			std::optional<TypeID> fightingIdentifier{registry.getTypeID("Fighting")};
 			REQUIRE(fightingIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fightingIdentifier.value() == toTypeID(Types::Fighting)));
+			CHECK((fightingIdentifier.value() == toTypeID(BuiltInTypeID::Fighting)));
 
 			std::optional<TypeID> waterIdentifier{registry.getTypeID("Water")};
 			REQUIRE(waterIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((waterIdentifier.value() == toTypeID(Types::Water)));
+			CHECK((waterIdentifier.value() == toTypeID(BuiltInTypeID::Water)));
 
 			std::optional<TypeID> stellarIdentifier{registry.getTypeID("Stellar")};
 			REQUIRE(stellarIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((stellarIdentifier.value() == toTypeID(Types::Stellar)));
+			CHECK((stellarIdentifier.value() == toTypeID(BuiltInTypeID::Stellar)));
 		}
 
 		THEN("looking up a nonexistent name returns nullopt")
@@ -260,7 +260,7 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("looking up Normal id returns Normal")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(Types::Normal))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltInTypeID::Normal))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -269,7 +269,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("looking up Fairy id returns Fairy")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(Types::Fairy))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltInTypeID::Fairy))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -415,7 +415,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Normal id returns zero")
 		{
-			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(Types::Normal))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltInTypeID::Normal))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -424,7 +424,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Stellar id returns eighteen")
 		{
-			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(Types::Stellar))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltInTypeID::Stellar))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -469,13 +469,13 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("hasType by id returns true for Normal")
 		{
-			bool hasTypeByIdentifier{registry.hasType(toTypeID(Types::Normal))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltInTypeID::Normal))};
 			CHECK(hasTypeByIdentifier);
 		}
 
 		THEN("hasType by id returns true for Stellar")
 		{
-			bool hasTypeByIdentifier{registry.hasType(toTypeID(Types::Stellar))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltInTypeID::Stellar))};
 			CHECK(hasTypeByIdentifier);
 		}
 

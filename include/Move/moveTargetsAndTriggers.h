@@ -21,7 +21,9 @@ namespace PocketCore::Move
 	enum class MoveTriggerID : ub
 	{
 		OnUse,
-		OnTarget,
+		BeforeHit,
+		OnHit,
+		AfterHit,
 		OnHazardSwitchIn,
 	};
 

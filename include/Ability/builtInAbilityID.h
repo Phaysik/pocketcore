@@ -35,6 +35,8 @@ namespace PocketCore::Ability
 		Drizzle,
 
 		Guts,
+		AirLock,
+		CloudNine,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

@@ -26,7 +26,7 @@ namespace PocketCore::Types
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	enum class Types : PocketCore::Core::ub
+	enum class BuiltInTypeID : PocketCore::Core::ub
 	{
 		Normal,
 		Fire,
@@ -53,7 +53,7 @@ namespace PocketCore::Types
 		@param[in] builtinType The built-in type to convert.
 		@return The corresponding open type identifier.
 	*/
-	ATTR_NODISCARD constexpr TypeID toTypeID(const Types builtinType) noexcept
+	ATTR_NODISCARD constexpr TypeID toTypeID(const BuiltInTypeID builtinType) noexcept
 	{
 		return TypeID{static_cast<ub>(builtinType)};
 	}

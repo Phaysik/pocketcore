@@ -263,7 +263,7 @@ namespace PocketCore::Configuration
 				@param[in] type The built-in @ref PocketCore::Types::Types enum value to remove.
 				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
 			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Types::Types type);
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Types::BuiltInTypeID type);
 
 			/*! @brief Removes a type from the registry by its stable type ID.
 				@details Useful for removing custom types using the ID returned by @ref addType.

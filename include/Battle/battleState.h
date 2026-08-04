@@ -81,8 +81,8 @@ namespace PocketCore::Battle
 			std::vector<Pokemon *> mPartyA{};
 			std::vector<Pokemon *> mPartyB{};
 
-			WeatherID mWeather{};
-			TerrainID mTerrain{};
+			WeatherID mWeatherID{};
+			TerrainID mTerrainID{};
 
 			// Spikes can have 0-3 layers
 

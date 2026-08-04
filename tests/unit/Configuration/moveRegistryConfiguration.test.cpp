@@ -42,7 +42,7 @@ namespace
 	MoveMeta makeMove(const std::string_view name)
 	{
 		return MoveMeta{
-			.mTriggers = {{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnTarget}},
+			.mTriggers = {{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnHit}},
 			.mName = name,
 			.mTargetID = MoveTargetID::SingleOpponent,
 		};
@@ -57,7 +57,7 @@ SCENARIO("MoveRegistryConfiguration addMove")
 	GIVEN("a unique move definition")
 	{
 		std::vector<MoveEffectTrigger> triggers{
-			{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnTarget},
+			{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnHit},
 		};
 		MoveMeta definition{.mTriggers = triggers, .mName = "Custom Jab", .mTargetID = MoveTargetID::SingleOpponent};
 
@@ -158,7 +158,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<MoveEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = MoveTriggerID::OnTarget}},
+				{{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = MoveTriggerID::OnHit}},
 			};
 			auto setResult{configuration.setMoveTriggers(customIdentifier, replacement)};
 

@@ -26,7 +26,8 @@ namespace PocketCore::Effect
 									 ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{
 		const double randomizationMultiplier{
-			static_cast<double>(Random::get<ub>(RANDOMIZATION_MULTIPLIER_MIN_VALUE, RANDOMIZATION_MULTIPLIER_MAX_VALUE)) / 100};
+			static_cast<double>(Random::get<ub>(RANDOMIZATION_MULTIPLIER_MIN_VALUE, RANDOMIZATION_MULTIPLIER_MAX_VALUE)) / 100,
+		};
 
 		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Randomization), randomizationMultiplier);
 	}

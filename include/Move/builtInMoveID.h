@@ -33,6 +33,7 @@ namespace PocketCore::Move
 		KarateChop,
 
 		Facade,
+		HydroSteam,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

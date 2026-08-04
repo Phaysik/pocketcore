@@ -47,6 +47,8 @@ namespace PocketCore::Configuration
 	inline constexpr double CRITICAL_HIT_MULTIPLIER_VALUE{1.5};
 	inline constexpr double STAB_HIT_MULTIPLIER_VALUE{1.5};
 	inline constexpr double TARGETS_HIT_MULTIPLIER_VALUE{0.75};
+	inline constexpr double POPULATION_BOMB_FIRST_HIT_MULTIPLIER_VALUE{1.0};
+	inline constexpr double POPULATION_BOMB_CONSECUTIVE_HIT_MULTIPLIER_VALUE{0.5};
 	inline constexpr double BURN_MULTIPLIER_VALUE{0.5};
 
 	// These should ideally be within [0, 100] since the randomly grabbed value will be between them and then divided by 100
@@ -58,6 +60,12 @@ namespace PocketCore::Configuration
 	inline constexpr double EFFECTIVE_VALUE{1.0};
 	inline constexpr double SUPER_EFFECTIVE_VALUE{2.0};
 	inline constexpr double NO_EFFECTIVE_VALUE{0.0};
+
+	inline constexpr double WEATHER_NULLIFICATION_MULTIPLIER_VALUE{1.0};
+	inline constexpr double WATER_MOVE_IN_RAIN_MULTIPLIER_VALUE{1.5};
+	inline constexpr double FIRE_MOVE_IN_RAIN_MULTIPLIER_VALUE{0.5};
+	inline constexpr double FIRE_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
+	inline constexpr double WATER_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.5};
 
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};

@@ -11,13 +11,13 @@
 
 #include <span>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 #include "Types/typeID.h"
 
+#include "moveHitPolicy.h"
 #include "moveID.h"
 #include "moveTargetsAndTriggers.h"
 
@@ -40,8 +40,8 @@ namespace PocketCore::Move
 	struct MoveMeta
 	{
 		public:
-			/*! @brief The move's hit distribution. */
-			std::vector<std::pair<ub, float>> mHitDistribution{{1, 1.0F}};
+			/*! @brief The strategy used to determine the move's number of hit attempts. */
+			HitCountPolicy mHitCountPolicy{FixedHitCount{}};
 
 			/*! @brief The owned trigger and effect definitions for this move. */
 			std::vector<MoveEffectTrigger> mTriggers{};

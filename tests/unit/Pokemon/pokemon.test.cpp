@@ -17,7 +17,7 @@ using PocketCore::Pokemon::Pokemon;
 using PocketCore::Types::NO_TYPE_ID;
 using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeID;
-using PocketCore::Types::Types;
+using PocketCore::Types::BuiltInTypeID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -37,7 +37,7 @@ SCENARIO("Pokemon type identifiers")
 
 	GIVEN("built-in and custom stable type identifiers")
 	{
-		TypeID builtInTypeID{toTypeID(Types::Fire)};
+		TypeID builtInTypeID{toTypeID(BuiltInTypeID::Fire)};
 		TypeID customTypeID{42};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{builtInTypeID, customTypeID};
 		Pokemon pokemon{"Hybrid", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}, typeIDs};
@@ -50,7 +50,7 @@ SCENARIO("Pokemon type identifiers")
 
 		WHEN("one type slot is replaced")
 		{
-			TypeID replacementTypeID{toTypeID(Types::Water)};
+			TypeID replacementTypeID{toTypeID(BuiltInTypeID::Water)};
 			pokemon.setType(1, replacementTypeID);
 
 			THEN("only that slot changes")
@@ -62,7 +62,7 @@ SCENARIO("Pokemon type identifiers")
 
 		WHEN("the complete type array is replaced")
 		{
-			std::array<TypeID, MAX_TYPES_PER_POKEMON> replacementTypeIDs{toTypeID(Types::Grass), TypeID{43}};
+			std::array<TypeID, MAX_TYPES_PER_POKEMON> replacementTypeIDs{toTypeID(BuiltInTypeID::Grass), TypeID{43}};
 			pokemon.setTypesArray(replacementTypeIDs);
 
 			THEN("the replacement array is returned unchanged")

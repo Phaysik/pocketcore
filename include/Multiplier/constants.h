@@ -16,6 +16,8 @@ namespace PocketCore::Multiplier
 	constexpr std::string_view MULTIPLIER_NAME_NONE{"None"};
 	constexpr std::string_view MULTIPLIER_NAME_ABILITY{"Ability"};
 	constexpr std::string_view MULTIPLIER_NAME_ITEM{"Item"};
+	constexpr std::string_view MULTIPLIER_NAME_TARGETS{"Targets"};
+	constexpr std::string_view MULTIPLIER_NAME_POPULATION_BOMB{"Population Bomb"};
 	constexpr std::string_view MULTIPLIER_NAME_WEATHER{"Weather"};
 	constexpr std::string_view MULTIPLIER_NAME_CRITICAL{"Critical"};
 	constexpr std::string_view MULTIPLIER_NAME_RANDOMIZATION{"Randomization"};

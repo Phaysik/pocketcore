@@ -23,11 +23,11 @@ using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Configuration::UnspecifiedMatchup;
 using PocketCore::Core::us;
+using PocketCore::Types::BuiltInTypeID;
 using PocketCore::Types::NO_TYPE_ID;
 using PocketCore::Types::toTypeID;
 using PocketCore::Types::TypeEffectiveness;
 using PocketCore::Types::TypeID;
-using PocketCore::Types::Types;
 using PocketCore::Utility::Debug::Logging::Logger;
 
 using enum TypeEffectiveness;
@@ -179,12 +179,12 @@ SCENARIO("TypeRegistryConfiguration getTypeID and getTypeName")
 			auto result = config.getTypeID("Normal");
 			REQUIRE(result.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((result.value() == toTypeID(Types::Normal)));
+			CHECK((result.value() == toTypeID(BuiltInTypeID::Normal)));
 		}
 
 		THEN("getTypeName returns the correct name")
 		{
-			auto result = config.getTypeName(toTypeID(Types::Fire));
+			auto result = config.getTypeName(toTypeID(BuiltInTypeID::Fire));
 			REQUIRE(result.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((result.value() == "Fire"));
@@ -766,7 +766,7 @@ SCENARIO("TypeRegistryConfiguration removeType by name")
 		{
 			auto result = config.removeType("Normal");
 			REQUIRE(result.has_value());
-			CHECK((result.value() == toTypeID(Types::Normal)));
+			CHECK((result.value() == toTypeID(BuiltInTypeID::Normal)));
 			CHECK((config.getAmountRegistered() == 18));
 			CHECK_FALSE(config.hasType("Normal"));
 		}
@@ -793,10 +793,10 @@ SCENARIO("TypeRegistryConfiguration removeType by enum")
 	{
 		THEN("removes the type and returns its id")
 		{
-			auto result = config.removeType(Types::Fire);
+			auto result = config.removeType(BuiltInTypeID::Fire);
 			REQUIRE(result.has_value());
-			CHECK((result.value() == toTypeID(Types::Fire)));
-			CHECK_FALSE(config.hasType(toTypeID(Types::Fire)));
+			CHECK((result.value() == toTypeID(BuiltInTypeID::Fire)));
+			CHECK_FALSE(config.hasType(toTypeID(BuiltInTypeID::Fire)));
 		}
 	}
 }
@@ -810,7 +810,7 @@ SCENARIO("TypeRegistryConfiguration removeType by stable id")
 	{
 		THEN("removes the type and returns its id")
 		{
-			TypeID normalId = toTypeID(Types::Normal);
+			TypeID normalId = toTypeID(BuiltInTypeID::Normal);
 			auto result = config.removeType(normalId);
 			REQUIRE(result.has_value());
 			CHECK((result.value() == normalId));
@@ -962,7 +962,7 @@ SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
 	{
 		THEN("clears all matchups to NOT_DEFINED")
 		{
-			TypeID normalId = toTypeID(Types::Normal);
+			TypeID normalId = toTypeID(BuiltInTypeID::Normal);
 			auto result = config.resetMatchups(normalId);
 			REQUIRE(result.has_value());
 
@@ -1017,7 +1017,7 @@ SCENARIO("TypeRegistryConfiguration hasType")
 	{
 		THEN("hasType by id returns true")
 		{
-			bool found = config.hasType(toTypeID(Types::Fire));
+			bool found = config.hasType(toTypeID(BuiltInTypeID::Fire));
 			CHECK(found);
 		}
 	}
@@ -1154,7 +1154,7 @@ SCENARIO("TypeRegistryConfiguration removeType by enum not found")
 			auto firstRemove = config.removeType("Normal");
 			REQUIRE(firstRemove.has_value());
 
-			auto secondRemove = config.removeType(Types::Normal);
+			auto secondRemove = config.removeType(BuiltInTypeID::Normal);
 			REQUIRE_FALSE(secondRemove.has_value());
 			CHECK((secondRemove.error().mKind == RegistryError::TypeNotFound));
 		}

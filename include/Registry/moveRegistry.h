@@ -41,7 +41,7 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Types::toTypeID;
 
-	using PocketCore::Types::Types;
+	using PocketCore::Types::BuiltInTypeID;
 
 	/*! @class MoveRegistry Registry/moveRegistry.h
 		@brief Stores built-in and user-defined move metadata in fixed-capacity storage.
@@ -70,11 +70,11 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = MoveTriggerID::OnTarget,
+						.mTrigger = MoveTriggerID::OnHit,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
-					.mTypeID = toTypeID(Types::Normal),
+					.mTypeID = toTypeID(BuiltInTypeID::Normal),
 					.mPower = 40,
 					.mTargetID = MoveTargetID::SingleOpponent,
 					.mRangeID = MoveRangeID::Adjacent,
@@ -85,11 +85,11 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = MoveTriggerID::OnTarget,
+						.mTrigger = MoveTriggerID::OnHit,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
-					.mTypeID = toTypeID(Types::Fighting),
+					.mTypeID = toTypeID(BuiltInTypeID::Fighting),
 					.mPower = 50,
 					.mTargetID = MoveTargetID::SingleOpponent,
 					.mRangeID = MoveRangeID::Adjacent,
