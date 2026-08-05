@@ -63,6 +63,11 @@ namespace PocketCore::Effect
 
 		for (const auto &[multID, multiplier] : mActiveMultipliers)
 		{
+			if (multiplier <= 0.0)
+			{
+				return 0U;
+			}
+
 			const auto roundDownHalfSafe = [](const double value) -> double {
 				double integerPart{};
 				const double fractionalPart{std::modf(value, &integerPart)};

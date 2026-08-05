@@ -29,6 +29,7 @@ namespace PocketCore::Move
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
+	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectTypeID;
@@ -84,7 +85,7 @@ namespace PocketCore::Move
 			ub mAccuracy{};
 
 			/*! @brief The move's priority. */
-			ub mPriority{};
+			sb mPriority{};
 
 			/*! @brief Whether the move is a special move. */
 			bool mSpecial{};

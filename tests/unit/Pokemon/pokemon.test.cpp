@@ -84,6 +84,29 @@ SCENARIO("Pokemon type identifiers")
 	}
 }
 
+SCENARIO("Pokemon health bounds")
+{
+	Pokemon pokemon{"MissingNo", 1, 1, 100, 1, 1, 1, 10, AbilityID{}, ItemID{}};
+
+	GIVEN("a Pokemon constructed at full health")
+	{
+		THEN("its maximum health is retained")
+		{
+			CHECK((pokemon.getMaximumHealth() == 100U));
+		}
+
+		WHEN("health is assigned above the maximum")
+		{
+			pokemon.setHealth(120U);
+
+			THEN("current health is clamped to the maximum")
+			{
+				CHECK((pokemon.getHealth() == 100U));
+			}
+		}
+	}
+}
+
 SCENARIO("Pokemon addStatus")
 {
 	StatusRegistry statusRegistry{};
