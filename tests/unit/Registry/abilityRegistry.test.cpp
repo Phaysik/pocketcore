@@ -6,9 +6,9 @@
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
-#include "Ability/abilityTargetsAndTriggers.h"
 #include "Ability/builtInAbilityID.h"
 #include "Ability/constants.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
 #include "Effect/effectType.h"
 
@@ -19,9 +19,9 @@ using PocketCore::Ability::ABILITY_NAME_NONE;
 using PocketCore::Ability::ABILITY_NAME_STENCH;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
-using PocketCore::Ability::AbilityTriggerID;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Core::ub;
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Registry::Ability::AbilityRegistry;
@@ -61,7 +61,7 @@ SCENARIO("AbilityRegistry")
 
 			AbilityMeta stench{*metadata};
 			REQUIRE((stench.mTriggers.size() == 1U));
-			CHECK((stench.mTriggers.front().mTrigger == AbilityTriggerID::OnSuccessfulHit));
+			CHECK((stench.mTriggers.front().mTrigger == BattleTriggerID::OnSuccessfulHit));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
 			CHECK((stench.mTriggers.front().mEffects.front() == EffectTypeID::Flinch));
 		}
@@ -73,7 +73,7 @@ SCENARIO("AbilityRegistry")
 
 			AbilityMeta drizzle{*metadata};
 			REQUIRE((drizzle.mTriggers.size() == 1U));
-			CHECK((drizzle.mTriggers.front().mTrigger == AbilityTriggerID::OnSwitchIn));
+			CHECK((drizzle.mTriggers.front().mTrigger == BattleTriggerID::OnSwitchIn));
 			CHECK((drizzle.mTriggers.front().mEffects.front() == EffectTypeID::SetRain));
 		}
 

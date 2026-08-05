@@ -16,13 +16,13 @@
 #include <vector>
 
 #include "Ability/abilityID.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
-#include "Move/moveTargetsAndTriggers.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
@@ -33,6 +33,7 @@
 namespace PocketCore::Effect
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Battle::BattleRangeID;
 	using PocketCore::Configuration::BASE_MULTIPLIER_VALUE;
 	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Core::ub;
@@ -86,13 +87,14 @@ namespace PocketCore::Effect
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
+			ItemID mItemID{};
 			MoveID mMoveID{};
 
-			std::optional<PocketCore::Move::MoveRangeID> mRangeOverride{};
+			std::optional<BattleRangeID> mRangeOverride{};
 
 			ub mUserIndex{0};
 			ub mTargetIndex{0};
-			ub mMoveBasePower{0};
+			us mMoveBasePower{0};
 			ub mMoveAccuracy{0};
 
 			ub mHitAttemptIndex{0};

@@ -10,25 +10,20 @@
 #define INCLUDE_EFFECT_EFFECTSOURCEANDSUPPRESSION_H
 
 #include <optional>
-#include <variant>
 
 #include "Ability/abilityID.h"
-#include "Ability/abilityTargetsAndTriggers.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
-#include "Item/itemTargetsAndTriggers.h"
 #include "Move/moveID.h"
-#include "Move/moveTargetsAndTriggers.h"
 
 namespace PocketCore::Effect
 {
 	using PocketCore::Ability::AbilityID;
-	using PocketCore::Ability::AbilityTriggerID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Core::ub;
 	using PocketCore::Item::ItemID;
-	using PocketCore::Item::ItemTriggerID;
 	using PocketCore::Move::MoveID;
-	using PocketCore::Move::MoveTriggerID;
 
 	enum class EffectSource : ub
 	{
@@ -45,7 +40,7 @@ namespace PocketCore::Effect
 			std::optional<AbilityID> mTargetAbilityID{};
 			std::optional<ItemID> mTargetItemID{};
 			std::optional<MoveID> mTargetMoveID{};
-			std::variant<AbilityTriggerID, ItemTriggerID, MoveTriggerID> mTargetTrigger{};
+			BattleTriggerID mTargetTrigger{};
 			EffectSource mTargetSource{};
 	};
 } // namespace PocketCore::Effect

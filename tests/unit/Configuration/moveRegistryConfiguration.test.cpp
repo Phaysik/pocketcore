@@ -6,23 +6,23 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Effect/effectType.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleTargetID;
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Move::MoveEffectTrigger;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
-using PocketCore::Move::MoveTargetID;
-using PocketCore::Move::MoveTriggerID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
@@ -42,9 +42,9 @@ namespace
 	MoveMeta makeMove(const std::string_view name)
 	{
 		return MoveMeta{
-			.mTriggers = {{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnHit}},
+			.mTriggers = {{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = BattleTriggerID::OnHit}},
 			.mName = name,
-			.mTargetID = MoveTargetID::SingleOpponent,
+			.mTargetID = BattleTargetID::SingleOpponent,
 		};
 	}
 } // namespace
@@ -57,9 +57,9 @@ SCENARIO("MoveRegistryConfiguration addMove")
 	GIVEN("a unique move definition")
 	{
 		std::vector<MoveEffectTrigger> triggers{
-			{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = MoveTriggerID::OnHit},
+			{.mEffects = {EffectTypeID::AccuracyCheck, EffectTypeID::BaseDamage}, .mTrigger = BattleTriggerID::OnHit},
 		};
-		MoveMeta definition{.mTriggers = triggers, .mName = "Custom Jab", .mTargetID = MoveTargetID::SingleOpponent};
+		MoveMeta definition{.mTriggers = triggers, .mName = "Custom Jab", .mTargetID = BattleTargetID::SingleOpponent};
 
 		WHEN("the move is added")
 		{
@@ -83,7 +83,7 @@ SCENARIO("MoveRegistryConfiguration addMove")
 
 	GIVEN("a move whose name is already registered")
 	{
-		MoveMeta definition{.mTriggers = {}, .mName = "Pound", .mTargetID = MoveTargetID::SingleOpponent};
+		MoveMeta definition{.mTriggers = {}, .mName = "Pound", .mTargetID = BattleTargetID::SingleOpponent};
 
 		THEN("registration reports DuplicateMove")
 		{
@@ -141,7 +141,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by name")
 		{
 			std::array<MoveEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::Recoil}, .mTrigger = MoveTriggerID::OnUse}},
+				{{.mEffects = {EffectTypeID::Recoil}, .mTrigger = BattleTriggerID::OnUse}},
 			};
 			auto setResult{configuration.setMoveTriggers("Custom Move", replacement)};
 
@@ -150,7 +150,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				REQUIRE(setResult.has_value());
 				const MoveMeta *metadata{configuration.getMoveMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnUse));
+				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnUse));
 				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::Recoil));
 			}
 		}
@@ -158,7 +158,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<MoveEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = MoveTriggerID::OnHit}},
+				{{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnHit}},
 			};
 			auto setResult{configuration.setMoveTriggers(customIdentifier, replacement)};
 
@@ -173,27 +173,27 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 
 		WHEN("its target is replaced by name")
 		{
-			auto setResult{configuration.setMoveTarget("Custom Move", MoveTargetID::AllOpponents)};
+			auto setResult{configuration.setMoveTarget("Custom Move", BattleTargetID::AllOpponents)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const MoveMeta *metadata{configuration.getMoveMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == MoveTargetID::AllOpponents));
+				CHECK((metadata->mTargetID == BattleTargetID::AllOpponents));
 			}
 		}
 
 		WHEN("its target is replaced by stable ID")
 		{
-			auto setResult{configuration.setMoveTarget(customIdentifier, MoveTargetID::Self)};
+			auto setResult{configuration.setMoveTarget(customIdentifier, BattleTargetID::Self)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const MoveMeta *metadata{configuration.getMoveMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == MoveTargetID::Self));
+				CHECK((metadata->mTargetID == BattleTargetID::Self));
 			}
 		}
 
@@ -215,7 +215,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by name")
 		{
 			MoveMeta replacement{makeMove("Replacement")};
-			replacement.mTargetID = MoveTargetID::AllExceptSelf;
+			replacement.mTargetID = BattleTargetID::AllExceptSelf;
 			auto updateResult{configuration.updateMove("Custom Move", replacement)};
 
 			THEN("stored metadata is replaced while preserving its stable ID")
@@ -230,7 +230,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				auto foundMove = std::ranges::find_if(registeredMoves.begin(), registeredMoves.end(),
 													  [](const MoveMeta &metadata) { return metadata.mName == "Replacement"; });
 				REQUIRE((foundMove != registeredMoves.end()));
-				CHECK((foundMove->mTargetID == MoveTargetID::AllExceptSelf));
+				CHECK((foundMove->mTargetID == BattleTargetID::AllExceptSelf));
 				CHECK(configuration.hasMove(customIdentifier));
 			}
 		}
@@ -238,7 +238,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by stable ID")
 		{
 			MoveMeta replacement{makeMove("Replacement By ID")};
-			replacement.mTargetID = MoveTargetID::AllAllies;
+			replacement.mTargetID = BattleTargetID::AllAllies;
 			auto updateResult{configuration.updateMove(customIdentifier, replacement)};
 
 			THEN("stored metadata is replaced while preserving its stable ID")
@@ -253,7 +253,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				auto foundMove = std::ranges::find_if(registeredMoves.begin(), registeredMoves.end(),
 													  [](const MoveMeta &metadata) { return metadata.mName == "Replacement By ID"; });
 				REQUIRE((foundMove != registeredMoves.end()));
-				CHECK((foundMove->mTargetID == MoveTargetID::AllAllies));
+				CHECK((foundMove->mTargetID == BattleTargetID::AllAllies));
 				CHECK(configuration.hasMove(customIdentifier));
 			}
 		}
@@ -332,7 +332,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		THEN("mutation rename update and remove report MoveNotFound")
 		{
 			auto triggersResult{configuration.setMoveTriggers("Missing", {})};
-			auto targetResult{configuration.setMoveTarget("Missing", MoveTargetID::Self)};
+			auto targetResult{configuration.setMoveTarget("Missing", BattleTargetID::Self)};
 			auto renameResult{configuration.renameMove("Missing", "Renamed")};
 			auto updateResult{configuration.updateMove("Missing", makeMove("Updated"))};
 			auto removeResult{configuration.removeMove("Missing")};

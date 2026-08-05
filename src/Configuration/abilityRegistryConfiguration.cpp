@@ -15,7 +15,7 @@
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
-#include "Ability/abilityTargetsAndTriggers.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 
@@ -23,7 +23,7 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
-	using PocketCore::Ability::AbilityTargetID;
+	using PocketCore::Battle::BattleTargetID;
 
 	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
 	{
@@ -51,13 +51,13 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(
-		const std::string_view &abilityName, const AbilityTargetID target)
+		const std::string_view &abilityName, const BattleTargetID target)
 	{
 		return mutateMetadata(abilityName, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(const AbilityID abilityID,
-																										 const AbilityTargetID target)
+																			 const BattleTargetID target)
 	{
 		return mutateMetadata(abilityID, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
 	}

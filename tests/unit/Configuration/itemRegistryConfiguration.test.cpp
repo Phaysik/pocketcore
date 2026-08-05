@@ -5,16 +5,18 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Effect/effectType.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Item/itemTargetsAndTriggers.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleTargetID;
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
@@ -22,8 +24,6 @@ using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemEffectTrigger;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::ItemMeta;
-using PocketCore::Item::ItemTargetID;
-using PocketCore::Item::ItemTriggerID;
 using PocketCore::Item::toItemID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
@@ -50,7 +50,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 	GIVEN("a unique item definition")
 	{
 		std::vector<ItemEffectTrigger> triggers{
-			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}, .mTrigger = ItemTriggerID::OnMoveUse},
+			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnMoveUse},
 		};
 		ItemMeta definition{.mTriggers = triggers, .mName = "Life Orb"};
 
@@ -134,7 +134,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by name")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnFaint}},
+				{{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = BattleTriggerID::OnFaint}},
 			};
 			auto setResult{configuration.setItemTriggers("Custom Item", replacement)};
 
@@ -143,7 +143,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 				REQUIRE(setResult.has_value());
 				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnFaint));
+				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnFaint));
 				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
 			}
 		}
@@ -151,7 +151,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::Flinch}, .mTrigger = ItemTriggerID::OnSwitchIn}},
+				{{.mEffects = {EffectTypeID::Flinch}, .mTrigger = BattleTriggerID::OnSwitchIn}},
 			};
 			auto setResult{configuration.setItemTriggers(customIdentifier, replacement)};
 
@@ -160,33 +160,33 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 				REQUIRE(setResult.has_value());
 				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnSwitchIn));
+				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnSwitchIn));
 			}
 		}
 
 		WHEN("its target is replaced by name")
 		{
-			auto setResult{configuration.setItemTarget("Custom Item", ItemTargetID::AllOpponents)};
+			auto setResult{configuration.setItemTarget("Custom Item", BattleTargetID::AllOpponents)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == ItemTargetID::AllOpponents));
+				CHECK((metadata->mTargetID == BattleTargetID::AllOpponents));
 			}
 		}
 
 		WHEN("its target is replaced by stable ID")
 		{
-			auto setResult{configuration.setItemTarget(customIdentifier, ItemTargetID::SingleOpponent)};
+			auto setResult{configuration.setItemTarget(customIdentifier, BattleTargetID::SingleOpponent)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == ItemTargetID::SingleOpponent));
+				CHECK((metadata->mTargetID == BattleTargetID::SingleOpponent));
 			}
 		}
 
@@ -208,9 +208,9 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by name")
 		{
 			ItemMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = ItemTriggerID::OnTurnEnd}},
+				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnTurnEnd}},
 				.mName = "Replacement Item",
-				.mTargetID = ItemTargetID::Self,
+				.mTargetID = BattleTargetID::Self,
 			};
 			auto updateResult{configuration.updateItem("Custom Item", replacement)};
 
@@ -225,9 +225,9 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by stable ID")
 		{
 			ItemMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = ItemTriggerID::OnMoveUse}},
+				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = BattleTriggerID::OnMoveUse}},
 				.mName = "Replacement Item By ID",
-				.mTargetID = ItemTargetID::AllAllies,
+				.mTargetID = BattleTargetID::AllAllies,
 			};
 			auto updateResult{configuration.updateItem(customIdentifier, replacement)};
 
@@ -272,7 +272,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		THEN("metadata mutation and removal report ItemNotFound")
 		{
 			auto setResult{configuration.setItemTriggers("Missing", {})};
-			auto setTargetResult{configuration.setItemTarget("Missing", ItemTargetID::Self)};
+			auto setTargetResult{configuration.setItemTarget("Missing", BattleTargetID::Self)};
 			auto updateResult{configuration.updateItem("Missing", {.mTriggers = {}, .mName = "Updated"})};
 			auto removeResult{configuration.removeItem("Missing")};
 

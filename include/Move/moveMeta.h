@@ -13,6 +13,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectSourceAndSuppresion.h"
@@ -21,10 +22,12 @@
 
 #include "moveHitPolicy.h"
 #include "moveID.h"
-#include "moveTargetsAndTriggers.h"
 
 namespace PocketCore::Move
 {
+	using PocketCore::Battle::BattleRangeID;
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
@@ -37,7 +40,7 @@ namespace PocketCore::Move
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
-			MoveTriggerID mTrigger;
+			BattleTriggerID mTrigger;
 			ub mSuppresionRuleCount{0};
 	};
 
@@ -72,10 +75,10 @@ namespace PocketCore::Move
 			us mPower{};
 
 			/*! @brief The stable built-in or user-assigned identifier for the move's target. */
-			MoveTargetID mTargetID{};
+			BattleTargetID mTargetID{};
 
 			/*! @brief The stable built-in or user-assigned identifier for the move's range. */
-			MoveRangeID mRangeID{};
+			BattleRangeID mRangeID{};
 
 			/*! @brief The move's accuracy. */
 			ub mAccuracy{};

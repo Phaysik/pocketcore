@@ -13,6 +13,7 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -21,11 +22,12 @@
 #include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Item/itemTargetsAndTriggers.h"
 #include "Registry/fixedMetadataRegistry.h"
 
 namespace PocketCore::Registry::Item
 {
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_ITEMS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectTypeID;
@@ -33,8 +35,6 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
-	using PocketCore::Item::ItemTargetID;
-	using PocketCore::Item::ItemTriggerID;
 	using PocketCore::Item::toItemID;
 
 	/*! @class ItemRegistry Registry/itemRegistry.h
@@ -59,17 +59,17 @@ namespace PocketCore::Registry::Item
 			{
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
+					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = BattleTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
-					.mTargetID = ItemTargetID::Self,
+					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = ItemTriggerID::OnTurnEnd}},
+					.mTriggers = {{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = BattleTriggerID::OnTurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
-					.mTargetID = ItemTargetID::Self,
+					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
 				});
 			}

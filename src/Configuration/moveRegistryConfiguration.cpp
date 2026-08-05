@@ -13,17 +13,17 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Move::MoveTargetID;
 
 	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::addMove(const MoveMeta &moveMeta)
 	{
@@ -50,13 +50,13 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTarget(const std::string_view &moveName,
-																								   const MoveTargetID target)
+																								   const BattleTargetID target)
 	{
 		return mutateMetadata(moveName, "setMoveTarget", [&target](MoveMeta &metadata) { metadata.mTargetID = target; });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTarget(const MoveID moveID,
-																								   const MoveTargetID target)
+																								   const BattleTargetID target)
 	{
 		return mutateMetadata(moveID, "setMoveTarget", [&target](MoveMeta &metadata) { metadata.mTargetID = target; });
 	}

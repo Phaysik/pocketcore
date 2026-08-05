@@ -13,6 +13,7 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -21,12 +22,14 @@
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Types/builtInTypeID.h"
 
 namespace PocketCore::Registry::Move
 {
+	using PocketCore::Battle::BattleRangeID;
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_MOVES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectTypeID;
@@ -35,9 +38,6 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Move::MoveRangeID;
-	using PocketCore::Move::MoveTargetID;
-	using PocketCore::Move::MoveTriggerID;
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Types::toTypeID;
 
@@ -70,14 +70,14 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = MoveTriggerID::OnHit,
+						.mTrigger = BattleTriggerID::OnHit,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
 					.mTypeID = toTypeID(BuiltInTypeID::Normal),
 					.mPower = 40,
-					.mTargetID = MoveTargetID::SingleOpponent,
-					.mRangeID = MoveRangeID::Adjacent,
+					.mTargetID = BattleTargetID::SingleOpponent,
+					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
 					.mSpecial = false,
@@ -85,14 +85,14 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = MoveTriggerID::OnHit,
+						.mTrigger = BattleTriggerID::OnHit,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 					.mTypeID = toTypeID(BuiltInTypeID::Fighting),
 					.mPower = 50,
-					.mTargetID = MoveTargetID::SingleOpponent,
-					.mRangeID = MoveRangeID::Adjacent,
+					.mTargetID = BattleTargetID::SingleOpponent,
+					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
 					.mSpecial = false,

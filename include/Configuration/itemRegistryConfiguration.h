@@ -14,22 +14,22 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Item/itemTargetsAndTriggers.h"
 #include "Registry/itemRegistry.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
-	using PocketCore::Item::ItemTargetID;
 	using PocketCore::Registry::Item::ItemRegistry;
 
 	namespace Detail
@@ -163,15 +163,15 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const std::string_view &itemName,
-																				const ItemTargetID target);
+																		const BattleTargetID target);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setItemTarget(ItemID, const ItemTargetID target)
+			/*! @overload std::expected<void, RegistryErrorInfo> setItemTarget(ItemID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an item selected by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const ItemID itemID, const ItemTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const ItemID itemID, const BattleTargetID target);
 
 			/*! @brief Renames an item without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.

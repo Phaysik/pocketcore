@@ -59,7 +59,7 @@ namespace PocketCore::Pokemon
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level, const AbilityID abilityID,
 									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
+				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
 				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
@@ -75,7 +75,7 @@ namespace PocketCore::Pokemon
 									   const AbilityID abilityID, const ItemID itemID,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAttack{attack},
-				  mDefense{defense}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID},
+				  mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID},
 				  mItemID{itemID}
 			{
 				setLevel(level);
@@ -154,6 +154,11 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr us getHealth() const
 			{
 				return mHealth;
+			}
+
+			ATTR_NODISCARD constexpr us getMaximumHealth() const
+			{
+				return mMaxHealth;
 			}
 
 			ATTR_NODISCARD constexpr us getSpeed() const
@@ -270,7 +275,13 @@ namespace PocketCore::Pokemon
 
 			constexpr void setHealth(const us health)
 			{
-				mHealth = health;
+				mHealth = std::min(health, mMaxHealth);
+			}
+
+			constexpr void setMaximumHealth(const us maximumHealth)
+			{
+				mMaxHealth = maximumHealth;
+				mHealth = std::min(mHealth, mMaxHealth);
 			}
 
 			constexpr void setSpeed(const us speed)
@@ -380,6 +391,7 @@ namespace PocketCore::Pokemon
 
 			us mAttack{};
 			us mDefense{};
+			us mMaxHealth{};
 			us mHealth{};
 			us mSpeed{};
 			us mSpAttack{};

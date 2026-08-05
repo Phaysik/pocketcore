@@ -12,16 +12,18 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Effect/effectType.h"
 
 #include "abilityID.h"
-#include "abilityTargetsAndTriggers.h"
 
 namespace PocketCore::Ability
 {
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectTypeID;
@@ -32,7 +34,7 @@ namespace PocketCore::Ability
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 			std::vector<EffectTypeID> mEffects{};
-			AbilityTriggerID mTrigger{};
+			BattleTriggerID mTrigger{};
 			ub mSuppresionRuleCount{0};
 	};
 
@@ -58,7 +60,7 @@ namespace PocketCore::Ability
 			AbilityID mAbilityID{};
 
 			/*! @brief The target ID for this ability's effects. */
-			AbilityTargetID mTargetID{};
+			BattleTargetID mTargetID{};
 	};
 } // namespace PocketCore::Ability
 

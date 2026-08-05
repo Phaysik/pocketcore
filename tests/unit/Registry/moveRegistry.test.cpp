@@ -4,15 +4,16 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/effectType.h"
 #include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
@@ -20,7 +21,6 @@ using PocketCore::Move::MOVE_NAME_NONE;
 using PocketCore::Move::MOVE_NAME_POUND;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
-using PocketCore::Move::MoveTriggerID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
 
@@ -52,7 +52,7 @@ SCENARIO("MoveRegistry")
 			const MoveMeta *metadata{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Pound))};
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 1U));
-			CHECK((metadata->mTriggers.front().mTrigger == MoveTriggerID::OnHit));
+			CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnHit));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 11U));
 			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
 		}

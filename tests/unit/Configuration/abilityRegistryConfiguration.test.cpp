@@ -7,7 +7,7 @@
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
-#include "Ability/abilityTargetsAndTriggers.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Effect/effectType.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -17,8 +17,8 @@
 using PocketCore::Ability::AbilityEffectTrigger;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
-using PocketCore::Ability::AbilityTargetID;
-using PocketCore::Ability::AbilityTriggerID;
+using PocketCore::Battle::BattleTargetID;
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::EffectTypeID;
@@ -47,7 +47,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 	GIVEN("a unique ability definition")
 	{
 		std::vector<AbilityEffectTrigger> triggers{
-			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusTick}, .mTrigger = AbilityTriggerID::OnTurnEnd},
+			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusTick}, .mTrigger = BattleTriggerID::OnTurnEnd},
 		};
 		AbilityMeta definition{.mTriggers = triggers, .mName = "Regenerator"};
 
@@ -132,7 +132,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		{
 			std::array<AbilityEffectTrigger, 1> replacement{
 				{
-					{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = AbilityTriggerID::OnStatus},
+					{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnStatus},
 				},
 			};
 			auto setResult{configuration.setAbilityTriggers("Custom Ability", replacement)};
@@ -142,7 +142,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 				REQUIRE(setResult.has_value());
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == AbilityTriggerID::OnStatus));
+				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnStatus));
 				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusApply));
 			}
 		}
@@ -151,7 +151,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		{
 			std::array<AbilityEffectTrigger, 1> replacement{
 				{
-					{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = AbilityTriggerID::OnFaint},
+					{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = BattleTriggerID::OnFaint},
 				},
 			};
 			auto setResult{configuration.setAbilityTriggers(customIdentifier, replacement)};
@@ -161,33 +161,33 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 				REQUIRE(setResult.has_value());
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == AbilityTriggerID::OnFaint));
+				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnFaint));
 			}
 		}
 
 		WHEN("its target is replaced by name")
 		{
-			auto setResult{configuration.setAbilityTarget("Custom Ability", AbilityTargetID::AllOpponents)};
+			auto setResult{configuration.setAbilityTarget("Custom Ability", BattleTargetID::AllOpponents)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == AbilityTargetID::AllOpponents));
+				CHECK((metadata->mTargetID == BattleTargetID::AllOpponents));
 			}
 		}
 
 		WHEN("its target is replaced by stable ID")
 		{
-			auto setResult{configuration.setAbilityTarget(customIdentifier, AbilityTargetID::AllAllies)};
+			auto setResult{configuration.setAbilityTarget(customIdentifier, BattleTargetID::AllAllies)};
 
 			THEN("target metadata changes")
 			{
 				REQUIRE(setResult.has_value());
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == AbilityTargetID::AllAllies));
+				CHECK((metadata->mTargetID == BattleTargetID::AllAllies));
 			}
 		}
 
@@ -209,9 +209,9 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		WHEN("it is updated by name")
 		{
 			AbilityMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = AbilityTriggerID::OnStatus}},
+				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnStatus}},
 				.mName = "Replacement Ability",
-				.mTargetID = AbilityTargetID::AllExceptSelf,
+				.mTargetID = BattleTargetID::AllExceptSelf,
 			};
 			auto updateResult{configuration.updateAbility("Custom Ability", replacement)};
 
@@ -226,9 +226,9 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		WHEN("it is updated by stable ID")
 		{
 			AbilityMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = AbilityTriggerID::OnMoveUse}},
+				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = BattleTriggerID::OnMoveUse}},
 				.mName = "Replacement Ability By ID",
-				.mTargetID = AbilityTargetID::Self,
+				.mTargetID = BattleTargetID::Self,
 			};
 			auto updateResult{configuration.updateAbility(customIdentifier, replacement)};
 
@@ -273,7 +273,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		THEN("metadata mutation and removal report AbilityNotFound")
 		{
 			auto setResult{configuration.setAbilityTriggers("Missing", {})};
-			auto setTargetResult{configuration.setAbilityTarget("Missing", AbilityTargetID::Self)};
+			auto setTargetResult{configuration.setAbilityTarget("Missing", BattleTargetID::Self)};
 			auto updateResult{configuration.updateAbility("Missing", {.mTriggers = {}, .mName = "Updated"})};
 			auto removeResult{configuration.removeAbility("Missing")};
 

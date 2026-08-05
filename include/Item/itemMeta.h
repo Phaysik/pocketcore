@@ -12,16 +12,18 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Effect/effectType.h"
 
 #include "itemID.h"
-#include "itemTargetsAndTriggers.h"
 
 namespace PocketCore::Item
 {
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectTypeID;
@@ -32,7 +34,7 @@ namespace PocketCore::Item
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
-			ItemTriggerID mTrigger;
+			BattleTriggerID mTrigger;
 			ub mSuppresionRuleCount{0};
 	};
 
@@ -58,7 +60,7 @@ namespace PocketCore::Item
 			ItemID mItemID{};
 
 			/*! @brief The target ID for this item's effects. */
-			ItemTargetID mTargetID{};
+			BattleTargetID mTargetID{};
 
 			/*! @brief If the item can be consumed in battle. If it gets consumed, the item is removed from the holder. */
 			bool mIsConsumable{};

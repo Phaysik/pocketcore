@@ -4,27 +4,27 @@
 #include <cmath>
 
 #include "Battle/battleState.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Effect/effectContext.h"
 #include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRangeID;
 using PocketCore::Battle::BattleState;
+using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER_VALUE;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::TargetsHandler;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
-using PocketCore::Move::MoveRangeID;
-using PocketCore::Move::MoveTargetID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Multiplier::BuiltinMultiplierID;
 using PocketCore::Multiplier::toMultiplierID;
@@ -35,7 +35,7 @@ using PocketCore::Registry::RegistryProvider;
 
 namespace
 {
-	MoveID registerMoveWithTarget(MoveRegistry &moveRegistry, const MoveTargetID moveTargetIdentifier)
+	MoveID registerMoveWithTarget(MoveRegistry &moveRegistry, const BattleTargetID moveTargetIdentifier)
 	{
 		const MoveID customMoveIdentifier{moveRegistry.getNextMoveID()};
 		const auto customMoveIndex{moveRegistry.getAmountRegistered()};
@@ -45,7 +45,7 @@ namespace
 												   .mName = "test-move",
 												   .mMoveID = customMoveIdentifier,
 												   .mTargetID = moveTargetIdentifier,
-												   .mRangeID = MoveRangeID::Adjacent,
+												   .mRangeID = BattleRangeID::Adjacent,
 											   });
 
 		moveRegistry.incrementAmountRegistered();
@@ -115,7 +115,7 @@ SCENARIO("TargetsHandler")
 	GIVEN("a move that targets only self")
 	{
 		EffectContext effectContext{};
-		effectContext.mMoveID = registerMoveWithTarget(moveRegistry, MoveTargetID::Self);
+		effectContext.mMoveID = registerMoveWithTarget(moveRegistry, BattleTargetID::Self);
 
 		WHEN("applying target handling")
 		{
@@ -131,7 +131,7 @@ SCENARIO("TargetsHandler")
 	GIVEN("a move that can hit multiple targets")
 	{
 		EffectContext effectContext{};
-		effectContext.mMoveID = registerMoveWithTarget(moveRegistry, MoveTargetID::AllOpponents);
+		effectContext.mMoveID = registerMoveWithTarget(moveRegistry, BattleTargetID::AllOpponents);
 
 		WHEN("applying target handling")
 		{

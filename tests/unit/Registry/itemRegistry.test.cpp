@@ -4,22 +4,22 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/effectType.h"
 #include "Item/builtInItemID.h"
 #include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Item/itemTargetsAndTriggers.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Effect::EffectTypeID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
 using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::ItemMeta;
-using PocketCore::Item::ItemTriggerID;
 using PocketCore::Item::toItemID;
 using PocketCore::Registry::Item::ItemRegistry;
 
@@ -51,7 +51,7 @@ SCENARIO("ItemRegistry")
 			const ItemMeta *metadata{registry.getItemMetadata(toItemID(BuiltinItemID::ChestoBerry))};
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 1U));
-			CHECK((metadata->mTriggers.front().mTrigger == ItemTriggerID::OnTurnEnd));
+			CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnTurnEnd));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 1U));
 			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
 		}

@@ -14,22 +14,22 @@
 #include <span>
 #include <string_view>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Move/moveTargetsAndTriggers.h"
 #include "Registry/moveRegistry.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
 	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Move::MoveTargetID;
 	using PocketCore::Registry::Move::MoveRegistry;
 
 	namespace Detail
@@ -163,15 +163,15 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const std::string_view &moveName,
-																				const MoveTargetID target);
+																		const BattleTargetID target);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTarget(MoveID, const MoveTargetID target)
+			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTarget(MoveID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an move selected by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const MoveID moveID, const MoveTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const MoveID moveID, const BattleTargetID target);
 
 			/*! @brief Renames an move without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.

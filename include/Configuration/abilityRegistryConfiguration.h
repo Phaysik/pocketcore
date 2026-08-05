@@ -16,7 +16,7 @@
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
-#include "Ability/abilityTargetsAndTriggers.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
@@ -28,7 +28,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
-	using PocketCore::Ability::AbilityTargetID;
+	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 
@@ -163,15 +163,15 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const std::string_view &abilityName,
-																				   const AbilityTargetID target);
+																		   const BattleTargetID target);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTarget(AbilityID, const AbilityTargetID target)
+			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTarget(AbilityID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an ability selected by stable ID.
 				@param[in] abilityID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const AbilityID abilityID, const AbilityTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const AbilityID abilityID, const BattleTargetID target);
 
 			/*! @brief Renames an ability without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.

@@ -13,17 +13,17 @@
 #include <string_view>
 #include <vector>
 
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Item/itemTargetsAndTriggers.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
-	using PocketCore::Item::ItemTargetID;
 
 	ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> ItemRegistryConfiguration::addItem(const ItemMeta &itemMeta)
 	{
@@ -50,13 +50,13 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTarget(const std::string_view &itemName,
-																								   const ItemTargetID target)
+																								   const BattleTargetID target)
 	{
 		return mutateMetadata(itemName, "setItemTarget", [&target](ItemMeta &metadata) { metadata.mTargetID = target; });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTarget(const ItemID itemID,
-																								   const ItemTargetID target)
+																								   const BattleTargetID target)
 	{
 		return mutateMetadata(itemID, "setItemTarget", [&target](ItemMeta &metadata) { metadata.mTargetID = target; });
 	}

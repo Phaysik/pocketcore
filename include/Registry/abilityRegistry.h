@@ -15,9 +15,9 @@
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
-#include "Ability/abilityTargetsAndTriggers.h"
 #include "Ability/builtInAbilityID.h"
 #include "Ability/constants.h"
+#include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -29,10 +29,10 @@ namespace PocketCore::Registry::Ability
 	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
-	using PocketCore::Ability::AbilityTargetID;
-	using PocketCore::Ability::AbilityTriggerID;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_ABILITIES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectTypeID;
@@ -65,16 +65,16 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = AbilityTriggerID::OnSuccessfulHit}},
+					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = BattleTriggerID::OnSuccessfulHit}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
-					.mTargetID = AbilityTargetID::AllOpponents,
+					.mTargetID = BattleTargetID::AllOpponents,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::SetRain}, .mTrigger = AbilityTriggerID::OnSwitchIn}},
+					.mTriggers = {{.mEffects = {EffectTypeID::SetRain}, .mTrigger = BattleTriggerID::OnSwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
-					.mTargetID = AbilityTargetID::Self,
+					.mTargetID = BattleTargetID::Self,
 				});
 			}
 
