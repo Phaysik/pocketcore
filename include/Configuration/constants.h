@@ -74,6 +74,8 @@ namespace PocketCore::Configuration
 	inline constexpr double PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};
 	inline constexpr double DRAGON_DEBUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{0.5};
 
+	inline constexpr ub MAX_SUPPRESSION_RULES_PER_TRIGGER{2};
+
 	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
 	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
 

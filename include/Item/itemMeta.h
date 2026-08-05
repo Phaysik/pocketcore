@@ -12,11 +12,30 @@
 #include <string_view>
 #include <vector>
 
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectType.h"
+
 #include "itemID.h"
 #include "itemTargetsAndTriggers.h"
 
 namespace PocketCore::Item
 {
+	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
+	using PocketCore::Core::ub;
+	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::SuppressionRule;
+
+	struct ItemEffectTrigger
+	{
+		public:
+			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
+			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
+			ItemTriggerID mTrigger;
+			ub mSuppresionRuleCount{0};
+	};
+
 	/*! @struct ItemMeta Item/itemMeta.h
 		@brief Stores one item's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage

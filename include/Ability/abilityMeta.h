@@ -12,11 +12,30 @@
 #include <string_view>
 #include <vector>
 
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectType.h"
+
 #include "abilityID.h"
 #include "abilityTargetsAndTriggers.h"
 
 namespace PocketCore::Ability
 {
+	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
+	using PocketCore::Core::ub;
+	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::SuppressionRule;
+
+	struct AbilityEffectTrigger
+	{
+		public:
+			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
+			std::vector<EffectTypeID> mEffects{};
+			AbilityTriggerID mTrigger{};
+			ub mSuppresionRuleCount{0};
+	};
+
 	/*! @struct AbilityMeta Ability/abilityMeta.h
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage

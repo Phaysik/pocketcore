@@ -9,10 +9,7 @@
 #ifndef INCLUDE_ITEM_TARGETSANDTRIGGERS_H
 #define INCLUDE_ITEM_TARGETSANDTRIGGERS_H
 
-#include <vector>
-
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
 
 namespace PocketCore::Item
 {
@@ -33,13 +30,6 @@ namespace PocketCore::Item
 		AllAllies,
 		AllOpponents,
 		SingleOpponent,
-	};
-
-	struct ItemEffectTrigger
-	{
-		public:
-			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
-			ItemTriggerID mTrigger;
 	};
 } // namespace PocketCore::Item
 

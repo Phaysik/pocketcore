@@ -19,6 +19,7 @@
 #include "Configuration/constants.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Move/moveTargetsAndTriggers.h"
@@ -50,15 +51,6 @@ namespace PocketCore::Effect
 	{
 		A,
 		B,
-	};
-
-	enum class EffectSource : ub
-	{
-		None,
-		Move,
-		Ability,
-		Item,
-		Hazard,
 	};
 
 	struct DamageContext

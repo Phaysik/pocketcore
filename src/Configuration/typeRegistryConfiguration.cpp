@@ -475,7 +475,8 @@ namespace PocketCore::Configuration
 		return removedId;
 	}
 
-	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const PocketCore::Types::BuiltInTypeID type)
+	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(
+		const PocketCore::Types::BuiltInTypeID type)
 	{
 		const TypeID typeID{PocketCore::Types::toTypeID(type)};
 

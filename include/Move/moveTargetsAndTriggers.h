@@ -9,10 +9,7 @@
 #ifndef INCLUDE_MOVE_TARGETSANDTRIGGERS_H
 #define INCLUDE_MOVE_TARGETSANDTRIGGERS_H
 
-#include <vector>
-
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
 
 namespace PocketCore::Move
 {
@@ -40,13 +37,6 @@ namespace PocketCore::Move
 	{
 		Unrestricted,
 		Adjacent,
-	};
-
-	struct MoveEffectTrigger
-	{
-		public:
-			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
-			MoveTriggerID mTrigger;
 	};
 } // namespace PocketCore::Move
 

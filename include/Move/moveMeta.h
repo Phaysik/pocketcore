@@ -13,7 +13,9 @@
 #include <string_view>
 #include <vector>
 
+#include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Effect/effectSourceAndSuppresion.h"
 #include "Effect/effectType.h"
 #include "Types/typeID.h"
 
@@ -23,10 +25,21 @@
 
 namespace PocketCore::Move
 {
+	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::SuppressionRule;
 	using PocketCore::Types::TypeID;
+
+	struct MoveEffectTrigger
+	{
+		public:
+			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
+			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
+			MoveTriggerID mTrigger;
+			ub mSuppresionRuleCount{0};
+	};
 
 	/*! @struct MoveMeta Move/moveMeta.h
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.

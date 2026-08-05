@@ -9,10 +9,7 @@
 #ifndef INCLUDE_ABILITY_TARGETSANDTRIGGERS_H
 #define INCLUDE_ABILITY_TARGETSANDTRIGGERS_H
 
-#include <vector>
-
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
 
 namespace PocketCore::Ability
 {
@@ -37,13 +34,6 @@ namespace PocketCore::Ability
 		AllAllies,
 		AllOpponents,
 		AllExceptSelf,
-	};
-
-	struct AbilityEffectTrigger
-	{
-		public:
-			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
-			AbilityTriggerID mTrigger;
 	};
 } // namespace PocketCore::Ability
 
