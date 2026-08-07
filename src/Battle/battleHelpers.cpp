@@ -39,7 +39,7 @@ namespace PocketCore::Battle
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
 
-	ATTR_NODISCARD ATTR_PURE const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
@@ -55,7 +55,7 @@ namespace PocketCore::Battle
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
 
-	ATTR_NODISCARD ATTR_PURE const std::vector<Pokemon *> &party(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST const std::vector<Pokemon *> &party(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}

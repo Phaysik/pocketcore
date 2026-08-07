@@ -85,13 +85,13 @@ namespace PocketCore::Battle
 
 	ATTR_NODISCARD ATTR_PURE std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
 
-	ATTR_NODISCARD ATTR_PURE const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_CONST const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
 
 	ATTR_NODISCARD ATTR_PURE BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept;
 
 	ATTR_NODISCARD ATTR_PURE std::vector<Pokemon *> &party(BattleState &state, const Side side);
 
-	ATTR_NODISCARD ATTR_PURE const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_CONST const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
 
 	ATTR_NODISCARD ATTR_PURE bool isHealthy(const BattleSlot &slot) noexcept;
 
