@@ -69,6 +69,10 @@ namespace PocketCore::Registry::Move
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
 					.mTriggers = {{
+					    .mEffects = {EffectTypeID::AccuracyCheck},
+					    .mTrigger = BattleTriggerID::BeforeHit,
+					},
+					{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
 						.mTrigger = BattleTriggerID::OnHit,
 					},},
@@ -84,6 +88,10 @@ namespace PocketCore::Registry::Move
 				});
 				addBuiltin({
 					.mTriggers = {{
+					    .mEffects = {EffectTypeID::AccuracyCheck},
+					    .mTrigger = BattleTriggerID::BeforeHit,
+					},
+					{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
 						.mTrigger = BattleTriggerID::OnHit,
 					},},

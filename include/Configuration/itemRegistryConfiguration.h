@@ -163,7 +163,7 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const std::string_view &itemName,
-																		const BattleTargetID target);
+																				const BattleTargetID target);
 
 			/*! @overload std::expected<void, RegistryErrorInfo> setItemTarget(ItemID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an item selected by stable ID.

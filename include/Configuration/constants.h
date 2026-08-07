@@ -76,13 +76,13 @@ namespace PocketCore::Configuration
 
 	inline constexpr ub MAX_SUPPRESSION_RULES_PER_TRIGGER{2};
 
-	inline constexpr float BASE_STAGE_MULTIPLIER_NUMERATOR{2.0F};
-	inline constexpr float BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0F};
+	inline constexpr double BASE_STAGE_MULTIPLIER_NUMERATOR{2.0};
+	inline constexpr double BASE_STAGE_MULTIPLIER_DENOMINATOR{2.0};
 
-	inline constexpr float BASE_ACCURACY_MULTIPLIER_NUMERATOR{3.0F};
-	inline constexpr float BASE_ACCURACY_MULTIPLIER_DENOMINATOR{3.0F};
-	inline constexpr float BASE_EVASION_MULTIPLIER_NUMERATOR{3.0F};
-	inline constexpr float BASE_EVASION_MULTIPLIER_DENOMINATOR{3.0F};
+	inline constexpr double BASE_ACCURACY_MULTIPLIER_NUMERATOR{3.0};
+	inline constexpr double BASE_ACCURACY_MULTIPLIER_DENOMINATOR{3.0};
+	inline constexpr double BASE_EVASION_MULTIPLIER_NUMERATOR{3.0};
+	inline constexpr double BASE_EVASION_MULTIPLIER_DENOMINATOR{3.0};
 
 	inline constexpr ub MIN_ACCURACY_HIT_VALUE{1};
 	inline constexpr ub MAX_ACCURACY_HIT_VALUE{100};

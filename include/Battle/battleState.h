@@ -58,8 +58,6 @@ namespace PocketCore::Battle
 			Pokemon *mPokemon{nullptr};
 			StatStages mStatStages{};
 
-			float mSpeedBoost{1.0F};
-
 			MoveID mChoiceLockedMove{};
 
 			ub mPosition{0};
@@ -71,6 +69,7 @@ namespace PocketCore::Battle
 			bool mIsProtected{false};
 			bool mIsFlinched{false};
 			bool mIsGrounded{false};
+			bool mFaintProcessed{false};
 	};
 
 	struct BattleState

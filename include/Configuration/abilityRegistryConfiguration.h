@@ -163,7 +163,7 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const std::string_view &abilityName,
-																		   const BattleTargetID target);
+																				   const BattleTargetID target);
 
 			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTarget(AbilityID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an ability selected by stable ID.

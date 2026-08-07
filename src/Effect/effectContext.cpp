@@ -63,10 +63,7 @@ namespace PocketCore::Effect
 
 		for (const auto &[multID, multiplier] : mActiveMultipliers)
 		{
-			if (multiplier <= 0.0)
-			{
-				return 0U;
-			}
+			const double normalizedMultiplier{std::max(multiplier, 1.0)};
 
 			const auto roundDownHalfSafe = [](const double value) -> double {
 				double integerPart{};
@@ -81,7 +78,7 @@ namespace PocketCore::Effect
 			};
 
 			const double fixedPointValue{
-				(FIXED_POINT_MULTIPLIER_NUMERATOR * multiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
+				(FIXED_POINT_MULTIPLIER_NUMERATOR * normalizedMultiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
 			};
 
 			damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));

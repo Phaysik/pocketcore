@@ -59,8 +59,8 @@ namespace PocketCore::Pokemon
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level, const AbilityID abilityID,
 									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack},
-				  mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
+				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed},
+				  mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -75,8 +75,8 @@ namespace PocketCore::Pokemon
 									   const AbilityID abilityID, const ItemID itemID,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAttack{attack},
-				  mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID},
-				  mItemID{itemID}
+				  mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense},
+				  mAbilityID{abilityID}, mItemID{itemID}
 			{
 				setLevel(level);
 			}

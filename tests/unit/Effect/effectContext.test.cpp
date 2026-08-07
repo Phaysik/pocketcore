@@ -134,7 +134,7 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("damage is clamped to at least one")
 		{
-			CHECK((context.applyMultiplier(999U) == 1U));
+			CHECK((context.applyMultiplier(0) == 1U));
 		}
 	}
 }

@@ -48,10 +48,10 @@ namespace PocketCore::Effect
 			targetDefenseStage = std::min(targetDefenseStage, static_cast<sb>(0));
 		}
 
-		const float userAttackMult{
+		const double userAttackMult{
 			CACHE_STAT_STAGE_MULTIPLIERS.at(statStageCacheIndex(userAttackStage)),
 		};
-		const float targetDefenseMult{
+		const double targetDefenseMult{
 			CACHE_STAT_STAGE_MULTIPLIERS.at(statStageCacheIndex(targetDefenseStage)),
 		};
 
@@ -64,13 +64,13 @@ namespace PocketCore::Effect
 		};
 
 		const double attackStat{
-			static_cast<double>(context.mIsSpecial ? userPokemon->getSpAttack() : userPokemon->getAttack())
-				* static_cast<double>(userAttackMult) * static_cast<double>(userAttackModifier),
+			static_cast<double>(context.mIsSpecial ? userPokemon->getSpAttack() : userPokemon->getAttack()) * userAttackMult
+				* userAttackModifier,
 		};
 
 		const double defenseStat{
-			static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense())
-				* static_cast<double>(targetDefenseMult) * static_cast<double>(targetDefenseModifier),
+			static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense()) * targetDefenseMult
+				* targetDefenseModifier,
 		};
 
 		if (!std::isfinite(attackStat) || !std::isfinite(defenseStat) || attackStat < 0.0 || defenseStat <= 0.0)

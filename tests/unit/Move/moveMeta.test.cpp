@@ -11,8 +11,6 @@ using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::baseAttackWithFlinch;
 using PocketCore::Move::baseAttackWithRecoil;
 using PocketCore::Move::baseAttackWithStatus;
-using PocketCore::Move::fieldEffectEffects;
-using PocketCore::Move::protectEffects;
 using PocketCore::Move::statusChangeEffects;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
@@ -25,10 +23,9 @@ SCENARIO("MoveMeta effect lists")
 
 		THEN("it contains the expected ordered baseline effects")
 		{
-			REQUIRE((effects.size() == 11U));
+			REQUIRE((effects.size() == 10U));
 			CHECK((effects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(1) == EffectTypeID::AccuracyCheck));
-			CHECK((effects.at(2) == EffectTypeID::CriticalHit));
+			CHECK((effects.at(1) == EffectTypeID::CriticalHit));
 			CHECK((effects.back() == EffectTypeID::BurnDamageReduction));
 		}
 	}
@@ -39,10 +36,10 @@ SCENARIO("MoveMeta effect lists")
 
 		THEN("it appends recoil to the base sequence")
 		{
-			REQUIRE((effects.size() == 12U));
+			REQUIRE((effects.size() == 11U));
 			CHECK((effects.back() == EffectTypeID::Recoil));
 			CHECK((effects.at(0) == EffectTypeID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(10) == EffectTypeID::BurnDamageReduction));
+			CHECK((effects.at(9) == EffectTypeID::BurnDamageReduction));
 		}
 	}
 
@@ -52,9 +49,9 @@ SCENARIO("MoveMeta effect lists")
 
 		THEN("it appends status apply to the base sequence")
 		{
-			REQUIRE((effects.size() == 12U));
+			REQUIRE((effects.size() == 11U));
 			CHECK((effects.back() == EffectTypeID::StatusApply));
-			CHECK((effects.at(10) == EffectTypeID::BurnDamageReduction));
+			CHECK((effects.at(9) == EffectTypeID::BurnDamageReduction));
 		}
 	}
 
@@ -64,9 +61,9 @@ SCENARIO("MoveMeta effect lists")
 
 		THEN("it appends flinch to the base sequence")
 		{
-			REQUIRE((effects.size() == 12U));
+			REQUIRE((effects.size() == 11U));
 			CHECK((effects.back() == EffectTypeID::Flinch));
-			CHECK((effects.at(10) == EffectTypeID::BurnDamageReduction));
+			CHECK((effects.at(9) == EffectTypeID::BurnDamageReduction));
 		}
 	}
 
@@ -74,35 +71,11 @@ SCENARIO("MoveMeta effect lists")
 	{
 		auto effects{statusChangeEffects()};
 
-		THEN("it contains priority block accuracy check and stat change")
-		{
-			REQUIRE((effects.size() == 3U));
-			CHECK((effects.at(0) == EffectTypeID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(1) == EffectTypeID::AccuracyCheck));
-			CHECK((effects.at(2) == EffectTypeID::StatChange));
-		}
-	}
-
-	GIVEN("protect effect sequence")
-	{
-		auto effects{protectEffects()};
-
-		THEN("it contains only priority block")
-		{
-			REQUIRE((effects.size() == 1U));
-			CHECK((effects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
-		}
-	}
-
-	GIVEN("field effect sequence")
-	{
-		auto effects{fieldEffectEffects()};
-
-		THEN("it contains priority block and accuracy check")
+		THEN("it contains priority block and stat change")
 		{
 			REQUIRE((effects.size() == 2U));
 			CHECK((effects.at(0) == EffectTypeID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(1) == EffectTypeID::AccuracyCheck));
+			CHECK((effects.at(1) == EffectTypeID::StatChange));
 		}
 	}
 

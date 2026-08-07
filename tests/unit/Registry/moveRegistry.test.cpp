@@ -51,10 +51,10 @@ SCENARIO("MoveRegistry")
 		{
 			const MoveMeta *metadata{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Pound))};
 			REQUIRE((metadata != nullptr));
-			REQUIRE((metadata->mTriggers.size() == 1U));
-			CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnHit));
-			REQUIRE((metadata->mTriggers.front().mEffects.size() == 11U));
-			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
+			REQUIRE((metadata->mTriggers.size() == 2U));
+			CHECK((metadata->mTriggers.at(1).mTrigger == BattleTriggerID::OnHit));
+			REQUIRE((metadata->mTriggers.at(1).mEffects.size() == 10U));
+			CHECK((metadata->mTriggers.at(1).mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
 		}
 
 		THEN("unknown move lookups are absent")

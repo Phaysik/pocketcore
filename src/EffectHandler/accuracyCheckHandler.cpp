@@ -33,12 +33,13 @@ namespace PocketCore::Effect
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};
 
-		float accuracy{
-			static_cast<float>(context.mMoveAccuracy) * CACHE_ACCURACY_STAGE_MULTIPLIERS.at(statStageCacheIndex(user.mStatStages.mAccuracy))
+		double accuracy{
+			static_cast<double>(context.mMoveAccuracy)
+				* CACHE_ACCURACY_STAGE_MULTIPLIERS.at(statStageCacheIndex(user.mStatStages.mAccuracy))
 				* CACHE_EVASION_STAGE_MULTIPLIERS.at(statStageCacheIndex(target.mStatStages.mEvasion)),
 		};
 
-		accuracy = std::max(std::min(accuracy, 100.0F), 0.0F);
+		accuracy = std::max(std::min(accuracy, 100.0), 0.0);
 
 		if (Random::get<sb>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE) > static_cast<sb>(accuracy))
 		{

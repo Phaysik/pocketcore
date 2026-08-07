@@ -163,7 +163,7 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const std::string_view &moveName,
-																		const BattleTargetID target);
+																				const BattleTargetID target);
 
 			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTarget(MoveID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an move selected by stable ID.

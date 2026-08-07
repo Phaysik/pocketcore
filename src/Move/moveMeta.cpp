@@ -18,9 +18,8 @@ namespace PocketCore::Move
 {
 	using PocketCore::Effect::EffectTypeID;
 
-	constexpr std::array BASE_ATTACK_EFFECTS{
+	constexpr std::array<EffectTypeID, 10> BASE_ATTACK_EFFECTS{
 		EffectTypeID::PsychicTerrainPriorityBlock,
-		EffectTypeID::AccuracyCheck,
 		EffectTypeID::CriticalHit,
 		EffectTypeID::BaseDamage,
 		EffectTypeID::Targets,
@@ -32,9 +31,8 @@ namespace PocketCore::Move
 		EffectTypeID::BurnDamageReduction,
 	};
 
-	constexpr std::array BASE_ATTACK_WITH_RECOIL{
+	constexpr std::array<EffectTypeID, 11> BASE_ATTACK_WITH_RECOIL{
 		EffectTypeID::PsychicTerrainPriorityBlock,
-		EffectTypeID::AccuracyCheck,
 		EffectTypeID::CriticalHit,
 		EffectTypeID::BaseDamage,
 		EffectTypeID::Targets,
@@ -47,9 +45,8 @@ namespace PocketCore::Move
 		EffectTypeID::Recoil,
 	};
 
-	constexpr std::array BASE_ATTACK_WITH_STATUS{
+	constexpr std::array<EffectTypeID, 11> BASE_ATTACK_WITH_STATUS{
 		EffectTypeID::PsychicTerrainPriorityBlock,
-		EffectTypeID::AccuracyCheck,
 		EffectTypeID::CriticalHit,
 		EffectTypeID::BaseDamage,
 		EffectTypeID::Targets,
@@ -62,9 +59,8 @@ namespace PocketCore::Move
 		EffectTypeID::StatusApply,
 	};
 
-	constexpr std::array BASE_ATTACK_WITH_FLINCH{
+	constexpr std::array<EffectTypeID, 11> BASE_ATTACK_WITH_FLINCH{
 		EffectTypeID::PsychicTerrainPriorityBlock,
-		EffectTypeID::AccuracyCheck,
 		EffectTypeID::CriticalHit,
 		EffectTypeID::BaseDamage,
 		EffectTypeID::Targets,
@@ -77,14 +73,10 @@ namespace PocketCore::Move
 		EffectTypeID::Flinch,
 	};
 
-	constexpr std::array STATUS_CHANGE_EFFECTS{
+	constexpr std::array<EffectTypeID, 2> STATUS_CHANGE_EFFECTS{
 		EffectTypeID::PsychicTerrainPriorityBlock,
-		EffectTypeID::AccuracyCheck,
 		EffectTypeID::StatChange,
 	};
-
-	constexpr std::array PROTECT_EFFECTS{EffectTypeID::PsychicTerrainPriorityBlock};
-	constexpr std::array FIELD_EFFECT_EFFECTS{EffectTypeID::PsychicTerrainPriorityBlock, EffectTypeID::AccuracyCheck};
 
 	ATTR_CONST std::span<const EffectTypeID> baseAttackEffects() noexcept
 	{
@@ -109,15 +101,5 @@ namespace PocketCore::Move
 	ATTR_CONST std::span<const EffectTypeID> statusChangeEffects() noexcept
 	{
 		return STATUS_CHANGE_EFFECTS;
-	}
-
-	ATTR_CONST std::span<const EffectTypeID> protectEffects() noexcept
-	{
-		return PROTECT_EFFECTS;
-	}
-
-	ATTR_CONST std::span<const EffectTypeID> fieldEffectEffects() noexcept
-	{
-		return FIELD_EFFECT_EFFECTS;
 	}
 } // namespace PocketCore::Move

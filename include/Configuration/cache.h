@@ -24,12 +24,12 @@ namespace PocketCore::Configuration
 		return static_cast<std::size_t>(clampedStage + MAX_STAT_STAGES);
 	}
 
-	ATTR_NODISCARD constexpr std::array<float, MAX_STAGE_CACHE> STAT_STAGE_MULTIPLIERS() noexcept
+	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> STAT_STAGE_MULTIPLIERS() noexcept
 	{
-		std::array<float, MAX_STAGE_CACHE> table{};
+		std::array<double, MAX_STAGE_CACHE> table{};
 
-		constexpr float NUM{BASE_STAGE_MULTIPLIER_NUMERATOR};
-		constexpr float DEN{BASE_STAGE_MULTIPLIER_DENOMINATOR};
+		constexpr double NUM{BASE_STAGE_MULTIPLIER_NUMERATOR};
+		constexpr double DEN{BASE_STAGE_MULTIPLIER_DENOMINATOR};
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
@@ -37,23 +37,23 @@ namespace PocketCore::Configuration
 
 			if (statStage >= 0)
 			{
-				table.at(index) = (NUM + static_cast<float>(statStage)) / DEN;
+				table.at(index) = (NUM + static_cast<double>(statStage)) / DEN;
 			}
 			else
 			{
-				table.at(index) = NUM / (DEN - static_cast<float>(statStage));
+				table.at(index) = NUM / (DEN - static_cast<double>(statStage));
 			}
 		}
 
 		return table;
 	}
 
-	ATTR_NODISCARD constexpr std::array<float, MAX_STAGE_CACHE> ACCURACY_STAGE_MULTIPLIERS() noexcept
+	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> ACCURACY_STAGE_MULTIPLIERS() noexcept
 	{
-		std::array<float, MAX_STAGE_CACHE> table{};
+		std::array<double, MAX_STAGE_CACHE> table{};
 
-		constexpr float NUM{BASE_ACCURACY_MULTIPLIER_NUMERATOR};
-		constexpr float DEN{BASE_ACCURACY_MULTIPLIER_DENOMINATOR};
+		constexpr double NUM{BASE_ACCURACY_MULTIPLIER_NUMERATOR};
+		constexpr double DEN{BASE_ACCURACY_MULTIPLIER_DENOMINATOR};
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
@@ -61,23 +61,23 @@ namespace PocketCore::Configuration
 
 			if (statStage >= 0)
 			{
-				table.at(index) = (NUM + static_cast<float>(statStage)) / DEN;
+				table.at(index) = (NUM + static_cast<double>(statStage)) / DEN;
 			}
 			else
 			{
-				table.at(index) = NUM / (DEN - static_cast<float>(statStage));
+				table.at(index) = NUM / (DEN - static_cast<double>(statStage));
 			}
 		}
 
 		return table;
 	}
 
-	ATTR_NODISCARD constexpr std::array<float, MAX_STAGE_CACHE> EVASION_STAGE_MULTIPLIERS() noexcept
+	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> EVASION_STAGE_MULTIPLIERS() noexcept
 	{
-		std::array<float, MAX_STAGE_CACHE> table{};
+		std::array<double, MAX_STAGE_CACHE> table{};
 
-		constexpr float NUM{BASE_EVASION_MULTIPLIER_NUMERATOR};
-		constexpr float DEN{BASE_EVASION_MULTIPLIER_DENOMINATOR};
+		constexpr double NUM{BASE_EVASION_MULTIPLIER_NUMERATOR};
+		constexpr double DEN{BASE_EVASION_MULTIPLIER_DENOMINATOR};
 
 		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
 		{
@@ -85,19 +85,19 @@ namespace PocketCore::Configuration
 
 			if (statStage >= 0)
 			{
-				table.at(index) = NUM / (DEN + static_cast<float>(statStage));
+				table.at(index) = NUM / (DEN + static_cast<double>(statStage));
 			}
 			else
 			{
-				table.at(index) = (NUM - static_cast<float>(statStage)) / DEN;
+				table.at(index) = (NUM - static_cast<double>(statStage)) / DEN;
 			}
 		}
 
 		return table;
 	}
 
-	constexpr std::array<float, MAX_STAGE_CACHE> CACHE_STAT_STAGE_MULTIPLIERS{STAT_STAGE_MULTIPLIERS()};
-	constexpr std::array<float, MAX_STAGE_CACHE> CACHE_ACCURACY_STAGE_MULTIPLIERS{ACCURACY_STAGE_MULTIPLIERS()};
-	constexpr std::array<float, MAX_STAGE_CACHE> CACHE_EVASION_STAGE_MULTIPLIERS{EVASION_STAGE_MULTIPLIERS()};
+	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_STAT_STAGE_MULTIPLIERS{STAT_STAGE_MULTIPLIERS()};
+	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_ACCURACY_STAGE_MULTIPLIERS{ACCURACY_STAGE_MULTIPLIERS()};
+	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_EVASION_STAGE_MULTIPLIERS{EVASION_STAGE_MULTIPLIERS()};
 } // namespace PocketCore::Configuration
 #endif
