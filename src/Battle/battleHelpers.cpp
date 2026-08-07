@@ -34,67 +34,67 @@ namespace PocketCore::Battle
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Utility::Random;
 
-	ATTR_NODISCARD std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_PURE std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
 
-	ATTR_NODISCARD const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_PURE const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
 
-	ATTR_NODISCARD BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept
+	ATTR_NODISCARD ATTR_PURE BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept
 	{
 		std::vector<BattleSlot> &slots{activeSlots(state, side)};
 		return slotIndex < slots.size() ? &slots.at(slotIndex) : nullptr;
 	}
 
-	ATTR_NODISCARD std::vector<Pokemon *> &party(BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_PURE std::vector<Pokemon *> &party(BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
 
-	ATTR_NODISCARD const std::vector<Pokemon *> &party(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_PURE const std::vector<Pokemon *> &party(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
 
-	ATTR_NODISCARD bool isHealthy(const BattleSlot &slot) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const BattleSlot &slot) noexcept
 	{
 		return slot.mPokemon != nullptr && !slot.mPokemon->isFainted();
 	}
 
-	ATTR_NODISCARD bool isHealthy(const Pokemon *pokemon) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *pokemon) noexcept
 	{
 		return pokemon != nullptr && !pokemon->isFainted();
 	}
 
-	ATTR_NODISCARD bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept
 	{
 		const std::vector<BattleSlot> &slots{activeSlots(state, side)};
 		return std::ranges::any_of(slots, [pokemon](const BattleSlot &slot) { return slot.mPokemon == pokemon; });
 	}
 
-	ATTR_NODISCARD bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept
 	{
 		const sb positionDifference{static_cast<sb>(std::abs(static_cast<sb>(source.mPosition) - static_cast<sb>(target.mPosition)))};
 		return positionDifference <= 1;
 	}
 
-	ATTR_NODISCARD bool targetExists(const BattleState &state, const BattleTarget target) noexcept
+	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget target) noexcept
 	{
 		const std::vector<BattleSlot> &slots{activeSlots(state, target.mSide)};
 		return target.mSlotIndex < slots.size() && isHealthy(slots.at(target.mSlotIndex));
 	}
 
-	ATTR_NODISCARD bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept
+	ATTR_NODISCARD ATTR_PURE bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept
 	{
 		const std::vector<Pokemon *> &sideParty{party(state, side)};
 		return std::ranges::any_of(sideParty, [](const Pokemon *pokemon) { return isHealthy(pokemon); });
 	}
 
-	ATTR_NODISCARD double getEffectiveSpeed(const BattleSlot &slot) noexcept
+	ATTR_NODISCARD ATTR_PURE double getEffectiveSpeed(const BattleSlot &slot) noexcept
 	{
 		const Pokemon *slotPokemon{slot.mPokemon};
 

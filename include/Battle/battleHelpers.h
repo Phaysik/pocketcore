@@ -83,32 +83,32 @@ namespace PocketCore::Battle
 		return side == Side::A ? 0U : 1U;
 	}
 
-	ATTR_NODISCARD std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_PURE std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
 
-	ATTR_NODISCARD const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_PURE const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
 
-	ATTR_NODISCARD BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept;
+	ATTR_NODISCARD ATTR_PURE BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept;
 
-	ATTR_NODISCARD std::vector<Pokemon *> &party(BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_PURE std::vector<Pokemon *> &party(BattleState &state, const Side side);
 
-	ATTR_NODISCARD const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_PURE const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
 
-	ATTR_NODISCARD bool isHealthy(const BattleSlot &slot) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const BattleSlot &slot) noexcept;
 
-	ATTR_NODISCARD bool isHealthy(const Pokemon *pokemon) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *pokemon) noexcept;
 
-	ATTR_NODISCARD bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept;
 
-	ATTR_NODISCARD bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept;
 
-	ATTR_NODISCARD bool targetExists(const BattleState &state, const BattleTarget target) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget target) noexcept;
 
-	ATTR_NODISCARD bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept;
 
-	ATTR_NODISCARD double getEffectiveSpeed(const BattleSlot &slot) noexcept;
+	ATTR_NODISCARD ATTR_PURE double getEffectiveSpeed(const BattleSlot &slot) noexcept;
 
-	ATTR_NODISCARD EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget target,
-												 const ub hitAttemptIndex);
+	ATTR_NODISCARD ATTR_PURE EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget target,
+														   const ub hitAttemptIndex);
 
 	void applyRecoil(BattleState &state, const EffectContext &context);
 
