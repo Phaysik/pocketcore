@@ -34,7 +34,7 @@ namespace PocketCore::Battle
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Utility::Random;
 
-	ATTR_NODISCARD ATTR_PURE std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
@@ -50,7 +50,7 @@ namespace PocketCore::Battle
 		return slotIndex < slots.size() ? &slots.at(slotIndex) : nullptr;
 	}
 
-	ATTR_NODISCARD ATTR_PURE std::vector<Pokemon *> &party(BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST std::vector<Pokemon *> &party(BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
