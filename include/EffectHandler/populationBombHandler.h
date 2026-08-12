@@ -28,6 +28,11 @@ namespace PocketCore::Effect
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
+
+	inline void applyPopulationBomb(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	{
+		PopulationBombHandler{}.apply(state, context, provider);
+	}
 } // namespace PocketCore::Effect
 
 #endif

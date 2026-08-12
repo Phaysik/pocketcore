@@ -16,7 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
@@ -27,7 +27,7 @@ namespace PocketCore::Registry::Multiplier
 {
 	using PocketCore::Configuration::MAX_MULTIPLIERS;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Multiplier::BuiltinMultiplierID;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;

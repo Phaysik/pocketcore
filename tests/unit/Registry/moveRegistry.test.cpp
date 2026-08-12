@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
@@ -14,7 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleTriggerID;
-using PocketCore::Effect::EffectTypeID;
+using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 using PocketCore::Move::MOVE_NAME_NONE;
@@ -54,7 +54,7 @@ SCENARIO("MoveRegistry")
 			REQUIRE((metadata->mTriggers.size() == 2U));
 			CHECK((metadata->mTriggers.at(1).mTrigger == BattleTriggerID::OnHit));
 			REQUIRE((metadata->mTriggers.at(1).mEffects.size() == 10U));
-			CHECK((metadata->mTriggers.at(1).mEffects.front() == EffectTypeID::PsychicTerrainPriorityBlock));
+			CHECK((metadata->mTriggers.at(1).mEffects.front() == BuiltinEffectID::PsychicTerrainPriorityBlock));
 		}
 
 		THEN("unknown move lookups are absent")

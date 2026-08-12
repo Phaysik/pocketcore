@@ -27,6 +27,11 @@ namespace PocketCore::Effect
 		public:
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};
+
+	inline void applyTargets(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	{
+		TargetsHandler{}.apply(state, context, provider);
+	}
 } // namespace PocketCore::Effect
 
 #endif

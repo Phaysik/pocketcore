@@ -21,7 +21,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 
 namespace PocketCore::Registry::Ability
@@ -35,7 +35,7 @@ namespace PocketCore::Registry::Ability
 	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_ABILITIES;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 
 	/*! @class AbilityRegistry Registry/abilityRegistry.h
 		@brief Stores built-in and user-defined ability metadata in fixed-capacity storage.
@@ -65,13 +65,13 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::Flinch}, .mTrigger = BattleTriggerID::OnSuccessfulHit}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::Flinch}, .mTrigger = BattleTriggerID::OnSuccessfulHit}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
 					.mTargetID = BattleTargetID::AllOpponents,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {EffectTypeID::SetRain}, .mTrigger = BattleTriggerID::OnSwitchIn}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::SetRain}, .mTrigger = BattleTriggerID::OnSwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 					.mTargetID = BattleTargetID::Self,

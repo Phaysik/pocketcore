@@ -5,7 +5,7 @@
 #include <string_view>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Item/builtInItemID.h"
 #include "Item/constants.h"
 #include "Item/itemID.h"
@@ -14,7 +14,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleTriggerID;
-using PocketCore::Effect::EffectTypeID;
+using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
 using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
@@ -53,7 +53,7 @@ SCENARIO("ItemRegistry")
 			REQUIRE((metadata->mTriggers.size() == 1U));
 			CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnTurnEnd));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 1U));
-			CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
+			CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::StatusRemove));
 		}
 
 		THEN("unknown item lookups are absent")

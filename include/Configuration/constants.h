@@ -40,6 +40,7 @@ namespace PocketCore::Configuration
 	inline constexpr us MAX_WEATHERS{1'000};
 	inline constexpr us MAX_TERRAINS{1'000};
 	inline constexpr us MAX_MULTIPLIERS{1'000};
+	inline constexpr us MAX_EFFECTS{1'000};
 
 	inline constexpr ub MIN_CRITICAL_HIT_VALUE{0};
 	inline constexpr ub MAX_CRITICAL_HIT_VALUE{99};
@@ -128,6 +129,8 @@ namespace PocketCore::Configuration
 		TerrainNotFound,	 /*!< No terrain matching the input was found. */
 		DuplicateMultiplier, /*!< A multiplier with the given name already exists. */
 		MultiplierNotFound,	 /*!< No multiplier matching the input was found. */
+		DuplicateEffect,	 /*!< An effect with the given name already exists. */
+		EffectNotFound,		 /*!< No effect matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -249,8 +252,14 @@ namespace PocketCore::Configuration
 					case RegistryError::MultiplierNotFound:
 						mErrorName = "MultiplierNotFound";
 						break;
-						// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this silences
-						// compiler warnings about unhandled enum values.
+					case RegistryError::DuplicateEffect:
+						mErrorName = "DuplicateEffect";
+						break;
+					case RegistryError::EffectNotFound:
+						mErrorName = "EffectNotFound";
+						break;
+					// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this
+					// silences compiler warnings about unhandled enum values.
 					default:
 						mErrorName = "UnknownError";
 						break;

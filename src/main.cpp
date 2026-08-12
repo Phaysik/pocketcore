@@ -11,6 +11,7 @@
 
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/configFlags.h"
+#include "Configuration/effectRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
@@ -63,6 +64,7 @@ int main()
 		ATTR_MAYBE_UNUSED const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
 		ATTR_MAYBE_UNUSED const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
+		ATTR_MAYBE_UNUSED const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
 	}
 
 	return EXIT_SUCCESS;

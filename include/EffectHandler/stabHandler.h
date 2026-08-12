@@ -27,6 +27,11 @@ namespace PocketCore::Effect
 		public:
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
+
+	inline void applySTAB(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	{
+		StabHandler{}.apply(state, context, provider);
+	}
 } // namespace PocketCore::Effect
 
 #endif

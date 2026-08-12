@@ -26,6 +26,11 @@ namespace PocketCore::Effect
 		public:
 			void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};
+
+	inline void applyTypeEffectiveness(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	{
+		TypeEffectivenessHandler{}.apply(state, context, provider);
+	}
 } // namespace PocketCore::Effect
 
 #endif

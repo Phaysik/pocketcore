@@ -15,8 +15,8 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Effect/builtInEffectID.h"
 #include "Effect/effectSourceAndSuppresion.h"
-#include "Effect/effectType.h"
 
 #include "itemID.h"
 
@@ -26,14 +26,14 @@ namespace PocketCore::Item
 	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::SuppressionRule;
 
 	struct ItemEffectTrigger
 	{
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
-			std::vector<PocketCore::Effect::EffectTypeID> mEffects;
+			std::vector<BuiltinEffectID> mEffects;
 			BattleTriggerID mTrigger;
 			ub mSuppresionRuleCount{0};
 	};

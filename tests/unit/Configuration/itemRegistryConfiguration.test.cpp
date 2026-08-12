@@ -7,7 +7,7 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
@@ -19,7 +19,7 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
-using PocketCore::Effect::EffectTypeID;
+using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemEffectTrigger;
 using PocketCore::Item::ItemID;
@@ -50,7 +50,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 	GIVEN("a unique item definition")
 	{
 		std::vector<ItemEffectTrigger> triggers{
-			{.mEffects = {EffectTypeID::Recoil, EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnMoveUse},
+			{.mEffects = {BuiltinEffectID::Recoil, BuiltinEffectID::StatusApply}, .mTrigger = BattleTriggerID::OnMoveUse},
 		};
 		ItemMeta definition{.mTriggers = triggers, .mName = "Life Orb"};
 
@@ -134,7 +134,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by name")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::StatusRemove}, .mTrigger = BattleTriggerID::OnFaint}},
+				{{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleTriggerID::OnFaint}},
 			};
 			auto setResult{configuration.setItemTriggers("Custom Item", replacement)};
 
@@ -144,14 +144,14 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 				const ItemMeta *metadata{configuration.getItemMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
 				CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnFaint));
-				CHECK((metadata->mTriggers.front().mEffects.front() == EffectTypeID::StatusRemove));
+				CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::StatusRemove));
 			}
 		}
 
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<ItemEffectTrigger, 1> replacement{
-				{{.mEffects = {EffectTypeID::Flinch}, .mTrigger = BattleTriggerID::OnSwitchIn}},
+				{{.mEffects = {BuiltinEffectID::Flinch}, .mTrigger = BattleTriggerID::OnSwitchIn}},
 			};
 			auto setResult{configuration.setItemTriggers(customIdentifier, replacement)};
 
@@ -208,7 +208,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by name")
 		{
 			ItemMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::StatusApply}, .mTrigger = BattleTriggerID::OnTurnEnd}},
+				.mTriggers = {{.mEffects = {BuiltinEffectID::StatusApply}, .mTrigger = BattleTriggerID::OnTurnEnd}},
 				.mName = "Replacement Item",
 				.mTargetID = BattleTargetID::Self,
 			};
@@ -225,7 +225,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 		WHEN("it is updated by stable ID")
 		{
 			ItemMeta replacement{
-				.mTriggers = {{.mEffects = {EffectTypeID::Recoil}, .mTrigger = BattleTriggerID::OnMoveUse}},
+				.mTriggers = {{.mEffects = {BuiltinEffectID::Recoil}, .mTrigger = BattleTriggerID::OnMoveUse}},
 				.mName = "Replacement Item By ID",
 				.mTargetID = BattleTargetID::AllAllies,
 			};

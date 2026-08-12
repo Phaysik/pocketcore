@@ -10,7 +10,7 @@
 #include "Ability/constants.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -23,7 +23,7 @@ using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleTriggerID;
 using PocketCore::Core::ub;
-using PocketCore::Effect::EffectTypeID;
+using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
@@ -63,7 +63,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE((stench.mTriggers.size() == 1U));
 			CHECK((stench.mTriggers.front().mTrigger == BattleTriggerID::OnSuccessfulHit));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
-			CHECK((stench.mTriggers.front().mEffects.front() == EffectTypeID::Flinch));
+			CHECK((stench.mTriggers.front().mEffects.front() == BuiltinEffectID::Flinch));
 		}
 
 		THEN("Drizzle retains its switch-in rain metadata")
@@ -74,7 +74,7 @@ SCENARIO("AbilityRegistry")
 			AbilityMeta drizzle{*metadata};
 			REQUIRE((drizzle.mTriggers.size() == 1U));
 			CHECK((drizzle.mTriggers.front().mTrigger == BattleTriggerID::OnSwitchIn));
-			CHECK((drizzle.mTriggers.front().mEffects.front() == EffectTypeID::SetRain));
+			CHECK((drizzle.mTriggers.front().mEffects.front() == BuiltinEffectID::SetRain));
 		}
 
 		THEN("unknown names and IDs are absent")

@@ -1,13 +1,13 @@
-/*! @file terrainHandler.h
-	@brief Contains the terrain effect handler
+/*! @file flinchHandler.h
+	@brief Contains the flinch effect handler
 	@date 07/24/2026
 	@version x.x.x
 	@since x.x.x
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_EFFECT_TERRAINHANDLER_H
-#define INCLUDE_EFFECT_TERRAINHANDLER_H
+#ifndef INCLUDE_EFFECT_FLINCHHANDLER_H
+#define INCLUDE_EFFECT_FLINCHHANDLER_H
 
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
@@ -22,15 +22,15 @@ namespace PocketCore::Effect
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
 
-	class TerrainHandler : public IEffectHandler
+	class FlinchHandler : public IEffectHandler
 	{
 		public:
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 
-	inline void applyTerrain(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applyFlinch(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{
-		TerrainHandler{}.apply(state, context, provider);
+		FlinchHandler{}.apply(state, context, provider);
 	}
 } // namespace PocketCore::Effect
 

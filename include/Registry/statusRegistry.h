@@ -16,7 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Status/builtInStatusID.h"
 #include "Status/constants.h"
@@ -27,7 +27,7 @@ namespace PocketCore::Registry::Status
 {
 	using PocketCore::Configuration::MAX_STATUSES;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusInteractionAction;

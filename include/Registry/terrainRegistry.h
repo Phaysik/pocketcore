@@ -16,7 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
@@ -27,7 +27,7 @@ namespace PocketCore::Registry::Terrain
 {
 	using PocketCore::Configuration::MAX_TERRAINS;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Terrain::BuiltinTerrainID;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Terrain::TerrainMeta;

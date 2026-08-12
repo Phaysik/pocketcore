@@ -17,7 +17,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
@@ -32,7 +32,7 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_MOVES;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Move::baseAttackEffects;
 	using PocketCore::Move::BuiltinMoveID;
 	using PocketCore::Move::MoveEffectTrigger;
@@ -69,7 +69,7 @@ namespace PocketCore::Registry::Move
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
 					.mTriggers = {{
-					    .mEffects = {EffectTypeID::AccuracyCheck},
+					    .mEffects = {BuiltinEffectID::AccuracyCheck},
 					    .mTrigger = BattleTriggerID::BeforeHit,
 					},
 					{
@@ -88,7 +88,7 @@ namespace PocketCore::Registry::Move
 				});
 				addBuiltin({
 					.mTriggers = {{
-					    .mEffects = {EffectTypeID::AccuracyCheck},
+					    .mEffects = {BuiltinEffectID::AccuracyCheck},
 					    .mTrigger = BattleTriggerID::BeforeHit,
 					},
 					{

@@ -16,7 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/effectType.h"
+#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Weather/builtInWeatherID.h"
 #include "Weather/constants.h"
@@ -27,7 +27,7 @@ namespace PocketCore::Registry::Weather
 {
 	using PocketCore::Configuration::MAX_WEATHERS;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::EffectTypeID;
+	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
 	using PocketCore::Weather::WeatherID;
