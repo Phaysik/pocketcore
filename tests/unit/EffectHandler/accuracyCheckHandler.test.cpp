@@ -44,7 +44,6 @@ namespace
 			.weatherRegistry = nullptr,
 			.terrainRegistry = nullptr,
 			.multiplierRegistry = nullptr,
-			.effectRegistry = nullptr,
 		};
 	}
 

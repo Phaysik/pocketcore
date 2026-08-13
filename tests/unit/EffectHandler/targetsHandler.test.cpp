@@ -78,7 +78,6 @@ SCENARIO("TargetsHandler")
 		.weatherRegistry = nullptr,
 		.terrainRegistry = nullptr,
 		.multiplierRegistry = nullptr,
-		.effectRegistry = nullptr,
 	};
 
 	GIVEN("a move identifier that is not registered")

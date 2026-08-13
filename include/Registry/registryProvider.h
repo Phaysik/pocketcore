@@ -20,11 +20,6 @@
 
 namespace PocketCore::Registry
 {
-	namespace Effect
-	{
-		class EffectRegistry;
-	} // namespace Effect
-
 	/*! @struct RegistryProvider Registry/registryProvider.h
 		@brief Aggregates non-owning pointers to all runtime metadata registries.
 		@details Provides a lightweight dependency bundle passed into systems that require cross-registry lookup access.
@@ -77,11 +72,6 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref Multiplier::MultiplierRegistry instance for multiplier metadata queries.
 			*/
 			const Multiplier::MultiplierRegistry *multiplierRegistry;
-
-			/*! @brief Non-owning pointer to the effect metadata registry.
-				@details Must point to a valid @ref Effect::EffectRegistry instance for effect execution.
-			*/
-			const Effect::EffectRegistry *effectRegistry;
 	};
 } // namespace PocketCore::Registry
 

@@ -1,12 +1,11 @@
-#include <benchmark/benchmark.h>
-
-#include "Registry/moveRegistry.h"
-
 #include <array>
 
 #include "Configuration/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
+#include "Registry/moveRegistry.h"
+
+#include <benchmark/benchmark.h>
 
 namespace
 {
@@ -18,7 +17,7 @@ namespace
 } // namespace
 
 static MoveRegistry makeFullMoveRegistry() // NOLINT(misc-use-anonymous-namespace)
-	{
+{
 	MoveRegistry registry{};
 
 	while (registry.getAmountRegistered() < MAX_MOVES)
@@ -34,7 +33,7 @@ static MoveRegistry makeFullMoveRegistry() // NOLINT(misc-use-anonymous-namespac
 }
 
 static void BM_FixedMetadataRegistry_FindMoveByID(benchmark::State &state) // NOLINT(misc-use-anonymous-namespace)
-	{
+{
 	const MoveRegistry registry{makeFullMoveRegistry()};
 	const std::array lookupIDs{
 		MoveID{0U},
