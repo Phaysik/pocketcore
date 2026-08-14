@@ -9,10 +9,13 @@
 #ifndef INCLUDE_BATTLE_BATTLE_HELPERS_H
 #define INCLUDE_BATTLE_BATTLE_HELPERS_H
 
+#include <algorithm>
 #include <cstddef>
+#include <span>
 #include <vector>
 
 #include "Battle/battleState.h"
+#include "Battle/battleValidation.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
@@ -23,6 +26,7 @@
 namespace PocketCore::Battle
 {
 	using PocketCore::Battle::BattleSlot;
+	using PocketCore::Core::sl;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Effect::Side;
@@ -36,6 +40,11 @@ namespace PocketCore::Battle
 	ATTR_NODISCARD constexpr std::size_t getSideOrder(const Side side) noexcept
 	{
 		return side == Side::A ? 0U : 1U;
+	}
+
+	ATTR_NODISCARD constexpr bool anyPartyPokemonNull(const std::span<Pokemon *const> &party)
+	{
+		return std::ranges::any_of(party, [](const Pokemon *pokemon) { return pokemon == nullptr; });
 	}
 
 	ATTR_NODISCARD ATTR_CONST std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
@@ -68,6 +77,22 @@ namespace PocketCore::Battle
 	void applyRecoil(BattleState &state, const EffectContext &context);
 
 	ATTR_NODISCARD ub resolveHitCount(const MoveMeta &moveMeta);
+
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB);
+
+	ATTR_NODISCARD ATTR_PURE sl healthyPokemonInParty(const std::span<Pokemon *const> &party);
+
+	void assignActiveSlots(const std::span<Pokemon *const> party, std::vector<BattleSlot> &slots, const ub activePokemonPerSide);
+
+	ATTR_NODISCARD bool canTarget(const BattleState &state, const BattleTarget &source, const BattleTarget &candidate,
+								  const BattleRangeID rangeID);
+
+	void appendSide(std::vector<BattleTarget> &targets, const BattleState &state, const BattleTarget &source, const BattleRangeID rangeID,
+					const Side side);
+
+	ATTR_NODISCARD ATTR_PURE BattleResult getResult(const BattleState &state) noexcept;
+
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::vector<Pokemon *> &trainerParty);
 } // namespace PocketCore::Battle
 
 #endif

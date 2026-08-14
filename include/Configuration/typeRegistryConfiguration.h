@@ -101,6 +101,14 @@ namespace PocketCore::Configuration
 
 			// MARK: Getters
 
+			/*! @brief Returns read-only access to the configured runtime type registry.
+				@return A reference that remains valid for the lifetime of this configuration.
+			*/
+			ATTR_NODISCARD constexpr const TypeRegistry &getRuntimeRegistry() const noexcept
+			{
+				return Base::getRegistry();
+			}
+
 			/*! @brief Returns the effectiveness of one type attacking another, looked up by display name.
 				@details Resolves both attacker and defender names to their internal array indices and reads the corresponding cell from the
 			   type chart.

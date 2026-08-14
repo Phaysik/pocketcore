@@ -27,6 +27,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Core::us;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
+	using Registry::Multiplier::MultiplierRegistry;
 
 	namespace Detail
 	{
@@ -50,18 +51,24 @@ namespace PocketCore::Configuration
 		@author Matthew Moore
 	*/
 	class MultiplierRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<Registry::Multiplier::MultiplierRegistry, MultiplierMeta, MultiplierID,
-													 MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID,
-													 Detail::MultiplierRegistryConfigurationPolicy>
+		: private FixedMetadataRegistryConfiguration<MultiplierRegistry, MultiplierMeta, MultiplierID, MAX_MULTIPLIERS,
+													 &MultiplierMeta::mMultiplierID, Detail::MultiplierRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<Registry::Multiplier::MultiplierRegistry, MultiplierMeta, MultiplierID,
-															MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID,
-															Detail::MultiplierRegistryConfigurationPolicy>;
+			using Base = FixedMetadataRegistryConfiguration<MultiplierRegistry, MultiplierMeta, MultiplierID, MAX_MULTIPLIERS,
+															&MultiplierMeta::mMultiplierID, Detail::MultiplierRegistryConfigurationPolicy>;
 
 		public:
 			/*! @brief Constructs a configuration containing all built-in multipliers. */
 			constexpr MultiplierRegistryConfiguration() = default;
+
+			/*! @brief Returns read-only access to the configured runtime multiplier registry.
+				@return A reference that remains valid for the lifetime of this configuration.
+			*/
+			ATTR_NODISCARD constexpr const MultiplierRegistry &getRuntimeRegistry() const noexcept
+			{
+				return Base::getRegistry();
+			}
 
 			/*! @brief Looks up complete metadata by stable multiplier ID.
 				@param[in] multiplierID The built-in or custom stable identifier.

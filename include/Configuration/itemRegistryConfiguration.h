@@ -65,6 +65,14 @@ namespace PocketCore::Configuration
 			/*! @brief Constructs a configuration containing all built-in items. */
 			constexpr ItemRegistryConfiguration() = default;
 
+			/*! @brief Returns read-only access to the configured runtime item registry.
+				@return A reference that remains valid for the lifetime of this configuration.
+			*/
+			ATTR_NODISCARD constexpr const ItemRegistry &getRuntimeRegistry() const noexcept
+			{
+				return Base::getRegistry();
+			}
+
 			/*! @brief Looks up complete metadata by stable item ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or

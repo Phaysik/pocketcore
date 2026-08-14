@@ -62,6 +62,14 @@ namespace PocketCore::Configuration
 			/*! @brief Constructs a configuration containing all built-in terrains. */
 			constexpr TerrainRegistryConfiguration() = default;
 
+			/*! @brief Returns read-only access to the configured runtime terrain registry.
+				@return A reference that remains valid for the lifetime of this configuration.
+			*/
+			ATTR_NODISCARD constexpr const TerrainRegistry &getRuntimeRegistry() const noexcept
+			{
+				return Base::getRegistry();
+			}
+
 			/*! @brief Looks up complete metadata by stable terrain ID.
 				@param[in] terrainID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or

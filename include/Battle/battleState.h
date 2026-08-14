@@ -75,6 +75,15 @@ namespace PocketCore::Battle
 	struct BattleState
 	{
 		public:
+			BattleState() = default;
+			BattleState(const BattleState &) = default;
+			BattleState(BattleState &&) noexcept = default;
+			BattleState &operator=(const BattleState &) = default;
+			BattleState &operator=(BattleState &&) noexcept = default;
+			~BattleState() noexcept;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+
 			std::vector<BattleSlot> mSideA{};
 			std::vector<BattleSlot> mSideB{};
 
@@ -98,6 +107,8 @@ namespace PocketCore::Battle
 			bool mStealthRockPartyB{false};
 
 			bool mBattleStarted{false};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Battle
 

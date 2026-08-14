@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <string_view>
 
+#include "Battle/battleEngine.h"
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/configFlags.h"
 #include "Configuration/effectRegistryConfiguration.h"
@@ -19,7 +20,8 @@
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Configuration/weatherRegistryConfiguration.h"
-#include "Core/attributeMacros.h"
+#include "Registry/effectRegistry.h"
+#include "Registry/registryProvider.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
 
@@ -32,6 +34,9 @@
 */
 int main()
 {
+	using PocketCore::Battle::BattleEngine;
+	using PocketCore::Registry::Effect::EffectRegistry;
+	using PocketCore::Registry::RegistryProvider;
 	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
 
@@ -44,6 +49,30 @@ int main()
 		{
 			return EXIT_FAILURE;
 		}
+
+		const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
+		const Configuration::AbilityRegistryConfiguration abilityRegistryConfig{};
+		const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
+		const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
+		const Configuration::StatusRegistryConfiguration statusRegistryConfig{};
+		const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
+		const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
+		const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
+		const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
+
+		const RegistryProvider registryProvider{
+			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+		};
+		const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
+
+		BattleEngine engine{registryProvider, effectRegistry};
 	}
 	else
 	{
@@ -56,15 +85,29 @@ int main()
 			return EXIT_FAILURE;
 		}
 
-		ATTR_MAYBE_UNUSED const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::AbilityRegistryConfiguration abilityRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::StatusRegistryConfiguration statusRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
-		ATTR_MAYBE_UNUSED const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
+		const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
+		const Configuration::AbilityRegistryConfiguration abilityRegistryConfig{};
+		const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
+		const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
+		const Configuration::StatusRegistryConfiguration statusRegistryConfig{};
+		const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
+		const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
+		const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
+		const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
+
+		const RegistryProvider registryProvider{
+			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+		};
+		const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
+
+		BattleEngine engine{registryProvider, effectRegistry};
 	}
 
 	return EXIT_SUCCESS;

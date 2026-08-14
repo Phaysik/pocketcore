@@ -7,7 +7,10 @@
 #include <variant>
 #include <vector>
 
+#include "Battle/battleAction.h"
 #include "Battle/battleState.h"
+#include "Battle/battleTargetsAndTriggers.h"
+#include "Battle/battleValidation.h"
 #include "Configuration/cache.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -25,6 +28,7 @@ namespace PocketCore::Battle
 	using PocketCore::Configuration::CACHE_STAT_STAGE_MULTIPLIERS;
 	using PocketCore::Configuration::statStageCacheIndex;
 	using PocketCore::Core::sb;
+	using PocketCore::Core::sl;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectSource;
 	using PocketCore::Effect::Side;
@@ -33,6 +37,12 @@ namespace PocketCore::Battle
 	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Utility::Random;
+
+#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
+#endif
 
 	ATTR_NODISCARD ATTR_CONST std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side)
 	{
@@ -59,6 +69,10 @@ namespace PocketCore::Battle
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
+
+#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+	#pragma GCC diagnostic pop
+#endif
 
 	ATTR_NODISCARD ATTR_PURE bool isHealthy(const BattleSlot &slot) noexcept
 	{
@@ -206,5 +220,120 @@ namespace PocketCore::Battle
 				}
 			},
 			moveMeta.mHitCountPolicy);
+	}
+
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB)
+	{
+		std::vector<Pokemon *> combinedParties{};
+		combinedParties.reserve(partyA.size() + partyB.size());
+		combinedParties.insert(combinedParties.end(), partyA.begin(), partyA.end());
+		combinedParties.insert(combinedParties.end(), partyB.begin(), partyB.end());
+		std::ranges::sort(combinedParties);
+
+		return std::ranges::adjacent_find(combinedParties) != combinedParties.end();
+	}
+
+	ATTR_NODISCARD ATTR_PURE sl healthyPokemonInParty(const std::span<Pokemon *const> &party)
+	{
+		return std::ranges::count_if(party, [](const Pokemon *pokemon) { return isHealthy(pokemon); });
+	}
+
+	void assignActiveSlots(const std::span<Pokemon *const> party, std::vector<BattleSlot> &slots, const ub activePokemonPerSide)
+	{
+		for (Pokemon *pokemon : party)
+		{
+			// Fainted Pokemon remain in the party for later inspection, but cannot be placed in an active slot.
+			if (!isHealthy(pokemon))
+			{
+				continue;
+			}
+
+			// Use the number of slots already filled as the battlefield position; this stays contiguous even when
+			// fainted or otherwise ineligible party members were skipped earlier in the party.
+			slots.push_back(BattleSlot{.mPokemon = pokemon, .mPosition = static_cast<ub>(slots.size())});
+
+			if (slots.size() == activePokemonPerSide)
+			{
+				// The caller already confirmed that enough healthy Pokemon exist, so no later party member can be selected.
+				return;
+			}
+		}
+	}
+
+	ATTR_NODISCARD bool canTarget(const BattleState &state, const BattleTarget &source, const BattleTarget &candidate,
+								  const BattleRangeID rangeID)
+	{
+		// Centralize occupancy and range checks so every selector applies identical eligibility rules.
+		if (!targetExists(state, candidate))
+		{
+			return false;
+		}
+
+		// Unrestricted effects ignore formation adjacency but still require an existing target.
+		if (rangeID == BattleRangeID::Unrestricted)
+		{
+			return true;
+		}
+
+		// Restricted effects use each slot's battlefield position to determine reachability.
+		const BattleSlot &sourceSlot{activeSlots(state, source.mSide).at(source.mSlotIndex)};
+		const BattleSlot &candidateSlot{activeSlots(state, candidate.mSide).at(candidate.mSlotIndex)};
+
+		return isAdjacent(sourceSlot, candidateSlot);
+	}
+
+	void appendSide(std::vector<BattleTarget> &targets, const BattleState &state, const BattleTarget &source, const BattleRangeID rangeID,
+					const Side side)
+	{
+		// Append eligible slots in active-slot order to keep multi-target execution deterministic.
+		const std::vector<BattleSlot> &slots{activeSlots(state, side)};
+
+		for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+		{
+			const BattleTarget candidate{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)};
+
+			if (canTarget(state, source, candidate, rangeID))
+			{
+				targets.push_back(candidate);
+			}
+		}
+	}
+
+	ATTR_NODISCARD ATTR_PURE BattleResult getResult(const BattleState &state) noexcept
+	{
+		// Result derivation in stateless: inspect the current parties on every equery.
+		if (!state.mBattleStarted)
+		{
+			return BattleResult::NotStarted;
+		}
+
+		// A side remains in the battle while any party member is healthy, active, or reserve.
+		const bool sideAHealthy{sideHasHealthyPokemon(state, Side::A)};
+		const bool sideBHealthy{sideHasHealthyPokemon(state, Side::B)};
+
+		if (sideAHealthy && sideBHealthy)
+		{
+			return BattleResult::InProgress;
+		}
+
+		// Exactly one surviving side wins; simultaneous exhaustion is a draw.
+		if (sideAHealthy)
+		{
+			return BattleResult::SideAWon;
+		}
+
+		if (sideBHealthy)
+		{
+			return BattleResult::SideBWon;
+		}
+
+		return BattleResult::Draw;
+	}
+
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::vector<Pokemon *> &trainerParty)
+	{
+		// A fainted slot requires replacement only when this side has a healthy reserve available.
+		return std::ranges::any_of(
+			trainerParty, [side, &state](const Pokemon *pokemon) { return isHealthy(pokemon) && !isActive(state, side, pokemon); });
 	}
 } // namespace PocketCore::Battle
