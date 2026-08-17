@@ -125,6 +125,49 @@ namespace PocketCore::Battle
 		return {};
 	}
 
+	ATTR_NODISCARD const BattleState &BattleEngine::getState() const noexcept
+	{
+		return mState;
+	}
+
+	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::switchPokemon(const SwitchAction &action)
+	{
+		// During forced replacement, only slots listed as vacant/fainted may be replaced.
+		if (mPhase == BattlePhase::AwaitingReplacements
+			&& std::ranges::find(mRequiredReplacements, BattleTarget{.mSide = action.mSide, .mSlotIndex = action.mActiveSlotIndex})
+				   == mRequiredReplacements.end())
+		{
+			return std::unexpected{BattleEngineError::ReplacementRequired};
+		}
+
+		// Reuse normal switch validation for both voluntary switches and forced replacements.
+		const std::expected<void, BattleEngineError> validationResult{validateSwitchAction(mState, action)};
+
+		if (!validationResult.has_value())
+		{
+			return std::unexpected{validationResult.error()};
+		}
+
+		// Preserve the battlefield position while resetting all occupant-specific slot state.
+		std::vector<BattleSlot> &slots{activeSlots(mState, action.mSide)};
+		BattleSlot &slot{slots.at(action.mActiveSlotIndex)};
+		const ub position{slot.mPosition};
+
+		std::vector<Pokemon *> &trainerParty{party(mState, action.mSide)};
+		slot = BattleSlot{.mPokemon = trainerParty.at(action.mPartyIndex), .mPosition = position};
+
+		const BattleTarget battleTarget{.mSide = action.mSide, .mSlotIndex = action.mActiveSlotIndex};
+
+		// The new occupant can react immediately through ability and item switch-in triggers.
+		triggerSlot(battleTarget, BattleTriggerID::OnSwitchIn);
+		triggerSlot(battleTarget, BattleTriggerID::OnHazardSwitchIn);
+
+		// Switch-in effects may faint Pokemon or satisfy the final outstanding replacement.
+		processFaints();
+
+		return {};
+	}
+
 	ATTR_NODISCARD ATTR_PURE bool BattleEngine::isSuppressed(const EffectSource source, const BattleTarget &owner,
 															 const BattleTriggerID triggerID, const EffectContext &context) const noexcept
 	{

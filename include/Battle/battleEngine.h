@@ -81,6 +81,11 @@ namespace PocketCore::Battle
 																			  const std::span<Pokemon *const> &partyB,
 																			  ub activePokemonPerSide = 1U);
 
+			/*! @brief Returns the engine-owned battle state.
+				@return A read-only reference valid for the lifetime of the engine.
+			*/
+			ATTR_NODISCARD const BattleState &getState() const noexcept;
+
 		private:
 			/*! @enum SlotTriggerTargeting
 				@brief Selects how ability and item effects determine their recipients during slot-trigger dispatch.
@@ -109,6 +114,12 @@ namespace PocketCore::Battle
 					/*! @brief Identifies whether an ability, item, move, or other effect source established the rule. */
 					EffectSource mSource{EffectSource::None};
 			};
+
+			/*! @brief Switches one active slot immediately and runs switch-in triggers.
+				@param[in] action The active slot and incoming party member selected by a trainer.
+				@return Void on success, or a validation error without changing the active slot.
+			*/
+			ATTR_NODISCARD std::expected<void, BattleEngineError> switchPokemon(const SwitchAction &action);
 
 			/*! @brief Determines whether an active suppression rule blocks a trigger dispatch.
 				@details Matches source category, trigger, and optional metadata identifiers while excluding a rule from suppressing its own
