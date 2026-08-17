@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <expected>
 #include <span>
 #include <vector>
 
@@ -20,8 +21,10 @@
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "Move/moveMeta.h"
+#include "Registry/moveRegistry.h"
 
 #include "battleAction.h"
+#include "battleValidation.h"
 
 namespace PocketCore::Battle
 {
@@ -31,6 +34,7 @@ namespace PocketCore::Battle
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Effect::Side;
 	using PocketCore::Move::MoveMeta;
+	using PocketCore::Registry::Move::MoveRegistry;
 
 	ATTR_NODISCARD constexpr Side getOppositeSide(const Side side) noexcept
 	{
@@ -93,6 +97,55 @@ namespace PocketCore::Battle
 	ATTR_NODISCARD ATTR_PURE BattleResult getResult(const BattleState &state) noexcept;
 
 	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::vector<Pokemon *> &trainerParty);
+
+	/*! @brief Resolves the active targets selected by a move action.
+		@param[in] state The state of the battle.
+		@param[in] action The move action whose metadata supplies the target selector.
+		@param[in] moveRegistry The move registry to grab the move metadata from.
+		@return The selected active slots in deterministic side and slot order, or a validation error.
+	*/
+	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> getMoveTargets(const BattleState &state,
+																							  const MoveAction &action,
+																							  const MoveRegistry *moveRegistry);
+
+	/*! @brief Expands a target selector into concrete, eligible active slots.
+		@details Applies occupancy and formation-range checks and preserves deterministic side and active-slot ordering for
+	   multi-target selectors. A single-opponent selector requires an explicit eligible selection unless exactly one opponent is
+	   eligible.
+		@param[in] state The state of the battle.
+		@param[in] sourceSide The side containing the source slot.
+		@param[in] sourceSlotIndex The active-slot index of the source.
+		@param[in] targetID The selector that determines which sides and slots are considered.
+		@param[in] rangeID The formation range applied between the source and each candidate, or @ref BattleRangeID::Unrestricted.
+		@param[in] selectedTarget The optional explicit target used by selectors that require one.
+		@return The non-empty list of eligible targets, or @ref BattleEngineError::InvalidActiveSlot or @ref
+	   BattleEngineError::InvalidTarget.
+	*/
+	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> resolveTargets(
+		const BattleState &state, const Side sourceSide, const ub sourceSlotIndex, const BattleTargetID targetID,
+		const BattleRangeID rangeID, const std::optional<BattleTarget> &selectedTarget);
+
+	/*! @brief Validates whether a Pokemon can enter the selected active slot.
+		@details Checks the battle result, active and party indexes, incoming Pokemon health, and whether the incoming Pokemon is
+	   already active without mutating battle state.
+		@param[in] state The state of the battle.
+		@param[in] action The switch action to validate.
+		@return Void when the switch is valid, or the first applicable @ref BattleEngineError.
+	*/
+	ATTR_NODISCARD ATTR_PURE std::expected<void, BattleEngineError> validateSwitchAction(const BattleState &state,
+																						 const SwitchAction &action);
+
+	/*! @brief Validates whether a move action can be accepted in the current battle state.
+		@details Checks the battle phase and result, acting slot, move metadata, remaining PP, and target selection without mutating
+	   battle state.
+		@param[in] state The state of the battle.
+		@param[in] action The move action to validate.
+		@param[in] phase The phase of the battle.
+		@param[in] moveRegistry The move registry to grab the move metadata from.
+		@return Void when the action is valid, or the first applicable @ref BattleEngineError.
+	*/
+	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
+																			 const BattlePhase phase, const MoveRegistry *moveRegistry);
 } // namespace PocketCore::Battle
 
 #endif

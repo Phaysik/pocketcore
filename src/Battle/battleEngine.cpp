@@ -12,9 +12,11 @@
 #include <expected>
 #include <optional>
 #include <span>
+#include <vector>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
+#include "Battle/battleAction.h"
 #include "Battle/battleHelpers.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Battle/battleValidation.h"
@@ -25,6 +27,8 @@
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
+#include "Move/moveID.h"
+#include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
 
 namespace PocketCore::Battle
@@ -42,6 +46,9 @@ namespace PocketCore::Battle
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::NO_ITEM_ID;
+	using PocketCore::Move::MoveEffectTrigger;
+	using PocketCore::Move::MoveID;
+	using PocketCore::Move::MoveMeta;
 	using PocketCore::Pokemon::Pokemon;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
@@ -116,75 +123,6 @@ namespace PocketCore::Battle
 		processFaints();
 
 		return {};
-	}
-
-	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> BattleEngine::resolveTargets(
-		const Side sourceSide, const ub sourceSlotIndex, const BattleTargetID targetID, const BattleRangeID rangeID,
-		const std::optional<BattleTarget> &selectedTarget) const
-	{
-		// The source itself must identify a currently occupied active slot
-		const BattleTarget source{.mSide = sourceSide, .mSlotIndex = sourceSlotIndex};
-		if (!targetExists(mState, source))
-		{
-			return std::unexpected{BattleEngineError::InvalidActiveSlot};
-		}
-
-		std::vector<BattleTarget> targets{};
-
-		// Expand the move's target selector into concrete active-slot addresses.
-
-		switch (targetID)
-		{
-			case BattleTargetID::Self:
-				// Self always passed targetExists above and does not need a caller-provided selection.
-				targets.push_back(source);
-				break;
-			case BattleTargetID::SingleOpponent:
-				// A supplied selection must identify an eligible opponent.
-				if (selectedTarget.has_value())
-				{
-					if (selectedTarget->mSide != getOppositeSide(sourceSide) || !canTarget(mState, source, *selectedTarget, rangeID))
-					{
-						return std::unexpected{BattleEngineError::InvalidTarget};
-					}
-
-					targets.push_back(*selectedTarget);
-					break;
-				}
-
-				// Without a selection, implicit targeting is valid only when exactly one opponent is eligible.
-				appendSide(targets, mState, source, rangeID, getOppositeSide(sourceSide));
-
-				if (targets.size() != 1U)
-				{
-					return std::unexpected{BattleEngineError::InvalidTarget};
-				}
-
-				break;
-			case BattleTargetID::AllAllies:
-				// Ally-wide effects include the source.
-				appendSide(targets, mState, source, rangeID, sourceSide);
-				break;
-			case BattleTargetID::AllOpponents:
-				appendSide(targets, mState, source, rangeID, getOppositeSide(sourceSide));
-				break;
-			case BattleTargetID::AllExceptSelf:
-				appendSide(targets, mState, source, rangeID, Side::A);
-				appendSide(targets, mState, source, rangeID, Side::B);
-
-				std::erase(targets, source);
-				break;
-			default:
-				return std::unexpected{BattleEngineError::InvalidTarget};
-		}
-
-		// Selectors that produce no live, in-range slots are invalid rather than successful no-ops.
-		if (targets.empty())
-		{
-			return std::unexpected{BattleEngineError::InvalidTarget};
-		}
-
-		return targets;
 	}
 
 	ATTR_NODISCARD ATTR_PURE bool BattleEngine::isSuppressed(const EffectSource source, const BattleTarget &owner,
@@ -304,7 +242,7 @@ namespace PocketCore::Battle
 		};
 
 		// Ability and item effects are not constrained by move formation range.
-		const auto targets{resolveTargets(owner.mSide, owner.mSlotIndex, targetID, BattleRangeID::Unrestricted, selectedTarget)};
+		const auto targets{resolveTargets(mState, owner.mSide, owner.mSlotIndex, targetID, BattleRangeID::Unrestricted, selectedTarget)};
 
 		if (targets.has_value())
 		{
@@ -323,6 +261,31 @@ namespace PocketCore::Battle
 		context.mUserIndex = previousUserIndex;
 		context.mTargetSide = previousTargetSide;
 		context.mTargetIndex = previousTargetIndex;
+	}
+
+	void BattleEngine::executeMoveTrigger(const MoveMeta &moveMeta, BattleTriggerID triggerID, EffectContext &context)
+	{
+		// Save the caller's source because nested trigger dispatch reuses the same context.
+		const EffectSource previousSource{context.mSourceType};
+		const BattleTarget owner{.mSide = context.mUserSide, .mSlotIndex = context.mUserIndex};
+		context.mSourceType = EffectSource::Move;
+
+		// Execute every metadata entry matching this move trigger in declaration order.
+		std::ranges::for_each(moveMeta.mTriggers, [this, triggerID, &owner, &context](const MoveEffectTrigger &trigger) {
+			if (trigger.mTrigger == triggerID)
+			{
+				// A trigger's suppression rules become visible before deciding whether its effects are suppressed.
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Move, owner);
+
+				if (!isSuppressed(EffectSource::Move, owner, triggerID, context))
+				{
+					executeEffects(trigger.mEffects, context);
+				}
+			}
+		});
+
+		// Restore the outer source so subsequent dispatch observes the context it received.
+		context.mSourceType = previousSource;
 	}
 
 	void BattleEngine::executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleTriggerID triggerID,

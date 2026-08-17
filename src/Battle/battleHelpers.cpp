@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <expected>
 #include <limits>
 #include <type_traits>
 #include <variant>
@@ -17,8 +18,10 @@
 #include "Effect/effectContext.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Move/moveHitPolicy.h"
+#include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Registry/moveRegistry.h"
 #include "Utility/random.h"
 
 namespace PocketCore::Battle
@@ -36,6 +39,7 @@ namespace PocketCore::Battle
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Utility::Random;
 
 #if defined(ATTR_GCC) && !defined(ATTR_CLANG)
@@ -335,5 +339,222 @@ namespace PocketCore::Battle
 		// A fainted slot requires replacement only when this side has a healthy reserve available.
 		return std::ranges::any_of(
 			trainerParty, [side, &state](const Pokemon *pokemon) { return isHealthy(pokemon) && !isActive(state, side, pokemon); });
+	}
+
+	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> getMoveTargets(const BattleState &state,
+																							  const MoveAction &action,
+																							  const MoveRegistry *moveRegistry)
+	{
+		// Validate only the action fields required to locate the move and its targeting metadata.
+		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+		const BattleSlot &userSlot{slots.at(action.mUserSlotIndex)};
+
+		if (!state.mBattleStarted || action.mUserSlotIndex >= slots.size() || !isHealthy(userSlot))
+		{
+			return std::unexpected{BattleEngineError::InvalidActiveSlot};
+		}
+
+		// Guard the fixed move array before retrieving the selected move ID.
+		if (action.mMoveSlotIndex >= userSlot.mPokemon->getMovesArray().size())
+		{
+			return std::unexpected{BattleEngineError::InvalidMoveSlot};
+		}
+
+		// Missing metadata makes the move unusable even when a move ID occupoed the selected slot.
+		const MoveID moveID{userSlot.mPokemon->getMoveID(action.mMoveSlotIndex)};
+		const MoveMeta *moveMeta{moveRegistry->getMoveMetadata(moveID)};
+
+		if (moveMeta == nullptr)
+		{
+			return std::unexpected{BattleEngineError::MoveNotFound};
+		}
+
+		// Delegate selector semantics and range filtering to the common target resolver.
+		return resolveTargets(state, action.mSide, action.mUserSlotIndex, moveMeta->mTargetID, moveMeta->mRangeID, action.mSelectedTarget);
+	}
+
+	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> resolveTargets(
+		const BattleState &state, const Side sourceSide, const ub sourceSlotIndex, const BattleTargetID targetID,
+		const BattleRangeID rangeID, const std::optional<BattleTarget> &selectedTarget)
+	{
+		// The source itself must identify a currently occupied active slot
+		const BattleTarget source{.mSide = sourceSide, .mSlotIndex = sourceSlotIndex};
+		if (!targetExists(state, source))
+		{
+			return std::unexpected{BattleEngineError::InvalidActiveSlot};
+		}
+
+		std::vector<BattleTarget> targets{};
+
+		// Expand the move's target selector into concrete active-slot addresses.
+
+		switch (targetID)
+		{
+			case BattleTargetID::Self:
+				// Self always passed targetExists above and does not need a caller-provided selection.
+				targets.push_back(source);
+				break;
+			case BattleTargetID::SingleOpponent:
+				// A supplied selection must identify an eligible opponent.
+				if (selectedTarget.has_value())
+				{
+					if (selectedTarget->mSide != getOppositeSide(sourceSide) || !canTarget(state, source, *selectedTarget, rangeID))
+					{
+						return std::unexpected{BattleEngineError::InvalidTarget};
+					}
+
+					targets.push_back(*selectedTarget);
+					break;
+				}
+
+				// Without a selection, implicit targeting is valid only when exactly one opponent is eligible.
+				appendSide(targets, state, source, rangeID, getOppositeSide(sourceSide));
+
+				if (targets.size() != 1U)
+				{
+					return std::unexpected{BattleEngineError::InvalidTarget};
+				}
+
+				break;
+			case BattleTargetID::AllAllies:
+				// Ally-wide effects include the source.
+				appendSide(targets, state, source, rangeID, sourceSide);
+				break;
+			case BattleTargetID::AllOpponents:
+				appendSide(targets, state, source, rangeID, getOppositeSide(sourceSide));
+				break;
+			case BattleTargetID::AllExceptSelf:
+				appendSide(targets, state, source, rangeID, Side::A);
+				appendSide(targets, state, source, rangeID, Side::B);
+
+				std::erase(targets, source);
+				break;
+			default:
+				return std::unexpected{BattleEngineError::InvalidTarget};
+		}
+
+		// Selectors that produce no live, in-range slots are invalid rather than successful no-ops.
+		if (targets.empty())
+		{
+			return std::unexpected{BattleEngineError::InvalidTarget};
+		}
+
+		return targets;
+	}
+
+	ATTR_NODISCARD ATTR_PURE std::expected<void, BattleEngineError> validateSwitchAction(const BattleState &state, const SwitchAction &action)
+	{
+		// Switching requires an initialized battle and an undecided result.
+		if (!state.mBattleStarted)
+		{
+			return std::unexpected{BattleEngineError::BattleNotStarted};
+		}
+
+		if (getResult(state) != BattleResult::InProgress)
+		{
+			return std::unexpected{BattleEngineError::BattleFinished};
+		}
+
+		// Verify the outgoing battlefield slot befor indexing the active side.
+		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+
+		if (action.mActiveSlotIndex >= slots.size())
+		{
+			return std::unexpected{BattleEngineError::InvalidActiveSlot};
+		}
+
+		// Verify the incoming party index independently because party and active-slot indexes are unrelated.
+		const std::vector<Pokemon *> &trainerParty{party(state, action.mSide)};
+
+		if (action.mPartyIndex >= trainerParty.size())
+		{
+			return std::unexpected{BattleEngineError::InvalidPartyIndex};
+		}
+
+		Pokemon *incomingPokemon{trainerParty.at(action.mPartyIndex)};
+
+		// Fainted reserves cannot be switched into battle.
+		if (!isHealthy(incomingPokemon))
+		{
+			return std::unexpected{BattleEngineError::PokemonFainted};
+		}
+
+		// Prevent one Pokemon from occupying two active slots or switching into its current slot.
+		if (isActive(state, action.mSide, incomingPokemon))
+		{
+			return std::unexpected{BattleEngineError::PokemonAlreadyActive};
+		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
+																			 const BattlePhase phase, const MoveRegistry *moveRegistry)
+	{
+		// Move actions are meaningful only after a battle has successfully started.
+		if (!state.mBattleStarted)
+		{
+			return std::unexpected{BattleEngineError::BattleNotStarted};
+		}
+
+		// Forced replacements must be resolved before either trainer can submit another move.
+		if (phase == BattlePhase::AwaitingReplacements)
+		{
+			return std::unexpected{BattleEngineError::ReplacementRequired};
+		}
+
+		// No action may mutate a battle whose result has already been decided.
+		if (getResult(state) != BattleResult::InProgress)
+		{
+			return std::unexpected{BattleEngineError::BattleFinished};
+		}
+
+		// Resolve the acting slot on the action's side and reject out-of-range indexes before access.
+		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+
+		if (action.mUserSlotIndex >= slots.size())
+		{
+			return std::unexpected{BattleEngineError::InvalidActiveSlot};
+		}
+
+		const BattleSlot &userSlot{slots.at(action.mUserSlotIndex)};
+
+		// A fainted active Pokemon remains in its slot until replacement, but it cannot act.
+		if (!isHealthy(userSlot))
+		{
+			return std::unexpected{BattleEngineError::PokemonFainted};
+		}
+
+		// The selected move slot must exist in the Pokemon's fixed move array.
+		const Pokemon *userPokemon{userSlot.mPokemon};
+
+		if (action.mMoveSlotIndex >= userPokemon->getMovesArray().size())
+		{
+			return std::unexpected{BattleEngineError::InvalidMoveSlot};
+		}
+
+		// A move is usable only when its ID is assigned and resolves to registered metadata.
+		const MoveID moveID{userPokemon->getMoveID(action.mMoveSlotIndex)};
+
+		if (moveID == Move::NO_MOVE_ID && moveRegistry->getMoveMetadata(moveID) == nullptr)
+		{
+			return std::unexpected{BattleEngineError::MoveNotFound};
+		}
+
+		// PP is checked during validation and consumed later only when the move actually executes.
+		if (userPokemon->getCurrentPP(action.mMoveSlotIndex) == 0U)
+		{
+			return std::unexpected{BattleEngineError::NoPP};
+		}
+
+		// Resolve targets now so malformed or ambiguous selections fail before turn state is mutated.
+		const std::expected<std::vector<BattleTarget>, BattleEngineError> targets{getMoveTargets(state, action, moveRegistry)};
+
+		if (!targets.has_value())
+		{
+			return std::unexpected{targets.error()};
+		}
+
+		return {};
 	}
 } // namespace PocketCore::Battle

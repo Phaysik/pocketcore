@@ -21,10 +21,12 @@
 #include "Effect/effectContext.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemMeta.h"
+#include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
 
+#include "battleAction.h"
 #include "battleHelpers.h"
 #include "battleState.h"
 #include "battleTargetsAndTriggers.h"
@@ -39,6 +41,7 @@ namespace PocketCore::Battle
 	using PocketCore::Effect::EffectSource;
 	using PocketCore::Effect::SuppressionRule;
 	using PocketCore::Item::ItemMeta;
+	using PocketCore::Move::MoveMeta;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
@@ -107,22 +110,6 @@ namespace PocketCore::Battle
 					EffectSource mSource{EffectSource::None};
 			};
 
-			/*! @brief Expands a target selector into concrete, eligible active slots.
-				@details Applies occupancy and formation-range checks and preserves deterministic side and active-slot ordering for
-			   multi-target selectors. A single-opponent selector requires an explicit eligible selection unless exactly one opponent is
-			   eligible.
-				@param[in] sourceSide The side containing the source slot.
-				@param[in] sourceSlotIndex The active-slot index of the source.
-				@param[in] targetID The selector that determines which sides and slots are considered.
-				@param[in] rangeID The formation range applied between the source and each candidate, or @ref BattleRangeID::Unrestricted.
-				@param[in] selectedTarget The optional explicit target used by selectors that require one.
-				@return The non-empty list of eligible targets, or @ref BattleEngineError::InvalidActiveSlot or @ref
-			   BattleEngineError::InvalidTarget.
-			*/
-			ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> resolveTargets(
-				const Side sourceSide, const ub sourceSlotIndex, const BattleTargetID targetID, const BattleRangeID rangeID,
-				const std::optional<BattleTarget> &selectedTarget) const;
-
 			/*! @brief Determines whether an active suppression rule blocks a trigger dispatch.
 				@details Matches source category, trigger, and optional metadata identifiers while excluding a rule from suppressing its own
 			   source on its owning slot.
@@ -185,6 +172,15 @@ namespace PocketCore::Battle
 			*/
 			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID,
 										const std::span<const BuiltinEffectID> &effects, EffectContext &context);
+
+			/*! @brief Executes every move metadata entry matching a trigger.
+				@details Temporarily marks the context source as a move, activates each entry's suppression rules before suppression checks,
+			   and restores the caller's source category afterward.
+				@param[in] moveMeta The move metadata containing trigger entries.
+				@param[in] triggerID The move trigger to dispatch.
+				@param[in,out] context The shared context supplied to matching effects.
+			*/
+			void executeMoveTrigger(const MoveMeta &moveMeta, BattleTriggerID triggerID, EffectContext &context);
 
 			/*! @brief Executes unsuppressed ability entries matching a trigger.
 				@details Stamps ability identity into @p context and either resolves the ability's declared targets or executes effects
