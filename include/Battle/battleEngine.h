@@ -84,7 +84,7 @@ namespace PocketCore::Battle
 			/*! @brief Returns the engine-owned battle state.
 				@return A read-only reference valid for the lifetime of the engine.
 			*/
-			ATTR_NODISCARD const BattleState &getState() const noexcept;
+			ATTR_NODISCARD ATTR_CONST const BattleState &getState() const noexcept;
 
 		private:
 			/*! @enum SlotTriggerTargeting

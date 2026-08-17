@@ -125,10 +125,20 @@ namespace PocketCore::Battle
 		return {};
 	}
 
-	ATTR_NODISCARD const BattleState &BattleEngine::getState() const noexcept
+#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
+#endif
+
+	ATTR_NODISCARD ATTR_CONST const BattleState &BattleEngine::getState() const noexcept
 	{
 		return mState;
 	}
+
+#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+	#pragma GCC diagnostic pop
+#endif
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::switchPokemon(const SwitchAction &action)
 	{
