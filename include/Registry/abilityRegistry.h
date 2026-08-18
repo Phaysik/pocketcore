@@ -31,11 +31,13 @@ namespace PocketCore::Registry::Ability
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_ABILITIES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class AbilityRegistry Registry/abilityRegistry.h
 		@brief Stores built-in and user-defined ability metadata in fixed-capacity storage.
@@ -47,11 +49,10 @@ namespace PocketCore::Registry::Ability
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class AbilityRegistry
-		: private PocketCore::Registry::FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
+	class AbilityRegistry : private FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>;
+			using Base = FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
@@ -65,13 +66,13 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::Flinch}, .mTrigger = BattleTriggerID::OnSuccessfulHit}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::Flinch}, .mTrigger = BattleEventID::Hit, .mRole = BattleEventRole::User}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
-					.mTargetID = BattleTargetID::AllOpponents,
+					.mTargetID = BattleTargetID::SingleOpponent,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::SetRain}, .mTrigger = BattleTriggerID::OnSwitchIn}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::SetRain}, .mTrigger = BattleEventID::SwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 					.mTargetID = BattleTargetID::Self,

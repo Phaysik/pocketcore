@@ -31,6 +31,7 @@ namespace PocketCore::Registry::Types
 	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Types::BuiltInTypeID;
 	using PocketCore::Types::toTypeID;
 	using PocketCore::Types::TypeID;
@@ -58,11 +59,10 @@ namespace PocketCore::Registry::Types
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
 	*/
-	class TypeRegistry
-		: private PocketCore::Registry::FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>
+	class TypeRegistry : private FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>
 	{
 		public:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>;
+			using Base = FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>;
 
 			// MARK: Constructor
 

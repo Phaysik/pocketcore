@@ -27,9 +27,10 @@
 
 namespace PocketCore::Registry::Move
 {
+	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleRangeID;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_MOVES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
@@ -39,9 +40,9 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;
-	using PocketCore::Types::toTypeID;
-
+	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Types::BuiltInTypeID;
+	using PocketCore::Types::toTypeID;
 
 	/*! @class MoveRegistry Registry/moveRegistry.h
 		@brief Stores built-in and user-defined move metadata in fixed-capacity storage.
@@ -54,10 +55,10 @@ namespace PocketCore::Registry::Move
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class MoveRegistry : private PocketCore::Registry::FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
+	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>;
+			using Base = FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
@@ -70,11 +71,13 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 					    .mEffects = {BuiltinEffectID::AccuracyCheck},
-					    .mTrigger = BattleTriggerID::BeforeHit,
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
 					},
 					{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = BattleTriggerID::OnHit,
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
@@ -89,11 +92,13 @@ namespace PocketCore::Registry::Move
 				addBuiltin({
 					.mTriggers = {{
 					    .mEffects = {BuiltinEffectID::AccuracyCheck},
-					    .mTrigger = BattleTriggerID::BeforeHit,
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
 					},
 					{
 						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
-						.mTrigger = BattleTriggerID::OnHit,
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),

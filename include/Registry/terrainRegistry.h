@@ -28,6 +28,7 @@ namespace PocketCore::Registry::Terrain
 	using PocketCore::Configuration::MAX_TERRAINS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Terrain::BuiltinTerrainID;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Terrain::TerrainMeta;
@@ -43,11 +44,10 @@ namespace PocketCore::Registry::Terrain
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class TerrainRegistry
-		: private PocketCore::Registry::FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
+	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>;
+			using Base = FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway

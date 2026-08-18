@@ -13,7 +13,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Battle::BattleTriggerID;
+using PocketCore::Battle::BattleEventID;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
@@ -51,7 +51,7 @@ SCENARIO("ItemRegistry")
 			const ItemMeta *metadata{registry.getItemMetadata(toItemID(BuiltinItemID::ChestoBerry))};
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 1U));
-			CHECK((metadata->mTriggers.front().mTrigger == BattleTriggerID::OnTurnEnd));
+			CHECK((metadata->mTriggers.front().mTrigger == BattleEventID::TurnEnd));
 			REQUIRE((metadata->mTriggers.front().mEffects.size() == 1U));
 			CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::StatusRemove));
 		}

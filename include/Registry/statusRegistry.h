@@ -28,6 +28,7 @@ namespace PocketCore::Registry::Status
 	using PocketCore::Configuration::MAX_STATUSES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusInteractionAction;
@@ -44,10 +45,10 @@ namespace PocketCore::Registry::Status
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class StatusRegistry : private PocketCore::Registry::FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
+	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>;
+			using Base = FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway

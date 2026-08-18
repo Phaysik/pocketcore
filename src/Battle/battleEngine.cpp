@@ -9,16 +9,20 @@
 #include "Battle/battleEngine.h"
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <expected>
 #include <optional>
 #include <span>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Battle/battleAction.h"
 #include "Battle/battleHelpers.h"
+#include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Battle/battleValidation.h"
 #include "Core/attributeMacros.h"
@@ -115,8 +119,8 @@ namespace PocketCore::Battle
 			{
 				const BattleTarget owner{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)};
 
-				triggerSlot(owner, BattleTriggerID::OnBattleStart);
-				triggerSlot(owner, BattleTriggerID::OnSwitchIn);
+				triggerSlot(owner, BattleEventID::BattleStart);
+				triggerSlot(owner, BattleEventID::SwitchIn);
 			}
 		}
 
@@ -289,8 +293,7 @@ namespace PocketCore::Battle
 		const BattleTarget battleTarget{.mSide = action.mSide, .mSlotIndex = action.mActiveSlotIndex};
 
 		// The new occupant can react immediately through ability and item switch-in triggers.
-		triggerSlot(battleTarget, BattleTriggerID::OnSwitchIn);
-		triggerSlot(battleTarget, BattleTriggerID::OnHazardSwitchIn);
+		triggerSlot(battleTarget, BattleEventID::SwitchIn);
 
 		// Switch-in effects may faint Pokemon or satisfy the final outstanding replacement.
 		processFaints();
@@ -299,10 +302,11 @@ namespace PocketCore::Battle
 	}
 
 	ATTR_NODISCARD ATTR_PURE bool BattleEngine::isSuppressed(const EffectSource source, const BattleTarget &owner,
-															 const BattleTriggerID triggerID, const EffectContext &context) const noexcept
+															 const BattleEventID eventID, const BattleEventRole role,
+															 const EffectContext &context) const noexcept
 	{
 		// A trigger is suppressed when any active rule matches its source, trigger, and optional metadata ID.
-		return std::ranges::any_of(mActiveSuppressions, [source, &owner, triggerID, &context](const ActiveSuppression &suppression) {
+		return std::ranges::any_of(mActiveSuppressions, [source, &owner, eventID, role, &context](const ActiveSuppression &suppression) {
 			const SuppressionRule &rule{suppression.mRule};
 
 			// A source never suppresses its own trigger on the slot that established the rule.
@@ -312,7 +316,8 @@ namespace PocketCore::Battle
 			}
 
 			// Rules for a different source category or trigger cannot affect this dispatch.
-			if (rule.mTargetSource != source || rule.mTargetTrigger != triggerID)
+			if (rule.mTargetSource != source || rule.mTargetTrigger != eventID
+				|| (rule.mTargetRole != BattleEventRole::Any && rule.mTargetRole != role))
 			{
 				return false;
 			}
@@ -349,23 +354,24 @@ namespace PocketCore::Battle
 		});
 	}
 
-	void BattleEngine::activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner,
-												   const BattleTriggerID triggerID)
+	void BattleEngine::activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleEventID eventID,
+												   const BattleEventRole role)
 	{
 		// Only suppression rules attached to the trigger currently being dispatched become active.
-		std::ranges::for_each(abilityMeta.mTriggers, [this, triggerID, &owner](const AbilityEffectTrigger &trigger) {
-			if (trigger.mTrigger == triggerID)
+		std::ranges::for_each(abilityMeta.mTriggers, [this, eventID, role, &owner](const AbilityEffectTrigger &trigger) {
+			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Ability, owner);
 			}
 		});
 	}
 
-	void BattleEngine::activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleTriggerID triggerID)
+	void BattleEngine::activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
+												const BattleEventRole role)
 	{
 		// Item suppression activation mirrors ability activation to preserve source-specific ownership.
-		std::ranges::for_each(itemMeta.mTriggers, [this, triggerID, &owner](const ItemEffectTrigger &trigger) {
-			if (trigger.mTrigger == triggerID)
+		std::ranges::for_each(itemMeta.mTriggers, [this, eventID, role, &owner](const ItemEffectTrigger &trigger) {
+			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Item, owner);
 			}
@@ -446,7 +452,8 @@ namespace PocketCore::Battle
 		}
 	}
 
-	void BattleEngine::executeMoveTrigger(const MoveMeta &moveMeta, BattleTriggerID triggerID, EffectContext &context)
+	void BattleEngine::executeMoveTrigger(const MoveMeta &moveMeta, const BattleEventID eventID, const BattleEventRole role,
+										  EffectContext &context)
 	{
 		// Save the caller's source because nested trigger dispatch reuses the same context.
 		const EffectSource previousSource{context.mSourceType};
@@ -454,13 +461,13 @@ namespace PocketCore::Battle
 		context.mSourceType = EffectSource::Move;
 
 		// Execute every metadata entry matching this move trigger in declaration order.
-		std::ranges::for_each(moveMeta.mTriggers, [this, triggerID, &owner, &context](const MoveEffectTrigger &trigger) {
-			if (trigger.mTrigger == triggerID)
+		std::ranges::for_each(moveMeta.mTriggers, [this, eventID, role, &owner, &context](const MoveEffectTrigger &trigger) {
+			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				// A trigger's suppression rules become visible before deciding whether its effects are suppressed.
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Move, owner);
 
-				if (!isSuppressed(EffectSource::Move, owner, triggerID, context))
+				if (!isSuppressed(EffectSource::Move, owner, eventID, role, context))
 				{
 					executeEffects(trigger.mEffects, context);
 				}
@@ -471,8 +478,8 @@ namespace PocketCore::Battle
 		context.mSourceType = previousSource;
 	}
 
-	void BattleEngine::executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleTriggerID triggerID,
-											 EffectContext &context, const bool targetEffects)
+	void BattleEngine::executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleEventID eventID,
+											 const BattleEventRole role, EffectContext &context, const bool targetEffects)
 	{
 		// Stamp source identity into the shared context for suppression matching and effect behavior.
 		context.mAbilityID = abilityMeta.mAbilityID;
@@ -481,7 +488,8 @@ namespace PocketCore::Battle
 		// Dispatch matching, unsuppressed trigger entries in metadata order.
 		for (const AbilityEffectTrigger &trigger : abilityMeta.mTriggers)
 		{
-			if (trigger.mTrigger != triggerID || isSuppressed(EffectSource::Ability, owner, triggerID, context))
+			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
+				|| isSuppressed(EffectSource::Ability, owner, eventID, role, context))
 			{
 				continue;
 			}
@@ -499,8 +507,8 @@ namespace PocketCore::Battle
 		}
 	}
 
-	void BattleEngine::executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleTriggerID triggerID,
-										  EffectContext &context, const bool targetEffects)
+	void BattleEngine::executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleEventID eventID,
+										  const BattleEventRole role, EffectContext &context, const bool targetEffects)
 	{
 		// Stamp source identity into the shared context for suppression matching and effect behavior.
 		context.mItemID = itemMeta.mItemID;
@@ -509,7 +517,8 @@ namespace PocketCore::Battle
 		// Dispatch matching, unsuppressed trigger entries in metadata order.
 		for (const ItemEffectTrigger &trigger : itemMeta.mTriggers)
 		{
-			if (trigger.mTrigger != triggerID || isSuppressed(EffectSource::Item, owner, triggerID, context))
+			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
+				|| isSuppressed(EffectSource::Item, owner, eventID, role, context))
 			{
 				continue;
 			}
@@ -537,14 +546,14 @@ namespace PocketCore::Battle
 			{
 				if (isHealthy(slots.at(slotIndex)))
 				{
-					triggerSlot(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)}, BattleTriggerID::OnTurnEnd);
+					triggerSlot(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)}, BattleEventID::TurnEnd);
 				}
 			}
 		}
 	}
 
-	void BattleEngine::triggerSlot(const BattleTarget &owner, const BattleTriggerID triggerID,
-								   const std::optional<BattleTarget> &eventTarget)
+	void BattleEngine::triggerSlot(const BattleTarget &owner, const BattleEventID eventID, const std::optional<BattleTarget> &eventTarget,
+								   const BattleEventRole role)
 	{
 		// Standalone slot triggers being with a fresh suppression scope
 		mActiveSuppressions.clear();
@@ -562,11 +571,12 @@ namespace PocketCore::Battle
 		context.mTargetIndex = eventTarget.has_value() ? eventTarget->mSlotIndex : owner.mSlotIndex;
 
 		// Dispatch ability and item hooks, then end the standalone suppression scope.
-		triggerSlotInContext(owner, triggerID, context);
+		triggerSlotInContext(owner, eventID, context, role);
 		mActiveSuppressions.clear();
 	}
 
-	void BattleEngine::triggerSlotInContext(const BattleTarget &owner, const BattleTriggerID triggerID, EffectContext &context)
+	void BattleEngine::triggerSlotInContext(const BattleTarget &owner, const BattleEventID eventID, EffectContext &context,
+											const BattleEventRole role)
 	{
 		// Ignore stale targets that were removed by an earlier nested effect.
 		if (!targetExists(mState, owner))
@@ -576,11 +586,11 @@ namespace PocketCore::Battle
 
 		// Resolve the current occupant's ability and item metadata, allowin either source to be absent.
 		Pokemon *pokemon{activeSlots(mState, owner.mSide).at(owner.mSlotIndex).mPokemon};
-		dispatchSlotSources(owner, pokemon, triggerID, context, SlotTriggerTargeting::ResolveMetadataTargets);
+		dispatchSlotSources(owner, pokemon, eventID, role, context, SlotTriggerTargeting::ResolveMetadataTargets);
 	}
 
-	void BattleEngine::dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleTriggerID triggerID,
-										   EffectContext &context, const SlotTriggerTargeting targeting)
+	void BattleEngine::dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
+										   const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting)
 	{
 		// Resolve the occupant's ability and item metadata, allowing either source to be absent.
 		// Preserve the outer source across nested ability and item trigger dispatch.
@@ -595,12 +605,12 @@ namespace PocketCore::Battle
 		// Activate all relevant suppression rules before executing either source's effects.
 		if (abilityMeta != nullptr)
 		{
-			activateAbilitySuppressions(*abilityMeta, owner, triggerID);
+			activateAbilitySuppressions(*abilityMeta, owner, eventID, role);
 		}
 
 		if (itemMeta != nullptr)
 		{
-			activateItemSuppressions(*itemMeta, owner, triggerID);
+			activateItemSuppressions(*itemMeta, owner, eventID, role);
 		}
 
 		// Ability effects execute before item effects for the same slot and trigger.
@@ -608,12 +618,12 @@ namespace PocketCore::Battle
 
 		if (abilityMeta != nullptr)
 		{
-			executeAbilityTrigger(owner, *abilityMeta, triggerID, context, targetEffects);
+			executeAbilityTrigger(owner, *abilityMeta, eventID, role, context, targetEffects);
 		}
 
 		if (itemMeta != nullptr)
 		{
-			executeItemTrigger(owner, *itemMeta, triggerID, context, targetEffects);
+			executeItemTrigger(owner, *itemMeta, eventID, role, context, targetEffects);
 		}
 
 		// Return source ownership to the caller's trigger context.
@@ -716,7 +726,8 @@ namespace PocketCore::Battle
 		}
 
 		// Faint effects preserve the event coordinates instead of resolving metadata target selectors.
-		dispatchSlotSources(faintedTarget, faintedPokemon, BattleTriggerID::OnFaint, context, SlotTriggerTargeting::PreserveContextTarget);
+		dispatchSlotSources(faintedTarget, faintedPokemon, BattleEventID::Faint, BattleEventRole::Any, context,
+							SlotTriggerTargeting::PreserveContextTarget);
 	}
 
 } // namespace PocketCore::Battle

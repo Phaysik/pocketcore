@@ -140,7 +140,8 @@ namespace PocketCore::Battle
 				@return True when at least one active rule suppresses the dispatch; otherwise false.
 			*/
 			ATTR_NODISCARD ATTR_PURE bool isSuppressed(const EffectSource source, const BattleTarget &owner,
-													   const BattleTriggerID triggerID, const EffectContext &context) const noexcept;
+													   const BattleEventID eventID, const BattleEventRole role,
+													   const EffectContext &context) const noexcept;
 
 			/*! @brief Adds metadata suppression rules to the current dispatch scope.
 				@details Copies at most the smaller of @p suppressionRuleCount and @p suppressionRules.size(), associating every copied rule
@@ -158,14 +159,16 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the ability.
 				@param[in] triggerID The trigger whose suppression rules become active.
 			*/
-			void activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleTriggerID triggerID);
+			void activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleEventID eventID,
+											 const BattleEventRole role);
 
 			/*! @brief Activates suppression rules from item entries matching a trigger.
 				@param[in] itemMeta The item metadata whose matching trigger entries are inspected.
 				@param[in] owner The active slot that owns the item.
 				@param[in] triggerID The trigger whose suppression rules become active.
 			*/
-			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleTriggerID triggerID);
+			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
+										  const BattleEventRole role);
 
 			/*! @brief Invokes one registered built-in effect against the mutable battle state and context.
 				@details Missing registry dependencies, missing effect metadata, or a null apply function make the invocation a no-op.
@@ -208,7 +211,7 @@ namespace PocketCore::Battle
 				@param[in] triggerID The move trigger to dispatch.
 				@param[in,out] context The shared context supplied to matching effects.
 			*/
-			void executeMoveTrigger(const MoveMeta &moveMeta, BattleTriggerID triggerID, EffectContext &context);
+			void executeMoveTrigger(const MoveMeta &moveMeta, BattleEventID eventID, BattleEventRole role, EffectContext &context);
 
 			/*! @brief Executes unsuppressed ability entries matching a trigger.
 				@details Stamps ability identity into @p context and either resolves the ability's declared targets or executes effects
@@ -219,8 +222,8 @@ namespace PocketCore::Battle
 				@param[in,out] context The context stamped with the ability source and passed to matching effects.
 				@param[in] targetEffects True to resolve the ability target selector; false to preserve the existing event target.
 			*/
-			void executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleTriggerID triggerID,
-									   EffectContext &context, const bool targetEffects);
+			void executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleEventID eventID,
+									   const BattleEventRole role, EffectContext &context, const bool targetEffects);
 
 			/*! @brief Executes unsuppressed item entries matching a trigger.
 				@details Stamps item identity into @p context and either resolves the item's declared targets or executes effects directly
@@ -231,8 +234,8 @@ namespace PocketCore::Battle
 				@param[in,out] context The context stamped with the item source and passed to matching effects.
 				@param[in] targetEffects True to resolve the item target selector; false to preserve the existing event target.
 			*/
-			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleTriggerID triggerID,
-									EffectContext &context, const bool targetEffects);
+			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleEventID eventID,
+									const BattleEventRole role, EffectContext &context, const bool targetEffects);
 
 			void executeEndTurnTrigger();
 
@@ -241,8 +244,9 @@ namespace PocketCore::Battle
 				@param[in] triggerID The trigger to dispatch.
 				@param[in] eventTarget The optional event recipient used to initialize target coordinates; defaults to @p owner.
 			*/
-			void triggerSlot(const BattleTarget &owner, const BattleTriggerID triggerID,
-							 const std::optional<BattleTarget> &eventTarget = std::nullopt);
+			void triggerSlot(const BattleTarget &owner, const BattleEventID eventID,
+							 const std::optional<BattleTarget> &eventTarget = std::nullopt,
+							 BattleEventRole role = BattleEventRole::Any);
 
 			/*! @brief Dispatches an ability-and-item trigger through an existing effect context.
 				@details Activates all matching ability and item suppression rules before executing ability effects followed by item
@@ -251,7 +255,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The trigger to dispatch.
 				@param[in,out] context The existing event or move context shared by the dispatched sources.
 			*/
-			void triggerSlotInContext(const BattleTarget &owner, const BattleTriggerID triggerID, EffectContext &context);
+			void triggerSlotInContext(const BattleTarget &owner, const BattleEventID eventID, EffectContext &context,
+									  BattleEventRole role = BattleEventRole::Any);
 
 			/*! @brief Dispatches an occupant's ability and item sources through an existing effect context.
 				@details Resolves source metadata, activates matching suppression rules, executes ability effects before item effects, and
@@ -263,8 +268,8 @@ namespace PocketCore::Battle
 				@param[in,out] context The event or move context shared by the dispatched sources.
 				@param[in] targeting Selects metadata target resolution or preservation of the context's existing target.
 			*/
-			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleTriggerID triggerID,
-									 EffectContext &context, const SlotTriggerTargeting targeting);
+			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
+									 const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting);
 
 			/*! @brief Dispatches faint triggers once for each newly fainted active occupant.
 				@details Marks each faint before dispatch to prevent recursive duplicate processing, then recomputes the battle phase and

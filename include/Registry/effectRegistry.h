@@ -46,8 +46,8 @@
 
 namespace PocketCore::Registry::Effect
 {
+	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_EFFECTS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::applyAccuracyCheck;
@@ -75,6 +75,7 @@ namespace PocketCore::Registry::Effect
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
 	using PocketCore::Effect::toEffectID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class EffectRegistry Registry/effectRegistry.h
 		@brief Stores built-in and user-defined effect metadata in fixed-capacity storage.
@@ -86,10 +87,10 @@ namespace PocketCore::Registry::Effect
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class EffectRegistry : private PocketCore::Registry::FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
+	class EffectRegistry : private FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>;
+			using Base = FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway

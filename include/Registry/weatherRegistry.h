@@ -28,6 +28,7 @@ namespace PocketCore::Registry::Weather
 	using PocketCore::Configuration::MAX_WEATHERS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
 	using PocketCore::Weather::WeatherID;
@@ -43,11 +44,10 @@ namespace PocketCore::Registry::Weather
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class WeatherRegistry
-		: private PocketCore::Registry::FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
+	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>;
+			using Base = FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway

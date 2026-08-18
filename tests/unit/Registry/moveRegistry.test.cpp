@@ -13,7 +13,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Battle::BattleTriggerID;
+using PocketCore::Battle::BattleEventID;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
@@ -52,7 +52,7 @@ SCENARIO("MoveRegistry")
 			const MoveMeta *metadata{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Pound))};
 			REQUIRE((metadata != nullptr));
 			REQUIRE((metadata->mTriggers.size() == 2U));
-			CHECK((metadata->mTriggers.at(1).mTrigger == BattleTriggerID::OnHit));
+			CHECK((metadata->mTriggers.at(1).mTrigger == BattleEventID::Hit));
 			REQUIRE((metadata->mTriggers.at(1).mEffects.size() == 10U));
 			CHECK((metadata->mTriggers.at(1).mEffects.front() == BuiltinEffectID::PsychicTerrainPriorityBlock));
 		}

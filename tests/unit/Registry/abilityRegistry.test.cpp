@@ -21,7 +21,8 @@ using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
-using PocketCore::Battle::BattleTriggerID;
+using PocketCore::Battle::BattleEventID;
+using PocketCore::Battle::BattleEventRole;
 using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
@@ -61,7 +62,8 @@ SCENARIO("AbilityRegistry")
 
 			AbilityMeta stench{*metadata};
 			REQUIRE((stench.mTriggers.size() == 1U));
-			CHECK((stench.mTriggers.front().mTrigger == BattleTriggerID::OnSuccessfulHit));
+			CHECK((stench.mTriggers.front().mTrigger == BattleEventID::Hit));
+			CHECK((stench.mTriggers.front().mRole == BattleEventRole::User));
 			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
 			CHECK((stench.mTriggers.front().mEffects.front() == BuiltinEffectID::Flinch));
 		}
@@ -73,7 +75,7 @@ SCENARIO("AbilityRegistry")
 
 			AbilityMeta drizzle{*metadata};
 			REQUIRE((drizzle.mTriggers.size() == 1U));
-			CHECK((drizzle.mTriggers.front().mTrigger == BattleTriggerID::OnSwitchIn));
+			CHECK((drizzle.mTriggers.front().mTrigger == BattleEventID::SwitchIn));
 			CHECK((drizzle.mTriggers.front().mEffects.front() == BuiltinEffectID::SetRain));
 		}
 

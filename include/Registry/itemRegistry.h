@@ -26,8 +26,8 @@
 
 namespace PocketCore::Registry::Item
 {
+	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_ITEMS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
@@ -36,6 +36,7 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::toItemID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class ItemRegistry Registry/itemRegistry.h
 		@brief Stores built-in and user-defined item metadata in fixed-capacity storage.
@@ -47,10 +48,10 @@ namespace PocketCore::Registry::Item
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class ItemRegistry : private PocketCore::Registry::FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
+	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>;
+			using Base = FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
@@ -59,14 +60,14 @@ namespace PocketCore::Registry::Item
 			{
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleTriggerID::OnTurnEnd}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleEventID::TurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
 					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleTriggerID::OnTurnEnd}},
+					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleEventID::TurnEnd}},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 					.mTargetID = BattleTargetID::Self,

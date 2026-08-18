@@ -26,8 +26,9 @@
 namespace PocketCore::Move
 {
 	using PocketCore::Battle::BattleRangeID;
+	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
@@ -41,7 +42,8 @@ namespace PocketCore::Move
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 			std::vector<PocketCore::Effect::BuiltinEffectID> mEffects;
-			BattleTriggerID mTrigger;
+			BattleEventID mTrigger;
+			BattleEventRole mRole{BattleEventRole::Any};
 			ub mSuppresionRuleCount{0};
 	};
 

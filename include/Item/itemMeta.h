@@ -22,8 +22,9 @@
 
 namespace PocketCore::Item
 {
+	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Battle::BattleTriggerID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::BuiltinEffectID;
@@ -34,7 +35,8 @@ namespace PocketCore::Item
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 			std::vector<BuiltinEffectID> mEffects;
-			BattleTriggerID mTrigger;
+			BattleEventID mTrigger;
+			BattleEventRole mRole{BattleEventRole::Any};
 			ub mSuppresionRuleCount{0};
 	};
 

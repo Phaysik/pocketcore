@@ -32,6 +32,7 @@ namespace PocketCore::Registry::Multiplier
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
 	using PocketCore::Multiplier::toMultiplierID;
+	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class MultiplierRegistry Registry/multiplierRegistry.h
 		@brief Stores built-in and user-defined multiplier metadata in fixed-capacity storage.
@@ -44,12 +45,10 @@ namespace PocketCore::Registry::Multiplier
 		@since x.x.x
 		@author Matthew Moore
 	*/
-	class MultiplierRegistry
-		: private PocketCore::Registry::FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
+	class MultiplierRegistry : private FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS,
-																	 &MultiplierMeta::mMultiplierID>;
+			using Base = FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>;
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway

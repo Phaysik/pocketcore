@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <expected>
 #include <limits>
+#include <optional>
+#include <span>
 #include <type_traits>
 #include <variant>
 #include <vector>
