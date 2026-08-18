@@ -146,6 +146,13 @@ namespace PocketCore::Battle
 	*/
 	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
 																			 const BattlePhase phase, const MoveRegistry *moveRegistry);
+
+	ATTR_NODISCARD std::expected<void, BattleEngineError> getValidationResult(const BattleState &state, const BattleAction &action,
+																			  const BattlePhase phase, const MoveRegistry *moveRegistry);
+
+	ATTR_NODISCARD ATTR_PURE BattleTarget getBattleTarget(const BattleAction &action);
+
+	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry);
 } // namespace PocketCore::Battle
 
 #endif

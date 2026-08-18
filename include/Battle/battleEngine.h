@@ -81,6 +81,15 @@ namespace PocketCore::Battle
 																			  const std::span<Pokemon *const> &partyB,
 																			  ub activePokemonPerSide = 1U);
 
+			/*! @brief Resolves and executes one complete turn of trainer actions.
+				@details Every action is validated before the first action executes. Each active slot may submit at most one action.
+			   Turn-end triggers run after all executable actions, and actions belonging to Pokemon that faint earlier in the turn are
+			   skipped.
+				@param[in] actions The move and switch choices submitted by both trainers.
+				@return Void on success, or the first validation error before the state is mutated.
+			*/
+			ATTR_NODISCARD std::expected<void, BattleEngineError> executeTurn(const std::span<const BattleAction> &actions);
+
 			/*! @brief Returns the engine-owned battle state.
 				@return A read-only reference valid for the lifetime of the engine.
 			*/
@@ -184,6 +193,14 @@ namespace PocketCore::Battle
 			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID,
 										const std::span<const BuiltinEffectID> &effects, EffectContext &context);
 
+			/*! @brief Executes a previously validated move action against its currently resolvable targets.
+				@details Consumes PP after metadata and targets resolve, dispatches move and slot triggers in battle order, applies damage
+			   and recoil per hit, processes faints, and confines suppression rules to the move, target, or hit scope that created them.
+			   Missing metadata or invalidated targets cancel execution without reporting an error.
+				@param[in] action The validated move action to execute.
+			*/
+			void executeMove(const MoveAction &action);
+
 			/*! @brief Executes every move metadata entry matching a trigger.
 				@details Temporarily marks the context source as a move, activates each entry's suppression rules before suppression checks,
 			   and restores the caller's source category afterward.
@@ -216,6 +233,8 @@ namespace PocketCore::Battle
 			*/
 			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleTriggerID triggerID,
 									EffectContext &context, const bool targetEffects);
+
+			void executeEndTurnTrigger();
 
 			/*! @brief Dispatches an ability-and-item trigger for one active slot in a fresh suppression scope.
 				@param[in] owner The active slot whose ability and item receive the trigger.

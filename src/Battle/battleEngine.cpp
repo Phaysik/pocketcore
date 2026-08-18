@@ -12,6 +12,7 @@
 #include <expected>
 #include <optional>
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "Ability/abilityID.h"
@@ -120,6 +121,125 @@ namespace PocketCore::Battle
 		}
 
 		// Startup effects may have caused faints, which can immediately require replacements or finish the battle.
+		processFaints();
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::executeTurn(const std::span<const BattleAction> &actions)
+	{
+		// Reject invalid engine phases before allocating work buffers or inspecting actions
+		if (!mState.mBattleStarted)
+		{
+			return std::unexpected{BattleEngineError::BattleNotStarted};
+		}
+
+		if (mPhase == BattlePhase::AwaitingReplacements)
+		{
+			return std::unexpected{BattleEngineError::ReplacementRequired};
+		}
+
+		if (getResult(mState) != BattleResult::InProgress)
+		{
+			return std::unexpected{BattleEngineError::BattleFinished};
+		}
+
+		// Track action owners and switch destinations while validating the complete turn atomically
+		std::vector<BattleTarget> actors{};
+		std::vector<Pokemon *> incomingPokemon{};
+		actors.reserve(actions.size());
+		incomingPokemon.reserve(actions.size());
+
+		for (const BattleAction &action : actions)
+		{
+			const std::expected<void, BattleEngineError> validationResult{
+				getValidationResult(mState, action, mPhase, mProvider->moveRegistry),
+			};
+
+			if (!validationResult.has_value())
+			{
+				return std::unexpected{validationResult.error()};
+			}
+
+			// Normalize both action types into the active slot that owns the action.
+			const BattleTarget actor{getBattleTarget(action)};
+
+			// Each active slot may contribute at most one action to a turn.
+			if (std::ranges::find(actors, actor) != actors.end())
+			{
+				return std::unexpected{BattleEngineError::DuplicateAction};
+			}
+
+			actors.push_back(actor);
+
+			const auto *switchAction{std::get_if<SwitchAction>(&action)};
+
+			if (switchAction != nullptr)
+			{
+				Pokemon *incoming{party(mState, switchAction->mSide).at(switchAction->mPartyIndex)};
+
+				if (std::ranges::find(incomingPokemon, incoming) != incomingPokemon.end())
+				{
+					return std::unexpected{BattleEngineError::DuplicateAction};
+				}
+
+				incomingPokemon.push_back(incoming);
+			}
+		}
+
+		// Separate actions into execution groups because all switches resolve before any moves.
+		std::vector<SwitchAction> switches{};
+		std::vector<MoveAction> moves{};
+		switches.reserve(actions.size());
+		moves.reserve(actions.size());
+
+		std::ranges::for_each(actions, [&switches, &moves](const BattleAction &action) {
+			const auto *switchAction{std::get_if<SwitchAction>(&action)};
+
+			if (switchAction != nullptr)
+			{
+				switches.push_back(*switchAction);
+			}
+			else
+			{
+				moves.push_back(std::get<MoveAction>(action));
+			}
+		});
+
+		// Resolve simultaneous switches deterministically by side and then battlefield slot.
+		std::ranges::sort(switches, [](const SwitchAction &left, const SwitchAction &right) {
+			return std::pair{getSideOrder(left.mSide), left.mActiveSlotIndex}
+				 < std::pair{getSideOrder(right.mSide), right.mActiveSlotIndex};
+		});
+
+		// Execute validated switches first so incoming Pokemon participate in subsequent move resolution.
+		for (const SwitchAction &switchAction : switches)
+		{
+			const std::expected<void, BattleEngineError> switchResult{switchPokemon(switchAction)};
+
+			if (!switchResult.has_value())
+			{
+				return std::unexpected{switchResult.error()};
+			}
+		}
+
+		// Randomize exact move-order ties before applying the priority and speed ordering below.
+		handleMovePrioritization(mState, moves, mProvider->moveRegistry);
+
+		// Re-check volatile battle conditions because earlier actions may have fainted or disabled a later actor.
+		std::ranges::for_each(moves, [this](const MoveAction &moveAction) {
+			const std::vector<BattleSlot> &slots{activeSlots(mState, moveAction.mSide)};
+			const BattleSlot userSlot{slots.at(moveAction.mUserSlotIndex)};
+
+			if (moveAction.mUserSlotIndex < slots.size() && isHealthy(userSlot) && !userSlot.mIsFlinched && userSlot.mSleepCounter == 0U)
+			{
+				executeMove(moveAction);
+			}
+		});
+
+		// Give each surviving active Pokemon one turn-end trigger in deterministic side-then-slot order.
+		executeEndTurnTrigger();
+
 		processFaints();
 
 		return {};
@@ -316,6 +436,16 @@ namespace PocketCore::Battle
 		context.mTargetIndex = previousTargetIndex;
 	}
 
+	void BattleEngine::executeMove(const MoveAction &action)
+	{
+		// TODO implement this function
+		if (action.mMoveSlotIndex > 200)
+		{
+			mState.mBattleStarted = false;
+			return;
+		}
+	}
+
 	void BattleEngine::executeMoveTrigger(const MoveMeta &moveMeta, BattleTriggerID triggerID, EffectContext &context)
 	{
 		// Save the caller's source because nested trigger dispatch reuses the same context.
@@ -393,6 +523,22 @@ namespace PocketCore::Battle
 			{
 				// Faint handling preserves its prebuilt event context and executes effects directly.
 				executeEffects(trigger.mEffects, context);
+			}
+		}
+	}
+
+	void BattleEngine::executeEndTurnTrigger()
+	{
+		for (const Side side : std::array{Side::A, Side::B})
+		{
+			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
+
+			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			{
+				if (isHealthy(slots.at(slotIndex)))
+				{
+					triggerSlot(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)}, BattleTriggerID::OnTurnEnd);
+				}
 			}
 		}
 	}

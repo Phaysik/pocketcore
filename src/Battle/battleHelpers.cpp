@@ -442,7 +442,8 @@ namespace PocketCore::Battle
 		return targets;
 	}
 
-	ATTR_NODISCARD ATTR_PURE std::expected<void, BattleEngineError> validateSwitchAction(const BattleState &state, const SwitchAction &action)
+	ATTR_NODISCARD ATTR_PURE std::expected<void, BattleEngineError> validateSwitchAction(const BattleState &state,
+																						 const SwitchAction &action)
 	{
 		// Switching requires an initialized battle and an undecided result.
 		if (!state.mBattleStarted)
@@ -556,5 +557,74 @@ namespace PocketCore::Battle
 		}
 
 		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, BattleEngineError> getValidationResult(const BattleState &state, const BattleAction &action,
+																			  const BattlePhase phase, const MoveRegistry *moveRegistry)
+	{
+		return std::visit(
+			[&state, phase, &moveRegistry](const auto &selectedAction) {
+				using Action = std::decay_t<decltype(selectedAction)>;
+				if constexpr (std::is_same_v<Action, MoveAction>)
+				{
+					return validateMoveAction(state, selectedAction, phase, moveRegistry);
+				}
+				else
+				{
+					return validateSwitchAction(state, selectedAction);
+				}
+			},
+			action);
+	}
+
+	ATTR_NODISCARD ATTR_PURE BattleTarget getBattleTarget(const BattleAction &action)
+	{
+		return std::visit(
+			[](const auto &selectedAction) {
+				using Action = std::decay_t<decltype(selectedAction)>;
+				if constexpr (std::is_same_v<Action, MoveAction>)
+				{
+					return BattleTarget{.mSide = selectedAction.mSide, .mSlotIndex = selectedAction.mUserSlotIndex};
+				}
+				else
+				{
+					return BattleTarget{.mSide = selectedAction.mSide, .mSlotIndex = selectedAction.mActiveSlotIndex};
+				}
+			},
+			action);
+	}
+
+	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry)
+	{
+		std::shuffle(moves.begin(), moves.end(), Random::getTwister());
+		std::ranges::stable_sort(moves, [&state, &moveRegistry](const MoveAction &left, const MoveAction &right) {
+			const BattleSlot &leftSlot{activeSlots(state, left.mSide).at(left.mUserSlotIndex)};
+			const BattleSlot &rightSlot{activeSlots(state, right.mSide).at(right.mUserSlotIndex)};
+
+			const MoveMeta *leftMove{moveRegistry->getMoveMetadata(leftSlot.mPokemon->getMoveID(left.mMoveSlotIndex))};
+			const MoveMeta *rightMove{moveRegistry->getMoveMetadata(rightSlot.mPokemon->getMoveID(right.mMoveSlotIndex))};
+
+			// Validated engine actions always have metadata; keep direct helper calls null-safe and ordered consistently.
+			if (leftMove == nullptr || rightMove == nullptr)
+			{
+				return leftMove != nullptr;
+			}
+
+			if (leftMove->mPriority != rightMove->mPriority)
+			{
+				return leftMove->mPriority > rightMove->mPriority;
+			}
+
+			// Compare as doubles without narrowing the effective speed calculation.
+			const double leftSpeed{getEffectiveSpeed(leftSlot)};
+			const double rightSpeed{getEffectiveSpeed(rightSlot)};
+
+			if (leftSpeed < rightSpeed || leftSpeed > rightSpeed)
+			{
+				return leftSpeed > rightSpeed;
+			}
+
+			return false;
+		});
 	}
 } // namespace PocketCore::Battle

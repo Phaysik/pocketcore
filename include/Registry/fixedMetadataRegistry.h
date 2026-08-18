@@ -59,7 +59,7 @@ namespace PocketCore::Registry
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until the entry is
 			   replaced or the registry is destroyed.
 			*/
-			ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
+			ATTR_NOINLINE ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
 				const us index{findEntryIndexByID(stableID)};
 
