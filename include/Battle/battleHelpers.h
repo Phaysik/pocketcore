@@ -252,7 +252,7 @@ namespace PocketCore::Battle
 		@return True when @p trainerParty contains a healthy Pokemon not active on @p side; otherwise false.
 		@note Time complexity is O(p * a), where p is the party size and a is the active-slot count.
 	*/
-	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *> &trainerParty);
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *const> &trainerParty);
 
 	/*! @brief Resolves the active targets selected by a move action.
 		@details Resolves the acting slot and its registered move metadata, then delegates selector and range behavior to @ref

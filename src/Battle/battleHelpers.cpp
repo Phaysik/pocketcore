@@ -337,7 +337,7 @@ namespace PocketCore::Battle
 		return BattleResult::Draw;
 	}
 
-	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *> &trainerParty)
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *const> &trainerParty)
 	{
 		// A fainted slot requires replacement only when this side has a healthy reserve available.
 		return std::ranges::any_of(
