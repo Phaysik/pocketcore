@@ -17,8 +17,8 @@
 #include "Ability/abilityMeta.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/builtInEffectID.h"
 #include "Effect/effectContext.h"
+#include "Effect/effectID.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemMeta.h"
 #include "Move/moveMeta.h"
@@ -36,8 +36,8 @@ namespace PocketCore::Battle
 {
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Core::ub;
-	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::EffectContext;
+	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectSource;
 	using PocketCore::Effect::SuppressionRule;
 	using PocketCore::Item::ItemMeta;
@@ -174,7 +174,7 @@ namespace PocketCore::Battle
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
 			*/
-			void executeEffect(const BuiltinEffectID effect, EffectContext &context);
+			void executeEffect(const EffectID effect, EffectContext &context);
 
 			/*! @brief Executes built-in effects in metadata order through one shared context.
 				@details Stops before the next effect when @ref EffectContext damage state disallows continuation and processes
@@ -182,7 +182,7 @@ namespace PocketCore::Battle
 				@param[in] effects The ordered effect identifiers to execute.
 				@param[in,out] context The context shared and mutated by every executed effect.
 			*/
-			void executeEffects(const std::span<const BuiltinEffectID> &effects, EffectContext &context);
+			void executeEffects(const std::span<const EffectID> &effects, EffectContext &context);
 
 			/*! @brief Executes an effect sequence once for each slot selected relative to an owner.
 				@details Resolves targets without formation-range restrictions, temporarily rewrites user and target coordinates for each
@@ -192,8 +192,8 @@ namespace PocketCore::Battle
 				@param[in] effects The ordered effects to execute for every resolved recipient.
 				@param[in,out] context The shared context whose event coordinates are preserved across target iteration.
 			*/
-			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID,
-										const std::span<const BuiltinEffectID> &effects, EffectContext &context);
+			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID, const std::span<const EffectID> &effects,
+										EffectContext &context);
 
 			/*! @brief Executes a previously validated move action against its currently resolvable targets.
 				@details Consumes PP after metadata and targets resolve, dispatches move and slot triggers in battle order, applies damage

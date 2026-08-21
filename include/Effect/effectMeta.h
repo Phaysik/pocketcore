@@ -47,6 +47,12 @@ namespace PocketCore::Effect
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			EffectID mEffectID{};
+
+			/*! @brief Whether applying this effect may change the active weather. */
+			bool mMayChangeWeather{};
+
+			/*! @brief Whether applying this effect may change the targeted Pokemon's statuses. */
+			bool mMayChangeStatus{};
 	};
 } // namespace PocketCore::Effect
 

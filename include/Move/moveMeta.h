@@ -16,7 +16,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Effect/builtInEffectID.h"
+#include "Effect/effectID.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Types/typeID.h"
 
@@ -33,7 +33,7 @@ namespace PocketCore::Move
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::SuppressionRule;
 	using PocketCore::Types::TypeID;
 
@@ -41,7 +41,7 @@ namespace PocketCore::Move
 	{
 		public:
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
-			std::vector<PocketCore::Effect::BuiltinEffectID> mEffects;
+			std::vector<EffectID> mEffects;
 			BattleEventID mTrigger;
 			BattleEventRole mRole{BattleEventRole::Any};
 			ub mSuppresionRuleCount{0};
@@ -93,13 +93,13 @@ namespace PocketCore::Move
 			bool mSpecial{};
 	};
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackEffects() noexcept;
+	ATTR_CONST std::span<const EffectID> baseAttackEffects() noexcept;
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithRecoil() noexcept;
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithStatus() noexcept;
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithFlinch() noexcept;
-	ATTR_CONST std::span<const BuiltinEffectID> protectEffects() noexcept;
-	ATTR_CONST std::span<const BuiltinEffectID> fieldEffectEffects() noexcept;
+	ATTR_CONST std::span<const EffectID> baseAttackWithRecoil() noexcept;
+	ATTR_CONST std::span<const EffectID> baseAttackWithStatus() noexcept;
+	ATTR_CONST std::span<const EffectID> baseAttackWithFlinch() noexcept;
+	ATTR_CONST std::span<const EffectID> protectEffects() noexcept;
+	ATTR_CONST std::span<const EffectID> fieldEffectEffects() noexcept;
 } // namespace PocketCore::Move
 
 #endif

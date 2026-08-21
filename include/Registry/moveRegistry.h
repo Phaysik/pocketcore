@@ -34,6 +34,7 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Configuration::MAX_MOVES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::toEffectID;
 	using PocketCore::Move::baseAttackEffects;
 	using PocketCore::Move::BuiltinMoveID;
 	using PocketCore::Move::MoveEffectTrigger;
@@ -70,7 +71,7 @@ namespace PocketCore::Registry::Move
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
 					.mTriggers = {{
-					    .mEffects = {BuiltinEffectID::AccuracyCheck},
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 					    .mTrigger = BattleEventID::BeforeHit,
 						.mRole = BattleEventRole::Target,
 					},
@@ -91,7 +92,7 @@ namespace PocketCore::Registry::Move
 				});
 				addBuiltin({
 					.mTriggers = {{
-					    .mEffects = {BuiltinEffectID::AccuracyCheck},
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 					    .mTrigger = BattleEventID::BeforeHit,
 						.mRole = BattleEventRole::Target,
 					},

@@ -13,82 +13,85 @@
 
 #include "Core/attributeMacros.h"
 #include "Effect/builtInEffectID.h"
+#include "Effect/effectID.h"
 
 namespace PocketCore::Move
 {
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::EffectID;
+	using PocketCore::Effect::toEffectID;
 
-	constexpr std::array<BuiltinEffectID, 10> BASE_ATTACK_EFFECTS{
-		BuiltinEffectID::PsychicTerrainPriorityBlock,
-		BuiltinEffectID::CriticalHit,
-		BuiltinEffectID::BaseDamage,
-		BuiltinEffectID::Targets,
-		BuiltinEffectID::Weather,
-		BuiltinEffectID::Terrain,
-		BuiltinEffectID::Randomization,
-		BuiltinEffectID::Stab,
-		BuiltinEffectID::TypeEffectiveness,
-		BuiltinEffectID::BurnDamageReduction,
+	constexpr std::array<EffectID, 10> BASE_ATTACK_EFFECTS{
+		toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock),
+		toEffectID(BuiltinEffectID::CriticalHit),
+		toEffectID(BuiltinEffectID::BaseDamage),
+		toEffectID(BuiltinEffectID::Targets),
+		toEffectID(BuiltinEffectID::Weather),
+		toEffectID(BuiltinEffectID::Terrain),
+		toEffectID(BuiltinEffectID::Randomization),
+		toEffectID(BuiltinEffectID::Stab),
+		toEffectID(BuiltinEffectID::TypeEffectiveness),
+		toEffectID(BuiltinEffectID::BurnDamageReduction),
 	};
 
-	constexpr std::array<BuiltinEffectID, 11> BASE_ATTACK_WITH_RECOIL{
-		BuiltinEffectID::PsychicTerrainPriorityBlock,
-		BuiltinEffectID::CriticalHit,
-		BuiltinEffectID::BaseDamage,
-		BuiltinEffectID::Targets,
-		BuiltinEffectID::Weather,
-		BuiltinEffectID::Terrain,
-		BuiltinEffectID::Randomization,
-		BuiltinEffectID::Stab,
-		BuiltinEffectID::TypeEffectiveness,
-		BuiltinEffectID::BurnDamageReduction,
-		BuiltinEffectID::Recoil,
+	constexpr std::array<EffectID, 11> BASE_ATTACK_WITH_RECOIL{
+		toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock),
+		toEffectID(BuiltinEffectID::CriticalHit),
+		toEffectID(BuiltinEffectID::BaseDamage),
+		toEffectID(BuiltinEffectID::Targets),
+		toEffectID(BuiltinEffectID::Weather),
+		toEffectID(BuiltinEffectID::Terrain),
+		toEffectID(BuiltinEffectID::Randomization),
+		toEffectID(BuiltinEffectID::Stab),
+		toEffectID(BuiltinEffectID::TypeEffectiveness),
+		toEffectID(BuiltinEffectID::BurnDamageReduction),
+		toEffectID(BuiltinEffectID::Recoil),
 	};
 
-	constexpr std::array<BuiltinEffectID, 11> BASE_ATTACK_WITH_STATUS{
-		BuiltinEffectID::PsychicTerrainPriorityBlock,
-		BuiltinEffectID::CriticalHit,
-		BuiltinEffectID::BaseDamage,
-		BuiltinEffectID::Targets,
-		BuiltinEffectID::Weather,
-		BuiltinEffectID::Terrain,
-		BuiltinEffectID::Randomization,
-		BuiltinEffectID::Stab,
-		BuiltinEffectID::TypeEffectiveness,
-		BuiltinEffectID::BurnDamageReduction,
-		BuiltinEffectID::StatusApply,
+	constexpr std::array<EffectID, 11> BASE_ATTACK_WITH_STATUS{
+		toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock),
+		toEffectID(BuiltinEffectID::CriticalHit),
+		toEffectID(BuiltinEffectID::BaseDamage),
+		toEffectID(BuiltinEffectID::Targets),
+		toEffectID(BuiltinEffectID::Weather),
+		toEffectID(BuiltinEffectID::Terrain),
+		toEffectID(BuiltinEffectID::Randomization),
+		toEffectID(BuiltinEffectID::Stab),
+		toEffectID(BuiltinEffectID::TypeEffectiveness),
+		toEffectID(BuiltinEffectID::BurnDamageReduction),
+		toEffectID(BuiltinEffectID::StatusApply),
 	};
 
-	constexpr std::array<BuiltinEffectID, 11> BASE_ATTACK_WITH_FLINCH{
-		BuiltinEffectID::PsychicTerrainPriorityBlock,
-		BuiltinEffectID::CriticalHit,
-		BuiltinEffectID::BaseDamage,
-		BuiltinEffectID::Targets,
-		BuiltinEffectID::Weather,
-		BuiltinEffectID::Terrain,
-		BuiltinEffectID::Randomization,
-		BuiltinEffectID::Stab,
-		BuiltinEffectID::TypeEffectiveness,
-		BuiltinEffectID::BurnDamageReduction,
-		BuiltinEffectID::Flinch,
+	constexpr std::array<EffectID, 11> BASE_ATTACK_WITH_FLINCH{
+		toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock),
+		toEffectID(BuiltinEffectID::CriticalHit),
+		toEffectID(BuiltinEffectID::BaseDamage),
+		toEffectID(BuiltinEffectID::Targets),
+		toEffectID(BuiltinEffectID::Weather),
+		toEffectID(BuiltinEffectID::Terrain),
+		toEffectID(BuiltinEffectID::Randomization),
+		toEffectID(BuiltinEffectID::Stab),
+		toEffectID(BuiltinEffectID::TypeEffectiveness),
+		toEffectID(BuiltinEffectID::BurnDamageReduction),
+		toEffectID(BuiltinEffectID::Flinch),
 	};
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackEffects() noexcept
+	ATTR_CONST std::span<const EffectID> baseAttackEffects() noexcept
 	{
 		return BASE_ATTACK_EFFECTS;
 	}
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithRecoil() noexcept
+	ATTR_CONST std::span<const EffectID> baseAttackWithRecoil() noexcept
 	{
 		return BASE_ATTACK_WITH_RECOIL;
 	}
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithStatus() noexcept
+	ATTR_CONST std::span<const EffectID> baseAttackWithStatus() noexcept
 	{
 		return BASE_ATTACK_WITH_STATUS;
 	}
 
-	ATTR_CONST std::span<const BuiltinEffectID> baseAttackWithFlinch() noexcept
+	ATTR_CONST std::span<const EffectID> baseAttackWithFlinch() noexcept
 	{
 		return BASE_ATTACK_WITH_FLINCH;
 	}

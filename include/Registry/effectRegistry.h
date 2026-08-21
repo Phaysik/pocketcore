@@ -163,11 +163,13 @@ namespace PocketCore::Registry::Effect
 					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_APPLY,
 					.mApply = applyStatusApply,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusApply),
+					.mMayChangeStatus = true,
 				});
 				addBuiltin({
 					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_REMOVE,
 					.mApply = applyStatusRemove,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusRemove),
+					.mMayChangeStatus = true,
 				});
 				addBuiltin({
 					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_TURN_SKIP,
@@ -188,16 +190,19 @@ namespace PocketCore::Registry::Effect
 					.mName = PocketCore::Effect::EFFECT_NAME_SET_SANDSTORM,
 					.mApply = applySetSandstorm,
 					.mEffectID = toEffectID(BuiltinEffectID::SetSandstorm),
+					.mMayChangeWeather = true,
 				});
 				addBuiltin({
 					.mName = PocketCore::Effect::EFFECT_NAME_SET_SUN,
 					.mApply = applySetSun,
 					.mEffectID = toEffectID(BuiltinEffectID::SetSun),
+					.mMayChangeWeather = true,
 				});
 				addBuiltin({
 					.mName = PocketCore::Effect::EFFECT_NAME_SET_RAIN,
 					.mApply = applySetRain,
 					.mEffectID = toEffectID(BuiltinEffectID::SetRain),
+					.mMayChangeWeather = true,
 				});
 				addBuiltin({
 					.mName = PocketCore::Effect::EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK,

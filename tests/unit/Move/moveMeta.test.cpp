@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::toEffectID;
 using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::baseAttackWithFlinch;
 using PocketCore::Move::baseAttackWithRecoil;
@@ -23,9 +24,9 @@ SCENARIO("MoveMeta effect lists")
 		THEN("it contains the expected ordered baseline effects")
 		{
 			REQUIRE((effects.size() == 10U));
-			CHECK((effects.front() == BuiltinEffectID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(1) == BuiltinEffectID::CriticalHit));
-			CHECK((effects.back() == BuiltinEffectID::BurnDamageReduction));
+			CHECK((effects.front() == toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock)));
+			CHECK((effects.at(1) == toEffectID(BuiltinEffectID::CriticalHit)));
+			CHECK((effects.back() == toEffectID(BuiltinEffectID::BurnDamageReduction)));
 		}
 	}
 
@@ -36,9 +37,9 @@ SCENARIO("MoveMeta effect lists")
 		THEN("it appends recoil to the base sequence")
 		{
 			REQUIRE((effects.size() == 11U));
-			CHECK((effects.back() == BuiltinEffectID::Recoil));
-			CHECK((effects.at(0) == BuiltinEffectID::PsychicTerrainPriorityBlock));
-			CHECK((effects.at(9) == BuiltinEffectID::BurnDamageReduction));
+			CHECK((effects.back() == toEffectID(BuiltinEffectID::Recoil)));
+			CHECK((effects.at(0) == toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock)));
+			CHECK((effects.at(9) == toEffectID(BuiltinEffectID::BurnDamageReduction)));
 		}
 	}
 
@@ -49,8 +50,8 @@ SCENARIO("MoveMeta effect lists")
 		THEN("it appends status apply to the base sequence")
 		{
 			REQUIRE((effects.size() == 11U));
-			CHECK((effects.back() == BuiltinEffectID::StatusApply));
-			CHECK((effects.at(9) == BuiltinEffectID::BurnDamageReduction));
+			CHECK((effects.back() == toEffectID(BuiltinEffectID::StatusApply)));
+			CHECK((effects.at(9) == toEffectID(BuiltinEffectID::BurnDamageReduction)));
 		}
 	}
 
@@ -61,8 +62,8 @@ SCENARIO("MoveMeta effect lists")
 		THEN("it appends flinch to the base sequence")
 		{
 			REQUIRE((effects.size() == 11U));
-			CHECK((effects.back() == BuiltinEffectID::Flinch));
-			CHECK((effects.at(9) == BuiltinEffectID::BurnDamageReduction));
+			CHECK((effects.back() == toEffectID(BuiltinEffectID::Flinch)));
+			CHECK((effects.at(9) == toEffectID(BuiltinEffectID::BurnDamageReduction)));
 		}
 	}
 

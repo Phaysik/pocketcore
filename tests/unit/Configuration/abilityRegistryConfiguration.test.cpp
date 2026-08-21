@@ -23,6 +23,7 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::toEffectID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
@@ -48,7 +49,8 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 	GIVEN("a unique ability definition")
 	{
 		std::vector<AbilityEffectTrigger> triggers{
-			{.mEffects = {BuiltinEffectID::Recoil, BuiltinEffectID::StatusTick}, .mTrigger = BattleEventID::TurnEnd},
+			{.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+			 .mTrigger = BattleEventID::TurnEnd},
 		};
 		AbilityMeta definition{.mTriggers = triggers, .mName = "Regenerator"};
 
@@ -133,7 +135,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		{
 			std::array<AbilityEffectTrigger, 1> replacement{
 				{
-					{.mEffects = {BuiltinEffectID::StatusApply}, .mTrigger = BattleEventID::StatusChanged},
+					{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::StatusChanged},
 				},
 			};
 			auto setResult{configuration.setAbilityTriggers("Custom Ability", replacement)};
@@ -144,7 +146,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
 				CHECK((metadata->mTriggers.front().mTrigger == BattleEventID::StatusChanged));
-				CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::StatusApply));
+				CHECK((metadata->mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::StatusApply)));
 			}
 		}
 
@@ -152,7 +154,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		{
 			std::array<AbilityEffectTrigger, 1> replacement{
 				{
-					{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleEventID::Faint},
+					{.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)}, .mTrigger = BattleEventID::Faint},
 				},
 			};
 			auto setResult{configuration.setAbilityTriggers(customIdentifier, replacement)};
@@ -210,7 +212,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		WHEN("it is updated by name")
 		{
 			AbilityMeta replacement{
-				.mTriggers = {{.mEffects = {BuiltinEffectID::StatusApply}, .mTrigger = BattleEventID::StatusChanged}},
+				.mTriggers = {{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::StatusChanged}},
 				.mName = "Replacement Ability",
 				.mTargetID = BattleTargetID::AllExceptSelf,
 			};
@@ -227,7 +229,8 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 		WHEN("it is updated by stable ID")
 		{
 			AbilityMeta replacement{
-				.mTriggers = {{.mEffects = {BuiltinEffectID::Recoil}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
+				.mTriggers
+				= {{.mEffects = {toEffectID(BuiltinEffectID::Recoil)}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
 				.mName = "Replacement Ability By ID",
 				.mTargetID = BattleTargetID::Self,
 			};

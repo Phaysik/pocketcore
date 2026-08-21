@@ -27,10 +27,12 @@
 namespace PocketCore::Registry::Item
 {
 	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Configuration::MAX_ITEMS;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::toEffectID;
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
@@ -60,14 +62,22 @@ namespace PocketCore::Registry::Item
 			{
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleEventID::TurnEnd}},
+					.mTriggers = {{
+						.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
+						.mTrigger = BattleEventID::StatusChanged,
+						.mRole = BattleEventRole::Target,
+					},},
 					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
 					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::StatusRemove}, .mTrigger = BattleEventID::TurnEnd}},
+					.mTriggers = {{
+						.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
+						.mTrigger = BattleEventID::StatusChanged,
+						.mRole = BattleEventRole::Target,
+					},},
 					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 					.mTargetID = BattleTargetID::Self,

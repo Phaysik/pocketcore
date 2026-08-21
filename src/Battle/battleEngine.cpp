@@ -25,6 +25,7 @@
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Battle/battleValidation.h"
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
@@ -37,6 +38,8 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Status/statusID.h"
+#include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
 {
@@ -44,11 +47,11 @@ namespace PocketCore::Battle
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
-	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
 	using PocketCore::Effect::EffectSource;
-	using PocketCore::Effect::toEffectID;
 	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
@@ -58,6 +61,8 @@ namespace PocketCore::Battle
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Status::StatusID;
+	using PocketCore::Weather::WeatherID;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
 																					const std::span<Pokemon *const> &partyB,
@@ -381,21 +386,60 @@ namespace PocketCore::Battle
 		});
 	}
 
-	void BattleEngine::executeEffect(const BuiltinEffectID effect, EffectContext &context)
+	void BattleEngine::executeEffect(const EffectID effect, EffectContext &context)
 	{
-		// Resolve the built-in identifier to metadata, then invoke its registered runtime function.
-		const EffectMeta *effectMeta{mEffectRegistry->getEffectMetadata(toEffectID(effect))};
+		// Resolve the open identifier to metadata, then invoke its registered runtime function.
+		const EffectMeta *effectMeta{mEffectRegistry->getEffectMetadata(effect)};
 
-		if (effectMeta != nullptr && effectMeta->mApply != nullptr)
+		if (effectMeta == nullptr || effectMeta->mApply == nullptr)
 		{
-			effectMeta->mApply(mState, context, *mProvider);
+			return;
+		}
+
+		const bool mayChangeWeather{effectMeta->mMayChangeWeather};
+		const bool mayChangeStatus{effectMeta->mMayChangeStatus};
+		const WeatherID previousWeatherID{mState.mWeatherID};
+
+		Pokemon *statusTarget{nullptr};
+
+		if (mayChangeStatus)
+		{
+			const BattleSlot *targetSlot{contextSlot(mState, context.mTargetSide, context.mTargetIndex)};
+			statusTarget = targetSlot != nullptr ? targetSlot->mPokemon : nullptr;
+		}
+
+		const std::array<StatusID, MAX_STATUSES_PER_POKEMON> previousStatuses{
+			statusTarget != nullptr ? statusTarget->getStatusesArray() : decltype(statusTarget->getStatusesArray()){}};
+
+		effectMeta->mApply(mState, context, *mProvider);
+
+		if (mayChangeWeather && mState.mWeatherID != previousWeatherID)
+		{
+			std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context](const Side side) {
+				const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
+
+				for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+				{
+					if (isHealthy(slots.at(slotIndex)))
+					{
+						triggerSlotInContext(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)},
+											 BattleEventID::WeatherChanged, context, BattleEventRole::Any);
+					}
+				}
+			});
+		}
+
+		if (statusTarget != nullptr && statusTarget->getStatusesArray() != previousStatuses)
+		{
+			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
+			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
 		}
 	}
 
-	void BattleEngine::executeEffects(const std::span<const BuiltinEffectID> &effects, EffectContext &context)
+	void BattleEngine::executeEffects(const std::span<const EffectID> &effects, EffectContext &context)
 	{
 		// Effects execute in metadata order and share one mutable context.
-		std::ranges::for_each(effects, [this, &context](const BuiltinEffectID effect) {
+		std::ranges::for_each(effects, [this, &context](const EffectID effect) {
 			if (!context.mDamage.mShouldContinue)
 			{
 				return;
@@ -409,7 +453,7 @@ namespace PocketCore::Battle
 	}
 
 	void BattleEngine::executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID,
-											  const std::span<const BuiltinEffectID> &effects, EffectContext &context)
+											  const std::span<const EffectID> &effects, EffectContext &context)
 	{
 		// Save event coordinates between target iteration temporarily rewrites both user and target fields.
 		const Side previousUserSide{context.mUserSide};

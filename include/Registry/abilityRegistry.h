@@ -37,6 +37,7 @@ namespace PocketCore::Registry::Ability
 	using PocketCore::Configuration::MAX_ABILITIES;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::toEffectID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class AbilityRegistry Registry/abilityRegistry.h
@@ -66,13 +67,14 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::Flinch}, .mTrigger = BattleEventID::Hit, .mRole = BattleEventRole::User}},
+					.mTriggers
+					= {{.mEffects = {toEffectID(BuiltinEffectID::Flinch)}, .mTrigger = BattleEventID::Hit, .mRole = BattleEventRole::User}},
 					.mName = PocketCore::Ability::ABILITY_NAME_STENCH,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
 					.mTargetID = BattleTargetID::SingleOpponent,
 				});
 				addBuiltin({
-					.mTriggers = {{.mEffects = {BuiltinEffectID::SetRain}, .mTrigger = BattleEventID::SwitchIn}},
+					.mTriggers = {{.mEffects = {toEffectID(BuiltinEffectID::SetRain)}, .mTrigger = BattleEventID::SwitchIn}},
 					.mName = PocketCore::Ability::ABILITY_NAME_DRIZZLE,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 					.mTargetID = BattleTargetID::Self,

@@ -21,6 +21,7 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::toEffectID;
 using PocketCore::Move::MoveEffectTrigger;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
@@ -43,7 +44,10 @@ namespace
 	MoveMeta makeMove(const std::string_view name)
 	{
 		return MoveMeta{
-			.mTriggers = {{.mEffects = {BuiltinEffectID::AccuracyCheck, BuiltinEffectID::BaseDamage}, .mTrigger = BattleEventID::Hit}},
+			.mTriggers = {{
+				.mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck), toEffectID(BuiltinEffectID::BaseDamage)},
+				.mTrigger = BattleEventID::Hit,
+			},},
 			.mName = name,
 			.mTargetID = BattleTargetID::SingleOpponent,
 		};
@@ -58,7 +62,10 @@ SCENARIO("MoveRegistryConfiguration addMove")
 	GIVEN("a unique move definition")
 	{
 		std::vector<MoveEffectTrigger> triggers{
-			{.mEffects = {BuiltinEffectID::AccuracyCheck, BuiltinEffectID::BaseDamage}, .mTrigger = BattleEventID::Hit},
+			{
+				.mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck), toEffectID(BuiltinEffectID::BaseDamage)},
+				.mTrigger = BattleEventID::Hit,
+			},
 		};
 		MoveMeta definition{.mTriggers = triggers, .mName = "Custom Jab", .mTargetID = BattleTargetID::SingleOpponent};
 
@@ -142,7 +149,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 		WHEN("its triggers are replaced by name")
 		{
 			std::array<MoveEffectTrigger, 1> replacement{
-				{{.mEffects = {BuiltinEffectID::Recoil}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
+				{{.mEffects = {toEffectID(BuiltinEffectID::Recoil)}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
 			};
 			auto setResult{configuration.setMoveTriggers("Custom Move", replacement)};
 
@@ -153,14 +160,14 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				REQUIRE((metadata != nullptr));
 				CHECK((metadata->mTriggers.front().mTrigger == BattleEventID::MoveUse));
 				CHECK((metadata->mTriggers.front().mRole == BattleEventRole::User));
-				CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::Recoil));
+				CHECK((metadata->mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::Recoil)));
 			}
 		}
 
 		WHEN("its triggers are replaced by stable ID")
 		{
 			std::array<MoveEffectTrigger, 1> replacement{
-				{{.mEffects = {BuiltinEffectID::StatusApply}, .mTrigger = BattleEventID::Hit}},
+				{{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::Hit}},
 			};
 			auto setResult{configuration.setMoveTriggers(customIdentifier, replacement)};
 
@@ -169,7 +176,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 				REQUIRE(setResult.has_value());
 				const MoveMeta *metadata{configuration.getMoveMetadata(customIdentifier)};
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mEffects.front() == BuiltinEffectID::StatusApply));
+				CHECK((metadata->mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::StatusApply)));
 			}
 		}
 
