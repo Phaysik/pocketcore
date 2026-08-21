@@ -25,8 +25,7 @@ namespace PocketCore::Effect
 	class RandomizationHandler : public IEffectHandler
 	{
 		public:
-			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
-					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
+			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
 
 	inline void applyRandomization(BattleState &state, EffectContext &context, const RegistryProvider &provider)

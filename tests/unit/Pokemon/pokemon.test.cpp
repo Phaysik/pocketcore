@@ -6,6 +6,7 @@
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
+#include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Registry/statusRegistry.h"
@@ -20,6 +21,7 @@
 using PocketCore::Ability::AbilityID;
 using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+using PocketCore::Core::ub;
 using PocketCore::Item::ItemID;
 using PocketCore::Move::MoveID;
 using PocketCore::Pokemon::Pokemon;
@@ -116,8 +118,8 @@ SCENARIO("Pokemon stream output")
 	GIVEN("a Pokemon with populated identifiers, stats, statuses, moves, and PP")
 	{
 		std::array<MoveID, 4> moveIDs{MoveID{10U}, MoveID{11U}, MoveID{12U}, MoveID{13U}};
-		std::array<PocketCore::Core::ub, 4> maxPP{15U, 20U, 25U, 30U};
-		std::array<PocketCore::Core::ub, 4> currentPP{5U, 10U, 15U, 20U};
+		std::array<ub, 4> maxPP{15U, 20U, 25U, 30U};
+		std::array<ub, 4> currentPP{5U, 10U, 15U, 20U};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{TypeID{2U}, TypeID{3U}};
 		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP, 101U,		   102U,	   150U,
 						103U,		 104U,	  105U,	 50U,		AbilityID{6U}, ItemID{7U}, typeIDs};

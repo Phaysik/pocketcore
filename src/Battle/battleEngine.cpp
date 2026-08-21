@@ -12,7 +12,6 @@
 #include <array>
 #include <cstddef>
 #include <expected>
-#include <iostream>
 #include <optional>
 #include <span>
 #include <utility>
@@ -30,6 +29,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
+#include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemID.h"

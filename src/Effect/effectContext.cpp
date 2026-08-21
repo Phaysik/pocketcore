@@ -71,8 +71,9 @@ namespace PocketCore::Effect
 			const double normalizedMultiplier{std::isfinite(multiplier) ? std::max(multiplier, 0.0) : 1.0};
 
 			const MultiplierMeta *multiplierMeta{multiplierRegistry.getMultiplierMetadata(multID)};
-			const MultiplierApplicationPolicy policy{multiplierMeta != nullptr ? multiplierMeta->mApplicationPolicy
-																			   : MultiplierApplicationPolicy::Floor};
+			const MultiplierApplicationPolicy policy{
+				multiplierMeta != nullptr ? multiplierMeta->mApplicationPolicy : MultiplierApplicationPolicy::Floor,
+			};
 
 			const auto roundDownHalfSafe = [](const double value) -> double {
 				double integerPart{};

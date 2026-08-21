@@ -49,8 +49,10 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 	GIVEN("a unique ability definition")
 	{
 		std::vector<AbilityEffectTrigger> triggers{
-			{.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
-			 .mTrigger = BattleEventID::TurnEnd},
+			{
+				.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+				.mTrigger = BattleEventID::TurnEnd,
+			},
 		};
 		AbilityMeta definition{.mTriggers = triggers, .mName = "Regenerator"};
 
