@@ -28,10 +28,12 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
+#include "Effect/effectContext.h"
 #include "Effect/effectMeta.h"
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
+#include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
@@ -51,6 +53,7 @@ namespace PocketCore::Battle
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::NO_ITEM_ID;
+	using PocketCore::Move::FixedHitCount;
 	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
@@ -444,11 +447,166 @@ namespace PocketCore::Battle
 
 	void BattleEngine::executeMove(const MoveAction &action)
 	{
-		// TODO implement this function
-		if (action.mMoveSlotIndex > 200)
+		// Recove the actor and move metadata from the already validated action
+		const BattleSlot &userSlot{activeSlots(mState, action.mSide).at(action.mUserSlotIndex)};
+		Pokemon *userPokemon{userSlot.mPokemon};
+
+		const MoveID moveID{userPokemon->getMoveID(action.mMoveSlotIndex)};
+		const MoveMeta *moveMeta{mProvider->moveRegistry->getMoveMetadata(moveID)};
+
+		if (moveMeta == nullptr)
 		{
-			mState.mBattleStarted = false;
+			// Metadata may have changed since validation. Fail will close without consuming PP.
 			return;
+		}
+
+		// Resolve targets again after switches and earlier moves may have changed the battlefield.
+		const std::expected<std::vector<BattleTarget>, BattleEngineError> targetsResult{
+			getMoveTargets(mState, action, mProvider->moveRegistry),
+		};
+
+		if (!targetsResult.has_value())
+		{
+			return;
+		}
+
+		// Suppressions are scoped to this move execution and rebuilt by each relevant event.
+		mActiveSuppressions.clear();
+
+		userPokemon->usePP(action.mMoveSlotIndex);
+		const ub hitCount{resolveHitCount(*moveMeta)};
+		const BattleTarget user{.mSide = action.mSide, .mSlotIndex = action.mUserSlotIndex};
+		EffectContext moveContext{makeMoveContext(action, *moveMeta, targetsResult->front(), 0U)};
+
+		// The move user and the move itself receive the user-side move-use event once.
+		triggerSlotInContext(user, BattleEventID::MoveUse, moveContext, BattleEventRole::User);
+		executeMoveTrigger(*moveMeta, BattleEventID::MoveUse, BattleEventRole::User, moveContext);
+
+		if (!moveContext.mDamage.mShouldContinue)
+		{
+			mActiveSuppressions.clear();
+			return;
+		}
+
+		// Keep move-wide suppression rules as the baseline restored before processing each target.
+		const std::size_t moveSuppressionCount{mActiveSuppressions.size()};
+
+		for (const BattleTarget target : targetsResult.value())
+		{
+			mActiveSuppressions.resize(moveSuppressionCount);
+
+			if (!targetExists(mState, target))
+			{
+				continue;
+			}
+
+			EffectContext targetContext{moveContext};
+			targetContext.mTargetSide = target.mSide;
+			targetContext.mTargetIndex = target.mSlotIndex;
+
+			// The current recipient observes the target side move-use event.
+			triggerSlotInContext(target, BattleEventID::MoveUse, targetContext, BattleEventRole::Target);
+
+			std::size_t targetSuppressionCount{mActiveSuppressions.size()};
+			const bool runBeforeHitPerAttempt{std::holds_alternative<FixedHitCount>(moveMeta->mHitCountPolicy)};
+
+			if (executeWeightHitCountPolicy(runBeforeHitPerAttempt, targetContext, moveMeta, targetSuppressionCount))
+			{
+				continue;
+			}
+
+			for (ub hitAttempt{0}; hitAttempt < hitCount && targetExists(mState, target) && targetContext.mDamage.mShouldContinue;
+				 ++hitAttempt)
+			{
+				mActiveSuppressions.resize(targetSuppressionCount);
+				EffectContext context{targetContext};
+				context.mHitAttemptIndex = static_cast<ub>(hitAttempt + 1U);
+
+				if (executeFixedHitCountPolicy(runBeforeHitPerAttempt, context, moveMeta))
+				{
+					break;
+				}
+
+				// Damage modifiers are dispatched once from each participant's perspective.
+				triggerSlotInContext(user, BattleEventID::DamageCalculation, context, BattleEventRole::User);
+				triggerSlotInContext(target, BattleEventID::DamageCalculation, context, BattleEventRole::Target);
+
+				executeMoveTrigger(*moveMeta, BattleEventID::Hit, BattleEventRole::Target, context);
+
+				executeDamageApplication(context, target);
+
+				applyRecoil(mState, context);
+				processFaints();
+
+				if (!context.mDamage.mIsMiss)
+				{
+					// User-owned effects such as Stench react to a successful hit on the current target.
+					triggerSlotInContext(user, BattleEventID::Hit, context, BattleEventRole::User);
+					executeMoveTrigger(*moveMeta, BattleEventID::AfterHit, BattleEventRole::Target, context);
+				}
+
+				if (!context.mDamage.mShouldContinue)
+				{
+					break;
+				}
+
+				targetContext = context;
+				targetContext.mDamage = {};
+				targetContext.resetMultipliers();
+			}
+		}
+
+		mActiveSuppressions.clear();
+	}
+
+	ATTR_NODISCARD bool BattleEngine::executeWeightHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &targetContext,
+																  const MoveMeta *moveMeta, std::size_t &targetSuppressionCount)
+	{
+		if (runBeforeHitPerAttempt)
+		{
+			return false;
+		}
+
+		targetContext.mHitAttemptIndex = 1U;
+		executeMoveTrigger(*moveMeta, BattleEventID::BeforeHit, BattleEventRole::Target, targetContext);
+
+		if (targetContext.mDamage.mIsMiss || !targetContext.mDamage.mShouldContinue)
+		{
+			return true;
+		}
+
+		targetSuppressionCount = mActiveSuppressions.size();
+
+		return false;
+	}
+
+	ATTR_NODISCARD bool BattleEngine::executeFixedHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &context,
+																 const MoveMeta *moveMeta)
+	{
+		if (runBeforeHitPerAttempt)
+		{
+			executeMoveTrigger(*moveMeta, BattleEventID::BeforeHit, BattleEventRole::Target, context);
+
+			if (context.mDamage.mIsMiss)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void BattleEngine::executeDamageApplication(const EffectContext &context, const BattleTarget &target)
+	{
+		if (context.mDamage.mShouldApplyDamage && context.mDamage.mDamage > 0U)
+		{
+			Pokemon *targetPokemon{activeSlots(mState, target.mSide).at(target.mSlotIndex).mPokemon};
+			const us damage{context.applyMultiplier(context.mDamage.mDamage)};
+			const us remainingHealth{
+				damage >= targetPokemon->getHealth() ? static_cast<us>(0) : static_cast<us>(targetPokemon->getHealth() - damage),
+			};
+
+			targetPokemon->setHealth(remainingHealth);
 		}
 	}
 

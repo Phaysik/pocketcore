@@ -238,6 +238,14 @@ namespace PocketCore::Battle
 
 			void executeEndTurnTrigger();
 
+			ATTR_NODISCARD bool executeWeightHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &targetContext,
+															const MoveMeta *moveMeta, std::size_t &targetSuppressionCount);
+
+			ATTR_NODISCARD bool executeFixedHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &context,
+														   const MoveMeta *moveMeta);
+
+			void executeDamageApplication(const EffectContext &context, const BattleTarget &target);
+
 			/*! @brief Dispatches an ability-and-item trigger for one active slot in a fresh suppression scope.
 				@param[in] owner The active slot whose ability and item receive the trigger.
 				@param[in] triggerID The trigger to dispatch.
