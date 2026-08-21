@@ -24,17 +24,17 @@ namespace PocketCore::Battle
 	*/
 	enum class BattleEventID : ub
 	{
-		BattleStart,       /*!< Fires once for each initially active Pokemon when a battle begins. */
-		SwitchIn,          /*!< Fires after a Pokemon enters an active battle slot. */
-		TurnEnd,           /*!< Fires for active Pokemon after all executable actions in a turn resolve. */
-		MoveUse,           /*!< Fires when an active Pokemon begins using a move. */
-		BeforeHit,         /*!< Fires before a move attempts to hit its target. */
+		BattleStart,	   /*!< Fires once for each initially active Pokemon when a battle begins. */
+		SwitchIn,		   /*!< Fires after a Pokemon enters an active battle slot. */
+		TurnEnd,		   /*!< Fires for active Pokemon after all executable actions in a turn resolve. */
+		MoveUse,		   /*!< Fires when an active Pokemon begins using a move. */
+		BeforeHit,		   /*!< Fires before a move attempts to hit its target. */
 		DamageCalculation, /*!< Fires while calculating damage for a move hit. */
-		Hit,               /*!< Fires when a move hit resolves against its target. */
-		AfterHit,          /*!< Fires after a move hit and its associated effects resolve. */
-		Faint,             /*!< Fires once when an active Pokemon faints. */
-		WeatherChanged,    /*!< Fires when the active weather changes. */
-		StatusChanged,     /*!< Fires when a Pokemon's status changes. */
+		Hit,			   /*!< Fires when a move hit resolves against its target. */
+		AfterHit,		   /*!< Fires after a move hit and its associated effects resolve. */
+		Faint,			   /*!< Fires once when an active Pokemon faints. */
+		WeatherChanged,	   /*!< Fires when the active weather changes. */
+		StatusChanged,	   /*!< Fires when a Pokemon's status changes. */
 	};
 
 	/*! @enum BattleEventRole
@@ -46,8 +46,8 @@ namespace PocketCore::Battle
 	*/
 	enum class BattleEventRole : ub
 	{
-		Any,    /*!< Matches an event without restricting it to a participant role. */
-		User,   /*!< Matches the Pokemon that initiated the event. */
+		Any,	/*!< Matches an event without restricting it to a participant role. */
+		User,	/*!< Matches the Pokemon that initiated the event. */
 		Target, /*!< Matches a Pokemon targeted by the event. */
 	};
 
@@ -60,11 +60,11 @@ namespace PocketCore::Battle
 	*/
 	enum class BattleTargetID : ub
 	{
-		Self,            /*!< Targets only the Pokemon that owns or uses the effect. */
-		AllAllies,      /*!< Targets every active Pokemon on the source's side, including the source. */
-		AllOpponents,   /*!< Targets every eligible active Pokemon on the opposing side. */
+		Self,			/*!< Targets only the Pokemon that owns or uses the effect. */
+		AllAllies,		/*!< Targets every active Pokemon on the source's side, including the source. */
+		AllOpponents,	/*!< Targets every eligible active Pokemon on the opposing side. */
 		SingleOpponent, /*!< Targets one explicitly selected or unambiguous eligible opponent. */
-		AllExceptSelf,  /*!< Targets every eligible active Pokemon except the source. */
+		AllExceptSelf,	/*!< Targets every eligible active Pokemon except the source. */
 	};
 
 	/*! @enum BattleRangeID
@@ -77,7 +77,7 @@ namespace PocketCore::Battle
 	enum class BattleRangeID : ub
 	{
 		Unrestricted, /*!< Allows eligible targets at any battlefield position. */
-		Adjacent,     /*!< Restricts eligible targets to the source's position or a neighboring position. */
+		Adjacent,	  /*!< Restricts eligible targets to the source's position or a neighboring position. */
 	};
 } // namespace PocketCore::Battle
 

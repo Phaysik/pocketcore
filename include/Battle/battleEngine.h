@@ -139,9 +139,8 @@ namespace PocketCore::Battle
 				@param[in] context The current effect context containing source-specific metadata identifiers.
 				@return True when at least one active rule suppresses the dispatch; otherwise false.
 			*/
-			ATTR_NODISCARD ATTR_PURE bool isSuppressed(const EffectSource source, const BattleTarget &owner,
-													   const BattleEventID eventID, const BattleEventRole role,
-													   const EffectContext &context) const noexcept;
+			ATTR_NODISCARD ATTR_PURE bool isSuppressed(const EffectSource source, const BattleTarget &owner, const BattleEventID eventID,
+													   const BattleEventRole role, const EffectContext &context) const noexcept;
 
 			/*! @brief Adds metadata suppression rules to the current dispatch scope.
 				@details Copies at most the smaller of @p suppressionRuleCount and @p suppressionRules.size(), associating every copied rule
@@ -245,8 +244,7 @@ namespace PocketCore::Battle
 				@param[in] eventTarget The optional event recipient used to initialize target coordinates; defaults to @p owner.
 			*/
 			void triggerSlot(const BattleTarget &owner, const BattleEventID eventID,
-							 const std::optional<BattleTarget> &eventTarget = std::nullopt,
-							 BattleEventRole role = BattleEventRole::Any);
+							 const std::optional<BattleTarget> &eventTarget = std::nullopt, BattleEventRole role = BattleEventRole::Any);
 
 			/*! @brief Dispatches an ability-and-item trigger through an existing effect context.
 				@details Activates all matching ability and item suppression rules before executing ability effects followed by item

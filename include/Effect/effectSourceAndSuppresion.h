@@ -20,8 +20,8 @@
 namespace PocketCore::Effect
 {
 	using PocketCore::Ability::AbilityID;
-	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleEventID;
+	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Core::ub;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;

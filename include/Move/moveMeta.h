@@ -25,9 +25,9 @@
 
 namespace PocketCore::Move
 {
-	using PocketCore::Battle::BattleRangeID;
 	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleEventRole;
+	using PocketCore::Battle::BattleRangeID;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::sb;

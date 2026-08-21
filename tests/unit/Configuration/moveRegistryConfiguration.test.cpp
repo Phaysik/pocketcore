@@ -15,9 +15,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Battle::BattleTargetID;
 using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
+using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
