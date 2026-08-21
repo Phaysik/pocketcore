@@ -65,6 +65,21 @@ namespace PocketCore::Effect
 	ATTR_NODISCARD us EffectContext::applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const
 	{
 		us damage{baseDamage};
+		double otherMultiplierValue{FIXED_POINT_MULTIPLIER_NUMERATOR};
+
+		const auto roundDownHalfSafe = [](const double value) -> double {
+			const double floorPart{std::floor(value)};
+			const double fractionalPart{value - floorPart};
+
+			// If it is strictly past the half point + tolerance, round up
+			if (fractionalPart > ROUND_DOWN_HALF_POINT + ROUND_DOWN_TOLERANCE)
+			{
+				return floorPart + 1.0;
+			}
+
+			// Otherwise, safely round down to the floor
+			return floorPart;
+		};
 
 		for (const auto &[multID, multiplier] : mActiveMultipliers)
 		{
@@ -72,38 +87,29 @@ namespace PocketCore::Effect
 
 			const MultiplierMeta *multiplierMeta{multiplierRegistry.getMultiplierMetadata(multID)};
 			const MultiplierApplicationPolicy policy{
-				multiplierMeta != nullptr ? multiplierMeta->mApplicationPolicy : MultiplierApplicationPolicy::Floor,
+				multiplierMeta != nullptr ? multiplierMeta->mApplicationPolicy : MultiplierApplicationPolicy::RoundHalfDown,
 			};
 
-			const auto roundDownHalfSafe = [](const double value) -> double {
-				double integerPart{};
-				const double fractionalPart{std::modf(value, &integerPart)};
-
-				if (fractionalPart > ROUND_DOWN_HALF_POINT + ROUND_DOWN_TOLERANCE)
-				{
-					return integerPart + 1.0;
-				}
-
-				return integerPart;
-			};
-
-			if (policy == MultiplierApplicationPolicy::Floor)
+			switch (policy)
 			{
-				damage = static_cast<us>(std::floor(damage * normalizedMultiplier));
-			}
-			else
-			{
-				const double fixedPointValue{
-					(FIXED_POINT_MULTIPLIER_NUMERATOR * normalizedMultiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
-				};
-
-				damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));
+				case MultiplierApplicationPolicy::RoundHalfDown:
+					damage = static_cast<us>(roundDownHalfSafe(damage * normalizedMultiplier));
+					break;
+				case MultiplierApplicationPolicy::Floor:
+					damage = static_cast<us>(std::floor(damage * normalizedMultiplier));
+					break;
+				case MultiplierApplicationPolicy::Other:
+				default:
+					otherMultiplierValue = std::round(otherMultiplierValue * normalizedMultiplier);
+					break;
 			}
 
 			damage = std::max(damage, static_cast<us>(1));
 		}
 
-		return damage;
+		otherMultiplierValue /= FIXED_POINT_MULTIPLIER_DENOMINATOR;
+
+		return std::max(static_cast<us>(roundDownHalfSafe(damage * otherMultiplierValue)), static_cast<us>(1));
 	}
 
 	ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> EffectContext::getActiveMultipliers() const noexcept

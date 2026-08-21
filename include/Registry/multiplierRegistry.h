@@ -29,6 +29,7 @@ namespace PocketCore::Registry::Multiplier
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Multiplier::BuiltinMultiplierID;
+	using PocketCore::Multiplier::MultiplierApplicationPolicy;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
 	using PocketCore::Multiplier::toMultiplierID;
@@ -63,10 +64,12 @@ namespace PocketCore::Registry::Multiplier
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_ABILITY,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Ability),
+					.mApplicationPolicy = MultiplierApplicationPolicy::Other,
 				});
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_ITEM,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Item),
+					.mApplicationPolicy = MultiplierApplicationPolicy::Other,
 				});
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TARGETS,
@@ -83,10 +86,12 @@ namespace PocketCore::Registry::Multiplier
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_CRITICAL,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Critical),
+					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_RANDOMIZATION,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Randomization),
+					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_STAB,
@@ -95,6 +100,7 @@ namespace PocketCore::Registry::Multiplier
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TYPE_EFFECTIVENESS,
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::TypeEffectiveness),
+					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
 					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_BURN,

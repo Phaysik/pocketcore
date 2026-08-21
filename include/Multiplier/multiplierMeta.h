@@ -24,8 +24,9 @@ namespace PocketCore::Multiplier
 	*/
 	enum class MultiplierApplicationPolicy : ub
 	{
-		Floor, /*!< Applies directly to damage and discards the fractional result. */
-		Other, /*!< Combines in 4096 fixed-point space with other values before one final damage application. */
+		RoundHalfDown, /*!< Applies directly to damage and rounds fractional halves down. */
+		Floor,		   /*!< Applies directly to damage and discards the fractional result. */
+		Other,		   /*!< Combines in 4096 fixed-point space with other values before one final damage application. */
 	};
 
 	/*! @struct MultiplierMeta Multiplier/multiplierMeta.h
@@ -47,7 +48,7 @@ namespace PocketCore::Multiplier
 			MultiplierID mMultiplierID{};
 
 			/*! @brief The calculation policy used when applying this multiplier to damage. */
-			MultiplierApplicationPolicy mApplicationPolicy{MultiplierApplicationPolicy::Floor};
+			MultiplierApplicationPolicy mApplicationPolicy{MultiplierApplicationPolicy::RoundHalfDown};
 	};
 } // namespace PocketCore::Multiplier
 

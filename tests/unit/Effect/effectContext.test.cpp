@@ -103,7 +103,7 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("the multiplied damage rounds up")
 		{
-			CHECK((context.applyMultiplier(11U, multiplierRegistry) == 17U));
+			CHECK((context.applyMultiplier(11U, multiplierRegistry) == 18U));
 		}
 	}
 
