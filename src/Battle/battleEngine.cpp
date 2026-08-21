@@ -12,6 +12,7 @@
 #include <array>
 #include <cstddef>
 #include <expected>
+#include <iostream>
 #include <optional>
 #include <span>
 #include <utility>
@@ -28,7 +29,6 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/builtInEffectID.h"
 #include "Effect/effectContext.h"
 #include "Effect/effectMeta.h"
 #include "Effect/effectSourceAndSuppresion.h"
@@ -645,7 +645,7 @@ namespace PocketCore::Battle
 		if (context.mDamage.mShouldApplyDamage && context.mDamage.mDamage > 0U)
 		{
 			Pokemon *targetPokemon{activeSlots(mState, target.mSide).at(target.mSlotIndex).mPokemon};
-			const us damage{context.applyMultiplier(context.mDamage.mDamage)};
+			const us damage{context.applyMultiplier(context.mDamage.mDamage, *mProvider->multiplierRegistry)};
 			const us remainingHealth{
 				damage >= targetPokemon->getHealth() ? static_cast<us>(0) : static_cast<us>(targetPokemon->getHealth() - damage),
 			};

@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <ostream>
 #include <string_view>
 
 #include "Ability/abilityID.h"
@@ -21,6 +22,7 @@
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Registry/registryProvider.h"
 #include "Registry/statusRegistry.h"
 #include "Status/statusHelpers.h"
 #include "Status/statusID.h"
@@ -39,6 +41,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Status::hasInteraction;
 	using PocketCore::Status::NO_STATUS_ID;
@@ -380,6 +383,8 @@ namespace PocketCore::Pokemon
 				mStatusIDs.at(nextActiveStatusIndex) = statusID;
 			}
 
+			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
+
 		private:
 			std::string_view mName{};
 
@@ -402,6 +407,16 @@ namespace PocketCore::Pokemon
 			AbilityID mAbilityID{};
 			ItemID mItemID{};
 	};
+
+	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.
+		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
+	   printed as `<unregistered>`.
+		@param[in,out] outStream The stream receiving the formatted Pokemon state.
+		@param[in] pokemon The Pokemon whose state is printed.
+		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
+		@return The supplied stream after writing the complete representation.
+	*/
+	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Pokemon
 
 #endif

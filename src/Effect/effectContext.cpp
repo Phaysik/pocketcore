@@ -10,6 +10,8 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Multiplier/multiplierID.h"
+#include "Multiplier/multiplierMeta.h"
+#include "Registry/multiplierRegistry.h"
 
 namespace PocketCore::Effect
 {
@@ -18,7 +20,10 @@ namespace PocketCore::Effect
 	using PocketCore::Configuration::ROUND_DOWN_HALF_POINT;
 	using PocketCore::Configuration::ROUND_DOWN_TOLERANCE;
 	using PocketCore::Core::us;
+	using PocketCore::Multiplier::MultiplierApplicationPolicy;
 	using PocketCore::Multiplier::MultiplierID;
+	using PocketCore::Multiplier::MultiplierMeta;
+	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 
 	void EffectContext::setMultiplier(const MultiplierID multID, const double value)
 	{
@@ -57,13 +62,17 @@ namespace PocketCore::Effect
 		mActiveMultipliers.emplace_back(multID, value);
 	}
 
-	ATTR_NODISCARD us EffectContext::applyMultiplier(const us baseDamage) const
+	ATTR_NODISCARD us EffectContext::applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const
 	{
 		us damage{baseDamage};
 
 		for (const auto &[multID, multiplier] : mActiveMultipliers)
 		{
-			const double normalizedMultiplier{std::max(multiplier, 1.0)};
+			const double normalizedMultiplier{std::isfinite(multiplier) ? std::max(multiplier, 0.0) : 1.0};
+
+			const MultiplierMeta *multiplierMeta{multiplierRegistry.getMultiplierMetadata(multID)};
+			const MultiplierApplicationPolicy policy{multiplierMeta != nullptr ? multiplierMeta->mApplicationPolicy
+																			   : MultiplierApplicationPolicy::Floor};
 
 			const auto roundDownHalfSafe = [](const double value) -> double {
 				double integerPart{};
@@ -77,11 +86,18 @@ namespace PocketCore::Effect
 				return integerPart;
 			};
 
-			const double fixedPointValue{
-				(FIXED_POINT_MULTIPLIER_NUMERATOR * normalizedMultiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
-			};
+			if (policy == MultiplierApplicationPolicy::Floor)
+			{
+				damage = static_cast<us>(std::floor(damage * normalizedMultiplier));
+			}
+			else
+			{
+				const double fixedPointValue{
+					(FIXED_POINT_MULTIPLIER_NUMERATOR * normalizedMultiplier) / FIXED_POINT_MULTIPLIER_DENOMINATOR,
+				};
 
-			damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));
+				damage = static_cast<us>(roundDownHalfSafe(damage * fixedPointValue));
+			}
 
 			damage = std::max(damage, static_cast<us>(1));
 		}

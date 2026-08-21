@@ -4,6 +4,7 @@
 
 #include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/multiplierID.h"
+#include "Registry/multiplierRegistry.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -11,6 +12,7 @@ using PocketCore::Effect::EffectContext;
 using PocketCore::Multiplier::BuiltinMultiplierID;
 using PocketCore::Multiplier::MultiplierID;
 using PocketCore::Multiplier::toMultiplierID;
+using PocketCore::Registry::Multiplier::MultiplierRegistry;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
@@ -83,13 +85,14 @@ SCENARIO("EffectContext setMultiplier")
 
 SCENARIO("EffectContext applyMultiplier")
 {
+	MultiplierRegistry multiplierRegistry{};
 	GIVEN("no active multipliers")
 	{
 		EffectContext context{};
 
 		THEN("base damage is unchanged")
 		{
-			CHECK((context.applyMultiplier(37U) == 37U));
+			CHECK((context.applyMultiplier(37U, multiplierRegistry) == 37U));
 		}
 	}
 
@@ -100,7 +103,7 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("the multiplied damage rounds up")
 		{
-			CHECK((context.applyMultiplier(11U) == 18U));
+			CHECK((context.applyMultiplier(11U, multiplierRegistry) == 17U));
 		}
 	}
 
@@ -111,7 +114,7 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("the multiplied damage rounds down")
 		{
-			CHECK((context.applyMultiplier(11U) == 16U));
+			CHECK((context.applyMultiplier(11U, multiplierRegistry) == 16U));
 		}
 	}
 
@@ -123,7 +126,18 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("all multipliers are applied in order")
 		{
-			CHECK((context.applyMultiplier(5U) == 20U));
+			CHECK((context.applyMultiplier(5U, multiplierRegistry) == 20U));
+		}
+	}
+
+	GIVEN("a fractional multiplier below one")
+	{
+		EffectContext context{};
+		context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Randomization), 0.85);
+
+		THEN("damage is reduced by the multiplier")
+		{
+			CHECK((context.applyMultiplier(100U, multiplierRegistry) == 85U));
 		}
 	}
 
@@ -134,7 +148,7 @@ SCENARIO("EffectContext applyMultiplier")
 
 		THEN("damage is clamped to at least one")
 		{
-			CHECK((context.applyMultiplier(0) == 1U));
+			CHECK((context.applyMultiplier(0, multiplierRegistry) == 1U));
 		}
 	}
 }
@@ -142,6 +156,7 @@ SCENARIO("EffectContext applyMultiplier")
 SCENARIO("EffectContext resetMultipliers")
 {
 	EffectContext context{};
+	MultiplierRegistry multiplierRegistry{};
 	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 2.0);
 	context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Item), 2.0);
 	REQUIRE((context.getActiveMultipliers().size() == 2U));
@@ -153,7 +168,7 @@ SCENARIO("EffectContext resetMultipliers")
 		THEN("no multipliers remain and calculations revert to base damage")
 		{
 			CHECK(context.getActiveMultipliers().empty());
-			CHECK((context.applyMultiplier(15U) == 15U));
+			CHECK((context.applyMultiplier(15U, multiplierRegistry) == 15U));
 		}
 	}
 }

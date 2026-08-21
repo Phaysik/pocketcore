@@ -8,9 +8,11 @@
 
 #include <array>
 #include <cstdlib>
+#include <iostream>
 #include <string_view>
 
 #include "Ability/abilityID.h"
+#include "Ability/builtInAbilityID.h"
 #include "Battle/battleAction.h"
 #include "Battle/battleEngine.h"
 #include "Configuration/abilityRegistryConfiguration.h"
@@ -22,11 +24,13 @@
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Configuration/weatherRegistryConfiguration.h"
+#include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Move/builtInMoveID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Types/builtInTypeID.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
 
@@ -39,18 +43,24 @@
 */
 int main()
 {
+	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Ability::toAbilityID;
 	using PocketCore::Battle::BattleAction;
 	using PocketCore::Battle::BattleEngine;
 	using PocketCore::Battle::BattleTarget;
 	using PocketCore::Battle::MoveAction;
 	using PocketCore::Effect::Side;
+	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::NO_ITEM_ID;
+	using PocketCore::Item::toItemID;
 	using PocketCore::Move::BuiltinMoveID;
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Types::BuiltInTypeID;
+	using PocketCore::Types::toTypeID;
 	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
 
@@ -83,15 +93,22 @@ int main()
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
 
-	Pokemon pokemonA{"Pokemon A", 100U, 100U, 100U, 90U, 100U, 100U, 50U, NO_ABILITY_ID, NO_ITEM_ID};
+	Pokemon pokemonA{
+		"Feraligatr", 100U, 100U, 100U, 90U, 100U, 100U, 50U, toAbilityID(BuiltinAbilityID::Drizzle), toItemID(BuiltinItemID::CheriBerry),
+	};
 	pokemonA.setMove(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonA.setMaxPP(0U, 35U);
 	pokemonA.setCurrentPP(0U, 35U);
+	pokemonA.setType(0, toTypeID(BuiltInTypeID::Water));
 
-	Pokemon pokemonB{"Pokemon B", 100U, 100U, 100U, 80U, 100U, 100U, 50U, NO_ABILITY_ID, NO_ITEM_ID};
+	Pokemon pokemonB{
+		"Charizard", 100U, 100U, 100U, 80U, 100U, 100U, 50U, toAbilityID(BuiltinAbilityID::Stench), toItemID(BuiltinItemID::ChestoBerry),
+	};
 	pokemonB.setMove(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonB.setMaxPP(0U, 35U);
 	pokemonB.setCurrentPP(0U, 35U);
+	pokemonB.setType(0, toTypeID(BuiltInTypeID::Fire));
+	pokemonB.setType(1, toTypeID(BuiltInTypeID::Flying));
 
 	const std::array<Pokemon *, 1> partyA{&pokemonA};
 	const std::array<Pokemon *, 1> partyB{&pokemonB};
@@ -121,6 +138,14 @@ int main()
 	{
 		return EXIT_FAILURE;
 	}
+
+	std::cout << "PartyA[0]: " << partyA.at(0)->getHealth() << '\n';
+	// std::cout << "PartyA[0]:\n";
+	// printPokemonWithNames(std::cout, *partyA.at(0), registryProvider) << '\n';
+
+	std::cout << "PartyB[0]: " << partyB.at(0)->getHealth() << '\n';
+	// std::cout << "PartyB[0]:\n";
+	// printPokemonWithNames(std::cout, *partyB.at(0), registryProvider) << '\n';
 
 	return EXIT_SUCCESS;
 }

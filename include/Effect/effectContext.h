@@ -27,6 +27,7 @@
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Registry/multiplierRegistry.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
 
@@ -45,6 +46,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::MultiplierMeta;
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Types::TypeID;
 
@@ -72,7 +74,7 @@ namespace PocketCore::Effect
 		public:
 			void setMultiplier(const MultiplierID multID, const double value);
 
-			ATTR_NODISCARD us applyMultiplier(const us baseDamage) const;
+			ATTR_NODISCARD us applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const;
 
 			void resetMultipliers();
 

@@ -1,10 +1,13 @@
 #include "Pokemon/pokemon.h"
 
 #include <array>
+#include <sstream>
+#include <string>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Item/itemID.h"
+#include "Move/moveID.h"
 #include "Registry/statusRegistry.h"
 #include "Status/builtInStatusID.h"
 #include "Status/statusID.h"
@@ -18,6 +21,7 @@ using PocketCore::Ability::AbilityID;
 using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 using PocketCore::Item::ItemID;
+using PocketCore::Move::MoveID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
@@ -102,6 +106,54 @@ SCENARIO("Pokemon health bounds")
 			THEN("current health is clamped to the maximum")
 			{
 				CHECK((pokemon.getHealth() == 100U));
+			}
+		}
+	}
+}
+
+SCENARIO("Pokemon stream output")
+{
+	GIVEN("a Pokemon with populated identifiers, stats, statuses, moves, and PP")
+	{
+		std::array<MoveID, 4> moveIDs{MoveID{10U}, MoveID{11U}, MoveID{12U}, MoveID{13U}};
+		std::array<PocketCore::Core::ub, 4> maxPP{15U, 20U, 25U, 30U};
+		std::array<PocketCore::Core::ub, 4> currentPP{5U, 10U, 15U, 20U};
+		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{TypeID{2U}, TypeID{3U}};
+		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP, 101U,		   102U,	   150U,
+						103U,		 104U,	  105U,	 50U,		AbilityID{6U}, ItemID{7U}, typeIDs};
+		std::array<StatusID, MAX_STATUSES_PER_POKEMON> statusIDs{StatusID{20U}, StatusID{21U}, StatusID{22U}, StatusID{23U}, StatusID{24U}};
+		pokemon.setStatusesArray(statusIDs);
+
+		WHEN("the Pokemon is written to a stream")
+		{
+			std::ostringstream output;
+			output << pokemon;
+
+			THEN("all public state is written with numeric identifiers and PP")
+			{
+				std::string expected{
+					"Pokemon {\n"
+					"  Name: Streammon\n"
+					"  Level: 50\n"
+					"  Level Damage Factor: 22\n"
+					"  Health: 150/150\n"
+					"  Attack: 101\n"
+					"  Defense: 102\n"
+					"  Special Attack: 104\n"
+					"  Special Defense: 105\n"
+					"  Speed: 103\n"
+					"  Ability ID: 6\n"
+					"  Item ID: 7\n"
+					"  Type IDs: [2, 3]\n"
+					"  Status IDs: [20, 21, 22, 23, 24]\n"
+					"  Moves:\n"
+					"    [0] ID: 10, PP: 5/15\n"
+					"    [1] ID: 11, PP: 10/20\n"
+					"    [2] ID: 12, PP: 15/25\n"
+					"    [3] ID: 13, PP: 20/30\n"
+					"}",
+				};
+				CHECK((output.str() == expected));
 			}
 		}
 	}
