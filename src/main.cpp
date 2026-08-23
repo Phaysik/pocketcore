@@ -20,6 +20,7 @@
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
+#include "Configuration/natureRegistryConfiguration.h"
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
@@ -80,6 +81,7 @@ int main()
 	const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
 	const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
 	const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
+	const Configuration::NatureRegistryConfiguration natureRegistryConfig{};
 
 	const RegistryProvider registryProvider{
 		.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -90,11 +92,21 @@ int main()
 		.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
 		.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
 		.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+		.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
 
 	Pokemon pokemonA{
-		"Feraligatr", 100U, 100U, 100U, 90U, 100U, 100U, 50U, toAbilityID(BuiltinAbilityID::Drizzle), toItemID(BuiltinItemID::CheriBerry),
+		"Feraligatr",
+		100U,
+		100U,
+		100U,
+		90U,
+		100U,
+		100U,
+		50U,
+		{toAbilityID(BuiltinAbilityID::Drizzle)},
+		{toItemID(BuiltinItemID::CheriBerry)},
 	};
 	pokemonA.setMove(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonA.setMaxPP(0U, 35U);
@@ -102,7 +114,16 @@ int main()
 	pokemonA.setType(0, toTypeID(BuiltInTypeID::Water));
 
 	Pokemon pokemonB{
-		"Charizard", 100U, 100U, 100U, 80U, 100U, 100U, 50U, toAbilityID(BuiltinAbilityID::Stench), toItemID(BuiltinItemID::ChestoBerry),
+		"Charizard",
+		100U,
+		100U,
+		100U,
+		80U,
+		100U,
+		100U,
+		50U,
+		{toAbilityID(BuiltinAbilityID::Stench)},
+		{toItemID(BuiltinItemID::ChestoBerry)},
 	};
 	pokemonB.setMove(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonB.setMaxPP(0U, 35U);

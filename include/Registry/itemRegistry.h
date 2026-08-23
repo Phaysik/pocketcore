@@ -58,7 +58,7 @@ namespace PocketCore::Registry::Item
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID. */
-			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{static_cast<us>(toItemID(BuiltinItemID::ChestoBerry).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{toItemID(BuiltinItemID::FinalItem).getValue()}
 			{
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({

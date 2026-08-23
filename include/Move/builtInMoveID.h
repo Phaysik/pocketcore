@@ -34,6 +34,7 @@ namespace PocketCore::Move
 
 		Facade,
 		HydroSteam,
+		FinalMove,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

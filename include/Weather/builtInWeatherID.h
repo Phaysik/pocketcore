@@ -39,6 +39,7 @@ namespace PocketCore::Weather
 		HeavyRain,
 		StrongWinds,
 		ShadowyAura,
+		FinalWeather,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

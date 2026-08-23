@@ -52,8 +52,7 @@ namespace PocketCore::Registry::Terrain
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinTerrainID. */
-			ATTR_NOINLINE explicit constexpr TerrainRegistry()
-				: Base{static_cast<us>(toTerrainID(BuiltinTerrainID::Psychic).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr TerrainRegistry() : Base{toTerrainID(BuiltinTerrainID::FinalTerrain).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Terrain::TERRAIN_NAME_NONE, .mTerrainID = toTerrainID(BuiltinTerrainID::None)});
 				addBuiltin({

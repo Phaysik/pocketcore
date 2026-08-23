@@ -47,6 +47,7 @@ namespace PocketCore::Types
 		Steel,
 		Fairy,
 		Stellar,
+		FinalType,
 	};
 
 	/*! @brief Converts a built-in type catalog value to its stable registry identifier.

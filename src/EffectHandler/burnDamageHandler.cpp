@@ -44,7 +44,7 @@ namespace PocketCore::Effect
 		}
 
 		const bool isBurned{Status::statusAlreadyExists(toStatusID(BuiltinStatusID::Burn), userPokemon->getStatusesArray())};
-		const bool abilityIsntGuts{userPokemon->getAbilityID() != toAbilityID(BuiltinAbilityID::Guts)};
+		const bool abilityIsntGuts{!std::ranges::contains(userPokemon->getAbilitiesArray(), toAbilityID(BuiltinAbilityID::Guts))};
 		const bool moveIsntFacade{context.mMoveID != toMoveID(BuiltinMoveID::Facade)};
 
 		if (isBurned && !context.mIsSpecial && abilityIsntGuts && moveIsntFacade)

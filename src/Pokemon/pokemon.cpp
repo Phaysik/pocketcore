@@ -27,13 +27,25 @@ namespace PocketCore::Pokemon
 				  << "  Special Attack: " << pokemon.getSpAttack() << '\n'
 				  << "  Special Defense: " << pokemon.getSpDefense() << '\n'
 				  << "  Speed: " << pokemon.getSpeed() << '\n'
-				  << "  Ability ID: " << pokemon.getAbilityID().getValue() << '\n'
-				  << "  Item ID: " << pokemon.getItemID().getValue() << '\n'
 				  << "  Type IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getTypesArray().size(); ++index)
 		{
 			outStream << (index == 0U ? "" : ", ") << pokemon.getTypeID(static_cast<ub>(index)).getValue();
+		}
+
+		outStream << "]\n  Ability IDs: [";
+
+		for (std::size_t index{0}; index < pokemon.getAbilitiesArray().size(); ++index)
+		{
+			outStream << (index == 0U ? "" : ", ") << pokemon.getAbilityID(static_cast<ub>(index)).getValue();
+		}
+
+		outStream << "]\n  Item IDs: [";
+
+		for (std::size_t index{0}; index < pokemon.getItemsArray().size(); ++index)
+		{
+			outStream << (index == 0U ? "" : ", ") << pokemon.getItemID(static_cast<ub>(index)).getValue();
 		}
 
 		outStream << "]\n  Status IDs: [";
@@ -77,16 +89,7 @@ namespace PocketCore::Pokemon
 				  << "  Defense: " << pokemon.getDefense() << '\n'
 				  << "  Special Attack: " << pokemon.getSpAttack() << '\n'
 				  << "  Special Defense: " << pokemon.getSpDefense() << '\n'
-				  << "  Speed: " << pokemon.getSpeed() << "\n  Ability:\n";
-
-		printIDAndName("    ", pokemon.getAbilityID(), [&registryProvider](const AbilityID abilityID) {
-			return registryProvider.abilityRegistry != nullptr ? registryProvider.abilityRegistry->getAbilityName(abilityID) : std::nullopt;
-		});
-
-		outStream << "\n  Item:\n";
-		printIDAndName("    ", pokemon.getItemID(), [&registryProvider](const ItemID itemID) {
-			return registryProvider.itemRegistry != nullptr ? registryProvider.itemRegistry->getItemName(itemID) : std::nullopt;
-		});
+				  << "  Speed: " << pokemon.getSpeed() << '\n';
 
 		outStream << "\n  Types:\n";
 		for (std::size_t index{0}; index < pokemon.getTypesArray().size(); ++index)
@@ -95,6 +98,29 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 			printIDAndName("      ", typeID, [&registryProvider](const TypeID identifier) {
 				return registryProvider.typeRegistry != nullptr ? registryProvider.typeRegistry->getTypeName(identifier) : std::nullopt;
+			});
+			outStream << '\n';
+		}
+
+		outStream << "\n  Abilities:\n";
+		for (std::size_t index{0}; index < pokemon.getAbilitiesArray().size(); ++index)
+		{
+			const AbilityID abilityID{pokemon.getAbilityID(static_cast<ub>(index))};
+			outStream << "    [" << index << "]:\n";
+			printIDAndName("      ", abilityID, [&registryProvider](const AbilityID identifier) {
+				return registryProvider.abilityRegistry != nullptr ? registryProvider.abilityRegistry->getAbilityName(identifier)
+																   : std::nullopt;
+			});
+			outStream << '\n';
+		}
+
+		outStream << "\n  Items:\n";
+		for (std::size_t index{0}; index < pokemon.getItemsArray().size(); ++index)
+		{
+			const ItemID itemID{pokemon.getItemID(static_cast<ub>(index))};
+			outStream << "    [" << index << "]:\n";
+			printIDAndName("      ", itemID, [&registryProvider](const ItemID identifier) {
+				return registryProvider.itemRegistry != nullptr ? registryProvider.itemRegistry->getItemName(identifier) : std::nullopt;
 			});
 			outStream << '\n';
 		}

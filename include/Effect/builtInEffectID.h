@@ -42,6 +42,7 @@ namespace PocketCore::Effect
 		SetSun,
 		SetRain,
 		PsychicTerrainPriorityBlock,
+		FinalEffect,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

@@ -13,6 +13,7 @@
 #include "itemRegistry.h"
 #include "moveRegistry.h"
 #include "multiplierRegistry.h"
+#include "natureRegistry.h"
 #include "statusRegistry.h"
 #include "terrainRegistry.h"
 #include "typeRegistry.h"
@@ -72,6 +73,11 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref Multiplier::MultiplierRegistry instance for multiplier metadata queries.
 			*/
 			const Multiplier::MultiplierRegistry *multiplierRegistry;
+
+			/*! @brief Non-owning pointer to the nature metadata registry.
+				@details Must point to a valid @ref Nature::NatureRegistry instance for nature metadata queries.
+			*/
+			const Nature::NatureRegistry *natureRegistry;
 	};
 } // namespace PocketCore::Registry
 

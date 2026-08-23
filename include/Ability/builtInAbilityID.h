@@ -39,6 +39,7 @@ namespace PocketCore::Ability
 		Elevate,
 		AirLock,
 		CloudNine,
+		FinalAbility,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

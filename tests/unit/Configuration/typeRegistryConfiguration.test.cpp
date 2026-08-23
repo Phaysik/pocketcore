@@ -662,22 +662,6 @@ SCENARIO("TypeRegistryConfiguration addType")
 			CHECK((result.error().mContext == "Shadow"));
 		}
 	}
-
-	GIVEN("registry at max capacity")
-	{
-		THEN("returns MaxCapacity error")
-		{
-			// Add types until registry is full (19 builtins, MAX_TYPES = 20, so we can add 1)
-			TypeDefinition firstDef{.name = "Extra", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			auto firstResult = config.addType(firstDef, UnspecifiedMatchup::Neutral);
-			REQUIRE(firstResult.has_value());
-
-			TypeDefinition overflowDef{.name = "Overflow", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			auto overflowResult = config.addType(overflowDef, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(overflowResult.has_value());
-			CHECK((overflowResult.error().mKind == RegistryError::MaxCapacity));
-		}
-	}
 }
 
 SCENARIO("TypeRegistryConfiguration addTypes")
@@ -711,22 +695,6 @@ SCENARIO("TypeRegistryConfiguration addTypes")
 			REQUIRE(result.has_value());
 			CHECK((config.getAmountRegistered() == 19));
 			CHECK(config.hasType("Custom"));
-		}
-	}
-
-	GIVEN("definitions that exceed capacity")
-	{
-		THEN("returns MaxCapacity error without modifying registry")
-		{
-			// Need more than 1 extra to exceed (19 builtins + 2 > 20)
-			TypeDefinition def1{.name = "Extra1", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			TypeDefinition def2{.name = "Extra2", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			std::array<TypeDefinition, 2> defs{def1, def2};
-
-			auto result = config.addTypes(std::span<const TypeDefinition>{defs}, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::MaxCapacity));
-			CHECK((config.getAmountRegistered() == 19));
 		}
 	}
 

@@ -22,11 +22,12 @@ namespace PocketCore::Configuration
 
 	// MARK: Constexpr statements
 
-	inline constexpr ub MAX_TYPES{20};
+	inline constexpr us MAX_TYPES{1'000};
 	inline constexpr ub MAX_TYPES_PER_POKEMON{2};
 
 	inline constexpr us MAX_ABILITIES{1'000};
 	inline constexpr ub MAX_ABILITIES_PER_POKEMON{1};
+	inline constexpr ub MAX_ABILITY_POOL_PER_POKEMON{10};
 
 	inline constexpr us MAX_ITEMS{1'000};
 	inline constexpr ub MAX_ITEMS_PER_POKEMON{1};
@@ -36,6 +37,12 @@ namespace PocketCore::Configuration
 
 	inline constexpr us MAX_STATUSES{1'000};
 	inline constexpr us MAX_STATUSES_PER_POKEMON{5};
+
+	inline constexpr us MAX_NATURES{1'000};
+	inline constexpr ub MAX_NATURES_PER_POKEMON{1};
+
+	inline constexpr us MAX_POKEMON{10'000};
+	inline constexpr us MAX_LEARNSETS{1'000};
 
 	inline constexpr us MAX_WEATHERS{1'000};
 	inline constexpr us MAX_TERRAINS{1'000};
@@ -97,6 +104,11 @@ namespace PocketCore::Configuration
 	inline constexpr double ROUND_DOWN_HALF_POINT{0.5};
 	inline constexpr double ROUND_DOWN_TOLERANCE{1e-9};
 
+	inline constexpr double NATURE_STAT_BASE_MULTIPLIER{1.0};
+	inline constexpr double NATURE_STAT_BOOST_MULTIPLIER{1.1};
+	inline constexpr double NATURE_STAT_WEAKNESS_MULTIPLIER{0.9};
+	inline constexpr ub MAX_STAT_TYPES{6};
+
 	inline constexpr sb MAX_STAT_STAGES{6};
 	inline constexpr sb MAX_STAGE_CACHE{(MAX_STAT_STAGES * 2) + 1};
 
@@ -131,6 +143,10 @@ namespace PocketCore::Configuration
 		MultiplierNotFound,	 /*!< No multiplier matching the input was found. */
 		DuplicateEffect,	 /*!< An effect with the given name already exists. */
 		EffectNotFound,		 /*!< No effect matching the input was found. */
+		DuplicateNature,	 /*!< A nature with the given name already exists. */
+		NatureNotFound,		 /*!< No nature matching the input was found. */
+		DuplicatePokemon,	 /*!< A Pokemon with the given name already exists. */
+		PokemonNotFound,	 /*!< No Pokemon matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -257,6 +273,18 @@ namespace PocketCore::Configuration
 						break;
 					case RegistryError::EffectNotFound:
 						mErrorName = "EffectNotFound";
+						break;
+					case RegistryError::DuplicateNature:
+						mErrorName = "DuplicateNature";
+						break;
+					case RegistryError::NatureNotFound:
+						mErrorName = "NatureNotFound";
+						break;
+					case RegistryError::DuplicatePokemon:
+						mErrorName = "DuplicatePokemon";
+						break;
+					case RegistryError::PokemonNotFound:
+						mErrorName = "PokemonNotFound";
 						break;
 					// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this
 					// silences compiler warnings about unhandled enum values.

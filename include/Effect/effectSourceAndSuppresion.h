@@ -16,6 +16,7 @@
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Nature/natureID.h"
 
 namespace PocketCore::Effect
 {
@@ -25,6 +26,7 @@ namespace PocketCore::Effect
 	using PocketCore::Core::ub;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Nature::NatureID;
 
 	enum class EffectSource : ub
 	{
@@ -33,6 +35,7 @@ namespace PocketCore::Effect
 		Ability,
 		Item,
 		Hazard,
+		Nature,
 	};
 
 	struct SuppressionRule
@@ -41,6 +44,7 @@ namespace PocketCore::Effect
 			std::optional<AbilityID> mTargetAbilityID{};
 			std::optional<ItemID> mTargetItemID{};
 			std::optional<MoveID> mTargetMoveID{};
+			std::optional<NatureID> mTargetNatureID{};
 			BattleEventID mTargetTrigger{};
 			BattleEventRole mTargetRole{BattleEventRole::Any};
 			EffectSource mTargetSource{};

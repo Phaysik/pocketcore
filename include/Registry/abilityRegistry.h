@@ -58,8 +58,7 @@ namespace PocketCore::Registry::Ability
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID. */
-			ATTR_NOINLINE explicit constexpr AbilityRegistry()
-				: Base{static_cast<us>(toAbilityID(BuiltinAbilityID::Drizzle).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr AbilityRegistry() : Base{toAbilityID(BuiltinAbilityID::FinalAbility).getValue()}
 			{
 				addBuiltin({
 					.mTriggers = {},

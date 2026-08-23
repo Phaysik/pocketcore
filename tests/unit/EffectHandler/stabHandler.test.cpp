@@ -40,7 +40,7 @@ namespace
 {
 	Pokemon makePokemonWithTypes(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &types)
 	{
-		return Pokemon{"UnitMon", 100U, 100U, 100U, 100U, 100U, 100U, 50U, NO_ABILITY_ID, NO_ITEM_ID, types};
+		return Pokemon{"UnitMon", 100U, 100U, 100U, 100U, 100U, 100U, 50U, {NO_ABILITY_ID}, {NO_ITEM_ID}, types};
 	}
 
 	RegistryProvider makeNullProvider()
@@ -54,6 +54,7 @@ namespace
 			.weatherRegistry = nullptr,
 			.terrainRegistry = nullptr,
 			.multiplierRegistry = nullptr,
+			.natureRegistry = nullptr,
 		};
 	}
 } // namespace

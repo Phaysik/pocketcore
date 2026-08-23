@@ -22,6 +22,7 @@
 #include "Effect/effectSourceAndSuppresion.h"
 #include "Item/itemMeta.h"
 #include "Move/moveMeta.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
@@ -42,6 +43,7 @@ namespace PocketCore::Battle
 	using PocketCore::Effect::SuppressionRule;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Move::MoveMeta;
+	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
@@ -169,6 +171,14 @@ namespace PocketCore::Battle
 			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
 										  const BattleEventRole role);
 
+			/*! @brief Activates suppression rules from nature entries matching a trigger.
+				@param[in] natureMeta The nature metadata whose matching trigger entries are inspected.
+				@param[in] owner The active slot that owns the nature.
+				@param[in] triggerID The trigger whose suppression rules become active.
+			*/
+			void activateNatureSuppressions(const NatureMeta &natureMeta, const BattleTarget &owner, const BattleEventID eventID,
+											const BattleEventRole role);
+
 			/*! @brief Invokes one registered built-in effect against the mutable battle state and context.
 				@details Missing registry dependencies, missing effect metadata, or a null apply function make the invocation a no-op.
 				@param[in] effect The built-in effect identifier to resolve.
@@ -235,6 +245,18 @@ namespace PocketCore::Battle
 			*/
 			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleEventID eventID,
 									const BattleEventRole role, EffectContext &context, const bool targetEffects);
+
+			/*! @brief Executes unsuppressed nature entries matching a trigger.
+				@details Stamps nature identity into @p context and either resolves the nature's declared targets or executes effects
+			   directly against an already prepared event context.
+				@param[in] owner The active slot that owns the nature.
+				@param[in] natureMeta The nature metadata containing trigger entries and targeting rules.
+				@param[in] triggerID The nature trigger to dispatch.
+				@param[in,out] context The context stamped with the nature source and passed to matching effects.
+				@param[in] targetEffects True to resolve the nature target selector; false to preserve the existing event target.
+			*/
+			void executeNatureTrigger(const BattleTarget &owner, const NatureMeta &natureMeta, const BattleEventID eventID,
+									  const BattleEventRole role, EffectContext &context, const bool targetEffects);
 
 			void executeEndTurnTrigger();
 

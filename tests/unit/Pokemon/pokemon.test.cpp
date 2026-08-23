@@ -42,7 +42,7 @@ SCENARIO("Pokemon type identifiers")
 {
 	GIVEN("a Pokemon constructed without explicit types")
 	{
-		Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}};
+		Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}};
 
 		THEN("both type slots are unassigned")
 		{
@@ -57,7 +57,7 @@ SCENARIO("Pokemon type identifiers")
 		TypeID builtInTypeID{toTypeID(BuiltInTypeID::Fire)};
 		TypeID customTypeID{42};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{builtInTypeID, customTypeID};
-		Pokemon pokemon{"Hybrid", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}, typeIDs};
+		Pokemon pokemon{"Hybrid", 1, 1, 1, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}, typeIDs};
 
 		THEN("the constructor preserves both identifiers")
 		{
@@ -92,7 +92,7 @@ SCENARIO("Pokemon type identifiers")
 
 SCENARIO("Pokemon health bounds")
 {
-	Pokemon pokemon{"MissingNo", 1, 1, 100, 1, 1, 1, 10, AbilityID{}, ItemID{}};
+	Pokemon pokemon{"MissingNo", 1, 1, 100, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}};
 
 	GIVEN("a Pokemon constructed at full health")
 	{
@@ -121,8 +121,8 @@ SCENARIO("Pokemon stream output")
 		std::array<ub, 4> maxPP{15U, 20U, 25U, 30U};
 		std::array<ub, 4> currentPP{5U, 10U, 15U, 20U};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{TypeID{2U}, TypeID{3U}};
-		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP, 101U,		   102U,	   150U,
-						103U,		 104U,	  105U,	 50U,		AbilityID{6U}, ItemID{7U}, typeIDs};
+		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP,		  101U,			102U,	150U, 103U,
+						104U,		 105U,	  50U,	 {AbilityID{6U}}, {ItemID{7U}}, typeIDs};
 		std::array<StatusID, MAX_STATUSES_PER_POKEMON> statusIDs{StatusID{20U}, StatusID{21U}, StatusID{22U}, StatusID{23U}, StatusID{24U}};
 		pokemon.setStatusesArray(statusIDs);
 
@@ -144,9 +144,9 @@ SCENARIO("Pokemon stream output")
 					"  Special Attack: 104\n"
 					"  Special Defense: 105\n"
 					"  Speed: 103\n"
-					"  Ability ID: 6\n"
-					"  Item ID: 7\n"
 					"  Type IDs: [2, 3]\n"
+					"  Ability IDs: [6]\n"
+					"  Item IDs: [7]\n"
 					"  Status IDs: [20, 21, 22, 23, 24]\n"
 					"  Moves:\n"
 					"    [0] ID: 10, PP: 5/15\n"
@@ -164,7 +164,7 @@ SCENARIO("Pokemon stream output")
 SCENARIO("Pokemon addStatus")
 {
 	StatusRegistry statusRegistry{};
-	Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, 10, AbilityID{}, ItemID{}};
+	Pokemon pokemon{"MissingNo", 1, 1, 1, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}};
 
 	GIVEN("a current status that blocks the incoming status")
 	{

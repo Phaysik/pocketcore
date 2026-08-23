@@ -26,6 +26,7 @@
 #include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
+#include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/multiplierRegistry.h"
 #include "Status/statusID.h"
@@ -45,6 +46,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
 	using PocketCore::Multiplier::toMultiplierID;
+	using PocketCore::Nature::NatureID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 	using PocketCore::Status::StatusID;
@@ -91,6 +93,7 @@ namespace PocketCore::Effect
 			AbilityID mAbilityID{};
 			ItemID mItemID{};
 			MoveID mMoveID{};
+			NatureID mNatureID{};
 
 			std::optional<BattleRangeID> mRangeOverride{};
 

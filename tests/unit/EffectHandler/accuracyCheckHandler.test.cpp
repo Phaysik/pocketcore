@@ -44,12 +44,13 @@ namespace
 			.weatherRegistry = nullptr,
 			.terrainRegistry = nullptr,
 			.multiplierRegistry = nullptr,
+			.natureRegistry = nullptr,
 		};
 	}
 
 	Pokemon makePokemon()
 	{
-		return Pokemon{"UnitMon", 90U, 90U, 100U, 90U, 90U, 90U, 50U, NO_ABILITY_ID, NO_ITEM_ID, {NO_TYPE_ID, NO_TYPE_ID}};
+		return Pokemon{"UnitMon", 90U, 90U, 100U, 90U, 90U, 90U, 50U, {NO_ABILITY_ID}, {NO_ITEM_ID}, {NO_TYPE_ID, NO_TYPE_ID}};
 	}
 } // namespace
 

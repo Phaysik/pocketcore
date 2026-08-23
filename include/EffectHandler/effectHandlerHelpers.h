@@ -10,6 +10,7 @@
 #define INCLUDE_EFFECT_EFFECTHANDLERHELPERS_H
 
 #include <algorithm>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -69,8 +70,10 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		const auto abilityName{provider.abilityRegistry->getAbilityName(battleSlot.mPokemon->getAbilityID())};
-		return abilityName.has_value() && abilityName.value() == expectedName;
+		return std::ranges::any_of(battleSlot.mPokemon->getAbilitiesArray(), [expectedName, &provider](const AbilityID pokemonAbility) {
+			const std::optional<std::string_view> abilityName{provider.abilityRegistry->getAbilityName(pokemonAbility)};
+			return abilityName.has_value() && abilityName.value() == expectedName;
+		});
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByID(const BattleSlot &battleSlot, const AbilityID &abilityID)
@@ -79,8 +82,7 @@ namespace PocketCore::Effect
 		{
 			return false;
 		}
-
-		return battleSlot.mPokemon->getAbilityID() == abilityID;
+		return std::ranges::contains(battleSlot.mPokemon->getAbilitiesArray(), abilityID);
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHoldsItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
@@ -91,8 +93,10 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		const auto itemName{provider.itemRegistry->getItemName(battleSlot.mPokemon->getItemID())};
-		return itemName.has_value() && itemName.value() == expectedName;
+		return std::ranges::any_of(battleSlot.mPokemon->getItemsArray(), [expectedName, &provider](const ItemID pokemonItem) {
+			const std::optional<std::string_view> itemName{provider.itemRegistry->getItemName(pokemonItem)};
+			return itemName.has_value() && itemName.value() == expectedName;
+		});
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHoldsItemByID(const BattleSlot &battleSlot, const ItemID itemID)
@@ -102,7 +106,31 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		return battleSlot.mPokemon->getItemID() == itemID;
+		return std::ranges::contains(battleSlot.mPokemon->getItemsArray(), itemID);
+	}
+
+	ATTR_NODISCARD static inline bool battleSlotHoldsNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
+																  const std::string_view expectedName)
+	{
+		if (battleSlot.mPokemon == nullptr || provider.natureRegistry == nullptr)
+		{
+			return false;
+		}
+
+		return std::ranges::any_of(battleSlot.mPokemon->getNatureIDsArray(), [expectedName, &provider](const NatureID natureID) {
+			const std::optional<std::string_view> natureName{provider.natureRegistry->getNatureName(natureID)};
+			return natureName.has_value() && natureName.value() == expectedName;
+		});
+	}
+
+	ATTR_NODISCARD static inline bool battleSlotHoldsNatureByID(const BattleSlot &battleSlot, const NatureID natureID)
+	{
+		if (battleSlot.mPokemon == nullptr)
+		{
+			return false;
+		}
+
+		return std::ranges::contains(battleSlot.mPokemon->getNatureIDsArray(), natureID);
 	}
 
 	ATTR_NODISCARD static inline bool isBattleSlotUngrounded(const BattleSlot &battleSlot)

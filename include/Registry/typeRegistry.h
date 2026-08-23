@@ -70,7 +70,7 @@ namespace PocketCore::Registry::Types
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 			*/
-			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{static_cast<us>(toTypeID(BuiltInTypeID::Stellar).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltInTypeID::FinalType).getValue()}
 			{
 				// LCOV_EXCL_BR_START — Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
 				// is not applicable.

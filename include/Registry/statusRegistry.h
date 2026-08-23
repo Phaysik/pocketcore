@@ -53,7 +53,7 @@ namespace PocketCore::Registry::Status
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID. */
-			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{static_cast<us>(toStatusID(BuiltinStatusID::Toxic).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
 			{
 				addBuiltin({
 					.mName = PocketCore::Status::STATUS_NAME_NONE,

@@ -33,6 +33,7 @@ namespace PocketCore::Terrain
 		Grass,
 		Misty,
 		Psychic,
+		FinalTerrain,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.

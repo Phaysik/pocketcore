@@ -36,7 +36,7 @@ SCENARIO("MoveRegistry")
 		THEN("all built-in move metadata is registered")
 		{
 			CHECK((registry.getAmountRegistered() == 3));
-			CHECK((registry.getNextMoveID() == 3));
+			CHECK((registry.getNextMoveID() == 5));
 
 			std::optional<MoveID> poundIdentifier{registry.getMoveID(MOVE_NAME_POUND)};
 			std::optional<MoveID> karateChopIdentifier{registry.getMoveID(MOVE_NAME_KARATE_CHOP)};

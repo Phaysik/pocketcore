@@ -44,9 +44,9 @@ namespace PocketCore::Effect
 
 		for (const Pokemon *pokemon : partyA)
 		{
-			if (pokemon != nullptr
-				&& (pokemon->getAbilityID() == toAbilityID(BuiltinAbilityID::AirLock)
-					|| pokemon->getAbilityID() == toAbilityID(BuiltinAbilityID::CloudNine)))
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilitiesArray(), [](const AbilityID ability) {
+					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
+				}))
 			{
 				context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Weather), WEATHER_NULLIFICATION_MULTIPLIER_VALUE);
 				return;
@@ -57,9 +57,10 @@ namespace PocketCore::Effect
 
 		for (const Pokemon *pokemon : partyB)
 		{
-			if (pokemon != nullptr
-				&& (pokemon->getAbilityID() == toAbilityID(BuiltinAbilityID::AirLock)
-					|| pokemon->getAbilityID() == toAbilityID(BuiltinAbilityID::CloudNine)))
+
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilitiesArray(), [](const AbilityID ability) {
+					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
+				}))
 			{
 				context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Weather), WEATHER_NULLIFICATION_MULTIPLIER_VALUE);
 				return;

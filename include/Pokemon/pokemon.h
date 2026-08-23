@@ -22,6 +22,7 @@
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
+#include "Nature/natureID.h"
 #include "Registry/registryProvider.h"
 #include "Registry/statusRegistry.h"
 #include "Status/statusHelpers.h"
@@ -34,13 +35,17 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_DENOMINATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
+	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Nature::NatureID;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Status::hasInteraction;
@@ -60,10 +65,12 @@ namespace PocketCore::Pokemon
 			// Constructors
 
 			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
-									   const us spAttack, const us spDefense, const us level, const AbilityID abilityID,
-									   const ItemID itemID, const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mTypeIDs{typeIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed},
-				  mSpAttack{spAttack}, mSpDefense{spDefense}, mAbilityID{abilityID}, mItemID{itemID}
+									   const us spAttack, const us spDefense, const us level,
+									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
+									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
+				: mName{name}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mAttack{attack}, mDefense{defense},
+				  mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -75,11 +82,12 @@ namespace PocketCore::Pokemon
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
 									   const us health, const us speed, const us spAttack, const us spDefense, const us level,
-									   const AbilityID abilityID, const ItemID itemID,
+									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
+									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAttack{attack},
-				  mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense},
-				  mAbilityID{abilityID}, mItemID{itemID}
+				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs},
+				  mItemIDs{itemIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed},
+				  mSpAttack{spAttack}, mSpDefense{spDefense}
 			{
 				setLevel(level);
 			}
@@ -137,11 +145,47 @@ namespace PocketCore::Pokemon
 				return mTypeIDs;
 			}
 
+			ATTR_NODISCARD constexpr const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &getAbilitiesArray() const noexcept
+			{
+				return mAbilityIDs;
+			}
+
+			ATTR_NODISCARD constexpr const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &getItemsArray() const noexcept
+			{
+				return mItemIDs;
+			}
+
+			ATTR_NODISCARD constexpr const std::array<NatureID, MAX_NATURES_PER_POKEMON> &getNatureIDsArray() const noexcept
+			{
+				return mNatureIDs;
+			}
+
 			ATTR_NODISCARD constexpr TypeID getTypeID(const ub index) const
 			{
 				assert(index < mTypeIDs.size());
 
 				return mTypeIDs.at(index);
+			}
+
+			ATTR_NODISCARD constexpr AbilityID getAbilityID(const ub index) const
+			{
+				assert(index < mAbilityIDs.size());
+
+				return mAbilityIDs.at(index);
+			}
+
+			ATTR_NODISCARD constexpr ItemID getItemID(const ub index) const
+			{
+				assert(index < mItemIDs.size());
+
+				return mItemIDs.at(index);
+			}
+
+			ATTR_NODISCARD constexpr NatureID getNatureID(const ub index) const
+			{
+				assert(index < mNatureIDs.size());
+
+				return mNatureIDs.at(index);
 			}
 
 			ATTR_NODISCARD constexpr us getAttack() const
@@ -187,16 +231,6 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr us getLevelDamageFactor() const
 			{
 				return mLevelDamageFactor;
-			}
-
-			ATTR_NODISCARD constexpr AbilityID getAbilityID() const
-			{
-				return mAbilityID;
-			}
-
-			ATTR_NODISCARD constexpr ItemID getItemID() const
-			{
-				return mItemID;
 			}
 
 			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
@@ -259,11 +293,47 @@ namespace PocketCore::Pokemon
 				mTypeIDs = typeIDs;
 			}
 
+			constexpr void setAbilityIDsArray(const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs)
+			{
+				mAbilityIDs = abilityIDs;
+			}
+
+			constexpr void setItemIDsArray(const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs)
+			{
+				mItemIDs = itemIDs;
+			}
+
+			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs)
+			{
+				mNatureIDs = natureIDs;
+			}
+
 			constexpr void setType(const ub slotIndex, const TypeID typeID)
 			{
 				assert(slotIndex < mTypeIDs.size());
 
 				mTypeIDs.at(slotIndex) = typeID;
+			}
+
+			constexpr void setAbility(const ub slotIndex, const AbilityID abilityID)
+			{
+				assert(slotIndex < mAbilityIDs.size());
+
+				mAbilityIDs.at(slotIndex) = abilityID;
+			}
+
+			constexpr void setItem(const ub slotIndex, const ItemID itemID)
+			{
+				assert(slotIndex < mItemIDs.size());
+
+				mItemIDs.at(slotIndex) = itemID;
+			}
+
+			constexpr void setNature(const ub slotIndex, const NatureID natureID)
+			{
+				assert(slotIndex < mNatureIDs.size());
+
+				mNatureIDs.at(slotIndex) = natureID;
 			}
 
 			constexpr void setAttack(const us attack)
@@ -307,16 +377,6 @@ namespace PocketCore::Pokemon
 				mLevel = level;
 				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
 													 + LEVEL_DAMAGE_FACTOR_OFFSET);
-			}
-
-			constexpr void setAbility(const AbilityID abilityID)
-			{
-				mAbilityID = abilityID;
-			}
-
-			constexpr void setItem(const ItemID itemID)
-			{
-				mItemID = itemID;
 			}
 
 			// Utility Functions
@@ -389,10 +449,16 @@ namespace PocketCore::Pokemon
 			std::string_view mName{};
 
 			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{};
+
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
+
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+
+			std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> mAbilityIDs{};
+			std::array<ItemID, MAX_ITEMS_PER_POKEMON> mItemIDs{};
+			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{};
 
 			us mAttack{};
 			us mDefense{};
@@ -403,9 +469,6 @@ namespace PocketCore::Pokemon
 			us mSpDefense{};
 			us mLevel{};
 			us mLevelDamageFactor{};
-
-			AbilityID mAbilityID{};
-			ItemID mItemID{};
 	};
 
 	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.

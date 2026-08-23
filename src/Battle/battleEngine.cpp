@@ -37,6 +37,8 @@
 #include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
+#include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Status/statusID.h"
 #include "Weather/weatherID.h"
@@ -47,6 +49,9 @@ namespace PocketCore::Battle
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectID;
@@ -60,6 +65,10 @@ namespace PocketCore::Battle
 	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
+	using PocketCore::Nature::NatureEffectTrigger;
+	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NatureMeta;
+	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Weather::WeatherID;
@@ -339,6 +348,8 @@ namespace PocketCore::Battle
 					return !rule.mTargetItemID.has_value() || rule.mTargetItemID == context.mItemID;
 				case EffectSource::Move:
 					return !rule.mTargetMoveID.has_value() || rule.mTargetMoveID == context.mMoveID;
+				case EffectSource::Nature:
+					return !rule.mTargetNatureID.has_value() || rule.mTargetNatureID == context.mNatureID;
 				case EffectSource::None:
 					ATTR_FALLTHROUGH;
 				case EffectSource::Hazard:
@@ -382,6 +393,18 @@ namespace PocketCore::Battle
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Item, owner);
+			}
+		});
+	}
+
+	void BattleEngine::activateNatureSuppressions(const NatureMeta &natureMeta, const BattleTarget &owner, const BattleEventID eventID,
+												  const BattleEventRole role)
+	{
+		// Nature suppression activation mirrors ability activation to preserve source-specific ownership.
+		std::ranges::for_each(natureMeta.mTriggers, [this, eventID, role, &owner](const NatureEffectTrigger &trigger) {
+			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
+			{
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Nature, owner);
 			}
 		});
 	}
@@ -738,6 +761,35 @@ namespace PocketCore::Battle
 		}
 	}
 
+	void BattleEngine::executeNatureTrigger(const BattleTarget &owner, const NatureMeta &natureMeta, const BattleEventID eventID,
+											const BattleEventRole role, EffectContext &context, const bool targetEffects)
+	{
+		// Stamp source identity into the shared context for suppression matching and effect behavior.
+		context.mNatureID = natureMeta.mNatureID;
+		context.mSourceType = EffectSource::Nature;
+
+		// Dispatch matching, unsuppressed trigger entries in metadata order.
+		for (const NatureEffectTrigger &trigger : natureMeta.mTriggers)
+		{
+			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
+				|| isSuppressed(EffectSource::Nature, owner, eventID, role, context))
+			{
+				continue;
+			}
+
+			if (targetEffects)
+			{
+				// Normal slot triggers resolve the ability's declared target selector.
+				executeTargetedEffects(owner, natureMeta.mTargetID, trigger.mEffects, context);
+			}
+			else
+			{
+				// Faint handling preserves its prebuilt event context and executes effects directly.
+				executeEffects(trigger.mEffects, context);
+			}
+		}
+	}
+
 	void BattleEngine::executeEndTurnTrigger()
 	{
 		for (const Side side : std::array{Side::A, Side::B})
@@ -798,35 +850,69 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const AbilityID abilityID{pokemon->getAbilityID()};
-		const AbilityMeta *abilityMeta{abilityID != NO_ABILITY_ID ? mProvider->abilityRegistry->getAbilityMetadata(abilityID) : nullptr};
+		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilitiesArray()};
+		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
+		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
+			return abilityID != NO_ABILITY_ID ? mProvider->abilityRegistry->getAbilityMetadata(abilityID) : nullptr;
+		});
 
-		const ItemID itemID{pokemon->getItemID()};
-		const ItemMeta *itemMeta{itemID != NO_ITEM_ID ? mProvider->itemRegistry->getItemMetadata(itemID) : nullptr};
+		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsArray()};
+		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
+		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
+			return itemID != NO_ITEM_ID ? mProvider->itemRegistry->getItemMetadata(itemID) : nullptr;
+		});
+
+		const std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{pokemon->getNatureIDsArray()};
+		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
+		std::ranges::transform(natureIDs, natureMetas.begin(), [this](const NatureID natureID) {
+			return natureID != NO_NATURE_ID ? mProvider->natureRegistry->getNatureMetadata(natureID) : nullptr;
+		});
 
 		// Activate all relevant suppression rules before executing either source's effects.
-		if (abilityMeta != nullptr)
-		{
-			activateAbilitySuppressions(*abilityMeta, owner, eventID, role);
-		}
+		std::ranges::for_each(abilityMetas, [this, &owner, eventID, role](const AbilityMeta *abilityMeta) {
+			if (abilityMeta != nullptr)
+			{
+				activateAbilitySuppressions(*abilityMeta, owner, eventID, role);
+			}
+		});
 
-		if (itemMeta != nullptr)
-		{
-			activateItemSuppressions(*itemMeta, owner, eventID, role);
-		}
+		std::ranges::for_each(itemMetas, [this, &owner, eventID, role](const ItemMeta *itemMeta) {
+			if (itemMeta != nullptr)
+			{
+				activateItemSuppressions(*itemMeta, owner, eventID, role);
+			}
+		});
+
+		std::ranges::for_each(natureMetas, [this, &owner, eventID, role](const NatureMeta *natureMeta) {
+			if (natureMeta != nullptr)
+			{
+				activateNatureSuppressions(*natureMeta, owner, eventID, role);
+			}
+		});
 
 		// Ability effects execute before item effects for the same slot and trigger.
 		const bool targetEffects{targeting == SlotTriggerTargeting::ResolveMetadataTargets};
 
-		if (abilityMeta != nullptr)
-		{
-			executeAbilityTrigger(owner, *abilityMeta, eventID, role, context, targetEffects);
-		}
+		std::ranges::for_each(abilityMetas, [this, &owner, eventID, role, &context, targetEffects](const AbilityMeta *abilityMeta) {
+			if (abilityMeta != nullptr)
+			{
+				executeAbilityTrigger(owner, *abilityMeta, eventID, role, context, targetEffects);
+			}
+		});
 
-		if (itemMeta != nullptr)
-		{
-			executeItemTrigger(owner, *itemMeta, eventID, role, context, targetEffects);
-		}
+		std::ranges::for_each(itemMetas, [this, &owner, eventID, role, &context, targetEffects](const ItemMeta *itemMeta) {
+			if (itemMeta != nullptr)
+			{
+				executeItemTrigger(owner, *itemMeta, eventID, role, context, targetEffects);
+			}
+		});
+
+		std::ranges::for_each(natureMetas, [this, &owner, eventID, role, &context, targetEffects](const NatureMeta *natureMeta) {
+			if (natureMeta != nullptr)
+			{
+				executeNatureTrigger(owner, *natureMeta, eventID, role, context, targetEffects);
+			}
+		});
 
 		// Return source ownership to the caller's trigger context.
 		context.mSourceType = previousSource;

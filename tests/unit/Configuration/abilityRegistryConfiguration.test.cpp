@@ -64,7 +64,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 			{
 				REQUIRE(result.has_value());
 				AbilityID assignedIdentifier{result.value()};
-				CHECK((assignedIdentifier.getValue() == 3U));
+				CHECK((assignedIdentifier.getValue() == 8U));
 
 				triggers.clear();
 				const AbilityMeta *metadata{configuration.getAbilityMetadata(assignedIdentifier)};

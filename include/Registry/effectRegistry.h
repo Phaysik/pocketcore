@@ -95,8 +95,7 @@ namespace PocketCore::Registry::Effect
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID. */
-			ATTR_NOINLINE explicit constexpr EffectRegistry()
-				: Base{static_cast<us>(toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock).getValue() + 1U)}
+			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Effect::EFFECT_NAME_NONE, .mEffectID = toEffectID(BuiltinEffectID::None)});
 				addBuiltin({

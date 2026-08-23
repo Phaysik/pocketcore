@@ -39,7 +39,7 @@ SCENARIO("AbilityRegistry")
 		THEN("all built-in abilities preserve their catalog identifiers")
 		{
 			CHECK((registry.getAmountRegistered() == 3));
-			CHECK((registry.getNextAbilityID() == 3));
+			CHECK((registry.getNextAbilityID() == 8));
 
 			std::optional<AbilityID> noneIdentifier{registry.getAbilityID(ABILITY_NAME_NONE)};
 			std::optional<AbilityID> stenchIdentifier{registry.getAbilityID(ABILITY_NAME_STENCH)};

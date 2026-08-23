@@ -42,6 +42,7 @@ namespace
 			.weatherRegistry = nullptr,
 			.terrainRegistry = nullptr,
 			.multiplierRegistry = nullptr,
+			.natureRegistry = nullptr,
 		};
 	}
 
@@ -55,8 +56,8 @@ namespace
 					   specialAttack,
 					   specialDefense,
 					   level,
-					   NO_ABILITY_ID,
-					   NO_ITEM_ID,
+					   {NO_ABILITY_ID},
+					   {NO_ITEM_ID},
 					   {NO_TYPE_ID, NO_TYPE_ID}};
 	}
 

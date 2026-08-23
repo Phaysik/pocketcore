@@ -77,7 +77,7 @@ SCENARIO("MoveRegistryConfiguration addMove")
 			{
 				REQUIRE(result.has_value());
 				MoveID assignedIdentifier{result.value()};
-				CHECK((assignedIdentifier.getValue() == 3U));
+				CHECK((assignedIdentifier.getValue() == 5U));
 
 				triggers.clear();
 				const MoveMeta *metadata{configuration.getMoveMetadata(assignedIdentifier)};

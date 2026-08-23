@@ -39,6 +39,7 @@ namespace PocketCore::Multiplier
 		Stab,
 		TypeEffectiveness,
 		Burn,
+		FinalMultiplier,
 	};
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
