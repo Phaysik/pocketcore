@@ -9,11 +9,14 @@
 #ifndef INCLUDE_REGISTRY_REGISTRY_PROVIDER_H
 #define INCLUDE_REGISTRY_REGISTRY_PROVIDER_H
 
+#include "Registry/pokemonRegistry.h"
+
 #include "abilityRegistry.h"
 #include "itemRegistry.h"
 #include "moveRegistry.h"
 #include "multiplierRegistry.h"
 #include "natureRegistry.h"
+#include "pokemonRegistry.h"
 #include "statusRegistry.h"
 #include "terrainRegistry.h"
 #include "typeRegistry.h"
@@ -78,6 +81,11 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref Nature::NatureRegistry instance for nature metadata queries.
 			*/
 			const Nature::NatureRegistry *natureRegistry;
+
+			/*! @brief Non-owning pointer to the pokemon metadata registry.
+				@details Must point to a valid @ref Pokemon::PokemonRegistry instance for pokemon metadata queries.
+			*/
+			const Pokemon::PokemonRegistry *pokemonRegistry;
 	};
 } // namespace PocketCore::Registry
 

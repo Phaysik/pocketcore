@@ -61,8 +61,7 @@ namespace PocketCore::Registry::Pokemon
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID. */
-			ATTR_NOINLINE explicit constexpr PokemonRegistry()
-				: Base{static_cast<us>(toPokemonID(BuiltinPokemonID::FinalPokemon).getValue())}
+			ATTR_NOINLINE explicit constexpr PokemonRegistry() : Base{toPokemonID(BuiltinPokemonID::FinalPokemon).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Pokemon::POKEMON_NAME_NONE, .mPokemonID = toPokemonID(BuiltinPokemonID::None)});
 				addBuiltin({

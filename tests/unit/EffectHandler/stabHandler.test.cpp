@@ -55,6 +55,7 @@ namespace
 			.terrainRegistry = nullptr,
 			.multiplierRegistry = nullptr,
 			.natureRegistry = nullptr,
+			.pokemonRegistry = nullptr,
 		};
 	}
 } // namespace

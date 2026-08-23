@@ -21,6 +21,7 @@
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Configuration/natureRegistryConfiguration.h"
+#include "Configuration/pokemonRegistryConfiguration.h"
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
@@ -82,6 +83,7 @@ int main()
 	const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
 	const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
 	const Configuration::NatureRegistryConfiguration natureRegistryConfig{};
+	const Configuration::PokemonRegistryConfiguration pokemonRegistryConfig{};
 
 	const RegistryProvider registryProvider{
 		.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -93,6 +95,7 @@ int main()
 		.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
 		.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
 		.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+		.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
 
