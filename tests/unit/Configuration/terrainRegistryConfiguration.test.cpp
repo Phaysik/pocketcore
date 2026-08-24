@@ -1,10 +1,17 @@
+/*! @file terrainRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the TerrainRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/terrainRegistryConfiguration.h"
 
 #include <algorithm>
 #include <array>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -31,7 +38,7 @@ namespace
 		}
 	}
 
-	TerrainMeta makeTerrain(const std::string_view name)
+	TerrainMeta makeTerrain(const std::string_view &name)
 	{
 		return TerrainMeta{.mName = name};
 	}

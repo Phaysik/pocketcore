@@ -63,7 +63,7 @@ namespace PocketCore::Effect
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																 const std::string_view expectedName)
+																 const std::string_view &expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.abilityRegistry == nullptr)
 		{
@@ -86,7 +86,7 @@ namespace PocketCore::Effect
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHoldsItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																const std::string_view expectedName)
+																const std::string_view &expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.itemRegistry == nullptr)
 		{
@@ -110,7 +110,7 @@ namespace PocketCore::Effect
 	}
 
 	ATTR_NODISCARD static inline bool battleSlotHoldsNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																  const std::string_view expectedName)
+																  const std::string_view &expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.natureRegistry == nullptr)
 		{

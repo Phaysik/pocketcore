@@ -22,12 +22,15 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h"
 #include "Core/typedefs.h"
+#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logger.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::InvocableWithArgs;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::RegistryError;
+	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
 	namespace Detail

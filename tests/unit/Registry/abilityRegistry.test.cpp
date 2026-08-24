@@ -1,3 +1,11 @@
+/*! @file abilityRegistry.test.cpp
+	@brief C++ file for running tests for the AbilityRegistry.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Registry/abilityRegistry.h"
 
 #include <optional>

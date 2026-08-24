@@ -66,7 +66,7 @@ namespace PocketCore::Registry::Nature
 			ATTR_NOINLINE explicit constexpr NatureRegistry() : Base{toNatureID(BuiltinNatureID::FinalNature).getValue()}
 			{
 				// --- Neutral natures (no triggers) ---
-				auto addNeutral = [this](const BuiltinNatureID natureID, const std::string_view name) {
+				auto addNeutral = [this](const BuiltinNatureID natureID, const std::string_view &name) {
 					addBuiltin({
 						.mStatMultipliers = makeMultipliers(1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
 						.mName = name,

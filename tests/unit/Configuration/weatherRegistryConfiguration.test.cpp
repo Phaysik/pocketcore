@@ -1,10 +1,17 @@
+/*! @file weatherRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the WeatherRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/weatherRegistryConfiguration.h"
 
 #include <algorithm>
 #include <array>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Utility/Debug/Logging/logger.h"
 #include "Weather/weatherID.h"
 #include "Weather/weatherMeta.h"
@@ -31,7 +38,7 @@ namespace
 		}
 	}
 
-	WeatherMeta makeWeather(const std::string_view name)
+	WeatherMeta makeWeather(const std::string_view &name)
 	{
 		return WeatherMeta{.mName = name};
 	}

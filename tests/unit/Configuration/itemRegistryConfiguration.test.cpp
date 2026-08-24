@@ -1,3 +1,11 @@
+/*! @file itemRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the ItemRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/itemRegistryConfiguration.h"
 
 #include <array>
@@ -6,7 +14,6 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
 #include "Effect/builtInEffectID.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"

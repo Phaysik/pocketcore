@@ -1,3 +1,11 @@
+/*! @file criticalHitHandler.test.cpp
+	@brief C++ file for running tests for the CriticalHitHandler.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/criticalHitHandler.h"
 
 #include <algorithm>

@@ -1,3 +1,11 @@
+/*! @file terrainHandler.test.cpp
+	@brief C++ file for running tests for the TerrainHandler.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/terrainHandler.h"
 
 #include <array>

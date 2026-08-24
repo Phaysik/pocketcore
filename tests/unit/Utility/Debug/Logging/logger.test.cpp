@@ -2,9 +2,9 @@
 	@brief Catch2 BDD unit tests for the static Logger wrapper.
 	@details Exercises initialization, level get/set, name/file replacement, and all seven logging-level template methods using Catch2's BDD
    syntax. Each test scenario manages temporary files that are cleaned up after the scenario completes.
-	@date 03/11/2026
-	@version x.x.x
-	@since x.x.x
+	@date 04/24/2026
+	@since 0.1.0
+	@version 0.1.5
 	@author Matthew Moore
 */
 
@@ -42,6 +42,8 @@ namespace
 	/*! @brief Flushes spdlog and reads the full contents of a log file.
 		@param fileName Optional path to a specific log file. If nullptr, uses the default test log file.
 		@return The file contents as a string.
+		@since 0.1.0
+		@version 0.1.5
 	*/
 	ATTR_NODISCARD std::string readLogFile(const std::string *fileName = nullptr)
 	{

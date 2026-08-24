@@ -1,3 +1,11 @@
+/*! @file stabHandler.test.cpp
+	@brief C++ file for running tests for the StabHandler.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/stabHandler.h"
 
 #include <array>

@@ -1,8 +1,8 @@
 /*! @file typeEffectiveness.h
 	@brief Contains the function declarations for creating a Detailed file description
-	@date 03/25/2026
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -26,6 +26,8 @@ namespace PocketCore::Types
 		@brief Describes the effectiveness multiplier of one type attacking another.
 		@details Used within the type chart to encode damage multipliers. @ref NOT_DEFINED serves as a sentinel for uninitialized matchup
 	   slots.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	enum class TypeEffectiveness : ub
 	{
@@ -36,6 +38,10 @@ namespace PocketCore::Types
 		SE,			 /*!< Super effective (1.5x multiplier). */
 	};
 
+	/*! @brief Returns the effectiveness value for a given type effectiveness.
+		@param effectiveNess The type effectiveness to get the value for.
+		@return The effectiveness value as a double.
+	*/
 	ATTR_NODISCARD constexpr double getEffectivenessValue(const TypeEffectiveness effectiveNess)
 	{
 		using enum TypeEffectiveness;

@@ -1,3 +1,11 @@
+/*! @file pokemon.test.cpp
+	@brief C++ file for running tests for the PokemonRegistry.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Pokemon/pokemon.h"
 
 #include <array>

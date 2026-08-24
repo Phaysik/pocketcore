@@ -1,3 +1,11 @@
+/*! @file abilityRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the AbilityRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/abilityRegistryConfiguration.h"
 
 #include <array>
@@ -8,7 +16,6 @@
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
 #include "Effect/builtInEffectID.h"
 #include "Utility/Debug/Logging/logger.h"
 

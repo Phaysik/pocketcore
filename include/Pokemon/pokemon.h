@@ -64,7 +64,7 @@ namespace PocketCore::Pokemon
 		public:
 			// Constructors
 
-			explicit constexpr Pokemon(const std::string_view name, const us attack, const us defense, const us health, const us speed,
+			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
@@ -78,7 +78,7 @@ namespace PocketCore::Pokemon
 				setLevel(level);
 			}
 
-			explicit constexpr Pokemon(const std::string_view name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
+			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
 									   const us health, const us speed, const us spAttack, const us spDefense, const us level,
@@ -242,7 +242,7 @@ namespace PocketCore::Pokemon
 
 			// Setters
 
-			constexpr void setName(const std::string_view name)
+			constexpr void setName(const std::string_view &name)
 			{
 				mName = name;
 			}

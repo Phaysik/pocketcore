@@ -1,9 +1,9 @@
-/*! \file moveMeta.cpp
-	\brief Contains the function definitions for creating a moveMeta
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file moveMeta.cpp
+	@brief Contains the function definitions for creating a moveMeta
+	@date --/--/----
+	@version x.x.x
+	@since x.x.x
+	@author Matthew Moore
 */
 
 #include "Move/moveMeta.h"

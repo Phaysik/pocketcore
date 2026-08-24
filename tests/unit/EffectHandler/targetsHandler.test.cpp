@@ -1,3 +1,11 @@
+/*! @file targetsHandler.test.cpp
+	@brief C++ file for running tests for the TargetsHandler.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/targetsHandler.h"
 
 #include <algorithm>

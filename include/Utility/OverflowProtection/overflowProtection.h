@@ -1,8 +1,8 @@
 /*! @file overflowProtection.h
 	@brief Declares constexpr helpers for overflow-safe unsigned multiplication.
-	@date 08/03/2026
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -20,6 +20,8 @@
 	saturating multiplication when overflow would occur. These helpers are intended for use with
 	unsigned integral types and are constexpr so they can be evaluated at compile time when possible.
 	@note All functions are `noexcept` and return conservative values on overflow (e.g., `std::numeric_limits<Number>::max()`).
+	@since 0.1.0
+	@version 0.1.0
 */
 namespace PocketCore::Utility::OverflowProtection
 {
@@ -33,6 +35,8 @@ namespace PocketCore::Utility::OverflowProtection
 		@param[in] num1 The first multiplicand.
 		@param[in] num2 The second multiplicand.
 		@return `true` when multiplication would overflow, `false` otherwise.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	ATTR_NODISCARD constexpr bool WillMultiplyOverflow(const Number num1, const Number num2) noexcept
 	{
@@ -57,6 +61,8 @@ namespace PocketCore::Utility::OverflowProtection
 		@return The product `num1 * num2` when no overflow occurs; otherwise
 		`std::numeric_limits<Number>::max()`.
 		@note This function is `constexpr` and `noexcept` and uses @ref WillMultiplyOverflow() to detect overflow.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	ATTR_NODISCARD constexpr Number SafeMultiply(const Number num1, const Number num2) noexcept
 	{

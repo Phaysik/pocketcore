@@ -12,15 +12,16 @@
 #include <span>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> MultiplierRegistryConfiguration::addMultiplier(
 		const MultiplierMeta &multiplierMeta)

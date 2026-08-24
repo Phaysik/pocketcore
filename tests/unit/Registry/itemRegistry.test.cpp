@@ -1,3 +1,11 @@
+/*! @file itemRegistry.test.cpp
+	@brief C++ file for running tests for the ItemRegistry.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Registry/itemRegistry.h"
 
 #include <optional>

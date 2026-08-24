@@ -1,10 +1,17 @@
+/*! @file statusRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the StatusRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/statusRegistryConfiguration.h"
 
 #include <algorithm>
 #include <array>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -31,7 +38,7 @@ namespace
 		}
 	}
 
-	StatusMeta makeStatus(const std::string_view name)
+	StatusMeta makeStatus(const std::string_view &name)
 	{
 		return StatusMeta{.mName = name};
 	}

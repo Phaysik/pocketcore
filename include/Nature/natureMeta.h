@@ -18,6 +18,7 @@
 #include "Effect/effectID.h"
 #include "Effect/effectSourceAndSuppresion.h"
 
+#include "constants.h"
 #include "natureID.h"
 
 namespace PocketCore::Nature
@@ -25,7 +26,6 @@ namespace PocketCore::Nature
 	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Configuration::MAX_STAT_TYPES;
 	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectID;

@@ -1,3 +1,11 @@
+/*! @file multiplierRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/multiplierRegistryConfiguration.h"
 
 #include <algorithm>
@@ -35,7 +43,7 @@ namespace
 		}
 	}
 
-	MultiplierMeta makeMultiplier(const std::string_view name)
+	MultiplierMeta makeMultiplier(const std::string_view &name)
 	{
 		return MultiplierMeta{.mName = name};
 	}

@@ -1,8 +1,8 @@
 /*! @file cconcepts.h
 	@brief Contains the declarations of common concepts that might be used in multiple files.
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -18,12 +18,16 @@
 	type-traits library. Use these concepts to constrain template parameters for integral,
 	unsigned, signed, floating-point, rational (integral or floating), and std::string-like types.
 	@note All concepts are compile-time predicates with no runtime cost.
+	@since 0.1.0
+	@version 0.1.0
 */
 namespace PocketCore::Core
 {
 	/*! @concept Integral
 		@brief Tests whether a type is an integral type.
 		@tparam T The type to test. Typical examples: `int`, `long`, `char`.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept Integral = std::is_integral_v<T>;
@@ -31,6 +35,8 @@ namespace PocketCore::Core
 	/*! @concept UnsignedIntegral
 		@brief Tests whether a type is an unsigned integral type.
 		@tparam T The type to test. Typical examples: `unsigned int`, `std::uint32_t`.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept UnsignedIntegral = std::is_unsigned_v<T>;
@@ -38,6 +44,8 @@ namespace PocketCore::Core
 	/*! @concept SignedIntegral
 		@brief Tests whether a type is a signed integral type.
 		@tparam T The type to test. Typical examples: `int`, `long`.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept SignedIntegral = std::is_signed_v<T>;
@@ -45,6 +53,8 @@ namespace PocketCore::Core
 	/*! @concept FloatingPoint
 		@brief Tests whether a type is a floating-point type.
 		@tparam T The type to test. Typical examples: `float`, `double`, `long double`.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept FloatingPoint = std::is_floating_point_v<T>;
@@ -54,6 +64,8 @@ namespace PocketCore::Core
 		@details This concept is satisfied if `T` is either an `Integral` or a `FloatingPoint`.
 		Use this to constrain templates that accept any numeric type that models rational numbers.
 		@tparam T The type to test. Accepts both integral and floating-point types.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept RationalNumber = Integral<T> || FloatingPoint<T>;
@@ -64,6 +76,8 @@ namespace PocketCore::Core
 		It is satisfied for `std::string`, `const std::string&`, `std::string&&`, etc.
 		@tparam T The type to test. Use this to constrain templates that require `std::string` specifically.
 		@note This concept does not accept C-style strings (e.g., `const char*`).
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <typename T>
 	concept String = std::is_same_v<std::string, std::remove_cvref_t<T>>;
@@ -74,6 +88,8 @@ namespace PocketCore::Core
 		@details This concept is satisfied when `std::invocable<Func>` is true, i.e. the callable
 		can be invoked with an empty argument list. Use this to constrain templates that accept
 		parameterless callables submitted to thread pools or deferred tasks.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <class Func>
 	concept InvocableNoArgs = std::invocable<Func>;
@@ -85,6 +101,8 @@ namespace PocketCore::Core
 		@details This concept is satisfied when `std::invocable<Func, Args...>` is true, i.e. the
 		callable can be invoked with the given `Args...`. Use this to constrain templates that accept
 		callables and their arguments for asynchronous invocation or task scheduling.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <class Func, class... Args>
 	concept InvocableWithArgs = std::invocable<Func, Args...>;

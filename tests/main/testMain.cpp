@@ -1,7 +1,8 @@
 /*! @file testMain.cpp
 	@brief C++ file for running all tests.
-	@date --/--/----
-	@version 1.0
+	@date 04/22/2026
+	@since 0.1.0
+	@version 0.1.4
 	@author Matthew Moore
 */
 

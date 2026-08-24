@@ -21,12 +21,15 @@
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Registry/multiplierRegistry.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
+	using PocketCore::Registry::RegistryError;
+	using PocketCore::Registry::RegistryErrorInfo;
 	using Registry::Multiplier::MultiplierRegistry;
 
 	namespace Detail

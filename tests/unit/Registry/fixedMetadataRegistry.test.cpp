@@ -1,3 +1,11 @@
+/*! @file fixedMetadataRegistry.test.cpp
+	@brief C++ file for running tests for the FixedMetadataRegistry.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Registry/fixedMetadataRegistry.h"
 
 #include <optional>

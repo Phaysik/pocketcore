@@ -1,9 +1,9 @@
-/*! \file logger.cpp
-	\brief Contains the function definitions for creating a logger
-	\date 03/11/2026
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file logger.cpp
+	@brief Contains the function definitions for creating a logger
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
+	@author Matthew Moore
 */
 
 #include "Utility/Debug/Logging/logger.h"

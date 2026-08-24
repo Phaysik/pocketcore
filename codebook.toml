@@ -1,0 +1,17 @@
+dictionaries = ["en_us"]
+words = [
+    "NVE",
+    "Spdlog",
+    "cconcepts",
+    "codeql",
+    "cout",
+    "cx",
+    "genhtml",
+    "googletest",
+    "lcov",
+    "matchups",
+    "pocketcore",
+    "semgrep",
+    "shellcheck",
+    "shellfmt",
+]

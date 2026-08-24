@@ -31,6 +31,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Ability::AbilityRegistry;
+	using PocketCore::Registry::RegistryError;
 
 	namespace Detail
 	{

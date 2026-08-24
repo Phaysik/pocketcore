@@ -1,8 +1,8 @@
 /*! @file configCat.h
 	@brief Declares a process-global wrapper for ConfigCat feature-flag access.
-	@date 08/03/2026
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -26,6 +26,8 @@ namespace PocketCore::Core
 	   singletons have static lifetime and are used by all callers in the process.
 		@note Concurrent initialization / close is not synchronized by this helper. Caller-side synchronization is required if multiple
 	   threads may call `setSDKKey` / `closeClient` concurrently.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	class ConfigCat
 	{
@@ -36,6 +38,8 @@ namespace PocketCore::Core
 				@details This constructor is trivial and performs no SDK initialization. To initialize the process-global ConfigCat client,
 			   either use the `ConfigCat(const std::string &sdkKey)` constructor or call `setSDKKey()` after construction. The default
 			   constructor is intended for use when a lightweight helper instance is required without side effects.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			explicit ConfigCat() = default;
 
@@ -44,6 +48,8 @@ namespace PocketCore::Core
 			   object. This constructor is `noexcept` in the implementation.
 				@param[in] sdkKey The ConfigCat SDK key used to create the client.
 				@post After construction, `client()` will hold a valid shared pointer if creation succeeded.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			explicit ConfigCat(const std::string &sdkKey) noexcept;
 
@@ -55,6 +61,8 @@ namespace PocketCore::Core
 				@param[in] key The feature flag key to query.
 				@param[in] defaultValue Value returned when the flag is unset.
 				@return The flag value when available; otherwise false.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static bool getValue(const std::string &key, const bool defaultValue = false)
 			{
@@ -73,6 +81,8 @@ namespace PocketCore::Core
 			   instance. If a client already exists, it will be replaced by the newly returned shared_ptr.
 				@param[in] sdkKey The SDK key used to obtain a client.
 				@note No synchronization is performed; callers must ensure thread-safety when invoking this concurrently.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static void setSDKKey(const std::string &sdkKey)
 			{
@@ -84,6 +94,8 @@ namespace PocketCore::Core
 			/*! @brief Close and reset the process-global client.
 				@details Calls `configcat::ConfigCatClient::close(client())` to perform any SDK shutdown, then resets the stored shared_ptr.
 			   After this call `client()` will be empty.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static void closeClient()
 			{
@@ -98,6 +110,8 @@ namespace PocketCore::Core
 				@details The options object is created on first use and lives for the lifetime of the process. Use this to configure
 			   SDK-level options prior to initializing the client.
 				@return Reference to the singleton `configcat::ConfigCatOptions`.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static configcat::ConfigCatOptions &options()
 			{
@@ -109,6 +123,8 @@ namespace PocketCore::Core
 				@details The returned reference refers to a `static` local `std::shared_ptr<configcat::ConfigCatClient>`. It may be empty if
 			   the client has not been initialized (see `setSDKKey`).
 				@return Reference to the singleton `std::shared_ptr<configcat::ConfigCatClient>`.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static std::shared_ptr<configcat::ConfigCatClient> &client()
 			{

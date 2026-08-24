@@ -1,3 +1,11 @@
+/*! @file moveRegistryConfiguration.test.cpp
+	@brief C++ file for running tests for the MoveRegistryConfiguration.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Configuration/moveRegistryConfiguration.h"
 
 #include <algorithm>
@@ -7,7 +15,6 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
 #include "Effect/builtInEffectID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
@@ -41,7 +48,7 @@ namespace
 		}
 	}
 
-	MoveMeta makeMove(const std::string_view name)
+	MoveMeta makeMove(const std::string_view &name)
 	{
 		return MoveMeta{
 			.mTriggers = {{

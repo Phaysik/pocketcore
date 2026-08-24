@@ -1,8 +1,8 @@
 /*! @file floatUtility.h
 	@brief Contains the function declarations for utility functions related to floating-point numbers.
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -25,6 +25,8 @@
 	is inappropriate due to rounding error.
 	@note Constants represent conservative defaults; callers may override them by passing
 	explicit epsilon values to the functions.
+	@since 0.1.0
+	@version 0.1.0
 */
 namespace PocketCore::Utility::Math
 {
@@ -34,6 +36,8 @@ namespace PocketCore::Utility::Math
 		tiny to avoid masking meaningful differences for typical double-precision calculations.
 		@note This is a reasonable default but may be tightened or relaxed depending on the
 		numerical domain. Callers may provide an explicit `absEpsilon` to `approximatelyEqualAbsRel`.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	constexpr double ABS_EPSILON{1e-12};
 
@@ -42,6 +46,8 @@ namespace PocketCore::Utility::Math
 		multiplied by the larger magnitude to produce a scale-appropriate tolerance. This
 		prevents false negatives when comparing large-magnitude values where absolute
 		tolerances would be ineffective.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	constexpr double REL_EPSILON{1e-8};
 
@@ -58,6 +64,8 @@ namespace PocketCore::Utility::Math
 		@param[in] relEpsilon Relative tolerance factor applied to the larger magnitude of the operands. Defaults to `REL_EPSILON`.
 		@return `true` if the values are considered equal within the provided tolerances; otherwise `false`.
 		@note The function is `constexpr` and `noexcept`, suitable for compile-time evaluation when used with constexpr values.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	template <PocketCore::Core::FloatingPoint FloatingPoint>
 	ATTR_NODISCARD constexpr bool approximatelyEqualAbsRel(const FloatingPoint lhs, const FloatingPoint rhs,

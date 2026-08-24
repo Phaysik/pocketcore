@@ -1,3 +1,11 @@
+/*! @file moveRegistry.test.cpp
+	@brief C++ file for running tests for the MoveRegistry.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "Registry/moveRegistry.h"
 
 #include <optional>

@@ -1,3 +1,11 @@
+/*! @file baseDamageHandler.test.cpp
+	@brief C++ file for running tests for the BaseDamageHandler.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/baseDamageHandler.h"
 
 #include <limits>
@@ -131,12 +139,12 @@ SCENARIO("BaseDamageHandler")
 		userSlot.mStatStages
 			= StatStages{.mAttack = 2, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
 		userSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0F,
-			.mAttackModifier = 1.1F,
-			.mDefenseModifier = 1.0F,
-			.mSpecialAttackModifier = 1.0F,
-			.mSpecialDefenseModifier = 1.0F,
-			.mSpeedModifier = 1.0F,
+			.mHealthModifier = 1.0,
+			.mAttackModifier = 1.1,
+			.mDefenseModifier = 1.0,
+			.mSpecialAttackModifier = 1.0,
+			.mSpecialDefenseModifier = 1.0,
+			.mSpeedModifier = 1.0,
 		};
 
 		BattleSlot targetSlot{};
@@ -144,12 +152,12 @@ SCENARIO("BaseDamageHandler")
 		targetSlot.mStatStages
 			= StatStages{.mAttack = 0, .mDefense = 1, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
 		targetSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0F,
-			.mAttackModifier = 1.0F,
-			.mDefenseModifier = 0.9F,
-			.mSpecialAttackModifier = 1.0F,
-			.mSpecialDefenseModifier = 1.0F,
-			.mSpeedModifier = 1.0F,
+			.mHealthModifier = 1.0,
+			.mAttackModifier = 1.0,
+			.mDefenseModifier = 0.9,
+			.mSpecialAttackModifier = 1.0,
+			.mSpecialDefenseModifier = 1.0,
+			.mSpeedModifier = 1.0,
 		};
 
 		BattleState battleState{};
@@ -185,12 +193,12 @@ SCENARIO("BaseDamageHandler")
 		userSlot.mStatStages
 			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 1, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
 		userSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0F,
-			.mAttackModifier = 1.0F,
-			.mDefenseModifier = 1.0F,
-			.mSpecialAttackModifier = 1.0F,
-			.mSpecialDefenseModifier = 1.0F,
-			.mSpeedModifier = 1.0F,
+			.mHealthModifier = 1.0,
+			.mAttackModifier = 1.0,
+			.mDefenseModifier = 1.0,
+			.mSpecialAttackModifier = 1.0,
+			.mSpecialDefenseModifier = 1.0,
+			.mSpeedModifier = 1.0,
 		};
 
 		BattleSlot targetSlot{};
@@ -198,12 +206,12 @@ SCENARIO("BaseDamageHandler")
 		targetSlot.mStatStages
 			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 6, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
 		targetSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0F,
-			.mAttackModifier = 1.0F,
-			.mDefenseModifier = 1.0F,
-			.mSpecialAttackModifier = 1.0F,
-			.mSpecialDefenseModifier = 1.0F,
-			.mSpeedModifier = 1.0F,
+			.mHealthModifier = 1.0,
+			.mAttackModifier = 1.0,
+			.mDefenseModifier = 1.0,
+			.mSpecialAttackModifier = 1.0,
+			.mSpecialDefenseModifier = 1.0,
+			.mSpeedModifier = 1.0,
 		};
 
 		BattleState battleState{};

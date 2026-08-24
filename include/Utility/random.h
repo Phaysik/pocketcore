@@ -1,8 +1,8 @@
 /*! @file random.h
 	@brief Contains the function declarations for creating a random number generator
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -16,18 +16,16 @@
 #include "Core/cconcepts.h" // for Integral
 
 /*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 namespace PocketCore::Utility
 {
 	/*! @class Random random.h "include/random.h"
 		@brief Class for creating a random number generator
-		@date --/--/----
-		@version x.x.x
-		@since x.x.x
+		@since 0.1.0
+		@version 0.1.0
 		@author Matthew Moore
 	*/
 	class Random
@@ -39,9 +37,8 @@ namespace PocketCore::Utility
 				@param[in] min The minimum value (inclusive)
 				@param[in] max The maximum value (inclusive)
 				@retval T The typecasted random number
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <PocketCore::Core::Integral T>
@@ -69,9 +66,8 @@ namespace PocketCore::Utility
 
 			/*! @brief Gets #mTwister
 				@retval std::mt19937 The global random number generator
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			ATTR_NODISCARD static std::mt19937 &getTwister() noexcept
@@ -82,9 +78,8 @@ namespace PocketCore::Utility
 		private:
 			/*! @brief Creates the global random number generator
 				@retval std::mt19937 The global random number generator
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			ATTR_NODISCARD static std::mt19937 generate() noexcept

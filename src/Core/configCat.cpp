@@ -1,9 +1,9 @@
-/*! \file configCat.cpp
-	\brief Contains the function definitions for creating a configCat
-	\date --/--/----
-	\version x.x.x
-	\since x.x.x
-	\author Matthew Moore
+/*! @file configCat.cpp
+	@brief Contains the function definitions for creating a configCat
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
+	@author Matthew Moore
 */
 
 #include "Core/configCat.h"

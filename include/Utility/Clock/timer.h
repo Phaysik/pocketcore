@@ -1,8 +1,8 @@
 /*! @file timer.h
 	@brief Contains the function declarations for creating a class to time code execution.
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -22,9 +22,8 @@
 #include "Core/typedefs.h"
 
 /*! @namespace PocketCore::Utility::Clock Holds any useful functionality that doesn't fit anywhere else
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 namespace PocketCore::Utility::Clock
@@ -35,9 +34,8 @@ namespace PocketCore::Utility::Clock
 	concept Ratio = std::is_same_v<T, std::ratio<T::num, T::den>>; /*!< A concept to check if a type is a std::ratio */
 
 	/*! @enum TimeUnit A collection of named units of time
-		@date --/--/----
-		@version x.x.x
-		@since x.x.x
+		@since 0.1.0
+		@version 0.1.0
 		@author Matthew Moore
 	*/
 	enum class TimeUnit : PocketCore::Core::ui
@@ -50,9 +48,8 @@ namespace PocketCore::Utility::Clock
 
 	/*! @class Timer timer.h "include/timer.h"
 		@brief A class to time code execution
-		@date --/--/----
-		@version x.x.x
-		@since x.x.x
+		@since 0.1.0
+		@version 0.1.0
 		@author Matthew Moore
 	*/
 	class Timer
@@ -75,9 +72,8 @@ namespace PocketCore::Utility::Clock
 				@pre The template parameter @p T must be a std::ratio type
 				@tparam T A parameter of type std::ratio defaulted to std::ratio<1L> or per second
 				@retval std::string_view The unit of time for the template parameter @p T
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <Ratio T = std::ratio<1L>>
@@ -112,9 +108,8 @@ namespace PocketCore::Utility::Clock
 			/*! @brief Creates and opens a log file with the name @p filename
 				@post A log file with the name @p filename is created and opened
 				@param[in] filename The name of the log file to create
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void createLogFile(const std::string &filename = "timer.log") noexcept
@@ -126,9 +121,8 @@ namespace PocketCore::Utility::Clock
 
 			/*! @brief Closes the currently opened log file (if any) and resets the stored file name.
 				@post Any open internal log file is closed and future calls to `createLogFile` may reopen a file.
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void closeLogFile() noexcept
@@ -143,9 +137,8 @@ namespace PocketCore::Utility::Clock
 
 			/*! @brief Sets #mStart to the current time
 				@post #mStart is set to Clock::now()
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void start() noexcept
@@ -157,9 +150,8 @@ namespace PocketCore::Utility::Clock
 				@pre The template parameter @p T must be a std::ratio type
 				@tparam T A parameter of type std::ratio, defaulted to std::ratio<1L> or per second
 				@retval double The amount of time passed since the start of #mStart
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <Ratio T = std::ratio<1L>>
@@ -179,9 +171,8 @@ namespace PocketCore::Utility::Clock
 				@param[in] iterations The number of times to run @p function
 				@param[in] function The function to time
 				@param[in] args The arguments to pass to @p function
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <Ratio T = std::ratio<1L>, typename Callable, typename... Args>
@@ -231,9 +222,8 @@ namespace PocketCore::Utility::Clock
 
 			/*! @brief Sets #mFunctionStart to the current time
 				@post #mFunctionStart is set to Clock::now()
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void functionStart() noexcept
@@ -245,9 +235,8 @@ namespace PocketCore::Utility::Clock
 				@pre The template parameter @p T must be a std::ratio type
 				@tparam T A parameter of type std::ratio, defaulted to std::ratio<1L> or per second
 				@retval double The amount of time passed since the start of #mFunctionStart
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <Ratio T = std::ratio<1L>>
@@ -261,9 +250,8 @@ namespace PocketCore::Utility::Clock
 				@post Will return a std::ofstream reference that may or may not be open, so make sure to check
 				@param[in] filename The name of the file, defaults to nullptr
 				@retval std::ofstream The log file
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static std::ofstream &getLogFile(const std::string *filename = nullptr) noexcept
@@ -295,6 +283,8 @@ namespace PocketCore::Utility::Clock
 
 			/*! @brief Provides access to the function-local static file name string.
 				@return A reference to the stored file name. The reference remains valid for the lifetime of the program.
+				@since 0.1.0
+				@version 0.1.0
 			*/
 			static std::string &getFileName() noexcept
 			{

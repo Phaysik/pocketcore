@@ -1,3 +1,11 @@
+/*! @file idInterface.test.cpp
+	@brief C++ file for running tests for the IDInterface.
+	@date --/--/----
+	@since x.x.x
+	@version x.x.x
+	@author Matthew Moore
+*/
+
 #include "ID/idInterface.h"
 
 #include <type_traits>

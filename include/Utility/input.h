@@ -1,8 +1,8 @@
 /*! @file input.h
 	@brief Contains the function declarations for getting user input.
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -20,18 +20,16 @@
 #include "Core/cconcepts.h" // for Integral, String
 
 /*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 namespace PocketCore::Utility
 {
 	/*! @class Input input.h "include/input.h"
 		@brief Will try and extract valid user input and clean up the input buffer as needed
-		@date --/--/----
-		@version x.x.x
-		@since x.x.x
+		@since 0.1.0
+		@version 0.1.0
 		@author Matthew Moore
 	*/
 	class Input
@@ -48,9 +46,8 @@ namespace PocketCore::Utility
 				@param[in, out] input The input stream to use. The default value is std::cin
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <typename T>
@@ -101,9 +98,8 @@ namespace PocketCore::Utility
 				@param[in, out] input The input stream to use. The default value is std::cin
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <PocketCore::Core::String T>
@@ -145,9 +141,8 @@ namespace PocketCore::Utility
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
 				@retval T The value that was extracted
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <PocketCore::Core::Integral T>
@@ -183,9 +178,8 @@ namespace PocketCore::Utility
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
 				@retval T The value that was extracted
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <typename T>
@@ -221,9 +215,8 @@ namespace PocketCore::Utility
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
 				@retval T The value that was extracted
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			template <typename T, typename Func>
@@ -256,9 +249,8 @@ namespace PocketCore::Utility
 			/*! @brief This function will clear any extraneous input in the input buffer
 				@post The input buffer will be empty
 				@param[in] input The input stream to use.
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void ignoreLine(std::istream &input) noexcept
@@ -272,9 +264,8 @@ namespace PocketCore::Utility
 			   normal operation mode
 				@param[in] input The input stream to use.
 				@retval bool If the extraction failed
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static bool clearFailedExtraction(std::istream &input)
@@ -301,9 +292,8 @@ namespace PocketCore::Utility
 			/*! @brief Will print out @p message provided that it is not empty
 				@param[in] message The message to print
 				@param[in] newLine If a new line should be printed
-				@date --/--/----
-				@version x.x.x
-				@since x.x.x
+				@since 0.1.0
+				@version 0.1.0
 				@author Matthew Moore
 			*/
 			static void printIfNotEmpty(std::string_view message, const bool newLine = false)

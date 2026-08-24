@@ -1,8 +1,8 @@
 /*! @file attributeMacros.h
 	@brief Declares portable compiler-attribute macros used across PocketCore.
-	@date 08/03/2026
-	@version x.x.x
-	@since x.x.x
+	@date 04/20/2026
+	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 
@@ -15,6 +15,8 @@
 		@details This macro defined when the compiler predefined macro `__GNUC__` is present.
 		Use it to enable GCC-specific attributes or workarounds.
 		@note Do not assume exact GCC version from this macro; check `__GNUC__`/`__GNUC_MINOR__` when needed.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_GCC
 #endif
@@ -25,6 +27,8 @@
 		@details This macro defined when the compiler predefined macro `__clang__` is present. Use it to conditionally enable Clang-specific
 	   features or attributes.
 		@note This macro is internal to the attribute macros helper and is not intended as a stable public API.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_CLANG
 #endif
@@ -34,6 +38,8 @@
 		@brief Defined when compiling with Microsoft Visual C++.
 		@details This macro defined when `_MSC_VER` is defined by the compiler.
 		Use it to guard MSVC-specific pragmas or attribute equivalents.
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_MSVC
 #endif
@@ -53,6 +59,8 @@
 			@code{.cpp}
 			ATTR_CONST int pure_function(int x) { return x * 2; }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_CONST __attribute__((const))
 	#else
@@ -71,6 +79,8 @@
 			@code{.cpp}
 			ATTR_PURE int compute_value(int x) { return x * 2; }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_PURE __attribute__((pure))
 	#else
@@ -89,6 +99,8 @@
 			@code{.cpp}
 			ATTR_RETURNS_NONNULL int* get_value() { static int x = 42; return &x; }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_RETURNS_NONNULL __attribute__((returns_nonnull))
 	#else
@@ -110,6 +122,8 @@
 				FlagC
 			};
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_FLAG_ENUM __attribute__((flag_enum))
 	#else
@@ -129,6 +143,8 @@
 			@code{.cpp}
 			ATTR_ALWAYS_INLINE static inline int fast_mul2(int x) { return x * 2; }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_ALWAYS_INLINE __attribute__((always_inline))
 	#else
@@ -150,6 +166,8 @@
 			@code{.cpp}
 			ATTR_ARTIFICIAL static inline void wrapper_for_debug() { helper(); }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_ARTIFICIAL __attribute__((artificial))
 	#else
@@ -173,6 +191,8 @@
 			// when an offset is required:
 			int * ATTR_ASSUME_ALIGNED_EX(16, 8) ptr2 = ...; // assume ptr2 + 8 is 16-byte aligned
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_ASSUME_ALIGNED_EX(alignment, offset) __attribute__((assume_aligned(alignment, offset)))
 		#define ATTR_ASSUME_ALIGNED(alignment)			  ATTR_ASSUME_ALIGNED_EX(alignment, 0)
@@ -195,6 +215,8 @@
 			@code{.cpp}
 			ATTR_COLD void handle_error(int code) { // infrequent error path  }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_COLD __attribute__((cold))
 	#else
@@ -215,6 +237,8 @@
 			@code{.cpp}
 			ATTR_HOT inline int inner_compute(int x) { return x * 2; }
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_HOT __attribute__((hot))
 	#else
@@ -234,6 +258,8 @@
 			// Both parameters must be non-null (indices are 1-based):
 			int copy_strings(const char *src, char *dst) ATTR_NONNULL(1, 2);
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_NONNULL(...) __attribute__((nonnull(__VA_ARGS__)))
 	#else
@@ -291,6 +317,8 @@
 			ofe = D0 | D1;     // no warnings
 			ofe = D0 | D1 | 4; // no warnings
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_ENUM_EXTENSIBILITY_OPEN __attribute__((enum_extensibility(open)))
 	#else
@@ -327,6 +355,8 @@
 			cfe = C0 | C1;     // no warnings
 			cfe = C0 | C1 | 4; // warning issued
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_ENUM_EXTENSIBILITY_CLOSED __attribute__((enum_extensibility(closed)))
 	#else
@@ -360,6 +390,8 @@
 			TypeA a; // OK
 			TypeB b; // OK if TypeB exists, otherwise compile error
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_USING_IF_EXISTS __attribute__((using_if_exists))
 	#else
@@ -394,6 +426,8 @@
 			x = s->a;    // warning
 			x = (*s).a;  // warning
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_NODEREF __attribute__((noderef))
 	#else
@@ -436,6 +470,8 @@
 			}
 			}
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_CALLED_ONCE __attribute__((called_once))
 	#else
@@ -467,6 +503,8 @@
 				return 0;
 			}
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_NO_SPECIALIZATIONS [[clang::no_specializations]]
 	#else
@@ -494,6 +532,8 @@
 				ATTR_PREFERRED_TYPE(bool) unsigned UseAlternateColorSpace : 1;
 			} s = { Green, false };
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_PREFERRED_TYPE(param) [[clang::preferred_type(param)]]
 	#else
@@ -519,6 +559,8 @@
 					ATTR_REINITIALIZES void Clear();
 			};
 			@endcode
+			@since 0.1.0
+			@version 0.1.0
 		*/
 		#define ATTR_REINITIALIZES [[clang::reinitializes]]
 	#else
@@ -545,6 +587,8 @@
 		@code{.cpp}
 		ATTR_NODISCARD int compute_value() { return 42; }
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_NODISCARD [[nodiscard]]
 #else
@@ -560,6 +604,8 @@
 		@code{.cpp}
 		int compute_value(ATTR_MAYBE_UNUSED int number) { return number; }
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_MAYBE_UNUSED [[maybe_unused]]
 #else
@@ -575,6 +621,8 @@
 		@code{.cpp}
 		ATTR_DEPRECATED int compute_value(int number) { return number; }
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_DEPRECATED [[deprecated]]
 #else
@@ -591,6 +639,8 @@
 		@code{.cpp}
 		ATTR_NORETURN void terminate_program() { exit(1); }
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_NORETURN [[noreturn]]
 #else
@@ -618,6 +668,8 @@
 			}
 		}
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_FALLTHROUGH [[fallthrough]]
 #else
@@ -638,6 +690,8 @@
 				return 1;
 		}
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_LIKELY [[likely]]
 #else
@@ -658,6 +712,8 @@
 				return 1;
 		}
 		@endcode
+		@since 0.1.0
+		@version 0.1.0
 	*/
 	#define ATTR_UNLIKELY [[unlikely]]
 #else

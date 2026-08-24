@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@date 04/29/2026
+	@since 0.1.0
+	@version 0.2.0
 	@author Matthew Moore
 */
 
@@ -37,9 +37,8 @@
 #include "Utility/Debug/Logging/logger.h"
 
 /*! @brief The entry point for the program
-	@date --/--/----
-	@version x.x.x
-	@since x.x.x
+	@since 0.1.0
+	@version 0.2.0
 	@author Matthew Moore
 	@return int The status code of the program
 */

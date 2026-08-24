@@ -11,8 +11,13 @@
 
 #include <string_view>
 
+#include "Core/typedefs.h"
+
 namespace PocketCore::Nature
 {
+	using PocketCore::Core::ub;
+	inline constexpr ub MAX_STAT_TYPES{6};
+
 	constexpr std::string_view NATURE_NAME_NONE{"None"};
 	constexpr std::string_view NATURE_NAME_HARDY{"Hardy"};
 	constexpr std::string_view NATURE_NAME_LONELY{"Lonely"};
@@ -39,6 +44,7 @@ namespace PocketCore::Nature
 	constexpr std::string_view NATURE_NAME_SASSY{"Sassy"};
 	constexpr std::string_view NATURE_NAME_CAREFUL{"Careful"};
 	constexpr std::string_view NATURE_NAME_QUIRKY{"Quirky"};
+
 } // namespace PocketCore::Nature
 
 #endif
