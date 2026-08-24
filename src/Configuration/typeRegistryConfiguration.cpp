@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 04/29/2026
+	@date 07/26/2026
 	@since 0.2.0
-	@version 0.2.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 

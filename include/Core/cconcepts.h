@@ -1,8 +1,8 @@
 /*! @file cconcepts.h
 	@brief Contains the declarations of common concepts that might be used in multiple files.
-	@date 04/20/2026
+	@date 07/26/2026
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -110,6 +110,8 @@ namespace PocketCore::Core
 	/*! @concept IsEnum
 		@brief Tests whether a type is an enumeration type.
 		@tparam T The type to test. Typical examples: scoped enums (`enum class`) and unscoped enums (`enum`).
+		@since 0.2.17
+		@version 0.2.17
 	*/
 	template <typename T>
 	concept IsEnum = std::is_enum_v<T>;

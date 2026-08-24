@@ -1,8 +1,8 @@
 /*! @file input.h
 	@brief Contains the function declarations for getting user input.
-	@date 04/20/2026
+	@date 07/26/2026
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -29,7 +29,7 @@ namespace PocketCore::Utility
 	/*! @class Input input.h "include/input.h"
 		@brief Will try and extract valid user input and clean up the input buffer as needed
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.3.0
 		@author Matthew Moore
 	*/
 	class Input
@@ -99,7 +99,7 @@ namespace PocketCore::Utility
 				@param[in] afterFailureOnly If you need to re-print the input message after a condition has failed. The default value is
 			   false
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.3.0
 				@author Matthew Moore
 			*/
 			template <PocketCore::Core::String T>
@@ -142,7 +142,7 @@ namespace PocketCore::Utility
 			   false
 				@retval T The value that was extracted
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.3.0
 				@author Matthew Moore
 			*/
 			template <PocketCore::Core::Integral T>
@@ -216,7 +216,7 @@ namespace PocketCore::Utility
 			   false
 				@retval T The value that was extracted
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.3.0
 				@author Matthew Moore
 			*/
 			template <typename T, typename Func>

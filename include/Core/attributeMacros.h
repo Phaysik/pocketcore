@@ -1,8 +1,8 @@
 /*! @file attributeMacros.h
 	@brief Declares portable compiler-attribute macros used across PocketCore.
-	@date 04/20/2026
+	@date 05/01/2026
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.2.18
 	@author Matthew Moore
 */
 
@@ -280,6 +280,8 @@
 			@code{.cpp}
 			ATTR_NOINLINE void expensive_path() { // large function body }
 			@endcode
+			@since 0.2.18
+			@version 0.2.18
 		*/
 		#define ATTR_NOINLINE __attribute__((noinline))
 	#else

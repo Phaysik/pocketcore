@@ -1,8 +1,8 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/26/2026
+	@since 0.3.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -30,13 +30,33 @@ namespace PocketCore::Ability
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::SuppressionRule;
 
+	/*! @struct AbilityEffectTrigger Ability/abilityMeta.h
+		@brief Stores the event-driven effects and suppression rules for one ability trigger.
+		@details The effect vector owns its ordered effect identifiers. The suppression-rule array has fixed physical storage, while
+		 @p mSuppresionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
+		 current battle event.
+		@note @p mSuppresionRuleCount must not exceed MAX_SUPPRESSION_RULES_PER_TRIGGER.
+		@date --/--/----
+		@since x.x.x
+		@version x.x.x
+		@author Matthew Moore
+	*/
 	struct AbilityEffectTrigger
 	{
 		public:
+			/*! @brief The fixed-capacity suppression rules associated with this trigger. */
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
+
+			/*! @brief The owned effect identifiers executed in declaration order when this trigger matches. */
 			std::vector<EffectID> mEffects{};
+
+			/*! @brief The battle event that activates this trigger. */
 			BattleEventID mTrigger{};
+
+			/*! @brief The battle-event role required for activation, or Any when the role is unrestricted. */
 			BattleEventRole mRole{BattleEventRole::Any};
+
+			/*! @brief The number of entries in mSuppressionRules that contain active suppression rules. */
 			ub mSuppresionRuleCount{0};
 	};
 
@@ -44,9 +64,9 @@ namespace PocketCore::Ability
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/26/2026
+		@since 0.3.0
+		@version 0.3.0
 		@author Matthew Moore
 	*/
 	struct AbilityMeta

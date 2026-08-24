@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/26/2026
+	@since 0.3.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -27,51 +27,112 @@ namespace PocketCore::Battle
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Weather::WeatherID;
 
+	/*! @struct StatStages Battle/battleState.h
+		@brief Stores a battler's temporary stat stage changes.
+		@details Each signed stage applies to the corresponding stat during battle calculations.
+		@date 07/26/2026
+		@since 0.3.0
+		@version 0.3.0
+		@author Matthew Moore
+	*/
 	struct StatStages
 	{
 		public:
+			/*! @brief The temporary Attack stage. */
 			sb mAttack{0};
+			/*! @brief The temporary Defense stage. */
 			sb mDefense{0};
+			/*! @brief The temporary Special Attack stage. */
 			sb mSpAttack{0};
+			/*! @brief The temporary Special Defense stage. */
 			sb mSpDefense{0};
+			/*! @brief The temporary Speed stage. */
 			sb mSpeed{0};
+			/*! @brief The temporary accuracy stage. */
 			sb mAccuracy{0};
+			/*! @brief The temporary evasion stage. */
 			sb mEvasion{0};
 	};
 
+	/*! @struct DamageFormulaModifiers Battle/battleState.h
+		@brief Stores multiplicative modifiers applied to damage-formula statistics.
+		@details A default-constructed instance leaves every supported statistic unchanged by initializing each modifier to 1.0.
+		@date --/--/----
+		@since x.x.x
+		@version x.x.x
+		@author Matthew Moore
+	*/
 	struct DamageFormulaModifiers
 	{
 		public:
+			/*! @brief The multiplicative modifier applied to health. */
 			double mHealthModifier{1.0};
+			/*! @brief The multiplicative modifier applied to Attack. */
 			double mAttackModifier{1.0};
+			/*! @brief The multiplicative modifier applied to Defense. */
 			double mDefenseModifier{1.0};
+			/*! @brief The multiplicative modifier applied to Special Attack. */
 			double mSpecialAttackModifier{1.0};
+			/*! @brief The multiplicative modifier applied to Special Defense. */
 			double mSpecialDefenseModifier{1.0};
+			/*! @brief The multiplicative modifier applied to Speed. */
 			double mSpeedModifier{1.0};
 	};
 
+	/*! @struct BattleSlot Battle/battleState.h
+		@brief Stores the active battle state associated with one position on a side.
+		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
+	   is empty.
+		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
+		@date 07/26/2026
+		@since 0.3.0
+		@version 0.3.0
+		@author Matthew Moore
+	*/
 	struct BattleSlot
 	{
 		public:
+			/*! @brief The temporary modifiers used by damage and battle calculations. */
 			DamageFormulaModifiers mDamageFormulaModifiers{};
 
+			/*! @brief The non-owning Pokemon occupying this slot, or nullptr when unoccupied. */
 			Pokemon *mPokemon{nullptr};
+			/*! @brief The temporary stat stages for the occupying Pokemon. */
 			StatStages mStatStages{};
 
+			/*! @brief The move currently locking this slot's Pokemon into a choice, if any. */
 			MoveID mChoiceLockedMove{};
 
+			/*! @brief The side-local position represented by this slot. */
 			ub mPosition{0};
 
+			/*! @brief The remaining sleep counter for this slot. */
 			ub mSleepCounter{0};
+			/*! @brief The current toxic counter for this slot. */
 			ub mToxicCounter{0};
+			/*! @brief The remaining protection counter for this slot. */
 			ub mProtectionCounter{0};
 
+			/*! @brief Indicates whether this slot is protected from applicable effects. */
 			bool mIsProtected{false};
+			/*! @brief Indicates whether this slot's Pokemon is flinched. */
 			bool mIsFlinched{false};
+			/*! @brief Indicates whether this slot's Pokemon is grounded. */
 			bool mIsGrounded{false};
+			/*! @brief Indicates whether faint processing has already occurred for this slot. */
 			bool mFaintProcessed{false};
 	};
 
+	/*! @struct BattleState Battle/battleState.h
+		@brief Stores the complete mutable state of a battle.
+		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
+	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
+		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
+		@date 07/26/2026
+		@since 0.3.0
+		@version 0.3.0
+		@author Matthew Moore
+	*/
 	struct BattleState
 	{
 		public:
@@ -84,28 +145,41 @@ namespace PocketCore::Battle
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)
 
+			/*! @brief The active slots for side A. */
 			std::vector<BattleSlot> mSideA{};
+			/*! @brief The active slots for side B. */
 			std::vector<BattleSlot> mSideB{};
 
+			/*! @brief Non-owning pointers to side A's party Pokemon. */
 			std::vector<Pokemon *> mPartyA{};
+			/*! @brief Non-owning pointers to side B's party Pokemon. */
 			std::vector<Pokemon *> mPartyB{};
 
+			/*! @brief The battle-wide weather identifier. */
 			WeatherID mWeatherID{};
+			/*! @brief The battle-wide terrain identifier. */
 			TerrainID mTerrainID{};
 
 			// Spikes can have 0-3 layers
 
+			/*! @brief The number of Spikes layers affecting side A, from 0 to 3. */
 			ub mSpikesPartyA{0};
+			/*! @brief The number of Spikes layers affecting side B, from 0 to 3. */
 			ub mSpikesPartyB{0};
 
 			// Spikes can have 0-2 layers
 
+			/*! @brief The number of Toxic Spikes layers affecting side A, from 0 to 2. */
 			ub mToxicSpikesPartyA{0};
+			/*! @brief The number of Toxic Spikes layers affecting side B, from 0 to 2. */
 			ub mToxicSpikesPartyB{0};
 
+			/*! @brief Indicates whether Stealth Rock affects side A. */
 			bool mStealthRockPartyA{false};
+			/*! @brief Indicates whether Stealth Rock affects side B. */
 			bool mStealthRockPartyB{false};
 
+			/*! @brief Indicates whether battle-start processing has completed. */
 			bool mBattleStarted{false};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes)

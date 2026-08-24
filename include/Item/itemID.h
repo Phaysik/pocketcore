@@ -1,8 +1,8 @@
 /*! @file itemID.h
 	@brief Contains the item status
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/26/2026
+	@since 0.3.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 

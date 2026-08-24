@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 07/26/2026
+	@since 0.2.19
+	@version 0.3.0
 	@author Matthew Moore
 */
 

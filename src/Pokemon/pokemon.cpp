@@ -1,3 +1,11 @@
+/*! @file pokemon.cpp
+	@brief Contains the function definitions for creating a Pokemon
+	@date 07/26/2026
+	@since 0.3.0
+	@version 0.3.0
+	@author Matthew Moore
+*/
+
 #include "Pokemon/pokemon.h"
 
 #include <cstddef>

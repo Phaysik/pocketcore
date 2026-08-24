@@ -1,8 +1,8 @@
 /*! @file floatUtility.h
 	@brief Contains the function declarations for utility functions related to floating-point numbers.
-	@date 04/20/2026
+	@date 07/26/2026
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -65,7 +65,7 @@ namespace PocketCore::Utility::Math
 		@return `true` if the values are considered equal within the provided tolerances; otherwise `false`.
 		@note The function is `constexpr` and `noexcept`, suitable for compile-time evaluation when used with constexpr values.
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.3.0
 	*/
 	template <PocketCore::Core::FloatingPoint FloatingPoint>
 	ATTR_NODISCARD constexpr bool approximatelyEqualAbsRel(const FloatingPoint lhs, const FloatingPoint rhs,
