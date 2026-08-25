@@ -1,8 +1,8 @@
 /*! @file idInterface.h
 	@brief Defines a tagged value type for creating strongly typed stable identifiers.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/27/2026
+	@since 0.4.1
+	@version 0.4.1
 	@author Matthew Moore
 */
 
@@ -26,31 +26,41 @@ namespace PocketCore::ID
 		@tparam Tag The unique type identifying the registry domain.
 		@tparam DefaultValue The numeric value used by the default constructor.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.4.1
+		@version 0.4.1
 		@author Matthew Moore
 	*/
 	template <typename Tag, us DefaultValue>
 	class IDInterface
 	{
 		public:
-			/*! @brief Constructs an identifier with the domain-specific default value. */
+			/*! @brief Constructs an identifier with the domain-specific default value.
+				@since 0.4.1
+				@version 0.4.1
+			 */
 			constexpr IDInterface() noexcept = default;
 
 			/*! @brief Constructs an identifier from a registry-assigned value.
 				@param[in] value The stable numeric value assigned by the domain registry.
+				@since 0.4.1
+				@version 0.4.1
 			*/
 			explicit constexpr IDInterface(const us value) noexcept : mValue{value} {}
 
 			/*! @brief Returns the underlying registry-assigned value.
 				@return The stable numeric identifier.
+				@since 0.4.1
+				@version 0.4.1
 			*/
 			ATTR_NODISCARD constexpr us getValue() const noexcept
 			{
 				return mValue;
 			}
 
-			/*! @brief Compares two identifiers from the same domain for equality. */
+			/*! @brief Compares two identifiers from the same domain for equality.
+				@since 0.4.1
+				@version 0.4.1
+			 */
 			constexpr std::strong_ordering operator<=>(const IDInterface &) const noexcept = default;
 
 		private:

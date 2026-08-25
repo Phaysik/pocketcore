@@ -4,6 +4,372 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.5.0] - 2026-07-27 (Item and FixedMetadata Registry Update)
+
+### Added
+
+- Create a _fixedMetadataRegistryConfiguration.h_ file that all _*RegistryConfiguration.h_ files will inherit from
+  - It has a method to get the registries metadata
+  - It has a method to get the registries stable ID
+  - It has a method to get the registries user readable name
+  - It has a method to get the all the entries in the registry
+  - It has a method to get the amount of entries in the registry
+  - It has a method to determine if the registry has an entry:
+    - By stable ID
+    - By user readable name
+  - It has a method to add metadata to the registry
+  - It has a method to add batch amounts of metadata to the registry
+  - It has a method to mutate a copy of the registered metadata and write it back:
+    - By stable ID
+    - By user readable name
+  - It has a method to rename the user readable name of the metadata
+  - It has a method to remove metadata from the registry:
+    - By stable ID
+    - By user readable name
+- Create a _fixedMetadataRegistry.h_ file that all _*Registry.h_ files will inherit from
+  - It has a method to get an entries metadata from the registry:
+    - By stable ID
+    - By registry array index
+  - It has a method to get the registries stable ID
+  - It has a method to get the registries user readable name
+  - It has a method to get the all the entries in the registry
+  - It has a method to get the amount of entries in the registry
+  - It has a method to get the next stable ID in the registry
+  - It has a method to get the internal array index in the registry by stable ID
+  - It has a method to determine if the registry has an entry:
+    - By stable ID
+    - By user readable name
+  - It has a method to set a specific entries metadata in the registry
+  - It has a method to set the amount of entries registered in the registry
+  - It has a method to set the next stable ID in the registry
+  - It has a method to increment the amount registered in the registry
+  - It has a method to decrement the amount registered in the registry
+  - It has a method to increment the next stable ID in the registry
+  - It has a protected constructor to be used be all children that inherit from it
+  - It has a protected method that will initialize the built-in entries
+- Added in both the source and header files to configure the item registry.
+  - It holds a struct that contains the user readable name, and the trigger and effect definitions.
+  - The actual registry configuration class allows the user to:
+    - Get the item metadata
+    - Get the item ID
+    - Get the item name
+    - Get a non-owning span of all the items
+    - Get the amount of items registered
+    - If the registry has an item:
+      - By user readable name
+      - By stable item ID
+    - Add an item
+    - Add in a list of items
+    - Set the trigger and effects for a specific item:
+      - By user readable name
+      - By stable item ID
+    - Rename an item
+    - Remove an item:
+      - By user readable name
+      - By stable item ID
+- Added a Ability registry configuration policy that holds:
+  - The configuration user name
+  - The configuration type
+  - The duplicate registry error
+  - The not found registry error
+- Add in item errors in _RegistryError_ and updated the _errorKingToString_ with the new errors
+- Added in the ability registry configuration and item registry configuration objects to _main.cpp_
+- Added a test suite for _itemRegistryConfiguration.h_
+- Added a test suite for _itemRegistry.h_
+
+### Changed
+
+- _AbilityRegistryConfiguration_ now inherits from _FixedMetadataRegistryConfiguration_:
+  - _getAbilityMetadata()_ now calls the parent _getMetadata()_ function
+  - _getAbilityID()_ now calls the parent _getID()_ function
+  - _getAbilityName()_ now calls the parent _getName()_ function
+  - _getRegisteredAbilities()_ now calls the parent _getRegisteredEntries()_ function
+  - _getAmountRegistered()_ now calls the parent _getAmountRegistered()_ function
+  - Both overloads of _hasAbility()_ now calls the parent _hasEntry()_ function
+- _AbilityRegistry_ now inherits from _FixedMetadataRegistry_:
+  - _getAbilityMetadata()_ now calls the parent _getMetadata()_ function
+  - _getAbilityID()_ now calls the parent _getID()_ function
+  - _getAbilityName()_ now calls the parent _getName()_ function
+  - _getRegisteredAbilities()_ now calls the parent _getRegisteredEntries()_ function
+  - _getNextAbilityID()_ now calls the parent _getNextID()_ function
+  - _findIndexByAbilityID()_ now calls the parent _findIndexByID()_ function
+  - Both overloads of _hasAbility()_ now calls the parent _hasEntry()_ function
+  - _setNextAbilityID()_ now calls the parent _setNextID()_ function
+  - _incrementNextAbilityID()_ now calls the parent _incrementNextID()_ function
+- _ItemRegistry_ now inherits from _FixedMetadataRegistry_:
+  - _getItemMetadata()_ now calls the parent _getMetadata()_ function
+  - _getItemID()_ now calls the parent _getID()_ function
+  - _getItemName()_ now calls the parent _getName()_ function
+  - _getRegisteredAbilities()_ now calls the parent _getRegisteredEntries()_ function
+  - _getNextItemID()_ now calls the parent _getNextID()_ function
+  - _findIndexByItemID()_ now calls the parent _findIndexByID()_ function
+  - Both overloads of _hasItem()_ now calls the parent _hasEntry()_ function
+  - _setNextItemID()_ now calls the parent _setNextID()_ function
+  - _incrementNextItemID()_ now calls the parent _incrementNextID()_ function
+- Update the _abilityRegistryConfiguration.cpp_ to use the new parent _fixedMetadataConfiguration.h_ functions in:
+  - _addAbility()_ now calls _addMetadata()_
+  - _addAbilities()_ now calls _addMetadataBatch()_
+  - Both overloads _setAbilityTriggers()_ now calls _mutateMetadata()_
+  - _renameAbility()_ now calls _renameMetadata()_
+  - Both overloads of _removeAbility()_ now calls _removeMetadata()_
+- Update _pokemon.test.cpp_ to use default initialization for item IDs
+
+### Fixed
+
+- Fixed the header guard in _Ability/constants.h_
+- Fixed the header guard in _Item/constants.h_
+- Update return type of from unsigned byte to unsigned short in _typeRegistryConfiguration.test.cpp_:
+- Update return type of from unsigned byte to unsigned short in _typeRegistry.test.cpp_:
+- Update return type of from unsigned byte to unsigned short in _idInterface.test.cpp_:
+
+### Removed
+
+- Remove the functions from _AbilityRegistryConfiguration_:
+  - Both overloads of _resolveIndex()_
+  - _removeEntry()_
+- Remove the member variable from _AbilityRegistryConfiguration_
+- Remove the functions from _AbilityRegistry_:
+  - _getEntry()_
+  - _getAmountRegistered()_
+  - _setEntry()_
+  - _setAmountRegistered()_
+  - _incrementAmountRegistered()_
+  - _decrementAmountRegistered()_
+  - _findEntryIndexByName()_
+  - _findEntryIndexByID()_
+  - _addBuiltin()_
+- Remove the functions from _ItemRegistry_:
+  - _getEntry()_
+  - _getAmountRegistered()_
+  - _setEntry()_
+  - _setAmountRegistered()_
+  - _incrementAmountRegistered()_
+  - _decrementAmountRegistered()_
+  - _findEntryIndexByName()_
+  - _findEntryIndexByID()_
+  - _addBuiltin()_
+- Remove the member variables from _ItemRegistry_
+- Remove the member variables from _AbilityRegistry_
+
+## [0.4.1] - 2026-07-27
+
+### Added
+
+- Added a new _IDInterface_ class that each stable ID tag will inherit from
+- Added a new file to hold the built-in Item IDs and a function to convert built-in Item IDs to the stable Item ID
+- Added a _Item/constants.h_ file that holds the user readable names for each Item ID.
+- Added item triggers, targets, and a wrapper for holding both.
+- Added a metadata file for Pokemon items that holds the relevant:
+  - User defined name, stable item ID, and a list of triggers with their effects
+- Added a file that holds the item registry.
+  - The actual registry class holds a constructor that initializes all the builtin items:
+    - Get the item metadata
+    - Get the item ID
+    - Get the item name
+    - Get a non-owning span of all the items
+    - Get the amount of items registered
+    - Get the next item ID
+    - Find the internal array index by stable item ID
+    - If the registry has an item:
+      - By user readable name
+      - By stable item ID
+    - Set an item ID's metadata
+    - Set the amount registered
+    - Set the next item ID
+    - Increment the amount registered
+    - Decrement the amount registered
+    - Increment the next item ID
+- Create a unique empty struct _AbilityIDTag_ for each _AbilityID_
+- Added new configuration constants:
+  - The maximum amount of abilities each Pokemon can have
+  - The maximum amount of items the item registry can hold
+  - The maximum amount of items each Pokemon can have
+- Add _StatusRemove_ to _effectType.h_
+- Added a test suite for _idInterface.h_
+
+### Changed
+
+- Update the function definition of _toAbilityID_ to use _ATTR\_NODISCARD_ from _attributeMacros.h_
+- Changed _AbilityID_ to be a typedef from the _IDInterface_ instead of a class
+- Changed _ItemID_ to be a typedef from the _IDInterface_ instead of an enum
+- Changed _TypeID_ to be a typedef from the _IDInterface_ instead of class
+- Update format of _abilityRegistryConfiguration.h_
+- Update return type of the following functions from unsigned byte to unsigned short in _abilityRegistryConfiguration.h_:
+  - _getEntry()_
+  - _getAbilityID()_
+  - _getAmountRegistered()_
+  - _getNextAbilityID()_
+  - _findIndexByAbilityID()_
+  - _setEntry()_
+  - _setAmountRegistered()_
+  - _setNextAbilityID()_
+  - Both overloads of _findEntryIndexByID()_
+- Update return type of the header functions from unsigned byte to unsigned short in _abilityRegistryConfiguration.cpp_:
+- Update return type of the following member variables from unsigned byte to unsigned short in _abilityRegistryConfiguration.h_:
+  - _mAmountRegistered_
+  - _mNextAbilityID_
+- Update return type of the following functions from unsigned byte to unsigned short in _abilityRegistryConfiguration.h_:
+  - _getAmountRegistered()_
+  - Both overloads of _resolveIndex()_
+  - _removeEntry()_
+- Update return type of the following functions from unsigned byte to unsigned short in _typeRegistryConfiguration.h_:
+  - _getAmountRegistered()_
+  - _addType()_
+  - _clearRows()_
+  - _rollbackEntries()_
+  - _removeEntry()_
+  - _resolveIndex()_
+- Update return type of the header functions from unsigned byte to unsigned short in _typeRegistryConfiguration.cpp_:
+- Update return type of the following functions from unsigned byte to unsigned short in _typeRegistry.h_:
+  - _getEntry()_
+  - _getTypeChartCell()_
+  - _getTypeChartRow()_
+  - _getTypeID()_
+  - _getTypeName()_
+  - _getAmountRegistered()_
+  - _setEntry()_
+  - _setTypeChartCell()_
+  - _setTypeChartRow()_
+  - _setAmountRegistered()_
+  - _findIndexByTypeID()_
+  - _findEntryIndexByName()_
+  - _findEntryIndexById()_
+- Update return type of the following member variables from unsigned byte to unsigned short in _typeRegistry.h_:
+  - _mAmountRegistered_
+  - _mNextTypeID_
+- Reorder some of the constant values in _Configuration/constants.h_
+- Update the amount of abilities that can exist from _64_ to _1000_
+
+### Fixed
+
+- Fix the namespace resolution for the registry member variable in _abilityRegistryConfiguration.h_
+- Fix the namespace resolution within _abilityRegistryConfiguration.cpp_
+- Fix the namespace resolution within _abilityRegistry.h_
+- Fix the namespace resolution within _abilityRegistry.test.cpp_
+
+### Remove
+
+- Removed the default initializer of the _mItemID_ in _pokemon.h_
+
+## [0.4.0] - 2026-07-27 (Ability Registry Update)
+
+### Added
+
+- Added a constant value to specify no Ability ID
+- Added a new file to hold the built-in Ability IDs and a function to convert built-in Ability IDs to the stable Ability ID
+- Added a file that holds the ability registry.
+  - The actual registry class holds a constructor that initializes all the builtin abilities:
+    - Get the ability metadata
+    - Get the ability ID
+    - Get the ability name
+    - Get a non-owning span of all the abilities
+    - Get the amount of abilities registered
+    - Get the next ability ID
+    - Find the internal array index by stable ability ID
+    - If the registry has an ability:
+      - By user readable name
+      - By stable Ability ID
+    - Set an ability ID's metadata
+    - Set the amount registered
+    - Set the next ability ID
+    - Increment the amount registered
+    - Decrement the amount registered
+    - Increment the next ability ID
+- Added in both the source and header files to configure the ability registry.
+  - It holds a struct that contains the user readable name, and the trigger and effect definitions.
+  - The actual registry configuration class allows the user to:
+    - Get the ability metadata
+    - Get the ability ID
+    - Get the ability name
+    - Get a non-owning span of all the abilities
+    - Get the amount of abilities registered
+    - If the registry has an ability:
+      - By user readable name
+      - By stable Ability ID
+    - Add an ability
+    - Add in a list of abilities
+    - Set the trigger and effects for a specific ability:
+      - By user readable name
+      - By stable Ability ID
+    - Rename an ability
+    - Remove an ability:
+      - By user readable name
+      - By stable Ability ID
+- Added in more configuration constants:
+  - Can now set the max amount of abilities in the ability registry
+  - Can now set the max amount of types a pokemon can hold
+  - Can now set the max amount of moves a pokemon can hold
+- Add in ability errors in _RegistryError_ and updated the _errorKingToString_ with the new errors
+- Add in an array of types to the Pokemon class.
+  - Add in a types array getter/setter and individual type getter/setter.
+- Added _typeID.h_:
+  - Holds a class that contains the stable type ID 
+  - A constant variable to specify no type ID
+  - Has a function to convert one of the type enum values to the stable Ability ID
+- Added a test suite for _abilityRegistryConfiguration.h_
+- Added a test suite for _abilityRegistry.h_
+- Added a test suite for _pokemon.h_
+- Added in new tests in _typeRegistryConfiguration.test.cpp_
+
+### Changed
+
+- Changed _AbilityID_ from an enum class to a class to hold a stable typed id specifically for abilities
+- Update the check in _addType_ to also check if the _getNextTypeID()_ is the _NO\_TYPE\_ID_
+- Update documentation for _abilityMeta.h_
+- Fix _clang-tidy_ warnings in _abilityTargetsAndTriggers.h_
+- Fix _clang-tidy_ warnings in _effectContext.h_
+- Fix _clang-tidy_ warnings in _effectType.h_
+- Fix _clang-tidy_ warnings in _itemID.h_
+- Fix _clang-tidy_ warnings in _moveID.h_
+- Fix _clang-tidy_ warnings in _statusID.h_
+- Fix _clang-tidy_ warnings in _pokemon.h_
+- Fix _clang-tidy_ warnings in _Types/constants.h_
+- Fix _clang-tidy_ warnings in _timer.h_
+- Fix _clang-tidy_ warnings in _random.h_
+- Fix _clang-tidy_ warnings in _weather.h_
+- Fix _clang-tidy_ warnings in _main.cpp_
+- Fix _clang-tidy_ warnings in _typeRegistryConfiguration.test.cpp_
+- Fix _clang-tidy_ warnings in _timer.test.cpp_
+- Update documentation for _Configuration/constants.h_
+- Update documentation for _typeRegistry.h_
+- In _typeRegistryConfiguration.h_ and _typeRegistryConfiguration.cpp_ update the return types from unsigned byte to the stable Type ID.
+- Run _clang-format_ on _typeRegistryConfiguration.cpp_
+- In _typeRegistry.h_ update the return types from unsigned byte to the stable Type ID.
+- In _effectContext.h_, change the type of _mMoveTypeID_ from unsigned byte to _TypeID_
+- Update _pokemon.h_:
+  - The constructors now take in an array of type IDs.
+  - Change all move count occurences with _MAX\_MOVES\_PER\_POKEMON_
+- Change all move count occurences with _MAX\_MOVES\_PER\_POKEMON_ in _pokemon.cpp_
+- Update _typeRegistryConfiguration.test.cpp_ to use the new stable type ID
+- Update _typeRegistry.test.cpp_ to use the new stable type ID
+
+### Removed
+
+- Removed the _getAbilityMetadata_ function
+
+## [0.3.2] - 2026-07-27
+
+### Added
+
+- Added _*.log_ to _.gitignore_
+- Added a _clearRows_ method to _typeRegistryConfiguration.h_ that will clear clear the offensive row and defensive column for a type index
+- Added _lcov_ exclusions in _typeRegistryConfiguration.cpp_ for branches that are not hittable
+
+### Changed
+
+- Run _clang-format_ on _typeRegistryConfiguration.cpp_
+- Updated both of the _resetMatchup_ functions to use the new _clearRows_ method
+
+### Removed
+
+- Removed redundant _arrayIndex_ check in _renameType_ because there is already a check that the _typeID_ exists, thus the _arrayIndex_ has to exist.
+
+## [0.3.1] - 2026-07-26
+
+### Removed
+
+- Removed redundant hooks folder
+
 ## [0.3.0] - 2026-07-26 (Pokemon & Ability, Item, and Status IDs)
 
 ### Added
@@ -515,6 +881,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.5.0]: https://github.com/Phaysik/pocketcore/compare/v0.4.0...v0.5.0
+[0.4.1]: https://github.com/Phaysik/pocketcore/commit/adf96f1bd73412520a65d92804be2ae17274b964
+[0.4.0]: https://github.com/Phaysik/pocketcore/compare/v0.3.0...v0.4.0
+[0.3.2]: https://github.com/Phaysik/pocketcore/commit/4e63ffb001c199804f40a73736977c4ac16a6193
+[0.3.1]: https://github.com/Phaysik/pocketcore/commit/5b3ec606ce94ca29d9a8bb8f08d74af50f06a525
 [0.3.0]: https://github.com/Phaysik/pocketcore/compare/v0.2.0...v0.3.0
 [0.2.19]: https://github.com/Phaysik/pocketcore/commit/b592768a73efdd33f5853434784c6f09e569cc1d
 [0.2.18]: https://github.com/Phaysik/pocketcore/commit/4acbfe60d336ea9f9509fb55f8750c7bf8288f80
@@ -535,7 +906,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 [0.2.3]: https://github.com/Phaysik/pocketcore/commit/7c4956adbb52c87dfcce7499c512592bb4c29747
 [0.2.2]: https://github.com/Phaysik/pocketcore/commit/54f68e5b31197ec8264a1474f309009a39c5b3d8
 [0.2.1]: https://github.com/Phaysik/pocketcore/commit/7bcdf6cb09123e7cc563b0e16db15cf4f4117054
-[0.2.0]: https://github.com/Phaysik/pocketcore/compare/0.1.0...v0.2.0
+[0.2.0]: https://github.com/Phaysik/pocketcore/compare/v0.1.0...v0.2.0
 [0.1.14]: https://github.com/Phaysik/pocketcore/commit/85937dbd94b09ceb28d63e864690ac54904559bf
 [0.1.13]: https://github.com/Phaysik/pocketcore/commit/a501cde9c1995a300eb0e431ce8fc4763798e6d5
 [0.1.12]: https://github.com/Phaysik/pocketcore/commit/c91cee6843d94cb516ef8c0c148fb6d07faed84c
@@ -550,4 +921,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 [0.1.3]: https://github.com/Phaysik/pocketcore/commit/b3f60fe4604dfabd8ec36d1c67814b74875deac8
 [0.1.2]: https://github.com/Phaysik/pocketcore/commit/db6c9380722de081275a91be968e3063ff534b46
 [0.1.1]: https://github.com/Phaysik/pocketcore/commit/63e8313bdc747329d441a0ec25cde1d76948ba35
-[0.1.0]: https://github.com/Phaysik/pocketcore/releases/tag/0.1.0
+[0.1.0]: https://github.com/Phaysik/pocketcore/releases/tag/v0.1.0

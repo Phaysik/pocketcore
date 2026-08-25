@@ -1,8 +1,8 @@
 /*! @file random.h
 	@brief Contains the function declarations for creating a random number generator
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.4.0
 	@author Matthew Moore
 */
 
@@ -78,7 +78,7 @@ namespace PocketCore::Utility
 			/*! @brief Creates the global random number generator
 				@retval std::mt19937 The global random number generator
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.4.0
 				@author Matthew Moore
 			*/
 			ATTR_NODISCARD static std::mt19937 generate() noexcept

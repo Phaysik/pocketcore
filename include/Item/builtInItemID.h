@@ -1,8 +1,8 @@
 /*! @file builtinItemID.h
 	@brief Defines identifiers for items compiled into PocketCore.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.4.1
+	@version 0.4.1
 	@author Matthew Moore
 */
 
@@ -22,8 +22,8 @@ namespace PocketCore::Item
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.4.1
+		@version 0.4.1
 		@author Matthew Moore
 	*/
 	enum class BuiltinItemID : PocketCore::Core::ub
@@ -37,6 +37,8 @@ namespace PocketCore::Item
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinItemID The built-in item to convert.
 		@return The corresponding open item identifier.
+		@since 0.4.1
+		@version 0.4.1
 	*/
 	ATTR_NODISCARD constexpr ItemID toItemID(const BuiltinItemID builtinItemID) noexcept
 	{

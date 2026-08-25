@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.3.0
-	@version 0.3.0
+	@version 0.4.1
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 07/26/2026
+		@date 07/27/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.4.1
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -88,7 +88,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level,
@@ -120,7 +120,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
@@ -160,6 +160,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns all move identifier slots.
 				@return A read-only reference valid for the object's lifetime.
+				@since 0.3.0
+				@version 0.4.0
 			*/
 			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMovesArray() const
 			{
@@ -183,7 +185,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns maximum PP for every move slot.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getMaxPPArray() const
 			{
@@ -207,7 +209,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns current PP for every move slot.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getCurrentPPArray() const
 			{
@@ -230,6 +232,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns all type identifier slots.
 				@return A read-only reference valid for the object's lifetime.
+				@since 0.4.0
+				@version 0.4.0
 			*/
 			ATTR_NODISCARD constexpr const std::array<TypeID, MAX_TYPES_PER_POKEMON> &getTypesArray() const noexcept
 			{
@@ -431,7 +435,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all move identifier slots.
 				@param[in] moveIDs The move identifiers to store.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			constexpr void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
 			{
@@ -455,7 +459,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces maximum PP for all move slots.
 				@param[in] maxPP The maximum PP values to store.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			constexpr void setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP)
 			{
@@ -479,7 +483,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces current PP for all move slots.
 				@param[in] currentPP The current PP values to store.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.4.0
 			*/
 			constexpr void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP)
 			{

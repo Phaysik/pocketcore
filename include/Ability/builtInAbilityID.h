@@ -1,8 +1,8 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.4.0
+	@version 0.4.1
 	@author Matthew Moore
 */
 
@@ -24,8 +24,8 @@ namespace PocketCore::Ability
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.4.0
+		@version 0.4.0
 		@author Matthew Moore
 	*/
 	enum class BuiltinAbilityID : ub
@@ -45,6 +45,8 @@ namespace PocketCore::Ability
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinAbilityID The built-in ability to convert.
 		@return The corresponding open ability identifier.
+		@since 0.4.0
+		@version 0.4.1
 	*/
 	ATTR_NODISCARD constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
 	{

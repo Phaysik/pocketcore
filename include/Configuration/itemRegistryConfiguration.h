@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring item metadata.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.5.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -34,12 +34,29 @@ namespace PocketCore::Configuration
 
 	namespace Detail
 	{
+		/*! @struct ItemRegistryConfigurationPolicy Configuration/itemRegistryConfiguration.h
+			@brief Policy class providing error codes and display strings for item registry configuration.
+			@details Encapsulates the item-specific error categories and display names used by the generic
+			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
+			 domain-specific terminology.
+			@date 07/27/2026
+			@since 0.5.0
+			@version 0.5.0
+			@author Matthew Moore
+		*/
 		struct ItemRegistryConfigurationPolicy
 		{
 			public:
+				/*! @brief The display name of the configuration system. */
 				static constexpr std::string_view configurationName{"ItemRegistryConfiguration"};
+
+				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"item"};
+
+				/*! @brief The error code returned when a duplicate ability name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateItem};
+
+				/*! @brief The error code returned when an ability lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::ItemNotFound};
 		};
 	} // namespace Detail
@@ -49,8 +66,8 @@ namespace PocketCore::Configuration
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.5.0
+		@version 0.5.0
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
@@ -62,7 +79,10 @@ namespace PocketCore::Configuration
 															Detail::ItemRegistryConfigurationPolicy>;
 
 		public:
-			/*! @brief Constructs a configuration containing all built-in items. */
+			/*! @brief Constructs a configuration containing all built-in items.
+				@since 0.5.0
+				@version 0.5.0
+			 */
 			constexpr ItemRegistryConfiguration() = default;
 
 			/*! @brief Returns read-only access to the configured runtime item registry.
@@ -77,6 +97,8 @@ namespace PocketCore::Configuration
 				@param[in] itemID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
@@ -86,6 +108,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a stable item ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
@@ -95,6 +119,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a display name by stable item ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
@@ -103,6 +129,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns all currently registered item definitions.
 				@return A read-only span that remains valid until mutation or destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
@@ -111,6 +139,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns the number of registered built-in and custom items.
 				@return The current registry entry count.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
@@ -120,6 +150,8 @@ namespace PocketCore::Configuration
 			/*! @brief Checks whether an item name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{
@@ -129,6 +161,8 @@ namespace PocketCore::Configuration
 			/*! @brief Checks whether an item ID is registered.
 				@param[in] itemID The built-in or custom stable identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const ItemID itemID) const
 			{
@@ -138,6 +172,8 @@ namespace PocketCore::Configuration
 			/*! @brief Registers one user-defined item and assigns a stable ID.
 				@param[in] itemMeta The name and trigger metadata to copy into the registry.
 				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> addItem(const ItemMeta &itemMeta);
 
@@ -145,6 +181,8 @@ namespace PocketCore::Configuration
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] itemMetas The item definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addItems(const std::span<const ItemMeta> &itemMetas);
 
@@ -152,6 +190,8 @@ namespace PocketCore::Configuration
 				@param[in] itemName The registered display name.
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const std::string_view &itemName,
 																				  const std::span<const ItemEffectTrigger> &triggers);
@@ -161,6 +201,8 @@ namespace PocketCore::Configuration
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const ItemID itemID,
 																				  const std::span<const ItemEffectTrigger> &triggers);
@@ -186,6 +228,8 @@ namespace PocketCore::Configuration
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameItem(const std::string_view &oldName,
 																			 const std::string_view &newName);
@@ -208,6 +252,8 @@ namespace PocketCore::Configuration
 			/*! @brief Removes an item by display name.
 				@param[in] itemName The registered display name.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching item exists.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const std::string_view &itemName);
 
@@ -215,6 +261,8 @@ namespace PocketCore::Configuration
 				@brief Removes an item by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching item exists.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const ItemID itemID);
 	};

@@ -1,8 +1,8 @@
 /*! @file abilityID.h
 	@brief Defines the open identifier used for built-in and user-defined abilities.
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.3.0
-	@version 0.3.0
+	@version 0.4.1
 	@author Matthew Moore
 */
 

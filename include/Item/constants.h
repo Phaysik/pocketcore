@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the item registry.
-	@date 04/17/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/27/2026
+	@since 0.4.1
+	@version 0.4.1
 	@author Matthew Moore
 */
 

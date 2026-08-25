@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.5.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -34,8 +34,8 @@ namespace PocketCore::Registry
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.5.0
+		@version 0.5.0
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -47,6 +47,8 @@ namespace PocketCore::Registry
 				@pre @p index < Capacity.
 				@param[in] index The internal array index.
 				@return A const reference that remains valid until replacement or registry destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const Metadata &getEntry(const us index) const
 			{
@@ -58,6 +60,8 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until the entry is
 			   replaced or the registry is destroyed.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
@@ -74,6 +78,8 @@ namespace PocketCore::Registry
 			/*! @brief Looks up a stable ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
@@ -91,6 +97,8 @@ namespace PocketCore::Registry
 			/*! @brief Looks up a display name by stable ID.
 				@param[in] stableID The stable identifier to find.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
@@ -106,6 +114,8 @@ namespace PocketCore::Registry
 
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
@@ -114,6 +124,8 @@ namespace PocketCore::Registry
 
 			/*! @brief Returns the number of registered records.
 				@return The number of valid entries in storage.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
@@ -122,6 +134,8 @@ namespace PocketCore::Registry
 
 			/*! @brief Returns the next numeric stable ID assigned to a custom record.
 				@return The next underlying ID value.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getNextID() const noexcept
 			{
@@ -131,6 +145,8 @@ namespace PocketCore::Registry
 			/*! @brief Finds an internal array index by stable ID.
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
@@ -147,6 +163,8 @@ namespace PocketCore::Registry
 			/*! @brief Checks whether a display name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
@@ -156,6 +174,8 @@ namespace PocketCore::Registry
 			/*! @brief Checks whether a stable ID is registered.
 				@param[in] stableID The stable identifier to find.
 				@return True if the ID is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const StableID stableID) const
 			{
@@ -166,6 +186,8 @@ namespace PocketCore::Registry
 				@pre @p index < Capacity.
 				@param[in] index The internal array index.
 				@param[in] metadata The complete metadata record to store.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NOINLINE constexpr void setEntry(const us index, const Metadata &metadata)
 			{
@@ -198,6 +220,8 @@ namespace PocketCore::Registry
 
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			constexpr void setAmountRegistered(const us amount) noexcept
 			{
@@ -208,13 +232,18 @@ namespace PocketCore::Registry
 
 			/*! @brief Sets the next numeric stable ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			constexpr void setNextID(const us nextID) noexcept
 			{
 				mNextID = nextID;
 			}
 
-			/*! @brief Increments the registered count. */
+			/*! @brief Increments the registered count.
+          		@since 0.5.0
+    			@version 0.5.0
+			 */
 			constexpr void incrementAmountRegistered() noexcept
 			{
 				assert(mAmountRegistered < mEntries.size());
@@ -222,7 +251,10 @@ namespace PocketCore::Registry
 				++mAmountRegistered;
 			}
 
-			/*! @brief Decrements the registered count. */
+			/*! @brief Decrements the registered count.
+          		@since 0.5.0
+    			@version 0.5.0
+			 */
 			constexpr void decrementAmountRegistered() noexcept
 			{
 				assert(mAmountRegistered > 0U);
@@ -230,7 +262,10 @@ namespace PocketCore::Registry
 				--mAmountRegistered;
 			}
 
-			/*! @brief Increments the next stable ID counter. */
+			/*! @brief Increments the next stable ID counter.
+          		@since 0.5.0
+    			@version 0.5.0
+			 */
 			constexpr void incrementNextID() noexcept
 			{
 				++mNextID;
@@ -239,12 +274,16 @@ namespace PocketCore::Registry
 		protected:
 			/*! @brief Constructs empty storage with a specified next-ID counter.
 				@param[in] nextID The first numeric ID available after built-in registration.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			explicit constexpr FixedMetadataRegistry(const us nextID) noexcept : mNextID{nextID} {}
 
 			/*! @brief Appends one built-in metadata record.
 				@pre @ref getAmountRegistered() < Capacity.
 				@param[in] metadata The complete built-in metadata record to append.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NOINLINE constexpr void addBuiltin(Metadata &&metadata)
 			{
@@ -276,6 +315,8 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive metadata display name.
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(n), where n is @ref mAmountRegistered.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
@@ -294,6 +335,8 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to locate.
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(log n), where n is @ref mIndexedAmount.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const
 			{

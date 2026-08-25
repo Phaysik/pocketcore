@@ -1,8 +1,8 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.3.0
-	@version 0.3.0
+	@version 0.4.0
 	@author Matthew Moore
 */
 
@@ -36,9 +36,9 @@ namespace PocketCore::Ability
 		 @p mSuppresionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
 		 current battle event.
 		@note @p mSuppresionRuleCount must not exceed MAX_SUPPRESSION_RULES_PER_TRIGGER.
-		@date --/--/----
-		@since x.x.x
-		@version x.x.x
+		@date 07/26/2026
+		@since 3.0.0
+		@version 3.0.0
 		@author Matthew Moore
 	*/
 	struct AbilityEffectTrigger
@@ -64,9 +64,9 @@ namespace PocketCore::Ability
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/26/2026
+		@date 07/27/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.4.0
 		@author Matthew Moore
 	*/
 	struct AbilityMeta

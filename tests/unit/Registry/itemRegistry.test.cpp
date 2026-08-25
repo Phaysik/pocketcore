@@ -1,8 +1,8 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 07/26/2026
+	@since 0.5.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 

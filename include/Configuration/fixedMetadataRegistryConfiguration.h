@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.5.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -54,15 +54,18 @@ namespace PocketCore::Configuration
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.5.0
+		@version 0.5.0
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
 	class FixedMetadataRegistryConfiguration
 	{
 		protected:
-			/*! @brief Constructs a configuration containing the concrete registry's built-in metadata. */
+			/*! @brief Constructs a configuration containing the concrete registry's built-in metadata.
+				@since 0.5.0
+				@version 0.5.0
+			 */
 			constexpr FixedMetadataRegistryConfiguration() = default;
 
 			/*! @brief Returns mutable access to the owned concrete registry.
@@ -85,6 +88,8 @@ namespace PocketCore::Configuration
 				@param[in] stableID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
@@ -94,6 +99,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a stable ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
@@ -103,6 +110,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a display name by stable ID.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
@@ -111,6 +120,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
@@ -119,6 +130,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns the number of registered built-in and custom records.
 				@return The current registry entry count.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
@@ -128,6 +141,8 @@ namespace PocketCore::Configuration
 			/*! @brief Checks whether a display name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
@@ -137,6 +152,8 @@ namespace PocketCore::Configuration
 			/*! @brief Checks whether a stable ID is registered.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const StableID stableID) const
 			{
@@ -146,6 +163,8 @@ namespace PocketCore::Configuration
 			/*! @brief Registers one complete metadata record and assigns its stable ID.
 				@param[in] metadata The metadata record with name and domain-specific data populated.
 				@return The assigned stable ID on success, or contextual registry error information.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> addMetadata(Metadata metadata)
 			{
@@ -187,6 +206,8 @@ namespace PocketCore::Configuration
 				@param[in] definitions The definitions to register in order.
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
@@ -235,6 +256,8 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The domain operation name used in diagnostics.
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -273,6 +296,8 @@ namespace PocketCore::Configuration
 
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -313,6 +338,8 @@ namespace PocketCore::Configuration
 				@param[in] oldName The current display name.
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)
@@ -344,6 +371,8 @@ namespace PocketCore::Configuration
 			/*! @brief Removes a metadata record by display name.
 				@param[in] name The registered display name.
 				@return The removed stable ID on success, or not-found error information.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const std::string_view &name)
 			{
@@ -364,6 +393,8 @@ namespace PocketCore::Configuration
 			/*! @brief Removes a metadata record by stable ID.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or not-found error information.
+				@since 0.5.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const StableID stableID)
 			{
@@ -379,6 +410,16 @@ namespace PocketCore::Configuration
 			}
 
 		private:
+			/*! @brief Resolves a display name to a registry index after lookup and validation.
+				@details Queries the registry for the stable ID associated with the given name, then resolves that ID to its array index.
+				Logs and reports not-found errors with domain-specific messages.
+				@param[in] name The case-sensitive display name to resolve.
+				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
+				@return The 0-based registry index on success, or a contextual registry error if name is not registered.
+				@note This function is exception-safe (noexcept); errors are communicated via std::expected.
+				@since 0.5.0
+				@version 0.5.0
+			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
 																				   const std::string_view &callerContext)
 			{
@@ -394,6 +435,15 @@ namespace PocketCore::Configuration
 					.value(); // LCOV_EXCL_BR - Cannot fail when getID just succeeded on the same registry
 			}
 
+			/*! @brief Resolves a stable ID to its registry index after validation.
+				@details Queries the registry for the array index of the entry with the given stable ID. Logs and reports not-found errors
+				with domain-specific messages when the ID is not registered.
+				@param[in] stableID The built-in or custom stable identifier to resolve.
+				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
+				@return The 0-based registry index on success, or a contextual registry error if the stable ID is not registered.
+				@since 0.5.0
+				@version 0.5.0
+			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const StableID stableID,
 																				   const std::string_view &callerContext)
 			{
@@ -407,6 +457,15 @@ namespace PocketCore::Configuration
 				return index.value();
 			}
 
+			/*! @brief Constructs a not-found error with domain-specific context and logging.
+				@details Logs an informational message using the policy's domain name and entity name, then constructs a RegistryErrorInfo
+				with the policy's not-found error code, the context (usually a name being searched), and the log result.
+				@param[in] context The display name or search term that was not found (empty for ID-only lookups).
+				@param[in] callerContext The operation name (e.g., "remove", "update") included in the log message.
+				@return A RegistryErrorInfo with the policy's not-found error, the context, and the log output reference.
+				@since 0.5.0
+				@version 0.5.0
+			*/
 			ATTR_NODISCARD const RegistryErrorInfo makeNotFoundError(const std::string_view &context,
 																	 const std::string_view &callerContext) const
 			{
@@ -417,6 +476,14 @@ namespace PocketCore::Configuration
 				return RegistryErrorInfo{Policy::notFoundError, context, logResult.value_or(std::string_view{})};
 			}
 
+			/*! @brief Removes the metadata entry at the specified registry index.
+				@param[in] index The valid 0-based index of the entry to remove.
+				@pre The index must refer to a currently registered entry.
+				@post The registry removes the entry and compacts any remaining entries as defined by @ref Registry::eraseEntry.
+				@note The underlying registry remains responsible for maintaining its entry count and index consistency.
+				@since 0.5.0
+				@version 0.5.0
+			*/
 			void removeEntry(const us index)
 			{
 				registry.eraseEntry(index);

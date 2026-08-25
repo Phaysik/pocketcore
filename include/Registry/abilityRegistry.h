@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.4.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -46,8 +46,8 @@ namespace PocketCore::Registry::Ability
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ABILITIES.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.4.0
+		@version 0.5.0
 		@author Matthew Moore
 	*/
 	class AbilityRegistry : private FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
@@ -57,7 +57,10 @@ namespace PocketCore::Registry::Ability
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID.
+				@since 0.4.0
+				@version 0.5.0
+			 */
 			ATTR_NOINLINE explicit constexpr AbilityRegistry() : Base{toAbilityID(BuiltinAbilityID::FinalAbility).getValue()}
 			{
 				addBuiltin({
@@ -103,6 +106,8 @@ namespace PocketCore::Registry::Ability
 				@param[in] abilityID The stable ability identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const AbilityMeta *getAbilityMetadata(const AbilityID abilityID) const
 			{
@@ -112,6 +117,8 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Looks up an ability ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<AbilityID> getAbilityID(const std::string_view &name) const
 			{
@@ -121,6 +128,8 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Looks up an ability display name by stable ID.
 				@param[in] abilityID The stable ability identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
 			{
@@ -129,6 +138,8 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Returns all currently registered ability definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
 			{
@@ -137,6 +148,8 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Returns the next stable ID assigned to a custom ability.
 				@return The underlying numeric value of the next ability ID.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getNextAbilityID() const noexcept
 			{
@@ -146,6 +159,8 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Finds an internal array index by stable ability ID.
 				@param[in] abilityID The stable ability identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByAbilityID(const AbilityID abilityID) const
 			{
@@ -155,6 +170,8 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Checks whether an ability name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view &name) const
 			{
@@ -164,6 +181,8 @@ namespace PocketCore::Registry::Ability
 			/*! @brief Checks whether an ability ID is registered.
 				@param[in] abilityID The stable ability identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const AbilityID abilityID) const
 			{
@@ -172,13 +191,18 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Sets the next custom ability ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.4.0
+				@version 0.5.0
 			*/
 			constexpr void setNextAbilityID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom ability ID counter. */
+			/*! @brief Increments the next custom ability ID counter.
+				@since 0.4.0
+				@version 0.5.0
+			 */
 			constexpr void incrementNextAbilityID() noexcept
 			{
 				incrementNextID();

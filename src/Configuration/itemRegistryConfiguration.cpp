@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the item registry.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.5.0
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"

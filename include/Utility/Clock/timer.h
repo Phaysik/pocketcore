@@ -1,8 +1,8 @@
 /*! @file timer.h
 	@brief Contains the function declarations for creating a class to time code execution.
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.4.0
 	@author Matthew Moore
 */
 
@@ -35,7 +35,7 @@ namespace PocketCore::Utility::Clock
 
 	/*! @enum TimeUnit A collection of named units of time
 		@since 0.1.0
-		@version 0.3.0
+		@version 0.4.0
 		@author Matthew Moore
 	*/
 	enum class TimeUnit : PocketCore::Core::ui

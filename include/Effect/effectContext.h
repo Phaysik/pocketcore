@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 07/26/2026
+	@date 07/27/2026
 	@version 0.3.0
-	@since 0.3.0
+	@since 0.4.0
 	@author Matthew Moore
 */
 
@@ -60,7 +60,7 @@ namespace PocketCore::Effect
 		@note All enum values must be handled exhaustively when selecting side-specific battle state.
 		@date 07/26/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.4.0
 		@author Matthew Moore
 	*/
 	enum class Side : ub
@@ -77,7 +77,7 @@ namespace PocketCore::Effect
 		 subsequent effect processing should continue.
 		@date 07/26/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.4.0
 		@author Matthew Moore
 	*/
 	struct DamageContext
@@ -115,8 +115,8 @@ namespace PocketCore::Effect
 	{
 		public:
 			/*! @brief Adds or updates a multiplier in the active application sequence.
-				@details Existing multipliers retain their original application order while their values are replaced. New multipliers are appended
-				to the sequence. Built-in multiplier positions are tracked for constant-time updates.
+				@details Existing multipliers retain their original application order while their values are replaced. New multipliers are
+			   appended to the sequence. Built-in multiplier positions are tracked for constant-time updates.
 				@param[in] multID The stable identifier of the multiplier to add or update.
 				@param[in] value The multiplier value to store for subsequent damage calculations.
 				@throws std::out_of_range If an invalid built-in multiplier identifier indexes the built-in position table.
@@ -124,8 +124,8 @@ namespace PocketCore::Effect
 			void setMultiplier(const MultiplierID multID, const double value);
 
 			/*! @brief Applies the active multipliers to a base damage value.
-				@details Applies multipliers in insertion order using each registered multiplier's application policy. Non-finite and negative
-				values are treated as 1.0 and 0.0 respectively, and the resulting damage is clamped to at least 1.
+				@details Applies multipliers in insertion order using each registered multiplier's application policy. Non-finite and
+			   negative values are treated as 1.0 and 0.0 respectively, and the resulting damage is clamped to at least 1.
 				@param[in] baseDamage The unmodified damage value.
 				@param[in] multiplierRegistry The registry used to resolve multiplier application policies.
 				@return The damage value after all active multipliers have been applied, with a minimum value of 1.

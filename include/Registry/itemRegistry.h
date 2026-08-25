@@ -1,8 +1,8 @@
 /*! @file itemRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.4.1
+	@version 0.5.0
 	@author Matthew Moore
 */
 
@@ -46,8 +46,8 @@ namespace PocketCore::Registry::Item
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.4.1
+		@version 0.5.0
 		@author Matthew Moore
 	*/
 	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
@@ -57,7 +57,10 @@ namespace PocketCore::Registry::Item
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinItemID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinItemID.
+				@since 0.4.1
+				@version 0.5.0
+			 */
 			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{toItemID(BuiltinItemID::FinalItem).getValue()}
 			{
 				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
@@ -108,6 +111,8 @@ namespace PocketCore::Registry::Item
 				@param[in] itemID The stable item identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
@@ -117,6 +122,8 @@ namespace PocketCore::Registry::Item
 			/*! @brief Looks up an item ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
@@ -126,6 +133,8 @@ namespace PocketCore::Registry::Item
 			/*! @brief Looks up an item display name by stable ID.
 				@param[in] itemID The stable item identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
@@ -134,6 +143,8 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Returns all currently registered item definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
@@ -142,6 +153,8 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Returns the next stable ID assigned to a custom item.
 				@return The underlying numeric value of the next item ID.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr us getNextItemID() const noexcept
 			{
@@ -151,6 +164,8 @@ namespace PocketCore::Registry::Item
 			/*! @brief Finds an internal array index by stable item ID.
 				@param[in] itemID The stable item identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByItemID(const ItemID itemID) const
 			{
@@ -160,6 +175,8 @@ namespace PocketCore::Registry::Item
 			/*! @brief Checks whether an item name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{
@@ -169,6 +186,8 @@ namespace PocketCore::Registry::Item
 			/*! @brief Checks whether an item ID is registered.
 				@param[in] itemID The stable item identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const ItemID itemID) const
 			{
@@ -177,13 +196,18 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Sets the next custom item ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.4.1
+				@version 0.5.0
 			*/
 			constexpr void setNextItemID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom item ID counter. */
+			/*! @brief Increments the next custom item ID counter.
+				@since 0.4.1
+				@version 0.5.0
+			 */
 			constexpr void incrementNextItemID() noexcept
 			{
 				incrementNextID();

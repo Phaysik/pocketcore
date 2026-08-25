@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 07/27/2026
+	@since 0.4.0
+	@version 0.4.0
 	@author Matthew Moore
 */
 
