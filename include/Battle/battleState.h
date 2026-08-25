@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 07/26/2026
+	@date 07/27/2026
 	@since 0.3.0
-	@version 0.3.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -84,9 +84,9 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 07/26/2026
+		@date 07/27/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	struct BattleSlot

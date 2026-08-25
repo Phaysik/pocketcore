@@ -2,7 +2,7 @@
 	@brief Defines the metadata stored for built-in and user-defined items.
 	@date 07/27/2026
 	@since 0.4.1
-	@version 0.4.1
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -38,7 +38,7 @@ namespace PocketCore::Item
 		@note @p mSuppresionRuleCount must not exceed MAX_SUPPRESSION_RULES_PER_TRIGGER.
 		@date 07/27/2026
 		@version 0.4.1
-		@since 0.4.1
+		@since 0.5.1
 		@author Matthew Moore
 	*/
 	struct ItemEffectTrigger
@@ -66,7 +66,7 @@ namespace PocketCore::Item
 	   must remain valid while this metadata is registered.
 		@date 07/27/2026
 		@version 0.4.1
-		@since 0.4.1
+		@since 0.5.1
 		@author Matthew Moore
 	*/
 	struct ItemMeta

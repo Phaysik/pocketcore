@@ -54,7 +54,7 @@ namespace PocketCore::Types
 		@param[in] builtinType The built-in type to convert.
 		@return The corresponding open type identifier.
 		@since 0.4.0
-		@version 0.4.0
+		@version 0.5.1
 	*/
 	ATTR_NODISCARD constexpr TypeID toTypeID(const BuiltInTypeID builtinType) noexcept
 	{

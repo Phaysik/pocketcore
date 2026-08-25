@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 07/27/2026
 	@since 0.3.0
-	@version 0.4.1
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -88,7 +88,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.4.0
+				@version 0.5.1
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level,
@@ -120,7 +120,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.4.0
+				@version 0.5.1
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,

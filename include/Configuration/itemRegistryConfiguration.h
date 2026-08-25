@@ -2,7 +2,7 @@
 	@brief Declares the user-facing facade for configuring item metadata.
 	@date 07/27/2026
 	@since 0.5.0
-	@version 0.5.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -41,7 +41,7 @@ namespace PocketCore::Configuration
 			 domain-specific terminology.
 			@date 07/27/2026
 			@since 0.5.0
-			@version 0.5.0
+			@version 0.5.1
 			@author Matthew Moore
 		*/
 		struct ItemRegistryConfigurationPolicy
@@ -67,7 +67,7 @@ namespace PocketCore::Configuration
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
 		@date 07/27/2026
 		@since 0.5.0
-		@version 0.5.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
@@ -98,7 +98,7 @@ namespace PocketCore::Configuration
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
@@ -109,7 +109,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
@@ -120,7 +120,7 @@ namespace PocketCore::Configuration
 				@param[in] itemID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
@@ -130,7 +130,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns all currently registered item definitions.
 				@return A read-only span that remains valid until mutation or destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
@@ -151,7 +151,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{
@@ -182,7 +182,7 @@ namespace PocketCore::Configuration
 				@param[in] itemMetas The item definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addItems(const std::span<const ItemMeta> &itemMetas);
 
@@ -191,7 +191,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const std::string_view &itemName,
 																				  const std::span<const ItemEffectTrigger> &triggers);
@@ -202,7 +202,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const ItemID itemID,
 																				  const std::span<const ItemEffectTrigger> &triggers);
@@ -229,7 +229,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameItem(const std::string_view &oldName,
 																			 const std::string_view &newName);
@@ -253,7 +253,7 @@ namespace PocketCore::Configuration
 				@param[in] itemName The registered display name.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching item exists.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const std::string_view &itemName);
 

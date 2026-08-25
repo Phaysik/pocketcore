@@ -25,7 +25,7 @@ namespace PocketCore::Registry
 		@details Each value represents a distinct failure mode used by @ref RegistryErrorInfo for programmatic error handling.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 		@since 0.1.0
-		@version 0.5.0
+		@version 0.5.1
 	*/
 	enum class RegistryError : ub
 	{
@@ -73,7 +73,7 @@ namespace PocketCore::Registry
 		without requiring the caller to enable logging.
 		@note This type is a lightweight data carrier and stores non-owning string views.
 		@since 0.1.0
-		@version 0.5.0
+		@version 0.5.1
 	*/
 	struct RegistryErrorInfo
 	{
@@ -83,7 +83,7 @@ namespace PocketCore::Registry
 				@param[in] errorKind The registry error category.
 				@param[in] errorContext The identifier or context associated with the failure.
 				@since 0.1.0
-				@version 0.2.0
+				@version 0.5.1
 			*/
 			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view &errorContext) noexcept
 				: mErrorName{errorKindToString(errorKind)}, mContext{errorContext}, mKind{errorKind}
@@ -94,7 +94,7 @@ namespace PocketCore::Registry
 				@param[in] errorContext The identifier or context associated with the failure.
 				@param[in] logFailure A message describing why logging failed.
 				@since 0.1.0
-				@version 0.2.0
+				@version 0.5.1
 			*/
 			constexpr RegistryErrorInfo(const RegistryError errorKind, const std::string_view &errorContext,
 										const std::string_view &logFailure) noexcept
@@ -120,7 +120,7 @@ namespace PocketCore::Registry
 			/*! @brief Converts @ref mKind to a human-readable name.
 				@return A string view containing the enum name suitable for diagnostics and error messages.
 				@since 0.1.0
-				@version 0.4.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr std::string_view errorKindToString(const RegistryError errorKind) noexcept
 			{

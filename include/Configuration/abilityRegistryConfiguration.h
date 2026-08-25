@@ -2,7 +2,7 @@
 	@brief Declares the user-facing facade for configuring ability metadata.
 	@date 07/27/2026
 	@since 0.4.0
-	@version 0.5.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -42,7 +42,7 @@ namespace PocketCore::Configuration
 			 domain-specific terminology.
 			@date 07/27/2026
 			@since 0.5.0
-			@version 0.5.0
+			@version 0.5.1
 			@author Matthew Moore
 		*/
 		struct AbilityRegistryConfigurationPolicy
@@ -68,7 +68,7 @@ namespace PocketCore::Configuration
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
 		@date 07/27/2026
 		@since 0.4.0
-		@version 0.5.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	class AbilityRegistryConfiguration
@@ -99,7 +99,7 @@ namespace PocketCore::Configuration
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const AbilityMeta *getAbilityMetadata(const AbilityID abilityID) const
 			{
@@ -110,7 +110,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<AbilityID> getAbilityID(const std::string_view &name) const
 			{
@@ -121,7 +121,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getAbilityName(const AbilityID abilityID) const
 			{
@@ -131,7 +131,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns all currently registered ability definitions.
 				@return A read-only span that remains valid until mutation or destruction.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const AbilityMeta> getRegisteredAbilities() const noexcept
 			{
@@ -152,7 +152,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr bool hasAbility(const std::string_view &name) const
 			{
@@ -183,7 +183,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityMetas The ability definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addAbilities(const std::span<const AbilityMeta> &abilityMetas);
 
@@ -192,7 +192,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const std::string_view &abilityName,
 																					 const std::span<const AbilityEffectTrigger> &triggers);
@@ -203,7 +203,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const AbilityID abilityID,
 																					 const std::span<const AbilityEffectTrigger> &triggers);
@@ -230,7 +230,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameAbility(const std::string_view &oldName,
 																				const std::string_view &newName);
@@ -255,7 +255,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityName The registered display name.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching ability exists.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> removeAbility(const std::string_view &abilityName);
 
@@ -264,7 +264,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching ability exists.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> removeAbility(const AbilityID abilityID);
 	};

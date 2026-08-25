@@ -2,7 +2,7 @@
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
 	@date 07/27/2026
 	@since 0.4.1
-	@version 0.5.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -47,7 +47,7 @@ namespace PocketCore::Registry::Item
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
 		@date 07/27/2026
 		@since 0.4.1
-		@version 0.5.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
@@ -59,7 +59,7 @@ namespace PocketCore::Registry::Item
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			 */
 			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{toItemID(BuiltinItemID::FinalItem).getValue()}
 			{
@@ -112,7 +112,7 @@ namespace PocketCore::Registry::Item
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const ItemMeta *getItemMetadata(const ItemID itemID) const
 			{
@@ -123,7 +123,7 @@ namespace PocketCore::Registry::Item
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
 			{
@@ -134,7 +134,7 @@ namespace PocketCore::Registry::Item
 				@param[in] itemID The stable item identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getItemName(const ItemID itemID) const
 			{
@@ -144,7 +144,7 @@ namespace PocketCore::Registry::Item
 			/*! @brief Returns all currently registered item definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const ItemMeta> getRegisteredItems() const noexcept
 			{
@@ -165,7 +165,7 @@ namespace PocketCore::Registry::Item
 				@param[in] itemID The stable item identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByItemID(const ItemID itemID) const
 			{
@@ -176,7 +176,7 @@ namespace PocketCore::Registry::Item
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.4.1
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
 			{

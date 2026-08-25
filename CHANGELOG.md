@@ -4,6 +4,136 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.5.1] - 2026-07-27
+
+### Added
+
+- Added _public_ specifiers in _AbilityRegistryConfigurationPolicy_ and _AbilityDefinition_
+- Added _public_ specifiers in _ItemRegistryConfigurationPolicy_ and _ItemDefinition_
+- Added _public_ specifiers in _MatchupPair_ and _TypeDefinition_
+- Added _public_ specifiers in _TypeEntry_
+
+### Changed
+
+- Update the function definition of _errorKindToString_ to use _ATTR\_NODISCARD_ from _attributeMacros.h_
+- Update the function definition of _toTypeID_ to use _ATTR\_NODISCARD_ from _attributeMacros.h_
+- Reordered the members of _AbilityMeta_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _AbilityEffectTrigger_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _RegistryError_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _effectContext_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _ItemMeta_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _ItemEffectTrigger_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _Pokemon_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Extract _PocketCore::Core::ub_ to a using declaration as its used more than once in _AbilityTargetsAndTriggers.h_
+- Extract _PocketCore::Core::ub_ to a using declaration as its used more than once in _builtinAbilityID.h_
+- Updated the documentation for _AbilityMeta_
+- Updated the documentation for _AbilityRegistryConfiguration_
+- Updated the documentation for _AbilityRegistry_
+- Updated the documentation for _FixedMetadataRegistry_
+- Update _getAbilityMetadata_ to return an _const AbilityMeta *_
+- Update _getMetadata_ to return an _const Metadata *_
+- Update _getItemMetadata_ to return an _const ItemMeta *_
+- Apply _clang-format_ on _abilityRegistryConfiguration.h_
+- Apply _clang-format_ on _fixedMetadataRegistryConfiguration.h_
+- Apply _clang-format_ on _Configuration/constants.h_
+- Make the following functions in _abilityRegistry.h_ and _abilityRegistry.cpp_ return a const value:
+  - _getAbilityID()_
+  - _getAbilityName()_
+  - _getRegisteredAbilities()_
+  - _findIndexByAbilityID()_
+- Pass the parameter by const reference/const for the following functions in _abilityRegistry.h_ and _abilityRegistry.cpp_
+  - _getAbilityID()_
+  - _hasAbility()_
+- Make the following functions in _abilityRegistryConfiguration.h_ and _abilityRegistryConfiguration.cpp_ return a const value:
+  - _getAbilityID()_
+  - _getAbilityName()_
+  - _getRegisteredAbilities()_
+- Pass the parameter by const reference/const for the following functions in _abilityRegistryConfiguration.h_ and _abilityRegistryConfiguration.cpp_
+  - _hasAbility()_
+  - _addAbilities()_
+  - Both overloads of _setAbilityTriggers()_
+  - Both overloads of _removeAbility()_
+- Make the following functions in _itemRegistryConfiguration.h_ and _itemRegistryConfiguration.cpp_ return a const value:
+  - _getItemID()_
+  - _getItemName()_
+  - _getRegisteredItems()_
+  - _findIndexByItemID()_
+- Pass the parameter by const reference/const for the following functions in _itemRegistryConfiguration.h_ and _itemRegistryConfiguration.cpp_
+  - _getItemID()_
+  - _hasItem()_
+- Make the following functions in _itemRegistry.h_ and _itemRegistry.cpp_ return a const value:
+  - _getItemID()_
+  - _getItemName()_
+  - _getRegisteredItems()_
+- Pass the parameter by const reference/const for the following functions in _itemRegistry.h_ and _itemRegistry.cpp_
+  - _getItemID()_
+  - _hasItem()_
+  - _addItems()_
+  - Both overloads of _setItemTriggers()_
+  - _renameItem()_
+  - _removeItem()_
+- Make the following functions in _typeRegistryConfiguration.h_ and _typeRegistryConfiguration.cpp_ return a const value:
+  - _getTypeID()_
+  - _getTypeName()_
+  - _getRegisteredTypes()_
+- Pass the parameter by const reference/const for the following functions in _typeRegistryConfiguration.h_ and _typeRegistryConfiguration.cpp_
+  - _getMatchup()_
+  - _getMatchupRow()_
+  - _getTypeID()_
+  - _setMatchup()_
+  - Both overloads of _setMatchupRow()_
+  - Both overloads of _setDefensiveColumn()_
+  - _addType()_
+  - _addTypes()_
+  - All three overloads of _removeType()_
+  - _removeTypes()_
+  - _renameType()_
+  - Both overloads of _resetMatchups()_
+  - _hasType()_
+  - _rollbackEntries()_
+  - _removeEntry()_
+  - _resolveIndex()_
+- Make the following functions in _typeRegistry.h_ and _typeRegistry.cpp_ return a const value:
+  - _getEntry()_
+  - _getTypeChartCell()_
+  - _getTypeChartRow()_
+  - _getRegisteredTypes()_
+  - _findIndexByTypeID()_
+- Pass the parameter by const reference/const for the following functions in _typeRegistry.h_ and _typeRegistry.cpp_
+  - _getTypeChartRow()_
+  - _getTypeID()_
+  - _hasType()_
+  - _findEntryIndexByName()_
+  - Both overloads of _addBuiltin()_
+- Make the following functions in _fixedMetadataRegistryConfiguration.h_ and _fixedMetadataRegistryConfiguration.cpp_ return a const value:
+  - _getID()_
+  - _getName()_
+  - _getRegisteredEntries()_
+  - _renameMetadata()_
+  - Both overloads of _removeMetadata()_
+  - _resolveIndex()_
+  - _makeNotFoundError()_
+- Pass the parameter by const reference/const for the following functions in _fixedMetadataRegistryConfiguration.h_ and _fixedMetadataRegistryConfiguration.cpp_
+  - _getID()_
+  - _hasEntry()_
+  - _addMetadata()_
+  - _addMetadataBatch()_
+  - Both overloads of _mutateMetadata()_
+  - _renameMetadata()_
+  - _removeMetadata()_
+  - _makeNotFoundError()_
+- Make the following functions in _fixedMetadataRegistry.h_ and _fixedMetadataRegistry.cpp_ return a const value:
+  - _getID()_
+  - _getName()_
+  - _getRegisteredEntries()_
+  - _findIndexByID()_
+- Pass the parameter by const reference/const for the following functions in _fixedMetadataRegistry.h_ and _fixedMetadataRegistry.cpp_
+  - _getID()_
+  - _hasEntry()_
+  - _findEntryIndexByName()_
+- Pass the parameter by _&&_ in _addBuiltin_
+
 ## [0.5.0] - 2026-07-27 (Item and FixedMetadata Registry Update)
 
 ### Added
@@ -881,6 +1011,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.5.1]: https://github.com/Phaysik/pocketcore/commit/f234e7c066c190e35cf0a83e0651a258f545b810
 [0.5.0]: https://github.com/Phaysik/pocketcore/compare/v0.4.0...v0.5.0
 [0.4.1]: https://github.com/Phaysik/pocketcore/commit/adf96f1bd73412520a65d92804be2ae17274b964
 [0.4.0]: https://github.com/Phaysik/pocketcore/compare/v0.3.0...v0.4.0

@@ -2,7 +2,7 @@
 	@brief Defines the metadata stored for built-in and user-defined abilities.
 	@date 07/27/2026
 	@since 0.3.0
-	@version 0.4.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -37,8 +37,8 @@ namespace PocketCore::Ability
 		 current battle event.
 		@note @p mSuppresionRuleCount must not exceed MAX_SUPPRESSION_RULES_PER_TRIGGER.
 		@date 07/26/2026
-		@since 3.0.0
-		@version 3.0.0
+		@since 0.3.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	struct AbilityEffectTrigger
@@ -66,7 +66,7 @@ namespace PocketCore::Ability
 	   must remain valid while this metadata is registered.
 		@date 07/27/2026
 		@since 0.3.0
-		@version 0.4.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	struct AbilityMeta

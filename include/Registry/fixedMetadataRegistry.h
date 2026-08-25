@@ -2,7 +2,7 @@
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
 	@date 07/27/2026
 	@since 0.5.0
-	@version 0.5.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -35,7 +35,7 @@ namespace PocketCore::Registry
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
 		@date 07/27/2026
 		@since 0.5.0
-		@version 0.5.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -61,7 +61,7 @@ namespace PocketCore::Registry
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until the entry is
 			   replaced or the registry is destroyed.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
@@ -79,7 +79,7 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
@@ -98,7 +98,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
@@ -115,7 +115,7 @@ namespace PocketCore::Registry
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
@@ -146,7 +146,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
@@ -164,7 +164,7 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
@@ -241,8 +241,8 @@ namespace PocketCore::Registry
 			}
 
 			/*! @brief Increments the registered count.
-          		@since 0.5.0
-    			@version 0.5.0
+				@since 0.5.0
+				@version 0.5.0
 			 */
 			constexpr void incrementAmountRegistered() noexcept
 			{
@@ -252,8 +252,8 @@ namespace PocketCore::Registry
 			}
 
 			/*! @brief Decrements the registered count.
-          		@since 0.5.0
-    			@version 0.5.0
+				@since 0.5.0
+				@version 0.5.0
 			 */
 			constexpr void decrementAmountRegistered() noexcept
 			{
@@ -263,8 +263,8 @@ namespace PocketCore::Registry
 			}
 
 			/*! @brief Increments the next stable ID counter.
-          		@since 0.5.0
-    			@version 0.5.0
+				@since 0.5.0
+				@version 0.5.0
 			 */
 			constexpr void incrementNextID() noexcept
 			{
@@ -283,7 +283,7 @@ namespace PocketCore::Registry
 				@pre @ref getAmountRegistered() < Capacity.
 				@param[in] metadata The complete built-in metadata record to append.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NOINLINE constexpr void addBuiltin(Metadata &&metadata)
 			{
@@ -316,7 +316,7 @@ namespace PocketCore::Registry
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(n), where n is @ref mAmountRegistered.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{

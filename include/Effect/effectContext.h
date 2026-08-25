@@ -2,7 +2,7 @@
 	@brief Contains the effect context
 	@date 07/27/2026
 	@version 0.3.0
-	@since 0.4.0
+	@since 0.5.1
 	@author Matthew Moore
 */
 
@@ -108,7 +108,7 @@ namespace PocketCore::Effect
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
 		@date 07/26/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	struct EffectContext

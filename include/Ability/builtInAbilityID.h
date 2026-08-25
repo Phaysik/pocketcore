@@ -2,7 +2,7 @@
 	@brief Defines identifiers for abilities compiled into PocketCore.
 	@date 07/27/2026
 	@since 0.4.0
-	@version 0.4.1
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -46,7 +46,7 @@ namespace PocketCore::Ability
 		@param[in] builtinAbilityID The built-in ability to convert.
 		@return The corresponding open ability identifier.
 		@since 0.4.0
-		@version 0.4.1
+		@version 0.5.1
 	*/
 	ATTR_NODISCARD constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
 	{

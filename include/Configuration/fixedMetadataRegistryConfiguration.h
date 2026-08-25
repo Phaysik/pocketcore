@@ -2,7 +2,7 @@
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
 	@date 07/27/2026
 	@since 0.5.0
-	@version 0.5.0
+	@version 0.5.1
 	@author Matthew Moore
 */
 
@@ -55,7 +55,7 @@ namespace PocketCore::Configuration
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
 		@date 07/27/2026
 		@since 0.5.0
-		@version 0.5.0
+		@version 0.5.1
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -89,7 +89,7 @@ namespace PocketCore::Configuration
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
@@ -100,7 +100,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
@@ -111,7 +111,7 @@ namespace PocketCore::Configuration
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
@@ -121,7 +121,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
@@ -142,7 +142,7 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
@@ -164,7 +164,7 @@ namespace PocketCore::Configuration
 				@param[in] metadata The metadata record with name and domain-specific data populated.
 				@return The assigned stable ID on success, or contextual registry error information.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> addMetadata(Metadata metadata)
 			{
@@ -207,7 +207,7 @@ namespace PocketCore::Configuration
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
@@ -257,7 +257,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -297,7 +297,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -339,7 +339,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)
@@ -372,7 +372,7 @@ namespace PocketCore::Configuration
 				@param[in] name The registered display name.
 				@return The removed stable ID on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const std::string_view &name)
 			{
@@ -394,7 +394,7 @@ namespace PocketCore::Configuration
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const StableID stableID)
 			{
@@ -418,7 +418,7 @@ namespace PocketCore::Configuration
 				@return The 0-based registry index on success, or a contextual registry error if name is not registered.
 				@note This function is exception-safe (noexcept); errors are communicated via std::expected.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
 																				   const std::string_view &callerContext)
@@ -464,7 +464,7 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The operation name (e.g., "remove", "update") included in the log message.
 				@return A RegistryErrorInfo with the policy's not-found error, the context, and the log output reference.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.5.1
 			*/
 			ATTR_NODISCARD const RegistryErrorInfo makeNotFoundError(const std::string_view &context,
 																	 const std::string_view &callerContext) const
