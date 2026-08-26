@@ -1,8 +1,8 @@
 /*! @file weatherMeta.h
 	@brief Defines the metadata stored for built-in and user-defined weathers.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.0
+	@version 0.8.0
 	@author Matthew Moore
 */
 
@@ -19,9 +19,9 @@ namespace PocketCore::Weather
 		@brief Stores one weather's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.0
+		@version 0.8.0
 		@author Matthew Moore
 	*/
 	struct WeatherMeta

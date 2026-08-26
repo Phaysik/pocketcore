@@ -1,8 +1,8 @@
 /*! @file builtinStatusID.h
 	@brief Defines identifiers for statuses compiled into PocketCore.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/29/2026
+	@since 0.7.0
+	@version 0.7.0
 	@author Matthew Moore
 */
 
@@ -23,9 +23,9 @@ namespace PocketCore::Status
 		@details This closed enum is only a catalog of built-in statuses. Runtime state and user-facing APIs use the open @ref StatusID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/29/2026
+		@since 0.7.0
+		@version 0.7.0
 		@author Matthew Moore
 	*/
 	enum class BuiltinStatusID : ub
@@ -43,6 +43,8 @@ namespace PocketCore::Status
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinStatusID The built-in status to convert.
 		@return The corresponding open status identifier.
+		@since 0.7.0
+		@version 0.7.0
 	*/
 	ATTR_NODISCARD constexpr StatusID toStatusID(const BuiltinStatusID builtinStatusID) noexcept
 	{

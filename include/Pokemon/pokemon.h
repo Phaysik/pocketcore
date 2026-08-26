@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 07/27/2026
+	@date 07/30/2026
 	@since 0.3.0
-	@version 0.5.1
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 07/27/2026
+		@date 07/29/2026
 		@since 0.3.0
-		@version 0.4.1
+		@version 0.7.2
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -386,6 +386,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns the Pokemon's level.
 				@return The level value.
+				@since 0.7.2
+				@version 0.7.2
 			*/
 			ATTR_NODISCARD constexpr us getLevel() const
 			{
@@ -404,6 +406,8 @@ namespace PocketCore::Pokemon
 				@param[in] index Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
 				@return The status identifier stored in the slot.
 				@pre index < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
 			{
@@ -659,6 +663,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets the level and recomputes its damage factor.
 				@param[in] level The new Pokemon level.
+				@since 0.7.2
+				@version 0.3.0
 			*/
 			constexpr void setLevel(const us level)
 			{
@@ -688,6 +694,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Determines whether current health is zero.
 				@return true when the Pokemon has no health remaining; otherwise false.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr bool isFainted() const
 			{

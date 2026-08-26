@@ -1,3 +1,11 @@
+/*! @file accuracyCheckHandler.cpp
+	@brief Contains the accuracy check effect handler implementation
+	@date 07/29/2026
+	@since 0.7.5
+	@version 0.7.5
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/accuracyCheckHandler.h"
 
 #include <algorithm>

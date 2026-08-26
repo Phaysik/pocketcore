@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring ability metadata.
-	@date 07/27/2026
+	@date 07/28/2026
 	@since 0.4.0
-	@version 0.5.1
+	@version 0.6.0
 	@author Matthew Moore
 */
 
@@ -67,9 +67,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal ability registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 07/27/2026
+		@date 07/28/2026
 		@since 0.4.0
-		@version 0.5.1
+		@version 0.6.0
 		@author Matthew Moore
 	*/
 	class AbilityRegistryConfiguration
@@ -86,6 +86,8 @@ namespace PocketCore::Configuration
 				@version 0.4.0
 			 */
 			constexpr AbilityRegistryConfiguration() = default;
+
+			using Base::getAmountRegistered;
 
 			/*! @brief Returns read-only access to the configured runtime ability registry.
 				@return A reference that remains valid for the lifetime of this configuration.
@@ -139,16 +141,6 @@ namespace PocketCore::Configuration
 				return getRegisteredEntries();
 			}
 
-			/*! @brief Returns the number of registered built-in and custom abilities.
-				@return The current registry entry count.
-				@since 0.4.0
-				@version 0.5.0
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
-			}
-
 			/*! @brief Checks whether an ability name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
@@ -175,7 +167,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityMeta The name and trigger metadata to copy into the registry.
 				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
 				@since 0.4.0
-				@version 0.5.0
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> addAbility(const AbilityMeta &abilityMeta);
 
@@ -184,7 +176,7 @@ namespace PocketCore::Configuration
 				@param[in] abilityMetas The ability definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
 				@since 0.4.0
-				@version 0.5.1
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addAbilities(const std::span<const AbilityMeta> &abilityMetas);
 
@@ -213,6 +205,8 @@ namespace PocketCore::Configuration
 				@param[in] abilityName The registered display name.
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+				@since 0.6.0
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const std::string_view &abilityName,
 																				   const BattleTargetID target);
@@ -222,6 +216,8 @@ namespace PocketCore::Configuration
 				@param[in] abilityID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+				@since 0.6.0
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTarget(const AbilityID abilityID, const BattleTargetID target);
 
@@ -240,6 +236,8 @@ namespace PocketCore::Configuration
 				@param[in] abilityName The registered display name.
 				@param[in] abilityMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+				@since 0.6.0
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateAbility(const std::string_view &abilityName,
 																				const AbilityMeta &abilityMeta);
@@ -249,6 +247,8 @@ namespace PocketCore::Configuration
 				@param[in] abilityID The built-in or custom stable identifier.
 				@param[in] abilityMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
+				@since 0.6.0
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateAbility(const AbilityID abilityID, const AbilityMeta &abilityMeta);
 

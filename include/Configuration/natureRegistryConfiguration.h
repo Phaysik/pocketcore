@@ -106,14 +106,6 @@ namespace PocketCore::Configuration
 				return getRegisteredEntries();
 			}
 
-			/*! @brief Returns the number of registered built-in and custom natures.
-				@return The current registry entry count.
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
-			}
-
 			/*! @brief Checks whether an nature name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.

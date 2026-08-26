@@ -1,3 +1,11 @@
+/*! @file targetsHandler.cpp
+	@brief Contains the targets effect handler implementation
+	@date 07/30/2026
+	@since 0.8.1
+	@version 0.8.1
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/targetsHandler.h"
 
 #include <cassert>

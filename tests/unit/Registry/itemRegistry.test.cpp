@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the ItemRegistry.
 	@date 07/26/2026
 	@since 0.5.0
-	@version 0.5.0
+	@version 0.6.2
 	@author Matthew Moore
 */
 

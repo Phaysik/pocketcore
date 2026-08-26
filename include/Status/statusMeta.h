@@ -1,8 +1,8 @@
 /*! @file statusMeta.h
 	@brief Defines the metadata stored for built-in and user-defined statuses.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/29/2026
+	@since 0.7.0
+	@version 0.7.0
 	@author Matthew Moore
 */
 
@@ -18,18 +18,47 @@
 
 namespace PocketCore::Status
 {
+	/*! @enum StatusInteractionAction
+		@showenumvalues
+		@brief Identifies how an incoming status interacts with an existing status.
+		@details Each action is evaluated from the incoming status toward the existing status identified by @ref
+	   StatusInteraction::mExistingStatusID.
+		@note Callers handling this enum should account for every value.
+		@date --/--/----
+		@since x.x.x
+		@version x.x.x
+		@author Matthew Moore
+	*/
 	enum class StatusInteractionAction : PocketCore::Core::ub
 	{
+		/*! @brief Allows the incoming and existing statuses to remain active together. */
 		Coexist,
+
+		/*! @brief Replaces the existing status with the incoming status. */
 		ReplaceCurrent,
+
+		/*! @brief Removes the existing status before the incoming status is applied. */
 		RemoveCurrent,
+
+		/*! @brief Prevents the incoming status from being applied while the existing status is active. */
 		BlockIncoming,
 	};
 
+	/*! @struct StatusInteraction Status/statusMeta.h
+		@brief Associates an existing status with the action taken when another status is applied.
+		@details Instances are stored by the incoming status and describe its behavior when @ref mExistingStatusID is already active.
+		@date --/--/----
+		@since x.x.x
+		@version x.x.x
+		@author Matthew Moore
+	*/
 	struct StatusInteraction
 	{
 		public:
+			/*! @brief The stable identifier of the status that is already active. */
 			StatusID mExistingStatusID{};
+
+			/*! @brief The action taken between the incoming status and the existing status. */
 			StatusInteractionAction mAction{StatusInteractionAction::Coexist};
 	};
 
@@ -37,9 +66,9 @@ namespace PocketCore::Status
 		@brief Stores one status's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/29/2026
+		@since 0.7.0
+		@version 0.7.0
 		@author Matthew Moore
 	*/
 	struct StatusMeta

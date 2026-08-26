@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/28/2026
+	@since 0.5.3
+	@version 0.6.2
 	@author Matthew Moore
 */
 
@@ -50,9 +50,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/28/2026
+		@since 0.5.3
+		@version 0.6.2
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -62,7 +62,10 @@ namespace PocketCore::Registry::Move
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
+				@since 0.5.3
+				@version 0.6.2
+			 */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
 			{
 				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
@@ -137,6 +140,8 @@ namespace PocketCore::Registry::Move
 				@param[in] moveID The stable move identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr const MoveMeta *getMoveMetadata(const MoveID moveID) const
 			{
@@ -146,6 +151,8 @@ namespace PocketCore::Registry::Move
 			/*! @brief Looks up an move ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr const std::optional<MoveID> getMoveID(const std::string_view &name) const
 			{
@@ -155,6 +162,8 @@ namespace PocketCore::Registry::Move
 			/*! @brief Looks up an move display name by stable ID.
 				@param[in] moveID The stable move identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getMoveName(const MoveID moveID) const
 			{
@@ -163,6 +172,8 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Returns all currently registered move definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr const std::span<const MoveMeta> getRegisteredMoves() const noexcept
 			{
@@ -171,6 +182,8 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Returns the next stable ID assigned to a custom move.
 				@return The underlying numeric value of the next move ID.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr us getNextMoveID() const noexcept
 			{
@@ -180,6 +193,8 @@ namespace PocketCore::Registry::Move
 			/*! @brief Finds an internal array index by stable move ID.
 				@param[in] moveID The stable move identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByMoveID(const MoveID moveID) const
 			{
@@ -189,6 +204,8 @@ namespace PocketCore::Registry::Move
 			/*! @brief Checks whether an move name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr bool hasMove(const std::string_view &name) const
 			{
@@ -198,6 +215,8 @@ namespace PocketCore::Registry::Move
 			/*! @brief Checks whether an move ID is registered.
 				@param[in] moveID The stable move identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			ATTR_NODISCARD constexpr bool hasMove(const MoveID moveID) const
 			{
@@ -206,13 +225,18 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Sets the next custom move ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.5.3
+				@version 0.5.3
 			*/
 			constexpr void setNextMoveID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom move ID counter. */
+			/*! @brief Increments the next custom move ID counter.
+				@since 0.5.3
+				@version 0.5.3
+			 */
 			constexpr void incrementNextMoveID() noexcept
 			{
 				incrementNextID();

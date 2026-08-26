@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 07/27/2026
+	@date 07/30/2026
 	@since 0.3.0
-	@version 0.5.1
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -32,7 +32,7 @@ namespace PocketCore::Battle
 		@details Each signed stage applies to the corresponding stat during battle calculations.
 		@date 07/26/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.7.2
 		@author Matthew Moore
 	*/
 	struct StatStages
@@ -84,9 +84,9 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 07/27/2026
+		@date 07/30/2026
 		@since 0.3.0
-		@version 0.5.1
+		@version 0.8.1
 		@author Matthew Moore
 	*/
 	struct BattleSlot
@@ -128,19 +128,53 @@ namespace PocketCore::Battle
 		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
 	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
 		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
-		@date 07/26/2026
+		@date 07/30/2026
 		@since 0.3.0
-		@version 0.3.0
+		@version 0.8.0
 		@author Matthew Moore
 	*/
 	struct BattleState
 	{
 		public:
+			/*! @brief Constructs an empty battle state with default-initialized battle data.
+				@since x.x.x
+				@version x.x.x
+			*/
 			BattleState() = default;
+
+			/*! @brief Constructs a battle state by copying all stored battle data.
+				@note Pokemon pointers remain non-owning references in the copied state.
+				@since x.x.x
+				@version x.x.x
+			*/
 			BattleState(const BattleState &) = default;
+
+			/*! @brief Constructs a battle state by moving stored battle data from another state.
+				@note Pokemon pointers remain non-owning references in the moved state.
+				@since x.x.x
+				@version x.x.x
+			*/
 			BattleState(BattleState &&) noexcept = default;
+
+			/*! @brief Replaces this battle state with a copy of another battle state.
+				@note Pokemon pointers remain non-owning references after assignment.
+				@since x.x.x
+				@version x.x.x
+			*/
 			BattleState &operator=(const BattleState &) = default;
+
+			/*! @brief Replaces this battle state by moving data from another battle state.
+				@note Pokemon pointers remain non-owning references after assignment.
+				@since x.x.x
+				@version x.x.x
+			*/
 			BattleState &operator=(BattleState &&) noexcept = default;
+
+			/*! @brief Destroys the battle state and releases storage owned by its value members.
+				@note The Pokemon objects referenced by the state are not owned or destroyed by this operation.
+				@since x.x.x
+				@version x.x.x
+			*/
 			~BattleState() noexcept;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes)

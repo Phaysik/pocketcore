@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 07/27/2026
+	@date 07/30/2026
 	@version 0.3.0
-	@since 0.5.1
+	@since 0.8.1
 	@author Matthew Moore
 */
 
@@ -106,9 +106,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 07/26/2026
+		@date 07/29/2026
 		@since 0.3.0
-		@version 0.5.1
+		@since 0.8.1
 		@author Matthew Moore
 	*/
 	struct EffectContext

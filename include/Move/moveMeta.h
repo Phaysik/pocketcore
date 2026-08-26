@@ -1,8 +1,8 @@
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 07/27/2026
+	@date 07/30/2026
 	@since 0.5.2
-	@version 0.5.2
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -38,9 +38,9 @@ namespace PocketCore::Move
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
+		@date 07/28/2026
 		@since 0.5.2
-		@version 0.5.2
+		@version 0.6.0
 		@author Matthew Moore
 	*/
 	struct MoveMeta
@@ -83,8 +83,8 @@ namespace PocketCore::Move
 	/*! @brief Returns the ordered effect sequence for a standard damaging move.
 		@return A non-owning span over the immutable base attack effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.8.1
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackEffects() noexcept;
@@ -93,8 +93,8 @@ namespace PocketCore::Move
 		@details Preserves the complete @ref baseAttackEffects sequence and appends the recoil effect.
 		@return A non-owning span over the immutable attack-with-recoil effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithRecoil() noexcept;
@@ -103,8 +103,8 @@ namespace PocketCore::Move
 		@details Preserves the complete @ref baseAttackEffects sequence and appends the status-application effect.
 		@return A non-owning span over the immutable attack-with-status effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithStatus() noexcept;
@@ -113,8 +113,8 @@ namespace PocketCore::Move
 		@details Preserves the complete @ref baseAttackEffects sequence and appends the flinch effect.
 		@return A non-owning span over the immutable attack-with-flinch effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithFlinch() noexcept;
@@ -122,8 +122,8 @@ namespace PocketCore::Move
 	/*! @brief Returns the ordered effect sequence for a move that protects its target.
 		@return A non-owning span over the immutable protection effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> protectEffects() noexcept;
@@ -131,8 +131,8 @@ namespace PocketCore::Move
 	/*! @brief Returns the ordered effect sequence for a move that changes a battlefield effect.
 		@return A non-owning span over the immutable battlefield effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
-		@since x.x.x
-		@version x.x.x
+		@since 0.5.3
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> fieldEffectEffects() noexcept;

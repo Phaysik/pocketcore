@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/29/2026
+	@since 0.6.4
+	@version 0.6.4
 	@author Matthew Moore
 */
 
@@ -40,9 +40,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/29/2026
+		@since 0.6.4
+		@version 0.6.4
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
@@ -52,7 +52,10 @@ namespace PocketCore::Registry::Status
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID.
+				@since 0.6.4
+				@version 0.6.4
+			 */
 			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
 			{
 				addBuiltin({
@@ -125,6 +128,8 @@ namespace PocketCore::Registry::Status
 				@param[in] statusID The stable status identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr const StatusMeta *getStatusMetadata(const StatusID statusID) const
 			{
@@ -134,6 +139,8 @@ namespace PocketCore::Registry::Status
 			/*! @brief Looks up an status ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StatusID> getStatusID(const std::string_view &name) const
 			{
@@ -143,6 +150,8 @@ namespace PocketCore::Registry::Status
 			/*! @brief Looks up an status display name by stable ID.
 				@param[in] statusID The stable status identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getStatusName(const StatusID statusID) const
 			{
@@ -151,6 +160,8 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Returns all currently registered status definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr const std::span<const StatusMeta> getRegisteredStatuses() const noexcept
 			{
@@ -159,6 +170,8 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Returns the next stable ID assigned to a custom status.
 				@return The underlying numeric value of the next status ID.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr us getNextStatusID() const noexcept
 			{
@@ -168,6 +181,8 @@ namespace PocketCore::Registry::Status
 			/*! @brief Finds an internal array index by stable status ID.
 				@param[in] statusID The stable status identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByStatusID(const StatusID statusID) const
 			{
@@ -177,6 +192,8 @@ namespace PocketCore::Registry::Status
 			/*! @brief Checks whether an status name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr bool hasStatus(const std::string_view &name) const
 			{
@@ -186,6 +203,8 @@ namespace PocketCore::Registry::Status
 			/*! @brief Checks whether an status ID is registered.
 				@param[in] statusID The stable status identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			ATTR_NODISCARD constexpr bool hasStatus(const StatusID statusID) const
 			{
@@ -194,13 +213,18 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Sets the next custom status ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.6.4
+				@version 0.6.4
 			*/
 			constexpr void setNextStatusID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom status ID counter. */
+			/*! @brief Increments the next custom status ID counter.
+				@since 0.6.4
+				@version 0.6.4
+			 */
 			constexpr void incrementNextStatusID() noexcept
 			{
 				incrementNextID();

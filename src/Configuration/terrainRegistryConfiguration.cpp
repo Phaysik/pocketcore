@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the terrain registry.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.1
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -12,7 +12,6 @@
 #include <span>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"

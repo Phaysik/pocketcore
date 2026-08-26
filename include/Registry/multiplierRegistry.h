@@ -1,8 +1,8 @@
 /*! @file multiplierRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined multipliers.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.1
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -41,9 +41,9 @@ namespace PocketCore::Registry::Multiplier
 	   may append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MULTIPLIERS.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.1
+		@version 0.8.1
 		@author Matthew Moore
 	*/
 	class MultiplierRegistry : private FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
@@ -53,7 +53,10 @@ namespace PocketCore::Registry::Multiplier
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID.
+				@since 0.8.1
+				@version 0.8.1
+			 */
 			ATTR_NOINLINE explicit constexpr MultiplierRegistry() : Base{toMultiplierID(BuiltinMultiplierID::FinalMultiplier).getValue()}
 			{
 				addBuiltin({
@@ -130,6 +133,8 @@ namespace PocketCore::Registry::Multiplier
 				@param[in] multiplierID The stable multiplier identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr const MultiplierMeta *getMultiplierMetadata(const MultiplierID multiplierID) const
 			{
@@ -139,6 +144,8 @@ namespace PocketCore::Registry::Multiplier
 			/*! @brief Looks up an multiplier ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<MultiplierID> getMultiplierID(const std::string_view &name) const
 			{
@@ -148,6 +155,8 @@ namespace PocketCore::Registry::Multiplier
 			/*! @brief Looks up an multiplier display name by stable ID.
 				@param[in] multiplierID The stable multiplier identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getMultiplierName(const MultiplierID multiplierID) const
 			{
@@ -156,6 +165,8 @@ namespace PocketCore::Registry::Multiplier
 
 			/*! @brief Returns all currently registered multiplier definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr const std::span<const MultiplierMeta> getRegisteredMultipliers() const noexcept
 			{
@@ -164,6 +175,8 @@ namespace PocketCore::Registry::Multiplier
 
 			/*! @brief Returns the next stable ID assigned to a custom multiplier.
 				@return The underlying numeric value of the next multiplier ID.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr us getNextMultiplierID() const noexcept
 			{
@@ -173,6 +186,8 @@ namespace PocketCore::Registry::Multiplier
 			/*! @brief Finds an internal array index by stable multiplier ID.
 				@param[in] multiplierID The stable multiplier identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByMultiplierID(const MultiplierID multiplierID) const
 			{
@@ -182,6 +197,8 @@ namespace PocketCore::Registry::Multiplier
 			/*! @brief Checks whether an multiplier name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr bool hasMultiplier(const std::string_view &name) const
 			{
@@ -191,6 +208,8 @@ namespace PocketCore::Registry::Multiplier
 			/*! @brief Checks whether an multiplier ID is registered.
 				@param[in] multiplierID The stable multiplier identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			ATTR_NODISCARD constexpr bool hasMultiplier(const MultiplierID multiplierID) const
 			{
@@ -199,13 +218,18 @@ namespace PocketCore::Registry::Multiplier
 
 			/*! @brief Sets the next custom multiplier ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.8.1
+				@version 0.8.1
 			*/
 			constexpr void setNextMultiplierID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom multiplier ID counter. */
+			/*! @brief Increments the next custom multiplier ID counter.
+				@since 0.8.1
+				@version 0.8.1
+			 */
 			constexpr void incrementNextMultiplierID() noexcept
 			{
 				incrementNextID();

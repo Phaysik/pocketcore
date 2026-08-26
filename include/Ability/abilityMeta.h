@@ -2,7 +2,7 @@
 	@brief Defines the metadata stored for built-in and user-defined abilities.
 	@date 07/27/2026
 	@since 0.3.0
-	@version 0.5.1
+	@version 0.5.3
 	@author Matthew Moore
 */
 
@@ -30,7 +30,7 @@ namespace PocketCore::Ability
 	   must remain valid while this metadata is registered.
 		@date 07/27/2026
 		@since 0.3.0
-		@version 0.5.1
+		@version 0.5.3
 		@author Matthew Moore
 	*/
 	struct AbilityMeta

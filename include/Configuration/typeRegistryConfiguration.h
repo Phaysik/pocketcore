@@ -110,6 +110,8 @@ namespace PocketCore::Configuration
 			 */
 			constexpr TypeRegistryConfiguration() = default;
 
+			using Base::getAmountRegistered;
+
 			// MARK: Getters
 
 			/*! @brief Returns read-only access to the configured runtime type registry.
@@ -185,16 +187,6 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD constexpr const std::span<const TypeMeta> getRegisteredTypes() const
 			{
 				return getRegisteredEntries();
-			}
-
-			/*! @brief Returns the total number of registered types (built-in + custom).
-				@return The count of registered types.
-				@since 0.1.0
-				@version 0.4.1
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
 			}
 
 			// MARK: Setters

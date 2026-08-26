@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 07/27/2026
+	@date 07/28/2026
 	@since 0.4.0
-	@version 0.4.1
+	@version 0.6.2
 	@author Matthew Moore
 */
 

@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring weather metadata.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.0
+	@version 0.8.0
 	@author Matthew Moore
 */
 
@@ -31,12 +31,29 @@ namespace PocketCore::Configuration
 
 	namespace Detail
 	{
+		/*! @struct WeatherRegistryConfigurationPolicy Configuration/weatherRegistryConfiguration.h
+			@brief Policy class providing error codes and display strings for weather registry configuration.
+			@details Encapsulates the weather-specific error categories and display names used by the generic
+			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
+			 domain-specific terminology.
+			@date 07/27/2026
+			@since 0.8.0
+			@version 0.8.0
+			@author Matthew Moore
+		*/
 		struct WeatherRegistryConfigurationPolicy
 		{
 			public:
+				/*! @brief The display name of the configuration system. */
 				static constexpr std::string_view configurationName{"WeatherRegistryConfiguration"};
+
+				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"weather"};
+
+				/*! @brief The error code returned when a duplicate ability name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateWeather};
+
+				/*! @brief The error code returned when an ability lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::WeatherNotFound};
 		};
 	} // namespace Detail
@@ -45,9 +62,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal weather registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.0
+		@version 0.8.0
 		@author Matthew Moore
 	*/
 	class WeatherRegistryConfiguration
@@ -59,8 +76,13 @@ namespace PocketCore::Configuration
 															Detail::WeatherRegistryConfigurationPolicy>;
 
 		public:
-			/*! @brief Constructs a configuration containing all built-in weathers. */
+			/*! @brief Constructs a configuration containing all built-in weathers.
+				@since 0.8.0
+				@version 0.8.0
+			 */
 			constexpr WeatherRegistryConfiguration() = default;
+
+			using Base::getAmountRegistered;
 
 			/*! @brief Returns read-only access to the configured runtime weather registry.
 				@return A reference that remains valid for the lifetime of this configuration.
@@ -74,6 +96,8 @@ namespace PocketCore::Configuration
 				@param[in] weatherID The built-in or custom stable identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const WeatherMeta *getWeatherMetadata(const WeatherID weatherID) const
 			{
@@ -83,6 +107,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a stable weather ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<WeatherID> getWeatherID(const std::string_view &name) const
 			{
@@ -92,6 +118,8 @@ namespace PocketCore::Configuration
 			/*! @brief Looks up a display name by stable weather ID.
 				@param[in] weatherID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getWeatherName(const WeatherID weatherID) const
 			{
@@ -100,23 +128,19 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns all currently registered weather definitions.
 				@return A read-only span that remains valid until mutation or destruction.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const WeatherMeta> getRegisteredWeathers() const noexcept
 			{
 				return getRegisteredEntries();
 			}
 
-			/*! @brief Returns the number of registered built-in and custom weathers.
-				@return The current registry entry count.
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
-			}
-
 			/*! @brief Checks whether an weather name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr bool hasWeather(const std::string_view &name) const
 			{
@@ -126,6 +150,8 @@ namespace PocketCore::Configuration
 			/*! @brief Checks whether an weather ID is registered.
 				@param[in] weatherID The built-in or custom stable identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr bool hasWeather(const WeatherID weatherID) const
 			{
@@ -135,6 +161,8 @@ namespace PocketCore::Configuration
 			/*! @brief Registers one user-defined weather and assigns a stable ID.
 				@param[in] weatherMeta The name and trigger metadata to copy into the registry.
 				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> addWeather(const WeatherMeta &weatherMeta);
 
@@ -142,6 +170,8 @@ namespace PocketCore::Configuration
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] weatherMetas The weather definitions to register in order.
 				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addWeathers(const std::span<const WeatherMeta> &weatherMetas);
 
@@ -150,6 +180,8 @@ namespace PocketCore::Configuration
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameWeather(const std::string_view &oldName,
 																				const std::string_view &newName);
@@ -158,6 +190,8 @@ namespace PocketCore::Configuration
 				@param[in] weatherName The registered display name.
 				@param[in] weatherMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the weather is not registered.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateWeather(const std::string_view &weatherName,
 																				const WeatherMeta &weatherMeta);
@@ -167,12 +201,16 @@ namespace PocketCore::Configuration
 				@param[in] weatherID The built-in or custom stable identifier.
 				@param[in] weatherMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the weather is not registered.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateWeather(const WeatherID weatherID, const WeatherMeta &weatherMeta);
 
 			/*! @brief Removes an weather by display name.
 				@param[in] weatherName The registered display name.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching weather exists.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> removeWeather(const std::string_view &weatherName);
 
@@ -180,6 +218,8 @@ namespace PocketCore::Configuration
 				@brief Removes an weather by stable ID.
 				@param[in] weatherID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching weather exists.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> removeWeather(const WeatherID weatherID);
 	};

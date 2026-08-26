@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the status registry.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/29/2026
+	@since 0.6.4
+	@version 0.6.4
 	@author Matthew Moore
 */
 
@@ -12,7 +12,6 @@
 #include <span>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"

@@ -1,8 +1,8 @@
 /*! @file terrainID.h
 	@brief Contains the terrain status
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.0
+	@version 0.8.0
 	@author Matthew Moore
 */
 

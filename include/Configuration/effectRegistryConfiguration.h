@@ -62,6 +62,8 @@ namespace PocketCore::Configuration
 			/*! @brief Constructs a configuration containing all built-in effects. */
 			constexpr EffectRegistryConfiguration() = default;
 
+			using Base::getAmountRegistered;
+
 			/*! @brief Returns read-only access to the configured runtime effect registry.
 				@return A reference that remains valid for the lifetime of this configuration.
 			*/
@@ -104,14 +106,6 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD constexpr const std::span<const EffectMeta> getRegisteredEffects() const noexcept
 			{
 				return getRegisteredEntries();
-			}
-
-			/*! @brief Returns the number of registered built-in and custom effects.
-				@return The current registry entry count.
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
 			}
 
 			/*! @brief Checks whether an effect name is registered.

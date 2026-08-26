@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 07/27/2026
+	@date 07/29/2026
 	@since 0.5.0
-	@version 0.5.1
+	@version 0.7.6
 	@author Matthew Moore
 */
 
@@ -33,9 +33,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 07/27/2026
+		@date 07/28/2026
 		@since 0.5.0
-		@version 0.5.1
+		@version 0.6.0
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -79,7 +79,7 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
@@ -146,7 +146,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.6.0
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const
 			{
@@ -187,7 +187,7 @@ namespace PocketCore::Registry
 				@param[in] index The internal array index.
 				@param[in] metadata The complete metadata record to store.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.7.6
 			*/
 			ATTR_NOINLINE constexpr void setEntry(const us index, const Metadata &metadata)
 			{

@@ -1,8 +1,8 @@
 /*! @file builtinTerrainID.h
 	@brief Defines identifiers for terrains compiled into PocketCore.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.0
+	@version 0.8.0
 	@author Matthew Moore
 */
 
@@ -21,9 +21,9 @@ namespace PocketCore::Terrain
 		@details This closed enum is only a catalog of built-in terrains. Runtime state and user-facing APIs use the open @ref TerrainID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.0
+		@version 0.8.0
 		@author Matthew Moore
 	*/
 	enum class BuiltinTerrainID : PocketCore::Core::ub
@@ -39,6 +39,8 @@ namespace PocketCore::Terrain
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinTerrainID The built-in terrain to convert.
 		@return The corresponding open terrain identifier.
+		@since 0.8.0
+		@version 0.8.0
 	*/
 	ATTR_NODISCARD constexpr TerrainID toTerrainID(const BuiltinTerrainID builtinTerrainID) noexcept
 	{

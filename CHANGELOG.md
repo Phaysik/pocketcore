@@ -4,6 +4,471 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.8.1] - 2026-07-30
+
+### Added
+
+- Add new configuration constant variables:
+  - The maximum amount of multipliers the registry can hold
+  - The base multiplier value
+  - The same type attack bonus (STAB) hit multiplier
+  - The targets hit multiplier
+- Add in a duplicate multiplier and multiplier not found registry error, and add in the switch cases for these errors in _errorKingToString()_
+- Added a file that holds the multiplier registry.
+  - The actual registry class holds a constructor that initializes all the builtin multipliers:
+  - Get the multiplier metadata
+  - Get the multiplier ID
+  - Get the multiplier name
+  - Get a non-owning span of all the multipliers
+  - Get the next multiplier ID
+  - Find the internal array index by stable multiplier ID
+  - If the registry has an multiplier:
+      - By user readable name
+      - By stable multiplier ID
+  - Set the next multiplier ID
+  - Increment the next multiplier ID
+- Added in both the source and header files to configure the multiplier registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the multiplier metadata
+    - Get the Multiplier ID
+    - Get the multiplier name
+    - Get a non-owning span of all the multipliers
+    - Get the amount of multipliers registered
+    - If the registry has a multiplier:
+      - By user readable name
+      - By stable Multiplier ID
+    - Add a multiplier
+    - Add in a list of multipliers
+    - Rename a multiplier
+    - Update a multiplier:
+      - By user readable name
+      - By stable Multiplier ID
+    - Remove a multiplier:
+      - By user readable name
+      - By stable Multiplier ID
+- Create an _EffectContext_ constructor that will initialize the list of multipliers with _BASE\_MULTIPLIER\_VALUE_
+- Added _Targets_ and _Stab_ in:
+  - _effectType.h_
+  - _moveMeta.cpp_
+- Added a source and header same type attack bonus (STAB) handler which inherits from _IEffectHandler_ that will calculate the stab part of the damage calculation from Bulbapedia.
+- Added a source and header targets handler which inherits from _IEffectHandler_ that will calculate the targets part of the damage calculation from Bulbapedia.
+- Add a hashing override for _IDInterface_
+- Added a new file to hold the built-in Multiplier IDs and a function to convert built-in Multiplier IDs to the stable Multiplier ID
+- Added a _Multiplier/constants.h_ file that holds the user readable names for each Multiplier ID.
+- Added a metadata file for Pokemon multipliers that holds the relevant:
+  - User defined name and stable ID
+- Added in the multiplier registry configuration objects to _main.cpp_
+- Add the stable status ID with its getter and setter to _Pokemon_
+- Add a member function to check if the _Pokemon_ is fainted
+- Add in the missing source files for:
+  - _terrainRegistryConfiguration.h_
+  - _weatherRegistryConfiguration.h_
+
+### Changed
+
+- Removed the _const_ from the member pokemon variable in _BattleSlot_
+- Update _EffectContext_ to no longer track each multiplier but have a stable multiplier ID.
+- Reordered effect type IDs in _EffectTypeID_
+- Update the documentation of _Status/constants.h_
+- Update the _criticalHitHandler.cpp_ file to use the new built in multiplier ID dictionary
+- Update the _moveRegistry.test.cpp_ check that _Pound_ from 9 effects to 11. 
+
+### Removed
+
+- Removed the item ID, status ID, and if the slot is fainted from _BattleSlot_
+
+## [0.8.0] - 2026-07-30 (Weather and Terrain Registry Update)
+
+### Added
+
+- Add new configuration constant variables:
+  - The maximum amount of weathers the registry can hold
+  - The maximum amount of terrains the registry can hold
+- Add in a duplicate status, duplicate terrain, weather not found, and terrain not found registry error, and add in the switch cases for these errors in _errorKingToString()_
+- Added a file that holds the terrain registry.
+  - The actual registry class holds a constructor that initializes all the builtin terrains:
+  - Get the terrain metadata
+  - Get the terrain ID
+  - Get the terrain name
+  - Get a non-owning span of all the terrains
+  - Get the next terrain ID
+  - Find the internal array index by stable terrain ID
+  - If the registry has an terrain:
+      - By user readable name
+      - By stable terrain ID
+  - Set the next terrain ID
+  - Increment the next terrain ID
+- Added in the header files to configure the terrain registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the terrain metadata
+    - Get the Terrain ID
+    - Get the terrain name
+    - Get a non-owning span of all the terrains
+    - Get the amount of terrains registered
+    - If the registry has a terrain:
+      - By user readable name
+      - By stable Terrain ID
+    - Add a terrain
+    - Add in a list of terrains
+    - Rename a terrain
+    - Update a terrain:
+      - By user readable name
+      - By stable Terrain ID
+    - Remove a terrain:
+      - By user readable name
+      - By stable Terrain ID
+- Added a file that holds the weather registry.
+  - The actual registry class holds a constructor that initializes all the builtin weathers:
+  - Get the weather metadata
+  - Get the weather ID
+  - Get the weather name
+  - Get a non-owning span of all the weathers
+  - Get the next weather ID
+  - Find the internal array index by stable weather ID
+  - If the registry has an weather:
+      - By user readable name
+      - By stable weather ID
+  - Set the next weather ID
+  - Increment the next weather ID
+- Added in the header files to configure the weather registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the weather metadata
+    - Get the Weather ID
+    - Get the weather name
+    - Get a non-owning span of all the weathers
+    - Get the amount of weathers registered
+    - If the registry has a weather:
+      - By user readable name
+      - By stable Weather ID
+    - Add a weather
+    - Add in a list of weathers
+    - Rename a weather
+    - Update a weather:
+      - By user readable name
+      - By stable Weather ID
+    - Remove a weather:
+      - By user readable name
+      - By stable Weather ID
+- Added a new file to hold the built-in Terrain IDs and a function to convert built-in Terrain IDs to the stable Terrain ID
+- Added a _Terrain/constants.h_ file that holds the user readable names for each Terrain ID.
+- Added a metadata file for Pokemon terrains that holds the relevant:
+  - User defined name and stable ID
+- Added a new file to hold the built-in Weather IDs and a function to convert built-in Weather IDs to the stable Weather ID
+- Added a _Weather/constants.h_ file that holds the user readable names for each Weather ID.
+- Added a metadata file for Pokemon weathers that holds the relevant:
+  - User defined name and stable ID
+- Added in the terrain and weather registry configuration objects to _main.cpp_
+
+### Changed
+
+- Update _BattleState_ to no longer track each weather and terrain, but have a stable weather ID and stable terrain ID.
+
+### Removed
+
+- Deleted _weather.h_
+
+## [0.7.7] - 2026-07-29
+
+### Changed
+
+- Update documentation in _statusID.h_
+
+## [0.7.6] - 2026-07-29
+
+### Added
+
+- Added _ATTR\_NOINLINE_ to _setEntry()_ in _fixedMetadataRegistry.h_
+
+## [0.7.5] - 2026-07-29
+
+### Added
+
+- Add new configuration constant variables:
+  - The minimum accuracy hit value that can be rolled
+  - The maximum accuracy hit value that can be rolled
+  - The numerator for the accuracy stat stage multiplier
+  - The denominator for the accuracy stat stage multiplier
+- Added a source and header accuracy check handler which inherits from _IEffectHandler_ that will calculate if the move will hit the target(s).
+- Add in missing imports in _criticalHitHandler.cpp_
+
+### Changed
+
+- Updated the _EffectContext_ move accuracy member variable to follow conventions
+
+### Fixed
+
+- Fixed getting the target defense stage multiplier by passing the _targetDefenseStage_ instead of _userAttackStage_
+
+## [0.7.4] - 2026-07-29
+
+### Added
+
+- Add _ccache_ to the install step _codeql-analysis.yml_ and _testing.yml_
+
+## [0.7.3] - 2026-07-29
+
+### Fixed
+
+- Fix the _moveRegistry.test.cpp_ check that _Pound_ had 10 effects instead of 9. 
+
+## [0.7.2] - 2026-07-29
+
+### Added
+
+- Added a battle position variable to the _BattleSlot_ struct
+- Add new configuration constant variables:
+  - The minimum critical hit value that can be rolled
+  - The maximum critical hit value that can be rolled
+  - The critical hit percentage
+  - The critical hit multiplier
+  - The numerator for the stat stage multiplier
+  - The denominator for the stat stage multiplier
+- Add a range override to the _EffectContext_
+- Add _IEffectHandler_ which is the base handler that all others will inherit from.
+  - It has an apply function that is virtual and all inherited handlers need to implement
+- Added a source and header base damage handler which inherits from _IEffectHandler_ that will calculate the base damage part of the damage calculation from Bulbapedia.
+- Added a source and header critical hit handler which inherits from _IEffectHandler_ that will calculate the critical hit part of the damage calculation from Bulbapedia.
+- Added an effect handler helper file that:
+  - Gets the team based on the _Side_ passed in
+  - Gets the const team based on the _Side_ passed in
+- Added in a level member variable with its getter and setter to _Pokemon_
+
+### Changed
+
+- Changed the variable type of _StatStages_ from unsigned short to signed byte.
+- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the _EffectTypeID_ IDs in:
+  - _effectType.h_
+  - _moveMeta.cpp_
+
+### Removed
+
+- Removed the _StatStage_ effect type ID from:
+  - _effectType.h_
+  - _moveMeta.cpp_
+
+## [0.7.1] - 2026-07-29
+
+### Added
+
+- Add _ccache_ to the _makefileDependencies.sh_ install step
+- Add _ccache_ to the _COMPILER_ Makefile variable
+
+## [0.7.0] - 2026-07-29 (Status Registry Update)
+
+### Added
+
+- Added a new file to hold the built-in Status IDs and a function to convert built-in Status IDs to the stable Status ID
+- Added a _Status/constants.h_ file that holds the user readable names for each Status ID.
+- Added a metadata file for Pokemon statuses that holds the relevant:
+  - User defined name and stable ID
+- Added a test suite for _fixedMetadataRegistry.h_
+
+### Changed
+
+- Changed _StatusID_ to be a typedef from the _IDInterface_ instead of an enum
+
+## [0.6.4] - 2026-07-29
+
+### Added
+
+- Add a new configuration constant that will specify how many statuses the registry can hold
+- Add in a duplicate status and status not found registry error, and add in the switch cases for these errors in _errorKingToString()_
+- Added a file that holds the status registry.
+  - The actual registry class holds a constructor that initializes all the builtin statuses:
+    - Get the status metadata
+    - Get the status ID
+    - Get the status name
+    - Get a non-owning span of all the statuses
+    - Get the next status ID
+    - Find the internal array index by stable status ID
+    - If the registry has an status:
+      - By user readable name
+      - By stable status ID
+    - Set the next status ID
+    - Increment the next status ID
+- Added in both the source and header files to configure the status registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the status metadata
+    - Get the Status ID
+    - Get the status name
+    - Get a non-owning span of all the statuses
+    - Get the amount of statuses registered
+    - If the registry has a status:
+      - By user readable name
+      - By stable Status ID
+    - Add a status
+    - Add in a list of statuses
+    - Rename a status
+    - Update a status:
+      - By user readable name
+      - By stable Status ID
+    - Remove a status:
+      - By user readable name
+      - By stable Status ID
+- Added in the status registry configuration object to _main.cpp_
+
+### Changed
+
+- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all callsites to reflect the new order
+
+## [0.6.3] - 2026-07-28
+
+### Added
+
+- Added a mutation test for _moveRegistry.test.cpp_
+
+## [0.6.2] - 2026-07-28
+
+### Added
+
+- Add _lcov_ exclusions to _abilityRegistry.h_ where branches are impossible to hit
+- Add _lcov_ exclusions to _itemRegistry.h_ where branches are impossible to hit
+- Add in new tests for _abilityRegistry_, _itemRegistry_, and _moveRegistry_
+  - Tests getting the next ability ID
+  - Tests getting the amount registered
+  - Tests incrementing the next ability ID
+
+### Changed
+
+- Update all hardcoded values in _abilityRegistry.test.cpp_ to use the constant variable values from _Ability/constants.h_
+- Update all hardcoded values in _itemRegistry.test.cpp_ to use the constant variable values from _Item/constants.h_
+- Update all hardcoded values in _moveRegistry.test.cpp_ to use the constant variable values from _Move/constants.h_
+- Update test case naming in _moveRegistry.test.cpp_
+
+## [0.6.1] - 2026-07-28
+
+### Fixed
+
+- Fixed the _moveRegistry.test.cpp_ to make _Pound_ have the _PsychicTerrainPriorityBlock
+
+## [0.6.0] - 2026-07-28 (Move Registry Update)
+
+### Added
+
+- Add in the ability to replace the target ID for abilities:
+  - By stable ID
+  - By user readable name
+- Add in the ability to update an abilities metadata
+  - By stable ID
+  - By user readable name
+- Add in the ability to replace the target ID for items:
+  - By stable ID
+  - By user readable name
+- Add in the ability to update an items metadata
+  - By stable ID
+  - By user readable name
+- Added in both the source and header files to configure the move registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the move metadata
+    - Get the Move ID
+    - Get the move name
+    - Get a non-owning span of all the moves
+    - Get the amount of moves registered
+    - If the registry has an move:
+      - By user readable name
+      - By stable Move ID
+    - Add an move
+    - Add in a list of moves
+    - Set the trigger and effects for a specific move:
+      - By user readable name
+      - By stable Move ID
+    - Rename an move
+    - Update a move:
+      - By user readable name
+      - By stable Move ID
+    - Remove an move:
+      - By user readable name
+      - By stable Move ID
+- Add in a duplicate move and move not found registry error, and add in the switch cases for these errors in _errorKingToString()_
+- Added a range ID to the _MoveMeta_
+- Add a _MoveRangeID_ enum to specify what the move can hit in _moveTargetsAndTriggers.h_
+- Add in the self Target ID to the ability _Drizzle_
+- Add in the self Target ID to these items:
+  - _CheriBerry_
+  - _ChestoBerry_
+- Add the missing metadata in the builtin moves:
+  - Type ID
+  - Power
+  - Target ID
+  - Range ID
+  - Accuracy
+  - Priority
+  - Special
+- Add _lcov_ exclusions to _fixedMetadataRegistry.h_ where branches are impossible to hit
+- Added in the move registry configuration object to _main.cpp_
+- Added a test suite for _moveRegistry.h_
+
+### Changed
+
+- Update documentation of _abilityRegistryConfiguration.h_
+- Update documentation of _itemRegistryConfiguration.h_
+- Update documentation of _moveRegistry.h_
+- Update documentation of _itemRegistryConfiguration.cpp_
+- Update all reference of _AbilityDefinition_ to _AbilityMeta_
+- Update all reference of _ItemDefinition_ to _ItemMeta_
+- Ran _clang-format_ on _effectContext.h_
+- Ran _clang-format_ on _moveMeta.cpp_
+- Resolve _clang-tidy_ warnings on:
+  - _effectType.h_
+  - _itemTargetsAndTriggers.h_
+  - _moveRegistry.h_
+- Change the _Stench_ trigger to be _OnDamageCalc_
+  - In _abiltyRegistry.h_
+  - In _abiltyRegistry.test.cpp_
+  
+### Removed
+
+- Removed the _AbilityDefinition_ struct
+- Removed the _ItemDefinition_ struct
+
+## [0.5.3] - 2026-07-27
+
+### Added
+
+- Add a target ID in _AbilityMeta_
+- Add a target ID in _ItemMeta_
+- Add a new configuration constant that will specify how many moves the registry can hold
+- Add a new psychic terrain effect type
+- Add a new trigger and target in _itemTargetsAndTriggers.h_
+- Add in a _None_ variant for built in move IDs
+- Added in new metadata for _MoveMeta_:
+  - The move's type ID
+  - The move's power
+  - The move's target ID
+  - The move's accuracy
+  - The move's priority
+  - If the move is special
+- Added in a few helper functions that will return commonly used sets of _EffectTypeID_
+- Added a file that holds the move registry.
+  - Inherits from _fixedMetadataRegistry.h_
+  - The actual registry class holds a constructor that initializes all the builtin moves
+  - Get the move metadata
+  - Get the move ID
+  - Get the move name
+  - Get a non-owning span of all the moves
+  - Get the next move ID
+  - Find the internal array index by stable move ID
+  - If the registry has an move:
+      - By user readable name
+      - By stable move ID
+  - Set the next move ID
+  - Increment the next move ID
+
+### Changed
+
+- Changed the symbolic link of _libstdc++.so.6_ to be the one from the install step in _makefileDependencies.sh_
+
+### Removed
+
+- Removed the copying of specific version of _libstdc++.so.x.x.xx_ in _makefileDependencies.sh_
+
 ## [0.5.2] - 2026-07-27
 
 ### Added
@@ -200,22 +665,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - It holds a struct that contains the user readable name, and the trigger and effect definitions.
   - The actual registry configuration class allows the user to:
     - Get the item metadata
-    - Get the item ID
+    - Get the Item ID
     - Get the item name
     - Get a non-owning span of all the items
     - Get the amount of items registered
     - If the registry has an item:
       - By user readable name
-      - By stable item ID
+      - By stable Item ID
     - Add an item
     - Add in a list of items
     - Set the trigger and effects for a specific item:
       - By user readable name
-      - By stable item ID
+      - By stable Item ID
     - Rename an item
     - Remove an item:
       - By user readable name
-      - By stable item ID
+      - By stable Item ID
 - Added a Ability registry configuration policy that holds:
   - The configuration user name
   - The configuration type
@@ -311,7 +776,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added a metadata file for Pokemon items that holds the relevant:
   - User defined name, stable item ID, and a list of triggers with their effects
 - Added a file that holds the item registry.
-  - The actual registry class holds a constructor that initializes all the builtin items:
+  - The actual registry class holds a constructor that initializes all the builtin items
     - Get the item metadata
     - Get the item ID
     - Get the item name
@@ -1030,6 +1495,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.8.1]: https://github.com/Phaysik/pocketcore/commit/6b29bca60d66011181ba0fe56a0eb9f1f600564b
+[0.8.0]: https://github.com/Phaysik/pocketcore/compare/v0.7.0...v0.8.0
+[0.7.7]: https://github.com/Phaysik/pocketcore/commit/6332560ff031fb7a2f1935120d893a1a8afb1b57
+[0.7.6]: https://github.com/Phaysik/pocketcore/commit/075a71559f202ea7da534fcfe96b255d44b4e071
+[0.7.5]: https://github.com/Phaysik/pocketcore/commit/221bce1911d7ced2b3c5c20db2a4c23df5c53e7e
+[0.7.4]: https://github.com/Phaysik/pocketcore/commit/79b756182540ad86248f64b44be62e0d228cb8db
+[0.7.3]: https://github.com/Phaysik/pocketcore/commit/ecefcf3e5eedd3e7bac2e714eaace30e4390656c
+[0.7.2]: https://github.com/Phaysik/pocketcore/commit/82ce0d3040412baf345fec3bd5b92fa5154d03af
+[0.7.1]: https://github.com/Phaysik/pocketcore/commit/58e84b19d5a665bcae6d61c51fe2865629cbcbea
+[0.7.0]: https://github.com/Phaysik/pocketcore/compare/v0.6.0...v0.7.0
+[0.6.4]: https://github.com/Phaysik/pocketcore/commit/79e8eb889ef4b2f7c7f7513cc093fa06192ee097
+[0.6.3]: https://github.com/Phaysik/pocketcore/commit/d5bd4b247aa96c01045a2ee9ee4f61ab0f07c4b8
+[0.6.2]: https://github.com/Phaysik/pocketcore/commit/31271d07d7a4a6b2d58971a3f19b8e6d72fe78e7
+[0.6.1]: https://github.com/Phaysik/pocketcore/commit/3b13b86153e35c999b149f04019d12c7076c8ba7
+[0.6.0]: https://github.com/Phaysik/pocketcore/compare/v0.5.0...v0.6.0
+[0.5.3]: https://github.com/Phaysik/pocketcore/commit/dd5311ed0a5ea1e424875123dfc6211855667232
 [0.5.2]: https://github.com/Phaysik/pocketcore/commit/8646188fbf35c3903b29d0713e3354b0ce5df12a
 [0.5.1]: https://github.com/Phaysik/pocketcore/commit/f234e7c066c190e35cf0a83e0651a258f545b810
 [0.5.0]: https://github.com/Phaysik/pocketcore/compare/v0.4.0...v0.5.0

@@ -1,8 +1,8 @@
 /*! @file targetsHandler.h
 	@brief Contains the targets effect handler
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.1
+	@version 0.8.1
 	@author Matthew Moore
 */
 
@@ -22,12 +22,41 @@ namespace PocketCore::Effect
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
 
+	/*! @class TargetsHandler EffectHandler/targetsHandler.h
+		@brief Applies the damage modifier associated with a move's target pattern.
+		@details The handler resolves the move metadata and adds or updates the built-in targets multiplier for moves that target more
+			than a single opponent or the user.
+		@warning The registry provider must contain an available move registry.
+		@note Missing move metadata leaves the effect context unchanged. The battle state is not inspected or modified.
+		@date 07/30/2026
+		@since 0.8.1
+		@version 0.8.1
+		@author Matthew Moore
+	*/
 	class TargetsHandler : public IEffectHandler
 	{
 		public:
+			/*! @brief Applies the target-count multiplier for the move described by the effect context.
+				@param[in] state The battle state, which is not inspected or modified by this handler.
+				@param[in,out] context The effect context containing the move identifier and receiving the targets multiplier.
+				@param[in] provider The registry provider used to resolve move metadata.
+				@pre @p provider must contain an available move registry.
+				@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move
+			   metadata leaves @p context unchanged.
+				@since 0.8.1
+				@version 0.8.1
+			*/
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};
 
+	/*! @brief Applies the target-count multiplier for the move in an effect context.
+		@param[in,out] state The battle state, which is not inspected or modified by this handler.
+		@param[in,out] context The effect context containing the move identifier and receiving the targets multiplier.
+		@param[in] provider The registry provider used to resolve move metadata.
+		@pre @p provider must contain an available move registry.
+		@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move metadata
+	   leaves @p context unchanged.
+	*/
 	inline void applyTargets(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{
 		TargetsHandler{}.apply(state, context, provider);

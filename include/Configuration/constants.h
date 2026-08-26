@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 07/27/2026
+	@date 07/29/2026
 	@since 0.1.0
-	@version 0.4.1
+	@version 0.7.5
 	@author Matthew Moore
 */
 

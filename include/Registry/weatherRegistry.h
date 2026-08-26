@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.0
+	@version 0.8.0
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Registry::Weather
 		@details Built-in weathers are registered during construction with IDs derived from @ref BuiltinWeatherID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.0
+		@version 0.8.0
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
@@ -51,7 +51,10 @@ namespace PocketCore::Registry::Weather
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID.
+				@since 0.8.0
+				@version 0.8.0
+			 */
 			ATTR_NOINLINE explicit constexpr WeatherRegistry() : Base{toWeatherID(BuiltinWeatherID::FinalWeather).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Weather::WEATHER_NAME_NONE, .mWeatherID = toWeatherID(BuiltinWeatherID::None)});
@@ -120,6 +123,8 @@ namespace PocketCore::Registry::Weather
 				@param[in] weatherID The stable weather identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const WeatherMeta *getWeatherMetadata(const WeatherID weatherID) const
 			{
@@ -129,6 +134,8 @@ namespace PocketCore::Registry::Weather
 			/*! @brief Looks up an weather ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<WeatherID> getWeatherID(const std::string_view &name) const
 			{
@@ -138,6 +145,8 @@ namespace PocketCore::Registry::Weather
 			/*! @brief Looks up an weather display name by stable ID.
 				@param[in] weatherID The stable weather identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getWeatherName(const WeatherID weatherID) const
 			{
@@ -146,6 +155,8 @@ namespace PocketCore::Registry::Weather
 
 			/*! @brief Returns all currently registered weather definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const WeatherMeta> getRegisteredWeathers() const noexcept
 			{
@@ -154,6 +165,8 @@ namespace PocketCore::Registry::Weather
 
 			/*! @brief Returns the next stable ID assigned to a custom weather.
 				@return The underlying numeric value of the next weather ID.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr us getNextWeatherID() const noexcept
 			{
@@ -163,6 +176,8 @@ namespace PocketCore::Registry::Weather
 			/*! @brief Finds an internal array index by stable weather ID.
 				@param[in] weatherID The stable weather identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByWeatherID(const WeatherID weatherID) const
 			{
@@ -172,6 +187,8 @@ namespace PocketCore::Registry::Weather
 			/*! @brief Checks whether an weather name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr bool hasWeather(const std::string_view &name) const
 			{
@@ -181,6 +198,8 @@ namespace PocketCore::Registry::Weather
 			/*! @brief Checks whether an weather ID is registered.
 				@param[in] weatherID The stable weather identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			ATTR_NODISCARD constexpr bool hasWeather(const WeatherID weatherID) const
 			{
@@ -189,13 +208,18 @@ namespace PocketCore::Registry::Weather
 
 			/*! @brief Sets the next custom weather ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.8.0
+				@version 0.8.0
 			*/
 			constexpr void setNextWeatherID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom weather ID counter. */
+			/*! @brief Increments the next custom weather ID counter.
+				@since 0.8.0
+				@version 0.8.0
+			 */
 			constexpr void incrementNextWeatherID() noexcept
 			{
 				incrementNextID();
