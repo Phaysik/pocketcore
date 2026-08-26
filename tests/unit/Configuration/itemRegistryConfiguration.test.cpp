@@ -15,6 +15,7 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/builtInEffectID.h"
+#include "Effect/effectTrigger.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
@@ -28,9 +29,9 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::EffectTrigger;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Item::BuiltinItemID;
-using PocketCore::Item::ItemEffectTrigger;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::ItemMeta;
 using PocketCore::Item::toItemID;
@@ -58,7 +59,7 @@ SCENARIO("ItemRegistryConfiguration addItem")
 
 	GIVEN("a unique item definition")
 	{
-		std::vector<ItemEffectTrigger> triggers{
+		std::vector<EffectTrigger> triggers{
 			{
 				.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusApply)},
 				.mTrigger = BattleEventID::MoveUse,
@@ -146,7 +147,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 
 		WHEN("its triggers are replaced by name")
 		{
-			std::array<ItemEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{{.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)}, .mTrigger = BattleEventID::Faint}},
 			};
 			auto setResult{configuration.setItemTriggers("Custom Item", replacement)};
@@ -163,7 +164,7 @@ SCENARIO("ItemRegistryConfiguration metadata lifecycle")
 
 		WHEN("its triggers are replaced by stable ID")
 		{
-			std::array<ItemEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{{.mEffects = {toEffectID(BuiltinEffectID::Flinch)}, .mTrigger = BattleEventID::SwitchIn}},
 			};
 			auto setResult{configuration.setItemTriggers(customIdentifier, replacement)};

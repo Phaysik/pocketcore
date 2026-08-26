@@ -19,6 +19,7 @@
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Effect/effectTrigger.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Registry/itemRegistry.h"
@@ -27,7 +28,7 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
-	using PocketCore::Item::ItemEffectTrigger;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Registry::Item::ItemRegistry;
@@ -194,9 +195,9 @@ namespace PocketCore::Configuration
 				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const std::string_view &itemName,
-																				  const std::span<const ItemEffectTrigger> &triggers);
+																				  const std::span<const EffectTrigger> &triggers);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setItemTriggers(ItemID, std::span<const ItemEffectTrigger>)
+			/*! @overload std::expected<void, RegistryErrorInfo> setItemTriggers(ItemID, std::span<const EffectTrigger>)
 				@brief Replaces all trigger metadata for an item selected by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
@@ -205,7 +206,7 @@ namespace PocketCore::Configuration
 				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const ItemID itemID,
-																				  const std::span<const ItemEffectTrigger> &triggers);
+																				  const std::span<const EffectTrigger> &triggers);
 
 			/*! @brief Replaces all trigger metadata for an item selected by name.
 				@param[in] itemName The registered display name.

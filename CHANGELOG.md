@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.5.2] - 2026-07-27
+
+### Added
+
+- Added a new file to hold the built-in Move IDs and a function to convert built-in Move IDs to the stable Move ID
+- Added a _Move/constants.h_ file that holds the user readable names for each Move ID.
+- Added a metadata file for Pokemon moves that holds the relevant:
+  - User defined name, stable ID, and a list of triggers with their effects
+- Added moves triggers, targets, and a wrapper for holding both.
+
+### Changed
+
+- Changed _MoveID_ to be a typedef from the _IDInterface_ instead of an enum
+- Run _clang-format_ on _pokemon.h_
+
+### Fixed
+
+- Fixed namespace resolution in _pokemon.h_ moves fill.
+
 ## [0.5.1] - 2026-07-27
 
 ### Added
@@ -1011,6 +1030,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.5.2]: https://github.com/Phaysik/pocketcore/commit/8646188fbf35c3903b29d0713e3354b0ce5df12a
 [0.5.1]: https://github.com/Phaysik/pocketcore/commit/f234e7c066c190e35cf0a83e0651a258f545b810
 [0.5.0]: https://github.com/Phaysik/pocketcore/compare/v0.4.0...v0.5.0
 [0.4.1]: https://github.com/Phaysik/pocketcore/commit/adf96f1bd73412520a65d92804be2ae17274b964

@@ -17,12 +17,14 @@
 #include "Ability/abilityMeta.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/attributeMacros.h"
+#include "Effect/effectTrigger.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Effect::EffectTrigger;
 
 	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
 	{
@@ -36,14 +38,14 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTriggers(
-		const std::string_view &abilityName, const std::span<const AbilityEffectTrigger> &triggers)
+		const std::string_view &abilityName, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(abilityName, "setAbilityTriggers",
 							  [&triggers](AbilityMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTriggers(
-		const AbilityID abilityID, const std::span<const AbilityEffectTrigger> &triggers)
+		const AbilityID abilityID, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(abilityID, "setAbilityTriggers",
 							  [&triggers](AbilityMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });

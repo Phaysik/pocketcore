@@ -37,7 +37,6 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Move::baseAttackEffects;
 	using PocketCore::Move::BuiltinMoveID;
-	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;

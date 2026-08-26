@@ -13,10 +13,7 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
-#include "Core/typedefs.h"
-#include "Effect/effectID.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectTrigger.h"
 
 #include "itemID.h"
 
@@ -25,40 +22,7 @@ namespace PocketCore::Item
 	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
-	using PocketCore::Core::ub;
-	using PocketCore::Effect::EffectID;
-	using PocketCore::Effect::SuppressionRule;
-
-	/*! @struct ItemEffectTrigger Item/itemMeta.h
-		@brief Stores the event-driven effects and suppression rules for one item trigger.
-		@details The effect vector owns its ordered effect identifiers. The suppression-rule array has fixed physical storage, while
-		 @p mSuppresionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
-		 current battle event.
-		@note @p mSuppresionRuleCount must not exceed MAX_SUPPRESSION_RULES_PER_TRIGGER.
-		@date 07/27/2026
-		@version 0.4.1
-		@since 0.5.1
-		@author Matthew Moore
-	*/
-	struct ItemEffectTrigger
-	{
-		public:
-			/*! @brief The fixed-capacity suppression rules associated with this trigger. */
-			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
-
-			/*! @brief The owned effect identifiers executed in declaration order when this trigger matches. */
-			std::vector<EffectID> mEffects;
-
-			/*! @brief The battle event that activates this trigger. */
-			BattleEventID mTrigger;
-
-			/*! @brief The battle-event role required for activation, or Any when the role is unrestricted. */
-			BattleEventRole mRole{BattleEventRole::Any};
-
-			/*! @brief The number of entries in mSuppressionRules that contain active suppression rules. */
-			ub mSuppresionRuleCount{0};
-	};
+	using PocketCore::Effect::EffectTrigger;
 
 	/*! @struct ItemMeta Item/itemMeta.h
 		@brief Stores one item's stable ID, display name, and owned trigger definitions.
@@ -73,7 +37,7 @@ namespace PocketCore::Item
 	{
 		public:
 			/*! @brief The owned trigger and effect definitions for this item. */
-			std::vector<ItemEffectTrigger> mTriggers;
+			std::vector<EffectTrigger> mTriggers;
 
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};

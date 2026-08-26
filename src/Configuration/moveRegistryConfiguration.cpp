@@ -14,8 +14,8 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
+#include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 
@@ -24,6 +24,8 @@ namespace PocketCore::Configuration
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
+
+	using PocketCore::Effect::EffectTrigger;
 
 	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::addMove(const MoveMeta &moveMeta)
 	{
@@ -36,14 +38,14 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTriggers(
-		const std::string_view &moveName, const std::span<const MoveEffectTrigger> &triggers)
+		const std::string_view &moveName, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(moveName, "setMoveTriggers",
 							  [&triggers](MoveMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTriggers(
-		const MoveID moveID, const std::span<const MoveEffectTrigger> &triggers)
+		const MoveID moveID, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(moveID, "setMoveTriggers",
 							  [&triggers](MoveMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });

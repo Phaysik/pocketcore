@@ -19,6 +19,7 @@
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
@@ -27,7 +28,7 @@ namespace PocketCore::Configuration
 {
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
-	using PocketCore::Move::MoveEffectTrigger;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Registry::Move::MoveRegistry;
@@ -154,16 +155,16 @@ namespace PocketCore::Configuration
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const std::string_view &moveName,
-																				  const std::span<const MoveEffectTrigger> &triggers);
+																				  const std::span<const EffectTrigger> &triggers);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTriggers(MoveID, std::span<const MoveEffectTrigger>)
+			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTriggers(MoveID, std::span<const EffectTrigger>)
 				@brief Replaces all trigger metadata for an move selected by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const MoveID moveID,
-																				  const std::span<const MoveEffectTrigger> &triggers);
+																				  const std::span<const EffectTrigger> &triggers);
 
 			/*! @brief Replaces all trigger metadata for an move selected by name.
 				@param[in] moveName The registered display name.

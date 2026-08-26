@@ -34,7 +34,6 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Item::BuiltinItemID;
-	using PocketCore::Item::ItemEffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::toItemID;

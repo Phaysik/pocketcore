@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the move registry.
-	@date 04/17/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/27/2026
+	@since 0.5.2
+	@version 0.5.2
 	@author Matthew Moore
 */
 

@@ -21,15 +21,16 @@
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Effect/effectTrigger.h"
 #include "Registry/abilityRegistry.h"
 
 namespace PocketCore::Configuration
 {
-	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Core::us;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::RegistryError;
 
@@ -195,9 +196,9 @@ namespace PocketCore::Configuration
 				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const std::string_view &abilityName,
-																					 const std::span<const AbilityEffectTrigger> &triggers);
+																					 const std::span<const EffectTrigger> &triggers);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTriggers(AbilityID, std::span<const AbilityEffectTrigger>)
+			/*! @overload std::expected<void, RegistryErrorInfo> setAbilityTriggers(AbilityID, std::span<const EffectTrigger>)
 				@brief Replaces all trigger metadata for an ability selected by stable ID.
 				@param[in] abilityID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
@@ -206,7 +207,7 @@ namespace PocketCore::Configuration
 				@version 0.5.1
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const AbilityID abilityID,
-																					 const std::span<const AbilityEffectTrigger> &triggers);
+																					 const std::span<const EffectTrigger> &triggers);
 
 			/*! @brief Replaces all trigger metadata for an ability selected by name.
 				@param[in] abilityName The registered display name.

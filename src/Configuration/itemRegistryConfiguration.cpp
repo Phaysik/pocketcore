@@ -15,12 +15,14 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/attributeMacros.h"
+#include "Effect/effectTrigger.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 
@@ -35,14 +37,14 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTriggers(
-		const std::string_view &itemName, const std::span<const ItemEffectTrigger> &triggers)
+		const std::string_view &itemName, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(itemName, "setItemTriggers",
 							  [&triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> ItemRegistryConfiguration::setItemTriggers(
-		const ItemID itemID, const std::span<const ItemEffectTrigger> &triggers)
+		const ItemID itemID, const std::span<const EffectTrigger> &triggers)
 	{
 		return mutateMetadata(itemID, "setItemTriggers",
 							  [&triggers](ItemMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });

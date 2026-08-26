@@ -17,11 +17,11 @@
 #include "Ability/abilityMeta.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/builtInEffectID.h"
+#include "Effect/effectTrigger.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Ability::AbilityEffectTrigger;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Battle::BattleEventID;
@@ -30,6 +30,7 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::EffectTrigger;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
@@ -55,7 +56,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 
 	GIVEN("a unique ability definition")
 	{
-		std::vector<AbilityEffectTrigger> triggers{
+		std::vector<EffectTrigger> triggers{
 			{
 				.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
 				.mTrigger = BattleEventID::TurnEnd,
@@ -142,7 +143,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 
 		WHEN("its triggers are replaced by name")
 		{
-			std::array<AbilityEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{
 					{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::StatusChanged},
 				},
@@ -161,7 +162,7 @@ SCENARIO("AbilityRegistryConfiguration metadata mutation")
 
 		WHEN("its triggers are replaced by stable ID")
 		{
-			std::array<AbilityEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{
 					{.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)}, .mTrigger = BattleEventID::Faint},
 				},

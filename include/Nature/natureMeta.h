@@ -13,10 +13,7 @@
 #include <string_view>
 
 #include "Battle/battleTargetsAndTriggers.h"
-#include "Configuration/constants.h"
-#include "Core/typedefs.h"
-#include "Effect/effectID.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectTrigger.h"
 
 #include "constants.h"
 #include "natureID.h"
@@ -26,20 +23,7 @@ namespace PocketCore::Nature
 	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
-	using PocketCore::Configuration::MAX_SUPPRESSION_RULES_PER_TRIGGER;
-	using PocketCore::Core::ub;
-	using PocketCore::Effect::EffectID;
-	using PocketCore::Effect::SuppressionRule;
-
-	struct NatureEffectTrigger
-	{
-		public:
-			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
-			std::vector<EffectID> mEffects;
-			BattleEventID mTrigger;
-			BattleEventRole mRole{BattleEventRole::Any};
-			ub mSuppresionRuleCount{0};
-	};
+	using PocketCore::Effect::EffectTrigger;
 
 	/*! @struct NatureMeta Nature/natureMeta.h
 		@brief Stores one nature's stable ID, display name, and owned trigger definitions.
@@ -57,7 +41,7 @@ namespace PocketCore::Nature
 			std::array<double, MAX_STAT_TYPES> mStatMultipliers{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
 			/*! @brief The owned trigger and effect definitions for this move. */
-			std::vector<NatureEffectTrigger> mTriggers{};
+			std::vector<EffectTrigger> mTriggers{};
 
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};

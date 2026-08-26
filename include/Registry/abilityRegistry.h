@@ -26,7 +26,6 @@
 
 namespace PocketCore::Registry::Ability
 {
-	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;

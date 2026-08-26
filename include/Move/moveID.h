@@ -2,7 +2,7 @@
 	@brief Contains the move status
 	@date 07/27/2026
 	@since 0.3.0
-	@version 0.4.0
+	@version 0.5.2
 	@author Matthew Moore
 */
 

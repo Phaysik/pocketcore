@@ -16,6 +16,7 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/builtInEffectID.h"
+#include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -28,8 +29,8 @@ using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Effect::BuiltinEffectID;
+using PocketCore::Effect::EffectTrigger;
 using PocketCore::Effect::toEffectID;
-using PocketCore::Move::MoveEffectTrigger;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Utility::Debug::Logging::Logger;
@@ -68,7 +69,7 @@ SCENARIO("MoveRegistryConfiguration addMove")
 
 	GIVEN("a unique move definition")
 	{
-		std::vector<MoveEffectTrigger> triggers{
+		std::vector<EffectTrigger> triggers{
 			{
 				.mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck), toEffectID(BuiltinEffectID::BaseDamage)},
 				.mTrigger = BattleEventID::Hit,
@@ -155,7 +156,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 
 		WHEN("its triggers are replaced by name")
 		{
-			std::array<MoveEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{{.mEffects = {toEffectID(BuiltinEffectID::Recoil)}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
 			};
 			auto setResult{configuration.setMoveTriggers("Custom Move", replacement)};
@@ -173,7 +174,7 @@ SCENARIO("MoveRegistryConfiguration metadata lifecycle")
 
 		WHEN("its triggers are replaced by stable ID")
 		{
-			std::array<MoveEffectTrigger, 1> replacement{
+			std::array<EffectTrigger, 1> replacement{
 				{{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::Hit}},
 			};
 			auto setResult{configuration.setMoveTriggers(customIdentifier, replacement)};

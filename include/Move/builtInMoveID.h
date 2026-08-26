@@ -1,8 +1,8 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
 	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.5.2
+	@version 0.5.2
 	@author Matthew Moore
 */
 
@@ -22,8 +22,8 @@ namespace PocketCore::Move
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
 		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@version 0.5.2
+		@since 0.5.2
 		@author Matthew Moore
 	*/
 	enum class BuiltinMoveID : PocketCore::Core::ub
@@ -40,6 +40,8 @@ namespace PocketCore::Move
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinMoveID The built-in move to convert.
 		@return The corresponding open move identifier.
+		@since 0.5.2
+		@version 0.5.2
 	*/
 	ATTR_NODISCARD constexpr MoveID toMoveID(const BuiltinMoveID builtinMoveID) noexcept
 	{

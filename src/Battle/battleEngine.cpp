@@ -32,6 +32,7 @@
 #include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
 #include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectTrigger.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Move/moveHitPolicy.h"
@@ -45,7 +46,6 @@
 
 namespace PocketCore::Battle
 {
-	using PocketCore::Ability::AbilityEffectTrigger;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
@@ -57,15 +57,13 @@ namespace PocketCore::Battle
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
 	using PocketCore::Effect::EffectSource;
-	using PocketCore::Item::ItemEffectTrigger;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Move::FixedHitCount;
-	using PocketCore::Move::MoveEffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Nature::NatureEffectTrigger;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::NO_NATURE_ID;
@@ -377,7 +375,7 @@ namespace PocketCore::Battle
 												   const BattleEventRole role)
 	{
 		// Only suppression rules attached to the trigger currently being dispatched become active.
-		std::ranges::for_each(abilityMeta.mTriggers, [this, eventID, role, &owner](const AbilityEffectTrigger &trigger) {
+		std::ranges::for_each(abilityMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Ability, owner);
@@ -389,7 +387,7 @@ namespace PocketCore::Battle
 												const BattleEventRole role)
 	{
 		// Item suppression activation mirrors ability activation to preserve source-specific ownership.
-		std::ranges::for_each(itemMeta.mTriggers, [this, eventID, role, &owner](const ItemEffectTrigger &trigger) {
+		std::ranges::for_each(itemMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Item, owner);
@@ -401,7 +399,7 @@ namespace PocketCore::Battle
 												  const BattleEventRole role)
 	{
 		// Nature suppression activation mirrors ability activation to preserve source-specific ownership.
-		std::ranges::for_each(natureMeta.mTriggers, [this, eventID, role, &owner](const NatureEffectTrigger &trigger) {
+		std::ranges::for_each(natureMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Nature, owner);
@@ -686,7 +684,7 @@ namespace PocketCore::Battle
 		context.mSourceType = EffectSource::Move;
 
 		// Execute every metadata entry matching this move trigger in declaration order.
-		std::ranges::for_each(moveMeta.mTriggers, [this, eventID, role, &owner, &context](const MoveEffectTrigger &trigger) {
+		std::ranges::for_each(moveMeta.mTriggers, [this, eventID, role, &owner, &context](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				// A trigger's suppression rules become visible before deciding whether its effects are suppressed.
@@ -711,7 +709,7 @@ namespace PocketCore::Battle
 		context.mSourceType = EffectSource::Ability;
 
 		// Dispatch matching, unsuppressed trigger entries in metadata order.
-		for (const AbilityEffectTrigger &trigger : abilityMeta.mTriggers)
+		for (const EffectTrigger &trigger : abilityMeta.mTriggers)
 		{
 			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
 				|| isSuppressed(EffectSource::Ability, owner, eventID, role, context))
@@ -740,7 +738,7 @@ namespace PocketCore::Battle
 		context.mSourceType = EffectSource::Item;
 
 		// Dispatch matching, unsuppressed trigger entries in metadata order.
-		for (const ItemEffectTrigger &trigger : itemMeta.mTriggers)
+		for (const EffectTrigger &trigger : itemMeta.mTriggers)
 		{
 			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
 				|| isSuppressed(EffectSource::Item, owner, eventID, role, context))
@@ -769,7 +767,7 @@ namespace PocketCore::Battle
 		context.mSourceType = EffectSource::Nature;
 
 		// Dispatch matching, unsuppressed trigger entries in metadata order.
-		for (const NatureEffectTrigger &trigger : natureMeta.mTriggers)
+		for (const EffectTrigger &trigger : natureMeta.mTriggers)
 		{
 			if (trigger.mTrigger != eventID || (trigger.mRole != BattleEventRole::Any && trigger.mRole != role)
 				|| isSuppressed(EffectSource::Nature, owner, eventID, role, context))
