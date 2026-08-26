@@ -272,6 +272,21 @@ namespace PocketCore::Registry
 			}
 
 		protected:
+			/*! @brief Returns mutable metadata at an internal array index without rebuilding lookup indexes.
+				@details Derived registries may use this only to update metadata fields that are not referenced by @p IDMember or @p
+			   NameMember.
+				@pre @p index < Capacity.
+				@param[in] index The internal array index.
+				@return A mutable reference that remains valid until replacement or registry destruction.
+				@since x.x.x
+				@version x.x.x
+			*/
+			ATTR_NODISCARD constexpr Metadata &getMutableEntry(const us index)
+			{
+				assert(index < mEntries.size());
+				return mEntries.at(index);
+			}
+
 			/*! @brief Constructs empty storage with a specified next-ID counter.
 				@param[in] nextID The first numeric ID available after built-in registration.
 				@since 0.5.0

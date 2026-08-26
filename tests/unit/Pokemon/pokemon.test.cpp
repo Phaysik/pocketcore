@@ -39,10 +39,10 @@ using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusInteractionAction;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Status::toStatusID;
-using PocketCore::Types::BuiltInTypeID;
-using PocketCore::Types::NO_TYPE_ID;
-using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeID;
+using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::NO_TYPE_ID;
+using PocketCore::Type::toTypeID;
+using PocketCore::Type::TypeID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

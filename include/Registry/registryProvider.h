@@ -53,9 +53,9 @@ namespace PocketCore::Registry
 			const Item::ItemRegistry *itemRegistry;
 
 			/*! @brief Non-owning pointer to the type metadata registry.
-				@details Must point to a valid @ref Types::TypeRegistry instance for type metadata queries.
+				@details Must point to a valid @ref Type::TypeRegistry instance for type metadata queries.
 			*/
-			const Types::TypeRegistry *typeRegistry;
+			const Type::TypeRegistry *typeRegistry;
 
 			/*! @brief Non-owning pointer to the status metadata registry.
 				@details Must point to a valid @ref Status::StatusRegistry instance for status metadata queries.

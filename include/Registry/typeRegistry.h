@@ -23,35 +23,58 @@
 #include "Types/constants.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
+#include "Types/typeMeta.h"
 
 #include "constants.h" // IWYU pragma: keep
 
-namespace PocketCore::Registry::Types
+namespace PocketCore::Registry::Type
 {
 	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
 	using PocketCore::Registry::FixedMetadataRegistry;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
-	using PocketCore::Types::TypeID;
-
-	namespace Types = PocketCore::Types;
-
-	/*! @struct TypeEntry Registry/typeRegistry.h
-		@brief A compile-time pair mapping a type ID to its display name.
-		@since 0.1.0
-		@version 0.5.1
-	*/
-	struct TypeEntry
-	{
-		public:
-			/*! @brief The display name for the type. */
-			std::string_view mName{};
-
-			/*! @brief The stable identifier for a built-in or user-defined type. */
-			TypeID mTypeID{};
-	};
+	using PocketCore::Type::BUG_NAME;
+	using PocketCore::Type::BUG_TYPE_MATCHUP;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::DARK_NAME;
+	using PocketCore::Type::DARK_TYPE_MATCHUP;
+	using PocketCore::Type::DRAGON_NAME;
+	using PocketCore::Type::DRAGON_TYPE_MATCHUP;
+	using PocketCore::Type::ELECTRIC_NAME;
+	using PocketCore::Type::ELECTRIC_TYPE_MATCHUP;
+	using PocketCore::Type::FAIRY_NAME;
+	using PocketCore::Type::FAIRY_TYPE_MATCHUP;
+	using PocketCore::Type::FIGHTING_NAME;
+	using PocketCore::Type::FIGHTING_TYPE_MATCHUP;
+	using PocketCore::Type::FIRE_NAME;
+	using PocketCore::Type::FIRE_TYPE_MATCHUP;
+	using PocketCore::Type::FLYING_NAME;
+	using PocketCore::Type::FLYING_TYPE_MATCHUP;
+	using PocketCore::Type::GHOST_NAME;
+	using PocketCore::Type::GHOST_TYPE_MATCHUP;
+	using PocketCore::Type::GRASS_NAME;
+	using PocketCore::Type::GRASS_TYPE_MATCHUP;
+	using PocketCore::Type::GROUND_NAME;
+	using PocketCore::Type::GROUND_TYPE_MATCHUP;
+	using PocketCore::Type::ICE_NAME;
+	using PocketCore::Type::ICE_TYPE_MATCHUP;
+	using PocketCore::Type::NORMAL_NAME;
+	using PocketCore::Type::NORMAL_TYPE_MATCHUP;
+	using PocketCore::Type::POISON_NAME;
+	using PocketCore::Type::POISON_TYPE_MATCHUP;
+	using PocketCore::Type::PSYCHIC_NAME;
+	using PocketCore::Type::PSYCHIC_TYPE_MATCHUP;
+	using PocketCore::Type::ROCK_NAME;
+	using PocketCore::Type::ROCK_TYPE_MATCHUP;
+	using PocketCore::Type::STEEL_NAME;
+	using PocketCore::Type::STEEL_TYPE_MATCHUP;
+	using PocketCore::Type::STELLAR_NAME;
+	using PocketCore::Type::toTypeID;
+	using PocketCore::Type::TypeEffectiveness;
+	using PocketCore::Type::TypeID;
+	using PocketCore::Type::TypeMeta;
+	using PocketCore::Type::WATER_NAME;
+	using PocketCore::Type::WATER_TYPE_MATCHUP;
 
 	/*! @class TypeRegistry Registry/typeRegistry.h
 		@brief A constexpr registry storing Pokemon types with their effectiveness chart in fixed-capacity arrays.
@@ -63,10 +86,10 @@ namespace PocketCore::Registry::Types
 		@since 0.1.0
 		@version 0.5.1
 	*/
-	class TypeRegistry : private FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>
+	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
 		public:
-			using Base = FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>;
+			using Base = FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>;
 
 			// MARK: Constructor
 
@@ -78,27 +101,99 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltInTypeID::FinalType).getValue()}
 			{
-				// LCOV_EXCL_BR_START — Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
+				// LCOV_EXCL_BR_START - Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
 				// is not applicable.
-				addBuiltin(Types::NORMAL_TYPE_MATCHUP, BuiltInTypeID::Normal, Types::NORMAL_NAME);
-				addBuiltin(Types::FIGHTING_TYPE_MATCHUP, BuiltInTypeID::Fighting, Types::FIGHTING_NAME);
-				addBuiltin(Types::FLYING_TYPE_MATCHUP, BuiltInTypeID::Flying, Types::FLYING_NAME);
-				addBuiltin(Types::POISON_TYPE_MATCHUP, BuiltInTypeID::Poison, Types::POISON_NAME);
-				addBuiltin(Types::GROUND_TYPE_MATCHUP, BuiltInTypeID::Ground, Types::GROUND_NAME);
-				addBuiltin(Types::ROCK_TYPE_MATCHUP, BuiltInTypeID::Rock, Types::ROCK_NAME);
-				addBuiltin(Types::BUG_TYPE_MATCHUP, BuiltInTypeID::Bug, Types::BUG_NAME);
-				addBuiltin(Types::GHOST_TYPE_MATCHUP, BuiltInTypeID::Ghost, Types::GHOST_NAME);
-				addBuiltin(Types::STEEL_TYPE_MATCHUP, BuiltInTypeID::Steel, Types::STEEL_NAME);
-				addBuiltin(Types::FIRE_TYPE_MATCHUP, BuiltInTypeID::Fire, Types::FIRE_NAME);
-				addBuiltin(Types::WATER_TYPE_MATCHUP, BuiltInTypeID::Water, Types::WATER_NAME);
-				addBuiltin(Types::GRASS_TYPE_MATCHUP, BuiltInTypeID::Grass, Types::GRASS_NAME);
-				addBuiltin(Types::ELECTRIC_TYPE_MATCHUP, BuiltInTypeID::Electric, Types::ELECTRIC_NAME);
-				addBuiltin(Types::PSYCHIC_TYPE_MATCHUP, BuiltInTypeID::Psychic, Types::PSYCHIC_NAME);
-				addBuiltin(Types::ICE_TYPE_MATCHUP, BuiltInTypeID::Ice, Types::ICE_NAME);
-				addBuiltin(Types::DRAGON_TYPE_MATCHUP, BuiltInTypeID::Dragon, Types::DRAGON_NAME);
-				addBuiltin(Types::DARK_TYPE_MATCHUP, BuiltInTypeID::Dark, Types::DARK_NAME);
-				addBuiltin(Types::FAIRY_TYPE_MATCHUP, BuiltInTypeID::Fairy, Types::FAIRY_NAME);
-				addBuiltin(BuiltInTypeID::Stellar, Types::STELLAR_NAME);
+				addBuiltin({
+					.mOffensiveMatchups = NORMAL_TYPE_MATCHUP,
+					.mName = NORMAL_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Normal),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = FIGHTING_TYPE_MATCHUP,
+					.mName = FIGHTING_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Fighting),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = FLYING_TYPE_MATCHUP,
+					.mName = FLYING_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Flying),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = POISON_TYPE_MATCHUP,
+					.mName = POISON_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Poison),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = GROUND_TYPE_MATCHUP,
+					.mName = GROUND_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Ground),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = ROCK_TYPE_MATCHUP,
+					.mName = ROCK_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Rock),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = BUG_TYPE_MATCHUP,
+					.mName = BUG_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Bug),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = GHOST_TYPE_MATCHUP,
+					.mName = GHOST_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Ghost),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = STEEL_TYPE_MATCHUP,
+					.mName = STEEL_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Steel),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = FIRE_TYPE_MATCHUP,
+					.mName = FIRE_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Fire),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = WATER_TYPE_MATCHUP,
+					.mName = WATER_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Water),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = GRASS_TYPE_MATCHUP,
+					.mName = GRASS_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Grass),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = ELECTRIC_TYPE_MATCHUP,
+					.mName = ELECTRIC_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Electric),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = PSYCHIC_TYPE_MATCHUP,
+					.mName = PSYCHIC_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Psychic),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = ICE_TYPE_MATCHUP,
+					.mName = ICE_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Ice),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = DRAGON_TYPE_MATCHUP,
+					.mName = DRAGON_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Dragon),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = DARK_TYPE_MATCHUP,
+					.mName = DARK_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Dark),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = FAIRY_TYPE_MATCHUP,
+					.mName = FAIRY_NAME,
+					.mTypeID = toTypeID(BuiltInTypeID::Fairy),
+				});
+				addBuiltin({.mName = STELLAR_NAME, .mTypeID = toTypeID(BuiltInTypeID::Stellar)});
 				// LCOV_EXCL_BR_STOP
 			}
 
@@ -109,6 +204,7 @@ namespace PocketCore::Registry::Types
 			using Base::getEntry;
 			using Base::getID;
 			using Base::getMetadata;
+			using Base::getMutableEntry;
 			using Base::getName;
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
@@ -129,12 +225,12 @@ namespace PocketCore::Registry::Types
 				@since 0.1.0
 				@version 0.5.1
 			*/
-			ATTR_NODISCARD constexpr Types::TypeEffectiveness getTypeChartCell(const us row, const us col) const
+			ATTR_NODISCARD constexpr TypeEffectiveness getTypeChartCell(const us row, const us col) const
 			{
-				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_CELL.data());
-				assert(col < mTypeChart.at(row).size() && COL_OOB_GET_TYPE_CHART_CELL.data());
+				assert(row < MAX_TYPES && ROW_OOB_GET_TYPE_CHART_CELL.data());
+				assert(col < MAX_TYPES && COL_OOB_GET_TYPE_CHART_CELL.data());
 
-				return mTypeChart.at(row).at(col);
+				return getEntry(row).mOffensiveMatchups.at(col);
 			}
 
 			/*! @brief Returns an entire row from the type chart.
@@ -144,11 +240,11 @@ namespace PocketCore::Registry::Types
 				@since 0.1.0
 				@version 0.5.1
 			*/
-			ATTR_NODISCARD constexpr const std::array<Types::TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
+			ATTR_NODISCARD constexpr const std::array<TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
 			{
-				assert(row < mTypeChart.size() && ROW_OOB_GET_TYPE_CHART_ROW.data());
+				assert(row < MAX_TYPES && ROW_OOB_GET_TYPE_CHART_ROW.data());
 
-				return mTypeChart.at(row);
+				return getEntry(row).mOffensiveMatchups;
 			}
 
 			/*! @brief Looks up a type ID by its display name.
@@ -160,7 +256,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view &name) const
 			{
-				return Base::getID(name);
+				return getID(name);
 			}
 
 			/*! @brief Looks up a type's display name by its ID.
@@ -172,17 +268,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
-				return Base::getName(typeID);
-			}
-
-			/*! @brief Returns the total number of registered types (built-in + custom).
-				@return The count of registered types.
-				@since 0.1.0
-				@version 0.4.1
-			*/
-			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
-			{
-				return Base::getAmountRegistered();
+				return getName(typeID);
 			}
 
 			/*! @brief Returns the next type ID that will be assigned to a newly registered type.
@@ -192,33 +278,21 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr TypeID getNextTypeID() const noexcept
 			{
-				return TypeID{Base::getNextID()};
+				return TypeID{getNextID()};
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
 				@details The returned span covers the first @ref getAmountRegistered elements of the internal entries array.
-				@return A span of @ref TypeEntry covering all valid registered entries.
+				@return A span of @ref TypeMeta covering all valid registered entries.
 				@since 0.1.0
 				@version 0.5.1
 			*/
-			ATTR_NODISCARD constexpr const std::span<const TypeEntry> getRegisteredTypes() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const TypeMeta> getRegisteredTypes() const noexcept
 			{
-				return Base::getRegisteredEntries();
+				return getRegisteredEntries();
 			}
 
 			// MARK: Setters
-
-			/*! @brief Sets the entry at the given index.
-				@pre @p index < @ref MAX_TYPES.
-				@param[in] index The index into the entries array.
-				@param[in] entry The @ref TypeEntry to store.
-				@since 0.1.0
-				@version 0.4.1
-			*/
-			constexpr void setEntry(const us index, const TypeEntry &entry)
-			{
-				Base::setEntry(index, entry);
-			}
 
 			/*! @brief Sets a single cell in the type chart.
 				@pre @p row < @ref MAX_TYPES and @p col < @ref MAX_TYPES.
@@ -228,12 +302,12 @@ namespace PocketCore::Registry::Types
 				@since 0.1.0
 				@version 0.4.1
 			*/
-			constexpr void setTypeChartCell(const us row, const us col, const Types::TypeEffectiveness value)
+			constexpr void setTypeChartCell(const us row, const us col, const TypeEffectiveness value)
 			{
-				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_CELL.data());
-				assert(col < mTypeChart.at(row).size() && COL_OOB_SET_TYPE_CHART_CELL.data());
+				assert(row < MAX_TYPES && ROW_OOB_SET_TYPE_CHART_CELL.data());
+				assert(col < MAX_TYPES && COL_OOB_SET_TYPE_CHART_CELL.data());
 
-				mTypeChart.at(row).at(col) = value;
+				getMutableEntry(row).mOffensiveMatchups.at(col) = value;
 			}
 
 			/*! @brief Replaces an entire row in the type chart.
@@ -243,21 +317,11 @@ namespace PocketCore::Registry::Types
 				@since 0.1.0
 				@version 0.4.1
 			*/
-			constexpr void setTypeChartRow(const us row, const std::array<Types::TypeEffectiveness, MAX_TYPES> &chart)
+			constexpr void setTypeChartRow(const us row, const std::array<TypeEffectiveness, MAX_TYPES> &chart)
 			{
-				assert(row < mTypeChart.size() && ROW_OOB_SET_TYPE_CHART_ROW.data());
+				assert(row < MAX_TYPES && ROW_OOB_SET_TYPE_CHART_ROW.data());
 
-				mTypeChart.at(row) = chart;
-			}
-
-			/*! @brief Sets the number of registered types.
-				@param[in] amount The new count.
-				@since 0.1.0
-				@version 0.4.1
-			*/
-			constexpr void setAmountRegistered(const us amount) noexcept
-			{
-				Base::setAmountRegistered(amount);
+				getMutableEntry(row).mOffensiveMatchups = chart;
 			}
 
 			/*! @brief Sets the next type ID counter.
@@ -267,7 +331,7 @@ namespace PocketCore::Registry::Types
 			*/
 			constexpr void setNextTypeID(const TypeID nextId) noexcept
 			{
-				Base::setNextID(nextId.getValue());
+				setNextID(nextId.getValue());
 			}
 
 			// MARK: Member Functions
@@ -281,7 +345,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByTypeID(const TypeID typeID) const
 			{
-				return Base::findIndexByID(typeID);
+				return findIndexByID(typeID);
 			}
 
 			/*! @brief Checks whether a type with the given name is registered.
@@ -293,7 +357,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
 			{
-				return Base::hasEntry(name);
+				return hasEntry(name);
 			}
 
 			/*! @brief Checks whether a type with the given ID is registered.
@@ -305,7 +369,7 @@ namespace PocketCore::Registry::Types
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
-				return Base::hasEntry(typeID);
+				return hasEntry(typeID);
 			}
 
 			/*! @brief Increments the next type ID counter by one.
@@ -314,74 +378,9 @@ namespace PocketCore::Registry::Types
 			 */
 			constexpr void incrementNextTypeID() noexcept
 			{
-				Base::incrementNextID();
+				incrementNextID();
 			}
-
-			/*! @brief Increments the number of registered types by one.
-				@since 0.1.0
-				@version 0.1.0
-			 */
-			constexpr void incrementAmountRegistered() noexcept
-			{
-				Base::incrementAmountRegistered();
-			}
-
-			/*! @brief Decrements the number of registered types by one.
-				@since 0.1.0
-				@version 0.1.0
-				*/
-			constexpr void decrementAmountRegistered() noexcept
-			{
-				Base::decrementAmountRegistered();
-			}
-
-		private:
-			/*! @brief Registers a built-in enum type without a type chart row.
-				@details Stores the entry via the shared fixed metadata base and increments the registered count.
-			   Used for types like Stellar that have no offensive matchup data.
-				@pre @ref getAmountRegistered() < @ref MAX_TYPES.
-				@post @ref getAmountRegistered() is incremented by one.
-				@param[in] type The built-in @ref Types enum value.
-				@param[in] name The display name for the type.
-				@since 0.1.0
-				@version 0.5.1
-			*/
-			constexpr void addBuiltin(const BuiltInTypeID type, const std::string_view &name)
-			{
-				Base::addBuiltin(TypeEntry{.mName = name, .mTypeID = toTypeID(type)});
-			}
-
-			/*! @overload void addBuiltin(const Types type, std::string_view name)
-				@brief Registers a built-in enum type together with its effectiveness row.
-				@details Stores the type chart row in @ref mTypeChart then delegates to the name-only overload.
-				@pre @ref getAmountRegistered() < @ref MAX_TYPES.
-				@post @ref getAmountRegistered() is incremented by one and the corresponding @ref mTypeChart row is populated.
-				@param[in] offensiveMatchups The full row of effectiveness values for this type against all others.
-				@param[in] type The built-in @ref Types enum value.
-				@param[in] name The display name for the type.
-				@since 0.1.0
-				@version 0.1.0
-			*/
-			ATTR_NOINLINE constexpr void addBuiltin(const std::span<const Types::TypeEffectiveness> &offensiveMatchups,
-													const Types::BuiltInTypeID type, const std::string_view &name)
-			{
-				const us amountRegistered{Base::getAmountRegistered()};
-				assert(offensiveMatchups.size() <= mTypeChart.at(amountRegistered).size() && MATCHUPS_EXCEED_COLUMNS_ADD_BUILTIN.data());
-
-				for (std::size_t i{0}; i < offensiveMatchups.size(); ++i)
-				{
-					mTypeChart.at(amountRegistered).at(i) = offensiveMatchups.at(i);
-				}
-
-				Base::addBuiltin(TypeEntry{.mName = name, .mTypeID = toTypeID(type)});
-			}
-
-		private:
-			/*! @brief Fixed-capacity 2-D array encoding the effectiveness of each type (row) attacking every other type (column).
-				@details Indexed as mTypeChart[attacker][defender]. Uninitialized slots contain @ref TypeEffectiveness::NOT_DEFINED.
-			*/
-			std::array<std::array<Types::TypeEffectiveness, MAX_TYPES>, MAX_TYPES> mTypeChart{};
 	};
-} // namespace PocketCore::Registry::Types
+} // namespace PocketCore::Registry::Type
 
 #endif

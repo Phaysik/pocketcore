@@ -13,7 +13,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
-namespace PocketCore::Types
+namespace PocketCore::Type
 {
 	using PocketCore::Configuration::EFFECTIVE_VALUE;
 	using PocketCore::Configuration::NO_EFFECTIVE_VALUE;
@@ -62,6 +62,6 @@ namespace PocketCore::Types
 				return NO_EFFECTIVE_VALUE;
 		}
 	}
-} // namespace PocketCore::Types
+} // namespace PocketCore::Type
 
 #endif

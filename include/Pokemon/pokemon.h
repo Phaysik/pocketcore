@@ -57,7 +57,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Status::statusRemoveHandler;
 	using PocketCore::Status::statusReplaceHandler;
 	using PocketCore::Status::willBlockIncoming;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::TypeID;
 
 	/*! @class Pokemon Pokemon/pokemon.h
 		@brief Stores a Pokemon's identity, battle statistics, moves, held items, abilities, types, natures, and statuses.

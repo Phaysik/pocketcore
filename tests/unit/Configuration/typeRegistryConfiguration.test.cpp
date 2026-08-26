@@ -31,11 +31,11 @@ using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Configuration::UnspecifiedMatchup;
 using PocketCore::Core::us;
-using PocketCore::Types::BuiltInTypeID;
-using PocketCore::Types::NO_TYPE_ID;
-using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeEffectiveness;
-using PocketCore::Types::TypeID;
+using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::NO_TYPE_ID;
+using PocketCore::Type::toTypeID;
+using PocketCore::Type::TypeEffectiveness;
+using PocketCore::Type::TypeID;
 using PocketCore::Utility::Debug::Logging::Logger;
 
 using enum TypeEffectiveness;

@@ -60,8 +60,8 @@ int main()
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
 	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
 

@@ -33,8 +33,8 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
 

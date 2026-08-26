@@ -14,7 +14,7 @@
 
 #include "typeID.h"
 
-namespace PocketCore::Types
+namespace PocketCore::Type
 {
 	/*! @enum Types
 		@showenumvalues
@@ -60,6 +60,6 @@ namespace PocketCore::Types
 	{
 		return TypeID{static_cast<ub>(builtinType)};
 	}
-} // namespace PocketCore::Types
+} // namespace PocketCore::Type
 
 #endif

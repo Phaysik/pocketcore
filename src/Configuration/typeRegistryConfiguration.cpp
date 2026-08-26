@@ -21,6 +21,7 @@
 #include "Core/typedefs.h"
 #include "Registry/typeRegistry.h"
 #include "Types/builtInTypeID.h"
+#include "Types/typeMeta.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
 #include "Utility/Debug/Logging/logger.h"
@@ -30,9 +31,9 @@ namespace PocketCore::Configuration
 	using PocketCore::Configuration::MatchupPair;
 	using PocketCore::Configuration::MAX_TYPES;
 	using PocketCore::Core::us;
-	using PocketCore::Registry::Types::TypeEntry;
-	using PocketCore::Types::TypeEffectiveness;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Registry::Type::TypeMeta;
+	using PocketCore::Type::TypeEffectiveness;
+	using PocketCore::Type::TypeID;
 	using PocketCore::Utility::Debug::Logging::Logger;
 
 	// MARK: Getters
@@ -254,7 +255,7 @@ namespace PocketCore::Configuration
 		const us registered{getRegistry().getAmountRegistered()};
 		const std::string_view typeName{definition.name};
 
-		if (registered >= MAX_TYPES || getRegistry().getNextTypeID() == PocketCore::Types::NO_TYPE_ID)
+		if (registered >= MAX_TYPES || getRegistry().getNextTypeID() == PocketCore::Type::NO_TYPE_ID)
 		{
 			const std::optional<std::string_view> logResult{
 				Logger::warn("TypeRegistryConfiguration: registry capacity or type ID space exhausted. Cannot add type '{}'.", typeName),
@@ -364,7 +365,7 @@ namespace PocketCore::Configuration
 
 		// Write directly to the registry — bypasses the positional overload's strict defined-count validation,
 		// which is not applicable when the fill policy has already been resolved by name-keyed logic.
-		getRegistry().setEntry(registered, TypeEntry{.mName = typeName, .mTypeID = getRegistry().getNextTypeID()});
+		getRegistry().setEntry(registered, TypeMeta{.mName = typeName, .mTypeID = getRegistry().getNextTypeID()});
 
 		for (us i{0}; i < registered; ++i)
 		{
@@ -476,9 +477,9 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(
-		const PocketCore::Types::BuiltInTypeID type)
+		const PocketCore::Type::BuiltInTypeID type)
 	{
-		const TypeID typeID{PocketCore::Types::toTypeID(type)};
+		const TypeID typeID{PocketCore::Type::toTypeID(type)};
 
 		const std::optional<us> arrayIndex{getRegistry().findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
 
@@ -519,7 +520,7 @@ namespace PocketCore::Configuration
 		const std::span<const std::string_view> &typeNames)
 	{
 		// Snapshot the entire registry for all-or-nothing rollback
-		const Registry::Types::TypeRegistry snapshot{getRegistry()};
+		const Registry::Type::TypeRegistry snapshot{getRegistry()};
 
 		for (const auto &name : typeNames)
 		{
@@ -570,7 +571,9 @@ namespace PocketCore::Configuration
 			getRegistry().findIndexByTypeID(typeValue).value(),
 		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
 
-		getRegistry().setEntry(arrayIndex, TypeEntry{.mName = newName, .mTypeID = typeValue}); // LCOV_EXCL_BR
+		TypeMeta renamedEntry{getRegistry().getEntry(arrayIndex)};
+		renamedEntry.mName = newName;
+		getRegistry().setEntry(arrayIndex, renamedEntry); // LCOV_EXCL_BR
 
 		return {};
 	}
@@ -625,7 +628,7 @@ namespace PocketCore::Configuration
 			// those
 			// branches from ever being hit
 
-			getRegistry().setEntry(row, TypeEntry{});
+			getRegistry().setEntry(row, TypeMeta{});
 			getRegistry().setTypeChartRow(row, {});
 
 			// LCOV_EXCL_BR_STOP
@@ -651,7 +654,7 @@ namespace PocketCore::Configuration
 		// branches from ever being hit
 
 		// Set data to default
-		getRegistry().setEntry(arrayIndex, TypeEntry{});
+		getRegistry().setEntry(arrayIndex, TypeMeta{});
 		getRegistry().setTypeChartRow(arrayIndex, {});
 
 		// LCOV_EXCL_BR_STOP

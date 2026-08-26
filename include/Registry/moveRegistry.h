@@ -42,8 +42,8 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Registry::FixedMetadataRegistry;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
 
 	/*! @class MoveRegistry Registry/moveRegistry.h
 		@brief Stores built-in and user-defined move metadata in fixed-capacity storage.

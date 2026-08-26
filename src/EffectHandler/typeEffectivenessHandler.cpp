@@ -23,9 +23,9 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Types::getEffectivenessValue;
-	using PocketCore::Types::NO_TYPE_ID;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::getEffectivenessValue;
+	using PocketCore::Type::NO_TYPE_ID;
+	using PocketCore::Type::TypeID;
 
 	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const
 	{
@@ -69,11 +69,11 @@ namespace PocketCore::Effect
 				continue;
 			}
 
-			const Types::TypeEffectiveness effectiveness{
+			const Type::TypeEffectiveness effectiveness{
 				provider.typeRegistry->getTypeChartCell(attackerIndex.value(), defenderIndex.value()),
 			};
 
-			if (effectiveness == Types::TypeEffectiveness::NOT_DEFINED)
+			if (effectiveness == Type::TypeEffectiveness::NOT_DEFINED)
 			{
 				continue;
 			}

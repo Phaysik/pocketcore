@@ -40,8 +40,8 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::FixedMetadataRegistry;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
 
 	/*! @class PokemonRegistry Registry/pokemonRegistry.h
 		@brief Stores built-in and user-defined pokemon metadata in fixed-capacity storage.

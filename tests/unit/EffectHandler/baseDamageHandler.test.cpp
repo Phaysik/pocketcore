@@ -33,7 +33,7 @@ using PocketCore::Effect::Side;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
-using PocketCore::Types::NO_TYPE_ID;
+using PocketCore::Type::NO_TYPE_ID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace))
 

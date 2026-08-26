@@ -23,8 +23,8 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Terrain::BuiltinTerrainID;
 	using PocketCore::Terrain::toTerrainID;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
 
 	void TerrainHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
 	{

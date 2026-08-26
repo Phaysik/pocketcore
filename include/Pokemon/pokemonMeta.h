@@ -32,7 +32,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Move::MoveID;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::TypeID;
 
 	/*! @struct PokemonMeta Pokemon/pokemonMeta.h
 		@brief Stores one pokemon's stable ID, display name, and owned trigger definitions.

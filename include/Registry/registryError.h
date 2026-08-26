@@ -63,8 +63,8 @@ namespace PocketCore::Registry
 	*/
 	enum class UnspecifiedMatchup : ub
 	{
-		Neutral,	/*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::E (neutral / 1x). */
-		NotDefined, /*!< Fill unspecified matchups with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. */
+		Neutral,	/*!< Fill unspecified matchups with @ref PocketCore::Type::TypeEffectiveness::E (neutral / 1x). */
+		NotDefined, /*!< Fill unspecified matchups with @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED. */
 	};
 
 	/*! @struct RegistryErrorInfo Configuration/constants.h

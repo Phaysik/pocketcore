@@ -26,11 +26,11 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
-	using PocketCore::Registry::Types::TypeEntry;
-	using PocketCore::Registry::Types::TypeRegistry;
+	using PocketCore::Registry::Type::TypeMeta;
+	using PocketCore::Registry::Type::TypeRegistry;
 	using PocketCore::Registry::UnspecifiedMatchup;
-	using PocketCore::Types::TypeEffectiveness;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::TypeEffectiveness;
+	using PocketCore::Type::TypeID;
 
 	namespace Detail
 	{
@@ -94,11 +94,11 @@ namespace PocketCore::Configuration
 		@version 0.4.1
 	*/
 	class TypeRegistryConfiguration
-		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID,
+		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
 													 Detail::TypeRegistryConfigurationPolicy>
 	{
 		private:
-			using Base = FixedMetadataRegistryConfiguration<TypeRegistry, TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID,
+			using Base = FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
 															Detail::TypeRegistryConfigurationPolicy>;
 
 		public:
@@ -125,7 +125,7 @@ namespace PocketCore::Configuration
 			   type chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@return The @ref PocketCore::Types::TypeEffectiveness value on success, or @ref RegistryErrorInfo if either type is not
+				@return The @ref PocketCore::Type::TypeEffectiveness value on success, or @ref RegistryErrorInfo if either type is not
 			   found.
 				@since 0.1.0
 				@version 0.5.1
@@ -136,7 +136,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns the full offensive matchup row for a type identified by display name.
 				@details Resolves the attacker name to its internal array index and returns a copy of the entire effectiveness row.
 				@param[in] attackerName The display name of the attacking type.
-				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness row on success, or @ref RegistryErrorInfo if the type
+				@return A copy of the full @ref PocketCore::Type::TypeEffectiveness row on success, or @ref RegistryErrorInfo if the type
 			   is not found.
 				@since 0.1.0
 				@version 0.5.1
@@ -147,7 +147,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns the full defensive matchup column for a type identified by display name.
 				@details Resolves the defender name to its internal array index and reads every attacker's effectiveness against it.
 				@param[in] defenderName The display name of the defending type.
-				@return A copy of the full @ref PocketCore::Types::TypeEffectiveness column on success, or @ref RegistryErrorInfo if the
+				@return A copy of the full @ref PocketCore::Type::TypeEffectiveness column on success, or @ref RegistryErrorInfo if the
 			   type is not found.
 				@since 0.1.0
 				@version 0.5.1
@@ -178,11 +178,11 @@ namespace PocketCore::Configuration
 			}
 
 			/*! @brief Returns a read-only span over all currently registered type entries.
-				@return A span of @ref TypeEntry covering all valid registered entries.
+				@return A span of @ref TypeMeta covering all valid registered entries.
 				@since 0.1.0
 				@version 0.5.1
 			*/
-			ATTR_NODISCARD constexpr const std::span<const TypeEntry> getRegisteredTypes() const
+			ATTR_NODISCARD constexpr const std::span<const TypeMeta> getRegisteredTypes() const
 			{
 				return getRegisteredEntries();
 			}
@@ -203,7 +203,7 @@ namespace PocketCore::Configuration
 				@details Looks up both type names, resolves their array indices, and writes the new effectiveness value into the chart.
 				@param[in] attackerName The display name of the attacking type.
 				@param[in] defenderName The display name of the defending type.
-				@param[in] value The @ref PocketCore::Types::TypeEffectiveness value to assign.
+				@param[in] value The @ref PocketCore::Type::TypeEffectiveness value to assign.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if either type is not found, or void on success.
 				@since 0.1.0
 				@version 0.5.1
@@ -215,10 +215,10 @@ namespace PocketCore::Configuration
 			/*! @brief Replaces the entire offensive matchup row for a type identified by name.
 				@details Looks up the attacker by name, resolves its array index, and overwrites every column in that row. The caller only
 			   needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED.
 				@pre @p newRow.size() <= @ref MAX_TYPES.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
-				@param[in] newRow A span of @ref PocketCore::Types::TypeEffectiveness values for the new offensive matchup row.
+				@param[in] newRow A span of @ref PocketCore::Type::TypeEffectiveness values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 				@since 0.1.0
@@ -229,7 +229,7 @@ namespace PocketCore::Configuration
 
 			/*! @brief Replaces the entire offensive matchup row for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry. Types not mentioned default
-			   to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   to @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
 				@param[in] attackerName The display name of the attacking type whose row will be replaced.
 				@param[in] newRow A span of @ref MatchupPair values for the new offensive matchup row.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the attacker or any referenced type is not
@@ -243,10 +243,10 @@ namespace PocketCore::Configuration
 			/*! @brief Replaces the entire defensive matchup column for a type identified by name.
 				@details Looks up the defender by name, resolves its array index, and overwrites every row's cell in that column. The caller
 			   only needs to provide entries for the currently registered types. Any indices beyond the span's size are set to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED.
 				@pre @p newCol.size() <= @ref MAX_TYPES.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
-				@param[in] newCol A span of @ref PocketCore::Types::TypeEffectiveness values for the new defensive matchup column.
+				@param[in] newCol A span of @ref PocketCore::Type::TypeEffectiveness values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 				@since 0.1.0
@@ -257,7 +257,7 @@ namespace PocketCore::Configuration
 
 			/*! @brief Replaces the entire defensive matchup column for a type using name-keyed pairs.
 				@details Resolves each @ref MatchupPair by looking up the referenced attacker type name in the registry. Types not mentioned
-			   default to @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
+			   default to @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED. This allows the caller to specify matchups in any order.
 				@param[in] defenderName The display name of the defending type whose column will be replaced.
 				@param[in] newCol A span of @ref MatchupPair values for the new defensive matchup column.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the defender or any referenced type is not
@@ -275,8 +275,8 @@ namespace PocketCore::Configuration
 			   This allows the caller to specify matchups in any order without knowing the internal registration sequence. The @p
 			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::NotDefined
 			   fails the call,
-			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Types::TypeEffectiveness::E, and
-			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Types::TypeEffectiveness::NOT_DEFINED.
+			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Type::TypeEffectiveness::E, and
+			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED.
 				@param[in] definition A @ref TypeDefinition struct containing the display name and matchup pair spans for the new type.
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
@@ -309,12 +309,12 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const std::string_view &typeName);
 
 			/*! @brief Removes a type from the registry by its enum value.
-				@param[in] type The built-in @ref PocketCore::Types::Types enum value to remove.
+				@param[in] type The built-in @ref PocketCore::Type::Type enum value to remove.
 				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
 				@since 0.1.0
 				@version 0.5.1
 			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Types::BuiltInTypeID type);
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Type::BuiltInTypeID type);
 
 			/*! @brief Removes a type from the registry by its stable type ID.
 				@details Useful for removing custom types using the ID returned by @ref addType.
@@ -348,7 +348,7 @@ namespace PocketCore::Configuration
 
 			/*! @brief Resets all matchup data for a type identified by display name.
 				@details Clears the type's entire offensive row and defensive column to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
 			   and array position are preserved.
 				@param[in] typeName The display name of the type whose matchups will be cleared.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
@@ -359,7 +359,7 @@ namespace PocketCore::Configuration
 
 			/*! @brief Resets all matchup data for a type identified by its stable type ID.
 				@details Clears the type's entire offensive row and defensive column to @ref
-			   PocketCore::Types::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
 			   and array position are preserved.
 				@param[in] typeID The stable type ID of the type whose matchups will be cleared.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.

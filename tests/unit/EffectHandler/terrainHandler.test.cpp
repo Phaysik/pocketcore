@@ -38,10 +38,10 @@ using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::toTerrainID;
-using PocketCore::Types::BuiltInTypeID;
-using PocketCore::Types::NO_TYPE_ID;
-using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeID;
+using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::NO_TYPE_ID;
+using PocketCore::Type::toTypeID;
+using PocketCore::Type::TypeID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
 

@@ -19,17 +19,18 @@
 #include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
+#include "Types/typeMeta.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Core::us;
-using PocketCore::Registry::Types::TypeEntry;
-using PocketCore::Registry::Types::TypeRegistry;
-using PocketCore::Types::BuiltInTypeID;
-using PocketCore::Types::toTypeID;
-using PocketCore::Types::TypeEffectiveness;
-using PocketCore::Types::TypeID;
+using PocketCore::Registry::Type::TypeMeta;
+using PocketCore::Registry::Type::TypeRegistry;
+using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::toTypeID;
+using PocketCore::Type::TypeEffectiveness;
+using PocketCore::Type::TypeID;
 
 using enum TypeEffectiveness;
 
@@ -90,14 +91,14 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("the first entry is Normal")
 		{
-			TypeEntry firstEntry{registry.getEntry(0)};
+			TypeMeta firstEntry{registry.getEntry(0)};
 			CHECK((firstEntry.mTypeID == toTypeID(BuiltInTypeID::Normal)));
 			CHECK((firstEntry.mName == "Normal"));
 		}
 
 		THEN("the last builtin entry is Stellar")
 		{
-			TypeEntry lastEntry{registry.getEntry(18)};
+			TypeMeta lastEntry{registry.getEntry(18)};
 			CHECK((lastEntry.mTypeID == toTypeID(BuiltInTypeID::Stellar)));
 			CHECK((lastEntry.mName == "Stellar"));
 		}
@@ -195,7 +196,7 @@ SCENARIO("TypeRegistry")
 		THEN("lookups work when the registry is at maximum capacity")
 		{
 			TypeID finalIdentifier{registry.getNextTypeID()};
-			registry.setEntry(19, TypeEntry{.mName = "Custom", .mTypeID = finalIdentifier});
+			registry.setEntry(19, TypeMeta{.mName = "Custom", .mTypeID = finalIdentifier});
 			registry.incrementAmountRegistered();
 
 			auto identifier{registry.getTypeID("Custom")};
@@ -296,13 +297,13 @@ SCENARIO("TypeRegistry")
 
 		THEN("registered types span has size 19")
 		{
-			std::span<const TypeEntry> registeredTypes{registry.getRegisteredTypes()};
+			std::span<const TypeMeta> registeredTypes{registry.getRegisteredTypes()};
 			CHECK((registeredTypes.size() == 19U));
 		}
 
 		THEN("registered types first entry is Normal")
 		{
-			std::span<const TypeEntry> registeredTypes{registry.getRegisteredTypes()};
+			std::span<const TypeMeta> registeredTypes{registry.getRegisteredTypes()};
 			REQUIRE_FALSE(registeredTypes.empty());
 
 			CHECK((registeredTypes.front().mName == "Normal"));
@@ -310,7 +311,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("registered types last entry is Stellar")
 		{
-			std::span<const TypeEntry> registeredTypes{registry.getRegisteredTypes()};
+			std::span<const TypeMeta> registeredTypes{registry.getRegisteredTypes()};
 			REQUIRE_FALSE(registeredTypes.empty());
 
 			CHECK((registeredTypes.back().mName == "Stellar"));
@@ -322,17 +323,17 @@ SCENARIO("TypeRegistry")
 
 		THEN("setting an entry updates that entry")
 		{
-			TypeEntry replacementEntry{.mName = "Custom", .mTypeID = TypeID{99}};
+			TypeMeta replacementEntry{.mName = "Custom", .mTypeID = TypeID{99}};
 			registry.setEntry(0, replacementEntry);
 
-			TypeEntry updatedEntry{registry.getEntry(0)};
+			TypeMeta updatedEntry{registry.getEntry(0)};
 			CHECK((updatedEntry.mTypeID == TypeID{99}));
 			CHECK((updatedEntry.mName == "Custom"));
 		}
 
 		THEN("setting an entry updates name lookups")
 		{
-			TypeEntry replacementEntry{.mName = "Cosmic", .mTypeID = TypeID{50}};
+			TypeMeta replacementEntry{.mName = "Cosmic", .mTypeID = TypeID{50}};
 			registry.setEntry(0, replacementEntry);
 
 			std::optional<TypeID> cosmicIdentifier{registry.getTypeID("Cosmic")};

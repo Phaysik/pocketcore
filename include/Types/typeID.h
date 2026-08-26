@@ -14,7 +14,7 @@
 #include "Core/typedefs.h"
 #include "ID/idInterface.h"
 
-namespace PocketCore::Types
+namespace PocketCore::Type
 {
 	using PocketCore::Core::ub;
 
@@ -33,6 +33,6 @@ namespace PocketCore::Types
 
 	/*! @brief The identifier used for an unassigned Pokemon type slot. */
 	inline constexpr TypeID NO_TYPE_ID{};
-} // namespace PocketCore::Types
+} // namespace PocketCore::Type
 
 #endif

@@ -35,7 +35,7 @@ namespace PocketCore::Move
 	using PocketCore::Core::us;
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::SuppressionRule;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::TypeID;
 
 	struct MoveEffectTrigger
 	{

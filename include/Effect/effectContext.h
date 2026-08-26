@@ -50,7 +50,7 @@ namespace PocketCore::Effect
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 	using PocketCore::Status::StatusID;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::TypeID;
 
 	/*! @enum Side
 		@showenumvalues

@@ -36,9 +36,9 @@ namespace PocketCore::Effect
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::toItemID;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Types::BuiltInTypeID;
-	using PocketCore::Types::toTypeID;
-	using PocketCore::Types::TypeID;
+	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::toTypeID;
+	using PocketCore::Type::TypeID;
 
 	ATTR_NODISCARD static inline std::vector<BattleSlot> &getTeam(BattleState &state, Side side)
 	{
