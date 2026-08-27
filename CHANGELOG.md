@@ -23,8 +23,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the next multiplier ID
   - Find the internal array index by stable multiplier ID
   - If the registry has an multiplier:
-      - By user readable name
-      - By stable multiplier ID
+    - By user readable name
+    - By stable multiplier ID
   - Set the next multiplier ID
   - Increment the next multiplier ID
 - Added in both the source and header files to configure the multiplier registry.
@@ -72,7 +72,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Reordered effect type IDs in _EffectTypeID_
 - Update the documentation of _Status/constants.h_
 - Update the _criticalHitHandler.cpp_ file to use the new built in multiplier ID dictionary
-- Update the _moveRegistry.test.cpp_ check that _Pound_ from 9 effects to 11. 
+- Update the _moveRegistry.test.cpp_ check that _Pound_ from 9 effects to 11.
 
 ### Removed
 
@@ -95,8 +95,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the next terrain ID
   - Find the internal array index by stable terrain ID
   - If the registry has an terrain:
-      - By user readable name
-      - By stable terrain ID
+    - By user readable name
+    - By stable terrain ID
   - Set the next terrain ID
   - Increment the next terrain ID
 - Added in the header files to configure the terrain registry.
@@ -108,17 +108,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
     - Get a non-owning span of all the terrains
     - Get the amount of terrains registered
     - If the registry has a terrain:
-      - By user readable name
-      - By stable Terrain ID
+    - By user readable name
+    - By stable Terrain ID
     - Add a terrain
     - Add in a list of terrains
     - Rename a terrain
     - Update a terrain:
-      - By user readable name
-      - By stable Terrain ID
+    - By user readable name
+    - By stable Terrain ID
     - Remove a terrain:
-      - By user readable name
-      - By stable Terrain ID
+    - By user readable name
+    - By stable Terrain ID
 - Added a file that holds the weather registry.
   - The actual registry class holds a constructor that initializes all the builtin weathers:
   - Get the weather metadata
@@ -128,8 +128,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the next weather ID
   - Find the internal array index by stable weather ID
   - If the registry has an weather:
-      - By user readable name
-      - By stable weather ID
+    - By user readable name
+    - By stable weather ID
   - Set the next weather ID
   - Increment the next weather ID
 - Added in the header files to configure the weather registry.
@@ -141,17 +141,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
     - Get a non-owning span of all the weathers
     - Get the amount of weathers registered
     - If the registry has a weather:
-      - By user readable name
-      - By stable Weather ID
+    - By user readable name
+    - By stable Weather ID
     - Add a weather
     - Add in a list of weathers
     - Rename a weather
     - Update a weather:
-      - By user readable name
-      - By stable Weather ID
+    - By user readable name
+    - By stable Weather ID
     - Remove a weather:
-      - By user readable name
-      - By stable Weather ID
+    - By user readable name
+    - By stable Weather ID
 - Added a new file to hold the built-in Terrain IDs and a function to convert built-in Terrain IDs to the stable Terrain ID
 - Added a _Terrain/constants.h_ file that holds the user readable names for each Terrain ID.
 - Added a metadata file for Pokemon terrains that holds the relevant:
@@ -212,7 +212,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Fixed
 
-- Fix the _moveRegistry.test.cpp_ check that _Pound_ had 10 effects instead of 9. 
+- Fix the _moveRegistry.test.cpp_ check that _Pound_ had 10 effects instead of 9.
 
 ## [0.7.2] - 2026-07-29
 
@@ -239,7 +239,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 ### Changed
 
 - Changed the variable type of _StatStages_ from unsigned short to signed byte.
-- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all call sites to reflect the new order
 - Reordered the _EffectTypeID_ IDs in:
   - _effectType.h_
   - _moveMeta.cpp_
@@ -314,8 +314,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Changed
 
-- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _EffectResult_ for smaller total struct byte size and updated all call sites to reflect the new order
 
 ## [0.6.3] - 2026-07-28
 
@@ -420,9 +420,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - _itemTargetsAndTriggers.h_
   - _moveRegistry.h_
 - Change the _Stench_ trigger to be _OnDamageCalc_
-  - In _abiltyRegistry.h_
-  - In _abiltyRegistry.test.cpp_
-  
+  - In _abilityRegistry.h_
+  - In _abilityRegistry.test.cpp_
+
 ### Removed
 
 - Removed the _AbilityDefinition_ struct
@@ -456,8 +456,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the next move ID
   - Find the internal array index by stable move ID
   - If the registry has an move:
-      - By user readable name
-      - By stable move ID
+    - By user readable name
+    - By stable move ID
   - Set the next move ID
   - Increment the next move ID
 
@@ -501,14 +501,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Update the function definition of _errorKindToString_ to use _ATTR\_NODISCARD_ from _attributeMacros.h_
 - Update the function definition of _toTypeID_ to use _ATTR\_NODISCARD_ from _attributeMacros.h_
-- Reordered the members of _AbilityMeta_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _AbilityEffectTrigger_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _RegistryError_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _effectContext_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _ItemMeta_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _ItemEffectTrigger_ for smaller total struct byte size and updated all callsites to reflect the new order
-- Reordered the members of _Pokemon_ for smaller total struct byte size and updated all callsites to reflect the new order
+- Reordered the members of _AbilityMeta_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _BattleSlot_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _AbilityEffectTrigger_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _RegistryError_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _effectContext_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _ItemMeta_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _ItemEffectTrigger_ for smaller total struct byte size and updated all call sites to reflect the new order
+- Reordered the members of _Pokemon_ for smaller total struct byte size and updated all call sites to reflect the new order
 - Extract _PocketCore::Core::ub_ to a using declaration as its used more than once in _AbilityTargetsAndTriggers.h_
 - Extract _PocketCore::Core::ub_ to a using declaration as its used more than once in _builtinAbilityID.h_
 - Updated the documentation for _AbilityMeta_
@@ -917,7 +917,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Add in an array of types to the Pokemon class.
   - Add in a types array getter/setter and individual type getter/setter.
 - Added _typeID.h_:
-  - Holds a class that contains the stable type ID 
+  - Holds a class that contains the stable type ID
   - A constant variable to specify no type ID
   - Has a function to convert one of the type enum values to the stable Ability ID
 - Added a test suite for _abilityRegistryConfiguration.h_
@@ -952,8 +952,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - In _effectContext.h_, change the type of _mMoveTypeID_ from unsigned byte to _TypeID_
 - Update _pokemon.h_:
   - The constructors now take in an array of type IDs.
-  - Change all move count occurences with _MAX\_MOVES\_PER\_POKEMON_
-- Change all move count occurences with _MAX\_MOVES\_PER\_POKEMON_ in _pokemon.cpp_
+  - Change all move count occurrences with _MAX\_MOVES\_PER\_POKEMON_
+- Change all move count occurrences with _MAX\_MOVES\_PER\_POKEMON_ in _pokemon.cpp_
 - Update _typeRegistryConfiguration.test.cpp_ to use the new stable type ID
 - Update _typeRegistry.test.cpp_ to use the new stable type ID
 
@@ -995,7 +995,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added a stable ID for Pokemon items
 - Added a stable ID for Pokemon abilities
 - Added a stable ID for Pokemon statuses
-- Added abilitiy triggers, targets, and a wrapper for holding both.
+- Added ability triggers, targets, and a wrapper for holding both.
 - Added a constants file for Pokemon abilities that holds the user defined names of the abilities.
 - Added a metadata file for Pokemon abilities that holds the relevant:
   - User defined name, and a list of triggers with their effects
@@ -1022,7 +1022,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
     - The counters for toxic, sleep, and protection.
     - The current hp of the pokemon.
     - If it has any speed boost.
-    - A struct of stat stages that apply to all 6 stats. 
+    - A struct of stat stages that apply to all 6 stats.
   - It holds a _BattleState_ that contains bother sides pokemon and their _BattleSlots_
     - It also holds the spikes, toxic spikes, and stealth rock state per side.
     - It holds if the battle has been started
@@ -1118,7 +1118,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Added _-Winline_ from _GCC\_WARNINGS_ in the Makefile
 - Add the attribute _ATTR\_NOINLINE_ to _attributeMacros.h_
-- Added reasoning on the _timer.h_ ctors and dtor deletors
+- Added reasoning on the _timer.h_ ctors and dtor deletros
 - Added reasoning on the _logger.h_ ctors and dtor deletors
 
 ### Changed
@@ -1223,7 +1223,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Create a _local/cmake/pkgconfig_ folder if it does not exist in the install _spdlog_ from cache step in both:
   - _testing.yml_
-  - _codeql-anaylsis.yml_
+  - _codeql-analysis.yml_
 
 ### Changed
 
@@ -1235,13 +1235,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Added _catch2_ to the install testing framework step in both:
   - _testing.yml_
-  - _codeql-anaylsis.yml_
-  
+  - _codeql-analysis.yml_
+
 ### Changed
 
 - Changed the name of the test install step from _Install Google Mock_ to _Install Testing Frameworks_ in both:
   - _testing.yml_
-  - _codeql-anaylsis.yml_
+  - _codeql-analysis.yml_
 
 ## [0.2.3] - 2026-04-29
 
@@ -1255,13 +1255,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Create a _local/lib/pkgconfig_ folder if it does not exist in the install _spdlog_ from cache step in both:
   - _testing.yml_
-  - _codeql-anaylsis.yml_
+  - _codeql-analysis.yml_
 
 ## [0.2.1] - 2026-04-29
 
 ### Changed
 
-- In the _testing.yml_ and _codeql-anaylsis.yml_:
+- In the _testing.yml_ and _codeql-analysis.yml_:
   - Updated where spdlog caches gets installed to
   - Now copies folders from the gcc cache install into local
 
