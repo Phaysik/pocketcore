@@ -1,5 +1,5 @@
 /*! @file overflowProtection.test.cpp
-	@brief Google Test unit tests for the OverflowProtection helpers.
+	@brief Catch2 unit tests for the OverflowProtection helpers.
 	@date 07/26/2026
 	@since 0.1.0
 	@version 0.3.0

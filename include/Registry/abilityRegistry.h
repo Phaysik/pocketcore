@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
-	@date 07/28/2026
+	@date 08/03/2026
 	@since 0.4.0
-	@version 0.6.2
+	@version 0.8.7
 	@author Matthew Moore
 */
 

@@ -1,8 +1,8 @@
 /*! @file multiplierRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined multipliers.
-	@date 07/30/2026
+	@date 08/03/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.8.7
 	@author Matthew Moore
 */
 
@@ -41,9 +41,9 @@ namespace PocketCore::Registry::Multiplier
 	   may append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MULTIPLIERS.
-		@date 07/30/2026
+		@date 08/03/2026
 		@since 0.8.1
-		@version 0.8.1
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	class MultiplierRegistry : private FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
@@ -55,7 +55,7 @@ namespace PocketCore::Registry::Multiplier
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.8.3
 			 */
 			ATTR_NOINLINE explicit constexpr MultiplierRegistry() : Base{toMultiplierID(BuiltinMultiplierID::FinalMultiplier).getValue()}
 			{

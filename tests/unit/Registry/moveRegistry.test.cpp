@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the MoveRegistry.
 	@date 07/30/2026
 	@since 0.6.0
-	@version 0.8.1
+	@version 0.8.2
 	@author Matthew Moore
 */
 

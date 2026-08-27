@@ -1,3 +1,11 @@
+/*! @file fixedMetadataRegistry.benchmark.cpp
+	@brief Contains benchmarks for the fixed metadata registry
+	@date 08/03/2026
+	@since 0.8.7
+	@version 0.8.7
+	@author Matthew Moore
+*/
+
 #include <array>
 
 #include "Configuration/constants.h"

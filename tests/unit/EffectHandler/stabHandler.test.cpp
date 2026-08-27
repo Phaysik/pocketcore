@@ -1,8 +1,8 @@
 /*! @file stabHandler.test.cpp
 	@brief C++ file for running tests for the StabHandler.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 08/03/2026
+	@since 0.8.7
+	@version 0.9.0
 	@author Matthew Moore
 */
 

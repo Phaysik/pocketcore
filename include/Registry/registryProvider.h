@@ -1,8 +1,8 @@
 /*! @file registryProvider.h
 	@brief Provides a registry provider that holds references to all registry objects.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 07/30/2026
+	@since 0.8.2
+	@version 0.8.2
 	@author Matthew Moore
 */
 
@@ -29,9 +29,9 @@ namespace PocketCore::Registry
 		@details Provides a lightweight dependency bundle passed into systems that require cross-registry lookup access.
 		All pointers are non-owning and must refer to registry instances whose lifetime exceeds the provider usage.
 		@warning Dereferencing any null member pointer is undefined behavior.
-		@date 08/03/2026
-		@version x.x.x
-		@since x.x.x
+		@date 07/30/2026
+		@since 0.8.2
+		@version 0.8.2
 		@author Matthew Moore
 	*/
 	struct RegistryProvider

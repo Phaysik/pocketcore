@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring item metadata.
-	@date 07/28/2026
+	@date 08/03/2026
 	@since 0.5.0
-	@version 0.6.0
+	@version 0.9.0
 	@author Matthew Moore
 */
 
@@ -66,9 +66,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal item registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 07/27/2026
+		@date 08/03/2026
 		@since 0.5.0
-		@version 0.6.0
+		@version 0.9.0
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
@@ -93,7 +93,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const ItemRegistry &getRuntimeRegistry() const noexcept
 			{
-				return Base::getRegistry();
+				return getRegistry();
 			}
 
 			/*! @brief Looks up complete metadata by stable item ID.

@@ -2,7 +2,7 @@
 	@brief Contains the targets effect handler
 	@date 07/30/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.8.2
 	@author Matthew Moore
 */
 
@@ -30,7 +30,7 @@ namespace PocketCore::Effect
 		@note Missing move metadata leaves the effect context unchanged. The battle state is not inspected or modified.
 		@date 07/30/2026
 		@since 0.8.1
-		@version 0.8.1
+		@version 0.8.2
 		@author Matthew Moore
 	*/
 	class TargetsHandler : public IEffectHandler
@@ -44,7 +44,7 @@ namespace PocketCore::Effect
 				@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move
 			   metadata leaves @p context unchanged.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.8.2
 			*/
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};

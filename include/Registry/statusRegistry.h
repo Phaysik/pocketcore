@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 07/29/2026
+	@date 08/03/2026
 	@since 0.6.4
-	@version 0.6.4
+	@version 0.8.7
 	@author Matthew Moore
 */
 
@@ -40,9 +40,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 07/29/2026
+		@date 08/03/2026
 		@since 0.6.4
-		@version 0.6.4
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>

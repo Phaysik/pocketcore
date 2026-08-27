@@ -68,7 +68,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const PokemonRegistry &getRuntimeRegistry() const noexcept
 			{
-				return Base::getRegistry();
+				return getRegistry();
 			}
 
 			/*! @brief Looks up complete metadata by stable pokemon ID.

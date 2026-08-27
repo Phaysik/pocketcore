@@ -1,8 +1,8 @@
 /*! @file random.test.cpp
 	@brief Catch2 unit tests for `Utility::Random` utilities.
-	@date --/--/----
-	@version 0.0.1
-	@since 0.0.1
+	@date 08/03/2026
+	@version 0.8.7
+	@since 0.9.0
 	@author Matthew Moore
 */
 

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 07/27/2026
+	@date 08/03/2026
 	@since 0.5.0
-	@version 0.5.1
+	@version 0.9.0
 	@author Matthew Moore
 */
 
@@ -53,9 +53,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 07/27/2026
+		@date 08/03/2026
 		@since 0.5.0
-		@version 0.5.1
+		@version 0.9.0
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -70,6 +70,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns mutable access to the owned concrete registry.
 				@return A mutable reference to the underlying registry instance.
+				@since 0.9.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr Registry &getRegistry() noexcept
 			{
@@ -78,6 +80,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns read-only access to the owned concrete registry.
 				@return A const reference to the underlying registry instance.
+				@since 0.9.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr const Registry &getRegistry() const noexcept
 			{
@@ -207,7 +211,7 @@ namespace PocketCore::Configuration
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.8.7
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
@@ -257,7 +261,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.8.7
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -297,7 +301,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.8.7
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -482,7 +486,7 @@ namespace PocketCore::Configuration
 				@post The registry removes the entry and compacts any remaining entries as defined by @ref Registry::eraseEntry.
 				@note The underlying registry remains responsible for maintaining its entry count and index consistency.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.8.7
 			*/
 			void removeEntry(const us index)
 			{

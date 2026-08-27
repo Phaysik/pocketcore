@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 07/30/2026
+	@date 07/31/2026
 	@since 0.3.0
-	@version 0.8.1
+	@version 0.8.4
 	@author Matthew Moore
 */
 

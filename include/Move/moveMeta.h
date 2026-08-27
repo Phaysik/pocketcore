@@ -1,8 +1,8 @@
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 07/30/2026
+	@date 08/03/2026
 	@since 0.5.2
-	@version 0.8.1
+	@version 0.8.7
 	@author Matthew Moore
 */
 
@@ -84,7 +84,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable base attack effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.8.1
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackEffects() noexcept;
@@ -94,7 +94,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable attack-with-recoil effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.5.3
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithRecoil() noexcept;
@@ -104,7 +104,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable attack-with-status effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.5.3
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithStatus() noexcept;
@@ -114,7 +114,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable attack-with-flinch effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.5.3
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> baseAttackWithFlinch() noexcept;
@@ -123,7 +123,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable protection effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.5.3
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> protectEffects() noexcept;
@@ -132,7 +132,7 @@ namespace PocketCore::Move
 		@return A non-owning span over the immutable battlefield effects. The span remains valid for the lifetime of the program.
 		@note No-throw. The function performs no allocation and references static storage.
 		@since 0.5.3
-		@version 0.5.3
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	ATTR_CONST std::span<const EffectID> fieldEffectEffects() noexcept;

@@ -1,8 +1,8 @@
 /*! @file input.h
 	@brief Contains the function declarations for getting user input.
-	@date 07/26/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.8.7
 	@author Matthew Moore
 */
 
@@ -29,7 +29,7 @@ namespace PocketCore::Utility
 	/*! @class Input input.h "include/input.h"
 		@brief Will try and extract valid user input and clean up the input buffer as needed
 		@since 0.1.0
-		@version 0.3.0
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	class Input
@@ -179,7 +179,7 @@ namespace PocketCore::Utility
 			   false
 				@retval T The value that was extracted
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.8.7
 				@author Matthew Moore
 			*/
 			template <typename T>
@@ -265,7 +265,7 @@ namespace PocketCore::Utility
 				@param[in] input The input stream to use.
 				@retval bool If the extraction failed
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.8.7
 				@author Matthew Moore
 			*/
 			static bool clearFailedExtraction(std::istream &input)

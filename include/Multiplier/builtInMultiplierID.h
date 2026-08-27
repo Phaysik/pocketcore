@@ -1,8 +1,8 @@
 /*! @file builtinMultiplierID.h
 	@brief Defines identifiers for multipliers compiled into PocketCore.
-	@date 07/30/2026
+	@date 07/31/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.8.3
 	@author Matthew Moore
 */
 
@@ -21,9 +21,9 @@ namespace PocketCore::Multiplier
 		@details This closed enum is only a catalog of built-in multipliers. Runtime state and user-facing APIs use the open @ref
 	   MultiplierID type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/30/2026
+		@date 07/31/2026
 		@since 0.8.1
-		@version 0.8.1
+		@version 0.8.3
 		@author Matthew Moore
 	*/
 	enum class BuiltinMultiplierID : PocketCore::Core::ub

@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 07/28/2026
+	@date 08/03/2026
 	@since 0.5.0
-	@version 0.6.0
+	@version 0.9.0
 	@author Matthew Moore
 */
 

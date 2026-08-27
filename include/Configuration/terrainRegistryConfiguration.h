@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring terrain metadata.
-	@date 07/30/2026
+	@date 08/03/2026
 	@since 0.8.0
-	@version 0.8.0
+	@version 0.9.0
 	@author Matthew Moore
 */
 
@@ -46,13 +46,13 @@ namespace PocketCore::Configuration
 			public:
 				/*! @brief The display name of the configuration system. */
 				static constexpr std::string_view configurationName{"TerrainRegistryConfiguration"};
-				
+
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"terrain"};
-				
+
 				/*! @brief The error code returned when a duplicate ability name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateTerrain};
-				
+
 				/*! @brief The error code returned when an ability lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::TerrainNotFound};
 		};
@@ -62,9 +62,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal terrain registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 07/30/2026
+		@date 08/03/2026
 		@since 0.8.0
-		@version 0.8.0
+		@version 0.9.0
 		@author Matthew Moore
 	*/
 	class TerrainRegistryConfiguration
@@ -87,7 +87,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const TerrainRegistry &getRuntimeRegistry() const noexcept
 			{
-				return Base::getRegistry();
+				return getRegistry();
 			}
 
 			/*! @brief Looks up complete metadata by stable terrain ID.
@@ -179,7 +179,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameTerrain(const std::string_view &oldName,
 																				const std::string_view &newName);
@@ -189,7 +189,7 @@ namespace PocketCore::Configuration
 				@param[in] terrainMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the terrain is not registered.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateTerrain(const std::string_view &terrainName,
 																				const TerrainMeta &terrainMeta);
@@ -200,7 +200,7 @@ namespace PocketCore::Configuration
 				@param[in] terrainMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the terrain is not registered.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateTerrain(const TerrainID terrainID, const TerrainMeta &terrainMeta);
 
@@ -208,7 +208,7 @@ namespace PocketCore::Configuration
 				@param[in] terrainName The registered display name.
 				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching terrain exists.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD std::expected<TerrainID, RegistryErrorInfo> removeTerrain(const std::string_view &terrainName);
 

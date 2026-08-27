@@ -67,7 +67,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const NatureRegistry &getRuntimeRegistry() const noexcept
 			{
-				return Base::getRegistry();
+				return getRegistry();
 			}
 
 			/*! @brief Looks up complete metadata by stable nature ID.

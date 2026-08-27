@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 07/30/2026
+	@date 07/31/2026
 	@since 0.3.0
-	@version 0.8.1
+	@version 0.8.4
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 07/29/2026
+		@date 07/31/2026
 		@since 0.3.0
-		@version 0.7.2
+		@version 0.8.4
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -88,7 +88,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.5.1
+				@version 0.8.3
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level,
@@ -120,7 +120,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.5.1
+				@version 0.8.3
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
@@ -396,6 +396,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns the precomputed level damage factor.
 				@return The level damage factor used by damage calculations.
+				@since 0.8.2
+				@version 0.8.2
 			*/
 			ATTR_NODISCARD constexpr us getLevelDamageFactor() const
 			{
@@ -421,7 +423,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the non-owning display-name view.
 				@param[in] name Display-name view whose backing storage must outlive the object.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setName(const std::string_view &name)
 			{
@@ -439,7 +441,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all move identifier slots.
 				@param[in] moveIDs The move identifiers to store.
 				@since 0.3.0
-				@version 0.4.0
+				@version 0.8.4
 			*/
 			constexpr void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
 			{
@@ -451,7 +453,7 @@ namespace PocketCore::Pokemon
 				@param[in] moveID The move identifier to store.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setMove(const ub slotIndex, const MoveID moveID)
 			{
@@ -463,7 +465,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces maximum PP for all move slots.
 				@param[in] maxPP The maximum PP values to store.
 				@since 0.3.0
-				@version 0.4.0
+				@version 0.8.4
 			*/
 			constexpr void setMaxPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP)
 			{
@@ -475,7 +477,7 @@ namespace PocketCore::Pokemon
 				@param[in] maxPP The maximum PP value to store.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setMaxPP(const ub slotIndex, const ub maxPP)
 			{
@@ -487,7 +489,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces current PP for all move slots.
 				@param[in] currentPP The current PP values to store.
 				@since 0.3.0
-				@version 0.4.0
+				@version 0.8.4
 			*/
 			constexpr void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP)
 			{
@@ -499,7 +501,7 @@ namespace PocketCore::Pokemon
 				@param[in] currentPP The current PP value to store.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setCurrentPP(const ub slotIndex, const ub currentPP)
 			{
@@ -510,6 +512,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Replaces all type identifier slots.
 				@param[in] typeIDs The type identifiers to store.
+				@since 0.4.0
+				@version 0.8.4
 			*/
 			constexpr void setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs)
 			{
@@ -544,6 +548,8 @@ namespace PocketCore::Pokemon
 				@param[in] slotIndex Type slot index; must be less than MAX_TYPES_PER_POKEMON.
 				@param[in] typeID The type identifier to store.
 				@pre slotIndex < MAX_TYPES_PER_POKEMON; violation triggers an assertion.
+				@since 0.4.0
+				@version 0.8.4
 			*/
 			constexpr void setType(const ub slotIndex, const TypeID typeID)
 			{
@@ -557,7 +563,7 @@ namespace PocketCore::Pokemon
 				@param[in] abilityID The ability identifier to store.
 				@pre slotIndex < MAX_ABILITIES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setAbility(const ub slotIndex, const AbilityID abilityID)
 			{
@@ -571,7 +577,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemID The item identifier to store.
 				@pre slotIndex < MAX_ITEMS_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setItem(const ub slotIndex, const ItemID itemID)
 			{
@@ -595,7 +601,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the base Attack statistic.
 				@param[in] attack The new Attack value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setAttack(const us attack)
 			{
@@ -605,7 +611,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the base Defense statistic.
 				@param[in] defense The new Defense value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setDefense(const us defense)
 			{
@@ -615,7 +621,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets current health, clamped to maximum health.
 				@param[in] health The requested current health value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setHealth(const us health)
 			{
@@ -634,7 +640,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the base Speed statistic.
 				@param[in] speed The new Speed value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setSpeed(const us speed)
 			{
@@ -644,7 +650,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the base Special Attack statistic.
 				@param[in] spAttack The new Special Attack value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setSpAttack(const us spAttack)
 			{
@@ -654,7 +660,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the base Special Defense statistic.
 				@param[in] spDefense The new Special Defense value.
 				@since 0.3.0
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setSpDefense(const us spDefense)
 			{
@@ -664,7 +670,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets the level and recomputes its damage factor.
 				@param[in] level The new Pokemon level.
 				@since 0.7.2
-				@version 0.3.0
+				@version 0.8.4
 			*/
 			constexpr void setLevel(const us level)
 			{

@@ -2,9 +2,9 @@
 	@brief Catch2 BDD unit tests for the static Logger wrapper.
 	@details Exercises initialization, level get/set, name/file replacement, and all seven logging-level template methods using Catch2's BDD
    syntax. Each test scenario manages temporary files that are cleaned up after the scenario completes.
-	@date 07/26/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.9.0
 	@author Matthew Moore
 */
 

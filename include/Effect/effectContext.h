@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 07/30/2026
+	@date 08/03/2026
 	@version 0.3.0
-	@since 0.8.1
+	@since 0.9.0
 	@author Matthew Moore
 */
 
@@ -75,9 +75,9 @@ namespace PocketCore::Effect
 		@brief Stores damage calculation results and control flags for an effect dispatch.
 		@details The context records the damage amount, recoil ratio, critical-hit and miss state, and whether damage application and
 		 subsequent effect processing should continue.
-		@date 07/26/2026
+		@date 07/31/2026
 		@since 0.3.0
-		@version 0.4.0
+		@version 0.8.6
 		@author Matthew Moore
 	*/
 	struct DamageContext
@@ -106,9 +106,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 07/29/2026
+		@date 08/03/2026
 		@since 0.3.0
-		@since 0.8.1
+		@version 0.9.0
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -120,6 +120,8 @@ namespace PocketCore::Effect
 				@param[in] multID The stable identifier of the multiplier to add or update.
 				@param[in] value The multiplier value to store for subsequent damage calculations.
 				@throws std::out_of_range If an invalid built-in multiplier identifier indexes the built-in position table.
+				@since 0.8.2
+				@version 0.8.7
 			*/
 			void setMultiplier(const MultiplierID multID, const double value);
 
@@ -129,18 +131,24 @@ namespace PocketCore::Effect
 				@param[in] baseDamage The unmodified damage value.
 				@param[in] multiplierRegistry The registry used to resolve multiplier application policies.
 				@return The damage value after all active multipliers have been applied, with a minimum value of 1.
+				@since 0.8.3
+				@version 0.8.7
 			*/
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const;
 
 			/*! @brief Removes all active multipliers and resets built-in multiplier indexes.
 				@post The active multiplier sequence is empty and subsequent multiplier insertion starts with a clean index table.
+				@since 0.8.2
+				@version 0.8.3
 			*/
 			void resetMultipliers();
 
 			/*! @brief Returns active multipliers in application order.
 				@return A read-only view that remains valid until the next multiplier mutation.
+				@since 0.8.7
+				@version 0.9.0
 			*/
-			ATTR_NODISCARD std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept;
+			ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 			/*! @brief The damage calculation state and effect-processing control flags. */
@@ -193,6 +201,7 @@ namespace PocketCore::Effect
 
 			/*! @brief The owned active multipliers in their application order. */
 			std::vector<std::pair<MultiplierID, double>> mActiveMultipliers{};
+
 			/*! @brief Maps built-in multiplier values to their positions in mActiveMultipliers. */
 			std::array<us, BUILTIN_MULTIPLIER_COUNT> mBuiltinMultiplierPositions{};
 	};

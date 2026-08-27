@@ -1,3 +1,11 @@
+/*! @file effectContext.benchmark.cpp
+	@brief Contains benchmarks for the effect context
+	@date 08/03/2026
+	@since 0.8.7
+	@version 0.8.7
+	@author Matthew Moore
+*/
+
 #include "Effect/effectContext.h"
 
 #include <array>

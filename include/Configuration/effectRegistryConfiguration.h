@@ -69,7 +69,7 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD constexpr const EffectRegistry &getRuntimeRegistry() const noexcept
 			{
-				return Base::getRegistry();
+				return getRegistry();
 			}
 
 			/*! @brief Looks up complete metadata by stable effect ID.

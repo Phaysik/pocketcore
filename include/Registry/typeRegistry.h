@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 07/27/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.5.1
+	@version 0.9.0
 	@author Matthew Moore
 */
 
@@ -84,7 +84,7 @@ namespace PocketCore::Registry::Type
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
 		@since 0.1.0
-		@version 0.5.1
+		@version 0.9.0
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -97,7 +97,7 @@ namespace PocketCore::Registry::Type
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.0
 			*/
 			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltInTypeID::FinalType).getValue()}
 			{
@@ -252,7 +252,7 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view &name) const
 			{
@@ -264,7 +264,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The type ID to search for.
 				@return The name wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 				@since 0.1.0
-				@version 0.4.1
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
@@ -274,7 +274,7 @@ namespace PocketCore::Registry::Type
 			/*! @brief Returns the next type ID that will be assigned to a newly registered type.
 				@return The next available stable type ID.
 				@since 0.1.0
-				@version 0.4.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr TypeID getNextTypeID() const noexcept
 			{
@@ -285,7 +285,7 @@ namespace PocketCore::Registry::Type
 				@details The returned span covers the first @ref getAmountRegistered elements of the internal entries array.
 				@return A span of @ref TypeMeta covering all valid registered entries.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const TypeMeta> getRegisteredTypes() const noexcept
 			{
@@ -327,7 +327,7 @@ namespace PocketCore::Registry::Type
 			/*! @brief Sets the next type ID counter.
 				@param[in] nextId The value to assign to the next-type-ID counter.
 				@since 0.1.0
-				@version 0.4.0
+				@version 0.9.0
 			*/
 			constexpr void setNextTypeID(const TypeID nextId) noexcept
 			{
@@ -341,7 +341,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByTypeID(const TypeID typeID) const
 			{
@@ -353,7 +353,7 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to check.
 				@return True if a type with that name exists in the registry, false otherwise.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
 			{
@@ -365,7 +365,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The type ID to check.
 				@return True if a type with that ID exists in the registry, false otherwise.
 				@since 0.1.0
-				@version 0.4.0
+				@version 0.9.0
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
@@ -374,7 +374,7 @@ namespace PocketCore::Registry::Type
 
 			/*! @brief Increments the next type ID counter by one.
 				@since 0.1.0
-				@version 0.2.19
+				@version 0.9.0
 			 */
 			constexpr void incrementNextTypeID() noexcept
 			{

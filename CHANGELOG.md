@@ -4,6 +4,318 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.9.0] - 2026-08-03 (Type Registry with Fixed Metadata Registry Update)
+
+### Added
+
+- Add a mutable and const read-only registry access in _fixedMetadataRegistryConfiguration.h_
+- Add a new teplate variable on _FixedMetadataRegistry_ that holds the _NameMember_
+
+### Changed
+
+- Add _ATTR\_PURE_ to:
+  - _statStageCacheIndex()_
+  - _findIndexByID()_
+  - _StableID_ _findEntryIndexByName()_
+  - _getActiveMultipliers()_
+- Add _ATTR\_NOINLINE_ to:
+  - _eraseEntry()_ 
+  - _string_view_ _findEntryIndexByName()_
+  - _TypeRegistry()_
+  - _span_ _addBuiltin_
+- Update _TypeEntry_ to have a _m_ prefix on member variables and update all call sites to it
+- Update _insertIDIndex_ to get the indexed entries and then use it in the rest of the function instead of _mIDIndex_
+- Update _removeIDIndex_ to get the indexed entries and then use it in the rest of the function instead of _mIDIndex_
+- Update _rebuiltIDIndex_ to get the indexed entries and then use it in the rest of the function instead of _mIDIndex_
+- Update documentation for:
+  - _typeRegistryConfiguration.h_
+  - _typeRegistry.h_
+- Integrate _typeRegistryConfiguration.h_ with _fixedMetadataRegistryConfiguration.h_
+  - _getTypeID()_ calls _getID()_
+  - _getTypeName()_ calls _getName()_
+  - _getRegisteredTypes()_ calls _getRegisteredEntries()_
+  - _getAmountRegistered()_ calls _getAmountRegistered()_
+  - Both overloads of _hasType()_ call _hasEntry()_
+- Integrate _typeRegistry.h_ with _fixedMetadataRegistry.h_
+  - _getEntry()_ calls _getEntry()_
+  - _getTypeID()_ calls _getID()_
+  - _getTypeName()_ calls _getName()_
+  - _getAmountRegistered()_ calls _getAmountRegistered()_
+  - _getNextTypeID()_ calls _getNextID()_
+  - _getRegisteredTypes()_ calls _getRegisteredEntries()_
+  - _setEntry()_ calls _setEntry()_
+  - _setAmountRegistered()_ calls _setAmountRegistered()_
+  - _setNextTypeID()_ calls _setNextID()_
+  - _findIndexByTypeID()_ calls _findIndexByID()_
+  - Both overloads of _hasType()_ call _hasEntry()_
+  - _incrementNextTypeID()_ calls _incrementNextID()_
+  - _incrementAmountRegistered()_ calls _incrementAmountRegistered()_
+  - _decrementAmountRegistered()_ calls _decrementAmountRegistered()_
+  - _addBuiltin()_ calls _addBuiltin()_
+- Update _clearRows()_ to get the registry by _getRegistry()_ instead of using the member variable
+- Update _typeRegistryConfiguration.cpp_ to call _getRegistry()_ instead of using the member variable
+- Run _clang-format_ on:
+  - _fixedMetadataRegistry.h_
+  - _moveRegistry.h_
+  - _multiplierRegistryConfiguration.cpp_
+  - _terrainRegistryConfiguration.cpp_
+  - _multipliersRegistryConfiguration.test.cpp_
+  - _statusRegistryConfiguration.test.cpp_
+  - _terrainRegistryConfiguration.test.cpp_
+  - _weatherRegistryConfiguration.test.cpp_
+  - _accuracyCheckHandler.test.cpp_
+  - _baseDamageHandler.test.cpp_
+- Fix _clang-tidy_ warnings in:
+  - _itemRegistryConfiguration.h_
+  - _effectContext.cpp_
+  - _accuracyCheckHandler.cpp_
+  - _stabHandler.cpp_
+  - _moveMeta.cpp_
+  - _abilityRegistryConfiguration.test.cpp_
+  - _itemRegistryConfiguration.test.cpp_
+  - _moveRegistryConfiguration.test.cpp_
+  - _multipliersRegistryConfiguration.test.cpp_
+  - _statusRegistryConfiguration.test.cpp_
+  - _terrainRegistryConfiguration.test.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _weatherRegistryConfiguration.test.cpp_
+  - _effectContext.test.cpp_
+  - _accuracyCheckHandler.test.cpp_
+  - _baseDamageHandler.test.cpp_
+  - _criticalHitHandler.test.cpp_
+  - _effectHandlerInterface.test.cpp_
+  - _stabHandler.test.cpp_
+  - _targetsHandler.test.cpp_
+  - _moveMeta.test.cpp_
+  - _logger.test.cpp_
+  - _random.test.cpp_
+- Extract namespace into a using statement in:
+  - _abilityRegistryConfiguration.h_
+  - _itemRegistryConfiguration.h_
+  - _moveRegistryConfiguration.h_
+  - _statusRegistryConfiguration.h_
+  - _terrainRegistryConfiguration.h_
+  - _typeRegistryConfiguration.h_
+  - _weatherRegistryConfiguration.h_2
+- Update _getName()_ to return the template _NameMember_ instead of _mName_
+
+### Remove
+
+- Removed the member registry variable in _typeRegistryConfiguration.h_
+- Removed the following in _typeRegistry.h_
+  - _findEntryIndexByName()_
+  - _findEntryIndexById()_
+  - _mEntries_
+  - _mAmountRegistered_
+  - _mNextTypeID_
+
+## [0.8.7] - 2026-08-03
+
+### Added
+
+- Add a warnings variable in the _Makefile_
+- Add _main.cpp_ to the list of excluded files when compiling benchmark targets
+- Add a benchmark file to see how the multiplier functionality of _EffectContext_ performs
+- Add a benchmark file to see how combined functions of _EffectTypeID_ perform
+- Add a benchmark file to see how finding move id's perform at full capacity
+- Add a _statStageCacheIndex()_ function to be used in the other cache functions
+- Add a method to get a non-owning read-only view of all active multipliers in the _EffectContext_
+- Add an array that will map the built-in multiplier values to their position in the active multipliers spare vector
+- Add two functions that get the user and target _BattleSlot_ from the _EffectContext_
+- Add _ATTR\_CONST_ to each of the common _EffectTypeID_ functions in _moveMeta.h_
+  - Also make them return a non-owning read-only span instead of a vector
+  - Also make them all _noexecpt_
+- Add the _Base::eraseEntry_ functionality in:
+  - _abilityRegistry.h_
+  - _itemRegistry.h_
+  - _moveRegistry.h_
+  - _multiplierRegistry.h_
+  - _statusRegistry.h_
+  - _terrainRegistry.h_
+  - _weatherRegistry.h_
+- Add an _eraseEntry()_ function to _fixedMetadataRegistry.h_
+- Add a struct that will hold an ID index entry which has a stableID and the entry index position
+- Add an array of sorted stable ID indexes used for lookup and a variable to track how many valid entries are in it
+- Add _insertIDIndex()_ that will insert an ID-index mapping while preserving sorted order
+- Add _removeIDIndex()_ that will remove an ID-index mapping and compact remaining mappings
+- Add _idIndexEntryLess()_ which will order two ID-index entries by _StableID_ then entry index
+- Add _rebuildIDIndex()_ that will rebuilt and resort the stable ID index from registered entries
+- Add _lcov_ exclusions to _typeRegistryConfiguration.cpp_ on branches that aren't reachable
+- Add a check to see if the attack stat or defense stat is infinite and if either is less than 0 in _baseDamageHandler.cpp_
+
+### Changed
+
+- Change the warnings when compiling bechmarks to use the benchmark warnings explicitly
+- Change the following functions to use _statStageCacheIndex()_ instead of using the same logic:
+  - _STAT\_STAGE\_MULTIPLIERS_
+  - _ACCURACY\_STAGE\_MULTIPLIERS_
+  - _EVASION\_STAGE\_MULTIPLIERS_
+- Change the _MAX\_CRITICAL\_HIT\_VALUE_ from _100_ to _99_ due to 0-based counting
+- Change _removeEntry()_ to call _eraseEntry()_
+- Update documentation in _fixedMetadataRegistry.h_
+- _incrementAmountRegistered()_ will insert the ID index into the entries
+- _decrementAmountRegistered()_ will remove the ID index into the entries
+- _addBuiltin()_ will now call _incrementAmountRegistered()_ instead of manually increasing the member variable
+- _findEntryIndexByID()_ will now do a binary-search lookup on the sorted stable ID index
+- Rebuild the id index on:
+  - _setEntry()_
+  - _setAmountRegistered_
+- Update _moveRegistry.h_ effect initialization by using _.begin()_ and _.end()_ iterators
+- Update both functions in _contiguousSequence.h_ with early returns
+- Update the unexpected return of _resetMatchups()_
+- Update _setMultiplier()_ to process in built multipliers at _O(1)_ by using the built in multipliers position otherwise it defaults to the _O(n)_ loop 
+- Update _resetMultipliers()_ to also fill the built in multiplier positions with _0U_
+- Update the float typings to double in _baseDamageHandler.cpp_
+- Update the following functions to call the battle slot helper functions from _IEffectHandler_:
+  - _accuracyCheckHandler.cpp_
+  - _baseDamageHandler.cpp_
+  - _stabHandler.cpp_
+- Apply _clang-format_ to:
+  - _accuracyCheckHandler.cpp_
+  - _baseDamageHandler.cpp_
+- Update includes in _moveMeta.cpp_
+- Update the following to fully cover all lines and branches
+  - _abilityRegistryConfiguration.test.cpp_
+  - _itemRegistryConfiguration.test.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _typeRegistry.test.cpp_
+  - _contiguousSequence.test.cpp_
+  - _logger.test.cpp_
+- Add a test suite for:
+  - _moveRegistryConfiguration.h_
+  - _multiplierRegistryConfiguration.h_
+  - _statusRegistryConfiguration.h_
+  - _terrainRegistryConfiguration.h_
+  - _weatherRegistryConfiguration.h_
+  - _effectContext.h_
+  - _accuracyCheckHandler.h_
+  - _baseDamageHandler.h_
+  - _criticalHitHandler.h_
+  - _effectHandlerInterface.h_
+  - _stabHandler.h_
+  - _targetsHandler.h_
+  - _moveMeta.h_
+  - _input.h_
+  - _random.h_
+
+### Fixed
+
+- Change how _addMetadataBatch()_ works by reverting the registry to what it was before calling the function if any addtion to the registry fails
+- Change how _setMatchupRow()_ works by reverting the registry to what it was before calling the function if any addtion to the registry fails
+- Change how _setDefensiveColumn()_ works by reverting the registry to what it was before calling the function if any addtion to the registry fails
+- Fix both uses of _mutateMetadata()_ to not allow the mutation update if the new name is already in use in the registry
+- Fix the asserts in _findEntryIndexByID()_ and _findEntryIndexByName()_ in _typeRegistry.h_ to be _<=_ instead of _<_
+- Fix _input.h_ to not use a redundant _T::value\_type_
+- Fix the damage calc done in _applyMultiplier()_
+- Clamp the resulting damage from _baseDamageHandler.cpp_ to _1.0_, and the numeric limit of an unsigned short
+- Fix the critical hit percentage check to be _<_ instead of _<=_ for a true accuracte percentage instead of being percentage + 1
+
+### Removed
+
+- Remove redunant includes in _Configuration/constants.h_
+
+## [0.8.6] - 2026-07-31
+
+### Removed
+
+- Removed _EffectResult_ struct and the member variable of it in _EffectContext_
+- Removed if protected in _DamageContext_
+
+## [0.8.5] - 2026-07-31
+
+### Added
+
+- Added a _DamageFormulaModifiers_ that will apply to each of the 6 basic stats
+  - Add it to each _BattleSlot_ 
+- Use the _DamageFormulaModifiers_ in _baseDamageHandler_ to update the attack/special attack and defense special/defense calcs
+
+### Changed
+
+- Default initialize the sparse multiplier list in _EffectContext_
+
+## [0.8.4] - 2026-07-31
+
+### Changed
+
+- Convert the setters in _Pokemon_ to be constexpr and bring the implemention into _pokemon.h_
+- Updated the tests in _pokemon.test.cpp_ to include the level of the _Pokemon_ when creating them
+
+### Removed
+
+- Removed _pokemon.cpp_
+
+## [0.8.3] - 2026-07-31
+
+### Added
+
+- Add new configuration constant variables:
+  - The numerator for the fixed point multiplier
+  - The denominator for the fixed point multiplier
+  - The threshold of when to round down when using the fixed point multiplier
+  - The threshold of tolerance for rounding down due to how doubles are stored in memory when using the fixed point multiplier
+- Add a function _applyMultiplier()_ to _EffectContext_
+  - This will put all multipliers through a fixed point calculation before multiplying it with the base damage
+- Add in a _Weather_ multiplier ID
+- Add in the user readable name for the weather multiplier ID
+- Add in the built in weather multiplier
+- Add level to the _Pokemon_ constructors and call _setLevel()_ in the constructor body
+
+### Removed
+
+- Removed the combined multiplier variable in _EffectContext_
+- Removed the combined multiplier variable use in _setMultiplier()_ and _resetMultipliers()_
+
+## [0.8.2] - 2026-07-30
+
+### Added
+
+- Add new configuration constant variables:
+  - The numerator for the evasion stat stage multiplier
+  - The denominator for the evasion stat stage multiplier
+  - The numerator for the level damage factor
+  - The denominator for the level damage factor
+  - The offset for the level damage factor
+  - The amount of stages a stat can have
+  - The maximum size of the cache for reach caching function.
+    - This is based on the amount of stages a stat can have.
+- Add a cache file that holds three stat stage multipliers that are cached so fast lookup.
+  - The base 6 stats
+  - Accuracy
+  - Evasion
+- Add a _RegistryProvider_ struct that will hold non-owning pointers to all other registries
+- Added a _setMultiplier()_ and _resetMultipliers()_ functions to _EffectContext_
+- Added a float to hold the combined multiplier that will be added at the end of the damage calculation in _EffectContext_
+- For the following handlers (both source and header), add a _RegistryProvider_ parameter:
+  - _effectHandlerInterface_
+  - _accuracyCheckHandler_
+  - _baseDamageHandler_
+  - _criticalHitHandler_
+  - _stabHandler_
+  - _targetsHandler_
+- Add a new move trigger ID for _OnTarget_
+- Add a level damage factor into the _Pokemon_ class for pseudo-caching and also add a getter for this variable.
+
+### Changed
+
+- Update the type of the parties in _BattleSlot_ from _const Pokemon *_ to _Pokemon *_
+- Change the multipliers from an _unordered\_map_ to a sparse multiplier vector in _EffectContext_
+- Change both _Pound_ and _Karate Chop_ to have the move trigger _OnTarget_ instead of _OnUse_
+- Update _accuracyCheckHandler_ to use the cached _evasion_ and _accuracy_ stage multipliers instead of calculating them on every call
+- Update _baseDamageHandler_ to use the cached _stat_ stage multipliers instead of calculating them on every call
+- Update _baseDamageHandler_ to get the pseudo-cached level damage factor from the pokemon to not recalculate it on every call to the handler 
+- Update _criticalHitHandler_ to call the _setMultiplier()_ method instead of modifying the multiplier map
+- Update _stabHandler_ to call the _setMultiplier()_ method instead of modifying the multiplier map
+- Update _targetsHandler_ to use the _RegistryProvider_ instead of using the member variable of the _MoveRegistryConfiguration_ 
+- Update _targetsHandler_ to call the _setMultiplier()_ method instead of modifying the multiplier map
+- Update the _MoveRegistry_ test such that _Pound_ will check for move trigger _OnTarget_ instead of _OnUse_
+
+### Removed
+
+- Removed the current hp in _BattleSlot_
+- Removed the _EffectContext_ constructor that base initialized the multipliers map
+- Removed the _MoveRegistryConfiguration_ member variable from _TargetsHandler_
+
 ## [0.8.1] - 2026-07-30
 
 ### Added
@@ -1495,6 +1807,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.9.0]: https://github.com/Phaysik/pocketcore/compare/v0.8.0...v0.9.0
+[0.8.7]: https://github.com/Phaysik/pocketcore/commit/2ce0d1b35250c945834fb7734ce2c1affac56dc0
+[0.8.6]: https://github.com/Phaysik/pocketcore/commit/12734b59dc609938ef9ab95b3ba459f873e8cc64
+[0.8.5]: https://github.com/Phaysik/pocketcore/commit/ac24d49144d29e4e0008efa3520dd2cbdc98b17c
+[0.8.4]: https://github.com/Phaysik/pocketcore/commit/b892dace57b8774f4ba43f5c7619a8e7633ecca4
+[0.8.3]: https://github.com/Phaysik/pocketcore/commit/4ee1c39b8754d3f769f8aa3032e0cc3b56d283bf
+[0.8.2]: https://github.com/Phaysik/pocketcore/commit/eedbf1173975c37d583fa486088ac91eeb873ccb
 [0.8.1]: https://github.com/Phaysik/pocketcore/commit/6b29bca60d66011181ba0fe56a0eb9f1f600564b
 [0.8.0]: https://github.com/Phaysik/pocketcore/compare/v0.7.0...v0.8.0
 [0.7.7]: https://github.com/Phaysik/pocketcore/commit/6332560ff031fb7a2f1935120d893a1a8afb1b57

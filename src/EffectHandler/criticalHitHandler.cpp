@@ -1,8 +1,8 @@
 /*! @file criticalHitHandler.cpp
 	@brief Contains the critical hit effect handler implementation
-	@date 07/30/2026
+	@date 08/03/2026
 	@since 0.7.2
-	@version 0.8.1
+	@version 0.8.7
 	@author Matthew Moore
 */
 

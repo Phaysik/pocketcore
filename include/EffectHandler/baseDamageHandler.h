@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.h
 	@brief Contains the base damage effect handler
-	@date 07/29/2026
+	@date 08/03/2026
 	@since 0.7.2
-	@version 0.7.5
+	@version 0.8.7
 	@author Matthew Moore
 */
 
@@ -31,9 +31,9 @@ namespace PocketCore::Effect
 		@warning The context must identify valid user and target slots. A missing Pokemon, zero move base
 			power, invalid effective stat, or non-positive effective defense leaves the existing damage unchanged.
 		@note The calculated damage is clamped to the range representable by the damage field.
-		@date 07/29/2026
+		@date 08/03/2026
 		@since 0.7.2
-		@version 0.7.5
+		@version 0.8.7
 		@author Matthew Moore
 	*/
 	class BaseDamageHandler : public IEffectHandler
@@ -47,7 +47,7 @@ namespace PocketCore::Effect
 				@post On successful calculation, @p context contains damage clamped to the representable damage range.
 				@note The existing damage value remains unchanged when required Pokemon data or valid effective statistics are unavailable.
 				@since 0.7.2
-				@version 0.7.5
+				@version 0.8.7
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};

@@ -2,7 +2,7 @@
 	@brief Contains the targets effect handler implementation
 	@date 07/30/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.8.2
 	@author Matthew Moore
 */
 

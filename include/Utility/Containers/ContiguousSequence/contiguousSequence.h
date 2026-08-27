@@ -1,8 +1,8 @@
 /*! @file contiguousSequence.h
 	@brief Declares helper algorithms for contiguous sequence containers.
-	@date 07/26/2026
-	@version 0.1.0
-	@since 0.3.0
+	@date 08/03/2026
+	@since 0.1.0
+	@version 0.3.0
 	@author Matthew Moore
 */
 
@@ -25,8 +25,8 @@
 	@note All functions take `std::span<const T>` and therefore do not modify
 		  the underlying sequence; callers should use `std::span` conversions
 		  to pass containers or raw arrays.
-	@version 0.1.0
 	@since 0.1.0
+	@version 0.1.0
 	@author Matthew Moore
 */
 namespace PocketCore::Utility::Containers::ContiguousSequence
@@ -47,8 +47,8 @@ namespace PocketCore::Utility::Containers::ContiguousSequence
 		@return The sum of the specified elements as an `Integral` value if the indices are valid;
 				returns zero if `startIndex >= sequence.size()` or `startIndex + length > sequence.size()`.
 		@note Time complexity: O(length). Space complexity: O(1).
-		@version 0.1.0
 		@since 0.1.0
+		@version 0.8.7
 	*/
 	template <Integral Integral>
 	ATTR_NODISCARD constexpr Integral computeContiguousSequenceSum(const std::span<const Integral> &sequence, const Integral startIndex,
@@ -92,8 +92,8 @@ namespace PocketCore::Utility::Containers::ContiguousSequence
 		@param[in] startIndex Zero-based index at which summation begins. Defaults to 0.
 		@return The sum of elements from `startIndex` to the end as an
 				`Integral` value.
-		@version 0.1.0
 		@since 0.1.0
+		@version 0.8.7
 	*/
 	template <Integral Integral>
 	ATTR_NODISCARD constexpr Integral computeContiguousSequenceSum(const std::span<const Integral> &sequence, const Integral startIndex = 0)
