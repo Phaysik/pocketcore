@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring status metadata.
-	@date 08/03/2026
+	@date 08/14/2026
 	@since 0.6.4
-	@version 0.9.0
+	@version 0.10.3
 	@author Matthew Moore
 */
 
@@ -62,9 +62,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal status registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/03/2026
+		@date 08/14/2026
 		@since 0.6.4
-		@version 0.9.0
+		@version 0.10.3
 		@author Matthew Moore
 	*/
 	class StatusRegistryConfiguration
@@ -84,6 +84,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns read-only access to the configured runtime status registry.
 				@return A reference that remains valid for the lifetime of this configuration.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			ATTR_NODISCARD constexpr const StatusRegistry &getRuntimeRegistry() const noexcept
 			{

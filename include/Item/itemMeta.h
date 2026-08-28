@@ -1,8 +1,8 @@
 /*! @file itemMeta.h
 	@brief Defines the metadata stored for built-in and user-defined items.
-	@date 08/12/2026
+	@date 08/18/2026
 	@since 0.4.1
-	@version 0.10.0
+	@version 0.10.8
 	@author Matthew Moore
 */
 

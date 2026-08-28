@@ -1,8 +1,8 @@
 /*! @file battleTargetsAndTriggers.h
 	@brief Defines the shared battle targets, triggers, and ranges.
-	@date 08/05/2026
+	@date 08/21/2026
 	@since 0.9.14
-	@version 0.9.14
+	@version 0.10.9
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@ namespace PocketCore::Battle
 		@brief Identifies an event that can trigger a battle effect.
 		@date 08/05/2026
 		@since 0.9.14
-		@version 0.9.14
+		@version 0.10.9
 		@author Matthew Moore
 	*/
 	enum class BattleEventID : ub
@@ -40,8 +40,8 @@ namespace PocketCore::Battle
 	/*! @enum BattleEventRole
 		@brief Identifies a participant's role in a battle event.
 		@date 08/18/2026
-		@since x.x.x
-		@version x.x.x
+		@since 0.10.8
+		@version 0.10.9
 		@author Matthew Moore
 	*/
 	enum class BattleEventRole : ub
@@ -55,7 +55,7 @@ namespace PocketCore::Battle
 		@brief Identifies the battlers affected by a battle effect.
 		@date 08/05/2026
 		@since 0.9.14
-		@version 0.9.14
+		@version 0.10.9
 		@author Matthew Moore
 	*/
 	enum class BattleTargetID : ub
@@ -71,7 +71,7 @@ namespace PocketCore::Battle
 		@brief Identifies the positional range allowed for a battle effect.
 		@date 08/05/2026
 		@since 0.9.14
-		@version 0.9.14
+		@version 0.10.9
 		@author Matthew Moore
 	*/
 	enum class BattleRangeID : ub

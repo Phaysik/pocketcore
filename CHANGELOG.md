@@ -4,6 +4,192 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.11.0] - 2026-08-21 (BattleEngine Update)
+
+### Added
+
+- Added more methods to _BattleEngine_:
+  - Execute a weight hit count policy
+  - Execute a fixed hit count policy
+  - Execute the damage application
+
+### Changed
+
+## [0.10.11] - 2026-08-21
+
+### Changed
+
+- Use maximum ammount of cores on make run command in:
+  - _codeql-analysis.yml_
+  - _testing.yml_
+
+## [0.10.10] - 2026-08-21
+
+### Changed
+
+- _hasReserve()_ take in a _std::span<Pokemon *const>_ instead of _std::span<Pokemon *>_
+
+## [0.10.9] - 2026-08-21
+
+- Add documentation to:
+  - _getOppositeSide()_
+  - _getSideOrder()_
+  - _anyPartyPokemonNull()_
+  - Both overloads of _activeSlots()_
+  - _contextSlot()_
+  - Both overloads of _party()_
+  - Both overloads of _isHealthy()_
+  - _isActive()_
+  - _isAdjacent()_
+  - _targetExists()_
+  - _sideHasHealthyPokemon()_
+  - _getEffectiveSpeed()_
+  - _makeMoveContext()_
+  - _applyRecoil()_
+  - _resolveHitCount()_
+  - _hasDuplicatePokemonPointers()_
+  - _healthyPokemonInParty()_
+  - _assignActiveSlots()_
+  - _canTarget()_
+  - _appendSide()_
+  - _getResult()_
+  - _hasReserve()_
+  - _getMoveTargets()_
+  - _validateSwitchAction()_
+  - _validateMoveAction()_
+  - _getValidationResult()_
+  - _getBattleTarget()_
+  - _handleMovePrioritization()_
+
+### Changed
+
+- Ran _clang-format_ on:
+  - _battleEngine.h_
+  - _battleTargetsAndTriggers.h_
+  - _effectSourceAndSuppression.h_
+  - _moveMeta.h_
+  - _moveRegistryConfiguration.test.cpp_
+- Update _hasReserve()_ to take in a _span_ instead of a _vector_
+
+## [0.10.8] - 2026-08-18
+
+### Added
+
+- Add a _BattleEventRole_ struct that identifies a participants role in a battle
+- Add a _BattleEventID_ struct that identifies an event that can trigger a battle effect
+- Add documentation to _BattleTargetID_ and _BattleRangeID_
+
+### Changed
+
+- Update all occurences of _BattleTriggerID_ with a _BattleEventID_ and _BattleEventRole_
+- Extract shared namespace usage into a using statement in:
+  - _abilityRegistry.h_
+  - _effectRegistry.h_
+  - _itemRegistry.h_
+  - _moveRegistry.h_
+  - _multiplierRegistry.h_
+  - _statusRegistry.h_
+  - _terrainRegistry.h_
+  - _typeRegistry.h_
+
+### Fixed
+
+- Add in missing headers for _battleHelpers.cpp_
+
+### Removed
+
+- Removed _BattleTriggerID_
+
+## [0.10.7] - 2026-08-18
+
+### Added
+
+- Added more methods to _BattleEngine_:
+  - Execute a turn
+  - Execute a move
+  - Execute an end turn trigger
+- Add a few more battle function helpers:
+  - _getValidationResult()_
+  - _getBattleTarget()_
+  - _handleMovePrioritization()_
+- Add _ATTR\_NOINLINE_ to _getMetadata()_
+- Added a small example of how to execute a turn in _main.cpp_
+
+### Removed
+
+- Removed _configFlags.h_
+
+## [0.10.6] - 2026-08-17
+
+### Added
+
+- Add _ATTR\_CONST_ to _getState()_
+
+### Fixed
+
+- Fix _clang-tidy_ warnings on _getState()_ in _battleEngine.cpp_ by wrapping it in a _GCC_ diagnostic push
+
+## [0.10.5] - 2026-08-17
+
+### Added
+
+- Added more methods to _BattleEngine_:
+  - Get the current state of the battle
+  - Switch a _Pokemon_
+
+## [0.10.4] - 2026-08-17
+
+### Added
+
+- Add a function to execute a move trigger
+- Add a few more battle function helpers:
+  - _getMoveTargets()_
+  - _validateMoveAction()_
+  - _validateSwitchAction()_
+
+### Changed
+
+- Move _resolveTargets_ from _battleEngine.h_ to _battleHelpers.h_
+
+## [0.10.3] - 2026-08-14
+
+### Added
+
+- Add in a battle engine header
+  - It can start a battle
+    - This will activate suppressions for:
+      - Abilities
+      - Items
+    - Check if an ability or item is suppressed
+    - Get a list of targets
+    - Execute triggers
+      - Abilities
+      - Items
+    - Process faints
+    - Refresh the battle phase
+    - Trigger a faint
+- Add in more battle helper functions:
+  - _anyPartyPokemonNull()_
+  - _hasDuplicatePokemonPointers()_
+  - _healthyPokemonInParty()_
+  - _assignActiveSlots()_
+  - _canTarget()_
+  - _appendSide()_
+  - _getResult()_
+  - _hasReserve()_
+- Add default ctors and a dtor for _BattleState_
+- Each of the registry configurations have a _getRuntimeRegistry()_ that will call _getRegistry()_
+- Add a basic _battleState.cpp_ that holds a default dtor to resolve build warnings
+- Add a _RegistryProvider_ to _main.cpp_ and initialize it will the other registries and create a _BattleEngine_ from it and the _EffectRegistry_
+
+### Changed
+
+- Extract shared namespace usage into a using statement in _multiplierRegistryConfiguration.h_
+
+### Fix
+
+- Fix _clang-tidy_ warnings on _activeSlots()_ in _battleHelpers.cpp_ by wrapping it in a _GCC_ diagnostic push
+
 ## [0.10.2] - 2026-08-13
 
 ### Added
@@ -2430,6 +2616,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.11.0]: https://github.com/Phaysik/pocketcore/compare/v0.10.0...v0.11.0
+[0.10.11]: https://github.com/Phaysik/pocketcore/commit/fe357929f7fcf30060aceb503af6c4a5de730375
+[0.10.10]: https://github.com/Phaysik/pocketcore/commit/e49201937a986b442e2c3b492f916c48d2c6f4fc
+[0.10.9]: https://github.com/Phaysik/pocketcore/commit/bca45ef07e5b06df0dc9a89457b7f630dce445aa
+[0.10.8]: https://github.com/Phaysik/pocketcore/commit/1dc2b2bdcea311a75b3824ea4b21b55530fe2789
+[0.10.7]: https://github.com/Phaysik/pocketcore/commit/49be44401043c4bdb76f60c02ee0419a31e41404
+[0.10.6]: https://github.com/Phaysik/pocketcore/commit/7e48ebe8f83422c81e32dd7048167f5832495b3a
+[0.10.5]: https://github.com/Phaysik/pocketcore/commit/a48456afbe1eec4b08a4e6c4136b3beef0d68cbe
+[0.10.4]: https://github.com/Phaysik/pocketcore/commit/7335cd39196ef3c407f10fddaf5eb5e50233779a
+[0.10.3]: https://github.com/Phaysik/pocketcore/commit/3eb890451f52df895fded53c66b1e657e57be4fc
 [0.10.2]: https://github.com/Phaysik/pocketcore/commit/a76e6814e9c4a56eaf14f1d61781ccf7f3b49f01
 [0.10.1]: https://github.com/Phaysik/pocketcore/commit/19c7b46aa69982f5661553c89926e3e4ca9304b6
 [0.10.0]: https://github.com/Phaysik/pocketcore/compare/v0.9.0...v0.10.0

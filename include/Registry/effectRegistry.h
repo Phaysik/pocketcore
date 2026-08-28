@@ -1,8 +1,8 @@
 /*! @file effectRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined effects.
-	@date 08/12/2026
+	@date 08/18/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.10.8
 	@author Matthew Moore
 */
 
@@ -82,9 +82,9 @@ namespace PocketCore::Registry::Effect
 		@details Built-in effects are registered during construction with IDs derived from @ref BuiltinEffectID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_EFFECTS.
-		@date 08/12/2026
+		@date 08/18/2026
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.10.8
 		@author Matthew Moore
 	*/
 	class EffectRegistry : private FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
@@ -96,7 +96,7 @@ namespace PocketCore::Registry::Effect
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.10.8
 			 */
 			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
 			{

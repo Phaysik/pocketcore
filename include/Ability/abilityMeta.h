@@ -1,8 +1,8 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 08/12/2026
+	@date 08/18/2026
 	@since 0.3.0
-	@version 0.10.0
+	@version 0.10.8
 	@author Matthew Moore
 */
 

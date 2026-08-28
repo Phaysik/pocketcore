@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 08/04/2026
+	@date 08/14/2026
 	@since 0.2.0
-	@version 0.9.13
+	@version 0.10.3
 	@author Matthew Moore
 */
 
@@ -108,7 +108,7 @@ namespace PocketCore::Configuration
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryErrorInfo. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
 		@since 0.1.0
-		@version 0.9.13
+		@version 0.10.3
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -133,6 +133,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Returns read-only access to the configured runtime type registry.
 				@return A reference that remains valid for the lifetime of this configuration.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			ATTR_NODISCARD constexpr const TypeRegistry &getRuntimeRegistry() const noexcept
 			{

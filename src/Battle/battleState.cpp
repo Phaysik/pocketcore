@@ -1,8 +1,8 @@
 /*! @file battleState.cpp
 	@brief Defines out-of-line operations for battle state storage.
 	@date 08/14/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.10.3
+	@version 0.10.3
 	@author Matthew Moore
 */
 

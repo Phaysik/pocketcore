@@ -1,8 +1,8 @@
 /*! @file effectSourceAndSuppresion.h
 	@brief Contains the effect source and suppression
-	@date 08/05/2026
+	@date 08/21/2026
 	@since 0.9.13
-	@version 0.9.14
+	@version 0.10.9
 	@author Matthew Moore
 */
 
@@ -60,9 +60,9 @@ namespace PocketCore::Effect
 			identifiers narrow a rule to one specific ability, item, move, or nature; leaving one empty matches every entity of that source
 			category.
 		@note Only the optional identifier matching the rule's target source is consulted.
-		@date 08/05/2026
+		@date 08/18/2026
 		@since 0.9.13
-		@version 0.9.14
+		@version 0.10.8
 		@author Matthew Moore
 	*/
 	struct SuppressionRule

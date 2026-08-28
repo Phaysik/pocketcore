@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 08/07/2026
+	@date 08/14/2026
 	@since 0.3.0
-	@version 0.9.16
+	@version 0.10.3
 	@author Matthew Moore
 */
 
@@ -128,52 +128,52 @@ namespace PocketCore::Battle
 		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
 	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
 		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
-		@date 08/04/2026
+		@date 08/14/2026
 		@since 0.3.0
-		@version 0.9.8
+		@version 0.10.3
 		@author Matthew Moore
 	*/
 	struct BattleState
 	{
 		public:
 			/*! @brief Constructs an empty battle state with default-initialized battle data.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			BattleState() = default;
 
 			/*! @brief Constructs a battle state by copying all stored battle data.
 				@note Pokemon pointers remain non-owning references in the copied state.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			BattleState(const BattleState &) = default;
 
 			/*! @brief Constructs a battle state by moving stored battle data from another state.
 				@note Pokemon pointers remain non-owning references in the moved state.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			BattleState(BattleState &&) noexcept = default;
 
 			/*! @brief Replaces this battle state with a copy of another battle state.
 				@note Pokemon pointers remain non-owning references after assignment.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			BattleState &operator=(const BattleState &) = default;
 
 			/*! @brief Replaces this battle state by moving data from another battle state.
 				@note Pokemon pointers remain non-owning references after assignment.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			BattleState &operator=(BattleState &&) noexcept = default;
 
 			/*! @brief Destroys the battle state and releases storage owned by its value members.
 				@note The Pokemon objects referenced by the state are not owned or destroyed by this operation.
-				@since x.x.x
-				@version x.x.x
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			~BattleState() noexcept;
 

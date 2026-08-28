@@ -1,8 +1,8 @@
-/*! @file battleEngine_copy.h
+/*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 08/05/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/21/2026
+	@since 0.10.3
+	@version 0.11.0
 	@author Matthew Moore
 */
 
@@ -55,22 +55,55 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 08/05/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/21/2026
+		@since 0.10.3
+		@version 0.10.9
 		@author Matthew Moore
 	*/
 	class BattleEngine
 	{
 		public:
+			/*! @brief Constructs an engine bound to the registries used for metadata lookup and effect execution.
+				@param[in] provider The registry bundle used to resolve move, ability, item, and nature metadata.
+				@param[in] effectRegistry The registry mapping built-in effect identifiers to their apply functions.
+				@pre Both registries must outlive the engine because they are stored as non-owning references.
+				@note The engine starts with no battle in progress; call @ref startBattle before executing turns.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			explicit BattleEngine(const RegistryProvider &provider, const EffectRegistry &effectRegistry) noexcept
 				: mProvider(&provider), mEffectRegistry(&effectRegistry)
 			{}
 
+			/*! @brief Prevents copying an engine because its battle state and suppression scopes are not shareable.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			BattleEngine(const BattleEngine &) = delete;
+
+			/*! @brief Prevents moving an engine because its battle state and suppression scopes are not transferable.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			BattleEngine(BattleEngine &&) = delete;
+
+			/*! @brief Prevents copy assignment of an engine.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			BattleEngine &operator=(const BattleEngine &) = delete;
+
+			/*! @brief Prevents move assignment of an engine.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			BattleEngine &operator=(BattleEngine &&) = delete;
+
+			/*! @brief Destroys the engine and releases the storage owned by its battle state.
+				@note The referenced registries and party Pokemon are not owned or destroyed by this operation.
+				@since 0.10.3
+				@version 0.10.3
+			*/
 			~BattleEngine() = default;
 
 			/*! @brief Starts a battle and assigns the first healthy party members to active slots.
@@ -78,6 +111,8 @@ namespace PocketCore::Battle
 				@param[in] partyB Side B's non-owning Pokemon pointers in party order.
 				@param[in] activePokemonPerSide Number of simultaneously active Pokemon required from each party. Must be greater than zero.
 				@return Void on success, or a validation error without starting the battle.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> startBattle(const std::span<Pokemon *const> &partyA,
 																			  const std::span<Pokemon *const> &partyB,
@@ -89,17 +124,23 @@ namespace PocketCore::Battle
 			   skipped.
 				@param[in] actions The move and switch choices submitted by both trainers.
 				@return Void on success, or the first validation error before the state is mutated.
+				@since 0.10.7
+				@version 0.10.7
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> executeTurn(const std::span<const BattleAction> &actions);
 
 			/*! @brief Returns the engine-owned battle state.
 				@return A read-only reference valid for the lifetime of the engine.
+				@since 0.10.5
+				@version 0.10.6
 			*/
 			ATTR_NODISCARD ATTR_CONST const BattleState &getState() const noexcept;
 
 		private:
 			/*! @enum SlotTriggerTargeting
 				@brief Selects how ability and item effects determine their recipients during slot-trigger dispatch.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			enum class SlotTriggerTargeting : ub
 			{
@@ -113,6 +154,8 @@ namespace PocketCore::Battle
 			/*! @struct ActiveSuppression Battle/battleEngine_copy.h
 				@brief Carries one active suppression rule together with the source and slot that established it.
 				@details The source identity and owner allow suppression matching to exclude a trigger from suppressing itself.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			struct ActiveSuppression
 			{
@@ -129,6 +172,8 @@ namespace PocketCore::Battle
 			/*! @brief Switches one active slot immediately and runs switch-in triggers.
 				@param[in] action The active slot and incoming party member selected by a trainer.
 				@return Void on success, or a validation error without changing the active slot.
+				@since 0.10.5
+				@version 0.10.8
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> switchPokemon(const SwitchAction &action);
 
@@ -140,6 +185,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The trigger being dispatched.
 				@param[in] context The current effect context containing source-specific metadata identifiers.
 				@return True when at least one active rule suppresses the dispatch; otherwise false.
+				@since 0.10.3
+				@version 0.10.9
 			*/
 			ATTR_NODISCARD ATTR_PURE bool isSuppressed(const EffectSource source, const BattleTarget &owner, const BattleEventID eventID,
 													   const BattleEventRole role, const EffectContext &context) const noexcept;
@@ -151,6 +198,8 @@ namespace PocketCore::Battle
 				@param[in] suppressionRuleCount The logical number of rules enabled by the metadata.
 				@param[in] source The category of source that establishes the rules.
 				@param[in] owner The active slot that owns the source.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			void activateSuppressions(const std::span<const SuppressionRule> &suppressionRules, const ub suppressionRuleCount,
 									  const EffectSource source, const BattleTarget &owner);
@@ -159,6 +208,8 @@ namespace PocketCore::Battle
 				@param[in] abilityMeta The ability metadata whose matching trigger entries are inspected.
 				@param[in] owner The active slot that owns the ability.
 				@param[in] triggerID The trigger whose suppression rules become active.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleEventID eventID,
 											 const BattleEventRole role);
@@ -167,6 +218,8 @@ namespace PocketCore::Battle
 				@param[in] itemMeta The item metadata whose matching trigger entries are inspected.
 				@param[in] owner The active slot that owns the item.
 				@param[in] triggerID The trigger whose suppression rules become active.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
 										  const BattleEventRole role);
@@ -183,6 +236,8 @@ namespace PocketCore::Battle
 				@details Missing registry dependencies, missing effect metadata, or a null apply function make the invocation a no-op.
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			void executeEffect(const EffectID effect, EffectContext &context);
 
@@ -191,6 +246,8 @@ namespace PocketCore::Battle
 			   effect-caused faints after a normally completed chain.
 				@param[in] effects The ordered effect identifiers to execute.
 				@param[in,out] context The context shared and mutated by every executed effect.
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			void executeEffects(const std::span<const EffectID> &effects, EffectContext &context);
 
@@ -201,6 +258,8 @@ namespace PocketCore::Battle
 				@param[in] targetID The selector used to resolve effect recipients.
 				@param[in] effects The ordered effects to execute for every resolved recipient.
 				@param[in,out] context The shared context whose event coordinates are preserved across target iteration.
+				@since 0.10.3
+				@version 0.10.4
 			*/
 			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID, const std::span<const EffectID> &effects,
 										EffectContext &context);
@@ -210,6 +269,8 @@ namespace PocketCore::Battle
 			   and recoil per hit, processes faints, and confines suppression rules to the move, target, or hit scope that created them.
 			   Missing metadata or invalidated targets cancel execution without reporting an error.
 				@param[in] action The validated move action to execute.
+				@since 0.10.7
+				@version 0.11.0
 			*/
 			void executeMove(const MoveAction &action);
 
@@ -219,6 +280,8 @@ namespace PocketCore::Battle
 				@param[in] moveMeta The move metadata containing trigger entries.
 				@param[in] triggerID The move trigger to dispatch.
 				@param[in,out] context The shared context supplied to matching effects.
+				@since 0.10.4
+				@version 0.10.8
 			*/
 			void executeMoveTrigger(const MoveMeta &moveMeta, BattleEventID eventID, BattleEventRole role, EffectContext &context);
 
@@ -230,6 +293,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The ability trigger to dispatch.
 				@param[in,out] context The context stamped with the ability source and passed to matching effects.
 				@param[in] targetEffects True to resolve the ability target selector; false to preserve the existing event target.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleEventID eventID,
 									   const BattleEventRole role, EffectContext &context, const bool targetEffects);
@@ -242,6 +307,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The item trigger to dispatch.
 				@param[in,out] context The context stamped with the item source and passed to matching effects.
 				@param[in] targetEffects True to resolve the item target selector; false to preserve the existing event target.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleEventID eventID,
 									const BattleEventRole role, EffectContext &context, const bool targetEffects);
@@ -258,20 +325,59 @@ namespace PocketCore::Battle
 			void executeNatureTrigger(const BattleTarget &owner, const NatureMeta &natureMeta, const BattleEventID eventID,
 									  const BattleEventRole role, EffectContext &context, const bool targetEffects);
 
+			/*! @brief Dispatches the turn-end trigger to every healthy active slot on both sides.
+				@details Side A's slots are processed before side B's, and each side's slots are processed in ascending index order to keep
+			   turn-end effects deterministic. Fainted slots are skipped.
+				@since 0.10.7
+				@version 0.10.8
+			*/
 			void executeEndTurnTrigger();
 
+			/*! @brief Runs the shared before-hit trigger once for a move whose hit count is not fixed per attempt.
+				@details The trigger executes a single time against the target and, when it succeeds, records the suppression scope depth so
+			   later per-hit scopes can be unwound back to it.
+				@param[in] runBeforeHitPerAttempt True when the move instead runs its before-hit trigger for every attempt, which makes this
+			   call a no-op.
+				@param[in,out] targetContext The per-target context receiving the first hit attempt index and trigger results.
+				@param[in] moveMeta The metadata of the executing move. Must not be nullptr.
+				@param[out] targetSuppressionCount Receives the suppression scope depth to restore between hits.
+				@return True when the move missed or the chain stopped and the target should be abandoned; otherwise false.
+				@since 0.11.0
+				@version 0.11.0
+			*/
 			ATTR_NODISCARD bool executeWeightHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &targetContext,
 															const MoveMeta *moveMeta, std::size_t &targetSuppressionCount);
 
+			/*! @brief Runs the before-hit trigger for a single attempt of a move that repeats it per hit.
+				@param[in] runBeforeHitPerAttempt True to execute the trigger for this attempt; false makes the call a no-op.
+				@param[in,out] context The per-hit context receiving the trigger results.
+				@param[in] moveMeta The metadata of the executing move. Must not be nullptr.
+				@return True when the attempt missed and the remaining hits should be abandoned; otherwise false.
+				@since 0.11.0
+				@version 0.11.0
+			*/
 			ATTR_NODISCARD bool executeFixedHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &context,
 														   const MoveMeta *moveMeta);
 
+			/*! @brief Applies the context's accumulated damage to the target's remaining health.
+				@details Multipliers are applied to the base damage before subtraction, and lethal damage clamps health to zero rather than
+			   underflowing.
+				@param[in] context The context supplying the damage amount, control flags, and active multipliers.
+				@param[in] target The active slot whose occupant loses health.
+				@pre The target slot must contain a Pokemon when the context requests damage application.
+				@post Nothing changes when damage application is disabled or the calculated damage is zero.
+				@note Fainting is detected separately by @ref processFaints.
+				@since 0.11.0
+				@version 0.11.0
+			*/
 			void executeDamageApplication(const EffectContext &context, const BattleTarget &target);
 
 			/*! @brief Dispatches an ability-and-item trigger for one active slot in a fresh suppression scope.
 				@param[in] owner The active slot whose ability and item receive the trigger.
 				@param[in] triggerID The trigger to dispatch.
 				@param[in] eventTarget The optional event recipient used to initialize target coordinates; defaults to @p owner.
+				@since 0.10.3
+				@version 0.10.9
 			*/
 			void triggerSlot(const BattleTarget &owner, const BattleEventID eventID,
 							 const std::optional<BattleTarget> &eventTarget = std::nullopt, BattleEventRole role = BattleEventRole::Any);
@@ -282,6 +388,8 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot whose current occupant receives the trigger.
 				@param[in] triggerID The trigger to dispatch.
 				@param[in,out] context The existing event or move context shared by the dispatched sources.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void triggerSlotInContext(const BattleTarget &owner, const BattleEventID eventID, EffectContext &context,
 									  BattleEventRole role = BattleEventRole::Any);
@@ -295,6 +403,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The trigger dispatched to both metadata sources.
 				@param[in,out] context The event or move context shared by the dispatched sources.
 				@param[in] targeting Selects metadata target resolution or preservation of the context's existing target.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
 									 const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting);
@@ -302,12 +412,16 @@ namespace PocketCore::Battle
 			/*! @brief Dispatches faint triggers once for each newly fainted active occupant.
 				@details Marks each faint before dispatch to prevent recursive duplicate processing, then recomputes the battle phase and
 			   required replacements.
+						@since 0.10.3
+						@version 0.10.3
 			*/
 			void processFaints();
 
 			/*! @brief Recomputes the battle phase and forced replacement slots from current party health.
 				@details Finished battles take precedence over replacement requests, and a fainted slot is requested only when its side has
 			   a healthy inactive reserve.
+						@since 0.10.3
+						@version 0.10.3
 			*/
 			void refreshBattlePhase();
 
@@ -315,6 +429,8 @@ namespace PocketCore::Battle
 				@details Builds a context addressed to the fainted slot, activates both sources' suppression rules, and executes ability
 			   effects before item effects without applying their target selectors.
 				@param[in] faintedTarget The active slot containing the fainted occupant.
+				@since 0.10.3
+				@version 0.10.8
 			*/
 			void triggerFaint(const BattleTarget faintedTarget);
 
