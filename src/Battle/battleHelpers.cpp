@@ -1,3 +1,11 @@
+/*! @file battleHelpers.cpp
+	@brief Contains the function definitions for battle helper functions
+	@date 08/07/2026
+	@since 0.9.14
+	@version 0.9.19
+	@author Matthew Moore
+*/
+
 #include "Battle/battleHelpers.h"
 
 #include <algorithm>

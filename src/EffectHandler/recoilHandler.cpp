@@ -1,3 +1,11 @@
+/*! @file recoilHandler.cpp
+	@brief Contains the recoil effect handler implementation
+	@date 08/12/2026
+	@since 0.10.0
+	@version 0.10.0
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/recoilHandler.h"
 
 #include <cassert>

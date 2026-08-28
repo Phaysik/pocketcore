@@ -1,8 +1,8 @@
 /*! @file configCat.h
 	@brief Declares a process-global wrapper for ConfigCat feature-flag access.
-	@date 07/26/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.9.1
 	@author Matthew Moore
 */
 

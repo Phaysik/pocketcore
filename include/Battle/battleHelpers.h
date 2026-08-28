@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 08/05/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/13/2026
+	@since 0.9.14
+	@version 0.10.2
 	@author Matthew Moore
 */
 
@@ -40,6 +40,8 @@ namespace PocketCore::Battle
 		@param[in] side The battle side to invert.
 		@return @ref Side::B for @ref Side::A; otherwise @ref Side::A.
 		@note Supports compile-time and runtime evaluation.
+		@since 0.9.14
+		@version 0.9.14
 	*/
 	ATTR_NODISCARD constexpr Side getOppositeSide(const Side side) noexcept
 	{
@@ -50,6 +52,8 @@ namespace PocketCore::Battle
 		@param[in] side The side whose ordering key is requested.
 		@return Zero for @ref Side::A and one for every other side value.
 		@note Supports compile-time and runtime evaluation.
+		@since 0.9.14
+		@version 0.9.14
 	*/
 	ATTR_NODISCARD constexpr std::size_t getSideOrder(const Side side) noexcept
 	{
@@ -71,6 +75,8 @@ namespace PocketCore::Battle
 		@param[in] side The side to select.
 		@return The mutable side-A collection for @ref Side::A; otherwise the mutable side-B collection. The reference remains valid while
 	   @p state exists.
+		@since 0.9.14
+		@version 0.9.19
 	*/
 	ATTR_NODISCARD ATTR_CONST std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
 
@@ -80,6 +86,8 @@ namespace PocketCore::Battle
 		@param[in] side The side to select.
 		@return The read-only side-A collection for @ref Side::A; otherwise the read-only side-B collection. The reference remains valid
 	   while @p state exists.
+		@since 0.9.14
+		@version 0.9.18
 	*/
 	ATTR_NODISCARD ATTR_CONST const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
 
@@ -89,6 +97,8 @@ namespace PocketCore::Battle
 		@param[in] slotIndex The zero-based active-slot index.
 		@return A non-owning pointer to the slot, or nullptr when @p slotIndex is outside the selected side. A non-null pointer remains
 	   valid until the selected slot vector reallocates.
+		@since 0.9.16
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE BattleSlot *contextSlot(BattleState &state, const Side side, const ub slotIndex) noexcept;
 
@@ -97,6 +107,8 @@ namespace PocketCore::Battle
 		@param[in] side The side to select.
 		@return The mutable side-A party for @ref Side::A; otherwise the mutable side-B party. The reference remains valid while @p state
 	   exists.
+		@since 0.9.14
+		@version 0.9.19
 	*/
 	ATTR_NODISCARD ATTR_CONST std::vector<Pokemon *> &party(BattleState &state, const Side side);
 
@@ -106,12 +118,16 @@ namespace PocketCore::Battle
 		@param[in] side The side to select.
 		@return The read-only side-A party for @ref Side::A; otherwise the read-only side-B party. The reference remains valid while @p
 	   state exists.
+		@since 0.9.14
+		@version 0.9.18
 	*/
 	ATTR_NODISCARD ATTR_CONST const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
 
 	/*! @brief Checks whether an active slot contains a non-fainted Pokemon.
 		@param[in] slot The active slot to inspect.
 		@return True when the slot has a non-null Pokemon that has not fainted; otherwise false.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool isHealthy(const BattleSlot &slot) noexcept;
 
@@ -119,6 +135,8 @@ namespace PocketCore::Battle
 		@brief Checks whether a Pokemon pointer identifies a non-fainted Pokemon.
 		@param[in] pokemon The non-owning pointer to inspect; may be nullptr.
 		@return True when @p pokemon is non-null and has not fainted; otherwise false.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *pokemon) noexcept;
 
@@ -128,6 +146,8 @@ namespace PocketCore::Battle
 		@param[in] pokemon The non-owning Pokemon identity to find; may be nullptr.
 		@return True when any selected active slot stores @p pokemon; otherwise false.
 		@note Time complexity is O(a), where a is the number of active slots on @p side.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept;
 
@@ -135,6 +155,8 @@ namespace PocketCore::Battle
 		@param[in] source The source slot supplying the first position.
 		@param[in] target The target slot supplying the second position.
 		@return True when the absolute position difference is zero or one; otherwise false.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept;
 
@@ -142,6 +164,8 @@ namespace PocketCore::Battle
 		@param[in] state The battle state to inspect.
 		@param[in] target The side and zero-based active-slot index to resolve.
 		@return True when the slot index exists and contains a non-fainted Pokemon; otherwise false.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget target) noexcept;
 
@@ -150,6 +174,8 @@ namespace PocketCore::Battle
 		@param[in] side The party side to inspect.
 		@return True when at least one party pointer is non-null and identifies a non-fainted Pokemon; otherwise false.
 		@note Time complexity is O(n), where n is the selected party size.
+		@since 0.9.14
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept;
 
@@ -157,6 +183,8 @@ namespace PocketCore::Battle
 		@details Multiplies the occupant's base speed by the cached speed-stage multiplier and the slot's damage-formula speed modifier.
 		@param[in] slot The active slot whose effective speed is requested.
 		@return The calculated effective speed, or 0.0 when the slot has no Pokemon.
+		@since 0.9.16
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE double getEffectiveSpeed(const BattleSlot &slot) noexcept;
 
@@ -168,6 +196,8 @@ namespace PocketCore::Battle
 		@param[in] target The active slot receiving the move.
 		@param[in] hitAttemptIndex The hit-attempt index stored in the context.
 		@return A new move-sourced effect context initialized from the supplied values.
+		@since 0.9.16
+		@version 0.9.17
 	*/
 	ATTR_NODISCARD ATTR_PURE EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget target,
 														   const ub hitAttemptIndex);
@@ -177,6 +207,8 @@ namespace PocketCore::Battle
 	   health at zero. No recoil is applied for a missing user, zero damage, or a non-finite or non-positive ratio.
 		@param[in,out] state The battle state containing the move user whose health may change.
 		@param[in] context The completed effect context supplying user coordinates, dealt damage, and recoil ratio.
+		@since 0.9.16
+		@version 0.9.16
 	*/
 	void applyRecoil(BattleState &state, const EffectContext &context);
 
@@ -186,6 +218,8 @@ namespace PocketCore::Battle
 		@param[in] moveMeta The move metadata containing the hit-count policy.
 		@return The fixed or randomly selected hit count, or zero when a weighted policy has no valid positive total weight.
 		@note Weighted resolution advances the shared random-number generator state.
+		@since 0.9.16
+		@version 0.9.16
 	*/
 	ATTR_NODISCARD ub resolveHitCount(const MoveMeta &moveMeta);
 

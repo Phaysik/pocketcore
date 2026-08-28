@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the move registry.
-	@date 07/28/2026
+	@date 08/05/2026
 	@since 0.6.0
-	@version 0.6.0
+	@version 0.9.14
 	@author Matthew Moore
 */
 

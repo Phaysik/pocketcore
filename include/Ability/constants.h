@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the type registry.
-	@date 07/27/2026
+	@date 08/04/2026
 	@since 0.3.0
-	@version 0.5.0
+	@version 0.9.10
 	@author Matthew Moore
 */
 

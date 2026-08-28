@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 08/03/2026
+	@date 08/12/2026
 	@since 0.8.0
-	@version 0.8.7
+	@version 0.10.0
 	@author Matthew Moore
 */
 
@@ -16,7 +16,6 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Weather/builtInWeatherID.h"
 #include "Weather/constants.h"
@@ -27,7 +26,6 @@ namespace PocketCore::Registry::Weather
 {
 	using PocketCore::Configuration::MAX_WEATHERS;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
@@ -41,7 +39,7 @@ namespace PocketCore::Registry::Weather
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
 		@date 08/03/2026
 		@since 0.8.0
-		@version 0.8.7
+		@version 0.9.2
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>

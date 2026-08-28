@@ -1,3 +1,11 @@
+/*! @file psychicTerrainPriorityBlockHandler.cpp
+	@brief Contains the psychic terrain priority block effect handler implementation
+	@date 08/12/2026
+	@since 0.10.0
+	@version 0.10.0
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/psychicTerrainPriorityBlockHandler.h"
 
 #include <cassert>

@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 08/03/2026
+	@date 08/07/2026
 	@version 0.3.0
-	@since 0.9.0
+	@since 0.9.16
 	@author Matthew Moore
 */
 
@@ -106,9 +106,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 08/03/2026
+		@date 08/07/2026
 		@since 0.3.0
-		@version 0.9.0
+		@since 0.9.16
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -121,7 +121,7 @@ namespace PocketCore::Effect
 				@param[in] value The multiplier value to store for subsequent damage calculations.
 				@throws std::out_of_range If an invalid built-in multiplier identifier indexes the built-in position table.
 				@since 0.8.2
-				@version 0.8.7
+				@version 0.9.4
 			*/
 			void setMultiplier(const MultiplierID multID, const double value);
 
@@ -132,7 +132,7 @@ namespace PocketCore::Effect
 				@param[in] multiplierRegistry The registry used to resolve multiplier application policies.
 				@return The damage value after all active multipliers have been applied, with a minimum value of 1.
 				@since 0.8.3
-				@version 0.8.7
+				@version 0.9.16
 			*/
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const;
 
@@ -146,7 +146,7 @@ namespace PocketCore::Effect
 			/*! @brief Returns active multipliers in application order.
 				@return A read-only view that remains valid until the next multiplier mutation.
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.9.4
 			*/
 			ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept;
 

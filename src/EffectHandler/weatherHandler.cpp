@@ -1,3 +1,11 @@
+/*! @file weatherHandler.cpp
+	@brief Contains the weather effect handler implementation
+	@date 08/04/2026
+	@since 0.9.8
+	@version 0.9.10
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/weatherHandler.h"
 
 #include <cassert>

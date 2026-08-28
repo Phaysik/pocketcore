@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring item metadata.
-	@date 08/03/2026
+	@date 08/07/2026
 	@since 0.5.0
-	@version 0.9.0
+	@version 0.9.16
 	@author Matthew Moore
 */
 
@@ -66,9 +66,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal item registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/03/2026
+		@date 08/07/2026
 		@since 0.5.0
-		@version 0.9.0
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
@@ -205,7 +205,7 @@ namespace PocketCore::Configuration
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.16
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const std::string_view &itemName,
 																				const BattleTargetID target);
@@ -216,7 +216,7 @@ namespace PocketCore::Configuration
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.14
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const ItemID itemID, const BattleTargetID target);
 

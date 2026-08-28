@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 07/31/2026
+	@date 08/07/2026
 	@since 0.3.0
-	@version 0.8.4
+	@version 0.9.16
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 07/31/2026
+		@date 08/07/2026
 		@since 0.3.0
-		@version 0.8.4
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -88,7 +88,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.8.3
+				@version 0.9.16
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
 									   const us spAttack, const us spDefense, const us level,
@@ -120,7 +120,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.8.3
+				@version 0.9.16
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
@@ -150,8 +150,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns all status identifier slots.
 				@return A read-only reference valid for the object's lifetime.
-				@since 0.3.0
-				@version 0.3.0
+				@since 0.9.11
+				@version 0.9.11
 			*/
 			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &getStatusesArray() const
 			{
@@ -348,6 +348,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Returns maximum health.
 				@return The maximum health value.
+				@since 0.9.14
+				@version 0.9.14
 			*/
 			ATTR_NODISCARD constexpr us getMaximumHealth() const
 			{
@@ -409,7 +411,7 @@ namespace PocketCore::Pokemon
 				@return The status identifier stored in the slot.
 				@pre index < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.9.11
 			*/
 			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
 			{
@@ -432,6 +434,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Replaces all status identifier slots.
 				@param[in] statusIDs The status identifiers to store.
+				@since 0.9.11
+				@version 0.9.11
 			*/
 			constexpr void setStatusesArray(const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &statusIDs)
 			{
@@ -630,6 +634,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets maximum health and clamps current health to the new maximum.
 				@param[in] maximumHealth The new maximum health value.
+				@since 0.9.14
+				@version 0.9.14
 			*/
 			constexpr void setMaximumHealth(const us maximumHealth)
 			{
@@ -713,6 +719,8 @@ namespace PocketCore::Pokemon
 			   removal interactions clear matching statuses and compact the remaining active statuses before insertion.
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
+				@since 0.9.11
+				@version 0.9.11
 			*/
 			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry)
 			{

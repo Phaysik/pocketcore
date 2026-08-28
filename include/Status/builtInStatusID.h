@@ -1,8 +1,8 @@
 /*! @file builtinStatusID.h
 	@brief Defines identifiers for statuses compiled into PocketCore.
-	@date 07/29/2026
+	@date 08/03/2026
 	@since 0.7.0
-	@version 0.7.0
+	@version 0.9.2
 	@author Matthew Moore
 */
 

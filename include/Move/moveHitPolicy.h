@@ -1,8 +1,8 @@
 /*! @file moveHitPolicy.h
 	@brief Defines how moves determine the number of hit attempts.
 	@date 08/04/2026
-	@version x.x.x
-	@since x.x.x
+	@since 0.9.8
+	@version 0.9.8
 	@author Matthew Moore
 */
 
@@ -21,8 +21,8 @@ namespace PocketCore::Move
 	/*! @struct FixedHitCount Move/moveHitPolicy.h
 		@brief Stores a fixed number of hit attempts for a move.
 		@date 08/04/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.9.8
+		@version 0.9.8
 		@author Matthew Moore
 	*/
 	struct FixedHitCount
@@ -35,8 +35,8 @@ namespace PocketCore::Move
 	/*! @struct WeightedHitCountOutcome Move/moveHitPolicy.h
 		@brief Associates a possible hit count with its integer selection weight.
 		@date 08/04/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.9.8
+		@version 0.9.8
 		@author Matthew Moore
 	*/
 	struct WeightedHitCountOutcome
@@ -53,8 +53,8 @@ namespace PocketCore::Move
 		@brief Stores weighted alternatives for selecting a move's hit count.
 		@details Weights are relative integer values and do not need to sum to 100. Resolution performs no allocation.
 		@date 08/04/2026
-		@version x.x.x
-		@since x.x.x
+		@since 0.9.8
+		@version 0.9.8
 		@author Matthew Moore
 	*/
 	struct WeightedHitCount

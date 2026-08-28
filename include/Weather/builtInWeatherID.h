@@ -1,8 +1,8 @@
 /*! @file builtinWeatherID.h
 	@brief Defines identifiers for weathers compiled into PocketCore.
-	@date 07/30/2026
+	@date 08/03/2026
 	@since 0.8.0
-	@version 0.8.0
+	@version 0.9.2
 	@author Matthew Moore
 */
 

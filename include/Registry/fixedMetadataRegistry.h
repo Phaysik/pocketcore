@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 08/03/2026
+	@date 08/04/2026
 	@since 0.5.0
-	@version 0.9.0
+	@version 0.9.11
 	@author Matthew Moore
 */
 
@@ -33,9 +33,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 08/03/2026
+		@date 08/04/2026
 		@since 0.5.0
-		@version 0.9.0
+		@version 0.9.11
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -300,7 +300,7 @@ namespace PocketCore::Registry
 				@pre @ref getAmountRegistered() < Capacity.
 				@param[in] metadata The complete built-in metadata record to append.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.9.11
 			*/
 			ATTR_NOINLINE constexpr void addBuiltin(Metadata &&metadata)
 			{
@@ -316,7 +316,7 @@ namespace PocketCore::Registry
 				internal storage index without scanning all registered metadata.
 				@date 08/03/2026
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.9.1
 				@author Matthew Moore
 			*/
 			struct IDIndexEntry
@@ -334,7 +334,7 @@ namespace PocketCore::Registry
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(n), where n is @ref mAmountRegistered.
 				@since 0.5.0
-				@version 0.9.0
+				@version 0.9.1
 			*/
 			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
 			{
@@ -354,7 +354,7 @@ namespace PocketCore::Registry
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(log n), where n is @ref mIndexedAmount.
 				@since 0.5.0
-				@version 0.9.0
+				@version 0.9.1
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const
 			{
@@ -377,7 +377,7 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier key.
 				@param[in] entryIndex The corresponding internal entry index.
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.9.1
 			*/
 			constexpr void insertIDIndex(const StableID stableID, const us entryIndex)
 			{
@@ -401,7 +401,7 @@ namespace PocketCore::Registry
 				@param[in] entryIndex The corresponding internal entry index.
 				@pre The mapping identified by @p stableID and @p entryIndex exists in @ref mIDIndex.
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.9.1
 			*/
 			constexpr void removeIDIndex(const StableID stableID, const us entryIndex)
 			{
@@ -425,7 +425,7 @@ namespace PocketCore::Registry
 				@param[in] rhs Right-hand index entry.
 				@return True when @p lhs is ordered before @p rhs.
 				@since 0.8.7
-				@version 0.8.7
+				@version 0.9.1
 			*/
 			ATTR_NODISCARD static constexpr bool idIndexEntryLess(const IDIndexEntry &lhs, const IDIndexEntry &rhs) noexcept
 			{
@@ -436,7 +436,7 @@ namespace PocketCore::Registry
 				@details Regenerates @ref mIDIndex from @ref mEntries for all indices in [0, @ref mAmountRegistered),
 				then sorts the generated entries with @ref idIndexEntryLess.
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.9.1
 			*/
 			constexpr void rebuildIDIndex() noexcept
 			{

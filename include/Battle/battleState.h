@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 07/31/2026
+	@date 08/07/2026
 	@since 0.3.0
-	@version 0.8.5
+	@version 0.9.16
 	@author Matthew Moore
 */
 
@@ -57,9 +57,9 @@ namespace PocketCore::Battle
 	/*! @struct DamageFormulaModifiers Battle/battleState.h
 		@brief Stores multiplicative modifiers applied to damage-formula statistics.
 		@details A default-constructed instance leaves every supported statistic unchanged by initializing each modifier to 1.0.
-		@date 07/31/2026
+		@date 08/04/2026
 		@since 0.8.5
-		@version 0.8.5
+		@version 0.9.10
 		@author Matthew Moore
 	*/
 	struct DamageFormulaModifiers
@@ -84,9 +84,9 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 07/31/2026
+		@date 08/07/2026
 		@since 0.3.0
-		@version 0.8.5
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	struct BattleSlot
@@ -128,9 +128,9 @@ namespace PocketCore::Battle
 		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
 	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
 		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
-		@date 07/30/2026
+		@date 08/04/2026
 		@since 0.3.0
-		@version 0.8.0
+		@version 0.9.8
 		@author Matthew Moore
 	*/
 	struct BattleState

@@ -1,8 +1,8 @@
 /*! @file battleAction.h
 	@brief Defines actions for battle states.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/13/2026
+	@since 0.10.2
+	@version 0.10.2
 	@author Matthew Moore
 */
 
@@ -25,9 +25,9 @@ namespace PocketCore::Battle
 
 	/*! @struct BattleTarget Battle/battleEngine.h
 		@brief Identifies one active battle slot selected as an effect or move target.
-		@date 08/05/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/07/2026
+		@since 0.9.16
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	struct BattleTarget
@@ -48,9 +48,9 @@ namespace PocketCore::Battle
 
 	/*! @struct MoveAction Battle/battleEngine.h
 		@brief Describes one active Pokemon selecting a move during a turn.
-		@date 08/05/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/07/2026
+		@since 0.9.16
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	struct MoveAction
@@ -71,16 +71,14 @@ namespace PocketCore::Battle
 
 	/*! @struct SwitchAction Battle/battleEngine.h
 		@brief Describes replacing one active Pokemon with a party member.
-		@date 08/05/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/13/2026
+		@since 0.10.2
+		@version 0.10.2
 		@author Matthew Moore
 	*/
 	struct SwitchAction
 	{
 		public:
-			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
-
 			/*! @brief The trainer performing the switch. */
 			Side mSide{Side::A};
 
@@ -89,8 +87,6 @@ namespace PocketCore::Battle
 
 			/*! @brief The zero-based party index of the incoming Pokemon. */
 			ub mPartyIndex{0};
-
-			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	using BattleAction = std::variant<MoveAction, SwitchAction>;

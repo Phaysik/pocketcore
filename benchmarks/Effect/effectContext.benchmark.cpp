@@ -2,7 +2,7 @@
 	@brief Contains benchmarks for the effect context
 	@date 08/03/2026
 	@since 0.8.7
-	@version 0.8.7
+	@version 0.9.2
 	@author Matthew Moore
 */
 

@@ -1,8 +1,8 @@
 /*! @file typeEffectiveness.h
 	@brief Contains the function declarations for creating a Detailed file description
-	@date 07/26/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.9.4
 	@author Matthew Moore
 */
 
@@ -41,6 +41,8 @@ namespace PocketCore::Type
 	/*! @brief Returns the effectiveness value for a given type effectiveness.
 		@param effectiveNess The type effectiveness to get the value for.
 		@return The effectiveness value as a double.
+		@since 0.9.4
+		@version 0.9.4
 	*/
 	ATTR_NODISCARD constexpr double getEffectivenessValue(const TypeEffectiveness effectiveNess)
 	{

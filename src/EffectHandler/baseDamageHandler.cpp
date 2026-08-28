@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.cpp
 	@brief Contains the base damage effect handler implementation
-	@date 08/03/2026
+	@date 08/07/2026
 	@since 0.7.2
-	@version 0.8.7
+	@version 0.9.16
 	@author Matthew Moore
 */
 

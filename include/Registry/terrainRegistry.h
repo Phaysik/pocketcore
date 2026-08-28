@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined terrains.
-	@date 08/03/2026
+	@date 08/12/2026
 	@since 0.8.0
-	@version 0.8.7
+	@version 0.10.0
 	@author Matthew Moore
 */
 
@@ -16,7 +16,6 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Effect/builtInEffectID.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
@@ -27,7 +26,6 @@ namespace PocketCore::Registry::Terrain
 {
 	using PocketCore::Configuration::MAX_TERRAINS;
 	using PocketCore::Core::us;
-	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Terrain::BuiltinTerrainID;
 	using PocketCore::Terrain::TerrainID;
@@ -41,7 +39,7 @@ namespace PocketCore::Registry::Terrain
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_TERRAINS.
 		@date 08/03/2026
 		@since 0.8.0
-		@version 0.8.7
+		@version 0.9.2
 		@author Matthew Moore
 	*/
 	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>

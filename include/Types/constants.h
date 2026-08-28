@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains the function declarations for creating a Detailed file description
-	@date 07/27/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.4.0
+	@version 0.9.3
 	@author Matthew Moore
 */
 

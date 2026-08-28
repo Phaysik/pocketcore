@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 08/13/2026
+	@since 0.9.10
+	@version 0.10.1
 	@author Matthew Moore
 */
 

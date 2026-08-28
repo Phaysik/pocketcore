@@ -1,8 +1,8 @@
 /*! @file effectMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 07/24/2026
+	@date 08/12/2026
+	@since 0.10.0
 	@version x.x.x
-	@since x.x.x
 	@author Matthew Moore
 */
 
@@ -31,9 +31,9 @@ namespace PocketCore::Effect
 		@brief Stores one effect's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/12/2026
+		@since 0.10.0
+		@version 0.10.0
 		@author Matthew Moore
 	*/
 	struct EffectMeta

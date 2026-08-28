@@ -1,8 +1,8 @@
 /*! @file effectID.h
 	@brief Defines the open identifier used for built-in and user-defined abilities.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/12/2026
+	@since 0.10.0
+	@version 0.10.0
 	@author Matthew Moore
 */
 

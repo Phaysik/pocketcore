@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 08/03/2026
+	@date 08/04/2026
 	@since 0.5.0
-	@version 0.9.0
+	@version 0.9.8
 	@author Matthew Moore
 */
 
@@ -35,6 +35,14 @@ namespace PocketCore::Configuration
 
 	namespace Detail
 	{
+		/*! @brief Returns an independent copy of a metadata record.
+			@tparam Metadata The metadata record type to copy.
+			@param[in] metadata The registered metadata record to copy.
+			@return A copy that can be mutated without affecting the stored entry.
+			@note Inlining is suppressed so the copy remains observable to sanitizers and coverage instrumentation.
+			@since 0.9.8
+			@version 0.9.8
+		*/
 		template <typename Metadata>
 		ATTR_NOINLINE constexpr Metadata cloneMetadata(const Metadata &metadata)
 		{
@@ -53,9 +61,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 08/03/2026
+		@date 08/04/2026
 		@since 0.5.0
-		@version 0.9.0
+		@version 0.9.8
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -261,7 +269,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.9.8
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -301,7 +309,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.9.8
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -343,7 +351,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.9.8
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)

@@ -1,8 +1,8 @@
 /*! @file effectHandlerHelpers.h
 	@brief Contains the effect handler helpers
-	@date 07/29/2026
+	@date 08/04/2026
 	@since 0.7.2
-	@version 0.7.2
+	@version 0.9.11
 	@author Matthew Moore
 */
 
@@ -59,7 +59,7 @@ namespace PocketCore::Effect
 		@return A const reference to the selected team, valid for the lifetime of @p state unless the team is invalidated.
 		@note The state parameter is non-const because the existing helper API accepts @ref BattleState by mutable reference.
 		@since 0.7.2
-		@version 0.7.2
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline const std::vector<BattleSlot> &getTeamConst(BattleState &state, Side side)
 	{
@@ -72,6 +72,8 @@ namespace PocketCore::Effect
 		@param[in] queriedType The type identifier to search for.
 		@return `true` when the slot contains a Pokemon with @p queriedType; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasType(const BattleSlot &battleSlot, const TypeID queriedType)
 	{
@@ -90,6 +92,8 @@ namespace PocketCore::Effect
 		@param[in] expectedName The ability name to search for.
 		@return `true` when a resolved ability name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the ability registry is unavailable, or no ability matches.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																 const std::string_view &expectedName)
@@ -110,6 +114,8 @@ namespace PocketCore::Effect
 		@param[in] abilityID The ability identifier to search for.
 		@return `true` when the slot contains a Pokemon with @p abilityID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByID(const BattleSlot &battleSlot, const AbilityID &abilityID)
 	{
@@ -126,6 +132,8 @@ namespace PocketCore::Effect
 		@param[in] expectedName The item name to search for.
 		@return `true` when a resolved item name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the item registry is unavailable, or no item matches.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHoldsItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																const std::string_view &expectedName)
@@ -146,6 +154,8 @@ namespace PocketCore::Effect
 		@param[in] itemID The item identifier to search for.
 		@return `true` when the slot contains a Pokemon holding @p itemID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHoldsItemByID(const BattleSlot &battleSlot, const ItemID itemID)
 	{
@@ -198,6 +208,8 @@ namespace PocketCore::Effect
 		@param[in] battleSlot The battle slot whose grounding state is inspected.
 		@return `true` when the slot is airborne because it is not grounded and its Pokemon has the Flying type; otherwise, `false`.
 		@note An empty slot is treated as grounded because it cannot satisfy the Flying-type condition.
+		@since 0.9.10
+		@version 0.9.11
 	*/
 	ATTR_NODISCARD static inline bool isBattleSlotUngrounded(const BattleSlot &battleSlot)
 	{
@@ -213,6 +225,8 @@ namespace PocketCore::Effect
 		@param[in] battleSlot The battle slot whose grounding state is inspected.
 		@return The logical negation of @ref isBattleSlotUngrounded.
 		@note An empty slot is treated as grounded.
+		@since 0.9.10
+		@version 0.9.10
 	*/
 	ATTR_NODISCARD static inline bool isBattleSlotGrounded(const BattleSlot &battleSlot)
 	{

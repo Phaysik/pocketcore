@@ -4,6 +4,629 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.10.2] - 2026-08-13
+
+### Added
+
+- Add a _SwitchAction_ struct that describes an active _Pokemon_ selecting a switch during a turn
+- Added a _battleValidation.h_ file that:
+  - Holds a _BattleEngineError_ enum of errors that can occur during a battle
+  - Holds a _BattleResult_ enum to show whether a battle is ongoing or who has won
+  - Holds a _BattlePhase_ enum to determine what state the battle is in
+
+### Changed
+
+- Moved _BattleTarget_ and _MoveAction_ from _battleHelpers.h_ to _battleAction.h_
+
+## [0.10.1] - 2026-08-13
+
+### Changed
+
+- Ran _clang-format_ on _fixedMetadataRegistry.benchmark.cpp_
+
+### Removed
+
+- Removed the effect registry from the _RegistryProvider_
+- Removed the nullptr effect registry in all the tests that mock a _RegistryProivder_
+
+## [0.10.0] - 2026-08-12 (Effect Registry Update)
+
+### Added
+
+- Add a configuration constant that holds the maximum amount of effects that the registry can hold
+- Add a duplicate effect and effect not found error code with their branches implemented in _errorKindToString()_
+- Added a new file to hold the built-in Effect IDs and a function to convert built-in Effect IDs to the stable Effect ID
+- Added a _Effect/constants.h_ file that holds the user readable names for each Effect ID.
+- Add a file that holds the stable Effect ID
+- Added a metadata file for effects that holds the relevant:
+  - User defined name, stable ID, and effect function to apply
+- Added a file that holds the effect registry.
+  - The actual registry class holds a constructor that initializes all the builtin effects:
+  - Get the effect metadata
+  - Get the effect ID
+  - Get the effect name
+  - Get a non-owning span of all the effects
+  - Get the next effect ID
+  - Find the internal array index by stable effect ID
+  - If the registry has an effect:
+    - By user readable name
+    - By stable effect ID
+  - Set the next effect ID
+  - Increment the next effect ID
+- Added in both the source and header files to configure the effect registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the effect metadata
+    - Get the Effect ID
+    - Get the effect name
+    - Get a non-owning span of all the effects
+    - Get the amount of effects registered
+    - If the registry has a effect:
+      - By user readable name
+      - By stable Effect ID
+    - Add a effect
+    - Add in a list of effects
+    - Rename a effect
+    - Update a effect:
+      - By user readable name
+      - By stable Effect ID
+    - Remove a effect:
+      - By user readable name
+      - By stable Effect ID
+- For each of the handlers, add an inline method that can be tied to _EffectMeta_
+- Add handlers for setting:
+  - _rain_
+  - _sandstorm_
+  - _sun_
+- Add empty implementations for these effects:
+  - _flinchHandler_
+  - _psychicTerrainPriorityBlockHandler_
+  - _recoilHandler_
+  - _statusApplyHandler_
+  - _statusRemoveHandler_
+  - _statusTickHandler_
+  - _statusTurnSkipHandler_
+- Add the effect registry to the _RegistryProvider_
+- Added in the effect registry configuration objects to _main.cpp_
+- Add a nullptr effect registry in all the tests that mock a _RegistryProivder_
+
+### Changed
+
+- Change all occurences of _EffectTypeID_ to _BuiltinEffectID_
+
+### Removed
+
+- Removed _effectType.h_
+- Removed _statusChangeEffects()_
+
+## [0.9.19] - 2026-08-07
+
+### Changed
+
+- Change _ATTR\_PURE_ to _ATTR\_CONST_ on:
+  - Non const overload of _activeSlots()_
+  - Non const overload of _party()_
+
+## [0.9.18] - 2026-08-07
+
+### Changed
+
+- Change _ATTR\_PURE_ to _ATTR\_CONST_ on:
+  - Const overload of _activeSlots()_
+  - Const overload of _party()_
+
+## [0.9.17] - 2026-08-07
+
+### Added
+
+- Added _ATTR\_PURE_ to:
+  - Both overloads of _activeSlots()_
+  - _contextSlot_
+  - Both overloads of _party()_
+  - Both overloads of _isHealthy()_
+  - _isActive()_
+  - _isAdjacent()_
+  - _targetExists()_
+  - _sideHasHealthyPokemon()_
+  - _getEffectiveSpeed()_
+  - _makeMoveContext()_
+
+## [0.9.16] - 2026-08-07
+
+### Added
+
+- Add a _BattleTarget_ struct that identifies an active battle slot that is selected as a target
+- Add a _MoveAction_ struct that describes an active _Pokemon_ selecting a move during a turn
+- Add in more helpers for the eventual battle between _Pokemon_
+  - _contextSlot()_
+  - _getEffectiveSpeed()_
+  - _makeMoveContext()_
+  - _applyRecoil()_
+  - _resolveHitCount()_
+- Add if the _BattleSlot_ has had the faint processed
+- Add an accuracy check before hit trigger on the built in moves
+- Create an empty battle engine source file
+
+### Changed
+
+- Apply _clang-format_ on:
+  - _abilityRegistryConfiguration.h_
+  - _abilityRegistryConfiguration.cpp_
+  - _itemRegistryConfiguration.h_
+  - _moveRegistryConfiguration.h_
+  - _pokemon.h_
+- Change all occurences of _float_ to _double_ in _cache.h_
+- Change the base stage, accuracy, and evasion multipliers from _float_ to _double_
+- Chane the early return in _applyMultiplier()_ to normalize to the max of the multiplier and 1
+- Change the intermediate accuracy variable type from _float_ to _double_ in _accuracyCheckHandler.cpp_
+- Change the attack mult and defense mult type from _float_ to _double_ in _baseDamageHandler.cpp_
+- Update the _moveMeta.test.cpp_ and _moveRegistry.test.cpp_ tests with the changes to common _EffectTypeID_ helpers
+
+### Fixed
+
+- Fixed the damage clamp calculation in _effectContext.test.cpp_
+
+### Removed
+
+- Removed the speed boost member variable in _BattleSlot_
+- Remove the _F_ suffix in _accuracyCheckHandler.cpp_
+- Remove _AccuracyCheck_ from each of the common _EffectTypeID_ arrays
+- Remove the _protectEffects()_ and _fieldEffectEffects()_ implementation and their tests
+
+## [0.9.15] - 2026-08-05
+
+### Added
+
+- Add early return in _applyMultiplier()_ if any of the active multipliers are <= 0
+- Add tests for the _Pokemon_ health bounds
+
+### Changed
+
+- Changed the move priority variable from unsigned byte to signed byte
+
+## [0.9.14] - 2026-08-05
+
+### Added
+
+- Add in helpers for the eventual battle between _Pokemon_:
+  - _getOppositeSide()_
+  - _getSideOrder()_
+  - Const and non-const variants of _activeSlots()_
+  - Const and non-const variants of _party()_
+  - _isHealthy()_ with a _BattleSlot_
+  - _isHealthy()_ with a _Pokemon_
+  - _isActive()_
+  - _isAdjacent()_
+  - _targetExists()_
+  - _sideHasHealthyPokemon()_
+- Add in a shared:
+  - _BattleTriggerID_
+  - _BattleTargetID_
+  - _BattleRangeID_
+- Add max health member variable with their getter and setter in _Pokemon_ and add it to the constructors
+
+### Changed
+
+- Change all occurences of the following to _BattleTriggerID_:
+  - _AbilityTriggerID_
+  - _ItemTriggerID_
+  - _MoveTriggerID_
+- Change all occurences of the following to _BattleTargetID_:
+  - _AbilityTargetID_
+  - _ItemTargetID_
+  - _MoveTargetID_
+- Change all occurence of _MoveRangeID_ to _BattleRangeID_
+- Change the move base power variable type from unsigned byte to unsigned short
+
+### Removed
+
+- Removed _AbilityEffectTrigger_
+- Removed _ItemEffectTrigger_
+- Removed _MoveEffectTrigger_
+- Deleted _abilityTargetsAndTriggers.h_
+- Deleted _itemTargetsAndTriggers.h_
+- Deleted _moveTargetsAndTriggers.h_
+
+## [0.9.13] - 2026-08-04
+
+### Added
+
+- Add a configuration constant that specifies how many suppression rules can be tied per target
+- Added a suppresion rule struct that holds:
+  - An optional ability ID
+  - An optional item ID
+  - An optional move ID
+  - A variant of the ability, item, and move trigger
+  - The effect source
+- Added the following to _AbilityEffectTrigger_, _ItemEffectTrigger_, and _MoveEffectTrigger_:
+  - An array of suppression rules
+  - The amount of suppression rules actually in use
+
+### Changed
+
+- Moved _AbilityEffectTrigger_ from _abilityTargetsAndTriggers.h_ to _abilityMeta.h_
+- Moved _ItemEffectTrigger_ from _itemTargetsAndTriggers.h_ to _itemMeta.h_
+- Moved _MoveEffectTrigger_ from _moveTargetsAndTriggers.h_ to _moveMeta.h_
+- Moved the _EffectSource_ enum from _effectContext.h_ to _effectSourceAndSuppression.h_
+- Run _clang-format_ on _typeRegistryConfiguration.cpp_
+
+## [0.9.12] - 2026-08-04
+
+### Added
+
+- Added an _OnSuccessfulHit_ to _AbilityTriggerID_
+
+### Changed
+
+- Changed the _Flinch_ ability to trigger _OnSuccessfulHit_ instead of _OnDamageCalc_ and update the test
+
+## [0.9.11] - 2026-08-04
+
+### Added
+
+- Add a configuration constant that specifies how many statuses a _Pokemon_ can have
+- Add if the item is consumable to _ItemMeta_
+- Add a getter and setter to grab all the statuses a _Pokemon_ has
+- Add in a method to add a status to the _Pokemon_
+- Add _ATTR\_NOINLINE_ to _addBuiltin()_
+- Add that _CheriBerry_ and _ChestoBerry_ are consumable in _itemRegistry.h_
+- Add the status interactions on each of the built in statuses
+- Add a file that helps with status interactions:
+  - _hasInteraction()_
+  - _willBlockIncoming()_
+  - _statusAlreadyExists()_
+  - _statusReplaceHandler()_
+  - _statusRemoveHandler()_
+  - _shiftAndGetNextAvailableStatus()_
+- Add a _StatusInteractionAction_ that will specify how the statuses will interact with each other
+- Add a struct that will hold the _StatusID_ and the _StatusInteractionAction_
+- Add a vector of status interactions in _StatusMeta_
+- Add tests for the statuses in _pokemon.test.cpp_
+
+### Changed
+
+- Reorder member variables in _BattleSlot_
+- Rename _mForceGrounded_ to _mIsGrounded_ and update all call sites
+- Change the _Pokemon_ class to have an array of statuses instead of just one _StatusID_
+- Update _getStatusID()_ to take in an array index parameter
+- Update _burnDamageHandler.cpp_ to use the new status helper functions
+
+### Removed
+
+- Removed the variable in _BattleSlot_ that says if the item was consumed
+- Removed the _setStatus()_ method
+
+## [0.9.10] - 2026-08-04
+
+### Added
+
+- Add _Levitate_ and _Elevate_ to the _builtInAbilityID_
+- Add _AirBalloon_  to the _builtInItemID_
+- Add a value to _BattleSlot_ to force it to be grounded
+- Add in new confguration constants:
+  - The electric buff in electric terrain base damage value
+  - The grass buff in grassy terrain base damage value
+  - The psychic buff in psychic terrain base damage value
+  - The dragon debuff in misty terrain base damage value
+- Add more functions to _effectHandlerHelpers.h_
+  - _battleSlotHasType()_
+  - _battleSlotHasAbilityByName()_
+  - _battleSlotHasAbilityByID()_
+  - _battleSlotHasItemByName()_
+  - _battleSlotHasItemByID()_
+  - _isBattleSlotUngrounded()_
+  - _isBattleSlotGrounded()_
+- Add _getConstUserBattleSlot()_ and _getConstTargetBattleSlot()_
+- Added a source and header terrain handler which inherits from _IEffectHandler_ that will calculate the terrain part of the base damage multiplier calculation.
+- Add a test suite for _terrainHandler.h_
+
+### Changed
+
+- Update the Ability constants to be inline
+- Change the _DamageFormulaModifiers_ members to be _double_ instead of _float_
+- Remove the constness of the _BattleState_ parameter in all _apply_ functions
+- _getTeamConst()_ takes the _BattleState_ by reference instead of const reference now
+- Update the intermediate _float_ calculations to be _double_ in _baseDamageHandler.cpp_
+- The following files now call the const methods instead of the non-const:
+  - _accuarcyCheckHandler.cpp_
+  - _baseDamageHandler.cpp_
+  - _stabHandler.cpp_
+  - _typeEffectivenessHandler.cpp_
+
+## [0.9.9] - 2026-08-04
+
+### Fix
+
+- Add missing header in _weatherHandler.cpp
+
+## [0.9.8] - 2026-08-04
+
+### Added
+
+- Add _AirLock_ and _CloudNine_ to the _builtInAbilityID_
+- Add _HydroSteam_ to the _builtInMoveID_
+- Added a _cloneMetadata()_ method to prevent inlining warnings
+- Add in new confguration constants:
+  - The fist hit multiplier value for population bomb
+  - The consecutive hit multiplier value for population bomb
+  - The weather nullification multiplier value
+  - The water move in rain multiplier value
+  - The fire move in rain multiplier value
+  - The fire move in harsh sunlight multiplier value
+  - The water move in harsh sunlight multiplier value
+- Added a source and header population bomb handler which inherits from _IEffectHandler_ that will calculate the population bomb part of the damage calculation from Bulbapedia.
+- Added a source and header weather handler which inherits from _IEffectHandler_ that will calculate the weather part of the damage calculation from Bulbapedia.
+- Add a move hit policy file that can differentiate between fixed number of hits and a weighted hit outcome
+- Add the following to _MoveTriggerID_
+  - _BeforeHit_
+  - _OnHit_
+  - _AfterHit_
+- Add _PopulationBomb_ to the _builtInMultiplierID_
+- Add user readable name for _PopulationBomb_ and _Targets_
+- Add the built in population bomb and targets multiplier
+
+### Changed
+
+- Change the weather ID and terrain ID variables in _BattleState_ to have a suffix of _ID_ now
+- Update documentation for _moveMeta.h_
+- Update imports for _moveMeta.h_
+- Change the hit distribution variable to be a hit count policy variable
+- Update both built in moves trigger from _OnTarget_ to _OnHit_ and their tests
+- Changed the _Types_ enum to be called _BuiltInTypeID_ and update all call sites
+- Update _moveRegistryConfiguration.cpp_ to initialize each member variable instead of doing a copy
+
+### Fixed
+- Renamed the current hit variable in _EffectContext_
+- Fix _clang-tidy_ warning in _randomizationHandler.cpp_
+- Add forgotten header in _random.test.cpp_
+
+### Removed
+
+- Removed the total hit count in _EffectContext_
+- Removed the _OnTarget_ move trigger ID
+
+## [0.9.7] - 2026-08-03
+
+### Added
+
+- Add in the total hits and current hit in _EffectContext_
+- Add a hit distribution in _MoveMeta_
+- Added a random number getter that will do decimal values
+- Add in new tests to cover the decimal random number getter
+
+### Changed
+
+- Add brace initialization to _mTriggers_ in _MoveMeta_
+
+## [0.9.6] - 2026-08-03
+
+### Added
+
+- Add in new confguration constants:
+ - The randomization minimum roll
+ - The randomization maximum roll
+- Add _Randomization_ to the _builtInMultiplierID_
+- Add user readable name for _Randomization_
+- Add the built in randomization multiplier
+- Added a source and header burn handler which inherits from _IEffectHandler_ that will calculate the burn part of the damage calculation from Bulbapedia.
+
+### Changed
+
+- Updated _CRITICAL\_HIT\_MULTIPLIER_ to _CRITICAL\_HIT\_MULTIPLIER\_VALUE_ and all the call sites
+- Updated _STAB\_HIT\_MULTIPLIER_ to _STAB\_HIT\_MULTIPLIER\_VALUE_ and all the call sites
+- Updated _STAB\_HIT\_MULTIPLIER_ to _STAB\_HIT\_MULTIPLIER\_VALUE_ and all the call sites
+- Updated _TARGETS\_HIT\_MULTIPLIER_ to _TARGETS\_HIT\_MULTIPLIER\_VALUE_ and all the call sites
+
+### Removed
+
+- Removed the _ATTR\_MAYBE\_UNUSED_ and _attributeMacros.h_ from:
+  - _typeEffectivenessHandler.h_
+  - _typeEffectivenessHandler.cpp_
+
+## [0.9.5] - 2026-08-03
+
+### Added
+
+- Add _Guts_ to the _builtInAbilityID_
+- Add user readable name for _Guts_
+- Add _Facade_ to the _builtInMoveID_
+- Add _Burn_ to the _builtInMultiplierID_
+- Add user readable name for _Burn_
+- Add the built in burn multiplier
+- Add in a new configuration constant that will set how much the damage is affected when the _Pokemon_ is burned
+- Added a source and header burn handler which inherits from _IEffectHandler_ that will calculate the burn part of the damage calculation from Bulbapedia.
+
+## [0.9.4] - 2026-08-03
+
+### Added
+
+- Add in new configuration constants:
+  - The value of a not very effective move hit
+  - The value of an effective move hit
+  - The value of a super effective hit
+  - The value of a no effective hit
+- Added a function to convert a _TypeEffectiveness_ to one of the configuration constants
+
+### Changed
+
+- Update the following variables from _float_ to _double_
+  - _BASE\_MULTIPLIER\_VALUE_
+  - _CRITICAL\_HIT\_MULTIPLIER\_VALUE_
+  - _STAB\_HIT\_MULTIPLIER\_VALUE_
+  - _TARGETS\_HIT\_MULTIPLIER\_VALUE_
+  - _FIXED\_POINT\_MULTIPLIER\_NUMERATOR_
+  - _FIXED\_POINT\_MULTIPLIER\_DENOMINATOR_
+- Update _effectContext.h_ to change the following from _float_ to _double_
+  - _setMultiplier()_
+  - _getActiveMultiplier()_
+  - _mActiveMultipliers_
+- Update _typeEffectivenessHandler.cpp_ to use the _getEffectivenessValue()_ function instead of having the code be commented out
+
+### Fixed
+
+- Add missing import to:
+  - _typeRegistryConfiguration.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _typeRegistry.test.cpp_
+
+### Remove
+
+- Remove the _F_ suffix in:
+  - _effectContext.test.cpp_
+  - _criticalHitHandler.test.cpp_
+  - _stabHandler.test.cpp_
+  - _targetsHandler.test.cpp_
+
+## [0.9.3] - 2026-08-03
+
+### Changed
+
+- Update the following to use _TypeEffectiveness_: instead of _TypeEffectivenessID_:
+  - _typeRegistryConfiguration.h_
+  - _typeRegistryConfiguration.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _typeRegistry.h_
+  - _typeRegistry.test.cpp_
+  - _Types/constants.h_
+- Renamed _builtInTypeEffectivenessID.h_ to  _typeEffectiveness.h_
+- Update imports of _builtInTypeEffectivenessID.h_ to  _typeEffectiveness.h_
+
+### Removed
+
+- Removed the type effectiveness registry
+- Removed the source and header file for the type effectiveness configuration
+- Removed the configuration constant that specified how many type effectiveness values the registry could hold
+- Removed the multiplier value that was targeted towards type effectiveness
+- Removed the builtin multiplier value for type effectiveness
+- Removed the type effectiveness metadata file
+- Removed the type effectiveness provider in:
+  - _registryProvider.h_
+  - _accuracyCheckHandler.test.cpp_
+  - _baseDamageHandler.test.cpp_
+  - _criticalHitHandler.test.cpp_
+  - _stabHandler.test.cpp_
+  - _targetsHandler.test.cpp_
+
+## [0.9.2] - 2026-08-03
+
+### Added
+
+- Add a configuration constant that holds the maximum amount of type effectiveness that the registry can hold
+- Add a duplicate type effectiveness and type effectiveness not found error code with their branches implemented in _errorKindToString()_
+- Added a file that holds the type effectiveness registry.
+  - The actual registry class holds a constructor that initializes all the builtin type effectiveness':
+  - Get the type effectiveness metadata
+  - Get the type effectiveness ID
+  - Get the type effectiveness name
+  - Get a non-owning span of all the type effectiveness'
+  - Get the next type effectiveness ID
+  - Find the internal array index by stable type effectiveness ID
+  - If the registry has an type effectiveness:
+    - By user readable name
+    - By stable type effectiveness ID
+  - Set the next type effectiveness ID
+  - Increment the next type effectiveness ID
+- Added in both the source and header files to configure the type effectiveness registry.
+  - It holds a struct that contains the configuration policy.
+  - The actual registry configuration class allows the user to:
+    - Get the type effectiveness metadata
+    - Get the Type Effectiveness ID
+    - Get the type effectiveness name
+    - Get a non-owning span of all the type effectivenesss
+    - Get the amount of type effectivenesss registered
+    - If the registry has a type effectiveness:
+      - By user readable name
+      - By stable Type Effectiveness ID
+    - Add a type effectiveness
+    - Add in a list of type effectivenesss
+    - Rename a type effectiveness
+    - Update a type effectiveness:
+      - By user readable name
+      - By stable Type Effectiveness ID
+    - Remove a type effectiveness:
+      - By user readable name
+      - By stable Type Effectiveness ID
+- Add a new type effectiveness multiplier value _Multiplier/constants.h_
+- Add a new built in multiplier for type effectiveness
+- Add the type effectiveness provider in:
+  - _registryProvider.h_
+  - _accuracyCheckHandler.test.cpp_
+  - _baseDamageHandler.test.cpp_
+  - _criticalHitHandler.test.cpp_
+  - _stabHandler.test.cpp_
+  - _targetsHandler.test.cpp_
+- Add builtin _TypeEffectivenessID_ values to _Types/constants.h_
+- Added a metadata file for type effectiveness that holds the relevant:
+  - User defined name, stable ID, and the effectiveness value
+- Added a source and header type effectiveness handler which inherits from _IEffectHandler_ that will calculate the type effectiveness part of the damage calculation from Bulbapedia.
+
+### Changed
+
+- Renamed _builtinAbilityID.h_ to _builtInAbilityID.h_
+- Update imports of _builtinAbilityID.h_ to _builtInAbilityID.h_
+- Renamed _builtinMultiplierID.h_ to _builtInMultiplierID.h_
+- Update imports of _builtinMultiplierID.h_ to _builtInMultiplierID.h_
+- Renamed _builtinItemID.h_ to _builtInItemID.h_
+- Update imports of _builtinItemID.h_ to _builtInItemID.h_
+- Renamed _builtinMoveID.h_ to _builtInMoveID.h_
+- Update imports of _builtinMoveID.h_ to _builtInMoveID.h_
+- Renamed _builtinStatusID.h_ to _builtInStatusID.h_
+- Update imports of _builtinStatusID.h_ to _builtInStatusID.h_
+- Renamed _builtinTerrainID.h_ to _builtInTerrainID.h_
+- Update imports of _builtinTerrainID.h_ to _builtInTerrainID.h_
+- Renamed _builtinWeatherID.h_ to _builtInWeatherID.h_
+- Update imports of _builtinWeatherID.h_ to _builtInWeatherID.h_
+- Renamed _types.h_ to _builtInTypeID.h_
+- Update imports of _types.h_ to _builtInTypeID.h_
+- Renamed _typeEffectiveness.h_ to _builtInTypeEffectivenessID.h_
+- Update imports of _typeEffectiveness.h_ to _builtInTypeEffectivenessID.h_
+- Update the header guard of _typeID.h_
+- Update _Detail::TypeIDTag_ to _Detail::TypeID_
+- Moved _toTypeID()_ from _typeID.h_ to _builtInTypeID.h_
+- Update the following to use _TypeEffectivenessID_ instead of _TypeEffectiveness_:
+  - _typeRegistryConfiguration.h_
+  - _typeRegistryConfiguration.cpp_
+  - _typeRegistryConfiguration.test.cpp_
+  - _typeRegistry.h_
+  - _typeRegistry.test.cpp_
+  - _Types/constants.h_
+
+### Removed
+
+- Removed _ccache_ from:
+  - _codeql-analysis.yml_
+  - _testing.yml_
+  - _Makefile_
+  - _makefileDependencies.sh_
+- Remove useless imports in _typeID.h_
+
+## [0.9.1] - 2026-08-03
+
+### Added
+
+- Add documentation to:
+  - _IDIndexEntry_
+  - Member variables of _IDIndexEntry_
+  - _findEntryIndexByName()_
+  - _findEntryIndexByID()_
+  - _insertIDIndex()_
+  - _removeIDIndex()_
+  - _idIndexEntryLess()_
+  - _rebuildIDIndex()_
+  - Member variables of _FixedMetadataRegistry_
+  - _RegistryProvider_
+  - Member variables of _RegistryProvider_
+  - _Types_
+
+### Changed
+
+- Update the following to use _@_ doxygen comments instead of _\\_:
+  - _attributeMacros.h_
+  - _configCat.h_
+  - _types.h_
+  - _contiguousSequence.h_
+  - _overflowProtection.h_
+
 ## [0.9.0] - 2026-08-03 (Type Registry with Fixed Metadata Registry Update)
 
 ### Added
@@ -1807,6 +2430,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Get the entire type registry as a non-owning view
   - Get the total amount of types registered
 
+[0.10.2]: https://github.com/Phaysik/pocketcore/commit/a76e6814e9c4a56eaf14f1d61781ccf7f3b49f01
+[0.10.1]: https://github.com/Phaysik/pocketcore/commit/19c7b46aa69982f5661553c89926e3e4ca9304b6
+[0.10.0]: https://github.com/Phaysik/pocketcore/compare/v0.9.0...v0.10.0
+[0.9.19]: https://github.com/Phaysik/pocketcore/commit/17f208e5da35a1f896f83aea363b066148a6f9d5
+[0.9.18]: https://github.com/Phaysik/pocketcore/commit/ce47285096501ba3f140e275c0bcbf1ebcd55533
+[0.9.17]: https://github.com/Phaysik/pocketcore/commit/2daa16b939a4ad52c06231d9a6acb9b84e056db3
+[0.9.16]: https://github.com/Phaysik/pocketcore/commit/594e950ef9b32c56f6cb4c0cf11bc442054e0dea
+[0.9.15]: https://github.com/Phaysik/pocketcore/commit/6ddf41c5e2e4d9f15b34ad480de3a65293c57438
+[0.9.14]: https://github.com/Phaysik/pocketcore/commit/7a51a0f1d8a20cf45cbcb51a2f194668883f1757
+[0.9.13]: https://github.com/Phaysik/pocketcore/commit/24ef5d4744da3f1075f92f01f6135975e9aba23a
+[0.9.12]: https://github.com/Phaysik/pocketcore/commit/8da0816d88ac05452b3f00727772ee40896a398d
+[0.9.11]: https://github.com/Phaysik/pocketcore/commit/7515a65c76bf698377dedc48197e19b4155974c2
+[0.9.10]: https://github.com/Phaysik/pocketcore/commit/bc44bf391b1e59888334bf17a61f906e4051649e
+[0.9.9]: https://github.com/Phaysik/pocketcore/commit/702111e3376598faab34a308c2363e78ec97b758
+[0.9.8]: https://github.com/Phaysik/pocketcore/commit/7732ddca583a17ba61b0ed3bc586b437ff909635
+[0.9.7]: https://github.com/Phaysik/pocketcore/commit/2118859498a40801db0e578e2909aa4da7ce2b3d
+[0.9.6]: https://github.com/Phaysik/pocketcore/commit/9f1dee5dcdac493830bf090fba78d0bf14a3a458
+[0.9.5]: https://github.com/Phaysik/pocketcore/commit/1e3a43c5607b964a5ea9f790f816a83a5f5f9326
+[0.9.4]: https://github.com/Phaysik/pocketcore/commit/bb397bf5fff716b858e13c166fb7befece6c3c2f
+[0.9.3]: https://github.com/Phaysik/pocketcore/commit/b60130d6d82bb2029d4d1d72bd67946e55f85cae
+[0.9.2]: https://github.com/Phaysik/pocketcore/commit/ed70413b4dc5f616cc717d07d0010577d6d394df
+[0.9.1]: https://github.com/Phaysik/pocketcore/commit/08c8f792bc9147b861155a0f7027deccb8daa3bf
 [0.9.0]: https://github.com/Phaysik/pocketcore/compare/v0.8.0...v0.9.0
 [0.8.7]: https://github.com/Phaysik/pocketcore/commit/2ce0d1b35250c945834fb7734ce2c1affac56dc0
 [0.8.6]: https://github.com/Phaysik/pocketcore/commit/12734b59dc609938ef9ab95b3ba459f873e8cc64

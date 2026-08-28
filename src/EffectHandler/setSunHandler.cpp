@@ -1,3 +1,11 @@
+/*! @file setSunHandler.cpp
+	@brief Contains the set sun effect handler implementation
+	@date 08/12/2026
+	@since 0.10.0
+	@version 0.10.0
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/setSunHandler.h"
 
 #include <cassert>

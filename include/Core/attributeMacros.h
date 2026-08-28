@@ -1,8 +1,8 @@
 /*! @file attributeMacros.h
 	@brief Declares portable compiler-attribute macros used across PocketCore.
-	@date 05/01/2026
+	@date 08/03/2026
 	@since 0.1.0
-	@version 0.2.18
+	@version 0.9.1
 	@author Matthew Moore
 */
 

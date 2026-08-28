@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 08/03/2026
+	@date 08/04/2026
 	@since 0.1.0
-	@version 0.9.0
+	@version 0.9.8
 	@author Matthew Moore
 */
 
@@ -84,7 +84,7 @@ namespace PocketCore::Registry::Type
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
 		@since 0.1.0
-		@version 0.9.0
+		@version 0.9.8
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -97,7 +97,7 @@ namespace PocketCore::Registry::Type
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.9.8
 			*/
 			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltInTypeID::FinalType).getValue()}
 			{
@@ -223,7 +223,7 @@ namespace PocketCore::Registry::Type
 				@param[in] col The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.3
 			*/
 			ATTR_NODISCARD constexpr TypeEffectiveness getTypeChartCell(const us row, const us col) const
 			{
@@ -238,7 +238,7 @@ namespace PocketCore::Registry::Type
 				@param[in] row The row index.
 				@return A copy of the full effectiveness row for the given type.
 				@since 0.1.0
-				@version 0.5.1
+				@version 0.9.3
 			*/
 			ATTR_NODISCARD constexpr const std::array<TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
 			{
@@ -300,7 +300,7 @@ namespace PocketCore::Registry::Type
 				@param[in] col The defending-type index.
 				@param[in] value The @ref TypeEffectiveness value to store.
 				@since 0.1.0
-				@version 0.4.1
+				@version 0.9.3
 			*/
 			constexpr void setTypeChartCell(const us row, const us col, const TypeEffectiveness value)
 			{
@@ -315,7 +315,7 @@ namespace PocketCore::Registry::Type
 				@param[in] row The row index.
 				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
 				@since 0.1.0
-				@version 0.4.1
+				@version 0.9.3
 			*/
 			constexpr void setTypeChartRow(const us row, const std::array<TypeEffectiveness, MAX_TYPES> &chart)
 			{

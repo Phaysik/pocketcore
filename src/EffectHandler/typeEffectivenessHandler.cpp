@@ -1,3 +1,11 @@
+/*! @file typeEffectivenessHandler.cpp
+	@brief Contains the type effectiveness effect handler implementation
+	@date 08/04/2026
+	@since 0.9.2
+	@version 0.9.10
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/typeEffectivenessHandler.h"
 
 #include <cassert>

@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 07/30/2026
+	@date 08/12/2026
 	@since 0.6.0
-	@version 0.8.2
+	@version 0.10.0
 	@author Matthew Moore
 */
 

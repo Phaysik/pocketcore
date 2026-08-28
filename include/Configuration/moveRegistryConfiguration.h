@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring move metadata.
-	@date 08/03/2026
+	@date 08/07/2026
 	@since 0.6.0
-	@version 0.9.0
+	@version 0.9.16
 	@author Matthew Moore
 */
 
@@ -66,9 +66,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal move registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/03/2026
+		@date 08/07/2026
 		@since 0.6.0
-		@version 0.9.0
+		@version 0.9.16
 		@author Matthew Moore
 	*/
 	class MoveRegistryConfiguration
@@ -205,7 +205,7 @@ namespace PocketCore::Configuration
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.16
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const std::string_view &moveName,
 																				const BattleTargetID target);
@@ -216,7 +216,7 @@ namespace PocketCore::Configuration
 				@param[in] target The target to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.14
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const MoveID moveID, const BattleTargetID target);
 
@@ -236,7 +236,7 @@ namespace PocketCore::Configuration
 				@param[in] moveMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.8
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMove(const std::string_view &moveName, const MoveMeta &moveMeta);
 
@@ -246,7 +246,7 @@ namespace PocketCore::Configuration
 				@param[in] moveMeta The metadata to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.9.8
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMove(const MoveID moveID, const MoveMeta &moveMeta);
 

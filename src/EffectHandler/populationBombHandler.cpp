@@ -1,3 +1,11 @@
+/*! @file populationBombHandler.cpp
+	@brief Contains the population bomb effect handler implementation
+	@date 08/04/2026
+	@since 0.9.8
+	@version 0.9.10
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/populationBombHandler.h"
 
 #include <cassert>

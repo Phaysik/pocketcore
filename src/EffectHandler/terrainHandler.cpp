@@ -1,3 +1,11 @@
+/*! @file terrainHandler.cpp
+	@brief Contains the terrain effect handler implementation
+	@date 08/04/2026
+	@since 0.9.10
+	@version 0.9.10
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/terrainHandler.h"
 
 #include <cassert>

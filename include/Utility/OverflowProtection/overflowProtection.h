@@ -1,8 +1,8 @@
 /*! @file overflowProtection.h
 	@brief Declares constexpr helpers for overflow-safe unsigned multiplication.
-	@date 07/26/2026
+	@date 08/30/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.9.1
 	@author Matthew Moore
 */
 

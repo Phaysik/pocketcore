@@ -1,8 +1,8 @@
 /*! @file effectRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined effects.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/12/2026
+	@since 0.10.0
+	@version 0.10.0
 	@author Matthew Moore
 */
 
@@ -82,9 +82,9 @@ namespace PocketCore::Registry::Effect
 		@details Built-in effects are registered during construction with IDs derived from @ref BuiltinEffectID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_EFFECTS.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/12/2026
+		@since 0.10.0
+		@version 0.10.0
 		@author Matthew Moore
 	*/
 	class EffectRegistry : private FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
@@ -94,7 +94,10 @@ namespace PocketCore::Registry::Effect
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID.
+				@since 0.10.0
+				@version 0.10.0
+			 */
 			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Effect::EFFECT_NAME_NONE, .mEffectID = toEffectID(BuiltinEffectID::None)});
@@ -233,6 +236,8 @@ namespace PocketCore::Registry::Effect
 				@param[in] effectID The stable effect identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr const EffectMeta *getEffectMetadata(const EffectID effectID) const
 			{
@@ -242,6 +247,8 @@ namespace PocketCore::Registry::Effect
 			/*! @brief Looks up an effect ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<EffectID> getEffectID(const std::string_view &name) const
 			{
@@ -251,6 +258,8 @@ namespace PocketCore::Registry::Effect
 			/*! @brief Looks up an effect display name by stable ID.
 				@param[in] effectID The stable effect identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getEffectName(const EffectID effectID) const
 			{
@@ -259,6 +268,8 @@ namespace PocketCore::Registry::Effect
 
 			/*! @brief Returns all currently registered effect definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr const std::span<const EffectMeta> getRegisteredEffects() const noexcept
 			{
@@ -267,6 +278,8 @@ namespace PocketCore::Registry::Effect
 
 			/*! @brief Returns the next stable ID assigned to a custom effect.
 				@return The underlying numeric value of the next effect ID.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr us getNextEffectID() const noexcept
 			{
@@ -276,6 +289,8 @@ namespace PocketCore::Registry::Effect
 			/*! @brief Finds an internal array index by stable effect ID.
 				@param[in] effectID The stable effect identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByEffectID(const EffectID effectID) const
 			{
@@ -285,6 +300,8 @@ namespace PocketCore::Registry::Effect
 			/*! @brief Checks whether an effect name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEffect(const std::string_view &name) const
 			{
@@ -294,6 +311,8 @@ namespace PocketCore::Registry::Effect
 			/*! @brief Checks whether an effect ID is registered.
 				@param[in] effectID The stable effect identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			ATTR_NODISCARD constexpr bool hasEffect(const EffectID effectID) const
 			{
@@ -302,13 +321,18 @@ namespace PocketCore::Registry::Effect
 
 			/*! @brief Sets the next custom effect ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.10.0
+				@version 0.10.0
 			*/
 			constexpr void setNextEffectID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom effect ID counter. */
+			/*! @brief Increments the next custom effect ID counter.
+				@since 0.10.0
+				@version 0.10.0
+			 */
 			constexpr void incrementNextEffectID() noexcept
 			{
 				incrementNextID();

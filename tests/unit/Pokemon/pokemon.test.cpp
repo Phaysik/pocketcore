@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 07/31/2026
+	@date 08/05/2026
 	@since 0.4.0
-	@version 0.8.4
+	@version 0.9.15
 	@author Matthew Moore
 */
 

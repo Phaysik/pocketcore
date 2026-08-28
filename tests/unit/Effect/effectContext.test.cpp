@@ -1,8 +1,8 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 08/03/2026
+	@date 08/07/2026
 	@since 0.8.7
-	@version 0.9.0
+	@version 0.9.16
 	@author Matthew Moore
 */
 

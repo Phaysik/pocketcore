@@ -1,3 +1,11 @@
+/*! @file burnDamageHandler.cpp
+	@brief Contains the burn damage effect handler implementation
+	@date 08/04/2026
+	@since 0.9.5
+	@version 0.9.11
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/burnDamageHandler.h"
 
 #include <cassert>

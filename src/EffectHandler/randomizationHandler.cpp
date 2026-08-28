@@ -1,3 +1,11 @@
+/*! @file randomizationHandler.cpp
+	@brief Contains the randomization effect handler implementation
+	@date 08/04/2026
+	@since 0.9.6
+	@version 0.9.10
+	@author Matthew Moore
+*/
+
 #include "EffectHandler/randomizationHandler.h"
 
 #include <cassert>

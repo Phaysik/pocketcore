@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 08/03/2026
+	@date 08/04/2026
 	@since 0.7.2
-	@version 0.8.7
+	@version 0.9.10
 	@author Matthew Moore
 */
 
@@ -26,9 +26,9 @@ namespace PocketCore::Effect
 		 metadata. The static accessors resolve the user or target slot identified by the context.
 		@warning The context indexes must refer to existing slots in the selected side's team.
 		@note The class is not copyable or movable.
-		@date 08/03/2026
+		@date 08/04/2026
 		@since 0.7.2
-		@version 0.8.2
+		@version 0.9.10
 		@author Matthew Moore
 	*/
 	class IEffectHandler
@@ -104,6 +104,8 @@ namespace PocketCore::Effect
 				@return A const reference to the user's battle slot, valid while the selected team is not invalidated.
 				@pre `context.mUserIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
+				@since 0.9.10
+				@version 0.9.10
 			*/
 			static const BattleSlot &getConstUserBattleSlot(BattleState &state, EffectContext &context)
 			{
@@ -136,6 +138,8 @@ namespace PocketCore::Effect
 				@return A const reference to the target's battle slot, valid while the selected team is not invalidated.
 				@pre `context.mTargetIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
+				@since 0.9.10
+				@version 0.9.10
 			*/
 			static const BattleSlot &getConstTargetBattleSlot(BattleState &state, EffectContext &context)
 			{

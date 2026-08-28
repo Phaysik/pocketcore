@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 08/05/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/07/2026
+	@since 0.9.16
+	@version 0.9.16
 	@author Matthew Moore
 */
 

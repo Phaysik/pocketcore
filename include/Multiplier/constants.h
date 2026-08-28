@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the multiplier registry.
-	@date 07/31/2026
+	@date 08/04/2026
 	@since 0.8.1
-	@version 0.8.3
+	@version 0.9.8
 	@author Matthew Moore
 */
 
