@@ -8,2117 +8,1377 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Added
 
-- Added three critical battle execution methods to _BattleEngine_ for handling move effects and damage:
-  - _executeWeightHitCountPolicy()_ - Orchestrates weighted hit distribution for multi-hit moves, managing per-attempt before-hit triggers and suppression scopes to ensure consistent effect resolution across variable hit counts
-  - _executeFixedHitCountPolicy()_ - Handles fixed-count multi-hit moves with optional per-attempt trigger execution, with early termination on miss
-  - _executeDamageApplication()_ - Applies accumulated context damage to target health using active multipliers, with lethal damage clamping to prevent underflow
+- Added three private `BattleEngine` execution helpers:
+  - `executeWeightHitCountPolicy()` runs the target-role `BeforeHit` move trigger once per target for `WeightedHitCount`, with `mHitAttemptIndex == 1`. A miss or cleared `mShouldContinue` skips that target; otherwise, suppressions activated by `BeforeHit` become the per-hit baseline.
+  - `executeFixedHitCountPolicy()` runs the target-role `BeforeHit` move trigger for every `FixedHitCount` attempt and stops the target's hit loop when that trigger marks a miss. The enclosing loop, rather than this helper, checks `mShouldContinue`.
+  - `executeDamageApplication()` applies damage only when `mShouldApplyDamage` is true and base damage is nonzero. It calls `EffectContext::applyMultiplier()`, subtracts the resulting `us` value, and clamps lethal or excess damage to zero health.
 
 ### Changed
+
+- Completed `BattleEngine::executeMove()`:
+  - Re-resolves the acting Pokemon, move metadata, and legal targets from the validated action; missing metadata or failed target resolution returns without consuming PP.
+  - Clears prior suppressions, consumes one PP, resolves the hit count, and dispatches `MoveUse` to the user's ability/item sources with role `User`, then to the move's role-`User` effects. Clearing `mShouldContinue` ends the move.
+  - Preserves move-wide suppressions for every target. Each existing target receives a copied context with updated coordinates and a role-`Target` `MoveUse` dispatch; suppressions produced there become the target baseline.
+  - Restores the target suppression baseline for each hit, assigns a one-based attempt index, dispatches `DamageCalculation` to user then target slots, executes the move's role-`Target` `Hit` effects, applies damage and recoil, and processes faints.
+  - After a non-miss, dispatches the user's role-`User` `Hit` event and then the move's role-`Target` `AfterHit` effects. A cleared `mShouldContinue` ends the target loop; otherwise, the next attempt inherits the context but resets damage state and active multipliers.
+  - Skips vanished targets, stops attempts when a target disappears, and clears all active suppressions when execution finishes or is cancelled.
 
 ## [0.10.11] - 2026-08-21
 
 ### Changed
 
-- Optimized GitHub Actions workflow build performance by utilizing maximum available CPU cores:
-  - Updated _codeql-analysis.yml_ to use `make -j$(nproc)` for parallel compilation in static analysis
-  - Updated _testing.yml_ to use `make -j$(nproc)` for parallel compilation in test builds
-  - This reduces CI/CD pipeline execution time by allowing full parallelization on multi-core runners
+- Changed the CodeQL workflow build command from `make` to `make -j$(nproc)`.
+- Changed the test workflow build command from `make build_tests` to `make -j$(nproc) build_tests`.
 
 ## [0.10.10] - 2026-08-21
 
 ### Changed
 
-- Strengthened const-correctness in _hasReserve()_ function signature to prevent unintended Pokemon pointer modifications:
-  - Changed parameter from _std::span<Pokemon \*>_ to _std::span<Pokemon \*const>_
-  - This enforces that the function receives a view of non-modifiable Pokemon pointers, improving API safety and signaling immutable intent to callers
+- Changed the declaration and definition of `hasReserve()` from `const std::span<Pokemon *> &` to `const std::span<Pokemon *const> &`.
+- The span now exposes const pointer elements, so pointers cannot be reassigned through this view. The pointed-to `Pokemon` objects remain mutable because the pointee type is still `Pokemon`, not `const Pokemon`.
 
 ## [0.10.9] - 2026-08-21
 
-### Added
-
-- Comprehensive Doxygen documentation added to 31 battle helper functions in _battleHelpers.h_ and _battleEngine.h_:
-  - Core party management: _hasReserve()_, _getOppositeSide()_, _getSideOrder()_, _sideHasHealthyPokemon()_
-  - Active slot utilities: _activeSlots()_, _party()_, _isActive()_, _isHealthy()_, _isAdjacent()_, _contextSlot()_
-  - Battle validation: _anyPartyPokemonNull()_, _hasDuplicatePokemonPointers()_, _healthyPokemonInParty()_, _assignActiveSlots()_, _canTarget()_
-  - Turn execution: _getEffectiveSpeed()_, _makeMoveContext()_, _handleMovePrioritization()_, _applyRecoil()_, _resolveHitCount()_
-  - Action processing: _getMoveTargets()_, _validateMoveAction()_, _validateSwitchAction()_, _getBattleTarget()_, _getValidationResult()_, _getResult()_, _appendSide()_, _targetExists()_
-
 ### Changed
 
-- Applied _clang-format_ code style standardization to 5 battle-related header and test files:
-  - _battleEngine.h_, _battleTargetsAndTriggers.h_, _effectSourceAndSuppression.h_, _moveMeta.h_, _moveRegistryConfiguration.test.cpp_
-- Enhanced _hasReserve()_ parameter type from _std::span<Pokemon \*>_ to _std::span<Pokemon \*const>_ for improved const-correctness
+- Added Doxygen contracts to the existing `BattleEngine` constructor, `executeTurn()`, `startBattle()`, `getState()`, and `switchPokemon()` APIs, including ownership, lifetime, phase, error, and action-count behavior.
+- Added Doxygen contracts to existing battle helpers covering side selection, active-slot and party access, health and adjacency queries, target existence, context construction, recoil and hit-count resolution, party validation and assignment, result/reserve calculation, move-target resolution, move/switch validation, action visitation, and move prioritization.
+- Changed `hasReserve()` in this documentation pass from `const std::vector<Pokemon *> &` to `const std::span<Pokemon *> &` in both declaration and definition; its algorithm did not change.
+- Applied formatting and include-order changes to battle headers, the historically named `effectSourceAndSuppresion.h`, move metadata, and the move-registry configuration test. No other runtime behavior changed.
 
 ## [0.10.8] - 2026-08-18
 
 ### Added
 
-- Introduced _BattleEventRole_ struct to categorize participants in battle events:
-  - Distinguishes between User (active Pokemon using an ability/item), Target (receiving the effect), and Any (flexible matching)
-  - Enables more granular trigger filtering and conditional effect execution based on role context
-- Introduced _BattleEventID_ struct to uniquely identify trigger events in the battle system:
-  - Replaces the previous _BattleTriggerID_ with an event-centric model
-  - Supports ability triggers, item triggers, move triggers, and battle state transitions
-- Added comprehensive documentation to _BattleTargetID_ and _BattleRangeID_ structs explaining targeting mechanics and range resolution
+- Added `BattleEventID : ub` with ordered values `BattleStart`, `SwitchIn`, `TurnEnd`, `DamageCalculation`, `MoveUse`, `Hit`, `AfterHit`, `Faint`, `WeatherChanged`, and `StatusChanged`.
+- Added `BattleEventRole : ub` with `Any`, `User`, and `Target`, separating participant perspective from event identity.
+- Added `mRole` to `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger`. It defaults to `BattleEventRole::Any`; built-in metadata assigns explicit roles where an old trigger encoded user or target perspective.
 
 ### Changed
 
-- Refactored all occurrences of _BattleTriggerID_ to use the new _BattleEventID_ and _BattleEventRole_ pair:
-  - Improves separation of concerns between event identification and participant roles
-  - Simplifies effect dispatch logic by combining role information with event identity
-- Extracted shared `PocketCore::` namespace prefixes into `using` statements for improved code clarity in:
-  - _abilityRegistry.h_, _effectRegistry.h_, _itemRegistry.h_, _moveRegistry.h_, _multiplierRegistry.h_, _statusRegistry.h_, _terrainRegistry.h_, _typeRegistry.h_
-
-### Fixed
-
-- Added missing `#include` directives to _battleHelpers.cpp_ to resolve compilation issues
+- Replaced `BattleTriggerID` throughout metadata, suppression rules, engine dispatch, helpers, and tests with the `BattleEventID` plus `BattleEventRole` pair.
+- Collapsed perspective-specific damage-calculation, move-use, and successful-hit triggers into shared event IDs carrying `User` or `Target`; lifecycle events use `Any` unless metadata requires a participant role.
+- Changed suppression matching and activation APIs to receive both event ID and role, so a rule must match the event, role, source kind, and any optional source ID before suppressing dispatch.
+- Changed move-trigger and slot-trigger dispatch signatures to carry roles; trigger metadata must match both fields before effects execute.
+- Added required standard-library includes to battle helpers and replaced repeated fully qualified registry-domain names with local `using` declarations. Registry behavior did not change.
 
 ### Removed
 
-- Removed the deprecated _BattleTriggerID_ enum as its functionality is superseded by _BattleEventID_ + _BattleEventRole_
+- Removed `BattleTriggerID` and its perspective-specific enumerators after all call sites moved to `BattleEventID` and `BattleEventRole`.
 
 ## [0.10.7] - 2026-08-18
 
 ### Added
 
-- Expanded _BattleEngine_ with core turn execution methods:
-  - _executeTurn()_ - Main turn loop orchestrating move validation, prioritization, execution, and state refresh
-  - _executeMove()_ - Dispatches a single move through its before-hit, hit/miss, and after-hit triggers
-  - _executeEndTurnTrigger()_ - Processes end-of-turn effects for abilities and items
-- Added battle helper functions for move validation and action processing:
-  - _getValidationResult()_ - Centralizes move/switch action validation logic
-  - _getBattleTarget()_ - Resolves a validated move target from raw target identifier
-  - _handleMovePrioritization()_ - Sorts move actions by priority and speed, with deterministic tie-breaking by side and slot
-- Added _ATTR_NOINLINE_ attribute to _getMetadata()_ method to prevent unwanted compiler inlining
-- Added practical example in _main.cpp_ demonstrating basic turn execution workflow for developers
+- Added public `BattleEngine::executeTurn(std::span<const BattleAction>) -> std::expected<void, BattleEngineError>`:
+  - Rejects unstarted, finished, or replacement-waiting battles and requires exactly one action for every healthy active slot.
+  - Validates each move or switch through `getValidationResult()`, rejects duplicate acting slots, and partitions valid actions into switches and moves.
+  - Executes switches in submitted order, then shuffles and stable-sorts moves by descending signed priority and descending effective speed so shuffle order breaks exact ties.
+  - Revalidates each move immediately before execution, skips an action if its actor is no longer healthy, executes remaining moves, runs turn-end triggers for each healthy slot in side-A/side-B and slot order, processes faints, and refreshes battle phase.
+- Added `getValidationResult()` to visit `BattleAction`, `getBattleTarget()` to derive the acting slot from either variant, and `handleMovePrioritization()` to perform randomized tie-breaking followed by priority/speed ordering.
+- Added initial private `executeMove()` behavior: resolve metadata and targets, consume PP, build one context per target, execute move `BeforeHit`, ability/item user and target damage-calculation triggers, move `OnHit`, recoil and faint processing, user successful-hit triggers, and move `AfterHit`.
+- Added `executeEndTurnTrigger()` to dispatch `OnTurnEnd` to every healthy active slot.
+- Marked `FixedMetadataRegistry::getMetadata()` `ATTR_NOINLINE` in its declaration and definition.
+- Added a `main.cpp` example that creates configured registries and an effect registry, starts a battle, submits a move action, and reads state.
 
 ### Removed
 
-- Removed _configFlags.h_ configuration header (functionality consolidated into other config files)
+- Removed the unused `configFlags.h` header.
 
 ## [0.10.6] - 2026-08-17
 
-### Added
+### Changed
 
-- Added _ATTR_CONST_ attribute to _getState()_ method in _BattleEngine_:
-  - Signals to the compiler that the method produces consistent output based on object state alone, enabling optimization
-  - Improves static analysis and allows compiler optimizations like common subexpression elimination
-
-### Fixed
-
-- Fixed clang-tidy warnings on _getState()_ in _battleEngine.cpp_:
-  - Wrapped compiler-specific code in GCC diagnostic push/pop pragmas to suppress false positives
-  - Maintains code cleanliness while acknowledging unavoidable compiler-specific patterns
+- Added the GNU-style `ATTR_CONST` optimization attribute to the `BattleEngine::getState()` declaration and definition. This compiler function attribute does not change C++ const qualification, ownership, or the returned reference.
+- Wrapped the GCC-only definition with diagnostic push/pop directives suppressing `-Wsuggest-attribute=returns_nonnull`, whose suggested attribute cannot be applied to a reference return. Runtime behavior is unchanged.
 
 ## [0.10.5] - 2026-08-17
 
 ### Added
 
-- Expanded _BattleEngine_ with two essential battle mechanics methods:
-  - _getState()_ - Provides read-only access to the current battle state for query operations
-  - _switchPokemon()_ - Handles active Pokemon substitution with validation of reserve availability
+- Added `BattleEngine::getState() const noexcept`, returning a read-only reference to engine-owned `BattleState` valid for the engine's lifetime.
+- Added private `switchPokemon()` implementation:
+  - During `AwaitingReplacements`, rejects any action not naming a slot in `mRequiredReplacements` with `ReplacementRequired`.
+  - Reuses `validateSwitchAction()` and returns its error without mutation.
+  - Replaces the active slot with a freshly initialized `BattleSlot`, preserving only battlefield position and selecting the party pointer at `mPartyIndex`; occupant-specific stages, counters, modifiers, flags, and faint state reset.
+  - Dispatches `OnSwitchIn` followed by `OnHazardSwitchIn`, then processes resulting faints and refreshes phase/replacement state.
 
 ## [0.10.4] - 2026-08-17
 
 ### Added
 
-- Added _executeMoveEffects()_ method to dispatch and resolve move-triggered effects through the effect system
-- Added move and switch validation helper functions:
-  - _getMoveTargets()_ - Resolves valid targets for a move based on its targeting rules and range
-  - _validateMoveAction()_ - Validates move selection against active Pokemon's move set and accuracy
-  - _validateSwitchAction()_ - Validates switch target exists in reserve and is not fainted
+- Declared private `BattleEngine::executeMove()`, `executeMoveTrigger()`, and `executeMoveEffects()` integration points. In this revision, `executeMove()` remains a placeholder and `executeMoveEffects()` has no implementation; only trigger dispatch is implemented.
+- Implemented `executeMoveTrigger()` to process matching move-trigger records in declaration order, activate each record's suppression rules before suppression evaluation, execute unsuppressed built-in effects, and restore the caller's prior `EffectSource`.
+- Added `getMoveTargets()` to validate acting/move slots, resolve current move metadata, and delegate selector/range expansion to `resolveTargets()`.
+- Added `validateMoveAction()` to reject an unstarted or finished phase, invalid/fainted users, invalid move slots, zero PP, missing move metadata, and invalid target resolution. Accuracy is not validated here.
+- Added `validateSwitchAction()` to reject invalid active or party indices, null/fainted incoming Pokemon, and Pokemon already active on that side.
 
 ### Changed
 
-- Refactored _resolveTargets()_ function from _battleEngine.h_ to _battleHelpers.h_:
-  - Consolidates all target resolution logic in the helpers module for better code organization
+- Moved target resolution from `BattleEngine` into battle helpers. `canTarget()` enforces live occupancy and optional adjacency; `appendSide()` preserves active-slot order; `resolveTargets()` implements all five target selectors and returns `InvalidTarget` for absent, illegal, or empty selections.
 
 ## [0.10.3] - 2026-08-14
 
 ### Added
 
-- Implemented core _BattleEngine_ infrastructure for turn-based battle orchestration:
-  - _startBattle()_ - Initializes battle state with two Pokemon parties, assigns initial active Pokemon with ability/item trigger activation
-  - Suppression scope management for abilities and items with proper RAII cleanup
-  - Trigger dispatch system for ability and item effects
-  - Faint detection and processing with automatic reserve substitution
-  - Battle phase tracking and refresh mechanisms
-- Added comprehensive battle helper functions for party and slot management:
-  - Party validation: _anyPartyPokemonNull()_, _hasDuplicatePokemonPointers()_, _healthyPokemonInParty()_
-  - Slot assignment: _assignActiveSlots()_, _canTarget()_, _appendSide()_
-  - Reserve checking: _hasReserve()_
-  - Battle state queries: _getResult()_
-- Implemented default and deleted constructors/destructors for _BattleState_ to enable proper object lifecycle management
-- Added _getRuntimeRegistry()_ method to all registry configuration classes:
-  - Delegates to internal _getRegistry()_ for runtime access to the underlying registry instance
-- Created _battleState.cpp_ with default destructor to resolve linker warnings from inline definitions
-- Integrated _RegistryProvider_ into _main.cpp_ to demonstrate instantiation and initialization of all registries with a working _BattleEngine_
+- Added the first `BattleEngine` API, constructed from non-owning `RegistryProvider *` and `EffectRegistry *`, with engine-owned `BattleState`, phase, active suppression records, and required replacements.
+- Added `startBattle()` returning `std::expected<void, BattleEngineError>`:
+  - Requires non-null provider/effect registry and all provider registry pointers; rejects repeated starts, null/duplicate party pointers, empty parties, active counts outside `1..3`, insufficient healthy Pokemon, and parties smaller than the active count.
+  - Copies both pointer spans into engine-owned party vectors, assigns the first healthy members to active slots, marks the battle started, sets the action phase, dispatches battle-start and switch-in ability/item triggers, then processes faints.
+- Added ability/item effect dispatch with metadata-order execution, mutable shared `EffectContext`, effect-registry lookup, null metadata/function checks, ability-before-item ordering, metadata target resolution, and restoration of outer context coordinates/source.
+- Added suppression scopes:
+  - Active records retain each `SuppressionRule`, owning slot, and source kind.
+  - Rule counts are clamped to physical spans; matching checks source, trigger, optional ability/item/move ID, and excludes a source from suppressing itself on its owning slot.
+  - Standalone slot triggers clear suppressions before and after dispatch; ability and item rules activate before either source executes.
+- Added faint processing that marks `mFaintProcessed` before dispatch to prevent duplicate recursive events, runs fainted ability/item effects, and recomputes battle phase and required replacements.
+- Added phase refresh: unstarted battles become `NotStarted`, decided results become `Finished`, and otherwise unhealthy active slots are requested only when that side has a healthy reserve; phase becomes `AwaitingReplacements` or `AwaitingActions`.
+- Added party/state helpers for null/duplicate detection, healthy counts, deterministic active assignment, target eligibility, side appending, result calculation, and healthy non-active reserve detection.
+- Added mutable and const `getRuntimeRegistry()` accessors to each domain registry configuration, exposing configuration-owned runtime registries without transferring ownership.
+- Added explicit default construction and out-of-line destruction for `BattleState`; copy and move operations are deleted.
+- Updated `main.cpp` to construct configuration-owned registries, form a `RegistryProvider`, construct an explicit `EffectRegistry`, and pass both pointers to `BattleEngine`.
 
 ### Changed
 
-- Extracted `PocketCore::Configuration::` namespace prefix into `using` statement in _multiplierRegistryConfiguration.h_ for cleaner code
+- Replaced repeated qualification in multiplier-registry configuration with a local namespace `using` declaration; behavior is unchanged.
 
 ### Fixed
 
-- Fixed clang-tidy warnings on _activeSlots()_ in _battleHelpers.cpp_ by wrapping platform-specific code in GCC diagnostic pragmas
+- Added GCC-only diagnostic guards around reference-returning `activeSlots()` overloads to suppress an inapplicable `returns_nonnull` suggestion.
 
 ## [0.10.2] - 2026-08-13
 
 ### Added
 
-- Introduced _SwitchAction_ struct to encapsulate Pokemon switching decisions during battle turns
-- Created comprehensive _battleValidation.h_ header with battle state management enums:
-  - _BattleEngineError_ - Defines all possible errors during battle execution (invalid switches, faulty moves, invalid targets, etc.)
-  - _BattleResult_ - Tracks battle outcome (ongoing, side A won, side B won) for win condition detection
-  - _BattlePhase_ - Enumerates battle progression stages (setup, move execution, end-of-turn) for state machine management
+- Added `battleAction.h` as the shared action model:
+  - `BattleTarget` stores `Side mSide` and zero-based `ub mSlotIndex` and has default equality.
+  - `MoveAction` stores an optional selected target, acting side, zero-based active user slot, and zero-based move slot.
+  - `SwitchAction` stores side, zero-based active slot to replace, and zero-based incoming party index.
+  - `BattleAction` is `std::variant<MoveAction, SwitchAction>`.
+- Added `BattleEngineError : ub` values `BattleAlreadyStarted`, `BattleNotStarted`, `BattleFinished`, `InvalidParty`, `InvalidActiveSlot`, `InvalidPartyIndex`, `InvalidMoveSlot`, `InvalidTarget`, `DuplicateAction`, `ReplacementRequired`, `PokemonFainted`, `PokemonAlreadyActive`, `MoveNotFound`, `AbilityNotFound`, `ItemNotFound`, `NoPP`, and `MissingRegistry`.
+- Added `BattleResult : ub` values `NotStarted`, `InProgress`, `SideAWon`, `SideBWon`, and `Draw`, plus `BattlePhase : ub` values `NotStarted`, `AwaitingActions`, `AwaitingReplacements`, and `Finished`.
 
 ### Changed
 
-- Reorganized action structs for improved module separation:
-  - Moved _BattleTarget_ and _MoveAction_ from _battleHelpers.h_ to new dedicated _battleAction.h_ header
-  - Consolidates all action-related types in single location for better code organization
+- Moved the existing `BattleTarget` and `MoveAction` definitions from `battleHelpers.h` into `battleAction.h`; their data layout and defaults are unchanged.
 
 ## [0.10.1] - 2026-08-13
 
 ### Changed
 
-- Applied _clang-format_ code style standardization to _fixedMetadataRegistry.benchmark.cpp_ for consistent formatting
+- Applied formatting-only changes to the fixed-metadata registry benchmark; benchmark operations and ranges are unchanged.
 
 ### Removed
 
-- Removed the effect registry from _RegistryProvider_:
-  - Effect registry is no longer auto-provided; must be explicitly passed to _BattleEngine_
-  - Improves separation of concerns between registry management and battle engine initialization
-- Removed nullptr effect registry mock instances from all tests that use a mocked _RegistryProvider_:
-  - Tests must now provide valid effect registry instances or explicit null handling
+- Removed the `EffectRegistry *effectRegistry` member and associated forward declarations/usings from `RegistryProvider`.
+- Removed the extra effect-registry field from every test `RegistryProvider` aggregate initializer. Tests no longer provide an effect registry through the provider; explicit `BattleEngine` wiring is introduced in 0.10.3.
 
 ## [0.10.0] - 2026-08-12 (Effect Registry Update)
 
 ### Added
 
-- Implemented comprehensive effect registry system for extensible battle effect management:
-  - Configuration constant `MAX_EFFECTS` to control registry capacity limits
-  - Duplicate effect and effect-not-found error codes with proper `errorKindToString()` branch coverage
-  - New effect registry header with constructor initializing all builtin effects and query methods
-  - Registry provides:
-    - Effect metadata lookup (effect function, name, stable ID)
-    - Registry queries (effect exists by name or ID, get all effects, get next effect ID)
-    - Effect ID to array index mapping for efficient lookup
-- Created effect registry configuration classes for runtime effect management:
-  - Add/remove effects by name or stable ID
-  - Rename existing effects
-  - Update effect metadata
-  - Comprehensive error handling for duplicate/invalid operations
-- Introduced effect handler infrastructure with inline method bindings for _EffectMeta_:
-  - Weather effect handlers: _setRainHandler_, _setSandstormHandler_, _setSunHandler_
-  - Status handlers: _statusApplyHandler_, _statusRemoveHandler_, _statusTickHandler_, _statusTurnSkipHandler_
-  - Action handlers: _flinchHandler_, _psychicTerrainPriorityBlockHandler_, _recoilHandler_
-- Integrated effect registry into _RegistryProvider_ for centralized registry access
-- Added mock effect registry instances in all test suites using _RegistryProvider_
-- Added effect registry initialization examples in _main.cpp_
+- Added open `EffectID`, with zero-valued `NO_EFFECT_ID`, and `BuiltinEffectID : ub` containing 22 values: `None`, `CriticalHit`, `BaseDamage`, `Targets`, `Weather`, `Terrain`, `PopulationBomb`, `Randomization`, `Stab`, `TypeEffectiveness`, `BurnDamageReduction`, `Flinch`, `Recoil`, `StatusApply`, `StatusRemove`, `StatusTurnSkip`, `StatusTick`, `AccuracyCheck`, `SetSandstorm`, `SetSun`, `SetRain`, and `PsychicTerrainPriorityBlock`.
+- Added `EffectMeta` with non-owning `std::string_view mName`, `EffectFunction mApply`, and stable `EffectID mEffectID`. `EffectFunction` is `void (*)(BattleState &, EffectContext &, const RegistryProvider &)`. No effect flags exist in this revision.
+- Added `EffectRegistry`, privately based on `FixedMetadataRegistry` with `MAX_EFFECTS == 1'000`. Construction registers all 22 built-ins; public wrappers expose metadata/name/ID lookup, registered spans, containment, index lookup, counters, mutation primitives, and next-ID management.
+- Added `EffectRegistryConfiguration` with configuration-owned storage and add, batch-add, rename, metadata replacement, remove-by-name/ID, lookup, containment, count, and registered-span APIs through `std::expected`; errors add `EffectAlreadyExists` and `EffectNotFound` branches.
+- Added free inline handler entry points used as `EffectFunction` values for existing class handlers and new flinch, recoil, psychic-terrain priority block, weather-setting, and status apply/remove/tick/turn-skip implementations.
+- Added `EffectRegistry *` to `RegistryProvider` in this revision, updated provider aggregates in tests, and demonstrated effect configuration/lookup in `main.cpp`. Version 0.10.1 removes this provider member.
 
 ### Changed
 
-- Renamed all occurrences of _EffectTypeID_ to _BuiltinEffectID_ for clarity and consistency with other builtin ID types
+- Replaced closed `EffectTypeID` throughout ability/item/move trigger vectors, registries, handlers, and tests with `BuiltinEffectID`; runtime registry APIs use open `EffectID` values.
+- Changed built-in metadata and tests to use registered handler functions directly.
 
 ### Removed
 
-- Removed _effectType.h_ header (functionality consolidated into builtin effect ID files)
-- Removed _statusChangeEffects()_ utility function (superseded by individual effect handlers)
+- Removed `effectType.h` after its enum moved to `builtInEffectID.h` and `effectID.h`.
+- Removed predefined move-effect helpers `baseAttackEffects()`, `baseAttackWithRecoil()`, `baseAttackWithStatus()`, `baseAttackWithFlinch()`, `statusChangeEffects()`, `protectEffects()`, and `fieldEffectEffects()`, together with their tests; built-in registries now define effect lists directly.
 
 ## [0.9.19] - 2026-08-07
 
 ### Changed
 
-- Refined compiler optimization hints by changing _ATTR_PURE_ to _ATTR_CONST_ on non-const overloads:
-  - Non-const _activeSlots()_ - Signals method doesn't depend on object state, enabling more aggressive optimizations
-  - Non-const _party()_ - Improves const-ness semantics for non-const view accessors
+- Changed only mutable `activeSlots(BattleState &, Side)` and `party(BattleState &, Side)` declarations and definitions from `ATTR_PURE` to GNU-style `ATTR_CONST` compiler attributes.
+- This is an optimization contract, not C++ `const` qualification and not a change to the mutability of returned references.
 
 ## [0.9.18] - 2026-08-07
 
 ### Changed
 
-- Refined compiler optimization hints by changing _ATTR_PURE_ to _ATTR_CONST_ on const overloads:
-  - Const _activeSlots()_ - Const view accessor can be marked const for better optimization
-  - Const _party()_ - Const view accessor can be marked const for better optimization
+- Changed only the const `activeSlots(const BattleState &, Side)` and `party(const BattleState &, Side)` overload declarations and definitions from the GNU-style `ATTR_PURE` compiler attribute to `ATTR_CONST`.
+- This changes the compiler optimization contract, not C++ `const` qualification or the mutability represented by the returned references.
 
 ## [0.9.17] - 2026-08-07
 
-### Added
+### Changed
 
-- Marked 10 battle helper functions with _ATTR_PURE_ compiler attribute to enable function specialization and optimize common subexpression elimination:
-  - Active slot queries: _activeSlots()_ (both const and non-const), _contextSlot()_
-  - Party access: _party()_ (both const and non-const)
-  - Pokemon status checks: _isHealthy()_ (both const and non-const), _isActive()_, _isAdjacent()_, _targetExists()_
-  - Battle analysis: _sideHasHealthyPokemon()_, _getEffectiveSpeed()_, _makeMoveContext()_
-  - PURE attribute signals that methods depend only on object state with no side effects
+- Added the GNU-style `ATTR_PURE` compiler attribute to the declarations and definitions of 13 battle-helper overloads/functions: both `activeSlots()` overloads, `contextSlot()`, both `party()` overloads, both `isHealthy()` overloads, `isActive()`, `isAdjacent()`, `targetExists()`, `sideHasHealthyPokemon()`, `getEffectiveSpeed()`, and `makeMoveContext()`.
+- No function bodies changed. In particular, the mutable `activeSlots()` and `party()` overloads still return mutable references, and `contextSlot()` still returns a mutable pointer; this entry records the compiler attributes applied by the patch rather than asserting that mutation through those results is side-effect-free.
 
 ## [0.9.16] - 2026-08-07
 
 ### Added
 
-- Introduced fundamental action structures for battle turn resolution:
-  - _BattleTarget_ struct - Encapsulates active Pokemon slot selection as effect target with proper identification
-  - _MoveAction_ struct - Represents a Pokemon's selected move action for the turn
-- Added 5 critical battle helper functions for move and combat analysis:
-  - _contextSlot()_ - Maps participant role to their active Pokemon slot index
-  - _getEffectiveSpeed()_ - Calculates Pokemon speed considering stat stages and ability effects
-  - _makeMoveContext()_ - Constructs move effect context from Pokemon metadata and battle state
-  - _applyRecoil()_ - Applies recoil damage to user after move execution
-  - _resolveHitCount()_ - Determines actual hit count from move distribution (fixed or weighted)
-- Added _mFaintProcessed_ flag to _BattleSlot_ to track which Pokemon have been processed in faint resolution
-- Integrated accuracy check into move execution pipeline before triggering move effects
-- Created empty _battleEngine.cpp_ source file to support inline header definitions
+- Added `BattleTarget` to `battleHelpers.h` with a `Side`, zero-based `ub` slot index, and default equality, and added `MoveAction` with an optional selected target, acting side, zero-based user-slot index, and zero-based move-slot index.
+- Added five battle helpers:
+  - `contextSlot()` returns a mutable slot pointer for a valid side/index pair or `nullptr` when the index is outside that side's active-slot vector.
+  - `getEffectiveSpeed()` returns zero for an empty slot; otherwise it multiplies the Pokemon's speed by the cached speed-stage multiplier and the slot's speed modifier.
+  - `makeMoveContext()` copies move identity, type, power, accuracy, range, hit index, source, participant coordinates, and damage category into a move-sourced `EffectContext`.
+  - `applyRecoil()` ignores missing users, zero damage, and non-finite or nonpositive recoil ratios; otherwise it floors damage times the recoil ratio, clamps recoil to `1..us::max`, and prevents health underflow.
+  - `resolveHitCount()` returns fixed counts directly and performs weighted selection over finite positive outcomes, returning zero for an invalid total weight.
+- Added `BattleSlot::mFaintProcessed`, defaulting to `false`.
+- Added a documentation-only `battleEngine.cpp` translation unit.
 
 ### Changed
 
-- Applied _clang-format_ code style standardization to 5 registry configuration files for consistent formatting:
-  - _abilityRegistryConfiguration.h_, _abilityRegistryConfiguration.cpp_, _itemRegistryConfiguration.h_, _moveRegistryConfiguration.h_, _pokemon.h_
-- Upgraded all floating-point calculations to _double_ precision for improved numerical accuracy:
-  - Changed _cache.h_ float constants to double
-  - Updated base stage, accuracy, and evasion multipliers to double in _cache.h_
-  - Updated accuracy calculation in _accuracyCheckHandler.cpp_ to use double
-  - Updated attack and defense multiplier calculations in _baseDamageHandler.cpp_ to use double
-- Enhanced _applyMultiplier()_ early return logic to normalize results to minimum multiplier of 1.0
-- Updated test expectations in _moveMeta.test.cpp_ and _moveRegistry.test.cpp_ for new effect type ID constants
-
-### Fixed
-
-- Fixed damage clamping calculation in _effectContext.test.cpp_ to properly handle edge cases
+- Changed the stage, accuracy, and evasion multiplier constants, generated cache arrays, and cache temporaries from `float` to `double`; changed accuracy-handler calculations and base-damage stage multipliers to `double` accordingly.
+- Changed `EffectContext::applyMultiplier()` to normalize each active multiplier with `std::max(multiplier, 1.0)` before fixed-point application. In this revision, zero, negative, and fractional multipliers below one therefore act as `1.0`; after each active multiplier, damage is still clamped to at least one.
+- Moved `AccuracyCheck` out of the common move-effect arrays and added it as a separate `BeforeHit` trigger for Pound and Karate Chop. Their existing damage sequence remains an `OnHit` trigger.
+- Gave the remaining common effect arrays explicit element types and sizes: base attack has 10 effects; recoil, status, and flinch variants have 11; and status change has two.
+- Updated effect-context, move-effect-list, and move-registry tests for multiplier normalization, the shorter arrays, removed helper lists, and the two-trigger built-in move metadata.
+- Applied formatting-only changes to ability, item, and move registry-configuration declarations, one ability-configuration definition, and Pokemon constructor initializers.
 
 ### Removed
 
-- Removed _mSpeedBoost_ member variable from _BattleSlot_ (speed effects now handled through ability/item triggers)
-- Removed 'F' float suffix from accuracy calculations in _accuracyCheckHandler.cpp_ (now using double)
-- Removed _AccuracyCheck_ from common effect type ID arrays (no longer a builtin effect)
-- Removed unimplemented _protectEffects()_ and _fieldEffectEffects()_ functions with their corresponding test suites
+- Removed `BattleSlot::mSpeedBoost`; `getEffectiveSpeed()` now uses `mDamageFormulaModifiers.mSpeedModifier` with the Pokemon's speed and cached stat-stage multiplier.
+- Removed `AccuracyCheck` from `BASE_ATTACK_EFFECTS`, `BASE_ATTACK_WITH_RECOIL`, `BASE_ATTACK_WITH_STATUS`, `BASE_ATTACK_WITH_FLINCH`, and `STATUS_CHANGE_EFFECTS`; the effect type itself remains available.
+- Removed the `PROTECT_EFFECTS` and `FIELD_EFFECT_EFFECTS` arrays, their `protectEffects()` and `fieldEffectEffects()` accessors, and their move-metadata test cases.
 
 ## [0.9.15] - 2026-08-05
 
 ### Added
 
-- Added defensive early-return in _applyMultiplier()_ to prevent zero or negative damage:
-  - When any active multiplier <= 0, returns zero damage immediately
-  - Prevents underflow and ensures non-negative health values
-- Added comprehensive test coverage for _Pokemon_ health boundary conditions:
-  - Maximum health initialization and validation
-  - Minimum health (fainted) edge cases
-  - Health overflow/underflow protection verification
+- Added a Pokemon health-boundary test that verifies construction retains the initial maximum health and `setHealth()` clamps a value above that maximum.
 
 ### Changed
 
-- Changed move priority variable type from `unsigned char` to `signed char`:
-  - Enables proper handling of priority moves with negative priority values
-  - Aligns with Pokemon mechanics (e.g., Trick Room reversing priority)
+- Changed `MoveMeta::mPriority` from `ub` to `sb`, allowing metadata to represent negative as well as nonnegative priorities.
+- Changed `EffectContext::applyMultiplier()` to return zero immediately when it encounters an active multiplier less than or equal to `0.0`; positive multipliers continue through the existing fixed-point rounding and minimum-one clamp.
 
 ## [0.9.14] - 2026-08-05
 
 ### Added
 
-- Implemented comprehensive battle helper functions for Pokemon state queries and side management:
-  - Side identification: _getOppositeSide()_, _getSideOrder()_
-  - Party access: _activeSlots()_, _party()_ (both const and non-const variants)
-  - Individual Pokemon state queries: _isHealthy()_, _isActive()_, _isAdjacent()_
-  - Battle state validation: _targetExists()_, _sideHasHealthyPokemon()_
-- Unified trigger/target/range identification into shared battle structs:
-  - _BattleTriggerID_ - Consolidated trigger identification across abilities, items, and moves
-  - _BattleTargetID_ - Consolidated target specification for all effect sources
-  - _BattleRangeID_ - Unified range specification for move/ability effects
-- Extended _Pokemon_ class with health tracking:
-  - Added _mMaxHealth_ member variable for storing maximum HP
-  - Implemented getter and setter methods for max health
-  - Integrated max health into constructor initialization
+- Added battle-level `BattleTriggerID`, `BattleTargetID`, and `BattleRangeID` enums in `battleTargetsAndTriggers.h` for shared ability, item, and move metadata.
+- Added `battleHelpers.h` and `battleHelpers.cpp` with `getOppositeSide()`, `getSideOrder()`, mutable and const `activeSlots()` and `party()` overloads, `isHealthy()` overloads for slots and Pokemon pointers, `isActive()`, `isAdjacent()`, `targetExists()`, and `sideHasHealthyPokemon()`.
+- Added Pokemon maximum-health state initialized from constructor health, `getMaximumHealth()`, and `setMaximumHealth()`. Health assignments and maximum-health reductions clamp current health to the maximum.
 
 ### Changed
 
-- Unified trigger identification system by consolidating ability/item/move triggers:
-  - Replaced _AbilityTriggerID_, _ItemTriggerID_, _MoveTriggerID_ with unified _BattleTriggerID_
-  - Updated all call sites throughout codebase for consistent trigger handling
-- Unified target identification system by consolidating ability/item/move targets:
-  - Replaced _AbilityTargetID_, _ItemTargetID_, _MoveTargetID_ with unified _BattleTargetID_
-  - Enables consistent target resolution across all effect types
-- Consolidated range identification:
-  - Renamed _MoveRangeID_ to _BattleRangeID_ for clarity and consistency
-- Enhanced move metadata:
-  - Upgraded move base power variable type from `unsigned char` (0-255) to `unsigned short` for greater range and future extensibility
+- Changed `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger` to store `BattleTriggerID`; the three metadata record types remain distinct. Changed ability, item, and move targets to `BattleTargetID`, and changed move range and effect-context range override to `BattleRangeID`.
+- Changed `SuppressionRule::mTargetTrigger` from a variant of the three domain trigger enums to one `BattleTriggerID`.
+- Updated built-in registries, registry-configuration APIs, target handling, and their tests to use the shared battle IDs.
+- Changed `MoveMeta::mPower` from `ub` to `us`.
 
 ### Removed
 
-- Removed separate trigger effect structures (now consolidated in unified system):
-  - Removed _AbilityEffectTrigger_ (functionality integrated into _BattleTriggerID_)
-  - Removed _ItemEffectTrigger_ (functionality integrated into _BattleTriggerID_)
-  - Removed _MoveEffectTrigger_ (functionality integrated into _BattleTriggerID_)
-- Deleted separate target/trigger headers (consolidated into battle-level headers):
-  - Deleted _abilityTargetsAndTriggers.h_
-  - Deleted _itemTargetsAndTriggers.h_
-  - Deleted _moveTargetsAndTriggers.h_
-- Rationale: Unification eliminates code duplication and simplifies trigger/target routing in battle engine
+- Removed `abilityTargetsAndTriggers.h`, `itemTargetsAndTriggers.h`, and `moveTargetsAndTriggers.h` after their trigger, target, and range enums moved to the battle-level header.
 
 ## [0.9.13] - 2026-08-04
 
 ### Added
 
-- Implemented effect suppression system for complex ability/item interactions:
-  - Added _MAX_SUPPRESSION_RULES_PER_TARGET_ configuration constant to control rule limits
-  - Created _SuppressionRule_ struct encapsulating per-target suppression logic with optional ability, item, or move ID constraints
-  - Extended _AbilityEffectTrigger_, _ItemEffectTrigger_, _MoveMoveEffectTrigger_ with:
-    - Array of suppression rules for each effect
-    - Active suppression rule count tracking
-- Moved effect trigger structures to their respective metadata headers for better organization:
-  - _AbilityEffectTrigger_ relocated from _abilityTargetsAndTriggers.h_ to _abilityMeta.h_
-  - _ItemEffectTrigger_ relocated from _itemTargetsAndTriggers.h_ to _itemMeta.h_
-  - _MoveEffectTrigger_ relocated from _moveTargetsAndTriggers.h_ to _moveMeta.h_
-- Relocated _EffectSource_ enum from _effectContext.h_ to dedicated _effectSourceAndSuppression.h_ header
+- Added `MAX_SUPPRESSION_RULES_PER_TRIGGER` with value `2`.
+- Added `SuppressionRule` with optional `mTargetAbilityID`, `mTargetItemID`, and `mTargetMoveID` constraints, a `std::variant<AbilityTriggerID, ItemTriggerID, MoveTriggerID>` named `mTargetTrigger`, and an `EffectSource` named `mTargetSource`.
+- Added a fixed `std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER>` and the historically spelled `ub mSuppresionRuleCount` to `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger`.
 
 ### Changed
 
-- Applied _clang-format_ code style standardization to _typeRegistryConfiguration.cpp_
+- Moved `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger` from their domain target/trigger headers into `abilityMeta.h`, `itemMeta.h`, and `moveMeta.h`, respectively.
+- Moved `EffectSource` from `effectContext.h` into the new, historically misspelled `effectSourceAndSuppresion.h` alongside `SuppressionRule`.
+- Applied formatting-only changes to `typeRegistryConfiguration.cpp`.
 
 ## [0.9.12] - 2026-08-04
 
 ### Added
 
-- Added _OnSuccessfulHit_ trigger type to _AbilityTriggerID_:
-  - Allows abilities to trigger only when move successfully hits (post-accuracy check)
-  - Enables hit-conditional effects like contact-damage abilities
+- Added `AbilityTriggerID::OnSuccessfulHit`.
 
 ### Changed
 
-- Refactored Flinch ability trigger mechanics:
-  - Changed from _OnDamageCalc_ to _OnSuccessfulHit_ to match Pokemon game mechanics
-  - Flinch abilities now only trigger after confirmed hit (skipping damage calc entirely)
-  - Updated corresponding test expectations for new trigger behavior
+- Changed the built-in Stench ability's `Flinch` effect trigger from `AbilityTriggerID::OnDamageCalc` to `AbilityTriggerID::OnSuccessfulHit` and updated its registry test expectation.
 
 ## [0.9.11] - 2026-08-04
 
 ### Added
 
-- Implemented multi-status Pokemon support system:
-  - Configuration constant _MAX_STATUSES_ controlling maximum simultaneous statuses per Pokemon
-  - Added _getStatuses()_ accessor returning span of all current status ailments
-  - Added _addStatus()_ method for applying new status with interaction handling
-  - Added _ATTR_NOINLINE_ to _addBuiltin()_ to prevent inlining of bulk insertion operations
-  - Integrated _CheriBerry_ and _ChestoBerry_ items as consumable status cures
-- Implemented comprehensive status interaction system:
-  - Status interaction metadata in each _StatusMeta_ entry with per-status interaction rules
-  - _StatusInteractionAction_ enum defining interaction behavior (block, replace, stack)
-  - Status interaction resolution functions:
-    - _hasInteraction()_ - Checks if status pair has defined interaction
-    - _willBlockIncoming()_ - Determines if incoming status is blocked
-    - _statusAlreadyExists()_ - Validates duplicate status check
-    - _statusReplaceHandler()_ - Handles status replacement logic
-    - _statusRemoveHandler()_ - Handles status removal and interaction cleanup
-    - _shiftAndGetNextAvailableStatus()_ - Compacts status array after removal
-- Added comprehensive multi-status test coverage in _pokemon.test.cpp_
+- Added `MAX_STATUSES_PER_POKEMON` with value `5`; the existing `MAX_STATUSES` registry capacity remains `1'000`.
+- Added `StatusInteractionAction` values `Coexist`, `ReplaceCurrent`, `RemoveCurrent`, and `BlockIncoming`, plus `StatusInteraction` records and `StatusMeta::mStatusInteractions`.
+- Added status helpers `hasInteraction()`, `willBlockIncoming()`, `statusAlreadyExists()`, `statusReplaceHandler()`, `statusRemoveHandler()`, and `shiftAndGetNextAvailableStatus()` for metadata lookup, blocking, duplicate detection, replacement, removal, and stable compaction.
+- Added `Pokemon::addStatus(StatusID, const StatusRegistry &)`. It ignores the no-status ID and duplicates, applies blocking before mutation, performs replacements and removals, compacts active IDs, clears trailing slots, and appends only when no replacement occurred and capacity remains.
+- Added built-in interaction metadata for Freeze blocking/removal relationships and Toxic replacing Poison.
+- Added Pokemon tests for blocking precedence, single and multiple replacement, removal with compaction, and a full array with no applicable interaction.
 
 ### Changed
 
-- Reorganized _BattleSlot_ member variables for improved cache locality and maintainability
-- Renamed _mForceGrounded_ to _mIsGrounded_ throughout codebase for clarity (all call sites updated)
-- Upgraded _Pokemon_ to store array of statuses instead of single status:
-  - Changed from `StatusID mStatus` to `StatusID mStatuses[MAX_STATUSES]`
-  - Updated all status queries and modifications to work with array
-- Refactored _getStatusID()_ to accept array index parameter for multi-status access
-- Updated _burnDamageHandler.cpp_ to use new status helper functions for proper status array iteration
+- Replaced Pokemon's single `StatusID` with `std::array<StatusID, MAX_STATUSES_PER_POKEMON>`. Added `getStatusesArray()` returning a const array reference, `setStatusesArray()`, and indexed `getStatusID(us)`, which asserts that the index is in range; this revision does not add a span-returning status accessor.
+- Changed burn detection to search the fixed status array through `statusAlreadyExists()`.
+- Marked `FixedMetadataRegistry::addBuiltin()` `ATTR_NOINLINE`.
+- Marked the built-in Cheri Berry and Chesto Berry metadata as consumable.
+- Renamed `BattleSlot::mForceGrounded` to `mIsGrounded` and reordered `mPosition` before the slot counters.
 
 ### Removed
 
-- Removed _mItemConsumed_ flag from _BattleSlot_ (item consumption now tracked separately in effect context)
-- Removed _setStatus()_ method (replaced by _addStatus()_ with interaction handling)
+- Removed `BattleSlot::mItemConsumed`.
+- Removed `Pokemon::setStatus()` with the single-status field.
 
 ## [0.9.10] - 2026-08-04
 
 ### Added
 
-- Added three new ability types to _builtInAbilityID_:
-  - _Levitate_ - Negates ground-type immunity interactions
-  - _Elevate_ - Variant levitation for specific interactions
-- Added _AirBalloon_ item to _builtInItemID_ for held item grounding mechanics
-- Added _mIsGrounded_ flag to _BattleSlot_ to track whether Pokemon is grounded (ignores Levitate/AirBalloon)
-- Implemented terrain-based damage multiplier configuration constants:
-  - _ELECTRIC_TERRAIN_BUFF_VALUE_ - Electric terrain base damage boost
-  - _GRASSY_TERRAIN_BUFF_VALUE_ - Grassy terrain base damage boost
-  - _PSYCHIC_TERRAIN_BUFF_VALUE_ - Psychic terrain base damage boost
-  - _MISTY_TERRAIN_DRAGON_DEBUFF_VALUE_ - Misty terrain dragon move reduction
-- Expanded _effectHandlerHelpers.h_ with 7 battle slot classification functions:
-  - Type checking: _battleSlotHasType()_
-  - Ability checking: _battleSlotHasAbilityByName()_, _battleSlotHasAbilityByID()_
-  - Item checking: _battleSlotHasItemByName()_, _battleSlotHasItemByID()_
-  - Grounding status: _isBattleSlotUngrounded()_, _isBattleSlotGrounded()_
-- Added const battle slot accessors:
-  - _getConstUserBattleSlot()_ - Read-only access to user's active Pokemon slot
-  - _getConstTargetBattleSlot()_ - Read-only access to target's active Pokemon slot
-- Implemented terrain damage handler (_TerrainHandler_) inheriting from _IEffectHandler_:
-  - Calculates terrain-based damage modifiers according to Bulbapedia specifications
-  - Integrates with effect system for automatic terrain bonus application
-- Added comprehensive test suite for _terrainHandler.h_
+- Added exactly two built-in ability enum values, `Levitate` and `Elevate`, and the built-in item enum value `AirBalloon`; this patch does not add registry metadata or grounding behavior for those IDs.
+- Added `BattleSlot::mForceGrounded`, defaulting to `false`.
+- Added terrain constants `ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE`, `GRASS_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE`, and `PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE`, each `1.3`, plus `DRAGON_DEBUFF_IN_TERRAIN_BASE_DAMAGE_VALUE` at `0.5`.
+- Added helper predicates `battleSlotHasType()`, `battleSlotHasAbilityByName()`, `battleSlotHasAbilityByID()`, `battleSlotHoldsItemByName()`, `battleSlotHoldsItemByID()`, `isBattleSlotUngrounded()`, and `isBattleSlotGrounded()`, plus const user/target slot accessors on `IEffectHandler`.
+- Added `TerrainHandler`. It returns when the target is ungrounded; otherwise matching Electric, Grass, Psychic, or Misty/Dragon combinations multiply the user's attack modifier by the corresponding terrain constant.
+- Added terrain-handler tests for grounded and Flying targets under Electric terrain, a Psychic-terrain boost, and the `mForceGrounded` override.
 
 ### Changed
 
-- Converted Ability constants to inline declarations for consistency with other registries
-- Upgraded all _DamageFormulaModifiers_ floating-point members from _float_ to _double_ for increased precision
-- Removed const qualification from _BattleState_ parameters in effect handler _apply()_ functions:
-  - Handlers now receive mutable battle state for conditional state modifications
-- Refactored _getTeamConst()_ to accept _BattleState_ by mutable reference for better flexibility
-- Updated all intermediate calculations in _baseDamageHandler.cpp_ from _float_ to _double_ precision
-- Refactored effect handlers to call const method variants where appropriate:
-  - _accuracyCheckHandler.cpp_, _baseDamageHandler.cpp_, _stabHandler.cpp_, _typeEffectivenessHandler.cpp_
+- Changed all six `DamageFormulaModifiers` members from `float` to `double` and changed base-damage intermediate modifiers to `double`.
+- Changed `IEffectHandler::apply()` and all existing overrides from `const BattleState &` to `BattleState &`; changed `getTeamConst()` to accept mutable `BattleState &`, while read-only handler paths use the new const slot accessors.
+- Defined `isBattleSlotUngrounded()` in this revision as Flying type unless `mForceGrounded` is true. `Levitate`, `Elevate`, and `AirBalloon` are not consulted.
+- Changed the existing ability-name constants to `inline constexpr`.
 
 ## [0.9.9] - 2026-08-04
 
 ### Fixed
 
-- Added missing `#include` directive in _weatherHandler.cpp_ to resolve compilation errors
+- Added the missing `#include <vector>` directive to `src/EffectHandler/weatherHandler.cpp`.
 
 ## [0.9.8] - 2026-08-04
 
 ### Added
 
-- Added two air-based immunity abilities to _builtInAbilityID_:
-  - _AirLock_ - Ability that disables weather effects
-  - _CloudNine_ - Variant air immunity ability
-- Added _HydroSteam_ to _builtInMoveID_ for weather-responsive water move
-- Implemented _cloneMetadata()_ method to prevent compiler inlining warnings on metadata copies
-- Expanded configuration constants for weather and multi-hit mechanics:
-  - First hit multiplier for Population Bomb (initial damage)
-  - Consecutive hit multiplier for Population Bomb (subsequent hits)
-  - Weather nullification multiplier (weather ability override)
-  - Water move effectiveness in rain (1.5x boost)
-  - Fire move penalties in rain (0.5x reduction)
-  - Fire move bonuses in harsh sunlight (1.5x boost)
-  - Water move penalties in harsh sunlight (0.5x reduction)
-- Implemented PopulationBombHandler inheriting from _IEffectHandler_:
-  - Calculates accurate population bomb damage from bulbapedia specifications
-  - Handles variable hit count mechanics per Bulbapedia accuracy
-- Implemented WeatherHandler inheriting from _IEffectHandler_:
-  - Calculates weather-based damage modifiers for all weather types
-  - Integrates with effect system for automatic weather bonus/penalty application
-- Added MoveHitPolicy framework for multi-hit move resolution:
-  - Differentiates between fixed hit counts (e.g., Double Hit = 2) and weighted distributions (e.g., Population Bomb = 2-5)
-  - Provides extensible policy interface for custom hit count behaviors
-- Added three new move trigger types to _MoveTriggerID_:
-  - _BeforeHit_ - Triggers before accuracy check (for ability/item interactions)
-  - _OnHit_ - Triggers after successful hit confirmation
-  - _AfterHit_ - Triggers after all hit effects resolve
-- Added _PopulationBomb_ and updated _Targets_ multiplier definitions with user-readable names
-- Integrated population bomb and targets multiplier builtin entries
+- Added built-in ability IDs `AirLock` and `CloudNine` and the built-in move ID `HydroSteam`.
+- Added `Move::FixedHitCount`, `WeightedHitCountOutcome`, and `WeightedHitCount`; `HitCountPolicy` is a `std::variant` of the fixed and weighted policies. Fixed counts store a `ub`, weighted outcomes store a `ub` hit count and `double` weight, and weighted policies own a `std::vector` of outcomes.
+- Added `MoveTriggerID::BeforeHit`, `MoveTriggerID::OnHit`, and `MoveTriggerID::AfterHit`.
+- Added `BuiltinMultiplierID::PopulationBomb`, display metadata for the `Targets` and `Population Bomb` multipliers, and built-in registry entries for both.
+- Added Population Bomb constants of `1.0` for hit-attempt index 1 and `0.5` for later attempts. `PopulationBombHandler` writes the corresponding multiplier for indices 1 and greater and leaves index 0 unchanged.
+- Added weather constants for nullification (`1.0`), Water in Rain (`1.5`), Fire in Rain (`0.5`), Fire in Harsh Sunlight (`1.5`), and Water in Harsh Sunlight (`0.5`).
+- Added `WeatherHandler`. Air Lock or Cloud Nine on any Pokemon in either party sets the Weather multiplier to `1.0` and returns; otherwise Rain boosts Water and weakens Fire, while Harsh Sunlight boosts Fire or Hydro Steam and weakens other Water moves.
 
 ### Changed
 
-- Renamed weather and terrain ID variables in _BattleState_ with explicit _ID_ suffix for consistency
-- Updated _moveMeta.h_ documentation to reflect new move trigger types and hit policies
-- Refactored move hit distribution from raw array to structured _MoveHitPolicy_ for better type safety
-- Updated all builtin move triggers from deprecated _OnTarget_ to _OnHit_ for consistency
-- Updated corresponding move trigger test expectations
-- Renamed _Types_ enum to _BuiltInTypeID_ for consistency with other builtin ID types
-- Updated all type enum references throughout codebase
-- Refactored _moveRegistryConfiguration.cpp_ to use explicit member initialization instead of copy construction
+- Replaced `MoveMeta::mHitDistribution`, a `std::vector<std::pair<ub, float>>` defaulting to one certain hit, with `mHitCountPolicy`, which defaults to `FixedHitCount{1}`.
+- Replaced `EffectContext::mTotalHits` and `mCurrentHit` with the zero-initialized `ub mHitAttemptIndex` field.
+- Renamed `BattleState::mWeather` and `mTerrain` to `mWeatherID` and `mTerrainID`.
+- Renamed the `Types` enum to `BuiltInTypeID` and updated registry, configuration, Pokemon, handler, and test call sites.
+- Changed Pound, Karate Chop, and test move definitions from `OnTarget` to `OnHit`.
+- Changed both `MoveRegistryConfiguration::updateMove()` overloads to copy each `MoveMeta` member explicitly, including the new hit-count policy.
 
 ### Fixed
 
-- Renamed _mCurrentHit_ variable in _EffectContext_ to _mCurrentHitAttempt_ for clarity
-- Fixed clang-tidy warnings in _randomizationHandler.cpp_ by adding appropriate diagnostic pragmas
-- Added missing `#include` directive in _random.test.cpp_
+- Added the `ATTR_NOINLINE constexpr` `Detail::cloneMetadata()` helper and routed generic metadata mutation copies through it to avoid copy-related compiler inlining diagnostics.
+- Corrected the braced initialization in `randomizationHandler.cpp` and added the missing Catch2 `catch_matchers.hpp` include to `random.test.cpp`.
+- Updated move, type, registry, Pokemon, and configuration tests and includes for the trigger and `BuiltInTypeID` API changes.
 
 ### Removed
 
-- Removed _mTotalHitCount_ from _EffectContext_ (now derived from MoveHitPolicy)
-- Removed deprecated _OnTarget_ move trigger ID (replaced by _OnHit_)
+- Removed `MoveTriggerID::OnTarget`.
 
 ## [0.9.7] - 2026-08-03
 
 ### Added
 
-- Implemented multi-hit move tracking in _EffectContext_:
-  - _mTotalHitCount_ - Total number of hits for the current move execution
-  - _mCurrentHit_ - Current hit number being processed
-- Added _mHitDistribution_ to _MoveMeta_ for flexible hit count specification (fixed or weighted distribution)
-- Implemented _getRandomDouble()_ method for decimal-precision random number generation:
-  - Enables accurate probability-based move mechanics (e.g., hit variance)
-- Added comprehensive test coverage for decimal random number generation
+- Added zero-initialized `ub` fields `EffectContext::mTotalHits` and `mCurrentHit` for multi-hit tracking.
+- Added `MoveMeta::mHitDistribution` as `std::vector<std::pair<ub, float>>`, initialized to `{{1, 1.0F}}`.
+- Added the floating-point `Random::get<T>(min, max)` overload, implemented with `std::uniform_real_distribution<T>` over `[min, max)`.
+- Added tests that bound a `double` draw to `[0.45, 0.63)` and verify deterministic floating-point output after reseeding the shared generator.
 
 ### Changed
 
-- Applied brace initialization to _mTriggers_ member in _MoveMeta_ for consistency with modern C++ practices
+- Value-initialized `MoveMeta::mTriggers` with `{}`.
 
 ## [0.9.6] - 2026-08-03
 
 ### Added
 
-- Implemented randomization effects configuration constants:
-  - Randomization minimum roll value (1/255)
-  - Randomization maximum roll value (240/255)
-- Added _Randomization_ multiplier to _builtInMultiplierID_ for damage variance
-- Added user-readable name for Randomization multiplier
-- Integrated randomization multiplier into builtin multiplier registry
-- Implemented BurnDamageHandler inheriting from _IEffectHandler_:
-  - Calculates burn-reduced damage according to Bulbapedia specifications (0.5x damage)
-  - Applies only to physical moves and works with abilities like Guts
+- Added `ub` randomization bounds `RANDOMIZATION_MULTIPLIER_MIN_VALUE{85}` and `RANDOMIZATION_MULTIPLIER_MAX_VALUE{100}`.
+- Added the `Randomization` built-in multiplier ID, display name, and registry metadata.
+- Added `RandomizationHandler`, which calls `Random::get<ub>(85, 100)`, divides the inclusive integer result by `100`, and stores the resulting `0.85` through `1.0` Randomization multiplier.
 
 ### Changed
 
-- Standardized multiplier constant naming by adding _VALUE_ suffix:
-  - _CRITICAL_HIT_MULTIPLIER_ → _CRITICAL_HIT_MULTIPLIER_VALUE_
-  - _STAB_HIT_MULTIPLIER_ → _STAB_HIT_MULTIPLIER_VALUE_
-  - _TARGETS_HIT_MULTIPLIER_ → _TARGETS_HIT_MULTIPLIER_VALUE_
-  - Updated all call sites throughout codebase
+- Renamed `CRITICAL_HIT_MULTIPLIER`, `STAB_HIT_MULTIPLIER`, and `TARGETS_HIT_MULTIPLIER` with the `_VALUE` suffix and updated handlers and tests.
 
 ### Removed
 
-- Removed unused _ATTR_MAYBE_UNUSED_ and _attributeMacros.h_ from:
-  - _typeEffectivenessHandler.h_, _typeEffectivenessHandler.cpp_
-  - Macros were unnecessary for these implementations
+- Removed the unused `Core/attributeMacros.h` includes and `ATTR_MAYBE_UNUSED` provider annotation from the type-effectiveness handler.
 
 ## [0.9.5] - 2026-08-03
 
 ### Added
 
-- Added _Guts_ ability to _builtInAbilityID_ with user-readable name:
-  - Ability allowing burned/paralyzed/poisoned Pokemon to attack at normal power
-- Added _Facade_ move to _builtInMoveID_:
-  - Status-responsive move with bonus power when user has status ailment
-- Added _Burn_ multiplier to _builtInMultiplierID_ with user-readable name
-- Integrated builtin burn multiplier into registry
-- Added configuration constant for burn damage reduction factor (0.5x):
-  - Specifies how much burn status reduces move damage
-- Implemented BurnDamageHandler inheriting from _IEffectHandler_:
-  - Calculates burn-adjusted damage for moves affected by burn status
-  - Follows Bulbapedia damage calculation specifications
+- Added the `Guts` built-in ability ID and display name and the `Facade` built-in move ID.
+- Added the `Burn` built-in multiplier ID, display name, registry metadata, and `BURN_MULTIPLIER_VALUE{0.5}`.
+- Added `BurnDamageHandler`. It returns for a missing user Pokemon and applies the `0.5` Burn multiplier only when the user is burned, the move is not special, the user does not have Guts, and the move is not Facade.
 
 ## [0.9.4] - 2026-08-03
 
 ### Added
 
-- Implemented type effectiveness multiplier constants for damage calculation:
-  - Not Very Effective (NVE) effectiveness value (0.5x)
-  - Effective (E) effectiveness value (1.0x)
-  - Super Effective (SE) effectiveness value (2.0x)
-  - No Effect (NE) effectiveness value (0.0x)
-- Added _getEffectivenessValue()_ function to convert _TypeEffectiveness_ enum to corresponding multiplier constants
+- Added `NOT_VERY_EFFECTIVE_VALUE{0.5}`, `EFFECTIVE_VALUE{1.0}`, `SUPER_EFFECTIVE_VALUE{2.0}`, and `NO_EFFECTIVE_VALUE{0.0}`.
+- Added `getEffectivenessValue(TypeEffectiveness)`: `NVE` maps to `0.5`, `E` to `1.0`, `SE` to `2.0`, and both `NE` and `NOT_DEFINED` to `0.0`.
 
 ### Changed
 
-- Upgraded all floating-point precision from _float_ to _double_ for improved numerical accuracy:
-  - Configuration constants: _BASE_MULTIPLIER_VALUE_, _CRITICAL_HIT_MULTIPLIER_VALUE_, _STAB_HIT_MULTIPLIER_VALUE_, _TARGETS_HIT_MULTIPLIER_VALUE_, _FIXED_POINT_MULTIPLIER_NUMERATOR_, _FIXED_POINT_MULTIPLIER_DENOMINATOR_
-  - _EffectContext_ methods and members:
-    - Changed _setMultiplier()_ parameter to double
-    - Changed _getActiveMultiplier()_ return type to double
-    - Upgraded _mActiveMultipliers_ array to store double values
-- Refactored _typeEffectivenessHandler.cpp_ to use _getEffectivenessValue()_ function instead of commented-out inline code
+- Changed the base, critical-hit, STAB, targets, and fixed-point multiplier constants from `float` to `double`.
+- Changed `EffectContext::setMultiplier()` to accept `double`, changed active multiplier storage to `std::vector<std::pair<MultiplierID, double>>`, and changed `getActiveMultipliers()` to return the corresponding `std::span`.
+- Changed `TypeEffectivenessHandler` to accumulate a `double` and multiply each defined target-type matchup by `getEffectivenessValue()` before storing the result.
+- Updated multiplier tests and literals for the `double` interfaces.
 
 ### Fixed
 
-- Added missing import directives to:
-  - _typeRegistryConfiguration.cpp_
-  - _typeRegistryConfiguration.test.cpp_
-  - _typeRegistry.test.cpp_
-
-### Removed
-
-- Removed float suffix 'F' from floating-point literals in test files:
-  - _effectContext.test.cpp_, _criticalHitHandler.test.cpp_, _stabHandler.test.cpp_, _targetsHandler.test.cpp_
-  - Unnecessary when using double precision
+- Added missing `Types/builtInTypeID.h` includes to the type-registry configuration source and its configuration and registry tests.
 
 ## [0.9.3] - 2026-08-03
 
 ### Changed
 
-- Refactored type effectiveness system to use enum values directly instead of registry IDs:
-  - Updated all references from _TypeEffectivenessID_ to _TypeEffectiveness_ enum
-  - Simplifies type effectiveness queries by eliminating indirection through ID lookups
-  - Updated files: _typeRegistryConfiguration.h/cpp/test.cpp_, _typeRegistry.h/test.cpp_, _Types/constants.h_
-- Renamed header file _builtInTypeEffectivenessID.h_ to _typeEffectiveness.h_ for clarity
-- Updated all import directives to reference new header name
+- Restored the `TypeEffectiveness` enum and `Types/typeEffectiveness.h`, with `NOT_DEFINED`, `NE`, `NVE`, `E`, and `SE` values.
+- Changed type-chart storage, built-in matchup constants, type-registry configuration APIs, and tests from `TypeEffectivenessID` values back to the enum.
+- Changed `TypeEffectivenessHandler` to read enum chart cells and skip `NOT_DEFINED`; numeric registry lookup and multiplication were removed, leaving the multiplier at its `1.0F` initial value until numeric enum conversion was added in 0.9.4.
 
 ### Removed
 
-- Removed entire type effectiveness registry system:
-  - Type effectiveness registry class and implementations
-  - Type effectiveness registry configuration files
-  - _MAX_TYPE_EFFECTIVENESS_ configuration constant (no longer needed)
-  - Type effectiveness multiplier value from multiplier system
-  - Builtin type effectiveness multiplier entry
-  - Type effectiveness metadata files
-  - Type effectiveness provider from _RegistryProvider_
-  - Type effectiveness dependencies from all test suites:
-    - _registryProvider.h_ and handler test files
-- Rationale: Type effectiveness is now a fixed enum, eliminating need for runtime registry
+- Removed `TypeEffectivenessRegistry`, `TypeEffectivenessRegistryConfiguration`, their source files, and the `RegistryProvider::typeEffectivenessRegistry` pointer.
+- Removed `TypeEffectivenessID`, `BuiltInTypeEffectivenessID`, `TypeEffectivenessMeta`, `NO_TYPE_EFFECTIVENESS_ID`, and `TYPE_EFFECTIVENESS_MAX_AMOUNT`.
+- Removed type-effectiveness provider initialization from handler tests and updated type-registry tests for enum-valued matchups.
 
 ## [0.9.2] - 2026-08-03
 
 ### Added
 
-- Implemented type effectiveness registry for extensible type matchup system:
-  - Configuration constant _MAX_TYPE_EFFECTIVENESS_ controlling registry capacity
-  - Error codes for duplicate type effectiveness and type effectiveness not found with _errorKindToString()_ support
-  - Type effectiveness registry class with constructor initializing all Pokemon-standard type matchups
-  - Registry provides:
-    - Type effectiveness metadata lookup (name, stable ID)
-    - Registry queries (type effectiveness exists by name or ID, get all entries, get next ID)
-    - ID to array index mapping for efficient lookup
-- Created type effectiveness registry configuration classes for runtime type matchup management:
-  - Add/remove/rename type effectiveness by name or stable ID
-  - Update type effectiveness metadata
-  - Comprehensive error handling
-- Added _TypeEffectiveness_ multiplier value to configuration constants
-- Integrated new builtin type effectiveness multiplier into multiplier registry
-- Added type effectiveness provider to _RegistryProvider_ for centralized access
-- Integrated type effectiveness provider into all handler test suites:
-  - _registryProvider.h_, _accuracyCheckHandler.test.cpp_, _baseDamageHandler.test.cpp_, _criticalHitHandler.test.cpp_, _stabHandler.test.cpp_
-  - _targetsHandler.test.cpp_
-- Add builtin _TypeEffectivenessID_ values to _Types/constants.h_
-- Added a metadata file for type effectiveness that holds the relevant:
-  - User defined name, stable ID, and the effectiveness value
-- Added a source and header type effectiveness handler which inherits from _IEffectHandler_ that will calculate the type effectiveness part of the damage calculation from Bulbapedia.
+- Added the open `TypeEffectivenessID`, its `NO_TYPE_EFFECTIVENESS_ID` sentinel, and built-in IDs `NE=0`, `NVE=1`, `E=2`, and `SE=3`.
+- Added `TypeEffectivenessMeta` with a non-owning name, `float` multiplier value, and stable ID.
+- Added the fixed-capacity `TypeEffectivenessRegistry` and `TYPE_EFFECTIVENESS_MAX_AMOUNT{MAX_TYPES_PER_POKEMON * 2}`, which is four. Construction fills all four slots; `NE` explicitly stores `0.0F`, while `NVE`, `E`, and `SE` retain the metadata field's `0.0F` default.
+- Added exact display names `Not Effective`, `Not Very Effective`, `Effective`, and `Super Effective`, plus `DuplicateTypeEffectiveness` and `TypeEffectivenessNotFound` registry errors and their string mappings.
+- Added `TypeEffectivenessRegistryConfiguration` lookup, containment, add, batch-add, rename, update, and remove operations. The exact plural APIs are `getRegisteredTypeEffectivenesss()` and `addTypeEffectivenesss()`.
+- Added the type-effectiveness registry pointer to `RegistryProvider` and initialized it in handler tests.
+- Added the `TypeEffectiveness` built-in multiplier ID, display name, and multiplier-registry metadata.
+- Added `TypeEffectivenessHandler`. For valid Pokemon, a damaging move, and available type and effectiveness registries, it multiplies registered effectiveness metadata across defined target types and stores the result as the Type Effectiveness multiplier.
 
 ### Changed
 
-- Standardized builtin ID header naming convention with camelCase ("builtin" → "builtIn") for consistency:
-  - _builtinAbilityID.h_ → _builtInAbilityID.h_ with updated imports throughout
-  - _builtinMultiplierID.h_ → _builtInMultiplierID.h_ with updated imports throughout
-  - _builtinItemID.h_ → _builtInItemID.h_ with updated imports throughout
-  - _builtinMoveID.h_ → _builtInMoveID.h_ with updated imports throughout
-  - _builtinStatusID.h_ → _builtInStatusID.h_ with updated imports throughout
-  - _builtinTerrainID.h_ → _builtInTerrainID.h_ with updated imports throughout
-  - _builtinWeatherID.h_ → _builtInWeatherID.h_ with updated imports throughout
-  - Rationale: Enforces consistent naming style across all builtin identifier headers
-- Refactored type identification system for improved organization:
-  - Renamed _types.h_ to _builtInTypeID.h_ to align with builtin ID naming convention
-  - Updated all imports to reference new header name
-  - Renamed _typeEffectiveness.h_ to _builtInTypeEffectivenessID.h_ for consistency
-  - Updated all imports accordingly
-- Enhanced type-related headers with improved structure:
-  - Updated header guard in _typeID.h_ for consistency
-  - Renamed namespace/detail types: _Detail::TypeIDTag_ → _Detail::TypeID_
-  - Relocated _toTypeID()_ function from _typeID.h_ to _builtInTypeID.h_ for better organization
-  - Consolidates type ID conversion logic with type constants
-- Refactored type effectiveness usage throughout type system:
-  - Updated following files to use _TypeEffectivenessID_ instead of _TypeEffectiveness_:
-    - _typeRegistryConfiguration.h/cpp/test.cpp_
-    - _typeRegistry.h/test.cpp_
-    - _Types/constants.h_
+- Renamed built-in ID headers for abilities, items, moves, multipliers, statuses, terrains, and weather from `builtin...` to `builtIn...`, updating all includes.
+- Renamed `Types/types.h` to `Types/builtInTypeID.h`, replaced `Types/typeEffectiveness.h` with `Types/builtInTypeEffectivenessID.h`, and updated their consumers.
+- Moved `toTypeID()` from `typeID.h` to `builtInTypeID.h`, changed the `typeID.h` guard, and renamed its detail tag from `TypeIDTag` to `typeID`.
+- Changed type-chart rows, configuration operations, built-in matchup constants, and tests from `TypeEffectiveness` enum values to stable `TypeEffectivenessID` values. Unspecified neutral matchups use the built-in `E` ID; not-defined matchups use `NO_TYPE_EFFECTIVENESS_ID`.
 
 ### Removed
 
-- Removed ccache compiler cache tool from build infrastructure:
-  - Removed from CI/CD workflows: _codeql-analysis.yml_, _testing.yml_
-  - Removed from build system: _Makefile_, _makefileDependencies.sh_
-  - Rationale: Simplifies build pipeline and reduces caching complexity
-- Removed unused import directives from _typeID.h_
-  - Cleanup following type system refactoring
+- Removed `ccache` from the Makefile compiler command, dependency installation script, and CodeQL and testing workflows.
+- Removed obsolete attribute and type-header includes from `typeID.h` after moving `toTypeID()`.
 
 ## [0.9.1] - 2026-08-03
 
 ### Added
 
-- Comprehensive documentation additions to core registry infrastructure:
-  - Index-related documentation: _IDIndexEntry_ struct and member variables, _findEntryIndexByName()_, _findEntryIndexByID()_, _insertIDIndex()_, _removeIDIndex()_, _idIndexEntryLess()_, _rebuildIDIndex()_
-  - Registry documentation: _FixedMetadataRegistry_ member variables explaining state tracking and ID management
-  - Provider documentation: _RegistryProvider_ class and member variables explaining registry access patterns
-  - Type-related documentation: _Types_ enum and identifiers
+- Documented `FixedMetadataRegistry` ID-index internals, lookup and maintenance helpers, fixed storage, registered/indexed counts, and next-ID state.
+- Documented `RegistryProvider` as a bundle of non-owning registry pointers, including lifetime and null-pointer requirements.
+- Documented the `Types` enum, stable-value role, and underlying `ub` storage.
 
 ### Changed
 
-- Modernized documentation format across core headers by converting from old Doxygen syntax (_\\_ comments) to modern format (_@_ comments):
-  - Applied consistently to: _attributeMacros.h_, _configCat.h_, _types.h_, _contiguousSequence.h_, _overflowProtection.h_
-  - Improves documentation consistency and readability throughout codebase
+- Modernized file-level Doxygen syntax and descriptions in exactly seven headers: `Core/attributeMacros.h`, `Core/configCat.h`, `Registry/fixedMetadataRegistry.h`, `Registry/registryProvider.h`, `Types/types.h`, `Utility/Containers/ContiguousSequence/contiguousSequence.h`, and `Utility/OverflowProtection/overflowProtection.h`.
+- Made no runtime behavior changes.
 
 ## [0.9.0] - 2026-08-03 (Type Registry with Fixed Metadata Registry Update)
 
 ### Added
 
-- Extended _fixedMetadataRegistryConfiguration.h_ with read-only registry access patterns:
-  - Mutable registry access for runtime modifications
-  - Const read-only access for safe multi-threaded queries
-- Added template variable to _FixedMetadataRegistry_ for flexible member name handling:
-  - _NameMember_ template parameter enabling type-specific naming conventions
+- Added an optional `NameMember` pointer-to-member template parameter to `FixedMetadataRegistry`, defaulting to `&Metadata::mName`; name lookup and comparison now operate through that member pointer so metadata records with an explicitly selected name field can use the generic registry.
+- Added protected mutable and const `getRegistry()` accessors to `FixedMetadataRegistryConfiguration`, giving derived domain configurations a single path to the registry owned by the generic configuration base.
+- Added mutable and const indexed-entry span helpers in `FixedMetadataRegistry`; ID-index insertion, removal, rebuilding, and lookup reuse these bounded views instead of reconstructing the active range at each access.
 
 ### Changed
 
-- Applied performance optimization attributes to frequently-called registry functions:
-  - _ATTR_PURE_ attribute to _statStageCacheIndex()_, _findIndexByID()_, _StableID findEntryIndexByName()_, _getActiveMultipliers()_ functions
-  - _ATTR_NOINLINE_ attribute to prevent unwanted inlining: _eraseEntry()_, _string_view findEntryIndexByName()_, _TypeRegistry()_ constructor, _span addBuiltin()_
-- Refactored _TypeEntry_ to use member variable prefixes (_m_ prefix) for consistency:
-  - Updated all call sites throughout codebase to use new naming convention
-- Optimized _IDIndexEntry_ lookup functions by caching indexed entries:
-  - _insertIDIndex()_, _removeIDIndex()_, _rebuildIDIndex()_ now call _getIndexedEntries()_ once instead of accessing _mIDIndex_ multiple times
-- Comprehensive refactoring of type registry integration with fixed metadata base:
-  - _typeRegistryConfiguration.h_ methods now delegate to _fixedMetadataRegistryConfiguration.h_ base implementations (delegating patterns for all getter/setter methods)
-  - _typeRegistry.h_ methods now delegate to _fixedMetadataRegistry.h_ base for memory/lookup consistency
-- Enhanced type registry architecture:
-  - Refactored _clearRows()_ to use _getRegistry()_ accessor instead of direct member access
-  - Updated _typeRegistryConfiguration.cpp_ to use _getRegistry()_ for consistent registry access patterns
-- Applied code formatting and consistency passes:
-  - Ran _clang-format_ on 10+ registry and handler files for style consistency
-  - Fixed _clang-tidy_ warnings in 23 source and test files
-  - Extracted namespace prefixes into `using` statements for 7 registry configuration headers
-- Updated _getName()_ method to return templated _NameMember_ instead of hardcoded _mName_ for flexibility
+- Changed `TypeEntry` fields from `name` and `typeID` to `mName` and `mTypeID`, and updated registry, configuration, and test call sites to the prefixed layout.
+- Changed `TypeRegistry` to privately specialize `FixedMetadataRegistry<TypeEntry, TypeID, MAX_TYPES, &TypeEntry::mTypeID, &TypeEntry::mName>`:
+  - Built-in type metadata is registered through the generic base while the type-effectiveness chart remains type-domain storage.
+  - The type registry selectively re-exports generic lookup, registered-span, containment, counter, entry mutation, erasure, and ID-management operations through `using Base::...` declarations.
+  - Type-specific methods continue to expose type names, IDs, metadata, and matchup rows without exposing the base-class relationship publicly.
+- Changed `TypeRegistryConfiguration` to privately inherit the generic fixed-metadata configuration specialization and delegate ordinary add, batch-add, rename, update, remove, lookup, containment, and registered-entry operations to that base; matchup-row and defensive-column operations remain type-specific.
+- Changed type configuration internals, including row clearing and source definitions, to obtain the registry through `getRegistry()` rather than a duplicate direct member.
+- Changed `FixedMetadataRegistry::getName()` and name-based search to dereference `NameMember` instead of assuming a field named `mName`.
+- Applied the exact optimization annotations introduced by this patch:
+  - `ATTR_PURE` on `statStageCacheIndex()`, fixed-registry `findIndexByID()` and `findEntryIndexByID()`, and `EffectContext::getActiveMultipliers()`.
+  - `ATTR_NOINLINE` on fixed-registry `eraseEntry()` and name search, plus the `TypeRegistry` constructor and its span-based built-in registration helper.
+- Updated registry configuration namespace aliases, formatting, include ordering, LCOV/clang-tidy suppressions, and affected tests to match the delegated APIs and renamed type fields; no concurrency guarantee was added.
 
 ### Removed
 
-- Removed member registry variable from _typeRegistryConfiguration.h_ (now uses inherited base implementation):
-  - Eliminates duplication and improves memory efficiency
-- Removed redundant functions from _typeRegistry.h_ that are now inherited from base:
-  - _findEntryIndexByName()_, _findEntryIndexByID()_
-  - Member variables: _mEntries_, _mAmountRegistered_, _mNextTypeID_
+- Removed `TypeRegistryConfiguration`'s direct `TypeRegistry` member; the inherited fixed-metadata configuration now owns the registry used by both generic and type-chart operations.
+- Removed `TypeRegistry`'s duplicate metadata array, registration count, next-ID counter, and hand-written generic name/ID lookup implementations in favor of the fixed-metadata base implementation.
 
 ## [0.8.7] - 2026-08-03
 
 ### Added
 
-- Enhanced build system infrastructure:
-  - Added warnings variable to _Makefile_ for explicit warning control
-  - Excluded _main.cpp_ from benchmark compilation targets
-  - Implemented performance benchmarks for core systems:
-    - Multiplier functionality performance in _EffectContext_
-    - Combined _EffectTypeID_ function performance
-    - Move ID lookup performance at registry full capacity
-- Optimized stat stage caching with helper function:
-  - Added _statStageCacheIndex()_ for centralized cache index calculation
-  - Used by stat multiplier cache functions (_STAT_STAGE_MULTIPLIERS_, _ACCURACY_STAGE_MULTIPLIERS_, _EVASION_STAGE_MULTIPLIERS_)
-- Enhanced _EffectContext_ multiplier system:
-  - Added read-only span accessor for all active multipliers
-  - Added array mapping builtin multiplier values to sparse vector positions (enables O(1) lookup for builtin multipliers)
-  - Added battle context helpers: _getUserBattleSlot()_, _getTargetBattleSlot()_ accessors
-- Optimized move effect functions in _moveMeta.h_:
-  - Applied _ATTR_CONST_ attribute to common _EffectTypeID_ query functions
-  - Changed return types from vectors to non-owning read-only spans for efficiency
-  - Added _noexcept_ specifications
-- Implemented registry erasure functionality:
-  - Added _eraseEntry()_ to _fixedMetadataRegistry.h_ base class
-  - Propagated to all registry types: _abilityRegistry.h_, _itemRegistry.h_, _moveRegistry.h_, _multiplierRegistry.h_, _statusRegistry.h_, _terrainRegistry.h_, _weatherRegistry.h_
-- Introduced stable ID index system for O(log n) lookups:
-  - _IDIndexEntry_ struct containing stable ID and entry position
-  - Sorted stable ID index array with entry count tracking
-  - _insertIDIndex()_ - Inserts ID-index mapping while preserving sorted order
-  - _removeIDIndex()_ - Removes ID-index mapping with compaction
-  - _idIndexEntryLess()_ - Comparator ordering by stable ID then entry index
-  - _rebuildIDIndex()_ - Rebuilds and resorts index from registered entries
-- Added code coverage exclusions:
-  - _lcov_ pragmas in _typeRegistryConfiguration.cpp_ for unreachable branches
-- Added defensive validation:
-  - Attack/defense stat infinity and negativity checks in _baseDamageHandler.cpp_
+- Added `BENCHMARK_WARNINGS`, derived from the normal warning set with `-Winline` and `-Wsuggest-attribute=pure` filtered out, and excluded `main.cpp` from benchmark source discovery.
+- Added three benchmark translation units:
+  - `EffectContext` benchmarks for setting every built-in multiplier, applying the active multiplier sequence, and updating built-in multipliers.
+  - `MoveMeta` benchmarks for constructing the predefined effect-list variants.
+  - A fixed-metadata registry ID-lookup benchmark registered with `DenseRange` to measure indexed lookup across registry occupancy.
+- Added `statStageCacheIndex()`, which clamps signed stages to `[-6, 6]` and translates them to `[0, 12]`; stat, accuracy, and evasion cache users now share the same signed-stage-to-array-index rule.
+- Added `FixedMetadataRegistry::IDIndexEntry`, a fixed-capacity sorted array of `{stable ID, entry index}` records, and an indexed-entry count:
+  - Stable-ID lookup uses `std::lower_bound`, making successful and unsuccessful ID searches logarithmic in the registered entry count.
+  - Insertion preserves stable-ID then entry-index ordering, removal compacts the index, and rebuilding regenerates mappings after entry replacement or count restoration.
+- Added `eraseEntry()` to the generic registry and re-exported it from the ability, item, move, multiplier, status, terrain, and weather registries; erasure compacts metadata and rebuilds the stable-ID index.
+- Added a one-based built-in-ID-to-vector-position array to `EffectContext`:
+  - First insertion records the sparse-vector position for a built-in multiplier.
+  - Later updates of that built-in use direct indexed access, while custom multiplier IDs retain linear search and append behavior.
+  - `getActiveMultipliers()` exposes the active sparse vector as a read-only span, and reset clears both the vector and position map.
+- Added shared `IEffectHandler` helpers for resolving the user and target `BattleSlot` from `BattleState` and `EffectContext`.
+- Added 15 focused Catch2 suite files covering five registry-configuration domains, `EffectContext`, the handler interface and five concrete handlers, move-effect metadata, and the input and random utilities; expanded the existing ability, item, and type configuration suites plus registry, type-chart, contiguous-sequence, and logger coverage.
 
 ### Changed
 
-- Unified benchmark warning management:
-  - Updated benchmark warnings to use explicit benchmark-specific flags instead of mixed compiler warnings
-- Refactored stat multiplier cache usage:
-  - Updated _STAT_STAGE_MULTIPLIERS_, _ACCURACY_STAGE_MULTIPLIERS_, _EVASION_STAGE_MULTIPLIERS_ to call _statStageCacheIndex()_ instead of repeating logic
-- Fixed critical hit calculation:
-  - Changed _MAX_CRITICAL_HIT_VALUE_ from 100 to 99 to account for 0-based counting
-  - Ensures accurate critical hit percentage calculations
-- Simplified registry entry removal:
-  - Refactored _removeEntry()_ to delegate to new _eraseEntry()_ function
-- Updated _fixedMetadataRegistry.h_ documentation for clarity
-- Enhanced ID index integration:
-  - _incrementAmountRegistered()_ now inserts ID index entry
-  - _decrementAmountRegistered()_ now removes ID index entry
-  - _addBuiltin()_ now calls _incrementAmountRegistered()_ instead of manual updates
-  - _findEntryIndexByID()_ now performs binary-search on sorted ID index (O(log n) instead of O(n))
-  - _setEntry()_ and _setAmountRegistered()_ trigger ID index rebuilds
-- Optimized move registry initialization:
-  - Refactored _moveRegistry.h_ effect initialization to use iterator begin/end instead of explicit loops
-- Improved function early returns:
-  - Updated both functions in _contiguousSequence.h_ with early exit patterns
-  - Updated _resetMatchups()_ unexpected return handling
-- Enhanced multiplier processing performance:
-  - _setMultiplier()_ now achieves O(1) for builtin multipliers using mapped positions (falls back to O(n) for others)
-  - _resetMultipliers()_ fills builtin multiplier positions with 0
-  - Updated float typing to double in _baseDamageHandler.cpp_ for precision
-- Refactored handler slot access:
-  - Updated handlers to use battle slot helper functions from _IEffectHandler_:
-    - _accuracyCheckHandler.cpp_, _baseDamageHandler.cpp_, _stabHandler.cpp_
-  - Improves code consistency and reusability
-- Applied code formatting:
-  - Ran _clang-format_ on _accuracyCheckHandler.cpp_, _baseDamageHandler.cpp_
-  - Updated includes in _moveMeta.cpp_
-- Improved test coverage:
-  - Updated 7 test files to fully cover all lines and branches:
-    - Registry configurations and type system tests
-    - Utility and logger tests
-  - Added comprehensive test suites for 15 new components:
-    - Registry configurations (multiplier, status, terrain, weather)
-    - Effect system (context, handlers, interface)
-    - Utilities (input, random, move metadata)
+- Changed all built-in move effect-list factories to return `std::span<const EffectTypeID>` over static `constexpr` arrays; the query functions are `ATTR_CONST` and `noexcept`, avoiding per-call vector construction for the predefined sequences.
+- Changed fixed-registry lifecycle hooks so built-in registration and amount increments insert index records, decrements remove them, and `setEntry()`/`setAmountRegistered()` rebuild the index when metadata positions can change.
+- Changed fixed-registry configuration removal to delegate compaction and index maintenance to `eraseEntry()`.
+- Changed accuracy, base-damage, and STAB handlers to use the shared user/target slot helpers instead of repeating side-vector selection and index checks.
+- Changed base-damage intermediates and validation to `double`; invalid non-finite or negative attack values and non-finite or non-positive defense values leave the existing damage unchanged, while valid results are clamped to `[1, std::numeric_limits<us>::max()]` before conversion.
+- Changed contiguous-sequence utilities to reject invalid start/length inputs through explicit early returns before arithmetic or iterator traversal.
+- Changed move-registry built-in effect copying to use span iterators, and applied associated include, formatting, documentation, LCOV, and test-maintenance updates.
 
 ### Fixed
 
-- Fixed registry transaction rollback behavior:
-  - _addMetadataBatch()_ now reverts registry to pre-call state if any addition fails
-  - _setMatchupRow()_ now reverts registry to pre-call state if any addition fails
-  - _setDefensiveColumn()_ now reverts registry to pre-call state if any addition fails
-  - Ensures atomic registry operations with all-or-nothing semantics
-- Fixed name uniqueness validation:
-  - Both _mutateMetadata()_ calls now prevent updates where new name already exists in registry
-- Fixed boundary condition bugs:
-  - _findEntryIndexByID()_ and _findEntryIndexByName()_ asserts changed from `<` to `<=` for correct boundary checking
-- Fixed template type handling:
-  - Removed redundant _T::value_type_ usage in _input.h_
-- Fixed damage calculation formula:
-  - Corrected _applyMultiplier()_ damage calculation logic
-  - Implemented damage clamping in _baseDamageHandler.cpp_ to range [1.0, USHORT_MAX]
-- Fixed critical hit percentage check:
-  - Changed comparison from `<=` to `<` for accurate percentage-based calculation
-  - Prevents off-by-one errors in critical hit probability
-
-### Removed
-
-- Removed redundant includes from _Configuration/constants.h_
+- Fixed `addMetadataBatch()` rollback without copying the entire registry: it records the prior registered count and next stable ID, erases each partially appended entry after a failure, restores the next-ID counter, and returns the original error.
+- Fixed both name- and ID-selected metadata mutation paths to reject a changed name that already belongs to another entry before committing the replacement.
+- Fixed type matchup row and defensive-column updates so a failed partial update restores the previous chart state and returns the failure instead of leaving partial matchup changes.
+- Fixed fixed-registry lookup boundary assertions so the registered-count sentinel returned for "not found" is valid, including empty and full-capacity searches.
+- Fixed critical-hit probability bounds by changing the random maximum from 100 to 99 and the threshold comparison from `<=` to `<`, yielding a 100-value roll domain with the configured threshold count.
+- Fixed `EffectContext::applyMultiplier()` to half-down round `damage * fixedPointValue` for each active multiplier rather than rounding the multiplier before multiplication; every step remains clamped to at least one.
+- Fixed base-damage overflow and invalid arithmetic by retaining floating-point intermediates until the final bounded conversion.
+- Fixed the constrained input template's element-type expression by removing the invalid redundant `T::value_type` qualification.
+- Fixed signed, overflow-prone, omitted-length, and out-of-range paths in contiguous-sequence calculations by validating bounds before computing the requested interval.
 
 ## [0.8.6] - 2026-07-31
 
 ### Removed
 
-- Removed _EffectResult_ struct and associated member variable from _EffectContext_:
-  - Simplifies effect execution model
-- Removed `if` protected scope in _DamageContext_
-  - Clarifies conditional logic structure
+- Removed `DamageContext::mIsProtected`.
+- Removed the complete `EffectResult` structure and `EffectContext::mResult`; status application, stat-change counters, and sleep-turn output are no longer stored in this context result object.
 
 ## [0.8.5] - 2026-07-31
 
 ### Added
 
-- Implemented stat damage modifiers system in _DamageFormulaModifiers_ struct:
-  - Separate multipliers for each of the 6 base stats (HP, ATK, DEF, SpA, SpD, SPE)
-  - Integrated into each _BattleSlot_ for per-Pokemon damage adjustments
-- Applied damage formula modifiers in _baseDamageHandler_:
-  - Uses _DamageFormulaModifiers_ to adjust attack, special attack, defense, and special defense calculations
-  - Enables stat-stage interactions with base damage formula
+- Added `DamageFormulaModifiers` to each `BattleSlot`, with independent health, attack, defense, special-attack, special-defense, and speed `float` fields initialized to `1.0F`.
+- Added damage-formula integration for attack and defense modifiers:
+  - Physical damage multiplies the user's Attack and target's Defense after applying their cached stat-stage multipliers.
+  - Special damage analogously applies the user's Special Attack and target's Special Defense modifiers.
+  - Health and Speed modifiers are stored for later consumers but are not read by `BaseDamageHandler` in this revision.
 
 ### Changed
 
-- Enhanced _EffectContext_ initialization:
-  - Default-initialized sparse multiplier list for consistent starting state
+- Changed `EffectContext::mActiveMultipliers` to use an explicit empty default member initializer.
 
 ## [0.8.4] - 2026-07-31
 
 ### Changed
 
-- Optimized _Pokemon_ class with compile-time evaluation:
-  - Converted setters to `constexpr` and moved implementations into _pokemon.h_
-  - Enables compile-time constant Pokemon creation
-- Updated test construction patterns:
-  - Modified _pokemon.test.cpp_ to include Pokemon level when constructing test instances
+- Moved every `Pokemon` setter into the class definition and made it `constexpr`, including name, move/PP arrays and indexed elements, type arrays and indexed elements, all six base stats, level and cached level-damage factor, ability, item, and status.
+- Preserved index assertions for move, PP, and type slot setters while making those mutation paths available during constant evaluation.
+- Updated Pokemon unit construction to provide the level argument introduced in 0.8.3 and verify both default and explicit type-ID construction paths.
 
 ### Removed
 
-- Removed _pokemon.cpp_ implementation file:
-  - All functionality moved to header for constexpr support
-  - Reduces build artifacts and simplifies compilation
+- Removed the now-empty `pokemon.cpp` implementation unit after all setter definitions moved to `pokemon.h`.
 
 ## [0.8.3] - 2026-07-31
 
 ### Added
 
-- Implemented fixed-point multiplier system for precise damage calculation:
-  - Configuration constants:
-    - _FIXED_POINT_MULTIPLIER_NUMERATOR_ - Numerator for fixed-point calculation
-    - _FIXED_POINT_MULTIPLIER_DENOMINATOR_ - Denominator for fixed-point calculation
-    - _FIXED_POINT_ROUNDING_THRESHOLD_ - When to round down
-    - _FIXED_POINT_TOLERANCE_THRESHOLD_ - Double precision rounding tolerance
-  - Added _applyMultiplier()_ function to _EffectContext_:
-    - Processes all damage multipliers through fixed-point arithmetic
-    - Multiplies result with base damage for final calculation
-- Integrated weather damage mechanics:
-  - Added _Weather_ multiplier ID to _builtInMultiplierID_
-  - Added user-readable name for weather multiplier
-  - Integrated builtin weather multiplier into registry
-- Enhanced _Pokemon_ level tracking:
-  - Added level parameter to _Pokemon_ constructors
-  - Calls _setLevel()_ in constructor body for initialization
+- Added fixed-point multiplier constants with numerator and denominator `4096.0F`, a half-down threshold of `0.5`, and a `1e-9` tolerance.
+- Added `EffectContext::applyMultiplier(baseDamage)`, which visits active multipliers in sparse-vector order, converts each configured float through the 4096/4096 scale, applies half-down rounding, and clamps each intermediate result to at least one. In this initial implementation the scaled multiplier itself is rounded before multiplication; 0.8.7 corrects the operation to round `damage * fixedPointValue`.
+- Added `BuiltinMultiplierID::Weather`, its display-name constant, and the corresponding built-in `MultiplierRegistry` entry.
+- Added a required level argument to both `Pokemon` constructors; each constructor calls `setLevel()` so `mLevel` and the cached level-damage factor are initialized together.
+
+### Changed
+
+- Changed `setMultiplier()` to replace an existing sparse-vector value or append a new `{MultiplierID, value}` pair without maintaining a product; `resetMultipliers()` now clears only the sparse vector.
 
 ### Removed
 
-- Removed combined multiplier variable from _EffectContext_:
-  - No longer needed with fixed-point multiplier system
-  - Eliminates redundant state tracking
-- Removed combined multiplier usage from _setMultiplier()_ and _resetMultipliers()_
-  - Refactored to work with individual multiplier values
+- Removed `EffectContext::mCombinedMultiplier` and the divide/multiply bookkeeping previously performed when a multiplier was replaced.
 
 ## [0.8.2] - 2026-07-30
 
 ### Added
 
-- Implemented comprehensive damage calculation foundation with stat stage and level caching:
-  - Configuration constants for stat calculations:
-    - Evasion stage multiplier numerator and denominator for dodge probability scaling
-    - Level damage factor numerator, denominator, and offset
-    - Maximum stages for stat stage multiplier caching
-    - Cache size constants based on stat stage counts
-  - Stat stage multiplier cache files for O(1) lookup:
-    - Base stat stage cache (HP, ATK, DEF, SpA, SpD, SPE)
-    - Accuracy stage multiplier cache
-    - Evasion stage multiplier cache
-- Implemented central registry provider:
-  - _RegistryProvider_ struct holding non-owning pointers to all registries
-  - Enables consistent registry access across effect handlers
-- Extended _EffectContext_ multiplier system:
-  - _setMultiplier()_ method to update active damage multiplier
-  - _resetMultipliers()_ method to clear all active multipliers
-  - Combined multiplier float for final damage adjustment
-- Enhanced effect handler architecture:
-  - Updated 6 handlers to accept _RegistryProvider_ parameter (source and header):
-    - _effectHandlerInterface_, _accuracyCheckHandler_, _baseDamageHandler_, _criticalHitHandler_, _stabHandler_, _targetsHandler_
-  - Enables handlers to query registry data at runtime
-- Added _OnTarget_ move trigger ID for target-specific effect triggers
-- Enhanced _Pokemon_ class with level caching:
-  - Added level damage factor pseudo-cache for efficiency
-  - Implemented getter method for cached value
+- Added compile-time stat-stage tables for the full `-6..+6` range:
+  - General stats use `(2 + stage) / 2` for nonnegative stages and `2 / (2 - stage)` for negative stages.
+  - Accuracy uses the analogous 3/3 formulas; evasion uses `3 / (3 + stage)` for nonnegative stages and `(3 - stage) / 3` for negative stages.
+  - `MAX_STAT_STAGES` is 6 and `MAX_STAGE_CACHE` is 13; the table generators store stage `s` at offset `s + 6`.
+- Added level-damage-factor constants `2`, `5`, and `2`; `Pokemon::setLevel()` stores `floor((2 * level) / 5) + 2` in `mLevelDamageFactor`, exposed by a new getter.
+- Added `RegistryProvider`, a non-owning aggregate of const pointers to the ability, move, item, type, status, weather, terrain, and multiplier registries.
+- Added `RegistryProvider` to the pure-virtual `IEffectHandler::apply()` contract and to the AccuracyCheck, BaseDamage, CriticalHit, STAB, and Targets implementations.
+- Added `EffectContext::setMultiplier()` and `resetMultipliers()` for the new sparse representation; replacement divides out the old contribution and multiplies in the new value, append multiplies in the new contribution, and reset restores the combined value to `1.0F`.
+- Added `MoveTriggerID::OnTarget` and assigned both Pound and Karate Chop's base-attack sequence to that trigger.
 
 ### Changed
 
-- Refactored _BattleSlot_ party member type:
-  - Changed from `const Pokemon *` to `Pokemon *` for mutability
-- Replaced multiplier storage mechanism in _EffectContext_:
-  - Changed from unordered_map to sparse multiplier vector for predictable performance
-- Updated move trigger assignments:
-  - Changed _Pound_ and _Karate Chop_ from _OnUse_ to _OnTarget_ trigger
-- Optimized handler performance with caching:
-  - _accuracyCheckHandler_ now uses cached evasion and accuracy stage multipliers instead of recalculating
-  - _baseDamageHandler_ now uses cached stat stage multipliers and pseudo-cached level factor
-  - Eliminates redundant calculations on every handler invocation
-- Unified multiplier updates across handlers:
-  - _criticalHitHandler_, _stabHandler_, _targetsHandler_ now call _setMultiplier()_ instead of direct map access
-- Refactored _targetsHandler_:
-  - Now uses _RegistryProvider_ instead of storing _MoveRegistryConfiguration_ member
-- Updated _MoveRegistry_ test expectations:
-  - _Pound_ move now checks for _OnTarget_ trigger
+- Changed `EffectContext` multiplier storage from a prepopulated `std::unordered_map` to an initially empty `std::vector<std::pair<MultiplierID, float>>` plus a cached combined product; this revision still performs linear ID searches.
+- Changed accuracy and base-damage handlers to consume the precomputed stage tables, and changed base damage to use the Pokemon's cached level factor rather than recomputing it per application.
+- Changed CriticalHit, STAB, and Targets handlers to call `setMultiplier()` rather than mutate multiplier storage directly.
+- Changed `TargetsHandler` to resolve move metadata through `RegistryProvider::moveRegistry`; the handler no longer owns a `MoveRegistryConfiguration`, and an unknown move ID now returns without adding a multiplier.
+- Changed `BattleSlot::mPokemon` from a pointer-to-const to a mutable `Pokemon *` and updated the Pound registry test to expect `OnTarget`.
 
 ### Removed
 
-- Removed current HP tracking from _BattleSlot_ (derived from _Pokemon_ object)
-- Removed _EffectContext_ constructor that base-initialized multiplier map
-- Removed _MoveRegistryConfiguration_ member variable from _TargetsHandler_ (now uses provider)
+- Removed `BattleSlot::mCurrentHp`.
+- Removed the `EffectContext` constructor that created a multiplier configuration and prepopulated every built-in multiplier at `1.0F`.
+- Removed `TargetsHandler`'s owned `MoveRegistryConfiguration` member.
 
 ## [0.8.1] - 2026-07-30
 
 ### Added
 
-- Implemented multiplier registry system for flexible damage calculation modifiers:
-  - Configuration constants:
-    - _MAX_MULTIPLIERS_ - Registry capacity limit
-    - _BASE_MULTIPLIER_VALUE_ - Default multiplier (1.0)
-    - _STAB_HIT_MULTIPLIER_ - Same-Type Attack Bonus multiplier (1.5)
-    - _TARGETS_HIT_MULTIPLIER_ - Multi-target penalty multiplier (0.75)
-  - Error codes for duplicate multiplier and multiplier not found with _errorKindToString()_ support
-  - Multiplier registry class with constructor initializing all builtin multipliers
-  - Registry provides:
-    - Multiplier metadata lookup (name, stable ID)
-    - Registry queries (multiplier exists by name or ID, get all entries, get next ID)
-    - ID to array index mapping for efficient lookup
-- Created multiplier registry configuration classes:
-  - Add/remove/rename multipliers by name or stable ID
-  - Update multiplier metadata
-  - Comprehensive error handling
-- Added _EffectContext_ constructor:
-  - Initializes multiplier list with _BASE_MULTIPLIER_VALUE_
-- Extended effect type system:
-  - Added _Targets_ and _STAB_ to _effectType.h_ and _moveMeta.cpp_
-  - New effect types for multi-target and same-type attack mechanics
-- Implemented effect handlers:
-  - STAB (Same-Type Attack Bonus) handler calculating type bonus per Bulbapedia
-  - Targets handler calculating multi-target damage reduction
-  - Both inherit from _IEffectHandler_ for consistent effect integration
-- Added type system infrastructure:
-  - Hashing override for _IDInterface_ for container support
-  - Builtin Multiplier ID file with conversion function
-  - _Multiplier/constants.h_ containing user-readable names
-  - Multiplier metadata file
-- Enhanced _Pokemon_ class:
-  - Added stable status ID with getter and setter
-  - Added _isFainted()_ member function
-- Added missing source file implementations:
-  - _terrainRegistryConfiguration.cpp_, _weatherRegistryConfiguration.cpp_
-- Integrated multiplier registry into _main.cpp_
+- Added the open tagged `MultiplierID` domain, `std::hash` support for tagged IDs, `MultiplierMeta`, display-name constants, the closed built-in catalog, and conversion to stable IDs.
+- Added a fixed-capacity multiplier registry and configuration facade with `DuplicateMultiplier`/`MultiplierNotFound` errors and add, atomic batch-add, rename, update, remove, lookup, registered-span, containment, count, and next-ID operations.
+- Registered six initial built-in multipliers: None, Ability, Item, Targets, Critical, and Stab. Configuration values are `1.0F` for the base multiplier, `1.5F` for critical hits, `1.5F` for STAB, and `0.75F` for spread targets.
+- Added an `EffectContext` constructor that enumerates the multiplier registry and initializes an `std::unordered_map<MultiplierID, float>` entry at the base value for every built-in multiplier.
+- Added `EffectTypeID::Targets` and `EffectTypeID::Stab`, and inserted both into the base attack pipeline, increasing Pound's expected effect count from 9 to 11.
+- Added `StabHandler`, which assigns the STAB multiplier when the move type is present in the user's type array.
+- Added `TargetsHandler`, initially backed by an owned `MoveRegistryConfiguration`, which assigns the spread-target multiplier unless move metadata targets a single opponent or self.
+- Added `Pokemon` status storage with getter/setter and `isFainted()`, which derives fainting from zero health.
+- Added the previously declared terrain and weather registry-configuration source implementations for add/batch, rename, update, and remove operations by name or stable ID.
+- Added `MultiplierRegistryConfiguration` construction to the custom-configuration path in `main()`.
 
 ### Changed
 
-- Removed const from _BattleSlot_ party member for mutability
-- Refactored _EffectContext_ from per-multiplier tracking to stable multiplier ID pattern
-- Reordered _EffectTypeID_ enum values for optimization
-- Updated _Status/constants.h_ documentation
-- Refactored _criticalHitHandler.cpp_ to use builtin multiplier ID dictionary
-- Updated _moveRegistry.test.cpp_:
-  - Changed expected effect count for _Pound_ from 9 to 11 effects
+- Changed `CriticalHitHandler` to store `1.5F` in the context's Critical multiplier entry rather than a dedicated critical-multiplier field.
+- Changed battle ownership so `BattleSlot::mPokemon` is mutable; item, status, and fainted state are now read from the pointed-to `Pokemon` rather than duplicated in the slot.
+- Reordered effect IDs and the base attack sequence to include Targets and STAB, and corrected the status constants header description.
 
 ### Removed
 
-- Removed item ID, status ID, and fainted status from _BattleSlot_
-  - These are now accessed through _Pokemon_ object instead
+- Removed `BattleSlot::mItemID`, `mStatusID`, and `mIsFainted`, along with the dedicated `EffectContext::mCriticalMultiplier` field.
 
 ## [0.8.0] - 2026-07-30 (Weather and Terrain Registry Update)
 
 ### Added
 
-- Implemented weather and terrain registry systems for environmental battle mechanics:
-  - Configuration constants:
-    - _MAX_WEATHERS_ - Weather registry capacity
-    - _MAX_TERRAINS_ - Terrain registry capacity
-  - Error codes for duplicate weather/terrain and not found conditions with _errorKindToString()_ support
-  - Weather registry class with constructor initializing all Pokemon-standard weathers
-  - Terrain registry class with constructor initializing all Pokemon-standard terrains
-  - Both registries provide:
-    - Metadata lookup (name, stable ID)
-    - Registry queries (exists by name/ID, get all entries, get next ID)
-    - ID to array index mapping
-- Created weather and terrain registry configuration classes:
-  - Add/remove/rename weather/terrain by name or stable ID
-  - Update weather/terrain metadata
-  - Comprehensive error handling
-- Added type system infrastructure for weathers and terrains:
-  - Builtin Weather ID file with conversion function to stable Weather ID
-  - Builtin Terrain ID file with conversion function to stable Terrain ID
-  - _Weather/constants.h_ with user-readable weather names
-  - _Terrain/constants.h_ with user-readable terrain names
-  - Metadata files for weather and terrain persistence
-- Integrated weather and terrain registries into _main.cpp_
+- Added tagged open `WeatherID` and `TerrainID` types with no-value sentinels, closed built-in catalogs, stable-ID converters, display-name constants, and name/ID metadata records.
+- Added `MAX_WEATHERS` and `MAX_TERRAINS`, each set to 1,000, plus duplicate/not-found registry error kinds and string conversion support.
+- Added header-defined fixed-capacity runtime registries:
+  - Weather registers 11 built-ins: None, Harsh Sunlight, Rain, Sandstorm, Hail, Snow, Fog, Extremely Harsh Sunlight, Heavy Rain, Strong Winds, and Shadowy Aura.
+  - Terrain registers five built-ins: None, Electric, Grass, Misty, and Psychic.
+  - Both expose domain metadata/name/ID lookup, registered spans, containment by name or ID, index lookup, registration counts, and next-ID mutation through the fixed-registry base.
+- Added weather and terrain configuration facade declarations for one-at-a-time and atomic batch registration, rename, full metadata update, and removal by name or stable ID. Their out-of-line definitions are not part of this commit and arrive in 0.8.1.
+- Added terrain and weather configuration construction to the custom-configuration path in `main()`.
 
 ### Changed
 
-- Refactored _BattleState_ to track stable weather and terrain IDs instead of full objects:
-  - Reduces memory footprint and simplifies lookup
-  - Enables dynamic weather/terrain management via registries
+- Changed `BattleState` from individual weather/terrain boolean flags to stable `WeatherID` and `TerrainID` fields, preserving environmental state as registry identities.
 
 ### Removed
 
-- Deleted _weather.h_ (functionality moved to weather registry)
+- Removed the legacy `Weathers` enum header after weather identity moved to the tagged ID and registry model.
 
 ## [0.7.7] - 2026-07-29
 
 ### Changed
 
-- Enhanced _statusID.h_ documentation for clarity and completeness
+- Integrated the parallel status-registry first-parent line with the branch containing the generic fixed-registry Catch2 suite, ccache build setup, signed stat stages, Pokemon level storage, the effect-handler interface, base-damage and critical-hit handlers, accuracy handling, CI fallback installation, Pound effect-count correction, and `ATTR_NOINLINE` on `setEntry()`.
+- Preserved the status registry's open ID domain, seven built-ins, configuration facade, and `BattleState`/`EffectResult` integration while bringing the battle-handler and build/test work into one history line.
+- This merge adds no standalone implementation or conflict-resolution behavior; the shared configuration constants file simply reflects the integrated second-parent values.
 
 ## [0.7.6] - 2026-07-29
 
-### Added
+### Changed
 
-- Applied _ATTR_NOINLINE_ attribute to _setEntry()_ in _fixedMetadataRegistry.h_
-  - Prevents compiler from inlining this frequently-called method for better code locality
+- Applied `ATTR_NOINLINE` to `FixedMetadataRegistry::setEntry()` to prevent compiler inlining; the method's assertion and metadata assignment behavior are otherwise unchanged.
 
 ## [0.7.5] - 2026-07-29
 
 ### Added
 
-- Implemented accuracy calculation system with configuration constants:
-  - _MIN_ACCURACY_HIT_VALUE_ - Minimum roll value for accuracy check (0)
-  - _MAX_ACCURACY_HIT_VALUE_ - Maximum roll value (255)
-  - Accuracy stage multiplier numerator and denominator for stat-based accuracy scaling
-- Implemented _AccuracyCheckHandler_ inheriting from _IEffectHandler_:
-  - Determines move hit/miss based on user and target accuracy stats
-  - Integrates with battle system for move resolution
-- Added missing import directives to _criticalHitHandler.cpp_
+- Added accuracy constants with a 3/3 stage basis and an inclusive random roll range of 1 through 100.
+- Added `AccuracyCheckHandler::apply(const BattleState &, EffectContext &)`, which:
+  - Resolves user and target slots from their sides and indices.
+  - Computes `move accuracy * user accuracy-stage multiplier * target evasion-stage multiplier` and clamps the result to `[0, 100]`.
+  - Marks `mIsMiss`, clears `mShouldApplyDamage`, and clears `mShouldContinue` when the 1-100 roll is greater than the clamped accuracy; a hit leaves those fields unchanged.
 
 ### Changed
 
-- Updated _EffectContext_ move accuracy member variable naming to follow conventions
+- Renamed `EffectContext::moveAccuracy` to `mMoveAccuracy` and added the type/context includes required by the damage and critical-handler sources.
 
 ### Fixed
 
-- Fixed target defense stage multiplier lookup:
-  - Changed from using user's attack stage to target's defense stage (was incorrectly using _userAttackStage_ instead of _targetDefenseStage_)
-  - Corrects base damage formula calculations
+- Fixed `BaseDamageHandler` to derive the target defense multiplier from `targetDefenseStage`; the initial implementation incorrectly reused `userAttackStage` for both sides of the attack/defense ratio.
 
 ## [0.7.4] - 2026-07-29
 
-### Added
+### Changed
 
-- Integrated compiler cache tool into build infrastructure:
-  - Added _ccache_ to install steps in _codeql-analysis.yml_ and _testing.yml_
-  - Speeds up rebuild times by caching compilation artifacts
+- Changed the cache-hit fallback package installation in both CodeQL and test workflows to install `ccache` alongside Catch2 and Google Mock, ensuring the `ccache g++` compiler command remains available when dependency caches are restored.
 
 ## [0.7.3] - 2026-07-29
 
 ### Fixed
 
-- Corrected move registry test expectations:
-  - Fixed _moveRegistry.test.cpp_ to expect _Pound_ having 10 effects instead of 9
+- Corrected the test-only Pound metadata expectation from 10 effects to 9 after `EffectTypeID::StatStage` was removed from the base attack sequence in 0.7.2; production move metadata is unchanged by this commit.
 
 ## [0.7.2] - 2026-07-29
 
 ### Added
 
-- Implemented battle slot positioning system:
-  - Added battle position variable to _BattleSlot_ struct for team coordination
-- Implemented critical hit calculation system:
-  - Configuration constants:
-    - _MIN_CRITICAL_HIT_VALUE_ - Minimum critical hit roll (0)
-    - _MAX_CRITICAL_HIT_VALUE_ - Maximum critical hit roll (100)
-    - _CRITICAL_HIT_PERCENTAGE_ - Base critical hit chance
-    - _CRITICAL_HIT_MULTIPLIER_ - Damage multiplier for critical hits (1.5)
-    - Stat stage multiplier numerator and denominator
-  - Added range override to _EffectContext_ for target specification
-- Implemented effect handler base class architecture:
-  - _IEffectHandler_ base class with virtual _apply()_ method
-  - All future handlers inherit from this interface for consistent effect integration
-- Implemented base damage handler:
-  - _BaseDamageHandler_ inheriting from _IEffectHandler_
-  - Calculates damage according to Bulbapedia formula
-- Implemented critical hit handler:
-  - _CriticalHitHandler_ inheriting from _IEffectHandler_
-  - Calculates critical hit probability and damage multiplier
-- Added effect handler utilities:
-  - _getTeamBySlot()_ - Gets mutable team reference from _Side_
-  - _getTeamBySlot()_ const overload - Gets const team reference
-- Extended _Pokemon_ class:
-  - Added level member variable with getter and setter
-  - Enables per-Pokemon level tracking for damage calculation
+- Added `IEffectHandler`, a non-copyable/non-movable polymorphic interface with pure virtual `apply(const BattleState &, EffectContext &) const`, and added mutable `getTeam()` plus read-only `getTeamConst()` side-selection helpers.
+- Added `BaseDamageHandler`:
+  - Returns without modifying damage when either Pokemon pointer is null or move power is zero.
+  - Selects Attack/Defense or Special Attack/Special Defense, applies signed stat-stage multipliers with a 2/2 basis, and on a critical hit ignores negative user attack stages and positive target defense stages.
+  - Computes `floor((floor(2 * level / 5) + 2) * round(power * attack / defense) / 50) + 2`, then stores at least one damage. At this revision the target multiplier is mistakenly calculated from the user attack stage; 0.7.5 corrects it.
+- Added `CriticalHitHandler` with constants 0 and 100 for the inclusive random range, threshold 5, and multiplier `1.5F`; a roll `<= 5` sets `mIsCritical` and changes the context's initially `1.0F` critical multiplier to `1.5F`.
+- Added `BattleSlot::mPosition`, `EffectContext::mRangeOverride`, and Pokemon level storage with getter/setter.
 
 ### Changed
 
-- Updated _StatStages_ variable type from `unsigned short` to `signed char`:
-  - Allows negative stat stage values
-  - Reduces memory footprint
-- Optimized struct layouts:
-  - Reordered _EffectResult_ members for smaller total byte size
-  - Updated all call sites to match new member order
-- Reorganized effect type IDs in _effectType.h_ and _moveMeta.cpp_ for optimization
+- Changed all `StatStages` fields from `us` to signed byte `sb`, allowing negative Attack, Defense, Special Attack, Special Defense, Speed, Accuracy, and Evasion stages.
+- Changed `EffectResult::mStatusToApply` to value-initialize the new open `StatusID` and moved it ahead of the byte counters.
+- Reordered CriticalHit and BaseDamage in both `EffectTypeID` and the base attack sequence so critical state is available before damage calculation.
 
 ### Removed
 
-- Removed _StatStage_ effect type ID from _effectType.h_ and _moveMeta.cpp_
-  - Functionality integrated directly into stat system
+- Removed `EffectTypeID::StatStage` and its base attack pipeline element, reducing that sequence from 10 effects to 9.
 
 ## [0.7.1] - 2026-07-29
 
 ### Added
 
-- Integrated compiler cache into build system:
-  - Added _ccache_ to _makefileDependencies.sh_ install step
-  - Added _ccache_ to _COMPILER_ Makefile variable
-  - Speeds up incremental builds significantly
+- Added `ccache` to the dependency installation package list.
+
+### Changed
+
+- Changed the Makefile compiler command from `g++` to `ccache g++`; no production source or runtime behavior changed.
 
 ## [0.7.0] - 2026-07-29 (Status Registry Update)
 
 ### Added
 
-- Implemented status ID system infrastructure:
-  - Builtin Status ID file with conversion function to stable Status ID
-  - _Status/constants.h_ with user-readable status names
-  - Status metadata file for persistence
-- Added comprehensive test suite for _fixedMetadataRegistry.h_
+- Added the status registry implementation independently on the battle-handler branch:
+  - `MAX_STATUSES` is 1,000, with `DuplicateStatus` and `StatusNotFound` errors integrated into registry error reporting.
+  - `StatusID` is an open tagged `IDInterface` identity with `NO_STATUS_ID`; `BuiltinStatusID`, `toStatusID()`, display-name constants, and `StatusMeta` define the closed built-in catalog and stored record.
+  - `StatusRegistry` registers None, Paralysis, Burn, Sleep, Freeze, Poison, and Toxic, and exposes status metadata/name/ID lookup, registered spans, containment, index lookup, registration-count mutation, and next-ID control through the fixed-registry base.
+  - `StatusRegistryConfiguration` supports one-at-a-time and atomic batch registration plus rename, full-record update, and removal by name or stable ID.
+- Added status configuration construction to the custom-configuration path in `main()`.
+- Added a Catch2 test registry over `FixedMetadataRegistry`, covering built-in stable IDs, name/metadata lookup, absent names and IDs, registered spans, containment, amount restoration, next-ID restoration, and next-ID incrementing.
 
 ### Changed
 
-- Refactored _StatusID_ from enum to typedef of _IDInterface_:
-  - Enables runtime status management and extensibility
-  - Allows custom status definitions beyond hardcoded enum values
+- Changed `EffectResult::mStatusToApply` from `StatusID::None` to value initialization of the open `StatusID` and moved it before the byte result counters; affected aggregate layout follows the new identity type.
+- Corrected the `StatusID` documentation to describe user-defined statuses rather than user-defined abilities.
 
 ## [0.6.4] - 2026-07-29
 
 ### Added
 
-- Implemented status registry system for extensible status ailment management:
-  - Configuration constant _MAX_STATUSES_ controlling registry capacity
-  - Error codes for duplicate status and status not found with _errorKindToString()_ support
-  - Status registry class with constructor initializing all Pokemon-standard statuses
-  - Registry provides:
-    - Status metadata lookup (name, stable ID)
-    - Registry queries (status exists by name or ID, get all entries, get next ID)
-    - ID to array index mapping for efficient lookup
-- Created status registry configuration classes:
-  - Add/remove/rename statuses by name or stable ID
-  - Update status metadata
-  - Comprehensive error handling
-- Integrated status registry configuration into _main.cpp_
+- Added the initial status registry on the parallel status branch:
+  - `MAX_STATUSES` is 1,000, and registry error reporting recognizes `DuplicateStatus` and `StatusNotFound`.
+  - The former closed `StatusID` enum becomes an open tagged `IDInterface` identity with `NO_STATUS_ID`; a separate `BuiltinStatusID` catalog, `toStatusID()` converter, seven display-name constants, and `StatusMeta` retain the built-in vocabulary.
+  - `StatusRegistry` pre-registers None, Paralysis, Burn, Sleep, Freeze, Poison, and Toxic, then exposes metadata/name/ID lookup, registered spans, containment by name or ID, index lookup, count mutation, entry replacement, and next-ID operations.
+  - `StatusRegistryConfiguration` provides one-at-a-time and atomic batch addition, rename, complete metadata update, and removal by name or stable ID through the shared fixed-registry configuration.
+- Added `StatusRegistryConfiguration` construction to `main()`'s custom-configuration path.
+- Added a generated Zed `compile_commands.json` compilation database containing the then-current compiler invocations and flags.
 
 ### Changed
 
-- Optimized memory layout:
-  - Reordered _BattleSlot_ member variables for smaller total struct byte size
-  - Reordered _EffectResult_ member variables for smaller total struct byte size
-  - Updated all call sites to reflect new member order
+- Changed `BattleSlot` and `EffectResult` member ordering and corresponding aggregate initialization to accommodate the open status identity and revised layout; no status-registry tests are introduced in this branch commit.
 
 ## [0.6.3] - 2026-07-28
 
 ### Added
 
-- Added mutation testing to _moveRegistry.test.cpp_
-  - Improves test robustness against code mutations
+- Added a test-only `MoveRegistry` branch that verifies the shared fixed-registry mutators through the move-domain wrapper:
+  - `incrementAmountRegistered()` changes the count from 3 to 4 and `decrementAmountRegistered()` restores it to 3.
+  - `getEntry(0)` returns the None move metadata.
+  - Copying that entry, changing its name to `CustomMove`, and calling `setEntry(0, replacement)` makes the new name observable through `getEntry(0)`.
+
+### Changed
+
+- Expanded the existing MoveRegistry scenario from read-only lookup/counter coverage to explicit amount and entry mutation assertions; no production code changed.
 
 ## [0.6.2] - 2026-07-28
 
 ### Added
 
-- Added code coverage exclusions:
-  - _lcov_ pragmas in _abilityRegistry.h_ for unreachable branches
-  - _lcov_ pragmas in _itemRegistry.h_ for unreachable branches
-- Expanded registry test coverage:
-  - New tests for _abilityRegistry_: get next ability ID, get amount registered, increment next ability ID
-  - New tests for _itemRegistry_: get next item ID, get amount registered, increment next item ID
-  - New tests for _moveRegistry_ with similar registry operations
+- Added LCOV constructor exclusions around built-in registration in the ability, item, and move registries; these are coverage annotations only and do not alter constructor execution.
+- Added test assertions across the three registries for direct registered-count restoration, direct next-stable-ID restoration, and next-ID increment behavior.
+- Added containment assertions by stable ID and centralized name, and strengthened registered-span checks with exact built-in size plus first/last metadata names.
 
 ### Changed
 
-- Refactored test constants to use centralized constant values:
-  - Updated _abilityRegistry.test.cpp_ to use _Ability/constants.h_ instead of hardcoded values
-  - Updated _itemRegistry.test.cpp_ to use _Item/constants.h_ instead of hardcoded values
-  - Updated _moveRegistry.test.cpp_ to use _Move/constants.h_ instead of hardcoded values
-  - Updated test case names in _moveRegistry.test.cpp_ for clarity
+- Changed ability, item, and move tests from hardcoded display-name literals to their domain constants where available.
+- Renamed the misleading Pound test from a Chesto Berry status-removal description to "Pound retains its psychic terrain priority block metadata," and changed generic span wording to state the exact built-in-span contract.
+- Changed local metadata copies in ability tests from `const` to mutable test values; no production behavior changed.
 
 ## [0.6.1] - 2026-07-28
 
 ### Fixed
 
-- Fixed move registry test expectations:
-  - Updated _moveRegistry.test.cpp_ to include _PsychicTerrainPriorityBlock_ trigger for _Pound_ move
+- Fixed only the Pound built-in metadata assertion in `moveRegistry.test.cpp`: the first effect remains `PsychicTerrainPriorityBlock`, not `StatusRemove`. No production metadata or runtime behavior changed.
 
 ## [0.6.0] - 2026-07-28 (Move Registry Update)
 
 ### Added
 
-- Extended ability and item registry with metadata update capabilities:
-  - Added ability to replace target ID for abilities by stable ID or user-readable name
-  - Added ability to update ability metadata by stable ID or user-readable name
-  - Added ability to replace target ID for items by stable ID or user-readable name
-  - Added ability to update item metadata by stable ID or user-readable name
-- Implemented move registry system for extensible move management:
-  - Configuration constant _MAX_MOVES_ controlling registry capacity
-  - Error codes for duplicate move and move not found with _errorKindToString()_ support
-  - Move registry class inheriting from _fixedMetadataRegistry.h_
-  - Registry provides:
-    - Move metadata lookup (name, stable ID)
-    - Registry queries (move exists by name or ID, get all entries, get next ID)
-    - ID to array index mapping for efficient lookup
-- Created move registry configuration classes:
-  - Add/remove/rename moves by name or stable ID
-  - Set move triggers and effects by name or stable ID
-  - Update move metadata by name or stable ID
-  - Comprehensive error handling
-- Extended _MoveMeta_ with range specification:
-  - Added _MoveRangeID_ enum to _moveTargetsAndTriggers.h_ for targeting specification
-  - Specifies what the move can hit (single, range, etc.)
-- Enhanced ability and item metadata:
-  - Added self target ID to _Drizzle_ ability
-  - Added self target ID to _CheriBerry_ and _ChestoBerry_ items
-- Completed move metadata initialization:
-  - Added type ID, power, target ID, range ID, accuracy, priority, and special flag to all builtin moves
-- Added code coverage exclusions:
-  - _lcov_ pragmas in _fixedMetadataRegistry.h_ for unreachable branches
-- Integrated move registry into _main.cpp_
-- Added comprehensive test suite for _moveRegistry.h_
+- Added _MoveRegistryConfiguration_ as the move-domain facade over _FixedMetadataRegistryConfiguration_, preserving the fixed-capacity registry model while exposing move-specific operations:
+  - Read metadata by _MoveID_, resolve IDs from names and names from IDs, inspect the registered metadata span and count, and test containment by name or ID
+  - Register one _MoveMeta_ or an atomic batch with monotonically assigned stable IDs and snapshot rollback when validation fails
+  - Replace trigger vectors and target IDs by name or ID, update an entire metadata record, rename entries, and remove entries with compacted storage
+  - Report policy-specific _DuplicateMove_ and _MoveNotFound_ errors through the shared registry error interface
+- Added ability and item configuration operations to set target IDs and replace complete metadata records by either user-readable name or stable ID.
+- Added _MoveRangeID_ with _Unrestricted_ and _Adjacent_ values so target selection and legal reach are represented independently.
+- Added move registry unit coverage for built-in registration, ID/name lookup, metadata, absent lookups, registered spans, and containment; marked defensive fixed-registry branches as LCOV exclusions.
+- Added _MoveRegistryConfiguration_ construction to the custom-configuration path in _main.cpp_.
 
 ### Changed
 
-- Updated documentation across registry configuration files:
-  - Enhanced _abilityRegistryConfiguration.h_, _itemRegistryConfiguration.h_, _moveRegistry.h_, _itemRegistryConfiguration.cpp_
-- Standardized metadata class naming:
-  - Renamed _AbilityDefinition_ to _AbilityMeta_ throughout codebase
-  - Renamed _ItemDefinition_ to _ItemMeta_ throughout codebase
-- Applied code formatting:
-  - Ran _clang-format_ on _effectContext.h_ and _moveMeta.cpp_
-- Fixed linting warnings:
-  - Resolved _clang-tidy_ warnings in _effectType.h_, _itemTargetsAndTriggers.h_, _moveRegistry.h_
-- Updated ability trigger assignments:
-  - Changed _Stench_ ability trigger from _OnUse_ to _OnDamageCalc_ in _abilityRegistry.h_ and tests
+- Changed ability, item, and move registration APIs to accept their domain metadata records directly; _AbilityMeta_ and _ItemMeta_ now serve as both registration input and stored representation.
+- Renamed _MoveMeta::mMoveTargetID_ to _mTargetID_ and added _mRangeID_ to distinguish the selected battler set from positional range constraints.
+- Completed built-in move records:
+  - _None_ retains default metadata
+  - _Pound_ is Normal-type, 40 power, physical, 100 accuracy, priority 0, targeting _SingleOpponent_ at _Adjacent_ range
+  - _Karate Chop_ is Fighting-type, 50 power, physical, 100 accuracy, priority 0, targeting _SingleOpponent_ at _Adjacent_ range
+- Changed _Drizzle_, _Cheri Berry_, and _Chesto Berry_ metadata to target _Self_.
+- Changed the _Stench_ trigger from _OnUse_ to _OnDamageCalc_ so its effect participates in damage calculation rather than move invocation.
+- Revised registry documentation and normalized formatting and static-analysis conformance in the touched effect, item-target, move-registry, and metadata sources.
 
 ### Removed
 
-- Removed _AbilityDefinition_ struct (renamed to _AbilityMeta_)
-- Removed _ItemDefinition_ struct (renamed to _ItemMeta_)
+- Removed the separate _AbilityDefinition_ and _ItemDefinition_ registration structures and their conversion paths in favor of direct metadata registration.
 
 ## [0.5.3] - 2026-07-27
 
 ### Added
 
-- Extended ability and item metadata with targeting:
-  - Added target ID to _AbilityMeta_ for ability effect targeting
-  - Added target ID to _ItemMeta_ for item effect targeting
-- Implemented move registry capacity constant:
-  - Configuration constant _MAX_MOVES_ controlling registry capacity
-- Extended effect type system:
-  - Added psychic terrain effect type for terrain-based ability interactions
-- Enhanced item trigger and target system:
-  - Added new trigger and target combinations in _itemTargetsAndTriggers.h_
-- Implemented move builtin support:
-  - Added _None_ variant to builtin Move IDs for null move representation
-  - Implemented comprehensive move registry inheriting from _fixedMetadataRegistry.h_
-  - Registry provides:
-    - Move metadata lookup (name, stable ID)
-    - Registry queries (move exists by name or ID, get all entries, get next ID)
-    - ID to array index mapping for efficient lookup
-- Extended _MoveMeta_ with complete metadata:
-  - Type ID for move type classification
-  - Power for base damage calculation
-  - Target ID for move targeting specification
-  - Accuracy for hit probability
-  - Priority for move ordering
-  - Special flag for status vs physical classification
-- Implemented move effect helper functions:
-  - Added helper functions returning commonly used _EffectTypeID_ sets for move classification
+- Added _MAX_MOVES_ with a fixed registry capacity of 1000 entries.
+- Added combat fields to _MoveMeta_: _TypeID_, unsigned-short power, move target, accuracy, priority, and the physical/special classification flag.
+- Added _MoveRegistry_ as a private specialization of _FixedMetadataRegistry_ for _MoveMeta_, _MoveID_, and _MAX_MOVES_:
+  - Registers _None_, _Pound_, and _Karate Chop_ as built-in entries
+  - Exposes move-domain metadata, ID, name, span, count, index, and containment queries while retaining controlled base mutators for configuration use
+- Added reusable move-effect pipeline builders:
+  - Base attacks execute _PsychicTerrainPriorityBlock_, _AccuracyCheck_, _BaseDamage_, _CriticalHit_, _StatStage_, _BurnDamageReduction_, _Weather_, _Terrain_, _TypeEffectiveness_, and _Randomization_ in order
+  - Dedicated builders append recoil, status application, or flinch behavior to the base attack pipeline
+  - Status, protect, and field-effect builders provide non-damaging trigger sequences without duplicating effect lists
+- Added _PsychicTerrainPriorityBlock_ to the effect type catalog.
+- Added target fields to _AbilityMeta_ and _ItemMeta_; introduced the item _OnMoveUseTarget_ trigger and _SingleOpponent_ target.
+- Added _BuiltinMoveID::None_ as the explicit built-in catalog entry for the null move.
 
 ### Changed
 
-- Updated dynamic linker configuration:
-  - Changed _libstdc++.so.6_ symbolic link to reference version from _makefileDependencies.sh_ install step
-  - Ensures consistent C++ runtime version across builds
+- Changed _setUpGCC()_ to link the system _libstdc++.so.6_ directly to the selected compiler installation's _libstdc++.so.6_, avoiding dependence on a specific GCC patch-level filename.
 
 ### Removed
 
-- Removed hardcoded _libstdc++.so.x.x.xx_ version copying from _makefileDependencies.sh_
-  - Simplified by using symbolic link approach
+- Removed hardcoded handling for _libstdc++.so.6.0.32_ and _libstdc++.so.6.0.35_ from the dependency setup script.
 
 ## [0.5.2] - 2026-07-27
 
 ### Added
 
-- Implemented move ID system infrastructure:
-  - Builtin Move ID file with conversion function to stable Move ID
-  - _Move/constants.h_ with user-readable move names
-  - Move metadata file containing name, stable ID, and trigger/effect lists
-- Implemented move trigger and target system:
-  - Move triggers, targets, and combined wrapper structures for move effect specification
+- Added the open _MoveID_ type as an _IDInterface_ specialization with a move-specific tag and default value 0, plus the _NO_MOVE_ID_ sentinel.
+- Added the closed _BuiltinMoveID_ catalog for _Pound_ and _Karate Chop_, a constexpr conversion to stable _MoveID_, and canonical names for _None_, _Pound_, and _Karate Chop_.
+- Added the initial _MoveMeta_ record containing owned trigger definitions, a non-owning name, and a stable ID.
+- Added _MoveTriggerID_ values _OnUse_ and _OnHazardSwitchIn_, and _MoveTargetID_ values _SingleOpponent_, _AllOpponents_, _AllAllies_, _Self_, and _AllExceptSelf_.
+- Added _MoveEffectTrigger_ to associate one move trigger with its ordered effect vector.
 
 ### Changed
 
-- Refactored _MoveID_ from enum to typedef of _IDInterface_:
-  - Enables runtime move management and extensibility
-  - Allows custom move definitions beyond hardcoded enum values
-- Applied code formatting:
-  - Ran _clang-format_ on _pokemon.h_ for style consistency
-
-### Fixed
-
-- Fixed namespace resolution in _pokemon.h_ move field initialization
+- Replaced the closed _MoveID_ enum with the tagged, registry-assigned identifier so user-defined moves no longer require extending a compile-time enum.
+- Changed _Pokemon_ move-array initialization from the former _MoveID::None_ enumerator to the fully qualified _PocketCore::Move::NO_MOVE_ID_ sentinel and normalized the touched header formatting.
 
 ## [0.5.1] - 2026-07-27
 
-### Added
-
-- Added public access specifiers to configuration policy structures:
-  - _AbilityRegistryConfigurationPolicy_, _AbilityMeta_
-  - _ItemRegistryConfigurationPolicy_, _ItemMeta_
-  - _MatchupPair_, _TypeDefinition_
-  - _TypeEntry_
-
 ### Changed
 
-- Enhanced function attributes for better optimization and safety:
-  - Updated _errorKindToString()_ definition to use _ATTR_NODISCARD_ attribute
-  - Updated _toTypeID()_ definition to use _ATTR_NODISCARD_ attribute
-  - Ensures compiler warns when return values are discarded
-- Optimized struct memory layouts throughout codebase:
-  - Reordered 9 struct members for smaller total byte sizes:
-    - _AbilityMeta_, _BattleSlot_, _AbilityEffectTrigger_, _RegistryError_, _EffectContext_, _ItemMeta_, _ItemEffectTrigger_, _Pokemon_
-  - Updated all call sites to match new member order
-- Enhanced code organization:
-  - Extracted _PocketCore::Core::ub_ to using declarations in _AbilityTargetsAndTriggers.h_ and _builtinAbilityID.h_
-  - Improves readability for frequently-used namespaces
-- Improved documentation:
-  - Updated documentation for _AbilityMeta_, _AbilityRegistryConfiguration_, _AbilityRegistry_, _FixedMetadataRegistry_
-- Applied code formatting:
-  - Ran _clang-format_ on _abilityRegistryConfiguration.h_, _fixedMetadataRegistryConfiguration.h_, _Configuration/constants.h_
-- Comprehensive const-correctness improvements (73 function updates):
-  - Made return types const in ability/item/type registry methods
-  - Updated method parameters to const-reference/const for safety
-  - Applied to all registry classes: ability, item, type, fixed metadata registries
-- Enhanced parameter passing:
-  - Updated _addBuiltin()_ to accept parameter by rvalue reference (&&) for move semantics
-- Updated metadata getter return types:
-  - _getAbilityMetadata()_ returns `const AbilityMeta *`
-  - _getMetadata()_ returns `const Metadata *`
-  - _getItemMetadata()_ returns `const ItemMeta *`
-  - Prevents accidental modification of registry metadata
+- Made access contracts explicit with public sections on registry policy and metadata structures, including _AbilityRegistryConfigurationPolicy_, _ItemRegistryConfigurationPolicy_, _AbilityMeta_, _ItemMeta_, _MatchupPair_, _TypeDefinition_, and _TypeEntry_.
+- Reordered members in _AbilityMeta_, _ItemMeta_, ability and item trigger records, _BattleSlot_, _EffectContext_, _RegistryErrorInfo_, and _Pokemon_; updated aggregate initializers to preserve behavior under the new layouts.
+- Replaced metadata lookup results based on optional reference wrappers with nullable pointers to const metadata in the fixed, ability, and item registries.
+- Strengthened type-registry const correctness by returning const entries, cells, rows, and references from read-only accessors.
+- Changed _std::string_view_ and _std::span_ parameters to const references across type, ability, item, and generic fixed-registry configuration interfaces to make the API contract uniform.
+- Changed protected built-in registration to accept an rvalue metadata record.
+- Changed _errorKindToString_ to take an explicit _RegistryError_ and marked it _ATTR_NODISCARD_; applied the same result-use attribute to _toTypeID_.
+- Consolidated local type aliases and revised documentation and formatting across the touched registry and configuration headers without changing registry behavior.
 
 ## [0.5.0] - 2026-07-27 (Item and FixedMetadata Registry Update)
 
 ### Added
 
-- Implemented base registry infrastructure that all specialized registries inherit from:
-  - _fixedMetadataRegistryConfiguration.h_ - Configuration base providing:
-    - Metadata, stable ID, and user-readable name access
-    - Entry existence queries (by stable ID or name)
-    - Add/batch add metadata with transaction support
-    - Mutate registered metadata (copy-modify-write pattern)
-    - Rename and remove metadata operations
-  - _fixedMetadataRegistry.h_ - Runtime registry base providing:
-    - Entry access by stable ID or array index
-    - Stable ID, name, and metadata queries
-    - Next stable ID and amount registered tracking
-    - Array index lookup by stable ID (binary search ready)
-    - Entry existence queries
-    - Entry mutation and amount management
-    - Protected constructor for inheritance
-    - Protected builtin initialization method
-- Implemented item registry system:
-  - Configuration constant _MAX_ITEMS_ controlling registry capacity
-  - Error codes for duplicate item and item not found with _errorKindToString()_ support
-  - Item registry configuration class with user-friendly operations:
-    - Get/set item metadata and properties
-    - Add/remove/rename items
-    - Set item triggers and effects
-    - Comprehensive error handling
-  - Item registry class for runtime management
-  - Item registry configuration policy structure
-- Added item error handling:
-  - New error codes in _RegistryError_ for item operations
-  - Updated _errorKindToString()_ with item error branches
-- Integrated item and ability registries into _main.cpp_
-- Added comprehensive test suites:
-  - _itemRegistryConfiguration.h_ test suite
-  - _itemRegistry.h_ test suite
+- Added _FixedMetadataRegistry_, a generic fixed-capacity array store parameterized by metadata, stable-ID type, and capacity:
+  - Tracks registered count and the next monotonic ID, resolves entries by name, ID, or array index, and exposes metadata, name, ID, span, count, index, and containment queries
+  - Restricts state mutation to controlled setters and protected built-in registration so domain registries retain registry invariants
+- Added _FixedMetadataRegistryConfiguration_, parameterized by a domain policy that supplies configuration/entity names and duplicate/not-found errors:
+  - Validates capacity, duplicate names and IDs, and missing entries with contextual _RegistryErrorInfo_ logging
+  - Adds one record or an atomic batch with snapshot rollback and monotonic ID assignment
+  - Applies callback-based copy-modify-write metadata mutation, rename, removal, and contiguous-array compaction
+- Added _ItemRegistryConfiguration_ operations over _ItemDefinition_ input records and trigger spans, including registration, atomic batch registration, trigger replacement, rename, and removal by name or _ItemID_, with _DuplicateItem_ and _ItemNotFound_ policy errors.
+- Added focused item-registry and item-configuration tests and integrated ability/item configuration paths into the main executable.
 
 ### Changed
 
-- Refactored ability and item registries to inherit from fixed metadata base:
-  - _AbilityRegistryConfiguration_ delegates to _FixedMetadataRegistryConfiguration_:
-    - All getter methods call parent implementations
-    - Add/remove/rename operations delegate to parent
-  - _AbilityRegistry_ delegates to _FixedMetadataRegistry_:
-    - All metadata access calls parent implementations
-    - ID management delegates to parent
-  - _ItemRegistry_ delegates to _FixedMetadataRegistry_:
-    - Mirrors ability registry structure for consistency
-- Updated ability and item configuration implementations to use parent methods:
-  - _addAbility()_, _addAbilities()_ delegate to parent batch add
-  - _setAbilityTriggers()_ delegates to parent mutate
-  - _renameAbility()_, _removeAbility()_ delegate to parent implementations
-- Updated test initialization:
-  - Modified _pokemon.test.cpp_ to use default initialization for item IDs
+- Changed _AbilityRegistry_ and _ItemRegistry_ into private _FixedMetadataRegistry_ specializations, exposing domain APIs while keeping generic storage mutation internal.
+- Changed _AbilityRegistryConfiguration_ to delegate validation, lookup, registration, batch rollback, metadata mutation, rename, and removal to the policy-driven fixed configuration base.
+- Changed item registry configuration to use the same shared mechanics and updated _Pokemon_ tests to rely on default item-ID initialization.
+- Changed registry test index and counter expectations from unsigned byte to unsigned short to match widened stable-ID storage.
 
 ### Fixed
 
-- Fixed header guard inconsistencies:
-  - _Ability/constants.h_, _Item/constants.h_
-- Updated return types for consistency:
-  - Changed from `unsigned char` to `unsigned short` in multiple test files:
-    - _typeRegistryConfiguration.test.cpp_, _typeRegistry.test.cpp_, _idInterface.test.cpp_
+- Corrected colliding header guards in the ability and item constants headers so both domains can be included in one translation unit.
 
 ### Removed
 
-- Removed redundant functions from _AbilityRegistryConfiguration_:
-  - Both overloads of _resolveIndex()_
-  - _removeEntry()_
-  - Member variable (now inherited)
-- Removed redundant functions from _AbilityRegistry_ (now inherited from base):
-  - _getEntry()_, _getAmountRegistered()_, _setEntry()_, _setAmountRegistered()_
-  - _incrementAmountRegistered()_, _decrementAmountRegistered()_
-  - _findEntryIndexByName()_, _findEntryIndexByID()_, _addBuiltin()_
-  - Member variables (now inherited)
-- Removed redundant functions from _ItemRegistry_ (now inherited):
-  - Same methods as removed from _AbilityRegistry_
-  - Member variables (now inherited)
+- Removed duplicated ability/item storage, index resolution, counters, built-in insertion, entry mutation, compaction, and rollback mechanics now owned by the fixed registry layers.
 
 ## [0.4.1] - 2026-07-27
 
 ### Added
 
-- Implemented generic stable ID infrastructure:
-  - Created _IDInterface_ base class that all stable ID tags inherit from
-  - Enables typed stable IDs for abilities, items, moves, and types
-  - Provides common interface for ID management across registry system
-- Implemented item ID system:
-  - Builtin Item ID file with conversion function to stable Item ID
-  - _Item/constants.h_ with user-readable item names
-  - Item metadata file containing name, stable ID, and trigger/effect lists
-- Implemented item trigger and target system:
-  - Item triggers, targets, and combined wrapper structures
-- Implemented item registry:
-  - Constructor initializing all builtin items
-  - Metadata access and query methods
-  - Array index lookup by stable item ID
-  - Entry existence checks by name or ID
-  - Entry mutation and amount tracking
-- Implemented ability ID tagging:
-  - Unique empty struct _AbilityIDTag_ for type safety
-- Extended configuration constants:
-  - _MAX_ABILITIES_PER_POKEMON_ for individual ability capacity
-  - _MAX_ITEMS_ for item registry capacity
-  - _MAX_ITEMS_PER_POKEMON_ for individual item capacity
-- Extended effect types:
-  - Added _StatusRemove_ effect type for status removal effects
-- Added test infrastructure:
-  - Test suite for _idInterface.h_
+- Added _IDInterface<Tag, DefaultValue>_, providing strong ordering, unsigned-short storage, explicit value construction, _getValue()_, and a configurable default sentinel while preventing cross-domain ID comparison.
+- Added the complete item identity and metadata model:
+  - Tagged _ItemID_, _NO_ITEM_ID_, _BuiltinItemID_, constexpr conversion, canonical names, _ItemMeta_, and item trigger/target records
+  - _None_, _Cheri Berry_, and _Chesto Berry_ built-ins, with berry trigger metadata that removes status conditions
+- Added _ItemRegistry_ with capacity 1000, built-in registration, metadata/name/ID/index lookup, containment queries, and controlled entry/count mutation.
+- Added _MAX_ABILITIES_PER_POKEMON_, _MAX_ITEMS_PER_POKEMON_, and _MAX_ITEMS_; added _StatusRemove_ to the effect type catalog.
+- Added unit coverage for default, explicit, ordered, and domain-separated _IDInterface_ behavior.
 
 ### Changed
 
-- Enhanced ID type safety:
-  - Updated _toAbilityID()_ to use _ATTR_NODISCARD_ attribute
-  - Refactored _AbilityID_ from class to typedef of _IDInterface_
-  - Refactored _ItemID_ from enum to typedef of _IDInterface_
-  - Refactored _TypeID_ from class to typedef of _IDInterface_
-  - All enable runtime extensibility and consistent type safety
-- Updated numeric types for registry indices:
-  - Changed return types from `unsigned char` to `unsigned short` in:
-    - _abilityRegistryConfiguration.h_: 9 functions + 2 member variables
-    - _typeRegistryConfiguration.h_: 6 functions
-    - _typeRegistry.h_: 12 functions + 2 member variables
-  - Allows support for up to 65,535 registry entries
-- Updated ability registry capacity:
-  - Increased maximum abilities from 64 to 1000 in configuration
-- Applied code formatting:
-  - Updated _abilityRegistryConfiguration.h_ for style consistency
-- Fixed namespace resolution:
-  - Updated registry member variable access in _abilityRegistryConfiguration.h_
-  - Updated _abilityRegistryConfiguration.cpp_
-  - Updated _abilityRegistry.h_
-  - Updated _abilityRegistry.test.cpp_
-- Reordered configuration constants:
-  - Reorganized _Configuration/constants.h_ values
+- Generalized _AbilityID_ and _TypeID_ from hand-written wrappers to tagged _IDInterface_ aliases; introduced _ItemID_ on the same abstraction and marked built-in conversions as result-bearing APIs.
+- Widened ability/type registry counters, indexes, and related return values from unsigned byte to unsigned short.
+- Increased _MAX_ABILITIES_ from 64 to 1000 and reorganized registry and per-Pokemon limits around _MAX_ABILITIES_PER_POKEMON_, _MAX_ITEMS_PER_POKEMON_, and _MAX_ITEMS_.
+- Normalized touched ability configuration formatting and explicit namespace qualification.
 
 ### Fixed
 
-- Fixed namespace resolution issues across ability registry implementation
+- Corrected namespace qualification for registry storage and ability identifiers across the ability registry, configuration implementation, and tests.
 
 ### Removed
 
-- Removed default initializer of _mItemID_ in _pokemon.h_
-  - Items must now be explicitly set
+- Removed the obsolete explicit _Pokemon::mItemID_ initializer because default construction of the tagged _ItemID_ now produces the no-item sentinel.
 
 ## [0.4.0] - 2026-07-27 (Ability Registry Update)
 
 ### Added
 
-- Implemented foundational ability registry system:
-  - Configuration constant for NO_ABILITY_ID
-  - Builtin Ability ID file with conversion function to stable Ability ID
-- Implemented ability registry:
-  - Constructor initializing all builtin abilities
-  - Metadata access (name, ID lookup)
-  - Registry query methods (entry count, next ID)
-  - Array index lookup by stable ability ID
-  - Entry existence checks by name or ID
-  - Entry mutation and amount tracking
-  - Getter/setter methods for next ability ID and amount registered
-- Implemented ability registry configuration:
-  - User-friendly configuration interface
-  - Add/remove/rename ability operations
-  - Set ability triggers and effects
-  - Comprehensive error handling
-  - Ability configuration policy structure with:
-    - Configuration user name
-    - Configuration type
-    - Error codes for duplicate/not-found conditions
-- Extended configuration system:
-  - _MAX_ABILITIES_IN_REGISTRY_ for ability registry capacity
-  - _MAX_TYPES_PER_POKEMON_ for Pokemon type array capacity
-  - _MAX_MOVES_PER_POKEMON_ for Pokemon move array capacity
-- Implemented Pokemon type system:
-  - Added type ID array to Pokemon class
-  - Getter/setter methods for type array and individual types
-- Implemented stable type ID system:
-  - Created _typeID.h_ with stable TypeID class
-  - Added NO_TYPE_ID constant
-  - Added conversion function from type enum to stable TypeID
-- Extended effect system:
-  - Added ability and item error codes to _RegistryError_
-  - Updated _errorKindToString()_ with error branches
-- Added comprehensive test suites:
-  - _abilityRegistryConfiguration.h_ test suite
-  - _abilityRegistry.h_ test suite
-  - _pokemon.h_ test suite
-  - Extended tests in _typeRegistryConfiguration.test.cpp_
+- Added the open, hand-written _AbilityID_ wrapper with a no-ability sentinel, the closed _BuiltinAbilityID_ catalog, and constexpr conversion between built-in and stable identities.
+- Added _AbilityRegistry_ with fixed capacity 64 and built-in _None_, _Stench_, and _Drizzle_ records; exposed metadata/name/ID/index lookup, containment, count/next-ID queries, and controlled mutators.
+- Added _AbilityRegistryConfiguration_ and _AbilityDefinition_ as the user-facing configuration layer:
+  - Registers one ability or an atomic batch with stable monotonic IDs
+  - Replaces trigger definitions, renames entries, removes entries with compaction, and reports duplicate/not-found/capacity errors with context
+- Added the open, hand-written _TypeID_ wrapper, _NO_TYPE_ID_, and built-in type conversion.
+- Added _MAX_TYPES_PER_POKEMON_ at 2 and _MAX_MOVES_PER_POKEMON_ at 4; _Pokemon_ now stores a fixed type-ID array and exposes whole-array and indexed type accessors.
+- Added focused ability registry/configuration, Pokemon type-storage, and stable type-ID tests.
 
 ### Changed
 
-- Refactored ID system for type safety:
-  - Changed _AbilityID_ from enum class to stable typed ID class
-  - Enables custom ability definitions beyond builtin set
-- Updated type registry checks:
-  - Added _NO_TYPE_ID_ validation in _addType()_ method
-- Enhanced numeric types:
-  - Updated return types from `unsigned char` to `unsigned short` in:
-    - _typeRegistryConfiguration.h_ and implementations
-    - _typeRegistry.h_: returns stable TypeID instead of raw bytes
-  - Updated member variable types in _typeRegistry.h_
-- Updated effect system:
-  - Changed _mMoveTypeID_ in _effectContext.h_ from `unsigned char` to _TypeID_
-  - Uses stable typed ID for type safety
-- Updated Pokemon interface:
-  - Constructors now accept array of type IDs
-  - Updated all move count references to use _MAX_MOVES_PER_POKEMON_ constant
-  - Improved consistency across _pokemon.h_ and _pokemon.cpp_
-- Applied code analysis fixes:
-  - Fixed clang-tidy warnings in 14 files:
-    - Headers: _abilityTargetsAndTriggers.h_, _effectContext.h_, _effectType.h_, _itemID.h_, _moveID.h_, _statusID.h_, _typeID.h_, _pokemon.h_, _timer.h_, _weather.h_, _Types/constants.h_
-    - Tests: _typeRegistryConfiguration.test.cpp_, _timer.test.cpp_
-    - Implementation: _main.cpp_
-- Updated documentation:
-  - Enhanced docs for _abilityMeta.h_, _Configuration/constants.h_, _typeRegistry.h_
-- Applied code formatting:
-  - Ran _clang-format_ on _typeRegistryConfiguration.cpp_
-- Updated test expectations:
-  - Modified _typeRegistryConfiguration.test.cpp_ for stable TypeID
-  - Modified _typeRegistry.test.cpp_ for stable TypeID
+- Replaced the original closed _AbilityID_ enum with the open stable-ID wrapper, separating extensible runtime identity from the built-in catalog.
+- Changed _TypeRegistry_ entries and APIs from raw byte identifiers to _TypeID_, including no-type validation and corresponding configuration/test updates.
+- Changed _EffectContext::mMoveTypeID_ from an unsigned byte to _TypeID_.
+- Changed _Pokemon_ construction and type access to use fixed arrays of _TypeID_; replaced literal move-array extents with _MAX_MOVES_PER_POKEMON_.
+- Revised documentation, formatting, and static-analysis conformance across the touched ID, effect, Pokemon, registry, timer, weather, test, and integration sources.
 
 ### Removed
 
-- Removed _getAbilityMetadata()_ function from registry (consolidated into generic interface)
+- Removed the switch-based _getAbilityMetadata_ factory; ability metadata now resides in the runtime registry and is resolved through registry lookup.
 
 ## [0.3.2] - 2026-07-27
 
 ### Added
 
-- Extended build artifact management:
-  - Added _.log_ files to _.gitignore_ for build log exclusion
-- Implemented type registry utilities:
-  - Added _clearRows()_ method to _typeRegistryConfiguration.h_
-  - Clears offensive row and defensive column for type at specified index
-  - Used by reset/matchup update operations
-- Enhanced code coverage tracking:
-  - Added _lcov_ exclusion annotations in _typeRegistryConfiguration.cpp_
-  - Marks branches that are provably unreachable (impossible code paths)
+- Added `*.log` to ignored build artifacts.
+- Added the private constexpr _clearRows_ helper to clear both the offensive row and defensive column for a registered type index.
+- Added LCOV branch exclusions for defensive paths proven unreachable by preceding registry checks.
 
 ### Changed
 
-- Applied code formatting:
-  - Ran _clang-format_ on _typeRegistryConfiguration.cpp_
-- Refactored matchup reset operations:
-  - Updated both _resetMatchup()_ function overloads to use new _clearRows()_ method
-  - Improves code reusability and maintainability
+- Changed both _resetMatchups()_ overloads to delegate chart clearing to _clearRows()_, keeping row/column reset semantics in one implementation.
+- Simplified _renameType_ to consume the guaranteed internal index directly after successful ID resolution and normalized the touched implementation formatting.
 
 ### Removed
 
-- Removed redundant array index check in _renameType()_
-  - Previously checked array index existence after type ID lookup
-  - Type ID existence check guarantees array index exists (invariant)
-  - Eliminates unnecessary duplicate validation
+- Removed the unreachable second not-found branch in _renameType_; successful name-to-ID resolution guarantees that the corresponding internal array index exists in the same registry state.
 
 ## [0.3.1] - 2026-07-26
 
 ### Removed
 
-- Removed redundant hooks folder from repository
-  - Simplifies project structure
+- Removed the _commit-msg_ hook and its mandatory `[feature]`, `[tweak]`, or `[bugfix]` subject-prefix policy.
+- Removed the _pre-commit_ hook, including checks for TODO markers, sensitive keywords, and executable script bits, plus its release build, formatting, Flawfinder, cppcheck, unit-test, and clang-tidy gates.
 
-## [0.3.0] - 2026-07-26 (Pokemon & Ability, Item, and Status IDs)
+## [0.3.0] - 2026-07-26 (Pokemon, Battle, and Effect Model)
 
 ### Added
 
-- Enhanced build system infrastructure:
-  - Added _COMPILER_VERSION_ to makefile targets: _run_ and _run_tidy_
-  - Enables version-specific compilation and analysis
-- Implemented stable ID system for Pokemon attributes:
-  - Stable ID for moves enabling runtime move management
-  - Stable ID for items enabling custom item definitions
-  - Stable ID for abilities enabling custom ability definitions
-  - Stable ID for status conditions enabling custom status effects
-- Implemented ability system infrastructure:
-  - Ability trigger, target, and combined wrapper structures
-  - Ability constants file with user-readable ability names
-  - Ability metadata file containing name, stable ID, and trigger/effect lists
-- Implemented Pokemon class:
-  - Base stat tracking:
-    - Attack, Defense, Health
-    - Special Attack, Special Defense, Speed
-  - Stable ID fields:
-    - Item ID
-    - Ability ID
-    - Move ID array (4-move set)
-  - Getter/setter methods for all fields
-  - PP (Power Point) usage tracking method
-- Implemented battle slot infrastructure:
-  - _BattleSlot_ structure containing:
-    - Active Pokemon reference
-    - Item and status ID tracking
-    - Choice lock tracking (move ID)
-    - Condition flags: protected, flinched, fainted, item consumed
-    - Counters: toxic, sleep, protection
-    - Current HP and speed boost tracking
-    - Stat stage modifiers for all 6 stats
-- Implemented battle state tracking:
-  - _BattleState_ structure containing:
-    - Both sides' Pokemon and corresponding BattleSlot entries
-    - Entry hazard state per side (spikes, toxic spikes, stealth rock)
-    - Battle initialization flag
-    - Weather tracking: rain, sun, sandstorm support
-    - Terrain tracking: electric, grassy, misty, psychic support
-- Implemented effect context infrastructure:
-  - Battler side enumeration for targeting
-  - Effect source enumeration for origin tracking
-  - Damage context structure containing:
-    - Recoil ratio for move recoil calculation
-    - Total damage accumulator
-    - Critical hit, miss, and protection flags
-    - Damage application and continuation flags
-  - Effect result structure with:
-    - Sleep turn counter
-    - Status application
-    - Stat stage changes (attack/defense)
-  - Effect context aggregation containing:
-    - Damage and effect result structures
-    - Effect source tracking
-    - Ability/item/critical hit multipliers
-    - User/target index tracking
-    - Move base power, type ID, accuracy
-    - Move and ability ID references
-    - User/target side tracking
-    - Special flag for move classification
-- Implemented effect type system:
-  - Effect type ID enumeration for effect classification
-  - Foundational for effect handler dispatch system
-- Implemented weather system:
-  - Weather enumeration for battle condition tracking
-- Automated configuration file management:
-  - Updated clang-tidy macro regex to include _ATTR_ prefix
-  - Enables custom attribute macro checking
-- Enhanced build system robustness:
-  - Changed _TEST_INTEGRATIONS_SOURCES_, _TEST_MOCKS_SOURCES_, _BENCHMARKS_SOURCES_ to use wildcard patterns
-  - Improves safety for file discovery
-- Namespace unification across codebase (20+ files updated):
-  - Changed namespace from _Pokemon_ to _PocketCore_ throughout:
-    - Configuration files: _configFlags.h_, _Configuration/constants.h_, _Registry/constants.h_
-    - Registry system: _typeRegistryConfiguration.h_, _typeRegistry.h_, _typeRegistryConfiguration.test.cpp_, _typeRegistry.test.cpp_
-    - Type system: _cconcepts.h_, _Types/constants.h_, _typeEffectiveness.h_, _types.h_
-    - Utility files: _configCat.h_, _configCat.cpp_
-    - Infrastructure: _timer.h_, _timer.test.cpp_, _contiguousSequence.h_, _contiguousSequence.test.cpp_
-    - Logging: _Logging/constants.h_, _logger.h_, _logger.cpp_, _logger.test.cpp_
-    - Helper utilities: _floatUtility.h_, _floatUtility.test.cpp_, _overflowProtection.h_, _overflowProtection.test.cpp_, _input.h_, _random.h_
-    - Main entry: _main.h_
-  - Reflects project scope change from single-game Pokemon engine to generic PocketCore framework
+- Added enum-backed identifiers for the initial built-in battle data:
+  - _AbilityID_ defines None, Stench, and Drizzle
+  - _ItemID_ defines None, Cheri Berry, and Chesto Berry
+  - _MoveID_ defines None, Pound, and Karate Chop
+  - _StatusID_ defines None, Paralysis, Burn, Sleep, Freeze, Poison, and Toxic
+- Added the initial ability metadata model:
+  - _AbilityTriggerID_ identifies battle start, switch-in, turn-end, damage-calculation, move-use, faint, weather, and status events
+  - _AbilityTargetID_ identifies self, all allies, all opponents, and all battlers except self
+  - _AbilityEffectTrigger_ associates one trigger with a dynamic list of _EffectTypeID_ values
+  - _AbilityMeta_ stores an ability name and trigger list; _getAbilityMetadata()_ maps Drizzle to SetRain on switch-in, Stench to Flinch on move use, and unknown/None IDs to empty metadata
+  - Ability name constants provide the display names for None, Drizzle, and Stench
+- Added the _Pokemon_ entity with two construction paths:
+  - Stores a non-owning name, six unsigned-short combat stats, one ability, one item, and four move slots
+  - Tracks maximum and current PP independently for each move slot
+  - Provides getters and setters for every stored property, with index assertions on individual move and PP access
+  - _usePP()_ decrements current PP only when the selected slot is valid and has PP remaining
+- Added foundational battle-state structures:
+  - _StatStages_ stores attack, defense, special attack, special defense, speed, accuracy, and evasion stages
+  - _BattleSlot_ associates a const Pokemon pointer with current HP, speed multiplier, item/status/choice-lock IDs, sleep/toxic/protection counters, and protected/fainted/flinched/item-consumed flags
+  - _BattleState_ stores active slots and parties for both sides, Spikes/Toxic Spikes/Stealth Rock state, battle-start state, Rain/Sun/Sandstorm flags, and Electric/Grassy/Misty/Psychic terrain flags
+- Added the effect execution data model:
+  - _EffectTypeID_ enumerates damage, critical-hit, stat-stage, burn, weather, terrain, type-effectiveness, randomization, flinch, recoil, status, accuracy, and weather-setting effect categories
+  - _Side_ and _EffectSource_ identify participants and whether an effect came from a move, ability, item, or hazard
+  - _DamageContext_ carries recoil, accumulated damage, hit/protection/critical state, and pipeline continuation/application controls
+  - _EffectResult_ carries attack/defense stage changes, sleep duration, and a status to apply
+  - _EffectContext_ combines damage/results with multipliers, user/target indices and sides, move properties, move/ability IDs, source type, and physical/special classification
+- Added a _Weathers_ enum for Harsh Sunlight, Rain, Sandstorm, Hail, Snow, Fog, Extremely Harsh Sunlight, Heavy Rain, Strong Winds, and Shadowy Aura.
+- Added _.zed/compile_commands.json_ with the generated compiler invocations used by Zed language tooling.
 
 ### Changed
 
-- Optimized struct memory layout:
-  - Moved _mTypeChart_ member variable below _mEntries_ in type registry
-  - Reduces struct byte size and improves cache efficiency
+- Renamed the repository-wide root namespace from _Pokemon_ to _PocketCore_ across configuration, core utilities, type registry, logging, tests, and the executable entry point; updated aliases and Doxygen references to the new namespace.
+- Updated _main.cpp_ to use _PocketCore_ namespace aliases and renamed its local configuration object to _typeRegistryConfig_.
+- Made optional test-integration, test-mock, and benchmark source discovery tolerant of absent directories by passing their _wildcard_ expansions to _find_.
+- Added _COMPILER_VERSION_ to both clang-tidy Make targets so analysis parses sources using the same C++ standard as compilation.
+- Expanded the clang-tidy allowed-macro expression from debug-only names to both \_ATTR**and \_DEBUG** prefixes.
+- Reordered _TypeRegistry_ storage so type entries precede the type chart; public behavior and capacity remain unchanged.
+- Updated affected configuration and registry tests for the _PocketCore_ namespace without changing their asserted behavior.
 
 ### Removed
+
+- Removed the committed sample messages from _pokemon.log_, leaving the log file empty.
 
 ## [0.2.19] - 2026-05-01
 
 ### Added
 
-- Enhanced code coverage tracking:
-  - Added _lcov_ exclusion annotations to _typeRegistryConfiguration.cpp_
-  - Marks unreachable/impossible code branches (provably unreachable)
-- Enhanced error handling:
-  - Added logging in _resetMatchups()_ for type not found condition
-  - Improves debuggability of registry operations
-- Added comprehensive test suite:
-  - Test file for _typeRegistryConfiguration_ with full coverage
+- Added a 24-scenario Catch2 suite for _TypeRegistryConfiguration_ covering:
+  - Cell, row, column, name, ID, span, count, and containment queries
+  - Positional and name-keyed row/column mutation
+  - Single and batch add/remove operations, enum and stable-ID removal, rename, and matchup reset
+  - Capacity, duplicate, missing-reference, rollback, round-trip, and _RegistryErrorInfo_ behavior
+- Added targeted LCOV branch/region exclusions around defensive optional-access and bounds-checked paths whose failure branches are prevented by registry invariants.
+- Added explicit not-found logging to the name-based _resetMatchups()_ overload; both overloads now preserve the missing name or stringified stable ID in _RegistryErrorInfo::mContext_.
 
 ### Changed
 
-- Improved error handling defaults:
-  - Changed default error in _errorKindToString()_ to _UnknownError_
-  - Ensures graceful fallback for unexpected error types
-- Standardized identifier naming convention:
-  - Changed all instances of _\*Id_ to _\*ID_ across 5 files:
-    - _typeRegistryConfiguration.h_
-    - _Registry/constants.h_
-    - _typeRegistry.h_
-    - _typeRegistryConfiguration.cpp_
-    - _typeRegistry.test.cpp_
-  - Improves code consistency and readability
+- Standardized type-identifier spelling from _Id_/_id_ to _ID_ across _TypeEntry_, _TypeRegistry_, _TypeRegistryConfiguration_, assertion messages, implementations, and tests:
+  - Renamed APIs including _getTypeID()_, _getNextTypeID()_, _setNextTypeID()_, _findIndexByTypeID()_, and _incrementNextTypeID()_
+  - Renamed parameters, locals, and _TypeEntry::typeID_ to match the public API
+- Changed the defensive default mapping in _RegistryErrorInfo::errorKindToString()_ from _UnknownRegistryError_ to _UnknownError_.
+- Simplified _resolveIndex()_ to return _findIndexByTypeID(...).value()_ after _getTypeID()_ succeeds, documenting and excluding the guaranteed optional-access path.
+- Updated the comment-writing instructions to use direct member-variable Doxygen comments without redundant _@var_ tags.
 
 ### Removed
 
-- Removed BatchMismatch error from _RegistryError_:
-  - No longer needed for registry operations
-- Optimized type registry operations by removing redundant checks:
-  - Removed duplicate check in _addType()_ (validation already performed)
-  - Removed redundant bounds check in _rollbackEntries()_
-    - Amount validation guaranteed before this method
-  - Removed redundant index lookup check in _resolveIndex()_
-    - Previous type ID existence check guarantees index validity
-  - Reduces code complexity and improves performance
+- Removed the unused _RegistryError::BatchMismatch_ value and its string-conversion branch.
+- Removed duplicate-type validation from the positional _addType()_ path where prior validation already guarantees uniqueness.
+- Removed the defensive registered-count clamp in _rollbackEntries()_; callers already maintain the registry-capacity invariant.
+- Removed the second not-found branch from _resolveIndex()_ because a successful name-to-ID lookup guarantees that the same registry contains the corresponding internal index.
 
 ## [0.2.18] - 2026-05-01
 
 ### Added
 
-- Enhanced inline optimization control:
-  - Added _-Winline_ compiler warning to _GCC_WARNINGS_ in Makefile
-  - Warns when inline requests cannot be satisfied
-  - Added _ATTR_NOINLINE_ attribute to _attributeMacros.h_
-  - Allows explicit prevention of function inlining
-- Enhanced documentation:
-  - Added reasoning/documentation for _timer.h_ constructors/destructors deletions
-  - Added reasoning/documentation for _logger.h_ constructors/destructors deletions
-  - Improves code understandability
+- Added _-Winline_ back to GCC warning-as-error builds so failed compiler inlining requests are reported.
+- Added the portable _ATTR_NOINLINE_ macro, which expands to `__attribute__((noinline))` when supported and otherwise expands to nothing; its documentation records code-size, profiling, debugging, constexpr, and hot-path tradeoffs.
+- Added C++26 diagnostic reasons to the deleted _Timer_ copy/move operations and all deleted _Logger_ construction, assignment, and destruction operations.
 
 ### Changed
 
-- Applied no-inline optimization:
-  - Applied _ATTR_NOINLINE_ to _getTypeID()_ function
-  - Prevents inlining for performance profiling/debugging
+- Applied _ATTR_NOINLINE_ to _TypeRegistry::getTypeId()_ to keep the linear name lookup as a discrete call and avoid the GCC 16 inline-growth build failure.
 
 ### Fixed
 
-- Fixed typo in _typedefs.h_
+- Corrected the documented GCC reflection flag from _-frelection_ to _-freflection_.
 
 ### Removed
 
-- Removed _sfloat_ type definition from _typedefs.h_
-  - No longer used in codebase
+- Removed the unused _sfloat_ alias for `_Float16` from _typedefs.h_.
 
 ## [0.2.17] - 2026-04-30
 
 ### Added
 
-- Implemented advanced type checking:
-  - Added C++ concept to check if type is an enum
-  - Enables compile-time enumeration detection
-- Added commented C++ reflection code in _typedefs.h_:
-  - Converts enum values to string names
-  - Awaiting clangd linter support for C++26 reflection
-  - Comment indicates future enhancement when language support available
+- Added the _IsEnum_ concept as a named wrapper over _std::is_enum_v_ for compile-time enum constraints.
+- Added the _sfloat_ alias for `_Float16`.
+- Added disabled prototype code for a reflection-based enum-to-string utility, with notes explaining that GCC can parse it but clangd does not yet support the required reflection flag.
 
 ### Changed
 
-- Updated C++ language standard:
-  - Changed _COMPILER_VERSION_ from previous version to _c++26_ in Makefile
-  - Enables use of latest C++ features and optimizations
+- Changed the Makefile language option from the provisional _-std=c++2c_ spelling to the finalized _-std=c++26_ spelling.
 
 ### Removed
 
-- Removed _-Winline_ from _GCC_WARNINGS_:
-  - Determined to be too noisy for codebase
+- Removed _-Winline_ from GCC warning-as-error builds while investigating compiler inline-growth failures.
 
 ## [0.2.16] - 2026-04-30
 
 ### Changed
 
-- Updated C++ standard library version:
-  - Updated libstdc++ from version 6.0.34 to 6.0.35 in _makefileDependencies.sh_
-  - Ensures runtime compatibility with latest GCC improvements
+- Updated _setUpGCC()_ to copy _libstdc++.so.6.0.35_ from the custom compiler installation instead of _libstdc++.so.6.0.34_, matching GCC 16.1.0's runtime artifact.
 
 ## [0.2.15] - 2026-04-30
 
 ### Changed
 
-- Updated compiler version:
-  - Updated GCC from 15.2.0 to 16.1.0 in _makefileDependencies.sh_
-  - Provides access to latest compiler optimizations and fixes
+- Updated the requested custom GCC version in _makefileDependencies.sh_ from 15.2.0 to 16.1.0 and changed its _update-alternatives_ priority from 15 to 16.
 
 ## [0.2.14] - 2026-04-29
 
 ### Added
 
-- Added build analysis tool:
-  - Added _bear_ to build dependency packages in _makefileDependencies.sh_
-  - Bear captures compilation commands for analysis tooling
+- Added _bear_ to the full developer-tool package installation in _makefileDependencies.sh_, enabling generation of compilation databases from Make builds.
 
 ## [0.2.13] - 2026-04-29
 
 ### Removed
 
-- Removed environment variable configuration from _codeql-analysis.yml_
-  - Determined to be unnecessary for analysis
+- Removed the CodeQL build step's _PATH_, _LIBRARY_PATH_, and _LD_LIBRARY_PATH_ overrides for _/usr/local/gcc-latest_; replacing _PATH_ prevented the runner from locating _make_.
 
 ## [0.2.12] - 2026-04-29
 
 ### Added
 
-- Enhanced CodeQL configuration:
-  - Added environment variable setup in _codeql-analysis.yml_
-  - Added workflow step to ensure CodeQL TRAP directory exists
-  - Creates directory if not present, enabling proper analysis output
+- Added custom GCC environment overrides to the CodeQL build step:
+  - Prepended _/usr/local/gcc-latest/bin_ to _PATH_
+  - Set _LIBRARY_PATH_ and _LD_LIBRARY_PATH_ to the compiler's _lib64_ directory
+- Added an always-running safeguard that creates the C/C++ CodeQL TRAP tarball directory when the temporary CodeQL database exists.
 
 ## [0.2.11] - 2026-04-29
 
 ### Added
 
-- Enhanced CodeQL workflow configuration:
-  - Added _build-mode: manual_ to _codeql-analysis.yml_
-  - Provides explicit control over build process during analysis
+- Set CodeQL initialization to _build-mode: manual_, explicitly associating analysis with the workflow's existing _make_ build rather than autobuild inference.
 
 ## [0.2.10] - 2026-04-29
 
 ### Changed
 
-- Updated GitHub Actions:
-  - Updated checkout action from v4 to v6 in _codeql-analysis.yml_
-  - Provides latest features and security improvements
+- Updated the CodeQL workflow's repository checkout from _actions/checkout@v4_ to _actions/checkout@v6_, restoring the action version used before the advanced-template conversion.
 
 ## [0.2.9] - 2026-04-29
 
 ### Changed
 
-- Optimized workflow caching:
-  - Reordered workflow steps to run CodeQL analysis before cache save
-  - Ensures analysis results are cached, improving subsequent run performance
+- Moved _github/codeql-action/analyze@v4_ immediately after the manual _make_ step and before all dependency-cache persistence and permission-repair steps.
+- Preserved the language-specific CodeQL result category; no cache keys or cached artifacts changed.
 
 ## [0.2.8] - 2026-04-29
 
 ### Changed
 
-- Updated CodeQL workflow configuration:
-  - Updated _codeql-analysis.yml_ to use official CodeQL workflow template
-  - Provides better maintainability and feature updates
-- Updated testing workflow:
-  - Updated _testing.yml_ runner to use _ubuntu-latest_
-  - Ensures compatibility with latest CI/CD environment
+- Converted _codeql-analysis.yml_ to GitHub's advanced CodeQL workflow structure:
+  - Renamed the workflow to _CodeQL Advanced_ and the job to include the matrix language
+  - Changed the language matrix from _cpp_ to _c-cpp_ and added a language-specific analysis category
+  - Added package-read permission and retained action, content, and security-event permissions
+  - Moved CodeQL initialization after dependency/toolchain setup and before the manual project build
+  - Temporarily changed repository checkout from v6 to the template's v4
+- Changed both CodeQL and test jobs from the fixed _ubuntu-24.04_ image to _ubuntu-latest_.
 
 ## [0.2.7] - 2026-04-29
 
 ### Changed
 
-- Updated GitHub Actions:
-  - Updated CodeQL init action from v3 to v4
-  - Provides improved CodeQL database initialization
+- Updated CodeQL database initialization from _github/codeql-action/init@v3_ to _init@v4_.
 
 ## [0.2.6] - 2026-04-29
 
 ### Changed
 
-- Updated GitHub Actions:
-  - Updated CodeQL analyze action from v2 to v4
-  - Provides improved security analysis capabilities
+- Updated the analysis upload/execution step from _github/codeql-action/analyze@v2_ to _analyze@v4_.
 
 ## [0.2.5] - 2026-04-29
 
 ### Added
 
-- Enhanced spdlog dependency caching:
-  - Added _local/cmake/pkgconfig_ folder creation in build workflows
-  - Ensures CMake package configuration files available for spdlog
-  - Implemented in both _testing.yml_ and _codeql-analysis.yml_
+- Added explicit creation of _/usr/local/lib/cmake/spdlog_ before restoring cached Spdlog CMake package files in the CodeQL and test workflows.
 
 ### Changed
 
-- Improved dependency management:
-  - Updated spdlog cache installation to copy _/lib/cmake/spdlog_ files to local directory
-  - Ensures spdlog CMake modules properly located for package discovery
+- Changed Spdlog CMake restoration to copy the cached directory contents into the pre-created destination rather than copying the directory itself, preventing an unintended nested _spdlog/spdlog_ path.
 
 ## [0.2.4] - 2026-04-29
 
 ### Added
 
-- Added Catch2 testing framework:
-  - Integrated _catch2_ into testing framework installation step
-  - Added Catch2 to build dependencies
-  - Enables parallel testing framework support (GoogleTest + Catch2)
+- Added the Catch2 package to the cache-hit fallback installation in both CodeQL and test workflows so Catch2 remains available when the full dependency script is skipped.
 
 ### Changed
 
-- Improved CI/CD clarity:
-  - Renamed testing installation step from "Install Google Mock" to "Install Testing Frameworks"
-  - Updated in both _testing.yml_ and _codeql-analysis.yml_
-  - Reflects support for multiple test frameworks
+- Renamed the fallback step from _Install Google Mock_ to _Install Testing Frameworks_ and retained Google Mock installation alongside Catch2.
 
 ## [0.2.3] - 2026-04-29
 
-### Changed
+### Fixed
 
-- Enhanced build permissions:
-  - Added sudo permissions when creating _local/lib/pkgconfig_ folder
-  - Ensures folder creation succeeds in restricted environments
+- Added _sudo_ to _/usr/local/lib/pkgconfig_ directory creation in the CodeQL and test workflows, allowing the cache restore step to create the root-owned system path.
 
 ## [0.2.2] - 2026-04-29
 
 ### Added
 
-- Enhanced dependency caching:
-  - Added _local/lib/pkgconfig_ folder creation in build workflows
-  - Ensures pkg-config can locate spdlog package configuration
-  - Implemented in both _testing.yml_ and _codeql-analysis.yml_
+- Added creation of _/usr/local/lib/pkgconfig_ before cached Spdlog pkg-config metadata is restored in the CodeQL and test workflows.
 
 ## [0.2.1] - 2026-04-29
 
 ### Changed
 
-- Improved spdlog caching strategy:
-  - Updated spdlog cache installation path in both _testing.yml_ and _codeql-analysis.yml_
-  - Modified to copy entire folders from GCC cache install to local directory
-  - Improves cache efficiency and dependency resolution
+- Changed cached Spdlog restoration in both CodeQL and test workflows from _/usr_ to the _/usr/local_ prefix used by the source installation:
+  - Libraries restore to _/usr/local/lib_
+  - CMake and pkg-config metadata restore beneath _/usr/local/lib_
+  - Headers restore to _/usr/local/include_
+- Changed the test workflow's GCC cache restoration from a non-recursive copy to _cp -r_, preserving the cached compiler directory hierarchy.
 
 ## [0.2.0] - 2026-04-29 (Type Registry Conversion)
 
 ### Changed
 
-- Refactored registry module naming:
-  - Renamed _configuration.h_ to _typeRegistryConfiguration.h_
-  - Renamed _configuration.cpp_ to _typeRegistryConfiguration.cpp_
-  - Clarifies file purpose for type registry configuration
-  - Makes codebase extensible for future registries (ability, item, status)
-- Updated registry documentation:
-  - Updated documentation for configuration constants file
-  - Updated documentation for _typeRegistryConfiguration.h_
-- Reorganized function definitions:
-  - Reordered functions in _typeRegistryConfiguration.h_ and _typeRegistryConfiguration.cpp_
-  - Improves logical grouping and code navigation
-- Updated module imports:
-  - Updated imports in _main.cpp_ to reflect new filenames
-- Enhanced code analysis:
-  - Added clang-tidy exclusions in _typeRegistry.test.cpp_
-  - Suppresses false positives in test code
+- Renamed the generic type-registry configuration module to make its ownership explicit:
+  - Renamed _Configuration/configuration.h_ to _Configuration/typeRegistryConfiguration.h_
+  - Renamed _Configuration/configuration.cpp_ to _Configuration/typeRegistryConfiguration.cpp_
+  - Renamed the public _Configuration_ class to _TypeRegistryConfiguration_ and updated every declaration, definition, diagnostic message, include, and construction site
+  - Updated _main.cpp_ to include the renamed header and instantiate _Configuration::TypeRegistryConfiguration_
+- Reorganized _TypeRegistryConfiguration_ without changing its registry-management contract:
+  - Grouped lookup APIs, mutation APIs, higher-level operations, and private helpers into dedicated sections
+  - Reordered source definitions to follow the public header and retained add, remove, rename, matchup, reset, rollback, and lookup behavior
+  - Updated Doxygen for _MatchupPair_, _TypeDefinition_, all public operations, and internal rollback/index-resolution helpers with parameters, return values, defaults, and failure behavior
+- Clarified type-registry configuration metadata in _Configuration/constants.h_:
+  - Added a local _ub_ alias and used it for _MAX_TYPES_, _RegistryError_, and _UnspecifiedMatchup_
+  - Documented each registry error category, the non-owning context carried by _RegistryErrorInfo_, and neutral versus undefined handling for omitted matchups
+  - Reordered _UnspecifiedMatchup_ beside the other helper enum and grouped constants, enums, error data, and private conversion logic
+- Renamed _TypeRegistry_ section labels from utility functions to member functions to match their actual ownership.
+- Added targeted _bugprone-unchecked-optional-access_ suppressions after successful _REQUIRE_ checks in _typeRegistry.test.cpp_, preserving the existing runtime assertions while removing false-positive clang-tidy reports.
 
 ## [0.1.14] - 2026-04-29
 
 ### Added
 
-- Start caching Spdlog in the github workflows
+- Added a complete Spdlog cache lifecycle to the CodeQL and test workflows:
+  - Created cache storage for libraries, CMake package metadata, pkg-config metadata, and headers under _cache/spdlog_
+  - Added an _actions/cache@v5_ entry keyed by the runner OS and the _makefileDependencies.sh_ hash, with an OS-level restore prefix
+  - Restored _libspdlog\*_, the _spdlog_ CMake package, pkg-config files, and headers into their system locations on a cache hit
+  - Saved the corresponding artifacts from _/usr/local_ after dependency installation
 
 ### Changed
 
-- Reorder Spdlog copy steps in _makefileDependencies.sh_
+- Added the Spdlog cache result to the workflow dependency-installation and Google Mock fallback conditions so an incomplete cache set triggers setup.
+- Reordered the Spdlog installation copy operations in _makefileDependencies.sh_ to install the library, CMake metadata, pkg-config metadata, and headers in the same order used by cache restoration.
 
 ## [0.1.13] - 2026-04-28
 
 ### Changed
 
-- Reordered the _configCat_ installation in _makefileDependencies.sh_ to be higher up
+- Moved ConfigCat detection and installation ahead of the custom GCC setup in _makefileDependencies.sh_, while retaining the existing _libconfigcat.a_ presence check.
+- Registered the custom compiler's _c++_ executable with _update-alternatives_ alongside _g++_, _gcc_, and _gcov_, using the same installation prefix and priority.
+- Restored the CodeQL and test workflow files to _.github/workflows/_ and removed the temporary standalone ConfigCat workflow introduced during the intermediate CI experiments; those experiments produced no other lasting workflow behavior.
 
 ## [0.1.12] - 2026-04-28
 
 ### Changed
 
-- Updated the checkout action from v4 to v6 and the cache action from v3 to v5 in:
-  - _codeql-analysis.yml_
-  - _testing.yml_
-  - _semgrep.yml_
-- In _makefileDependencies.sh_, changed _sudo apt..._ to _sudo apt-get update_
+- Updated _actions/checkout_ from v4 to v6 in the CodeQL, test, and Semgrep workflows.
+- Updated all _actions/cache_ uses from v3 to v5 in the CodeQL and test workflows, covering apt packages, apt lists, Google Test, ConfigCat, Curl, hash-library, and GCC caches.
+- Replaced interactive-oriented _apt_ calls with _apt-get_ for package update, upgrade, and Rust/Cargo removal operations in _makefileDependencies.sh_.
+- Normalized _semgrep.yml_ list and step indentation while preserving its pull-request, branch, path, and scheduled triggers.
 
 ## [0.1.11] - 2026-04-28
 
 ### Added
 
-- Caching for config cat, curl, and hash library for _codeql-analysis.yml_
+- Added ConfigCat, Curl, and hash-library caches to the CodeQL workflow:
+  - Created separate library and include cache directories for each dependency
+  - Added _actions/cache@v3_ entries keyed by runner OS, dependency name, and the _makefileDependencies.sh_ hash
+  - Restored static libraries to _/usr/lib_ and headers to dependency-specific directories under _/usr/include_ on cache hits
+  - Saved _libconfigcat.a_, _libcurl.a_, _libhash-library.a_, and their headers after dependency installation
+
+### Changed
+
+- Expanded CodeQL dependency installation conditions to account for ConfigCat, Curl, hash-library, and GCC cache misses.
+- Expanded the CodeQL Google Mock fallback condition and the equivalent test-workflow conditions to account for the GCC cache result.
 
 ## [0.1.10] - 2026-04-28
 
 ### Added
 
-- Add a check in _makefileDependencies.sh_ to find determine if configCat is already installed, if not install it.
+- Added an idempotent ConfigCat installation guard to _makefileDependencies.sh_:
+  - Checks for _/usr/lib/libconfigcat.a_ before invoking _setUpConfigCat()_
+  - Skips the vcpkg-based ConfigCat, Curl, and hash-library installation when the cached/static ConfigCat library is already present
+  - Emits an explicit status message for both the installed and setup paths
 
 ## [0.1.9] - 2026-04-28
 
 ### Added
 
-- A step in the github workflows to find the latest version of GCC
+- Added a _Find latest GCC_ step to the CodeQL and test workflows that locates the highest versioned _/usr/local/gcc-\*_ directory and exports it as _LATEST_GCC_.
 
 ### Changed
 
-- When saving the GCC cache, we now use the latest gcc version found in the previous step.
+- Changed GCC cache saving to copy from _LATEST_GCC_ instead of the hard-coded _/usr/local/gcc-15_ path.
+- Changed automated dependency setup to build and register the requested GCC version through _setUpGCC()_ whenever the active compiler version does not match.
 
 ### Removed
 
-- Removed conditional gcc installation in _makefileDependencies.sh_, now just always installs one version.
+- Removed the automated _g++-13_ package-installation and _update-alternatives_ fallback from _makefileDependencies.sh_.
 
 ## [0.1.8] - 2026-04-28
 
 ### Added
 
-- GCC cache in github workflow actions:
-  - _codeql-analysis.yml_
-  - _testing.yml_
+- Added GCC caching to _codeql-analysis.yml_ and _testing.yml_:
+  - Created _cache/gcc-latest_ and cached it with _actions/cache@v3_ using the runner OS and _makefileDependencies.sh_ hash
+  - Restored cached compiler files into _/usr/local/gcc-latest_
+  - Registered cached _g++_, _gcc_, and _gcov_ binaries through _update-alternatives_ at priority 100
+  - Saved the locally built GCC installation into the cache after each workflow build
+
+### Changed
+
+- Removed the explicit _COMPILER_STANDARD=13_ arguments from CodeQL and test build commands so both workflows use the compiler standard selected by the Makefile.
 
 ## [0.1.7] - 2026-04-24
 
-### Fixed
+### Changed
 
-- Ran shellcheck and shellfmt on _makefileDependencies.sh_
+- Applied _shellcheck_ and _shellfmt_ remediation throughout _makefileDependencies.sh_:
+  - Replaced single-bracket conditions with _[[...]]_ expressions and made compound automated-install conditions explicit
+  - Quoted positional parameters, paths, command substitutions, version values, and environment-variable expansions to prevent unintended word splitting and glob expansion
+  - Added _cd ... || exit_ guards so failed directory transitions stop the active setup routine
+  - Switched interactive input to _read -r_ and guarded optional command/version probes with fallbacks
+  - Normalized parallel-build invocations and allowed selected optional setup commands to continue after failure where the script already treated them as non-fatal
+- Reformatted the dependency script consistently without changing its set of supported dependency installers.
 
 ## [0.1.6] - 2026-04-24
 
 ### Changed
 
-- Updated the _typeRegistry.test.cpp_ to _catch2_ format
+- Completed the TypeRegistry test migration from Google Test to Catch2 BDD syntax:
+  - Replaced the Google Test and Catch2 matcher headers with _catch_test_macros.hpp_
+  - Replaced the shared Google Test fixture and individual _TEST_F_ cases with one _SCENARIO_ organized by _GIVEN_ and _THEN_ sections
+  - Converted fatal preconditions to _REQUIRE_/_REQUIRE_FALSE_ and independent assertions to _CHECK_/_CHECK_FALSE_
+  - Retained coverage for built-in registration, type-chart cells and rows, name/ID lookups, mutation APIs, counters, spans, case sensitivity, and undefined slots
+  - Added the cognitive-complexity lint suppression required by the nested BDD structure
 
 ## [0.1.5] - 2026-04-24
 
 ### Added
 
-- Added _-D${TEST_STANDARD}_ to the _clang-tidy_ command within the _tidy_ Makefile target
-- Added _-D${TEST_STANDARD}_ to the _run-clang-tidy_ command within the _run_tidy_ Makefile target
+- Added _-D${TEST_STANDARD}_ to both the serial _clang-tidy_ and parallel _run-clang-tidy_ invocations so static analysis follows the selected test framework's preprocessor path.
 
 ### Changed
 
-- Updated the _TEST_STANDARD_ Makefile variable to _catch2_ by default
-- Converted the google tests for the following test files into catch2 tests:
+- Changed the default _TEST_STANDARD_ from _googletest_ to _catch2_.
+- Rewrote the repository test-generation instructions around Catch2 BDD conventions:
+  - Standardized on _SCENARIO_, _GIVEN_, _WHEN_, and _THEN_
+  - Defined _REQUIRE_ versus _CHECK_ usage, matcher guidance, exception assertions, comparison-expression wrapping, and table-driven scenarios
+  - Updated the example test and lint-suppression guidance for nested BDD cases
+- Migrated the following suites from Google Test cases and fixtures to Catch2 BDD sections while preserving their tested behavior:
   - _cconcepts.test.cpp_
   - _timer.test.cpp_
   - _contiguousSequence.test.cpp_
@@ -2130,129 +1390,98 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Added
 
-- Added _-D${TEST_STANDARD}_ to the _COMPILER_FLAGS_TEST_ Makefile variable
+- Added _-D${TEST_STANDARD}_ to _COMPILER_FLAGS_TEST_, exposing the selected framework as a test-build preprocessor symbol.
 
 ### Changed
 
-- Moved the _TEST_STANDARD_ Makefile variable closer to the top of the file
-- Changed the _testMain.cpp_ file to conditionally include either the catch2 or googletest libraries depending on what the _TEST_STANDARD_ is set to
-  - This will also then execute either the catch2 or googletest test runner depending on what the _TEST_STANDARD_ is set to
+- Moved _TEST_STANDARD_ beside the compiler configuration so it is available while test compiler flags are assembled.
+- Made _testMain.cpp_ framework-aware:
+  - Includes _catch_session.hpp_ and runs _Catch::Session_ when _catch2_ is defined
+  - Includes _gtest/gtest.h_, initializes Google Test, and runs _RUN_ALL_TESTS()_ when _googletest_ is defined
+  - Produces a compile-time error when neither supported framework symbol is defined
+  - Standardized the entry-point argument declaration to _char \*argv[]_
 
 ## [0.1.3] - 2026-04-22
 
 ### Added
 
-- Added a _TEST_STANDARD_ variable in the Makefile that defaults to _googletest_
-- Added a _GOOGLE_TEST_LIBRARIES_ Makefile variable that contains the libraries required for Google Test to work if the _TEST_STANDARD_ is set to _googletest_ otherwise it will be empty
-- Added a _Catch2_LIBRARIES_ Makefile variable that contains the libraries required for Catch2 to work if the _TEST_STANDARD_ is set to _catch2_ otherwise it will be empty
-- Added a _GOOGLE_TEST_EXECUTION_FLAGS_ Makefile variable that contains the execution flags for Google Test if the _TEST_STANDARD_ is set to _googletest_ otherwise it will be empty
-- Added a _CATCH2_EXECUTION_FLAGS_ Makefile variable that contains the execution flags for Catch2 if the _TEST_STANDARD_ is set to _catch2_ otherwise it will be empty
+- Added the _TEST_STANDARD_ Makefile selector with _googletest_ as the default.
+- Added framework-specific link variables:
+  - _GOOGLE_TEST_LIBRARIES_ selects project libraries, coverage, Google Test, Google Mock, and pthread linkage
+  - _CATCH2_LIBRARIES_ selects Catch2 linkage
+- Added framework-specific execution variables:
+  - _GOOGLE_TEST_EXECUTION_FLAGS_ supplies repeat, brief-output, and optional break-on-failure arguments
+  - _CATCH2_EXECUTION_FLAGS_ supplies compact reporting and optional break-on-failure arguments
 
 ### Changed
 
-- Updated the _TEST_LIBRARIES_ Makefile variable to both _GOOGLE_TEST_LIBRARIES_ and _Catch2_LIBRARIES_
-- Updated the _TEST_EXECUTION_FLAGS_ Makefile variable to both _GOOGLE_TEST_EXECUTION_FLAGS_ and _CATCH2_EXECUTION_FLAGS_
+- Changed _TEST_LIBRARIES_ and _TEST_EXECUTION_FLAGS_ into aggregate variables whose non-empty values are selected by _TEST_STANDARD_, allowing the existing test targets to drive either framework.
 
 ## [0.1.2] - 2026-04-22
 
 ### Added
 
-- Added in _catch2_ to the list of makefile dependencies
-- Added in the _Catch2_ library in the _TEST_LIBRARIES_ Makefile variable
-- Added _lcov_ exclusions that match assert and _LCOV_EXCL_BR_
-- Added a _clean_coverage_ phony Makefile target that will delete all _lcov_ coverage files
-- Added the _clean_coverage_ target to the _README.md_ and the _makefileDescriptions.rst_
-- Added the _run_tidy_ target to the _README.md_ and the _makefileDescriptions.rst_
+- Added Catch2 to the Ubuntu dependency set and linked _libCatch2_ into test builds alongside the existing Google Test libraries.
+- Added _LCOV_EXCLUDE_ASSERT_ to treat assertion branches and _LCOV_EXCL_BR_ annotations as coverage exclusions.
+- Added TypeRegistry coverage annotations around built-in registration and bounds-checked lookup paths whose exception branches are unreachable after validated preconditions.
+- Added the _clean_coverage_ target to remove accumulated _.gcda_ counters and made _coverage_ depend on it as well as generated HTML output.
+- Added _clean_coverage_ and _run_tidy_ to the Make target documentation in _README.md_ and _makefileDescriptions.rst_.
+- Strengthened TypeRegistry and Logger tests:
+  - Covered built-in entries, stable IDs, matchup values, undefined slots, lookup failures, mutation round trips, and registration counters
+  - Covered logger defaults, output-file changes, logger replacement, all severity methods, and logging-failure messages
 
 ### Changed
 
-- Added the _lcov_ exclusions to the _LCOV_FLAGS_ Makefile variable
-- Added the _lcov_ exclusions to the _lcov_ command within the _lcov_ Makefile target
-- Added the _lcov_ exclusions to the _genhtml_ command within the _genhtml_ Makefile target
-- The _coverage_ Makefile target now also depends on the _clean_coverage_ target
-- Updated the description of the _coverage_ target in the _README.md_ and _makefileDescriptions.rst_
-- Updated the description of the _tidy_ target in the _README.md_ and _makefileDescriptions.rst_
-- Added in _lcov_ exclusions to the _typeRegistry_ as some of the branches are just unreachable
-- Changed types from auto to their exact types in the _typeRegistry.test.cpp_ file
-- Changed types from auto to their exact types in the _logger.test.cpp_ file
-- Changed types to their _typedefs.h_ types in the _logger.test.cpp_ file
-- Changed _readLogFile_ in _logger.test.cpp_ to take in a file name variable and use that instead of the private log file member variable.
+- Applied the assertion exclusion rule consistently during capture, test-file removal, and HTML generation.
+- Simplified coverage and profiling output paths from escaped relative paths to _coverage_ and _profiling_.
+- Corrected TypeRegistry API documentation by removing _std::out_of_range_ claims from methods whose index validity is enforced as a precondition.
+- Replaced inferred test variables with explicit project or standard-library types and introduced local namespace aliases where they improve the expected type contract.
+- Changed the Logger test helper _readLogFile()_ to accept an optional file-name override and return the file contents directly, allowing tests to verify output after changing log destinations.
+- Updated Make target documentation to explain coverage-counter cleanup and the serial versus parallel clang-tidy workflows.
 
 ### Removed
 
-- Removed redundant folder path finding on _GENHTML_OUTPUT_FOLDER_ Makefile variable
-- Removed redundant folder path finding on _PROFILE_FOLDER_ Makefile variable
+- Removed redundant escaped current-directory prefixes from _GENHTML_OUTPUT_FOLDER_ and _PROFILE_FOLDER_.
 
 ## [0.1.1] - 2026-04-20
 
 ### Fixed
 
-- Fixed the project name in the README.md to _pocketcore_
-- Fixed the sphinx project documentation _conf.py_ to have the appropriate title and repository URL
+- Replaced the inherited _project-name_ README heading with _pocketcore_.
+- Replaced Sphinx template placeholders with the _pocketcore_ HTML title and the repository URL _<https://github.com/Phaysik/pocketcore>_, enabling the documentation repository button to target the correct project.
 
 ## [0.1.0] - 2026-04-20 (Type Configuration Update)
 
 ### Added
 
-- Added in boilerplate code from [CPPBase](https://github.com/Phaysik/CPPBase/commit/34d5cc39654bd807c3f62a8af207e07d3f971f1d)
-- Create a constants file that defines registry error assert message strings.
-- Create a type effectiveness file that holds the 5 possible states of type effectiveness.
-  - NOT_DEFINED - A sentinel value for uninitialized matchups
-  - NE - No Effect (0x multiplier)
-  - NVE - Not Very Effective (0.5x multiplier)
-  - E - Effective (1x multiplier)
-  - SE - Super Effective (2x multiplier)
-- Create a type enum file that holds the enum of all standard pokemon types.
-- Create a type registry file.
-  - Holds an enum that is a mapping pair of a stable type ID to a human readable name.
-  - Holds the type registry which contains:
-    - All the builtin standard types and their type matchups that come from Pokemon (including the Stellar type)
-    - Can query to get the type entry by index
-    - Can query to get a single type matchup from the type chart by offensive row and defensive column
-    - Can query to get an entire type matchup row from the type chart
-    - Can get the stable type ID from the registry by name
-    - Can get the name of a type from the registry by stable type ID
-    - Get the amount currently registered types in the registry
-    - Get the next type ID that will be assigned to a new type
-    - Get a read-only span of all registered types in the registry
-    - Can set/override an entry in the registry with a new type entry
-    - Can set the type matchup in the type chart by passing in the offensive row, defensive column, and the type effectiveness
-    - Set an entire row of type matchups in the type chart by passing in a row index and an array of type effectiveness values
-    - Can set the amount of types registered in the registry
-    - Can set the next stable type id that will be assigned to a new type
-    - Can find the internal array index of a type by its stable type ID
-    - Can query to see if the registry contains a type:
-      - By its stable type ID
-      - By its user name
-- Create a constants file that holds the metadata for the builtin types and their type matchups.
-- Create a constants file that defines configuration constants for the application and registry error metadata.
-  - Holds a RegistryError enum to specify any error that could happen while adding types to the registry.
-  - A single struct to convert the error enum to a human readable string.
-  - An enum that can be used to specify what to fill unspecified type matchups as:
-    - Neutral (1x)
-    - NotDefined (NOT_DEFINED)
-- Create a type configuration file that allows users to:
-  - Define a matchup pair that has a user readable name along with the effectiveness of the type. The effectiveness here is meant to be used to determine the strength of the type against other types.
-  - Define a type definition that contains a user readable name along with the offensive and defensive strengths of the type.
-  - Add a single type or an array of types
-  - Remove a type:
-    - By user defined name
-    - By stable type ID
-  - Rename a type
-  - Set the type matchup of any type:
-    - Can do entire offensive rows
-    - Can do entire defensive columns
-  - Can reset the type's matchup to NOT_DEFINED
-  - Can get the type matchup effectiveness for any type against any other type
-    - Can get the entire type matchup effectiveness offensive row
-    - Can get the entire type matchup effectiveness defensive column
-  - Can check if the registry has a type
-    - By user defined name
-    - By stable type ID
-  - Can get the stable type ID of a type by its user defined name
-  - Can get the user defined name of a type by its stable type ID
-  - Get the entire type registry as a non-owning view
-  - Get the total amount of types registered
+- Imported the initial project foundation from [CPPBase](https://github.com/Phaysik/CPPBase/commit/34d5cc39654bd807c3f62a8af207e07d3f971f1d), comprising 65 source, test, build, workflow, editor, hook, and documentation files.
+- Added the initial Pokemon type model:
+  - _Types_ enumerates the 18 standard types plus Stellar with stable underlying byte values
+  - _TypeEffectiveness_ represents undefined, no-effect, not-very-effective, neutral, and super-effective chart states
+  - Built-in constants define display names and offensive matchup rows for every registered type
+- Added the fixed-capacity _TypeRegistry_:
+  - Initializes all built-in types and their matchup data in a 20-entry registry
+  - Stores stable type IDs separately from internal array indices and tracks both the registered count and next custom ID
+  - Exposes entry, chart-cell, chart-row, name, ID, count, and read-only registered-span queries
+  - Exposes controlled entry/chart mutation, count/ID counter updates, internal-index lookup, and name/ID containment checks
+- Added the user-facing _Configuration_ API for custom type management:
+  - _MatchupPair_ and _TypeDefinition_ describe name-keyed offensive and defensive matchup input
+  - Supports adding one type or an atomic batch, with neutral or undefined defaults for omitted matchups
+  - Supports removal by name, built-in enum, stable ID, or atomic name batch; renaming retains IDs and matchup data
+  - Supports setting individual matchups, complete offensive rows, and complete defensive columns from ordered values or name-keyed pairs
+  - Supports resetting a type's row and column, querying cells/rows/columns, and forwarding registry identity and count queries
+  - Reports capacity, duplicate, missing-type, matchup, and batch failures through _std::expected<..., RegistryErrorInfo>_ with optional logging context
+- Added reusable core and utility modules:
+  - Compiler-attribute macros, concepts, typedefs, and ConfigCat integration
+  - Timing, contiguous-sequence access, logging, floating-point comparison, overflow protection, input, and random-number helpers
+  - Configuration flags and assertion-message constants used by registry preconditions
+- Added build and developer tooling:
+  - Make targets for release/development builds, tests, coverage, clang-tidy, cppcheck, flawfinder, formatting, Doxygen/Sphinx documentation, Valgrind, Google Benchmark, Tracy, and gprof
+  - Dependency setup functions for GCC, LLVM tools, Doxygen, Sphinx, Tracy, ConfigCat, Vulkan, Google Benchmark, and Spdlog
+  - Clang format/tidy/language-server configuration, VS Code build and debug tasks, repository initialization, and commit hooks
+- Added continuous integration and security analysis through test, CodeQL, and Semgrep GitHub Actions workflows.
+- Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
+- Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
 [0.11.0]: https://github.com/Phaysik/pocketcore/compare/v0.10.0...v0.11.0
 [0.10.11]: https://github.com/Phaysik/pocketcore/commit/fe357929f7fcf30060aceb503af6c4a5de730375
