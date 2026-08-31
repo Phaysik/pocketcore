@@ -1,8 +1,8 @@
 /*! @file builtinNatureID.h
 	@brief Defines identifiers for natures compiled into PocketCore.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/22/2026
+	@since 0.11.6
+	@version 0.11.6
 	@author Matthew Moore
 */
 
@@ -21,9 +21,9 @@ namespace PocketCore::Nature
 		@details This closed enum is only a catalog of built-in natures. Runtime state and user-facing APIs use the open @ref NatureID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/22/2026
+		@since 0.11.6
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	enum class BuiltinNatureID : PocketCore::Core::ub
@@ -60,6 +60,8 @@ namespace PocketCore::Nature
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinNatureID The built-in nature to convert.
 		@return The corresponding open nature identifier.
+		@since 0.11.6
+		@version 0.11.6
 	*/
 	ATTR_NODISCARD constexpr NatureID toNatureID(const BuiltinNatureID builtinNatureID) noexcept
 	{

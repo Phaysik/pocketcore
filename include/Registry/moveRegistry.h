@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.5.3
-	@version 0.10.8
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -50,9 +50,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 08/18/2026
+		@date 08/22/2026
 		@since 0.5.3
-		@version 0.10.8
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -64,7 +64,7 @@ namespace PocketCore::Registry::Move
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.10.8
+				@version 0.11.6
 			 */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
 			{

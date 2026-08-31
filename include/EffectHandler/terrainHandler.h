@@ -1,8 +1,8 @@
 /*! @file terrainHandler.h
 	@brief Contains the terrain effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.10
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -29,9 +29,9 @@ namespace PocketCore::Effect
 		@warning The context must identify valid user and target slots, and the user's modifier is mutated in place rather than stored as
 			a context multiplier.
 		@note Terrain effects are skipped entirely when the target is not grounded.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.10
-		@version 0.9.10
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class TerrainHandler : public IEffectHandler
@@ -45,7 +45,7 @@ namespace PocketCore::Effect
 				@post The user's attack damage-formula modifier is multiplied by the terrain value matching the move's type.
 				@note The state remains unchanged when the target is ungrounded or the move's type does not match the terrain.
 				@since 0.9.10
-				@version 0.9.10
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -58,7 +58,7 @@ namespace PocketCore::Effect
 		@post The user's attack damage-formula modifier is multiplied by the terrain value matching the move's type.
 		@note The state remains unchanged when the target is ungrounded or the move's type does not match the terrain.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyTerrain(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

@@ -1,8 +1,8 @@
 /*! @file burnDamageHandler.h
 	@brief Contains the burn damage effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.5
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 			physical, the user does not have the Guts ability, and the move is not Facade.
 		@warning The context must identify a valid user slot.
 		@note The handler does not inspect the target slot or the registry provider.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.5
-		@version 0.9.11
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class BurnDamageHandler : public IEffectHandler
@@ -45,7 +45,7 @@ namespace PocketCore::Effect
 				@note The context remains unchanged when the user slot has no Pokemon, the move is special, the user has Guts, or the move
 				 is Facade.
 				@since 0.9.5
-				@version 0.9.11
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -58,7 +58,7 @@ namespace PocketCore::Effect
 		@post @p context contains the configured burn multiplier only when every burn reduction condition is satisfied.
 		@note The context remains unchanged when the user is not burned or the burn reduction does not apply to the move.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyBurnDamage(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

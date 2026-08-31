@@ -1,8 +1,8 @@
 /*! @file effectContext.benchmark.cpp
 	@brief Contains benchmarks for the effect context
-	@date 08/03/2026
+	@date 08/27/2026
 	@since 0.8.7
-	@version 0.9.2
+	@version 0.12.8
 	@author Matthew Moore
 */
 

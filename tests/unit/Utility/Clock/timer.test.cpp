@@ -1,8 +1,8 @@
 /*! @file timer.test.cpp
 	@brief Catch2 unit tests for `Clock::Timer` utilities.
-	@date 07/27/2026
+	@date 08/27/2026
 	@since 0.1.0
-	@version 0.4.0
+	@version 0.12.8
 	@author Matthew Moore
 */
 

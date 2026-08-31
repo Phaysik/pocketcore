@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 08/21/2026
+	@date 08/26/2026
 	@since 0.9.16
-	@version 0.11.0
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -31,7 +31,7 @@
 #include "Effect/effectContext.h"
 #include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectSourceAndSuppression.h"
 #include "Effect/effectTrigger.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
@@ -378,7 +378,7 @@ namespace PocketCore::Battle
 		std::ranges::for_each(abilityMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
-				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Ability, owner);
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppressionRuleCount, EffectSource::Ability, owner);
 			}
 		});
 	}
@@ -390,7 +390,7 @@ namespace PocketCore::Battle
 		std::ranges::for_each(itemMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
-				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Item, owner);
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppressionRuleCount, EffectSource::Item, owner);
 			}
 		});
 	}
@@ -402,7 +402,7 @@ namespace PocketCore::Battle
 		std::ranges::for_each(natureMeta.mTriggers, [this, eventID, role, &owner](const EffectTrigger &trigger) {
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
-				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Nature, owner);
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppressionRuleCount, EffectSource::Nature, owner);
 			}
 		});
 	}
@@ -688,7 +688,7 @@ namespace PocketCore::Battle
 			if (trigger.mTrigger == eventID && (trigger.mRole == BattleEventRole::Any || trigger.mRole == role))
 			{
 				// A trigger's suppression rules become visible before deciding whether its effects are suppressed.
-				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppresionRuleCount, EffectSource::Move, owner);
+				activateSuppressions(trigger.mSuppressionRules, trigger.mSuppressionRuleCount, EffectSource::Move, owner);
 
 				if (!isSuppressed(EffectSource::Move, owner, eventID, role, context))
 				{

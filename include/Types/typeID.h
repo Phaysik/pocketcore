@@ -1,8 +1,8 @@
 /*! @file typeID.h
 	@brief Defines the open identifier used for built-in and user-defined Pokemon types.
-	@date 08/03/2026
+	@date 08/26/2026
 	@since 0.4.0
-	@version 0.9.2
+	@version 0.12.5
 	@author Matthew Moore
 */
 

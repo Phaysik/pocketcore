@@ -1,8 +1,8 @@
 /*! @file effectContext.cpp
 	@brief Contains the effect context implementation
-	@date 08/05/2026
+	@date 08/27/2026
 	@since 0.8.2
-	@version 0.9.15
+	@version 0.12.8
 	@author Matthew Moore
 */
 

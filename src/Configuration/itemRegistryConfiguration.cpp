@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the item registry.
-	@date 08/05/2026
+	@date 08/26/2026
 	@since 0.5.0
-	@version 0.9.14
+	@version 0.12.6
 	@author Matthew Moore
 */
 

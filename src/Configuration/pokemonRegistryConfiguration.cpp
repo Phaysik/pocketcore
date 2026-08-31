@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the pokemon registry.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/22/2026
+	@since 0.12.0
+	@version 0.12.0
 	@author Matthew Moore
 */
 
@@ -12,7 +12,6 @@
 #include <span>
 #include <string_view>
 
-#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"

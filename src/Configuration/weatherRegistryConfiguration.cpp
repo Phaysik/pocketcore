@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the weather registry.
-	@date 07/30/2026
+	@date 08/26/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.12.7
 	@author Matthew Moore
 */
 

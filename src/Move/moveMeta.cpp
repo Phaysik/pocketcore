@@ -1,8 +1,8 @@
 /*! @file moveMeta.cpp
 	@brief Contains the function definitions for creating a moveMeta
-	@date 08/12/2026
+	@date 08/21/2026
 	@since 0.5.3
-	@version 0.10.0
+	@version 0.11.1
 	@author Matthew Moore
 */
 

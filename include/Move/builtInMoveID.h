@@ -1,8 +1,8 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 08/04/2026
+	@date 08/22/2026
 	@since 0.5.2
-	@version 0.9.8
+	@version 0.11.6
 	@author Matthew Moore
 */
 
@@ -21,9 +21,9 @@ namespace PocketCore::Move
 		@details This closed enum is only a catalog of built-in moves. Runtime state and user-facing APIs use the open @ref MoveID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/04/2026
+		@date 08/22/2026
 		@version 0.5.2
-		@version 0.9.8
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	enum class BuiltinMoveID : PocketCore::Core::ub

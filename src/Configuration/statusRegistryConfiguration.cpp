@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the status registry.
-	@date 07/29/2026
+	@date 08/26/2026
 	@since 0.6.4
-	@version 0.6.4
+	@version 0.12.7
 	@author Matthew Moore
 */
 

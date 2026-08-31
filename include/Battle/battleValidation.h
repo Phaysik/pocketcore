@@ -1,8 +1,8 @@
 /*! @file battleValidation.h
 	@brief Defines validation methods for battling Pokemon and their actions.
-	@date 08/13/2026
+	@date 08/28/2026
 	@since 0.10.2
-	@version 0.10.2
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -23,9 +23,9 @@ namespace PocketCore::Battle
 		@details The engine reports these values through `std::expected` when validating battle startup, submitted actions, targets, and
 			replacements. A rejected request leaves the battle state unchanged.
 		@note All enum values must be handled exhaustively when reporting engine failures.
-		@date 08/13/2026
+		@date 08/28/2026
 		@since 0.10.2
-		@version 0.10.2
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	enum class BattleEngineError : ub
@@ -69,9 +69,9 @@ namespace PocketCore::Battle
 	/*! @enum BattleResult
 		@showenumvalues
 		@brief Identifies whether a battle is ongoing or which trainer has won.
-		@date 08/12/2026
+		@date 08/28/2026
 		@since 0.10.2
-		@version x.x.x
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	enum class BattleResult : ub
@@ -91,9 +91,9 @@ namespace PocketCore::Battle
 	/*! @enum BattlePhase
 		@showenumvalues
 		@brief Identifies the input or terminal phase of the battle state machine.
-		@date 08/12/2026
+		@date 08/28/2026
 		@since 0.10.2
-		@version 0.10.2
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	enum class BattlePhase : ub

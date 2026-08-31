@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 08/04/2026
+	@date 08/26/2026
 	@since 0.7.2
-	@version 0.9.10
+	@version 0.12.7
 	@author Matthew Moore
 */
 
@@ -28,7 +28,7 @@ namespace PocketCore::Effect
 		@note The class is not copyable or movable.
 		@date 08/04/2026
 		@since 0.7.2
-		@version 0.9.10
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	class IEffectHandler
@@ -37,37 +37,37 @@ namespace PocketCore::Effect
 			/*! @brief Constructs an effect handler interface.
 				@note The default implementation performs no initialization.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			*/
 			IEffectHandler() = default;
 
 			/*! @brief Prevents copying an effect handler.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			 */
 			IEffectHandler(const IEffectHandler &) = delete;
 
 			/*! @brief Prevents moving an effect handler.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			 */
 			IEffectHandler(IEffectHandler &&) = delete;
 
 			/*! @brief Prevents copy assignment of an effect handler.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			 */
 			IEffectHandler operator=(const IEffectHandler &) = delete;
 
 			/*! @brief Prevents move assignment of an effect handler.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			 */
 			IEffectHandler operator=(IEffectHandler &&) = delete;
 
 			/*! @brief Destroys an effect handler through the interface.
 				@since 0.7.2
-				@version 0.7.2
+				@version 0.12.7
 			 */
 			virtual ~IEffectHandler() = default; // LCOV_EXCL_LINE
 
@@ -77,7 +77,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registries used to resolve effect metadata.
 				@note Concrete handlers define the effect-specific behavior.
 				@since 0.7.2
-				@version 0.8.2
+				@version 0.12.7
 			*/
 			virtual void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const = 0;
 
@@ -88,7 +88,7 @@ namespace PocketCore::Effect
 				@pre `context.mUserIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.8.7
-				@version 0.8.7
+				@version 0.12.7
 			*/
 			static BattleSlot &getUserBattleSlot(BattleState &state, EffectContext &context)
 			{
@@ -105,7 +105,7 @@ namespace PocketCore::Effect
 				@pre `context.mUserIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.9.10
-				@version 0.9.10
+				@version 0.12.7
 			*/
 			static const BattleSlot &getConstUserBattleSlot(BattleState &state, EffectContext &context)
 			{
@@ -122,7 +122,7 @@ namespace PocketCore::Effect
 				@pre `context.mTargetIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.8.7
-				@version 0.8.7
+				@version 0.12.7
 			*/
 			static BattleSlot &getTargetBattleSlot(BattleState &state, EffectContext &context)
 			{
@@ -139,7 +139,7 @@ namespace PocketCore::Effect
 				@pre `context.mTargetIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.9.10
-				@version 0.9.10
+				@version 0.12.7
 			*/
 			static const BattleSlot &getConstTargetBattleSlot(BattleState &state, EffectContext &context)
 			{

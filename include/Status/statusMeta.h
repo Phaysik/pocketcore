@@ -1,8 +1,8 @@
 /*! @file statusMeta.h
 	@brief Defines the metadata stored for built-in and user-defined statuses.
-	@date 08/04/2026
+	@date 08/26/2026
 	@since 0.7.0
-		@version 0.9.11
+	@version 0.12.7
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@ namespace PocketCore::Status
 		@details Each action is evaluated from the incoming status toward the existing status identified by @ref
 	   StatusInteraction::mExistingStatusID.
 		@note Callers handling this enum should account for every value.
-		@date 0/04/2026
+		@date 08/26/2026
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	enum class StatusInteractionAction : PocketCore::Core::ub
@@ -47,9 +47,9 @@ namespace PocketCore::Status
 	/*! @struct StatusInteraction Status/statusMeta.h
 		@brief Associates an existing status with the action taken when another status is applied.
 		@details Instances are stored by the incoming status and describe its behavior when @ref mExistingStatusID is already active.
-		@date 0/04/2026
+		@date 08/26/2026
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	struct StatusInteraction

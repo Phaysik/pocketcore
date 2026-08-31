@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring ability metadata.
-	@date 08/14/2026
+	@date 08/26/2026
 	@since 0.4.0
-	@version 0.10.3
+	@version 0.12.7
 	@author Matthew Moore
 */
 
@@ -67,9 +67,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal ability registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/14/2026
+		@date 08/26/2026
 		@since 0.4.0
-		@version 0.10.3
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	class AbilityRegistryConfiguration
@@ -187,7 +187,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 				@since 0.4.0
-				@version 0.5.1
+				@version 0.12.6
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const std::string_view &abilityName,
 																					 const std::span<const EffectTrigger> &triggers);
@@ -198,7 +198,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the ability is not registered.
 				@since 0.4.0
-				@version 0.5.1
+				@version 0.12.6
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setAbilityTriggers(const AbilityID abilityID,
 																					 const std::span<const EffectTrigger> &triggers);

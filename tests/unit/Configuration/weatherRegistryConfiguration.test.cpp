@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 08/03/2026
+	@date 08/23/2026
 	@since 0.8.7
-	@version 0.9.0
+	@version 0.12.1
 	@author Matthew Moore
 */
 

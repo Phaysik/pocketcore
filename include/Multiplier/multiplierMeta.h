@@ -1,8 +1,8 @@
 /*! @file multiplierMeta.h
 	@brief Defines the metadata stored for built-in and user-defined multipliers.
-	@date 07/30/2026
+	@date 08/21/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.11.5
 	@author Matthew Moore
 */
 
@@ -21,6 +21,8 @@ namespace PocketCore::Multiplier
 
 	/*! @enum MultiplierApplicationPolicy
 		@brief Selects how a damage multiplier participates in modifier calculation.
+		@since 0.11.2
+		@version 0.11.5
 	*/
 	enum class MultiplierApplicationPolicy : ub
 	{
@@ -33,9 +35,9 @@ namespace PocketCore::Multiplier
 		@brief Stores one multiplier's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/30/2026
+		@date 08/21/2026
 		@since 0.8.1
-		@version 0.8.1
+		@version 0.11.5
 		@author Matthew Moore
 	*/
 	struct MultiplierMeta

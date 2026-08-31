@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring weather metadata.
-	@date 08/14/2026
+	@date 08/27/2026
 	@since 0.8.0
-	@version 0.10.3
+	@version 0.12.8
 	@author Matthew Moore
 */
 
@@ -36,9 +36,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the weather-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 07/27/2026
+			@date 08/26/2026
 			@since 0.8.0
-			@version 0.8.0
+			@version 0.12.7
 			@author Matthew Moore
 		*/
 		struct WeatherRegistryConfigurationPolicy
@@ -62,9 +62,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal weather registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/14/2026
+		@date 08/27/2026
 		@since 0.8.0
-		@version 0.10.3
+		@version 0.12.8
 		@author Matthew Moore
 	*/
 	class WeatherRegistryConfiguration
@@ -87,7 +87,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns read-only access to the configured runtime weather registry.
 				@return A reference that remains valid for the lifetime of this configuration.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.8
 			*/
 			ATTR_NODISCARD constexpr const WeatherRegistry &getRuntimeRegistry() const noexcept
 			{

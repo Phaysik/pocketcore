@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.test.cpp
 	@brief C++ file for running tests for the AccuracyCheckHandler.
-	@date 08/13/2026
+	@date 08/26/2026
 	@since 0.8.7
-	@version 0.10.1
+	@version 0.12.5
 	@author Matthew Moore
 */
 

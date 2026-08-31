@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 08/21/2026
+	@date 08/28/2026
 	@since 0.9.14
-	@version 0.10.10
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -27,7 +27,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectSourceAndSuppression.h"
 #include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"

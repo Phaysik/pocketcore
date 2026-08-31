@@ -1,8 +1,7 @@
 /*! @file builtinPokemonID.h
 	@brief Defines identifiers for pokemons compiled into PocketCore.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/22/2026
+	@since 0.11.6
 	@author Matthew Moore
 */
 
@@ -21,9 +20,9 @@ namespace PocketCore::Pokemon
 		@details This closed enum is only a catalog of built-in pokemons. Runtime state and user-facing APIs use the open @ref PokemonID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/22/2026
+		@since 0.11.6
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	enum class BuiltinPokemonID : PocketCore::Core::ub
@@ -44,6 +43,8 @@ namespace PocketCore::Pokemon
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinPokemonID The built-in pokemon to convert.
 		@return The corresponding open pokemon identifier.
+		@since 0.11.6
+		@version 0.11.6
 	*/
 	ATTR_NODISCARD constexpr PokemonID toPokemonID(const BuiltinPokemonID builtinPokemonID) noexcept
 	{

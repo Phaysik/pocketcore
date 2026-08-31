@@ -1,8 +1,8 @@
 /*! @file populationBombHandler.h
 	@brief Contains the population bomb effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.8
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -27,9 +27,9 @@ namespace PocketCore::Effect
 		@details The handler selects the configured first-hit or consecutive-hit multiplier based on the context's one-based hit attempt
 			index and stores it as the built-in Population Bomb multiplier in @ref EffectContext.
 		@note The handler does not inspect or modify the battle state or registry provider.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.8
-		@version 0.9.10
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class PopulationBombHandler : public IEffectHandler
@@ -43,7 +43,7 @@ namespace PocketCore::Effect
 				 attempts.
 				@note A hit attempt index of zero leaves the active multipliers unchanged.
 				@since 0.9.8
-				@version 0.9.10
+				@version 0.12.9
 			*/
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
@@ -56,7 +56,7 @@ namespace PocketCore::Effect
 		@post @p context contains the first-hit multiplier for the first attempt and the consecutive-hit multiplier for later attempts.
 		@note A hit attempt index of zero leaves the active multipliers unchanged.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyPopulationBomb(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

@@ -1,8 +1,8 @@
 /*! @file setRainHandler.h
 	@brief Contains the setRain effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -27,9 +27,9 @@ namespace PocketCore::Effect
 		@details The handler unconditionally replaces the current weather identifier with the built-in rain identifier.
 		@warning Any previously active weather is overwritten without checking for immunity or duration.
 		@note The handler does not inspect the effect context or registry provider.
-		@date 08/12/2026
+		@date 08/28/2026
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class SetRainHandler : public IEffectHandler
@@ -41,7 +41,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registry provider, which is not used by this handler.
 				@post @p state reports rain as the active weather.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -52,7 +52,7 @@ namespace PocketCore::Effect
 		@param[in] provider The registry provider, which is not used by this handler.
 		@post @p state reports rain as the active weather.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applySetRain(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

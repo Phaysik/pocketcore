@@ -1,8 +1,8 @@
 /*! @file criticalHitHandler.h
 	@brief Contains the critical hit effect handler
-	@date 08/12/2026
+	@date 08/26/2026
 	@since 0.7.2
-	@version 0.10.0
+	@version 0.12.7
 	@author Matthew Moore
 */
 
@@ -27,9 +27,9 @@ namespace PocketCore::Effect
 		@details The handler performs a configured random critical-hit roll. When the roll succeeds,
 		it marks the damage as critical and stores the configured critical-hit multiplier in @ref EffectContext.
 		@note The handler does not inspect or modify the battle state or registry provider.
-		@date 08/04/2026
+		@date 08/26/2026
 		@since 0.7.2
-		@version 0.9.10
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	class CriticalHitHandler : public IEffectHandler
@@ -42,7 +42,7 @@ namespace PocketCore::Effect
 				@post On a successful roll, @p context marks the damage as critical and contains the configured critical-hit multiplier.
 				@note A failed roll leaves the critical-hit state and multiplier unchanged.
 				@since 0.7.2
-				@version 0.9.10
+				@version 0.12.7
 			*/
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context,
 					   ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
@@ -55,7 +55,7 @@ namespace PocketCore::Effect
 		@post On a successful roll, @p context marks the damage as critical and contains the configured critical-hit multiplier.
 		@note A failed roll leaves the critical-hit state and multiplier unchanged.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.7
 	*/
 	inline void applyCriticalHit(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

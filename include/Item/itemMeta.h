@@ -1,8 +1,8 @@
 /*! @file itemMeta.h
 	@brief Defines the metadata stored for built-in and user-defined items.
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.4.1
-	@version 0.10.8
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Item
 		@brief Stores one item's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 08/12/2026
-		@version 0.4.1
-		@since 0.10.0
+		@date 08/26/2026
+		@since 0.4.1
+		@version 0.12.6
 		@author Matthew Moore
 	*/
 	struct ItemMeta

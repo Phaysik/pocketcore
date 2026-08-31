@@ -1,8 +1,8 @@
-/*! @file effectSourceAndSuppresion.h
+/*! @file effectSourceAndSuppression.h
 	@brief Contains the effect source and suppression
-	@date 08/21/2026
+	@date 08/28/2026
 	@since 0.9.13
-	@version 0.10.9
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -33,9 +33,9 @@ namespace PocketCore::Effect
 		@brief Identifies the category of game object that initiated an effect.
 		@details Suppression matching compares this category before consulting any source-specific identifier.
 		@note All enum values must be handled exhaustively when dispatching on the effect source.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.13
-		@version 0.9.13
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	enum class EffectSource : ub
@@ -60,9 +60,9 @@ namespace PocketCore::Effect
 			identifiers narrow a rule to one specific ability, item, move, or nature; leaving one empty matches every entity of that source
 			category.
 		@note Only the optional identifier matching the rule's target source is consulted.
-		@date 08/18/2026
+		@date 08/28/2026
 		@since 0.9.13
-		@version 0.10.8
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	struct SuppressionRule

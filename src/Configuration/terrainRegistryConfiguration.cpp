@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the terrain registry.
-	@date 08/03/2026
+	@date 08/26/2026
 	@since 0.8.1
-	@version 0.9.0
+	@version 0.12.7
 	@author Matthew Moore
 */
 

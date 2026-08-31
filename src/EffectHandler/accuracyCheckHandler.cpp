@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.cpp
 	@brief Contains the accuracy check effect handler implementation
-	@date 08/07/2026
+	@date 08/26/2026
 	@since 0.7.5
-	@version 0.9.16
+	@version 0.12.7
 	@author Matthew Moore
 */
 

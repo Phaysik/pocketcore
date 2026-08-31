@@ -1,8 +1,8 @@
 /*! @file randomizationHandler.h
 	@brief Contains the randomization effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.6
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 			and stores it as the built-in randomization multiplier in @ref EffectContext.
 		@warning The context must identify valid user and target slots.
 		@note The multiplier is always applied, and the roll is not deterministic between calls.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.6
-		@version 0.9.10
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class RandomizationHandler : public IEffectHandler
@@ -44,7 +44,7 @@ namespace PocketCore::Effect
 				@post @p context contains a randomization multiplier derived from the configured percentage range.
 				@note The handler logs the participating slots, which report `<empty>` when a slot has no Pokemon.
 				@since 0.9.6
-				@version 0.9.10
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -56,7 +56,7 @@ namespace PocketCore::Effect
 		@pre The user and target indexes in @p context must refer to existing slots in their selected teams.
 		@post @p context contains a randomization multiplier derived from the configured percentage range.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyRandomization(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

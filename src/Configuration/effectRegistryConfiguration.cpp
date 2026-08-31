@@ -1,8 +1,8 @@
 /*! @file effectRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the effect registry.
-	@date --/--/----
-	@since x.x.x
-	@version x.x.x
+	@date 08/28/2026
+	@since 0.12.9
+	@version 0.12.9
 	@author Matthew Moore
 */
 

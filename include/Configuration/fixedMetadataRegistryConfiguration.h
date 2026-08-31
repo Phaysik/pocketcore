@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 08/04/2026
+	@date 08/28/2026
 	@since 0.5.0
-	@version 0.9.8
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -41,7 +41,7 @@ namespace PocketCore::Configuration
 			@return A copy that can be mutated without affecting the stored entry.
 			@note Inlining is suppressed so the copy remains observable to sanitizers and coverage instrumentation.
 			@since 0.9.8
-			@version 0.9.8
+			@version 0.12.9
 		*/
 		template <typename Metadata>
 		ATTR_NOINLINE constexpr Metadata cloneMetadata(const Metadata &metadata)
@@ -61,9 +61,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 08/04/2026
+		@date 08/25/2026
 		@since 0.5.0
-		@version 0.9.8
+		@version 0.12.3
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -430,7 +430,7 @@ namespace PocketCore::Configuration
 				@return The 0-based registry index on success, or a contextual registry error if name is not registered.
 				@note This function is exception-safe (noexcept); errors are communicated via std::expected.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.3
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
 																				   const std::string_view &callerContext)
@@ -454,7 +454,7 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
 				@return The 0-based registry index on success, or a contextual registry error if the stable ID is not registered.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.12.3
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const StableID stableID,
 																				   const std::string_view &callerContext)
@@ -476,7 +476,7 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The operation name (e.g., "remove", "update") included in the log message.
 				@return A RegistryErrorInfo with the policy's not-found error, the context, and the log output reference.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.3
 			*/
 			ATTR_NODISCARD const RegistryErrorInfo makeNotFoundError(const std::string_view &context,
 																	 const std::string_view &callerContext) const
@@ -494,7 +494,7 @@ namespace PocketCore::Configuration
 				@post The registry removes the entry and compacts any remaining entries as defined by @ref Registry::eraseEntry.
 				@note The underlying registry remains responsible for maintaining its entry count and index consistency.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.12.3
 			*/
 			void removeEntry(const us index)
 			{

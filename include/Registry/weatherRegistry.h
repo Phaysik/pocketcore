@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 08/18/2026
+	@date 08/28/2026
 	@since 0.8.0
-	@version 0.10.8
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -37,9 +37,9 @@ namespace PocketCore::Registry::Weather
 		@details Built-in weathers are registered during construction with IDs derived from @ref BuiltinWeatherID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
-		@date 08/18/2026
+		@date 08/22/2026
 		@since 0.8.0
-		@version 0.10.8
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
@@ -51,7 +51,7 @@ namespace PocketCore::Registry::Weather
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.11.6
 			 */
 			ATTR_NOINLINE explicit constexpr WeatherRegistry() : Base{toWeatherID(BuiltinWeatherID::FinalWeather).getValue()}
 			{

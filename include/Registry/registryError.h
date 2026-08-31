@@ -1,8 +1,8 @@
 /*! @file registryError.h
 	@brief Defines registry error types and metadata.
-	@date 05/01/2026
-	@since x.x.x
-	@version x.x.x
+	@date 08/26/2026
+	@since 0.12.1
+	@version 0.12.5
 	@author Matthew Moore
 */
 
@@ -25,7 +25,7 @@ namespace PocketCore::Registry
 		@details Each value represents a distinct failure mode used by @ref RegistryErrorInfo for programmatic error handling.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 		@since 0.1.0
-		@version 0.10.0
+		@version 0.12.0
 	*/
 	enum class RegistryError : ub
 	{
@@ -59,7 +59,7 @@ namespace PocketCore::Registry
 		@brief Controls how the name-keyed @ref Configuration::addType overload treats matchups not explicitly provided.
 		@details Selects the default value assigned to omitted matchup entries when expanding a partial matchup definition.
 		@since 0.1.0
-		@version 0.2.0
+		@version 0.12.5
 	*/
 	enum class UnspecifiedMatchup : ub
 	{
@@ -73,7 +73,7 @@ namespace PocketCore::Registry
 		without requiring the caller to enable logging.
 		@note This type is a lightweight data carrier and stores non-owning string views.
 		@since 0.1.0
-		@version 0.10.0
+		@version 0.12.0
 	*/
 	struct RegistryErrorInfo
 	{
@@ -120,7 +120,7 @@ namespace PocketCore::Registry
 			/*! @brief Converts @ref mKind to a human-readable name.
 				@return A string view containing the enum name suitable for diagnostics and error messages.
 				@since 0.1.0
-				@version 0.10.0
+				@version 0.12.0
 			*/
 			ATTR_NODISCARD constexpr std::string_view errorKindToString(const RegistryError errorKind) noexcept
 			{

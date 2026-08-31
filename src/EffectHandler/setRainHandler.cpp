@@ -1,8 +1,8 @@
 /*! @file setRainHandler.cpp
 	@brief Contains the set rain effect handler implementation
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 

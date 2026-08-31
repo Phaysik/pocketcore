@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring multiplier metadata.
-	@date 08/14/2026
+	@date 08/27/2026
 	@since 0.8.1
-	@version 0.10.3
+	@version 0.12.8
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the multiplier-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 07/30/2026
+			@date 08/26/2026
 			@since 0.8.1
-			@version 0.8.1
+			@version 0.12.7
 			@author Matthew Moore
 		*/
 		struct MultiplierRegistryConfigurationPolicy
@@ -65,9 +65,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal multiplier registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/14/2026
+		@date 08/27/2026
 		@since 0.8.1
-		@version 0.10.3
+		@version 0.12.8
 		@author Matthew Moore
 	*/
 	class MultiplierRegistryConfiguration
@@ -85,10 +85,12 @@ namespace PocketCore::Configuration
 			 */
 			constexpr MultiplierRegistryConfiguration() = default;
 
+			using Base::getAmountRegistered;
+
 			/*! @brief Returns read-only access to the configured runtime multiplier registry.
 				@return A reference that remains valid for the lifetime of this configuration.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.8
 			*/
 			ATTR_NODISCARD constexpr const MultiplierRegistry &getRuntimeRegistry() const noexcept
 			{

@@ -1,8 +1,8 @@
 /*! @file effectTrigger.h
 	@brief Defines shared event-driven effect trigger metadata.
 	@date 08/26/2026
-	@since 0.5.2
-	@version 0.5.2
+	@since 0.12.6
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -16,7 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectID.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectSourceAndSuppression.h"
 
 namespace PocketCore::Effect
 {
@@ -28,12 +28,12 @@ namespace PocketCore::Effect
 	/*! @struct EffectTrigger Effect/effectTrigger.h
 		@brief Stores the effects and suppression rules activated by one battle event.
 		@details The effect vector owns its ordered effect identifiers. The suppression-rule array has fixed physical storage, while
-		 @p mSuppresionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
+		 @p mSuppressionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
 		 current battle event.
-		@note @p mSuppresionRuleCount must not exceed @ref MAX_SUPPRESSION_RULES_PER_TRIGGER.
+		@note @p mSuppressionRuleCount must not exceed @ref MAX_SUPPRESSION_RULES_PER_TRIGGER.
 		@date 08/26/2026
-		@since 0.5.2
-		@version 0.5.2
+		@since 0.12.6
+		@version 0.12.6
 		@author Matthew Moore
 	*/
 	struct EffectTrigger
@@ -52,7 +52,7 @@ namespace PocketCore::Effect
 			BattleEventRole mRole{BattleEventRole::Any};
 
 			/*! @brief The number of entries in @ref mSuppressionRules that contain active suppression rules. */
-			ub mSuppresionRuleCount{0};
+			ub mSuppressionRuleCount{0};
 	};
 } // namespace PocketCore::Effect
 

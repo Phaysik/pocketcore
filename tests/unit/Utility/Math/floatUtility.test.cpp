@@ -3,9 +3,9 @@
 	@details Exercises absolute and relative epsilon paths to ensure correct behavior
 	across near-zero and large-magnitude comparisons. Tests intentionally execute
 	runtime code paths (non-constexpr variables) to improve coverage reporting.
-	@date 07/26/2026
+	@date 08/27/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.8
 	@author Matthew Moore
 */
 

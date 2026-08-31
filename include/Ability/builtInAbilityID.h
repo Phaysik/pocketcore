@@ -1,8 +1,8 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 08/04/2026
+	@date 08/22/2026
 	@since 0.4.0
-	@version 0.9.10
+	@version 0.11.6
 	@author Matthew Moore
 */
 
@@ -23,9 +23,9 @@ namespace PocketCore::Ability
 		@details This closed enum is only a catalog of built-in abilities. Runtime state and user-facing APIs use the open @ref AbilityID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/04/2026
+		@date 08/22/2026
 		@since 0.4.0
-		@version 0.9.10
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	enum class BuiltinAbilityID : ub

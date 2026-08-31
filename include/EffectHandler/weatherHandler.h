@@ -1,8 +1,8 @@
 /*! @file weatherHandler.h
 	@brief Contains the weather effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.8
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 			present. Otherwise it selects the rain or harsh sunlight multiplier based on the move's type, treating Hydro Steam as a
 			sunlight-boosted move.
 		@note The handler inspects both parties rather than only the active slots, and does not use the registry provider.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.8
-		@version 0.9.10
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class WeatherHandler : public IEffectHandler
@@ -44,7 +44,7 @@ namespace PocketCore::Effect
 				 type-specific multiplier otherwise.
 				@note The active multipliers remain unchanged when no weather is active or the move's type is unaffected by the weather.
 				@since 0.9.8
-				@version 0.9.10
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -57,7 +57,7 @@ namespace PocketCore::Effect
 		 multiplier otherwise.
 		@note The active multipliers remain unchanged when the weather does not affect the move.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyWeather(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

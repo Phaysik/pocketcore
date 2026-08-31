@@ -1,8 +1,8 @@
 /*! @file builtInEffectID.h
 	@brief Contains the effect types
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@ namespace PocketCore::Effect
 		@details Each value maps to a stable @ref EffectID through @ref toEffectID, and the enumerator order defines the built-in
 			identifier values. Existing enumerators must not be reordered because their numeric values are stable identifiers.
 		@note All enum values must be handled exhaustively when dispatching on a built-in effect.
-		@date 08/12/2026
+		@date 08/28/2026
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	enum class BuiltinEffectID : ub

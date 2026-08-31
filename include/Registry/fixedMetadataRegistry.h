@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.5.0
-	@version 0.10.7
+	@version 0.12.5
 	@author Matthew Moore
 */
 
@@ -33,9 +33,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 08/18/2026
+		@date 08/26/2026
 		@since 0.5.0
-		@version 0.10.7
+		@version 0.12.5
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -280,8 +280,8 @@ namespace PocketCore::Registry
 				@pre @p index < Capacity.
 				@param[in] index The internal array index.
 				@return A mutable reference that remains valid until replacement or registry destruction.
-				@since x.x.x
-				@version x.x.x
+				@since 0.12.5
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr Metadata &getMutableEntry(const us index)
 			{

@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.10] - 2026-08-28
+
+## [0.12.9] - 2026-08-28
+
+## [0.12.8] - 2026-08-27
+
+## [0.12.7] - 2026-08-26
+
+## [0.12.6] - 2026-08-26
+
+## [0.12.5] - 2026-08-26
+
+## [0.12.4] - 2026-08-25
+
+## [0.12.3] - 2026-08-25
+
+## [0.12.2] - 2026-08-24
+
+## [0.12.1] - 2026-08-23
+
+## [0.12.0] - 2026-08-22 (Nature Registry Update)
+
+## [0.11.6] - 2026-08-22
+
+## [0.11.5] - 2026-08-21
+
+## [0.11.4] - 2026-08-21
+
+## [0.11.3] - 2026-08-21
+
+## [0.11.2] - 2026-08-21
+
+## [0.11.1] - 2026-08-21
+
 ## [0.11.0] - 2026-08-21 (BattleEngine Update)
 
 ### Added
@@ -44,7 +78,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen contracts to the existing `BattleEngine` constructor, `executeTurn()`, `startBattle()`, `getState()`, and `switchPokemon()` APIs, including ownership, lifetime, phase, error, and action-count behavior.
 - Added Doxygen contracts to existing battle helpers covering side selection, active-slot and party access, health and adjacency queries, target existence, context construction, recoil and hit-count resolution, party validation and assignment, result/reserve calculation, move-target resolution, move/switch validation, action visitation, and move prioritization.
 - Changed `hasReserve()` in this documentation pass from `const std::vector<Pokemon *> &` to `const std::span<Pokemon *> &` in both declaration and definition; its algorithm did not change.
-- Applied formatting and include-order changes to battle headers, the historically named `effectSourceAndSuppresion.h`, move metadata, and the move-registry configuration test. No other runtime behavior changed.
+- Applied formatting and include-order changes to battle headers, the historically named `effectSourceAndSuppression.h`, move metadata, and the move-registry configuration test. No other runtime behavior changed.
 
 ## [0.10.8] - 2026-08-18
 
@@ -57,7 +91,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 ### Changed
 
 - Replaced `BattleTriggerID` throughout metadata, suppression rules, engine dispatch, helpers, and tests with the `BattleEventID` plus `BattleEventRole` pair.
-- Collapsed perspective-specific damage-calculation, move-use, and successful-hit triggers into shared event IDs carrying `User` or `Target`; lifecycle events use `Any` unless metadata requires a participant role.
+- Collapsed perspective-specific damage-calculation, move-use, and successful-hit triggers into shared event IDs carrying `User` or `Target`; life cycle events use `Any` unless metadata requires a participant role.
 - Changed suppression matching and activation APIs to receive both event ID and role, so a rule must match the event, role, source kind, and any optional source ID before suppressing dispatch.
 - Changed move-trigger and slot-trigger dispatch signatures to carry roles; trigger metadata must match both fields before effects execute.
 - Added required standard-library includes to battle helpers and replaced repeated fully qualified registry-domain names with local `using` declarations. Registry behavior did not change.
@@ -71,10 +105,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 ### Added
 
 - Added public `BattleEngine::executeTurn(std::span<const BattleAction>) -> std::expected<void, BattleEngineError>`:
-  - Rejects unstarted, finished, or replacement-waiting battles and requires exactly one action for every healthy active slot.
+  - Rejects un-started, finished, or replacement-waiting battles and requires exactly one action for every healthy active slot.
   - Validates each move or switch through `getValidationResult()`, rejects duplicate acting slots, and partitions valid actions into switches and moves.
   - Executes switches in submitted order, then shuffles and stable-sorts moves by descending signed priority and descending effective speed so shuffle order breaks exact ties.
-  - Revalidates each move immediately before execution, skips an action if its actor is no longer healthy, executes remaining moves, runs turn-end triggers for each healthy slot in side-A/side-B and slot order, processes faints, and refreshes battle phase.
+  - Re-validates each move immediately before execution, skips an action if its actor is no longer healthy, executes remaining moves, runs turn-end triggers for each healthy slot in side-A/side-B and slot order, processes faints, and refreshes battle phase.
 - Added `getValidationResult()` to visit `BattleAction`, `getBattleTarget()` to derive the acting slot from either variant, and `handleMovePrioritization()` to perform randomized tie-breaking followed by priority/speed ordering.
 - Added initial private `executeMove()` behavior: resolve metadata and targets, consume PP, build one context per target, execute move `BeforeHit`, ability/item user and target damage-calculation triggers, move `OnHit`, recoil and faint processing, user successful-hit triggers, and move `AfterHit`.
 - Added `executeEndTurnTrigger()` to dispatch `OnTurnEnd` to every healthy active slot.
@@ -110,7 +144,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Declared private `BattleEngine::executeMove()`, `executeMoveTrigger()`, and `executeMoveEffects()` integration points. In this revision, `executeMove()` remains a placeholder and `executeMoveEffects()` has no implementation; only trigger dispatch is implemented.
 - Implemented `executeMoveTrigger()` to process matching move-trigger records in declaration order, activate each record's suppression rules before suppression evaluation, execute unsuppressed built-in effects, and restore the caller's prior `EffectSource`.
 - Added `getMoveTargets()` to validate acting/move slots, resolve current move metadata, and delegate selector/range expansion to `resolveTargets()`.
-- Added `validateMoveAction()` to reject an unstarted or finished phase, invalid/fainted users, invalid move slots, zero PP, missing move metadata, and invalid target resolution. Accuracy is not validated here.
+- Added `validateMoveAction()` to reject an un-started or finished phase, invalid/fainted users, invalid move slots, zero PP, missing move metadata, and invalid target resolution. Accuracy is not validated here.
 - Added `validateSwitchAction()` to reject invalid active or party indices, null/fainted incoming Pokemon, and Pokemon already active on that side.
 
 ### Changed
@@ -131,7 +165,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - Rule counts are clamped to physical spans; matching checks source, trigger, optional ability/item/move ID, and excludes a source from suppressing itself on its owning slot.
   - Standalone slot triggers clear suppressions before and after dispatch; ability and item rules activate before either source executes.
 - Added faint processing that marks `mFaintProcessed` before dispatch to prevent duplicate recursive events, runs fainted ability/item effects, and recomputes battle phase and required replacements.
-- Added phase refresh: unstarted battles become `NotStarted`, decided results become `Finished`, and otherwise unhealthy active slots are requested only when that side has a healthy reserve; phase becomes `AwaitingReplacements` or `AwaitingActions`.
+- Added phase refresh: un-started battles become `NotStarted`, decided results become `Finished`, and otherwise unhealthy active slots are requested only when that side has a healthy reserve; phase becomes `AwaitingReplacements` or `AwaitingActions`.
 - Added party/state helpers for null/duplicate detection, healthy counts, deterministic active assignment, target eligibility, side appending, result calculation, and healthy non-active reserve detection.
 - Added mutable and const `getRuntimeRegistry()` accessors to each domain registry configuration, exposing configuration-owned runtime registries without transferring ownership.
 - Added explicit default construction and out-of-line destruction for `BattleState`; copy and move operations are deleted.
@@ -223,7 +257,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
   - `contextSlot()` returns a mutable slot pointer for a valid side/index pair or `nullptr` when the index is outside that side's active-slot vector.
   - `getEffectiveSpeed()` returns zero for an empty slot; otherwise it multiplies the Pokemon's speed by the cached speed-stage multiplier and the slot's speed modifier.
   - `makeMoveContext()` copies move identity, type, power, accuracy, range, hit index, source, participant coordinates, and damage category into a move-sourced `EffectContext`.
-  - `applyRecoil()` ignores missing users, zero damage, and non-finite or nonpositive recoil ratios; otherwise it floors damage times the recoil ratio, clamps recoil to `1..us::max`, and prevents health underflow.
+  - `applyRecoil()` ignores missing users, zero damage, and non-finite or non-positive recoil ratios; otherwise it floors damage times the recoil ratio, clamps recoil to `1..us::max`, and prevents health underflow.
   - `resolveHitCount()` returns fixed counts directly and performs weighted selection over finite positive outcomes, returning zero for an invalid total weight.
 - Added `BattleSlot::mFaintProcessed`, defaulting to `false`.
 - Added a documentation-only `battleEngine.cpp` translation unit.
@@ -279,12 +313,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Added `MAX_SUPPRESSION_RULES_PER_TRIGGER` with value `2`.
 - Added `SuppressionRule` with optional `mTargetAbilityID`, `mTargetItemID`, and `mTargetMoveID` constraints, a `std::variant<AbilityTriggerID, ItemTriggerID, MoveTriggerID>` named `mTargetTrigger`, and an `EffectSource` named `mTargetSource`.
-- Added a fixed `std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER>` and the historically spelled `ub mSuppresionRuleCount` to `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger`.
+- Added a fixed `std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER>` and the historically spelled `ub mSuppressionRuleCount` to `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger`.
 
 ### Changed
 
 - Moved `AbilityEffectTrigger`, `ItemEffectTrigger`, and `MoveEffectTrigger` from their domain target/trigger headers into `abilityMeta.h`, `itemMeta.h`, and `moveMeta.h`, respectively.
-- Moved `EffectSource` from `effectContext.h` into the new, historically misspelled `effectSourceAndSuppresion.h` alongside `SuppressionRule`.
+- Moved `EffectSource` from `effectContext.h` into the new, historically misspelled `effectSourceAndSuppression.h` alongside `SuppressionRule`.
 - Applied formatting-only changes to `typeRegistryConfiguration.cpp`.
 
 ## [0.9.12] - 2026-08-04
@@ -535,7 +569,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 ### Changed
 
 - Changed all built-in move effect-list factories to return `std::span<const EffectTypeID>` over static `constexpr` arrays; the query functions are `ATTR_CONST` and `noexcept`, avoiding per-call vector construction for the predefined sequences.
-- Changed fixed-registry lifecycle hooks so built-in registration and amount increments insert index records, decrements remove them, and `setEntry()`/`setAmountRegistered()` rebuild the index when metadata positions can change.
+- Changed fixed-registry life cycle hooks so built-in registration and amount increments insert index records, decrements remove them, and `setEntry()`/`setAmountRegistered()` rebuild the index when metadata positions can change.
 - Changed fixed-registry configuration removal to delegate compaction and index maintenance to `eraseEntry()`.
 - Changed accuracy, base-damage, and STAB handlers to use the shared user/target slot helpers instead of repeating side-vector selection and index checks.
 - Changed base-damage intermediates and validation to `double`; invalid non-finite or negative attack values and non-finite or non-positive defense values leave the existing damage unchanged, while valid results are clamped to `[1, std::numeric_limits<us>::max()]` before conversion.
@@ -1088,7 +1122,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 ### Added
 
 - Added _-Winline_ back to GCC warning-as-error builds so failed compiler inlining requests are reported.
-- Added the portable _ATTR_NOINLINE_ macro, which expands to `__attribute__((noinline))` when supported and otherwise expands to nothing; its documentation records code-size, profiling, debugging, constexpr, and hot-path tradeoffs.
+- Added the portable _ATTR_NOINLINE_ macro, which expands to `__attribute__((noinline))` when supported and otherwise expands to nothing; its documentation records code-size, profiling, debugging, constexpr, and hot-path trade offs.
 - Added C++26 diagnostic reasons to the deleted _Timer_ copy/move operations and all deleted _Logger_ construction, assignment, and destruction operations.
 
 ### Changed
@@ -1156,7 +1190,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Added
 
-- Set CodeQL initialization to _build-mode: manual_, explicitly associating analysis with the workflow's existing _make_ build rather than autobuild inference.
+- Set CodeQL initialization to _build-mode: manual_, explicitly associating analysis with the workflow's existing _make_ build rather than auto build inference.
 
 ## [0.2.10] - 2026-04-29
 
@@ -1261,7 +1295,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ### Added
 
-- Added a complete Spdlog cache lifecycle to the CodeQL and test workflows:
+- Added a complete Spdlog cache life cycle to the CodeQL and test workflows:
   - Created cache storage for libraries, CMake package metadata, pkg-config metadata, and headers under _cache/spdlog_
   - Added an _actions/cache@v5_ entry keyed by the runner OS and the _makefileDependencies.sh_ hash, with an OS-level restore prefix
   - Restored _libspdlog\*_, the _spdlog_ CMake package, pkg-config files, and headers into their system locations on a cache hit
@@ -1483,6 +1517,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
+[0.12.10]: https://github.com/Phaysik/pocketcore/commit/94964584ab90c2e64135f53c6907354c224a5d59
+[0.12.9]: https://github.com/Phaysik/pocketcore/commit/0b71f6b558826e6e528e5f60540efd68ad62868a
+[0.12.8]: https://github.com/Phaysik/pocketcore/commit/34ed13d54861723d51c86523673c40aea6e22ddf
+[0.12.7]: https://github.com/Phaysik/pocketcore/commit/5980aac45384316d35e56a2781689f5ad3124bce
+[0.12.6]: https://github.com/Phaysik/pocketcore/commit/dd488ac0cca068daa07c3442e3a40e7a9509974d
+[0.12.5]: https://github.com/Phaysik/pocketcore/commit/8a892e0b9f8cde8e79bad4f417f3f1d2710f906f
+[0.12.4]: https://github.com/Phaysik/pocketcore/commit/bab3639025ac8e7c495182b026dcdb4e544d28b6
+[0.12.3]: https://github.com/Phaysik/pocketcore/commit/63d8b22e3aec39119874deb941cd8d715cbbd3f0
+[0.12.2]: https://github.com/Phaysik/pocketcore/commit/2371e413f2ceb47cf76a16904fbaae7a8dcdfdb8
+[0.12.1]: https://github.com/Phaysik/pocketcore/commit/d31881e3683fd8f812932de37ac794def4132fac
+[0.12.0]: https://github.com/Phaysik/pocketcore/compare/v0.11.0...v0.12.0
+[0.11.6]: https://github.com/Phaysik/pocketcore/commit/2fe6a59f393c725a303ce452ceae2f683a455971
+[0.11.5]: https://github.com/Phaysik/pocketcore/commit/f1078de88e81dc9e124dba0542a50a57ad53fd84
+[0.11.4]: https://github.com/Phaysik/pocketcore/commit/9794e874571dd81592e23917b0045984a9bf85e0
+[0.11.3]: https://github.com/Phaysik/pocketcore/commit/385dcd5ed5e5db8eafe2fbcbb78ba6de3d080165
+[0.11.2]: https://github.com/Phaysik/pocketcore/commit/b547c616f310a4f8364b435354a63eb474f67d20
+[0.11.1]: https://github.com/Phaysik/pocketcore/commit/91db1f0a76b93ef5912afe8f631a89d211801365
 [0.11.0]: https://github.com/Phaysik/pocketcore/compare/v0.10.0...v0.11.0
 [0.10.11]: https://github.com/Phaysik/pocketcore/commit/fe357929f7fcf30060aceb503af6c4a5de730375
 [0.10.10]: https://github.com/Phaysik/pocketcore/commit/e49201937a986b442e2c3b492f916c48d2c6f4fc

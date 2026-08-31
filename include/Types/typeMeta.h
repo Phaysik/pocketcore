@@ -1,8 +1,8 @@
 /*! @file typeMeta.h
 	@brief Defines the metadata stored for built-in and user-defined types.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/26/2026
+	@since 0.12.5
+	@version 0.12.5
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@ namespace PocketCore::Type
 		@brief Stores one type's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/26/2026
+		@since 0.12.5
+		@version 0.12.5
 		@author Matthew Moore
 	*/
 	struct TypeMeta

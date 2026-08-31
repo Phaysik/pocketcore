@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the ability registry.
-	@date 08/07/2026
+	@date 08/26/2026
 	@since 0.4.0
-	@version 0.9.16
+	@version 0.12.6
 	@author Matthew Moore
 */
 

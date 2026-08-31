@@ -1,8 +1,8 @@
 /*! @file natureMeta.h
 	@brief Defines the metadata stored for built-in and user-defined natures.
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/26/2026
+	@since 0.11.6
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -29,9 +29,9 @@ namespace PocketCore::Nature
 		@brief Stores one nature's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/26/2026
+		@since 0.11.6
+		@version 0.12.6
 		@author Matthew Moore
 	*/
 	struct NatureMeta

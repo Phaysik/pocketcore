@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 07/29/2026
+	@date 08/23/2026
 	@since 0.7.0
-	@version 0.7.0
+	@version 0.12.1
 	@author Matthew Moore
 */
 

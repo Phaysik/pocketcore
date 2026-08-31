@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the nature registry.
-	@date 04/17/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/23/2026
+	@since 0.11.6
+	@version 0.12.1
 	@author Matthew Moore
 */
 

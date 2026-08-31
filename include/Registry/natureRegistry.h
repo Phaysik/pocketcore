@@ -1,8 +1,8 @@
 /*! @file natureRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined natures.
-	@date 07/27/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/23/2026
+	@since 0.11.6
+	@version 0.12.1
 	@author Matthew Moore
 */
 
@@ -43,9 +43,9 @@ namespace PocketCore::Registry::Nature
 		@details Built-in natures are registered during construction with IDs derived from @ref BuiltinNatureID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_NATURES.
-		@date 07/27/2026
-		@version x.x.x
-		@since x.x.x
+		@date 08/23/2026
+		@since 0.11.6
+		@version 0.12.1
 		@author Matthew Moore
 	*/
 	class NatureRegistry : private FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>
@@ -62,7 +62,10 @@ namespace PocketCore::Registry::Nature
 
 		public:
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
-			/*! @brief Constructs a registry populated with every @ref BuiltinNatureID. */
+			/*! @brief Constructs a registry populated with every @ref BuiltinNatureID.
+				@since 0.11.6
+				@version 0.12.1
+			 */
 			ATTR_NOINLINE explicit constexpr NatureRegistry() : Base{toNatureID(BuiltinNatureID::FinalNature).getValue()}
 			{
 				// --- Neutral natures (no triggers) ---
@@ -260,6 +263,8 @@ namespace PocketCore::Registry::Nature
 				@param[in] natureID The stable nature identifier.
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   registry destruction.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr const NatureMeta *getNatureMetadata(const NatureID natureID) const
 			{
@@ -269,6 +274,8 @@ namespace PocketCore::Registry::Nature
 			/*! @brief Looks up an nature ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr const std::optional<NatureID> getNatureID(const std::string_view &name) const
 			{
@@ -278,6 +285,8 @@ namespace PocketCore::Registry::Nature
 			/*! @brief Looks up an nature display name by stable ID.
 				@param[in] natureID The stable nature identifier.
 				@return The display name if registered, or std::nullopt otherwise.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getNatureName(const NatureID natureID) const
 			{
@@ -286,6 +295,8 @@ namespace PocketCore::Registry::Nature
 
 			/*! @brief Returns all currently registered nature definitions.
 				@return A read-only span that remains valid until the registry is mutated or destroyed.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr const std::span<const NatureMeta> getRegisteredNatures() const noexcept
 			{
@@ -294,6 +305,8 @@ namespace PocketCore::Registry::Nature
 
 			/*! @brief Returns the next stable ID assigned to a custom nature.
 				@return The underlying numeric value of the next nature ID.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr us getNextNatureID() const noexcept
 			{
@@ -303,6 +316,8 @@ namespace PocketCore::Registry::Nature
 			/*! @brief Finds an internal array index by stable nature ID.
 				@param[in] natureID The stable nature identifier.
 				@return The internal index if registered, or std::nullopt otherwise.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByNatureID(const NatureID natureID) const
 			{
@@ -312,6 +327,8 @@ namespace PocketCore::Registry::Nature
 			/*! @brief Checks whether an nature name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr bool hasNature(const std::string_view &name) const
 			{
@@ -321,6 +338,8 @@ namespace PocketCore::Registry::Nature
 			/*! @brief Checks whether an nature ID is registered.
 				@param[in] natureID The stable nature identifier.
 				@return True if the ID is registered, otherwise false.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD constexpr bool hasNature(const NatureID natureID) const
 			{
@@ -329,13 +348,18 @@ namespace PocketCore::Registry::Nature
 
 			/*! @brief Sets the next custom nature ID counter.
 				@param[in] nextID The next underlying ID value.
+				@since 0.11.6
+				@version 0.11.6
 			*/
 			constexpr void setNextNatureID(const us nextID) noexcept
 			{
 				setNextID(nextID);
 			}
 
-			/*! @brief Increments the next custom nature ID counter. */
+			/*! @brief Increments the next custom nature ID counter.
+				@since 0.11.6
+				@version 0.11.6
+			 */
 			constexpr void incrementNextNatureID() noexcept
 			{
 				incrementNextID();

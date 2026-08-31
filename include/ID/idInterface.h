@@ -1,8 +1,8 @@
 /*! @file idInterface.h
 	@brief Defines a tagged value type for creating strongly typed stable identifiers.
-	@date 07/30/2026
+	@date 08/26/2026
 	@since 0.4.1
-	@version 0.8.1
+	@version 0.12.7
 	@author Matthew Moore
 */
 
@@ -77,9 +77,9 @@ namespace std
 			used as a key in standard unordered containers.
 		@tparam Tag The unique type identifying the registry domain.
 		@tparam DefaultValue The numeric value used by the identifier's default constructor.
-		@date 07/30/2026
+		@date 08/26/2026
 		@since 0.8.1
-		@version 0.8.1
+		@version 0.12.7
 		@author Matthew Moore
 	*/
 	template <typename Tag, PocketCore::Core::us DefaultValue>
@@ -91,7 +91,7 @@ namespace std
 				@return The hash produced by the standard hash function for the identifier's numeric value.
 				@note The operation is noexcept and produces equal hash values for equal identifiers.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.7
 			*/
 			std::size_t operator()(const PocketCore::ID::IDInterface<Tag, DefaultValue> &identifier) const noexcept
 			{

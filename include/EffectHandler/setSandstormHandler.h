@@ -1,8 +1,8 @@
 /*! @file setSandstormHandler.h
 	@brief Contains the setSandstorm effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -27,9 +27,9 @@ namespace PocketCore::Effect
 		@details The handler unconditionally replaces the current weather identifier with the built-in sandstorm identifier.
 		@warning Any previously active weather is overwritten without checking for immunity or duration.
 		@note The handler does not inspect the effect context or registry provider.
-		@date --/--/----
+		@date 08/28/2026
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class SetSandstormHandler : public IEffectHandler
@@ -41,7 +41,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registry provider, which is not used by this handler.
 				@post @p state reports sandstorm as the active weather.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -52,7 +52,7 @@ namespace PocketCore::Effect
 		@param[in] provider The registry provider, which is not used by this handler.
 		@post @p state reports sandstorm as the active weather.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applySetSandstorm(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

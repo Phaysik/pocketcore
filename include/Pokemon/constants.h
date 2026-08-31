@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 04/17/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/22/2026
+	@since 0.11.6
+	@version 0.11.6
 	@author Matthew Moore
 */
 

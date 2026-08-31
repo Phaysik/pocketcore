@@ -1,8 +1,8 @@
 /*! @file natureID.h
 	@brief Contains the nature status
-	@date 07/24/2026
-	@version x.x.x
-	@since x.x.x
+	@date 08/22/2026
+	@since 0.11.6
+	@version 0.11.6
 	@author Matthew Moore
 */
 

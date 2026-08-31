@@ -1,8 +1,8 @@
 /*! @file overflowProtection.test.cpp
 	@brief Catch2 unit tests for the OverflowProtection helpers.
-	@date 07/26/2026
+	@date 08/27/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.8
 	@author Matthew Moore
 */
 

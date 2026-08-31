@@ -1,8 +1,8 @@
 /*! @file statusHelpers.h
 	@brief Defines identifiers for status aides.
-	@date 08/04/2026
+	@date 08/28/2026
 	@since 0.9.11
-	@version 0.9.11
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -30,7 +30,7 @@ namespace PocketCore::Status
 		@return `true` when the incoming status declares @p action against @p existingStatusID; otherwise, `false`.
 		@note Returns `false` when the incoming status has no registered metadata.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	ATTR_NODISCARD constexpr bool hasInteraction(const StatusID statusID, const StatusID existingStatusID,
 												 const StatusInteractionAction action, const StatusRegistry &statusRegistry)
@@ -53,7 +53,7 @@ namespace PocketCore::Status
 		@param[in] statusIDs The Pokemon's current statuses, including empty slots.
 		@return `true` when the incoming status declares a blocking interaction against any current status; otherwise, `false`.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	ATTR_NODISCARD constexpr bool willBlockIncoming(const StatusID statusID, const StatusRegistry &statusRegistry,
 													const std::array<StatusID, Configuration::MAX_STATUSES_PER_POKEMON> &statusIDs)
@@ -68,7 +68,7 @@ namespace PocketCore::Status
 		@param[in] statusIDs The Pokemon's current statuses, including empty slots.
 		@return `true` when @p statusID occupies one of the slots; otherwise, `false`.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	ATTR_NODISCARD constexpr bool statusAlreadyExists(const StatusID statusID,
 													  const std::array<StatusID, Configuration::MAX_STATUSES_PER_POKEMON> &statusIDs)
@@ -83,7 +83,7 @@ namespace PocketCore::Status
 		@return `true` when at least one status was replaced; otherwise, `false`.
 		@post The first superseded slot holds @p statusID and any further superseded slots are cleared, which prevents duplicates.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	ATTR_NODISCARD constexpr bool statusReplaceHandler(const StatusID statusID, const StatusRegistry &statusRegistry,
 													   std::array<StatusID, Configuration::MAX_STATUSES_PER_POKEMON> &statusIDs)
@@ -108,7 +108,7 @@ namespace PocketCore::Status
 		@post Each removed slot holds the empty status identifier, leaving gaps that require compaction.
 		@note @ref shiftAndGetNextAvailableStatus compacts the resulting gaps.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	constexpr void statusRemoveHandler(const StatusID statusID, const StatusRegistry &statusRegistry,
 									   std::array<StatusID, Configuration::MAX_STATUSES_PER_POKEMON> &statusIDs)
@@ -128,7 +128,7 @@ namespace PocketCore::Status
 		@warning Slots at or after the returned index retain stale values and must be overwritten before use.
 		@note Runs in linear time over the fixed status capacity.
 		@since 0.9.11
-		@version 0.9.11
+		@version 0.12.9
 	*/
 	ATTR_NODISCARD constexpr std::size_t shiftAndGetNextAvailableStatus(
 		std::array<StatusID, Configuration::MAX_STATUSES_PER_POKEMON> &statusIDs)

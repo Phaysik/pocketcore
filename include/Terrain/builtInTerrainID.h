@@ -1,8 +1,8 @@
 /*! @file builtinTerrainID.h
 	@brief Defines identifiers for terrains compiled into PocketCore.
-	@date 08/03/2026
+	@date 08/22/2026
 	@since 0.8.0
-	@version 0.9.2
+	@version 0.11.6
 	@author Matthew Moore
 */
 
@@ -21,9 +21,9 @@ namespace PocketCore::Terrain
 		@details This closed enum is only a catalog of built-in terrains. Runtime state and user-facing APIs use the open @ref TerrainID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 07/30/2026
+		@date 08/22/2026
 		@since 0.8.0
-		@version 0.8.0
+		@version 0.11.6
 		@author Matthew Moore
 	*/
 	enum class BuiltinTerrainID : PocketCore::Core::ub

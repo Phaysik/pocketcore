@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.benchmark.cpp
 	@brief Contains benchmarks for the fixed metadata registry
-	@date 08/13/2026
+	@date 08/27/2026
 	@since 0.8.7
-	@version 0.10.1
+	@version 0.12.8
 	@author Matthew Moore
 */
 

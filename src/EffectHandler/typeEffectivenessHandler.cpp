@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.cpp
 	@brief Contains the type effectiveness effect handler implementation
-	@date 08/04/2026
+	@date 08/28/2026
 	@since 0.9.2
-	@version 0.9.10
+	@version 0.12.9
 	@author Matthew Moore
 */
 

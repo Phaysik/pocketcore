@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.h
 	@brief Contains the type effectiveness handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.9.2
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 			@ref EffectContext.
 		@warning The context must identify valid user and target slots.
 		@note Undefined type chart cells and unregistered target types are skipped and leave the running product unchanged.
-		@date 08/04/2026
+		@date 08/28/2026
 		@since 0.9.2
-		@version 0.9.10
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class TypeEffectivenessHandler : public IEffectHandler
@@ -45,7 +45,7 @@ namespace PocketCore::Effect
 				@note The context remains unchanged when either slot has no Pokemon, the move base power is zero, the type registry is
 				 unavailable, or the move type is not registered.
 				@since 0.9.2
-				@version 0.9.10
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
 	};
@@ -58,7 +58,7 @@ namespace PocketCore::Effect
 		@post On success, @p context contains the product of every defined effectiveness value against the target's types.
 		@note The context remains unchanged when required Pokemon, move base power, or type registry data is unavailable.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyTypeEffectiveness(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

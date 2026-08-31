@@ -1,8 +1,8 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.3.0
-	@version 0.10.8
+	@version 0.12.6
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Ability
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 07/27/2026
+		@date 08/26/2026
 		@since 0.3.0
-		@version 0.5.3
+		@version 0.12.6
 		@author Matthew Moore
 	*/
 	struct AbilityMeta

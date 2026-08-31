@@ -1,8 +1,8 @@
 /*! @file cache.h
 	@brief Defines constexpr lookup tables for battle stat-stage multipliers.
-	@date 08/07/2026
+	@date 08/27/2026
 	@since 0.8.2
-	@version 0.9.16
+	@version 0.12.8
 	@author Matthew Moore
 */
 
@@ -24,7 +24,7 @@ namespace PocketCore::Configuration
 		@note Values outside the range from @p -MAX_STAT_STAGES to @p MAX_STAT_STAGES are clamped before conversion.
 		@note The function is constexpr and noexcept so it can be used while constructing compile-time lookup tables.
 		@since 0.8.7
-		@version 0.9.0
+		@version 0.12.8
 	*/
 	ATTR_NODISCARD ATTR_PURE constexpr std::size_t statStageCacheIndex(const sb statStage) noexcept
 	{
@@ -37,7 +37,7 @@ namespace PocketCore::Configuration
 		@note Negative stages use the reciprocal-style denominator formula, while non-negative stages use the numerator-increment formula.
 		@note The returned table is constructed at compile time when used in a constant expression.
 		@since 0.8.2
-		@version 0.9.16
+		@version 0.12.8
 	*/
 	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> STAT_STAGE_MULTIPLIERS() noexcept
 	{
@@ -68,7 +68,7 @@ namespace PocketCore::Configuration
 		@note Negative stages use the reciprocal-style denominator formula, while non-negative stages use the numerator-increment formula.
 		@note The returned table is constructed at compile time when used in a constant expression.
 		@since 0.8.2
-		@version 0.9.16
+		@version 0.12.8
 	*/
 	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> ACCURACY_STAGE_MULTIPLIERS() noexcept
 	{
@@ -100,7 +100,7 @@ namespace PocketCore::Configuration
 	   numerator-increment formula.
 		@note The returned table is constructed at compile time when used in a constant expression.
 		@since 0.8.2
-		@version 0.9.16
+		@version 0.12.8
 	*/
 	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> EVASION_STAGE_MULTIPLIERS() noexcept
 	{

@@ -1,8 +1,8 @@
 /*! @file statusRemoveHandler.h
 	@brief Contains the statusRemove effect handler
-	@date 08/12/2026
+	@date 08/28/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.9
 	@author Matthew Moore
 */
 
@@ -23,9 +23,9 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 
 	/*! @class StatusRemoveHandler EffectHandler/statusRemoveHandler.h
-		@date 08/12/2026
+		@date 08/28/2026
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 		@author Matthew Moore
 	*/
 	class StatusRemoveHandler : public IEffectHandler
@@ -37,7 +37,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registry provider, which is not used by this handler.
 				@note This is a placeholder implementation with no observable effect.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.9
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -48,7 +48,7 @@ namespace PocketCore::Effect
 		@param[in] provider The registry provider, which is not used by this handler.
 		@note The call currently has no observable effect.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.9
 	*/
 	inline void applyStatusRemove(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{

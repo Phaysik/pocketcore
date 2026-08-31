@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.1.0
-	@version 0.10.8
+	@version 0.12.5
 	@author Matthew Moore
 */
 
@@ -83,9 +83,9 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 08/18/2026
+		@date 08/26/2026
 		@since 0.1.0
-		@version 0.10.8
+		@version 0.12.5
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -98,7 +98,7 @@ namespace PocketCore::Registry::Type
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 				@since 0.1.0
-				@version 0.9.8
+				@version 0.12.5
 			*/
 			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltInTypeID::FinalType).getValue()}
 			{
@@ -224,7 +224,7 @@ namespace PocketCore::Registry::Type
 				@param[in] col The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
 				@since 0.1.0
-				@version 0.9.3
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr TypeEffectiveness getTypeChartCell(const us row, const us col) const
 			{
@@ -239,7 +239,7 @@ namespace PocketCore::Registry::Type
 				@param[in] row The row index.
 				@return A copy of the full effectiveness row for the given type.
 				@since 0.1.0
-				@version 0.9.3
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr const std::array<TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
 			{
@@ -253,7 +253,7 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view &name) const
 			{
@@ -265,7 +265,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The type ID to search for.
 				@return The name wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr std::optional<std::string_view> getTypeName(const TypeID typeID) const
 			{
@@ -275,7 +275,7 @@ namespace PocketCore::Registry::Type
 			/*! @brief Returns the next type ID that will be assigned to a newly registered type.
 				@return The next available stable type ID.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr TypeID getNextTypeID() const noexcept
 			{
@@ -286,7 +286,7 @@ namespace PocketCore::Registry::Type
 				@details The returned span covers the first @ref getAmountRegistered elements of the internal entries array.
 				@return A span of @ref TypeMeta covering all valid registered entries.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr const std::span<const TypeMeta> getRegisteredTypes() const noexcept
 			{
@@ -301,7 +301,7 @@ namespace PocketCore::Registry::Type
 				@param[in] col The defending-type index.
 				@param[in] value The @ref TypeEffectiveness value to store.
 				@since 0.1.0
-				@version 0.9.3
+				@version 0.12.5
 			*/
 			constexpr void setTypeChartCell(const us row, const us col, const TypeEffectiveness value)
 			{
@@ -316,7 +316,7 @@ namespace PocketCore::Registry::Type
 				@param[in] row The row index.
 				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
 				@since 0.1.0
-				@version 0.9.3
+				@version 0.12.5
 			*/
 			constexpr void setTypeChartRow(const us row, const std::array<TypeEffectiveness, MAX_TYPES> &chart)
 			{
@@ -328,7 +328,7 @@ namespace PocketCore::Registry::Type
 			/*! @brief Sets the next type ID counter.
 				@param[in] nextId The value to assign to the next-type-ID counter.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			constexpr void setNextTypeID(const TypeID nextId) noexcept
 			{
@@ -342,7 +342,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The stable type ID to search for.
 				@return The array index wrapped in std::optional if found, or std::nullopt if no type with that ID is registered.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr const std::optional<us> findIndexByTypeID(const TypeID typeID) const
 			{
@@ -354,7 +354,7 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to check.
 				@return True if a type with that name exists in the registry, false otherwise.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
 			{
@@ -366,7 +366,7 @@ namespace PocketCore::Registry::Type
 				@param[in] typeID The type ID to check.
 				@return True if a type with that ID exists in the registry, false otherwise.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			*/
 			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
@@ -375,7 +375,7 @@ namespace PocketCore::Registry::Type
 
 			/*! @brief Increments the next type ID counter by one.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.5
 			 */
 			constexpr void incrementNextTypeID() noexcept
 			{

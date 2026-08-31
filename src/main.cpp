@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 08/18/2026
+	@date 08/26/2026
 	@since 0.1.0
-	@version 0.10.7
+	@version 0.12.5
 	@author Matthew Moore
 */
 

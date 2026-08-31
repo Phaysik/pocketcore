@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 08/21/2026
+	@date 08/28/2026
 	@since 0.10.3
-	@version 0.11.0
+	@version 0.12.10
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "Effect/effectID.h"
-#include "Effect/effectSourceAndSuppresion.h"
+#include "Effect/effectSourceAndSuppression.h"
 #include "Item/itemMeta.h"
 #include "Move/moveMeta.h"
 #include "Nature/natureMeta.h"
@@ -55,9 +55,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 08/21/2026
+		@date 08/28/2026
 		@since 0.10.3
-		@version 0.10.9
+		@version 0.12.10
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -69,7 +69,7 @@ namespace PocketCore::Battle
 				@pre Both registries must outlive the engine because they are stored as non-owning references.
 				@note The engine starts with no battle in progress; call @ref startBattle before executing turns.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			explicit BattleEngine(const RegistryProvider &provider, const EffectRegistry &effectRegistry) noexcept
 				: mProvider(&provider), mEffectRegistry(&effectRegistry)
@@ -77,32 +77,32 @@ namespace PocketCore::Battle
 
 			/*! @brief Prevents copying an engine because its battle state and suppression scopes are not shareable.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			BattleEngine(const BattleEngine &) = delete;
 
 			/*! @brief Prevents moving an engine because its battle state and suppression scopes are not transferable.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			BattleEngine(BattleEngine &&) = delete;
 
 			/*! @brief Prevents copy assignment of an engine.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			BattleEngine &operator=(const BattleEngine &) = delete;
 
 			/*! @brief Prevents move assignment of an engine.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			BattleEngine &operator=(BattleEngine &&) = delete;
 
 			/*! @brief Destroys the engine and releases the storage owned by its battle state.
 				@note The referenced registries and party Pokemon are not owned or destroyed by this operation.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.10
 			*/
 			~BattleEngine() = default;
 
@@ -186,7 +186,7 @@ namespace PocketCore::Battle
 				@param[in] context The current effect context containing source-specific metadata identifiers.
 				@return True when at least one active rule suppresses the dispatch; otherwise false.
 				@since 0.10.3
-				@version 0.10.9
+				@version 0.11.6
 			*/
 			ATTR_NODISCARD ATTR_PURE bool isSuppressed(const EffectSource source, const BattleTarget &owner, const BattleEventID eventID,
 													   const BattleEventRole role, const EffectContext &context) const noexcept;
@@ -209,7 +209,7 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the ability.
 				@param[in] triggerID The trigger whose suppression rules become active.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.6
 			*/
 			void activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleEventID eventID,
 											 const BattleEventRole role);
@@ -219,7 +219,7 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the item.
 				@param[in] triggerID The trigger whose suppression rules become active.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.6
 			*/
 			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
 										  const BattleEventRole role);
@@ -228,6 +228,8 @@ namespace PocketCore::Battle
 				@param[in] natureMeta The nature metadata whose matching trigger entries are inspected.
 				@param[in] owner The active slot that owns the nature.
 				@param[in] triggerID The trigger whose suppression rules become active.
+				@since 0.11.6
+				@version 0.12.6
 			*/
 			void activateNatureSuppressions(const NatureMeta &natureMeta, const BattleTarget &owner, const BattleEventID eventID,
 											const BattleEventRole role);
@@ -237,7 +239,7 @@ namespace PocketCore::Battle
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.11.1
 			*/
 			void executeEffect(const EffectID effect, EffectContext &context);
 
@@ -247,7 +249,7 @@ namespace PocketCore::Battle
 				@param[in] effects The ordered effect identifiers to execute.
 				@param[in,out] context The context shared and mutated by every executed effect.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.11.1
 			*/
 			void executeEffects(const std::span<const EffectID> &effects, EffectContext &context);
 
@@ -259,7 +261,7 @@ namespace PocketCore::Battle
 				@param[in] effects The ordered effects to execute for every resolved recipient.
 				@param[in,out] context The shared context whose event coordinates are preserved across target iteration.
 				@since 0.10.3
-				@version 0.10.4
+				@version 0.11.1
 			*/
 			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID, const std::span<const EffectID> &effects,
 										EffectContext &context);
@@ -281,7 +283,7 @@ namespace PocketCore::Battle
 				@param[in] triggerID The move trigger to dispatch.
 				@param[in,out] context The shared context supplied to matching effects.
 				@since 0.10.4
-				@version 0.10.8
+				@version 0.12.6
 			*/
 			void executeMoveTrigger(const MoveMeta &moveMeta, BattleEventID eventID, BattleEventRole role, EffectContext &context);
 
@@ -294,7 +296,7 @@ namespace PocketCore::Battle
 				@param[in,out] context The context stamped with the ability source and passed to matching effects.
 				@param[in] targetEffects True to resolve the ability target selector; false to preserve the existing event target.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.6
 			*/
 			void executeAbilityTrigger(const BattleTarget &owner, const AbilityMeta &abilityMeta, const BattleEventID eventID,
 									   const BattleEventRole role, EffectContext &context, const bool targetEffects);
@@ -308,7 +310,7 @@ namespace PocketCore::Battle
 				@param[in,out] context The context stamped with the item source and passed to matching effects.
 				@param[in] targetEffects True to resolve the item target selector; false to preserve the existing event target.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.6
 			*/
 			void executeItemTrigger(const BattleTarget &owner, const ItemMeta &itemMeta, const BattleEventID eventID,
 									const BattleEventRole role, EffectContext &context, const bool targetEffects);
@@ -321,6 +323,8 @@ namespace PocketCore::Battle
 				@param[in] triggerID The nature trigger to dispatch.
 				@param[in,out] context The context stamped with the nature source and passed to matching effects.
 				@param[in] targetEffects True to resolve the nature target selector; false to preserve the existing event target.
+				@since 0.11.6
+				@version 0.12.6
 			*/
 			void executeNatureTrigger(const BattleTarget &owner, const NatureMeta &natureMeta, const BattleEventID eventID,
 									  const BattleEventRole role, EffectContext &context, const bool targetEffects);
@@ -329,7 +333,7 @@ namespace PocketCore::Battle
 				@details Side A's slots are processed before side B's, and each side's slots are processed in ascending index order to keep
 			   turn-end effects deterministic. Fainted slots are skipped.
 				@since 0.10.7
-				@version 0.10.8
+				@version 0.12.10
 			*/
 			void executeEndTurnTrigger();
 
@@ -343,7 +347,7 @@ namespace PocketCore::Battle
 				@param[out] targetSuppressionCount Receives the suppression scope depth to restore between hits.
 				@return True when the move missed or the chain stopped and the target should be abandoned; otherwise false.
 				@since 0.11.0
-				@version 0.11.0
+				@version 0.12.10
 			*/
 			ATTR_NODISCARD bool executeWeightHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &targetContext,
 															const MoveMeta *moveMeta, std::size_t &targetSuppressionCount);
@@ -354,7 +358,7 @@ namespace PocketCore::Battle
 				@param[in] moveMeta The metadata of the executing move. Must not be nullptr.
 				@return True when the attempt missed and the remaining hits should be abandoned; otherwise false.
 				@since 0.11.0
-				@version 0.11.0
+				@version 0.12.10
 			*/
 			ATTR_NODISCARD bool executeFixedHitCountPolicy(const bool runBeforeHitPerAttempt, EffectContext &context,
 														   const MoveMeta *moveMeta);
@@ -368,7 +372,7 @@ namespace PocketCore::Battle
 				@post Nothing changes when damage application is disabled or the calculated damage is zero.
 				@note Fainting is detected separately by @ref processFaints.
 				@since 0.11.0
-				@version 0.11.0
+				@version 0.12.10
 			*/
 			void executeDamageApplication(const EffectContext &context, const BattleTarget &target);
 
@@ -412,16 +416,16 @@ namespace PocketCore::Battle
 			/*! @brief Dispatches faint triggers once for each newly fainted active occupant.
 				@details Marks each faint before dispatch to prevent recursive duplicate processing, then recomputes the battle phase and
 			   required replacements.
-						@since 0.10.3
-						@version 0.10.3
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			void processFaints();
 
 			/*! @brief Recomputes the battle phase and forced replacement slots from current party health.
 				@details Finished battles take precedence over replacement requests, and a fainted slot is requested only when its side has
 			   a healthy inactive reserve.
-						@since 0.10.3
-						@version 0.10.3
+				@since 0.10.3
+				@version 0.10.3
 			*/
 			void refreshBattlePhase();
 

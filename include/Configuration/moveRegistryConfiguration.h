@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring move metadata.
-	@date 08/14/2026
+	@date 08/27/2026
 	@since 0.6.0
-	@version 0.10.3
+	@version 0.12.8
 	@author Matthew Moore
 */
 
@@ -40,9 +40,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the move-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 07/28/2026
+			@date 08/26/2026
 			@since 0.6.0
-			@version 0.6.0
+			@version 0.12.7
 			@author Matthew Moore
 		*/
 		struct MoveRegistryConfigurationPolicy
@@ -66,9 +66,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal move registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/14/2026
+		@date 08/27/2026
 		@since 0.6.0
-		@version 0.10.3
+		@version 0.12.8
 		@author Matthew Moore
 	*/
 	class MoveRegistryConfiguration
@@ -91,7 +91,7 @@ namespace PocketCore::Configuration
 			/*! @brief Returns read-only access to the configured runtime move registry.
 				@return A reference that remains valid for the lifetime of this configuration.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.8
 			*/
 			ATTR_NODISCARD constexpr const MoveRegistry &getRuntimeRegistry() const noexcept
 			{
@@ -186,7 +186,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.6
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const std::string_view &moveName,
 																				  const std::span<const EffectTrigger> &triggers);
@@ -197,7 +197,7 @@ namespace PocketCore::Configuration
 				@param[in] triggers The trigger definitions to copy into the registry.
 				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.6
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const MoveID moveID,
 																				  const std::span<const EffectTrigger> &triggers);
