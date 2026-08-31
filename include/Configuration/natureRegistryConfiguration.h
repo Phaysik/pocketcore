@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring nature metadata.
-	@date 08/27/2026
+	@date 08/30/2026
 	@since 0.11.6
-	@version 0.12.8
+	@version 0.12.11
 	@author Matthew Moore
 */
 
@@ -36,9 +36,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the nature-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/22/2026
+			@date 08/30/2026
 			@since 0.11.6
-			@version 0.11.6
+			@version 0.12.11
 			@author Matthew Moore
 		*/
 		struct NatureRegistryConfigurationPolicy
@@ -62,9 +62,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal nature registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/27/2026
+		@date 08/30/2026
 		@since 0.11.6
-		@version 0.12.8
+		@version 0.12.11
 		@author Matthew Moore
 	*/
 	class NatureRegistryConfiguration

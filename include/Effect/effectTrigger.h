@@ -1,8 +1,8 @@
 /*! @file effectTrigger.h
 	@brief Defines shared event-driven effect trigger metadata.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.12.6
-	@version 0.12.6
+	@version 0.12.11
 	@author Matthew Moore
 */
 
@@ -31,9 +31,9 @@ namespace PocketCore::Effect
 		 @p mSuppressionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
 		 current battle event.
 		@note @p mSuppressionRuleCount must not exceed @ref MAX_SUPPRESSION_RULES_PER_TRIGGER.
-		@date 08/26/2026
+		@date 08/30/2026
 		@since 0.12.6
-		@version 0.12.6
+		@version 0.12.11
 		@author Matthew Moore
 	*/
 	struct EffectTrigger

@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 08/28/2026
+	@date 08/30/2026
 	@since 0.9.14
-	@version 0.12.9
+	@version 0.12.11
 	@author Matthew Moore
 */
 

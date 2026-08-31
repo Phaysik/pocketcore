@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 08/28/2026
+	@date 08/30/2026
 	@since 0.10.3
-	@version 0.12.10
+	@version 0.12.11
 	@author Matthew Moore
 */
 
@@ -209,7 +209,7 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the ability.
 				@param[in] triggerID The trigger whose suppression rules become active.
 				@since 0.10.3
-				@version 0.12.6
+				@version 0.12.11
 			*/
 			void activateAbilitySuppressions(const AbilityMeta &abilityMeta, const BattleTarget &owner, const BattleEventID eventID,
 											 const BattleEventRole role);
@@ -219,7 +219,7 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the item.
 				@param[in] triggerID The trigger whose suppression rules become active.
 				@since 0.10.3
-				@version 0.12.6
+				@version 0.12.11
 			*/
 			void activateItemSuppressions(const ItemMeta &itemMeta, const BattleTarget &owner, const BattleEventID eventID,
 										  const BattleEventRole role);
@@ -229,7 +229,7 @@ namespace PocketCore::Battle
 				@param[in] owner The active slot that owns the nature.
 				@param[in] triggerID The trigger whose suppression rules become active.
 				@since 0.11.6
-				@version 0.12.6
+				@version 0.12.11
 			*/
 			void activateNatureSuppressions(const NatureMeta &natureMeta, const BattleTarget &owner, const BattleEventID eventID,
 											const BattleEventRole role);
@@ -283,7 +283,7 @@ namespace PocketCore::Battle
 				@param[in] triggerID The move trigger to dispatch.
 				@param[in,out] context The shared context supplied to matching effects.
 				@since 0.10.4
-				@version 0.12.6
+				@version 0.12.11
 			*/
 			void executeMoveTrigger(const MoveMeta &moveMeta, BattleEventID eventID, BattleEventRole role, EffectContext &context);
 

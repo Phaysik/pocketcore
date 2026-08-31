@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the pokemon registry.
-	@date 08/22/2026
+	@date 08/30/2026
 	@since 0.12.0
-	@version 0.12.0
+	@version 0.12.11
 	@author Matthew Moore
 */
 

@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 08/27/2026
+	@date 08/30/2026
 	@since 0.3.0
-	@version 0.12.8
+	@version 0.12.11
 	@author Matthew Moore
 */
 
