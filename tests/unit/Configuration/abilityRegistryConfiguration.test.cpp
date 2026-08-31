@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.4.0
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/builtInEffectID.h"
 #include "Effect/effectTrigger.h"
+#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>

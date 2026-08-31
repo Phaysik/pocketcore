@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the move registry.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.6.0
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -18,14 +18,15 @@
 #include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-
-	using PocketCore::Effect::EffectTrigger;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::addMove(const MoveMeta &moveMeta)
 	{

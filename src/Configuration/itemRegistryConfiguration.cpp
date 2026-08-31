@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the item registry.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.5.0
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 #include "Effect/effectTrigger.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -25,6 +26,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> ItemRegistryConfiguration::addItem(const ItemMeta &itemMeta)
 	{

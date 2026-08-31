@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the terrain registry.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.8.1
-	@version 0.12.7
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -13,11 +13,13 @@
 #include <string_view>
 
 #include "Core/attributeMacros.h"
+#include "Registry/registryError.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Terrain::TerrainMeta;
 

@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.2.19
-	@version 0.12.5
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -16,6 +16,7 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Registry/registryError.h"
 #include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"

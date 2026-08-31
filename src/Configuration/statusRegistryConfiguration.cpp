@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the status registry.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.6.4
-	@version 0.12.7
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -13,11 +13,13 @@
 #include <string_view>
 
 #include "Core/attributeMacros.h"
+#include "Registry/registryError.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 
 namespace PocketCore::Configuration
 {
+	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 

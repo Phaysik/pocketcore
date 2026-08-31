@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.8.7
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
+#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>

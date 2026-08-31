@@ -1,13 +1,14 @@
 /*! @file burnDamageHandler.cpp
 	@brief Contains the burn damage effect handler implementation
-	@date 08/28/2026
+	@date 08/30/2026
 	@since 0.9.5
-	@version 0.12.9
+	@version 0.12.12
 	@author Matthew Moore
 */
 
 #include "EffectHandler/burnDamageHandler.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "Ability/builtInAbilityID.h"

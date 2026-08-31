@@ -2,7 +2,7 @@
 	@brief Defines validated user customization operations for the pokemon registry.
 	@date 08/30/2026
 	@since 0.12.0
-	@version 0.12.11
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -15,11 +15,13 @@
 #include "Core/attributeMacros.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> PokemonRegistryConfiguration::addPokemon(const PokemonMeta &pokemonMeta)
 	{

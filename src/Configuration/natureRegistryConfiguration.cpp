@@ -2,7 +2,7 @@
 	@brief Defines validated user customization operations for the nature registry.
 	@date 08/30/2026
 	@since 0.12.0
-	@version 0.12.11
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -15,11 +15,13 @@
 #include "Core/attributeMacros.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> NatureRegistryConfiguration::addNature(const NatureMeta &natureMeta)
 	{

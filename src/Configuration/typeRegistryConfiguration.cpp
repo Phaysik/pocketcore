@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 08/27/2026
+	@date 08/30/2026
 	@since 0.2.0
-	@version 0.12.8
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Registry/registryError.h"
 #include "Registry/typeRegistry.h"
 #include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
@@ -31,6 +32,8 @@ namespace PocketCore::Configuration
 	using PocketCore::Configuration::MatchupPair;
 	using PocketCore::Configuration::MAX_TYPES;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::RegistryError;
+	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Registry::Type::TypeMeta;
 	using PocketCore::Type::TypeEffectiveness;
 	using PocketCore::Type::TypeID;

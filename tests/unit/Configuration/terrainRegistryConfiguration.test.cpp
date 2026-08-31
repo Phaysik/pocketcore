@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TerrainRegistryConfiguration.
-	@date 08/23/2026
+	@date 08/30/2026
 	@since 0.8.7
-	@version 0.12.1
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -12,6 +12,7 @@
 #include <array>
 #include <string_view>
 
+#include "Registry/registryError.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
 #include "Utility/Debug/Logging/logger.h"

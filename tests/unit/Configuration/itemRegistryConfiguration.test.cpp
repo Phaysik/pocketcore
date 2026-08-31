@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.5.0
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
+#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logger.h"
 
 #include <catch2/catch_test_macros.hpp>

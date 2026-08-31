@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the ability registry.
-	@date 08/26/2026
+	@date 08/30/2026
 	@since 0.4.0
-	@version 0.12.6
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectTrigger.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -25,6 +26,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Effect::EffectTrigger;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
 	{

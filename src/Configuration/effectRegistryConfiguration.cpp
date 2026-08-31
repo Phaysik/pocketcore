@@ -1,8 +1,8 @@
 /*! @file effectRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the effect registry.
-	@date 08/28/2026
+	@date 08/30/2026
 	@since 0.12.9
-	@version 0.12.9
+	@version 0.12.12
 	@author Matthew Moore
 */
 
@@ -15,11 +15,13 @@
 #include "Core/attributeMacros.h"
 #include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
+#include "Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
+	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<EffectID, RegistryErrorInfo> EffectRegistryConfiguration::addEffect(const EffectMeta &effectMeta)
 	{
