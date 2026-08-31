@@ -6,39 +6,215 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ## [0.12.11] - 2026-08-30
 
+### Added
+
+- Added inherited registration-count access to registry facades that previously did not expose `FixedMetadataRegistry::getAmountRegistered()` directly.
+- Added domain terminology to the Codebook spelling allowlist and raised rumdl's MD013 line-length limit from 200 to 450 characters.
+
+### Changed
+
+- Renamed `Effect/effectSourceAndSuppresion.h` to `Effect/effectSourceAndSuppression.h` and updated all battle, helper, and trigger includes.
+- Renamed `EffectTrigger::mSuppresionRuleCount` to `mSuppressionRuleCount` and updated ability, item, nature, and move trigger execution to use the corrected member.
+- Documented nature and Pokemon configuration and registry contracts, including fixed-capacity ownership, stable-ID allocation, atomic batch rollback, case-sensitive non-owning names, and update/remove behavior.
+- Removed redundant configuration-constants includes from the nature and Pokemon configuration implementations.
+
 ## [0.12.10] - 2026-08-28
+
+### Changed
+
+- Documented `BattleEngine` construction and registry lifetimes, battle start and turn-validation requirements, deterministic event ordering, effect and suppression dispatch, per-target and per-hit trigger behavior, damage clamping, faint processing, and cleanup semantics. This revision made no runtime behavior changes.
 
 ## [0.12.9] - 2026-08-28
 
+### Added
+
+- Added the out-of-line `EffectRegistryConfiguration` mutation implementation. The facade can add one effect or an atomic span of effects, rename an entry, replace metadata by name or `EffectID` while retaining the stored stable ID, and remove an entry by name or ID.
+- Documented battle-action validation, built-in effect identities, suppression matching, concrete effect-handler preconditions and outcomes, and status interaction, replacement, removal, and compaction rules.
+
+### Removed
+
+- Removed the unused `protectEffects()` and `fieldEffectEffects()` declarations from move metadata.
+- Removed unused built-in-effect includes and aliases from multiplier, status, terrain, and weather registries.
+
 ## [0.12.8] - 2026-08-27
+
+### Changed
+
+- Marked `EffectContext::getActiveMultipliers()` as `ATTR_PURE` and made the `AccuracyCheckHandler` API's access section explicit.
+- Simplified domain configuration accessors to return their inherited registry through `getRegistry()` and clarified cache dimensions, configuration constants, type-registry behavior, and effect-processing contracts. No runtime behavior changed.
 
 ## [0.12.7] - 2026-08-26
 
+### Changed
+
+- Replaced trivial registration-count forwarding methods with direct `using Base::getAmountRegistered` declarations across registry and configuration facades.
+- Documented battle-state data carriers, generic registry error handling, stable-ID semantics, move, multiplier, status, terrain, and weather configuration operations, effect-handler inputs and outcomes, and status metadata. These documentation and API-surface cleanups did not change runtime behavior.
+
 ## [0.12.6] - 2026-08-26
+
+### Added
+
+- Added the shared `EffectTrigger` record with fixed suppression-rule storage, an ordered effect-ID vector, battle event and role selectors, and a logical suppression-rule count.
+
+### Changed
+
+- Replaced `AbilityEffectTrigger`, `ItemEffectTrigger`, `MoveEffectTrigger`, and `NatureEffectTrigger` with `EffectTrigger` in metadata, configuration APIs, battle dispatch, and tests. All four effect sources now use one trigger representation without changing trigger order or matching behavior.
+
+### Removed
+
+- Removed the four duplicated domain-specific trigger structure definitions and their now-redundant suppression, effect-ID, constants, and typedef includes.
 
 ## [0.12.5] - 2026-08-26
 
+### Added
+
+- Added `TypeMeta`, which stores one type's offensive matchup row, non-owning name, and stable `TypeID` in a single metadata record.
+
+### Changed
+
+- Changed `TypeRegistry` from separate `TypeEntry` metadata and type-chart storage to a `FixedMetadataRegistry<TypeMeta, TypeID, ...>` specialization whose registered metadata owns each matchup row.
+- Changed type configuration, registry lookup, weather and terrain handlers, type-effectiveness handling, Pokemon metadata consumers, and tests to read and mutate `TypeMeta` records and their embedded matchups.
+- Consolidated built-in type names and matchup rows under the type domain and updated registry capacity and namespace references to match the new metadata model.
+
+### Removed
+
+- Removed `TypeEntry` and the registry's standalone type-chart array, eliminating the parallel indexing requirement between metadata and matchup storage.
+
 ## [0.12.4] - 2026-08-25
+
+### Changed
+
+- Changed built-in type registration to construct a `TypeEntry` and call `FixedMetadataRegistry::addBuiltin()` directly.
+
+### Removed
+
+- Removed `TypeRegistry`'s redundant indexed `getEntry()` forwarding method; inherited fixed-registry access remains available to the type-specific implementation.
 
 ## [0.12.3] - 2026-08-25
 
+### Changed
+
+- Documented ability and item metadata ownership, registry and configuration lookup/mutation contracts, generic fixed-registry configuration behavior, stable tagged-ID semantics, and `EffectContext` multiplier handling.
+- Removed redundant configuration-constants includes from the ability and item configuration implementations. This revision made no runtime behavior changes.
+
 ## [0.12.2] - 2026-08-24
+
+### Changed
+
+- Changed `EffectContext`'s built-in multiplier-position table size to derive directly from the one-past-the-end `BuiltinMultiplierID::FinalMultiplier` sentinel instead of `Stab + 1`.
+- Documented ability trigger storage, battle-state ownership and non-owning Pokemon lifetimes, effect-context dispatch and multiplier semantics, and the complete Pokemon constructor, accessor, mutation, status, and stream-output contracts.
 
 ## [0.12.1] - 2026-08-23
 
+### Added
+
+- Added `Registry/registryError.h` as the shared home for `RegistryError`, `UnspecifiedMatchup`, `RegistryErrorInfo`, and `NO_LOGGING_FAILURE`; registry configuration and tests now consume errors from the registry namespace rather than configuration constants.
+- Added rumdl Markdown line-length configuration and a Codebook project dictionary for repository-specific terminology.
+
+### Changed
+
+- Moved `MAX_STAT_TYPES` into the nature domain and updated its consumers, reducing unrelated registry and nature dependencies on configuration constants.
+- Changed selected non-owning `std::string_view` parameters in Pokemon, registry helpers, tests, and formatting utilities to pass by const reference, and removed obsolete configuration-constants includes exposed by the error extraction.
+- Expanded Doxygen contracts for registry errors, type configuration and lookup, logging, concepts, attributes, timers, input, random generation, and related utility APIs.
+
 ## [0.12.0] - 2026-08-22 (Nature Registry Update)
+
+### Added
+
+- Added the out-of-line `NatureRegistryConfiguration` mutation implementation. The facade can add one nature or an atomic span of natures, rename an entry, replace metadata by name or `NatureID` while retaining the stored stable ID, and remove an entry by name or ID; the query and runtime-registry accessors remain inherited from the declaration introduced in 0.11.6.
+- Added the complete `PokemonRegistryConfiguration` facade over a configuration-owned `PokemonRegistry`:
+  - Query APIs expose metadata, name/ID lookup, registered spans, registration counts, containment checks, and const access to the runtime registry.
+  - Mutation APIs add one Pokemon or an atomic span, rename an entry, replace metadata by name or `PokemonID` while retaining the stored stable ID, and remove an entry by name or ID.
+  - Duplicate names report `DuplicatePokemon`, missing names or IDs report `PokemonNotFound`, and additions enforce the `MAX_POKEMON == 10'000` fixed capacity. Names remain case-sensitive, non-owning `std::string_view` values whose backing storage must outlive their registrations.
+  - Successful custom additions consume monotonically increasing IDs. Removal does not reuse IDs, and a failed batch erases entries appended by that batch and restores the prior registration count and next-ID snapshot.
+
+### Changed
+
+- Added a non-owning `const PokemonRegistry *pokemonRegistry` member to `RegistryProvider`. The example now constructs `PokemonRegistryConfiguration` and supplies its runtime registry through the provider; effect-handler test aggregates add a `nullptr` for the new field.
+- Changed the `PokemonRegistry` built-in-count constructor expression to cast the final built-in ID before adding one, without changing the registered catalog or runtime behavior.
+- Updated the generated Zed compilation database for the nature-configuration source and new Pokemon-configuration translation unit. This patch did not add dedicated nature- or Pokemon-configuration tests.
 
 ## [0.11.6] - 2026-08-22
 
+### Added
+
+- Added the nature domain:
+  - `NatureID` is an open tagged identifier with `NO_NATURE_ID`; `BuiltinNatureID` defines `None`, the 25 standard natures, and the `FinalNature` sentinel, with corresponding display-name constants and conversion to the open ID.
+  - `NatureMeta` stores six stat multipliers, an owned `EffectTrigger` vector, a non-owning name, a `BattleTargetID`, and its stable `NatureID`. Configuration constants define `MAX_NATURES == 1'000`, `MAX_NATURES_PER_POKEMON == 1`, and neutral, boosted, and weakened stat factors of `1.0`, `1.1`, and `0.9`.
+  - `NatureRegistry` registers `None` plus all 25 standard natures. Hardy, Docile, Serious, Bashful, and Quirky are neutral; every other built-in applies the standard boost and weakness to its canonical attack, defense, special-attack, special-defense, or speed pair. The registry exposes metadata/name/ID queries, registered spans and counts, containment checks, and the fixed-registry mutation primitives used by configuration code.
+  - Declared `NatureRegistryConfiguration` and its duplicate/not-found policy, query facade, single and batch additions, rename, stable-ID-preserving update, removal, and runtime-registry access. Its out-of-line mutation definitions are added in 0.12.0.
+- Added the Pokemon metadata domain:
+  - `PokemonID` is an open tagged identifier with `NO_POKEMON_ID`; `BuiltinPokemonID` defines `None`, the Bulbasaur, Charmander, and Squirtle evolutionary families, and `FinalPokemon`.
+  - `PokemonMeta` contains four move IDs and four maximum-PP values, two type IDs, a ten-entry ability pool, one item ID, six base stats, level, non-owning name, stable `PokemonID`, and logical ability-pool count. Constants define `MAX_POKEMON == 10'000` and `MAX_ABILITY_POOL_PER_POKEMON == 10`.
+  - `PokemonRegistry` registers `None` and the nine starter-family species with their built-in moves, PP, types, ability pools, item, levels, and base stats. It exposes metadata/name/ID lookup, registered spans and counts, containment checks, next-ID state, and the fixed-registry mutation primitives; a Pokemon configuration facade is not added until 0.12.0.
+- Added nature-aware battle dispatch. `EffectContext` carries a `NatureID`; `EffectSource` adds `Nature`; suppression rules can constrain `mTargetNatureID`; and `BattleEngine::executeNatureTrigger()` executes matching nature effects through the same target and suppression pipeline used by abilities and items. Slot events dispatch abilities, then items, then each equipped nature, and nature sources participate in self-suppression exclusion and source restoration.
+
+### Changed
+
+- Changed runtime `Pokemon` storage from scalar ability and item IDs to fixed arrays of one ability, one item, and one nature. Constructors, whole-array and indexed accessors, and setters now operate on those arrays while retaining the existing four move, PP, two type, status, stat, level, and health state.
+- Changed numeric and registry-resolved Pokemon stream output to print plural ability and item sections plus nature IDs/names. Name resolution uses the corresponding provider registry and retains the `<unregistered>` fallback for missing metadata or null registry pointers.
+- Added a non-owning `const NatureRegistry *natureRegistry` to `RegistryProvider`; no Pokemon-registry provider member exists in this revision. The example constructs `NatureRegistryConfiguration`, constructs `PokemonRegistry` directly, equips runtime Pokemon with ability/item/nature arrays, and wires only the nature registry into the provider.
+- Added `Final...` built-in sentinels across the existing ability, effect, item, move, multiplier, status, terrain, type, and weather domains where required by the registry initialization pattern. Updated affected handlers, tests, and generated Zed compilation-database data for the new identifiers and array-based Pokemon API.
+
 ## [0.11.5] - 2026-08-21
+
+### Added
+
+- Added `MultiplierApplicationPolicy::RoundHalfDown` before `Floor` and `Other`. It becomes the `MultiplierMeta` default and the fallback for an unregistered multiplier ID.
+
+### Changed
+
+- Assigned built-in multiplier policies to match their calculation stages: Ability and Item use `Other`; Critical Hit, Randomization, and Type Effectiveness use `Floor`; Targets, Population Bomb, Weather, STAB, Burn Damage Reduction, and the remaining defaulted entries use `RoundHalfDown`.
+- Refined `EffectContext::applyMultiplier()`:
+  - A reusable helper rounds values above one half up and exact or tolerance-close halves down. `RoundHalfDown` applies that helper directly, while `Floor` applies `std::floor` directly.
+  - `Other` multipliers accumulate into a fixed-point value initialized to `4096`, rounding each accumulated product. After all active multipliers, the accumulator is divided by the `4096` denominator and applied once with half-down rounding.
+  - Non-finite inputs still normalize to `1.0`, negative inputs still clamp to `0.0`, and damage remains at least one after each active multiplier and after the final deferred application.
+- Updated multiplier tests for the new built-in assignments; in particular, Ability multiplier `11 * 1.6` changes from the initial floor result `17` to the deferred half-down result `18`.
 
 ## [0.11.4] - 2026-08-21
 
+### Fixed
+
+- Added the previously omitted `src/Pokemon/pokemon.cpp`, resolving the missing out-of-line stream definitions declared and tested in 0.11.2.
+- Defined `operator<<` to serialize Pokemon state with numeric ability, item, type, status, and move IDs; level and level-damage factor; health and stats; and current/maximum PP for every move slot.
+- Defined `printPokemonWithNames()` to resolve ability, item, type, status, and move names through `RegistryProvider`, emit both stable IDs and names, preserve PP output, and use `<unregistered>` when metadata is absent or the corresponding registry pointer is null. GCC-only diagnostic guards suppress the inapplicable reference-return `returns_nonnull` suggestion.
+
 ## [0.11.3] - 2026-08-21
+
+### Changed
+
+- Changed `RandomizationHandler::applyRandomization()` to obtain const user and target slots through `IEffectHandler` helpers, then log the user side/index/name, target side/index/name, and generated random multiplier with `Logger::info` before storing the Randomization multiplier in the effect context. The `RegistryProvider` parameter remains unused.
+- Cleaned the handler declaration/includes and applied clang-tidy-driven const qualification and formatting in `BattleEngine`, `EffectContext`, and the touched ability-configuration and Pokemon tests. No additional battle behavior changed.
 
 ## [0.11.2] - 2026-08-21
 
+### Added
+
+- Added the initial `MultiplierApplicationPolicy` with `Floor` and `Other`, and added `MultiplierMeta::mApplicationPolicy` defaulting to `Floor`.
+- Declared out-of-line Pokemon stream APIs `operator<<` and `printPokemonWithNames()` and added stream tests specifying numeric state, identifiers, move slots, and PP output. This revision did not include `src/Pokemon/pokemon.cpp`, so the declarations were not yet backed by linked definitions; the missing translation unit is supplied in 0.11.4.
+
+### Changed
+
+- Changed `EffectContext::applyMultiplier()` to require a `const MultiplierRegistry &` and resolve the application policy for every active multiplier. Missing metadata falls back to `Floor`; non-finite values normalize to `1.0`; negative values clamp to `0.0`; and the result is clamped to at least one after each active multiplier.
+- Implemented the initial policy behavior: `Floor` computes `floor(damage * normalizedMultiplier)`, while `Other` computes the revision's `4096` fixed-point value and half-down rounds `damage * fixedPointValue` immediately. Tests specify `11 * 1.6 == 17`, `11 * 1.5 == 16`, `100 * 0.85 == 85`, and a zero multiplier applied to zero base damage clamping to one.
+- Changed `BattleEngine` damage application to pass the provider's multiplier registry into `applyMultiplier()`.
+- Expanded the example battle with richer Pokemon names, move/PP sets, typings, opposing identities, and post-turn health output. The Pokemon stream implementation was moved to the intended out-of-line API contract, but no Pokemon source file was present in this patch.
+
 ## [0.11.1] - 2026-08-21
+
+### Added
+
+- Added `EffectMeta::mMayChangeStatus` and `EffectMeta::mMayChangeWeather`, both defaulting to `false`. Built-in metadata marks Status Apply and Status Remove as status mutators, and Set Sandstorm, Set Sun, and Set Rain as weather mutators. Status Turn Skip, Status Tick, and the remaining built-in effects retain the defaults in this patch.
+- Added effect-driven battle notifications in `BattleEngine::executeEffect()`:
+  - For flagged effects, the engine captures the prior weather and, when the context identifies an existing target Pokemon, that Pokemon's status array before invoking the registered handler.
+  - A changed weather ID dispatches `WeatherChanged` with role `Any` to every healthy active slot on both sides. A changed target status array dispatches `StatusChanged` with role `Target` to that target.
+  - A missing target slot or null target Pokemon does not prevent the handler from running, but it leaves no status snapshot to compare and therefore emits no `StatusChanged` event. Weather change detection remains independent of target availability.
+
+### Changed
+
+- Changed ability, item, and move trigger effect vectors from closed `BuiltinEffectID` values to open `EffectID` values. `BattleEngine::executeEffect()`, `executeEffects()`, and targeted-effect dispatch now accept `EffectID` directly and resolve it without reconverting a built-in ID.
+- Changed static move effect arrays and their span-returning helpers to `EffectID`, converting each built-in entry with `toEffectID()`. Built-in ability and move metadata use the same conversion, allowing registry-defined effects to share the existing dispatch path.
+- Changed Cheri Berry and Chesto Berry from `TurnEnd` triggers to `StatusChanged` with role `Target`; both continue to run Status Remove, now stored as an `EffectID`.
 
 ## [0.11.0] - 2026-08-21 (BattleEngine Update)
 
