@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.3.0
-	@version 0.12.5
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 08/24/2026
+		@date 09/01/2026
 		@since 0.3.0
-		@version 0.12.2
+		@version 0.12.14
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -88,15 +88,15 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.14
 			*/
-			explicit constexpr Pokemon(const std::string_view &name, const us attack, const us defense, const us health, const us speed,
-									   const us spAttack, const us spDefense, const us level,
+			explicit constexpr Pokemon(const std::string_view &name, const us health, const us attack, const us defense, const us spAttack,
+									   const us spDefense, const us speed, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
-				: mName{name}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mAttack{attack}, mDefense{defense},
-				  mMaxHealth{health}, mHealth{health}, mSpeed{speed}, mSpAttack{spAttack}, mSpDefense{spDefense}
+				: mName{name}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health},
+				  mAttack{attack}, mDefense{defense}, mSpAttack{spAttack}, mSpDefense{spDefense}, mSpeed{speed}
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -120,18 +120,18 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.14
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
-									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us attack, const us defense,
-									   const us health, const us speed, const us spAttack, const us spDefense, const us level,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us health, const us attack,
+									   const us defense, const us spAttack, const us spDefense, const us speed, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs},
-				  mItemIDs{itemIDs}, mAttack{attack}, mDefense{defense}, mMaxHealth{health}, mHealth{health}, mSpeed{speed},
-				  mSpAttack{spAttack}, mSpDefense{spDefense}
+				  mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health}, mAttack{attack}, mDefense{defense}, mSpAttack{spAttack},
+				  mSpDefense{spDefense}, mSpeed{speed}
 			{
 				setLevel(level);
 			}
@@ -814,20 +814,20 @@ namespace PocketCore::Pokemon
 			/*! @brief The owned nature identifier slots. */
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{};
 
-			/*! @brief The base Attack statistic. */
-			us mAttack{};
-			/*! @brief The base Defense statistic. */
-			us mDefense{};
 			/*! @brief The maximum health value. */
 			us mMaxHealth{};
 			/*! @brief The current health value. */
 			us mHealth{};
-			/*! @brief The base Speed statistic. */
-			us mSpeed{};
+			/*! @brief The base Attack statistic. */
+			us mAttack{};
+			/*! @brief The base Defense statistic. */
+			us mDefense{};
 			/*! @brief The base Special Attack statistic. */
 			us mSpAttack{};
 			/*! @brief The base Special Defense statistic. */
 			us mSpDefense{};
+			/*! @brief The base Speed statistic. */
+			us mSpeed{};
 			/*! @brief The current level. */
 			us mLevel{};
 			/*! @brief The derived factor used by level-scaled damage calculations. */

@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.cpp
 	@brief Contains the base damage effect handler implementation
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.7.2
-	@version 0.12.7
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -44,6 +44,7 @@ namespace PocketCore::Effect
 
 		if (userPokemon == nullptr || targetPokemon == nullptr || context.mMoveBasePower == 0)
 		{
+			context.mDamage.mDamage = 0;
 			return;
 		}
 
@@ -77,12 +78,14 @@ namespace PocketCore::Effect
 		};
 
 		const double defenseStat{
-			static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense()) * targetDefenseMult
-				* targetDefenseModifier,
+			std::max(static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense())
+						 * targetDefenseMult * targetDefenseModifier,
+					 1.0),
 		};
 
-		if (!std::isfinite(attackStat) || !std::isfinite(defenseStat) || attackStat < 0.0 || defenseStat <= 0.0)
+		if (!std::isfinite(attackStat) || !std::isfinite(defenseStat) || attackStat <= 0.0)
 		{
+			context.mDamage.mDamage = 0;
 			return;
 		}
 

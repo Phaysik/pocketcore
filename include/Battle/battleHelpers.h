@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 08/21/2026
+	@date 09/01/2026
 	@since 0.9.14
-	@version 0.10.10
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -210,7 +210,7 @@ namespace PocketCore::Battle
 		@param[in,out] state The battle state containing the move user whose health may change.
 		@param[in] context The completed effect context supplying user coordinates, dealt damage, and recoil ratio.
 		@since 0.9.16
-		@version 0.10.9
+		@version 0.12.14
 	*/
 	void applyRecoil(BattleState &state, const EffectContext &context);
 

@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.8.7
-	@version 0.12.5
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -12,20 +12,20 @@
 
 #include "Ability/abilityID.h"
 #include "Battle/battleState.h"
+#include "Battle/battleState.testHelper.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
+#include "Effect/effectContext.testHelper.h"
 #include "Item/itemID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
 #include "Types/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Ability::NO_ABILITY_ID;
-using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
-using PocketCore::Battle::DamageFormulaModifiers;
-using PocketCore::Battle::StatStages;
 using PocketCore::Core::us;
 using PocketCore::Effect::BaseDamageHandler;
 using PocketCore::Effect::EffectContext;
@@ -33,484 +33,509 @@ using PocketCore::Effect::Side;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
+using PocketCore::Testing::makeBattleState;
+using PocketCore::Testing::makeEffectContext;
+using PocketCore::Testing::makePokemon;
 using PocketCore::Type::NO_TYPE_ID;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace))
-
-namespace
-{
-	RegistryProvider makeNullProvider()
-	{
-		return RegistryProvider{
-			.abilityRegistry = nullptr,
-			.moveRegistry = nullptr,
-			.itemRegistry = nullptr,
-			.typeRegistry = nullptr,
-			.statusRegistry = nullptr,
-			.weatherRegistry = nullptr,
-			.terrainRegistry = nullptr,
-			.multiplierRegistry = nullptr,
-			.natureRegistry = nullptr,
-			.pokemonRegistry = nullptr,
-		};
-	}
-
-	Pokemon makePokemon(const us level, const us attack, const us defense, const us specialAttack, const us specialDefense)
-	{
-		return Pokemon{"UnitMon",
-					   attack,
-					   defense,
-					   100U,
-					   80U,
-					   specialAttack,
-					   specialDefense,
-					   level,
-					   {NO_ABILITY_ID},
-					   {NO_ITEM_ID},
-					   {NO_TYPE_ID, NO_TYPE_ID}};
-	}
-
-} // namespace
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
 SCENARIO("BaseDamageHandler")
 {
 	BaseDamageHandler baseDamageHandler{};
-	RegistryProvider provider{makeNullProvider()};
+	RegistryProvider provider{};
 
-	GIVEN("the Generation V onward Bulbapedia base-damage example")
+	GIVEN("invalid pokemon pointers")
 	{
-		Pokemon userPokemon{makePokemon(75U, 123U, 90U, 100U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 163U, 85U, 105U)};
+		GIVEN("null user pokemon")
+		{
+			Pokemon targetPokemon{makePokemon({})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon});
+			BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = nullptr}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mMoveBasePower = 65U;
+			EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since no valid user")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
+			}
+		}
+
+		GIVEN("null target pokemon")
+		{
+			Pokemon userPokemon{makePokemon({})};
+
+			BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = nullptr}}})};
+
+			EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since no valid target")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
+			}
+		}
+	}
+
+	GIVEN("no move base power")
+	{
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
+
+		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
+
+		EffectContext context{makeEffectContext({.mMoveBasePower = 0, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
 		WHEN("base damage is applied before external modifiers")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			baseDamageHandler.apply(battleState, context, provider);
 
-			THEN("the initial damage calculation follows each floor boundary")
+			THEN("the initial damage returns 0 since no move base power")
 			{
-				CHECK((effectContext.mDamage.mDamage == 33U));
+				CHECK((context.mDamage.mDamage == 0));
 			}
 		}
 	}
 
-	GIVEN("missing Pokemon data or zero move power")
+	GIVEN("a target with 0 defense")
 	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 110U, 100U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 0, .mLevel = 50})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = nullptr});
+		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 0;
-		effectContext.mDamage.mDamage = 777U;
+		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-		WHEN("base damage is applied")
+		WHEN("base damage is applied before external modifiers")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			baseDamageHandler.apply(battleState, context, provider);
 
-			THEN("damage remains unchanged")
+			THEN("the initial damage calculation clamps the defense to 1.0")
 			{
-				CHECK((effectContext.mDamage.mDamage == 777U));
+				CHECK((context.mDamage.mDamage == 5'118));
 			}
 		}
 	}
 
-	GIVEN("a physical attack with valid user and target stats")
+	GIVEN("a user with a non-finite modifiers")
 	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 100U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 110U, 85U, 105U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
 
-		BattleSlot userSlot{};
-		userSlot.mPokemon = &userPokemon;
-		userSlot.mStatStages
-			= StatStages{.mAttack = 2, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
-		userSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0,
-			.mAttackModifier = 1.1,
-			.mDefenseModifier = 1.0,
-			.mSpecialAttackModifier = 1.0,
-			.mSpecialDefenseModifier = 1.0,
-			.mSpeedModifier = 1.0,
-		};
+		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-		BattleSlot targetSlot{};
-		targetSlot.mPokemon = &targetPokemon;
-		targetSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 1, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
-		targetSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0,
-			.mAttackModifier = 1.0,
-			.mDefenseModifier = 0.9,
-			.mSpecialAttackModifier = 1.0,
-			.mSpecialDefenseModifier = 1.0,
-			.mSpeedModifier = 1.0,
-		};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(userSlot);
-		battleState.mSideB.push_back(targetSlot);
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 80U;
-		effectContext.mIsSpecial = false;
-
-		WHEN("base damage is applied")
+		GIVEN("specifically the attack modifier")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{
+						.mDamageFormulaModifiers = {.mAttackModifier = std::numeric_limits<double>::quiet_NaN()},
+						.mPokemon = &userPokemon,
+					},},
+					.mSideB = {{.mPokemon = &targetPokemon}},
+				}),
+			};
 
-			THEN("damage matches the formula")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage >= 1U));
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since non-finite attack")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
+			}
+		}
+
+		GIVEN("specifically the defense modifier")
+		{
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon}},
+					.mSideB = {{
+						.mDamageFormulaModifiers = {.mDefenseModifier = std::numeric_limits<double>::quiet_NaN()},
+						.mPokemon = &targetPokemon,
+					},},
+				}),
+			};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since non-finite defense")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("a critical special attack with unfavorable user and favorable target stages")
+	GIVEN("a user has a positive attack stat")
 	{
-		Pokemon userPokemon{makePokemon(50U, 100U, 90U, 130U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 100U, 85U, 120U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
 
-		BattleSlot userSlot{};
-		userSlot.mPokemon = &userPokemon;
-		userSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 1, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
-		userSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0,
-			.mAttackModifier = 1.0,
-			.mDefenseModifier = 1.0,
-			.mSpecialAttackModifier = 1.0,
-			.mSpecialDefenseModifier = 1.0,
-			.mSpeedModifier = 1.0,
-		};
+		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-		BattleSlot targetSlot{};
-		targetSlot.mPokemon = &targetPokemon;
-		targetSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 6, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
-		targetSlot.mDamageFormulaModifiers = DamageFormulaModifiers{
-			.mHealthModifier = 1.0,
-			.mAttackModifier = 1.0,
-			.mDefenseModifier = 1.0,
-			.mSpecialAttackModifier = 1.0,
-			.mSpecialDefenseModifier = 1.0,
-			.mSpeedModifier = 1.0,
-		};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(userSlot);
-		battleState.mSideB.push_back(targetSlot);
-
-		EffectContext criticalContext{};
-		criticalContext.mUserSide = Side::A;
-		criticalContext.mTargetSide = Side::B;
-		criticalContext.mUserIndex = 0;
-		criticalContext.mTargetIndex = 0;
-		criticalContext.mMoveBasePower = 90U;
-		criticalContext.mIsSpecial = true;
-		criticalContext.mDamage.mIsCritical = true;
-
-		EffectContext nonCriticalContext{criticalContext};
-		nonCriticalContext.mDamage.mIsCritical = false;
-
-		WHEN("base damage is applied")
+		GIVEN("with a negative attack modifier")
 		{
-			baseDamageHandler.apply(battleState, criticalContext, provider);
-			baseDamageHandler.apply(battleState, nonCriticalContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mDamageFormulaModifiers = {.mAttackModifier = -1.0}, .mPokemon = &userPokemon}},
+					.mSideB = {{.mPokemon = &targetPokemon}},
+				}),
+			};
 
-			THEN("critical damage uses clamped stages and is not lower than non-critical")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((criticalContext.mDamage.mDamage >= 1U));
-				CHECK((nonCriticalContext.mDamage.mDamage >= 1U));
-				CHECK((criticalContext.mDamage.mDamage >= nonCriticalContext.mDamage.mDamage));
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since the attack was below 0")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
+			}
+		}
+
+		GIVEN("with a 0 attack modifier")
+		{
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mDamageFormulaModifiers = {.mAttackModifier = 0.0}, .mPokemon = &userPokemon}},
+					.mSideB = {{.mPokemon = &targetPokemon}},
+				}),
+			};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage returns 0 since the attack was 0")
+				{
+					CHECK((context.mDamage.mDamage == 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("a valid user but missing target and non-zero move power")
+	GIVEN("the Generation V onward")
 	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 110U, 100U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mSpecialAttack = 100, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mSpecialDefense = 124, .mLevel = 50})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = nullptr});
+		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 60U;
-		effectContext.mDamage.mDamage = 555U;
-
-		WHEN("base damage is applied")
+		GIVEN("Bulbapedia base-damage attack example")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-			THEN("the guard returns before changing damage")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage == 555U));
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 33));
+				}
+			}
+		}
+
+		GIVEN("example using special attack")
+		{
+			EffectContext context{
+				makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
+			};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 35));
+				}
 			}
 		}
 	}
 
-	GIVEN("valid Pokemon pointers but zero move power")
+	GIVEN("modified stat stages")
 	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 110U, 100U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 110U, 85U, 105U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 123, .mSpecialAttack = 100, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mSpecialDefense = 124, .mLevel = 50})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 0U;
-		effectContext.mDamage.mDamage = 444U;
-
-		WHEN("base damage is applied")
+		GIVEN("user has increased attack stages and target has increased defense stages")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mAttack = 4}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mDefense = 2}}},
+				}),
+			};
 
-			THEN("the guard returns before damage math")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage == 444U));
+				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK(context.mDamage.mDamage == 49);
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext(
+						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the increased defense stat stages are ignored")
+				{
+					CHECK((context.mDamage.mDamage == 96));
+				}
 			}
 		}
-	}
 
-	GIVEN("critical damage with negative stages")
-	{
-		Pokemon userPokemon{makePokemon(50U, 110U, 90U, 130U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 100U, 85U, 120U)};
-
-		BattleSlot userSlot{};
-		userSlot.mPokemon = &userPokemon;
-		userSlot.mStatStages = StatStages{
-			.mAttack = 0,
-			.mDefense = 0,
-			.mSpAttack = static_cast<signed char>(-1),
-			.mSpDefense = 0,
-			.mSpeed = 0,
-			.mAccuracy = 0,
-			.mEvasion = 0,
-		};
-
-		BattleSlot targetSlot{};
-		targetSlot.mPokemon = &targetPokemon;
-		targetSlot.mStatStages = StatStages{
-			.mAttack = 0,
-			.mDefense = 0,
-			.mSpAttack = 0,
-			.mSpDefense = static_cast<signed char>(-1),
-			.mSpeed = 0,
-			.mAccuracy = 0,
-			.mEvasion = 0,
-		};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(userSlot);
-		battleState.mSideB.push_back(targetSlot);
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 90U;
-		effectContext.mIsSpecial = true;
-		effectContext.mDamage.mIsCritical = true;
-
-		WHEN("base damage is applied")
+		GIVEN("user has decreased attack stages and target has increased defense stages")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mAttack = -4}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mDefense = 2}}},
+				}),
+			};
 
-			THEN("valid negative stages produce damage without throwing")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage >= 1U));
+				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 7));
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext(
+						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
+				{
+					CHECK((context.mDamage.mDamage == 33));
+				}
 			}
 		}
-	}
 
-	GIVEN("missing user Pokemon pointer")
-	{
-		Pokemon targetPokemon{makePokemon(50U, 90U, 110U, 85U, 105U)};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = nullptr});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 70U;
-		effectContext.mDamage.mDamage = 333U;
-
-		WHEN("base damage is applied")
+		GIVEN("user has increased attack stages and target has decreased defense stages")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mAttack = 4}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mDefense = -2}}},
+				}),
+			};
 
-			THEN("the guard short-circuits on user pointer")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage == 333U));
+				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 190));
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext(
+						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the base damage does not change")
+				{
+					CHECK((context.mDamage.mDamage == 190));
+				}
 			}
 		}
-	}
 
-	GIVEN("non-critical special damage with a negative user special attack stage")
-	{
-		Pokemon userPokemon{makePokemon(50U, 110U, 90U, 130U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 100U, 85U, 120U)};
-
-		BattleSlot userSlot{};
-		userSlot.mPokemon = &userPokemon;
-		userSlot.mStatStages = StatStages{
-			.mAttack = 0,
-			.mDefense = 0,
-			.mSpAttack = static_cast<signed char>(-1),
-			.mSpDefense = 0,
-			.mSpeed = 0,
-			.mAccuracy = 0,
-			.mEvasion = 0,
-		};
-
-		BattleSlot targetSlot{};
-		targetSlot.mPokemon = &targetPokemon;
-		targetSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 0};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(userSlot);
-		battleState.mSideB.push_back(targetSlot);
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveBasePower = 90U;
-		effectContext.mIsSpecial = true;
-		effectContext.mDamage.mIsCritical = false;
-
-		EffectContext neutralContext{effectContext};
-		battleState.mSideA.front().mStatStages.mSpAttack = 0;
-
-		WHEN("base damage is applied")
+		GIVEN("user has increased special attack stages and target has increased special defense stages")
 		{
-			baseDamageHandler.apply(battleState, neutralContext, provider);
-			battleState.mSideA.front().mStatStages.mSpAttack = static_cast<signed char>(-1);
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mSpAttack = 6}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mSpDefense = 3}}},
+				}),
+			};
 
-			THEN("the negative stage reduces damage without throwing")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage < neutralContext.mDamage.mDamage));
+				EffectContext context{
+					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 55));
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext({
+						.mDamage = {.mIsCritical = true},
+						.mMoveBasePower = 65,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+						.mIsSpecial = true,
+					}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the increased defense stat stages are ignored")
+				{
+					CHECK((context.mDamage.mDamage == 136));
+				}
 			}
 		}
-	}
 
-	GIVEN("a target with zero defense")
-	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 100U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 0U, 85U, 105U)};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mMoveBasePower = 80U;
-		effectContext.mDamage.mDamage = 777U;
-
-		WHEN("base damage is applied")
+		GIVEN("user has decreased special attack stages and target has increased special defense stages")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mSpAttack = -2}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mSpDefense = 3}}},
+				}),
+			};
 
-			THEN("invalid defense leaves damage unchanged")
+			WHEN("base damage is applied before external modifiers")
 			{
-				CHECK((effectContext.mDamage.mDamage == 777U));
+				EffectContext context{
+					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 8));
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext({
+						.mDamage = {.mIsCritical = true},
+						.mMoveBasePower = 65,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+						.mIsSpecial = true,
+					}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
+				{
+					CHECK((context.mDamage.mDamage == 35));
+				}
+			}
+		}
+
+		GIVEN("user has increased special attack stages and target has decreased special defense stages")
+		{
+			BattleState battleState{
+				makeBattleState({
+					.mSideA = {{.mPokemon = &userPokemon, .mStatStages = {.mSpAttack = 6}}},
+					.mSideB = {{.mPokemon = &targetPokemon, .mStatStages = {.mSpDefense = -3}}},
+				}),
+			};
+
+			WHEN("base damage is applied before external modifiers")
+			{
+				EffectContext context{
+					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the initial damage calculation follows each floor boundary")
+				{
+					CHECK((context.mDamage.mDamage == 337));
+				}
+			}
+
+			WHEN("the hit is critical")
+			{
+				EffectContext context{
+					makeEffectContext({
+						.mDamage = {.mIsCritical = true},
+						.mMoveBasePower = 65,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+						.mIsSpecial = true,
+					}),
+				};
+
+				baseDamageHandler.apply(battleState, context, provider);
+
+				THEN("the base damage does not change")
+				{
+					CHECK((context.mDamage.mDamage == 337));
+				}
 			}
 		}
 	}
 
 	GIVEN("a damage calculation that exceeds the result type")
 	{
-		Pokemon userPokemon{makePokemon(65'535U, 65'535U, 90U, 65'535U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 1U, 85U, 1U)};
+		Pokemon userPokemon{makePokemon({.mAttack = 65'535, .mLevel = 65'535})};
+		Pokemon targetPokemon{makePokemon({.mDefense = 1, .mLevel = 50})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon});
+		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mMoveBasePower = 255U;
+		EffectContext context{makeEffectContext({.mMoveBasePower = 255, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-		WHEN("base damage is applied")
+		WHEN("base damage is applied before external modifiers")
 		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
+			baseDamageHandler.apply(battleState, context, provider);
 
-			THEN("damage saturates at the largest representable value")
+			THEN("the initial damage calculation saturates at the largest representable value")
 			{
-				CHECK((effectContext.mDamage.mDamage == std::numeric_limits<unsigned short>::max()));
-			}
-		}
-	}
-
-	GIVEN("stat stages outside the supported range")
-	{
-		Pokemon userPokemon{makePokemon(50U, 120U, 90U, 100U, 95U)};
-		Pokemon targetPokemon{makePokemon(50U, 90U, 110U, 85U, 105U)};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{
-			.mPokemon = &userPokemon,
-			.mStatStages = StatStages{.mAttack = std::numeric_limits<signed char>::max()},
-		});
-		battleState.mSideB.push_back(BattleSlot{
-			.mPokemon = &targetPokemon,
-			.mStatStages = StatStages{.mDefense = std::numeric_limits<signed char>::min()},
-		});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mMoveBasePower = 80U;
-
-		WHEN("base damage is applied")
-		{
-			baseDamageHandler.apply(battleState, effectContext, provider);
-
-			THEN("the stages are clamped to valid cache bounds")
-			{
-				CHECK((effectContext.mDamage.mDamage >= 1U));
+				CHECK((context.mDamage.mDamage == std::numeric_limits<us>::max()));
 			}
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace))
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)

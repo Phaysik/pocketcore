@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 08/31/2026
+	@date 09/01/2026
 	@since 0.12.13
-	@version 0.12.13
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -55,8 +55,8 @@ namespace PocketCore::Testing
 
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
-		return Pokemon{data.mName,			data.mAttack,		  data.mDefense, data.mHealth,	  data.mSpeed,
-					   data.mSpecialAttack, data.mSpecialDefense, data.mLevel,	 data.mAbilities, data.mItems};
+		return Pokemon{data.mName,	data.mHealth, data.mAttack,	   data.mDefense, data.mSpecialAttack, data.mSpecialDefense,
+					   data.mSpeed, data.mLevel,  data.mAbilities, data.mItems,	  data.mTypes};
 	}
 
 } // namespace PocketCore::Testing

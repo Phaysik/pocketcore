@@ -4,7 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.14] - 2026-09-01
+
+## [0.12.13] - 2026-08-31
+
+### Added
+
+- Added `Random::setSeed()` for reseeding the shared `std::mt19937` and constrained `Random::findSeed()` to search seed values until a nullary callable returns a requested result.
+- Added reusable test helpers for battle states, effect contexts, tagged-ID comparability, and Pokemon construction so unit suites can share valid domain fixtures.
+
+### Changed
+
+- Changed accuracy calculation to use one clamped accuracy-stage multiplier indexed by the user's accuracy stage minus the target's evasion stage; accuracy remains clamped to 0 through 100 before the inclusive 1 through 100 roll determines a miss.
+- Default-initialized every `RegistryProvider` registry pointer to `nullptr`, allowing value initialization while retaining its non-owning dependency contract.
+- Changed fixed-registry batch registration to preserve the forwarding-reference factory rather than copying it before repeated invocation.
+- Simplified built-in item, move, multiplier, nature, Pokemon, terrain, type, and weather ID headers by importing the shared `ub` alias into their domain namespaces.
+- Added `testInclude` to test-build and editor include paths, rewrote the accuracy-check scenarios around deterministic seeded rolls and stage-difference behavior, and enabled dark-mode HTML coverage reports.
+
+### Removed
+
+- Removed the separate evasion-stage multiplier table and its constants because evasion is now represented by the combined accuracy-stage difference.
+
 ## [0.12.12] - 2026-08-30
+
+### Fixed
+
+- Restored missing direct standard-library and registry-error includes, plus required namespace aliases, in registry-configuration, weather and burn handler, and configuration-test translation units after the shared `RegistryError` extraction.
 
 ## [0.12.11] - 2026-08-30
 
@@ -1697,7 +1722,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.12]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.14]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.13]: https://github.com/Phaysik/pocketcore/commit/9f14ed4b0c53ee56dc191ce1028e87be11d6707a
+[0.12.12]: https://github.com/Phaysik/pocketcore/commit/bf7af55f51a6326138ba5e53a8926a4ee0781b60
 [0.12.11]: https://github.com/Phaysik/pocketcore/commit/9dff04af8ac262f716e5150476df7cb4329f0a58
 [0.12.10]: https://github.com/Phaysik/pocketcore/commit/94964584ab90c2e64135f53c6907354c224a5d59
 [0.12.9]: https://github.com/Phaysik/pocketcore/commit/0b71f6b558826e6e528e5f60540efd68ad62868a

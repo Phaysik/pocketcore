@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.1.0
-	@version 0.12.5
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -38,7 +38,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.2.0
+	@version 0.12.14
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -103,9 +103,9 @@ int main()
 		100U,
 		100U,
 		100U,
+		100U,
+		100U,
 		90U,
-		100U,
-		100U,
 		50U,
 		{toAbilityID(BuiltinAbilityID::Drizzle)},
 		{toItemID(BuiltinItemID::CheriBerry)},
@@ -120,9 +120,9 @@ int main()
 		100U,
 		100U,
 		100U,
+		100U,
+		100U,
 		80U,
-		100U,
-		100U,
 		50U,
 		{toAbilityID(BuiltinAbilityID::Stench)},
 		{toItemID(BuiltinItemID::ChestoBerry)},

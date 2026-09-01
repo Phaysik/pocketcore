@@ -1,8 +1,8 @@
 /*! @file targetsHandler.cpp
 	@brief Contains the targets effect handler implementation
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.8.1
-	@version 0.12.7
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -34,11 +34,6 @@ namespace PocketCore::Effect
 	void TargetsHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const
 	{
 		const MoveMeta *moveMeta{provider.moveRegistry->getMoveMetadata(context.mMoveID)};
-
-		if (moveMeta == nullptr)
-		{
-			return;
-		}
 
 		const BattleTargetID moveTarget{moveMeta->mTargetID};
 

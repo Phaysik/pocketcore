@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 08/30/2026
+	@date 09/01/2026
 	@since 0.9.14
-	@version 0.12.11
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -163,7 +163,7 @@ namespace PocketCore::Battle
 		const BattleSlot *userSlot{contextSlot(state, context.mUserSide, context.mUserIndex)};
 
 		if (userSlot == nullptr || userSlot->mPokemon == nullptr || context.mDamage.mDamage == 0U
-			|| !std::isfinite(context.mDamage.mRecoilRatio) || context.mDamage.mRecoilRatio <= 0.0F)
+			|| !std::isfinite(context.mDamage.mRecoilRatio) || context.mDamage.mRecoilRatio <= 0.0)
 		{
 			return;
 		}

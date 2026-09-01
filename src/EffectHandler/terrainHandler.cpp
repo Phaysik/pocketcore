@@ -1,8 +1,8 @@
 /*! @file terrainHandler.cpp
 	@brief Contains the terrain effect handler implementation
-	@date 08/28/2026
+	@date 09/01/2026
 	@since 0.9.10
-	@version 0.12.9
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -45,7 +45,7 @@ namespace PocketCore::Effect
 		}
 
 		const bool isElectricTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Electric)};
-		const bool isGrassyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Grass)};
+		const bool isGrassyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Grassy)};
 		const bool isPsychicTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Psychic)};
 		const bool isMistyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Misty)};
 

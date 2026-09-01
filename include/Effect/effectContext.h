@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 08/30/2026
+	@date 09/01/2026
 	@since 0.3.0
-	@version 0.12.11
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -31,6 +31,7 @@
 #include "Registry/multiplierRegistry.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
+#include "Utility/Math/floatUtility.h"
 
 namespace PocketCore::Effect
 {
@@ -51,6 +52,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Type::TypeID;
+	using PocketCore::Utility::Math::approximatelyEqualAbsRel;
 
 	/*! @enum Side
 		@showenumvalues
@@ -75,16 +77,32 @@ namespace PocketCore::Effect
 		@brief Stores damage calculation results and control flags for an effect dispatch.
 		@details The context records the damage amount, recoil ratio, critical-hit and miss state, and whether damage application and
 		 subsequent effect processing should continue.
-		@date 08/24/2026
+		@date 09/01/2026
 		@since 0.3.0
-		@version 0.12.2
+		@version 0.12.14
 		@author Matthew Moore
 	*/
 	struct DamageContext
 	{
 		public:
+			/*! @brief Compares two damage contexts for equivalent damage-processing state.
+				@details Compares recoil ratios with @ref approximatelyEqualAbsRel and all remaining fields exactly.
+				@param[in] other The damage context to compare.
+				@return True when both contexts contain equivalent damage-processing state; otherwise false.
+				@since 0.12.14
+				@version 0.12.14
+			*/
+			constexpr bool operator==(const DamageContext &other) const noexcept
+			{
+				return approximatelyEqualAbsRel(mRecoilRatio, other.mRecoilRatio) && mDamage == other.mDamage
+					&& mIsCritical == other.mIsCritical && mIsMiss == other.mIsMiss && mShouldApplyDamage == other.mShouldApplyDamage
+					&& mShouldContinue == other.mShouldContinue;
+			}
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The fraction of damage returned to the source as recoil. */
-			float mRecoilRatio{0.0F};
+			double mRecoilRatio{0.0};
 
 			/*! @brief The calculated damage amount. */
 			us mDamage{0};
@@ -100,15 +118,17 @@ namespace PocketCore::Effect
 
 			/*! @brief Indicates whether processing of subsequent effects should continue. */
 			bool mShouldContinue{true};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	/*! @struct EffectContext Effect/effectContext.h
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 08/27/2026
+		@date 09/01/2026
 		@since 0.3.0
-		@version 0.12.8
+		@version 0.12.14
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -148,9 +168,23 @@ namespace PocketCore::Effect
 				@since 0.8.7
 				@version 0.12.8
 			*/
-			ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept;
+			ATTR_NODISCARD ATTR_PURE constexpr std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept
+			{
+				return mActiveMultipliers;
+			}
+
+			/*! @brief Compares two effect contexts for complete equality.
+				@details Compares every member, including active multipliers and their built-in position table, using each member's equality
+				 operator.
+				@param[in] other The effect context to compare.
+				@return True when both contexts contain identical state; otherwise false.
+				@since 0.12.14
+				@version 0.12.14
+			*/
+			constexpr bool operator==(const EffectContext &other) const noexcept = default;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The damage calculation state and effect-processing control flags. */
 			DamageContext mDamage{};
 			/*! @brief The type identifier associated with the current effect source. */

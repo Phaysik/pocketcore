@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined terrains.
-	@date 08/28/2026
+	@date 09/01/2026
 	@since 0.8.0
-	@version 0.12.9
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -37,9 +37,9 @@ namespace PocketCore::Registry::Terrain
 		@details Built-in terrains are registered during construction with IDs derived from @ref BuiltinTerrainID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_TERRAINS.
-		@date 08/22/2026
+		@date 09/01/2026
 		@since 0.8.0
-		@version 0.11.6
+		@version 0.12.14
 		@author Matthew Moore
 	*/
 	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
@@ -51,7 +51,7 @@ namespace PocketCore::Registry::Terrain
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinTerrainID.
 				@since 0.8.0
-				@version 0.11.6
+				@version 0.12.14
 			 */
 			ATTR_NOINLINE explicit constexpr TerrainRegistry() : Base{toTerrainID(BuiltinTerrainID::FinalTerrain).getValue()}
 			{
@@ -62,7 +62,7 @@ namespace PocketCore::Registry::Terrain
 				});
 				addBuiltin({
 					.mName = PocketCore::Terrain::TERRAIN_NAME_GRASS,
-					.mTerrainID = toTerrainID(BuiltinTerrainID::Grass),
+					.mTerrainID = toTerrainID(BuiltinTerrainID::Grassy),
 				});
 				addBuiltin({
 					.mName = PocketCore::Terrain::TERRAIN_NAME_MISTY,

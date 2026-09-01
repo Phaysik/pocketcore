@@ -1,22 +1,20 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.9.10
-	@version 0.12.5
+	@version 0.12.14
 	@author Matthew Moore
 */
 
 #include "EffectHandler/terrainHandler.h"
 
-#include <array>
-#include <cmath>
-
-#include "Ability/abilityID.h"
 #include "Battle/battleState.h"
-#include "Configuration/constants.h"
+#include "Battle/battleState.testHelper.h"
 #include "Effect/effectContext.h"
-#include "Item/itemID.h"
+#include "Effect/effectContext.testHelper.h"
+#include "EffectHandler/terrainHandler.testHelper.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Types/builtInTypeID.h"
@@ -24,201 +22,583 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Ability::NO_ABILITY_ID;
-using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
-using PocketCore::Configuration::ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
-using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
-using PocketCore::Configuration::PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
 using PocketCore::Effect::TerrainHandler;
-using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::toTerrainID;
+using PocketCore::Testing::hasDragonDebuffInTerrain;
+using PocketCore::Testing::hasElectricBuffInTerrain;
+using PocketCore::Testing::hasGrassBuffInTerrain;
+using PocketCore::Testing::hasPsychicBuffInTerrain;
+using PocketCore::Testing::makeBattleState;
+using PocketCore::Testing::makeEffectContext;
+using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltInTypeID;
-using PocketCore::Type::NO_TYPE_ID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeID;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
-
-namespace
-{
-	RegistryProvider makeNullProvider()
-	{
-		return RegistryProvider{
-			.abilityRegistry = nullptr,
-			.moveRegistry = nullptr,
-			.itemRegistry = nullptr,
-			.typeRegistry = nullptr,
-			.statusRegistry = nullptr,
-			.weatherRegistry = nullptr,
-			.terrainRegistry = nullptr,
-			.multiplierRegistry = nullptr,
-			.natureRegistry = nullptr,
-			.pokemonRegistry = nullptr,
-		};
-	}
-
-	Pokemon makePokemonWithTypes(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &types)
-	{
-		return Pokemon{"UnitMon", 100U, 90U, 100U, 80U, 100U, 90U, 50U, {NO_ABILITY_ID}, {NO_ITEM_ID}, types};
-	}
-} // namespace
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
 SCENARIO("TerrainHandler")
 {
 	TerrainHandler terrainHandler{};
-	RegistryProvider provider{makeNullProvider()};
+	RegistryProvider provider{};
 
-	GIVEN("electric terrain, an electric move, and a grounded target")
+	GIVEN("electric terrain with an electric move")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Electric), NO_TYPE_ID})};
-		Pokemon groundedTarget{makePokemonWithTypes({toTypeID(BuiltInTypeID::Normal), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
+		};
 
-		BattleState battleState{};
-		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Electric);
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &groundedTarget});
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Electric),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Electric);
-
-		WHEN("terrain effects are applied")
+		GIVEN("and the target isn't flying")
 		{
-			terrainHandler.apply(battleState, effectContext, provider);
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
 
-			THEN("the terrain attack boost is applied")
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
 			{
-				CHECK((
-					std::fabs(battleState.mSideA.at(0).mDamageFormulaModifiers.mAttackModifier - ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE)
-					< 0.0001));
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasElectricBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasElectricBuffInTerrain(battleState, 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("electric terrain, an electric move, and an ungrounded flying-type target")
+	GIVEN("electric terrain without an electric move")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Electric), NO_TYPE_ID})};
-		Pokemon flyingTarget{makePokemonWithTypes({toTypeID(BuiltInTypeID::Flying), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
+		};
 
-		BattleState battleState{};
-		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Electric);
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &flyingTarget});
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Electric);
-
-		WHEN("terrain effects are applied")
+		GIVEN("and the target isn't flying")
 		{
-			terrainHandler.apply(battleState, effectContext, provider);
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
 
-			THEN("the terrain attack boost is not applied")
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
 			{
-				CHECK((std::fabs(battleState.mSideA.at(0).mDamageFormulaModifiers.mAttackModifier - 1.0) < 0.0001));
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("psychic terrain and a psychic move against a grounded target")
+	GIVEN("grass terrain with a grass move")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Psychic), NO_TYPE_ID})};
-		Pokemon groundedTarget{makePokemonWithTypes({toTypeID(BuiltInTypeID::Normal), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
+		};
 
-		BattleState battleState{};
-		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Psychic);
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &groundedTarget});
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Grass),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Psychic);
-
-		WHEN("terrain effects are applied")
+		GIVEN("and the target isn't flying")
 		{
-			terrainHandler.apply(battleState, effectContext, provider);
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
 
-			THEN("the psychic terrain attack boost is applied")
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
 			{
-				CHECK(
-					(std::fabs(battleState.mSideA.at(0).mDamageFormulaModifiers.mAttackModifier - PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE)
-					 < 0.0001));
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasGrassBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasGrassBuffInTerrain(battleState, 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("electric terrain and an intrinsically ungrounded flying target")
+	GIVEN("grass terrain without a grass move")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Electric), NO_TYPE_ID})};
-		Pokemon flyingTarget{makePokemonWithTypes({toTypeID(BuiltInTypeID::Flying), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
+		};
 
-		BattleState battleState{};
-		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Electric);
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &flyingTarget});
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Electric);
-
-		WHEN("terrain effects are applied")
+		GIVEN("and the target isn't flying")
 		{
-			terrainHandler.apply(battleState, effectContext, provider);
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
 
-			THEN("the terrain attack boost is not applied")
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
 			{
-				CHECK((std::fabs(battleState.mSideA.at(0).mDamageFormulaModifiers.mAttackModifier - 1.0) < 0.0001));
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+				}
 			}
 		}
 	}
 
-	GIVEN("electric terrain and a flying target explicitly forced grounded")
+	GIVEN("psychic terrain with a psychic move")
 	{
-		Pokemon userPokemon{makePokemonWithTypes({toTypeID(BuiltInTypeID::Electric), NO_TYPE_ID})};
-		Pokemon flyingTarget{makePokemonWithTypes({toTypeID(BuiltInTypeID::Flying), NO_TYPE_ID})};
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
+		};
 
-		BattleState battleState{};
-		battleState.mTerrainID = toTerrainID(BuiltinTerrainID::Electric);
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon});
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &flyingTarget, .mIsGrounded = true});
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Psychic),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveTypeID = toTypeID(BuiltInTypeID::Electric);
-
-		WHEN("terrain effects are applied")
+		GIVEN("and the target isn't flying")
 		{
-			terrainHandler.apply(battleState, effectContext, provider);
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
 
-			THEN("the terrain attack boost is applied")
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
 			{
-				CHECK((
-					std::fabs(battleState.mSideA.at(0).mDamageFormulaModifiers.mAttackModifier - ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE)
-					< 0.0001));
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+	}
+
+	GIVEN("psychic terrain without a psychic move")
+	{
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
+		};
+
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
+
+		GIVEN("and the target isn't flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+				}
+			}
+		}
+	}
+
+	GIVEN("misty terrain with a dragon move")
+	{
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
+		};
+
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Dragon),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
+
+		GIVEN("and the target isn't flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasDragonDebuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is applied")
+				{
+					CHECK(hasDragonDebuffInTerrain(battleState, 0));
+				}
+			}
+		}
+	}
+
+	GIVEN("misty terrain without a dragon move")
+	{
+		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		BattleState battleState{
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
+		};
+
+		EffectContext context{
+			makeEffectContext({
+				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
+
+		GIVEN("and the target isn't flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+				}
+			}
+		}
+
+		GIVEN("and the target is flying but is forcibly grounded")
+		{
+			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+
+			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+
+			WHEN("terrain effects are applied")
+			{
+				terrainHandler.apply(battleState, context, provider);
+
+				THEN("the terrain attack boost is not applied")
+				{
+					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+				}
 			}
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)

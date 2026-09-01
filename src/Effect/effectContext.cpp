@@ -1,8 +1,8 @@
 /*! @file effectContext.cpp
 	@brief Contains the effect context implementation
-	@date 08/27/2026
+	@date 09/01/2026
 	@since 0.8.2
-	@version 0.12.8
+	@version 0.12.14
 	@author Matthew Moore
 */
 
@@ -11,8 +11,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <span>
-#include <utility>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -118,11 +116,6 @@ namespace PocketCore::Effect
 		otherMultiplierValue /= FIXED_POINT_MULTIPLIER_DENOMINATOR;
 
 		return std::max(static_cast<us>(roundDownHalfSafe(damage * otherMultiplierValue)), static_cast<us>(1));
-	}
-
-	ATTR_NODISCARD ATTR_PURE std::span<const std::pair<MultiplierID, double>> EffectContext::getActiveMultipliers() const noexcept
-	{
-		return mActiveMultipliers;
 	}
 
 	void EffectContext::resetMultipliers()
