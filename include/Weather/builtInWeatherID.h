@@ -1,8 +1,8 @@
 /*! @file builtinWeatherID.h
 	@brief Defines identifiers for weathers compiled into PocketCore.
-	@date 08/22/2026
+	@date 08/31/2026
 	@since 0.8.0
-	@version 0.11.6
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -15,18 +15,20 @@
 
 namespace PocketCore::Weather
 {
+	using PocketCore::Core::ub;
+
 	/*! @enum BuiltinWeatherID
 		@showenumvalues
 		@brief Names the weathers provided by PocketCore itself.
 		@details This closed enum is only a catalog of built-in weathers. Runtime state and user-facing APIs use the open @ref WeatherID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 08/31/2026
 		@since 0.8.0
-		@version 0.11.6
+		@version 0.12.13
 		@author Matthew Moore
 	*/
-	enum class BuiltinWeatherID : PocketCore::Core::ub
+	enum class BuiltinWeatherID : ub
 	{
 		None,
 		HarshSunlight,
@@ -46,11 +48,11 @@ namespace PocketCore::Weather
 		@param[in] builtinWeatherID The built-in weather to convert.
 		@return The corresponding open weather identifier.
 		@since 0.8.0
-		@version 0.8.0
+		@version 0.12.13
 	*/
 	ATTR_NODISCARD constexpr WeatherID toWeatherID(const BuiltinWeatherID builtinWeatherID) noexcept
 	{
-		return WeatherID{static_cast<PocketCore::Core::ub>(builtinWeatherID)};
+		return WeatherID{static_cast<ub>(builtinWeatherID)};
 	}
 } // namespace PocketCore::Weather
 

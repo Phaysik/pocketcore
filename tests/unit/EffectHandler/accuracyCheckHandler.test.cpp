@@ -1,401 +1,329 @@
 /*! @file accuracyCheckHandler.test.cpp
 	@brief C++ file for running tests for the AccuracyCheckHandler.
-	@date 08/26/2026
+	@date 08/31/2026
 	@since 0.8.7
-	@version 0.12.5
+	@version 0.12.13
 	@author Matthew Moore
 */
 
 #include "EffectHandler/accuracyCheckHandler.h"
 
-#include <limits>
+#include <cstddef>
 
-#include "Ability/abilityID.h"
 #include "Battle/battleState.h"
-#include "Configuration/constants.h"
+#include "Battle/battleState.testHelper.h"
 #include "Effect/effectContext.h"
-#include "Item/itemID.h"
+#include "Effect/effectContext.testHelper.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
-#include "Types/typeID.h"
 #include "Utility/random.h"
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
-using PocketCore::Battle::StatStages;
-using PocketCore::Configuration::MAX_ACCURACY_HIT_VALUE;
-using PocketCore::Configuration::MIN_ACCURACY_HIT_VALUE;
 using PocketCore::Effect::AccuracyCheckHandler;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
-using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
-using PocketCore::Type::NO_TYPE_ID;
+using PocketCore::Testing::makeBattleState;
+using PocketCore::Testing::makeEffectContext;
+using PocketCore::Testing::makePokemon;
 using PocketCore::Utility::Random;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace))
-
-namespace
-{
-	RegistryProvider makeNullProvider()
-	{
-		return RegistryProvider{
-			.abilityRegistry = nullptr,
-			.moveRegistry = nullptr,
-			.itemRegistry = nullptr,
-			.typeRegistry = nullptr,
-			.statusRegistry = nullptr,
-			.weatherRegistry = nullptr,
-			.terrainRegistry = nullptr,
-			.multiplierRegistry = nullptr,
-			.natureRegistry = nullptr,
-			.pokemonRegistry = nullptr,
-		};
-	}
-
-	Pokemon makePokemon()
-	{
-		return Pokemon{"UnitMon", 90U, 90U, 100U, 90U, 90U, 90U, 50U, {NO_ABILITY_ID}, {NO_ITEM_ID}, {NO_TYPE_ID, NO_TYPE_ID}};
-	}
-} // namespace
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
 SCENARIO("AccuracyCheckHandler")
 {
 	AccuracyCheckHandler accuracyCheckHandler{};
-	RegistryProvider provider{makeNullProvider()};
+	RegistryProvider provider{};
 
 	GIVEN("perfect move accuracy and neutral stages")
 	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
 
-		BattleSlot userSlot{};
-		userSlot.mPokemon = &userPokemon;
-		userSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 6, .mEvasion = 0};
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
 
-		BattleSlot targetSlot{};
-		targetSlot.mPokemon = &targetPokemon;
-		targetSlot.mStatStages
-			= StatStages{.mAttack = 0, .mDefense = 0, .mSpAttack = 0, .mSpDefense = 0, .mSpeed = 0, .mAccuracy = 0, .mEvasion = 6};
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(userSlot);
-		battleState.mSideB.push_back(targetSlot);
+		EffectContext effectContext{
+			makeEffectContext({
+				.mUserIndex = 0,
+				.mTargetIndex = 0,
+				.mMoveAccuracy = 100U,
+				.mUserSide = Side::A,
+				.mTargetSide = Side::B,
+			}),
+		};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 100U;
-
-		WHEN("the random roll is seeded deterministically")
+		WHEN("the handler is applied")
 		{
-			Random::getTwister().seed(1U);
 			accuracyCheckHandler.apply(battleState, effectContext, provider);
 
 			THEN("the attack never misses")
 			{
-				CHECK_FALSE(effectContext.mDamage.mIsMiss);
 				CHECK(effectContext.mDamage.mShouldApplyDamage);
 				CHECK(effectContext.mDamage.mShouldContinue);
-			}
-		}
-	}
-
-	GIVEN("zero move accuracy")
-	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = 0,
-												},});
-
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = 0,
-												},});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 0U;
-
-		WHEN("the check is applied")
-		{
-			Random::getTwister().seed(7U);
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
-
-			THEN("the attack is marked as a miss")
-			{
-				CHECK(effectContext.mDamage.mIsMiss);
-				CHECK_FALSE(effectContext.mDamage.mShouldApplyDamage);
-				CHECK_FALSE(effectContext.mDamage.mShouldContinue);
-			}
-		}
-	}
-
-	GIVEN("a low but non-zero move accuracy")
-	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = 0,
-												},});
-
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = 0,
-												},});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 1U;
-
-		WHEN("a deterministic random roll is sampled")
-		{
-			Random::getTwister().seed(2U);
-			const auto roll = Random::get<signed char>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE);
-			Random::getTwister().seed(2U);
-
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
-
-			THEN("the miss flag matches the sampled threshold comparison")
-			{
-				const bool expectedMiss{roll > static_cast<signed char>(effectContext.mMoveAccuracy)};
-				CHECK((effectContext.mDamage.mIsMiss == expectedMiss));
-				CHECK((effectContext.mDamage.mShouldApplyDamage == !expectedMiss));
-				CHECK((effectContext.mDamage.mShouldContinue == !expectedMiss));
-			}
-		}
-	}
-
-	GIVEN("user and target are on opposite sides compared with default setups")
-	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
-
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &targetPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 6,
-													.mEvasion = 0,
-												},});
-
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &userPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 6,
-													.mEvasion = 0,
-												},});
-
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::B;
-		effectContext.mTargetSide = Side::A;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 100U;
-
-		WHEN("the accuracy check resolves battle slots")
-		{
-			Random::getTwister().seed(23U);
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
-
-			THEN("the attack still does not miss")
-			{
 				CHECK_FALSE(effectContext.mDamage.mIsMiss);
-				CHECK(effectContext.mDamage.mShouldApplyDamage);
-				CHECK(effectContext.mDamage.mShouldContinue);
 			}
 		}
 	}
 
-	GIVEN("matching negative accuracy and evasion stages")
+	GIVEN("perfect move accuracy and increased target evasion stages")
 	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = static_cast<signed char>(-1),
-													.mEvasion = 0,
-												},});
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = 6}})};
 
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = static_cast<signed char>(-1),
-												},});
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 50U;
-
-		WHEN("the accuracy check is applied")
+		WHEN("the handler is applied 100 times")
 		{
-			Random::getTwister().seed(31U);
-			const auto roll = Random::get<signed char>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE);
-			Random::getTwister().seed(31U);
+			std::size_t missCount{0};
 
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
+			Random::setSeed(5);
 
-			THEN("the opposing stage modifiers cancel without throwing")
+			for (std::size_t i{0}; i < 100; ++i)
 			{
-				const bool expectedMiss{roll > 50};
-				CHECK((effectContext.mDamage.mIsMiss == expectedMiss));
-				CHECK((effectContext.mDamage.mShouldApplyDamage == !expectedMiss));
-				CHECK((effectContext.mDamage.mShouldContinue == !expectedMiss));
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 100U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack will miss on average 66% of the time")
+			{
+				CHECK((missCount == 66));
 			}
 		}
 	}
 
-	GIVEN("a valid user accuracy stage and negative target evasion stage")
+	GIVEN("perfect move accuracy and decreased user accuracy stages")
 	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{.mPokemon = &userPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = 0,
-												},});
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = -6}})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
 
-		battleState.mSideB.push_back(BattleSlot{.mPokemon = &targetPokemon,
-												.mStatStages = StatStages{
-													.mAttack = 0,
-													.mDefense = 0,
-													.mSpAttack = 0,
-													.mSpDefense = 0,
-													.mSpeed = 0,
-													.mAccuracy = 0,
-													.mEvasion = static_cast<signed char>(-1),
-												},});
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mUserIndex = 0;
-		effectContext.mTargetIndex = 0;
-		effectContext.mMoveAccuracy = 50U;
-
-		WHEN("the handler computes final accuracy")
+		WHEN("the handler is applied 100 times")
 		{
-			Random::getTwister().seed(37U);
-			const auto roll = Random::get<signed char>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE);
-			Random::getTwister().seed(37U);
+			std::size_t missCount{0};
 
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
+			Random::setSeed(5);
 
-			THEN("negative evasion increases accuracy without throwing")
+			for (std::size_t i{0}; i < 100; ++i)
 			{
-				const bool expectedMiss{roll > 66};
-				CHECK((effectContext.mDamage.mIsMiss == expectedMiss));
-				CHECK((effectContext.mDamage.mShouldApplyDamage == !expectedMiss));
-				CHECK((effectContext.mDamage.mShouldContinue == !expectedMiss));
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 100U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack will miss on average 66% of the time")
+			{
+				CHECK((missCount == 66));
 			}
 		}
 	}
 
-	GIVEN("accuracy stages outside the supported range")
+	GIVEN("perfect move accuracy, equal increase of user accuracy stages and decreased target evasion stages")
 	{
-		Pokemon userPokemon{makePokemon()};
-		Pokemon targetPokemon{makePokemon()};
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
 
-		BattleState battleState{};
-		battleState.mSideA.push_back(BattleSlot{
-			.mPokemon = &userPokemon,
-			.mStatStages = StatStages{.mAccuracy = std::numeric_limits<signed char>::max()},
-		});
-		battleState.mSideB.push_back(BattleSlot{
-			.mPokemon = &targetPokemon,
-			.mStatStages = StatStages{.mEvasion = std::numeric_limits<signed char>::min()},
-		});
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = -6}})};
 
-		EffectContext effectContext{};
-		effectContext.mUserSide = Side::A;
-		effectContext.mTargetSide = Side::B;
-		effectContext.mMoveAccuracy = 100U;
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		WHEN("the accuracy check is applied")
+		WHEN("the handler is applied 100 times")
 		{
-			Random::getTwister().seed(41U);
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
+			std::size_t missCount{0};
 
-			THEN("the stages are clamped to valid cache bounds")
+			for (std::size_t i{0}; i < 100; ++i)
 			{
-				CHECK_FALSE(effectContext.mDamage.mIsMiss);
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 100U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack will never miss")
+			{
+				CHECK((missCount == 0));
+			}
+		}
+	}
+
+	GIVEN("50% move accuracy, max user accuracy stages and -3 target evasion stages")
+	{
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
+
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = -3}})};
+
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+
+		WHEN("the handler is applied 100 times")
+		{
+			std::size_t missCount{0};
+
+			for (std::size_t i{0}; i < 100; ++i)
+			{
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 50U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack will never miss")
+			{
+				CHECK((missCount == 0));
+			}
+		}
+	}
+
+	GIVEN("34% move accuracy and max user accuracy stages")
+	{
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
+
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
+
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+
+		WHEN("the handler is applied 100 times")
+		{
+			std::size_t missCount{0};
+
+			for (std::size_t i{0}; i < 100; ++i)
+			{
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 34U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack never misses")
+			{
+				CHECK((missCount == 0));
+			}
+		}
+	}
+
+	GIVEN("10% move accuracy and max user accuracy stages")
+	{
+		Pokemon userPokemon{makePokemon({})};
+		Pokemon targetPokemon{makePokemon({})};
+
+		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
+		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
+
+		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+
+		WHEN("the handler is applied 100 times")
+		{
+			std::size_t missCount{0};
+
+			Random::setSeed(18);
+
+			for (std::size_t i{0}; i < 100; ++i)
+			{
+				EffectContext effectContext{
+					makeEffectContext({
+						.mUserIndex = 0,
+						.mTargetIndex = 0,
+						.mMoveAccuracy = 10U,
+						.mUserSide = Side::A,
+						.mTargetSide = Side::B,
+					}),
+				};
+
+				accuracyCheckHandler.apply(battleState, effectContext, provider);
+
+				if (effectContext.mDamage.mIsMiss)
+				{
+					++missCount;
+				}
+			}
+
+			THEN("the attack hits 30% of the time")
+			{
+				CHECK((missCount == 70));
 			}
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace))
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

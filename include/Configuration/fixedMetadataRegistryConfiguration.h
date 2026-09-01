@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 08/28/2026
+	@date 08/31/2026
 	@since 0.5.0
-	@version 0.12.9
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -61,9 +61,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 08/25/2026
+		@date 08/31/2026
 		@since 0.5.0
-		@version 0.12.3
+		@version 0.12.13
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -219,7 +219,7 @@ namespace PocketCore::Configuration
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.12.13
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
@@ -239,7 +239,7 @@ namespace PocketCore::Configuration
 				const us previousAmountRegistered{registry.getAmountRegistered()};
 				const us previousNextID{registry.getNextID()};
 
-				const auto forwardedFactory{std::forward<Factory>(factory)};
+				Factory &&forwardedFactory{std::forward<Factory>(factory)};
 
 				for (const Definition &definition : definitions)
 				{

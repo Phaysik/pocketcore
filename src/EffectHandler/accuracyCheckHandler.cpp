@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.cpp
 	@brief Contains the accuracy check effect handler implementation
-	@date 08/26/2026
+	@date 08/31/2026
 	@since 0.7.5
-	@version 0.12.7
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -27,7 +27,6 @@ namespace PocketCore::Effect
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::CACHE_ACCURACY_STAGE_MULTIPLIERS;
-	using PocketCore::Configuration::CACHE_EVASION_STAGE_MULTIPLIERS;
 	using PocketCore::Configuration::MAX_ACCURACY_HIT_VALUE;
 	using PocketCore::Configuration::MIN_ACCURACY_HIT_VALUE;
 	using PocketCore::Configuration::statStageCacheIndex;
@@ -43,13 +42,15 @@ namespace PocketCore::Effect
 
 		double accuracy{
 			static_cast<double>(context.mMoveAccuracy)
-				* CACHE_ACCURACY_STAGE_MULTIPLIERS.at(statStageCacheIndex(user.mStatStages.mAccuracy))
-				* CACHE_EVASION_STAGE_MULTIPLIERS.at(statStageCacheIndex(target.mStatStages.mEvasion)),
+				* CACHE_ACCURACY_STAGE_MULTIPLIERS.at(
+					statStageCacheIndex(static_cast<sb>(user.mStatStages.mAccuracy - target.mStatStages.mEvasion))),
 		};
 
 		accuracy = std::max(std::min(accuracy, 100.0), 0.0);
 
-		if (Random::get<sb>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE) > static_cast<sb>(accuracy))
+		const sb randomValue{Random::get<sb>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE)};
+
+		if (randomValue > static_cast<sb>(accuracy))
 		{
 			context.mDamage.mIsMiss = true;
 			context.mDamage.mShouldApplyDamage = false;

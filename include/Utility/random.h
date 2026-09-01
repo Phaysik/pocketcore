@@ -1,8 +1,8 @@
 /*! @file random.h
 	@brief Contains the function declarations for creating a random number generator
-	@date 08/03/2026
+	@date 08/31/2026
 	@since 0.1.0
-	@version 0.9.7
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -10,10 +10,13 @@
 #define INCLUDE_RANDOM_H
 
 #include <chrono>
+#include <concepts>
 #include <random>
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h" // for Integral
+#include "Core/typedefs.h"
 
 /*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
 	@since 0.1.0
@@ -22,10 +25,12 @@
 */
 namespace PocketCore::Utility
 {
+	using PocketCore::Core::ul;
+
 	/*! @class Random random.h "include/random.h"
 		@brief Class for creating a random number generator
 		@since 0.1.0
-		@version 0.9.7
+		@version 0.12.13
 		@author Matthew Moore
 	*/
 	class Random
@@ -72,6 +77,42 @@ namespace PocketCore::Utility
 			ATTR_NODISCARD static std::mt19937 &getTwister() noexcept
 			{
 				return mTwister;
+			}
+
+			/*! @brief Sets the seed for #mTwister
+				@param[in] seed The seed value
+				@since 0.12.13
+				@version 0.12.13
+				@author Matthew Moore
+			*/
+			static void setSeed(const ul seed) noexcept
+			{
+				mTwister.seed(seed);
+			}
+
+			/*! @brief Gets a seed for the random number generator based on a function and desired result
+				@tparam Func The function type
+				@tparam DesiredValue The desired result type
+				@param[in] func The function to invoke
+				@param[in] result The desired result
+				@retval std::size_t The seed value
+				@since 0.12.13
+				@version 0.12.13
+				@author Matthew Moore
+			*/
+			template <typename Func, typename DesiredValue>
+				requires PocketCore::Core::InvocableNoArgs<Func> && std::same_as<std::invoke_result_t<Func>, DesiredValue>
+			ATTR_NODISCARD static ul findSeed(Func &&func, const DesiredValue &result) noexcept
+			{
+				Func &&forwardedFunc{std::forward<Func>(func)};
+				std::size_t seedIncrement{0};
+
+				while (result != forwardedFunc())
+				{
+					mTwister.seed(seedIncrement++);
+				}
+
+				return --seedIncrement;
 			}
 
 		private:

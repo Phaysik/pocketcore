@@ -1,8 +1,8 @@
 /*! @file builtinItemID.h
 	@brief Defines identifiers for items compiled into PocketCore.
-	@date 08/22/2026
+	@date 08/31/2026
 	@since 0.4.1
-	@version 0.11.6
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -15,18 +15,20 @@
 
 namespace PocketCore::Item
 {
+	using PocketCore::Core::ub;
+
 	/*! @enum BuiltinItemID
 		@showenumvalues
 		@brief Names the items provided by PocketCore itself.
 		@details This closed enum is only a catalog of built-in items. Runtime state and user-facing APIs use the open @ref ItemID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 08/31/2026
 		@since 0.4.1
-		@version 0.11.6
+		@version 0.12.13
 		@author Matthew Moore
 	*/
-	enum class BuiltinItemID : PocketCore::Core::ub
+	enum class BuiltinItemID : ub
 	{
 		None,
 		CheriBerry,
@@ -38,11 +40,11 @@ namespace PocketCore::Item
 		@param[in] builtinItemID The built-in item to convert.
 		@return The corresponding open item identifier.
 		@since 0.4.1
-		@version 0.4.1
+		@version 0.12.13
 	*/
 	ATTR_NODISCARD constexpr ItemID toItemID(const BuiltinItemID builtinItemID) noexcept
 	{
-		return ItemID{static_cast<PocketCore::Core::ub>(builtinItemID)};
+		return ItemID{static_cast<ub>(builtinItemID)};
 	}
 } // namespace PocketCore::Item
 

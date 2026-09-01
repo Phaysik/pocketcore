@@ -1,8 +1,8 @@
 /*! @file cache.h
 	@brief Defines constexpr lookup tables for battle stat-stage multipliers.
-	@date 08/27/2026
+	@date 08/31/2026
 	@since 0.8.2
-	@version 0.12.8
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -94,43 +94,9 @@ namespace PocketCore::Configuration
 		return table;
 	}
 
-	/*! @brief Builds the evasion-stage multiplier lookup table.
-		@return An array containing the evasion multiplier for every supported clamped stat stage.
-		@note Positive stages reduce the multiplier using the denominator-increment formula, while negative stages use the
-	   numerator-increment formula.
-		@note The returned table is constructed at compile time when used in a constant expression.
-		@since 0.8.2
-		@version 0.12.8
-	*/
-	ATTR_NODISCARD constexpr std::array<double, MAX_STAGE_CACHE> EVASION_STAGE_MULTIPLIERS() noexcept
-	{
-		std::array<double, MAX_STAGE_CACHE> table{};
-
-		constexpr double NUM{BASE_EVASION_MULTIPLIER_NUMERATOR};
-		constexpr double DEN{BASE_EVASION_MULTIPLIER_DENOMINATOR};
-
-		for (sb statStage{-MAX_STAT_STAGES}; statStage <= MAX_STAT_STAGES; ++statStage)
-		{
-			const std::size_t index{statStageCacheIndex(statStage)};
-
-			if (statStage >= 0)
-			{
-				table.at(index) = NUM / (DEN + static_cast<double>(statStage));
-			}
-			else
-			{
-				table.at(index) = (NUM - static_cast<double>(statStage)) / DEN;
-			}
-		}
-
-		return table;
-	}
-
 	/*! @brief The precomputed standard stat-stage multipliers indexed by @ref statStageCacheIndex. */
 	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_STAT_STAGE_MULTIPLIERS{STAT_STAGE_MULTIPLIERS()};
 	/*! @brief The precomputed accuracy-stage multipliers indexed by @ref statStageCacheIndex. */
 	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_ACCURACY_STAGE_MULTIPLIERS{ACCURACY_STAGE_MULTIPLIERS()};
-	/*! @brief The precomputed evasion-stage multipliers indexed by @ref statStageCacheIndex. */
-	constexpr std::array<double, MAX_STAGE_CACHE> CACHE_EVASION_STAGE_MULTIPLIERS{EVASION_STAGE_MULTIPLIERS()};
 } // namespace PocketCore::Configuration
 #endif

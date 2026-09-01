@@ -1,8 +1,8 @@
 /*! @file registryProvider.h
 	@brief Provides a registry provider that holds references to all registry objects.
-	@date 08/26/2026
+	@date 08/31/2026
 	@since 0.8.2
-	@version 0.12.5
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -29,9 +29,9 @@ namespace PocketCore::Registry
 		@details Provides a lightweight dependency bundle passed into systems that require cross-registry lookup access.
 		All pointers are non-owning and must refer to registry instances whose lifetime exceeds the provider usage.
 		@warning Dereferencing any null member pointer is undefined behavior.
-		@date 08/26/2026
+		@date 08/31/2026
 		@since 0.8.2
-		@version 0.12.5
+		@version 0.12.13
 		@author Matthew Moore
 	*/
 	struct RegistryProvider
@@ -40,52 +40,52 @@ namespace PocketCore::Registry
 			/*! @brief Non-owning pointer to the ability metadata registry.
 				@details Must point to a valid @ref Ability::AbilityRegistry instance for ability metadata queries.
 			*/
-			const Ability::AbilityRegistry *abilityRegistry;
+			const Ability::AbilityRegistry *abilityRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the move metadata registry.
 				@details Must point to a valid @ref Move::MoveRegistry instance for move metadata queries.
 			*/
-			const Move::MoveRegistry *moveRegistry;
+			const Move::MoveRegistry *moveRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the item metadata registry.
 				@details Must point to a valid @ref Item::ItemRegistry instance for item metadata queries.
 			*/
-			const Item::ItemRegistry *itemRegistry;
+			const Item::ItemRegistry *itemRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the type metadata registry.
 				@details Must point to a valid @ref Type::TypeRegistry instance for type metadata queries.
 			*/
-			const Type::TypeRegistry *typeRegistry;
+			const Type::TypeRegistry *typeRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the status metadata registry.
 				@details Must point to a valid @ref Status::StatusRegistry instance for status metadata queries.
 			*/
-			const Status::StatusRegistry *statusRegistry;
+			const Status::StatusRegistry *statusRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the weather metadata registry.
 				@details Must point to a valid @ref Weather::WeatherRegistry instance for weather metadata queries.
 			*/
-			const Weather::WeatherRegistry *weatherRegistry;
+			const Weather::WeatherRegistry *weatherRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the terrain metadata registry.
 				@details Must point to a valid @ref Terrain::TerrainRegistry instance for terrain metadata queries.
 			*/
-			const Terrain::TerrainRegistry *terrainRegistry;
+			const Terrain::TerrainRegistry *terrainRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the multiplier metadata registry.
 				@details Must point to a valid @ref Multiplier::MultiplierRegistry instance for multiplier metadata queries.
 			*/
-			const Multiplier::MultiplierRegistry *multiplierRegistry;
+			const Multiplier::MultiplierRegistry *multiplierRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the nature metadata registry.
 				@details Must point to a valid @ref Nature::NatureRegistry instance for nature metadata queries.
 			*/
-			const Nature::NatureRegistry *natureRegistry;
+			const Nature::NatureRegistry *natureRegistry{nullptr};
 
 			/*! @brief Non-owning pointer to the pokemon metadata registry.
 				@details Must point to a valid @ref Pokemon::PokemonRegistry instance for pokemon metadata queries.
 			*/
-			const Pokemon::PokemonRegistry *pokemonRegistry;
+			const Pokemon::PokemonRegistry *pokemonRegistry{nullptr};
 	};
 } // namespace PocketCore::Registry
 

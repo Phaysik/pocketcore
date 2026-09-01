@@ -164,12 +164,6 @@ namespace PocketCore::Configuration
 	/*! @brief The denominator used by the negative accuracy-stage formula. */
 	inline constexpr double BASE_ACCURACY_MULTIPLIER_DENOMINATOR{3.0};
 
-	/*! @brief The numerator used by the negative evasion-stage formula. */
-	inline constexpr double BASE_EVASION_MULTIPLIER_NUMERATOR{3.0};
-
-	/*! @brief The denominator used by the non-negative evasion-stage formula. */
-	inline constexpr double BASE_EVASION_MULTIPLIER_DENOMINATOR{3.0};
-
 	/*! @brief The inclusive lower bound of an accuracy hit roll. */
 	inline constexpr ub MIN_ACCURACY_HIT_VALUE{1};
 

@@ -1,8 +1,8 @@
 /*! @file idInterface.test.cpp
 	@brief C++ file for running tests for the IDInterface.
-	@date 08/23/2026
+	@date 08/31/2026
 	@since 0.4.1
-	@version 0.12.1
+	@version 0.12.13
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "Core/typedefs.h"
+#include "ID/idInterface.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -19,26 +20,21 @@ using PocketCore::ID::IDInterface;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
-namespace
+SCENARIO("IDInterface")
 {
 	struct FirstIDTag;
 	struct SecondIDTag;
 
 	using FirstID = IDInterface<FirstIDTag, 0>;
 	using SecondID = IDInterface<SecondIDTag, 255>;
-
-	template <typename Left, typename Right>
-	concept EqualityComparableWith = requires(Left left, Right right) { left == right; };
+	using PocketCore::Testing::EqualityComparableWith;
 
 	static_assert(sizeof(FirstID) == sizeof(us));
 	static_assert(sizeof(SecondID) == sizeof(us));
 	static_assert(std::is_trivially_copyable_v<FirstID>);
 	static_assert(std::is_trivially_copyable_v<SecondID>);
 	static_assert(!EqualityComparableWith<FirstID, SecondID>);
-} // namespace
 
-SCENARIO("IDInterface")
-{
 	GIVEN("two identifier domains with different defaults")
 	{
 		FirstID firstDefault{};
@@ -61,7 +57,19 @@ SCENARIO("IDInterface")
 		{
 			CHECK((firstIdentifier.getValue() == 42));
 			CHECK((firstIdentifier == matchingIdentifier));
-			CHECK_FALSE((firstIdentifier == differentIdentifier));
+			CHECK((firstIdentifier < differentIdentifier));
+		}
+
+		THEN("check their equality by constructor")
+		{
+			CHECK((FirstID{42} == FirstID{42}));
+			CHECK((FirstID{41} != FirstID{42}));
+
+			CHECK((FirstID{41} < FirstID{42}));
+			CHECK((FirstID{41} <= FirstID{42}));
+
+			CHECK((FirstID{41} > FirstID{40}));
+			CHECK((FirstID{41} >= FirstID{40}));
 		}
 	}
 }

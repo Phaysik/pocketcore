@@ -1,13 +1,15 @@
 /*! @file cconcepts.test.cpp
 	@brief C++ file for creating tests for validating custom concepts.
-	@date 07/26/2026
+	@date 08/31/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.13
 	@author Matthew Moore
 */
 
 #include "Core/cconcepts.h"
 
+#include <cstddef>
+#include <functional>
 #include <string>
 #include <string_view>
 
@@ -17,6 +19,9 @@
 
 using PocketCore::Core::FloatingPoint;
 using PocketCore::Core::Integral;
+using PocketCore::Core::InvocableNoArgs;
+using PocketCore::Core::InvocableWithArgs;
+using PocketCore::Core::IsEnum;
 using PocketCore::Core::RationalNumber;
 using PocketCore::Core::sb;
 using PocketCore::Core::si;
@@ -198,6 +203,96 @@ SCENARIO("Concepts")
 	}
 
 	// NOLINTEND(hicpp-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+
+	GIVEN("InvocableNoArgs")
+	{
+		GIVEN("std::function<void()> and a lambda with no arguments")
+		{
+			THEN("They should satisfy the InvocableNoArgs concept")
+			{
+				REQUIRE(InvocableNoArgs<std::function<void()>>);
+				REQUIRE(InvocableNoArgs<decltype([] {})>);
+			}
+		}
+
+		GIVEN("std::function<void(param)> and a lambda with arguments")
+		{
+			THEN("They should not satisfy the InvocableNoArgs concept")
+			{
+				REQUIRE_FALSE(InvocableNoArgs<std::function<void(std::size_t)>>);
+				REQUIRE_FALSE(InvocableNoArgs<decltype([](std::size_t) {})>);
+			}
+		}
+
+		GIVEN("Non-callable types")
+		{
+			THEN("Should not satisfy the InvocableNoArgs concept")
+			{
+				REQUIRE_FALSE(InvocableNoArgs<std::string>);
+				REQUIRE_FALSE(InvocableNoArgs<std::string_view>);
+			}
+		}
+	}
+
+	GIVEN("InvocableWithArgs")
+	{
+		GIVEN("std::function<void(param?)> and a lambda with arguments")
+		{
+			THEN("They should satisfy the InvocableWithArgs concept")
+			{
+				REQUIRE(InvocableWithArgs<std::function<void(std::size_t)>, std::size_t>);
+				REQUIRE(InvocableWithArgs<decltype([](std::size_t) {}), std::size_t>);
+			}
+		}
+
+		GIVEN("std::function<void(param?)> and a lambda with arguments with the wrong argument type")
+		{
+			THEN("Should not satisfy the InvocableWithArgs concept")
+			{
+				REQUIRE_FALSE(InvocableWithArgs<std::function<void(std::size_t)>, std::string>);
+				REQUIRE_FALSE(InvocableWithArgs<decltype([](std::size_t) {}), std::string>);
+			}
+		}
+
+		GIVEN("Non-callable types")
+		{
+			THEN("Should not satisfy the InvocableWithArgs concept")
+			{
+				REQUIRE_FALSE(InvocableWithArgs<std::string>);
+				REQUIRE_FALSE(InvocableWithArgs<std::string_view>);
+			}
+		}
+	}
+
+	GIVEN("Enum")
+	{
+		GIVEN("Enum and enum class types")
+		{
+			// NOLINTNEXTLINE(cppcoreguidelines-use-enum-class)
+			enum test
+			{
+			};
+
+			enum class testClass
+			{
+			};
+
+			THEN("They should satisfy the Enum concept")
+			{
+				REQUIRE(IsEnum<test>);
+				REQUIRE(IsEnum<testClass>);
+			}
+		}
+
+		GIVEN("Non-enum and non-enum class types")
+		{
+			THEN("They should not satisfy the Enum concept")
+			{
+				REQUIRE_FALSE(IsEnum<std::string>);
+				REQUIRE_FALSE(IsEnum<std::string_view>);
+			}
+		}
+	}
 }
 
 // NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
