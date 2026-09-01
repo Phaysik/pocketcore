@@ -166,7 +166,7 @@ namespace PocketCore::Effect
 			/*! @brief Returns active multipliers in application order.
 				@return A read-only view that remains valid until the next multiplier mutation.
 				@since 0.8.7
-				@version 0.12.8
+				@version 0.12.14
 			*/
 			ATTR_NODISCARD ATTR_PURE constexpr std::span<const std::pair<MultiplierID, double>> getActiveMultipliers() const noexcept
 			{

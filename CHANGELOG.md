@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.15] - 2026-09-01
+
 ## [0.12.14] - 2026-09-01
+
+### Added
+
+- Added equality support for effect-test assertions: `DamageContext::operator==` compares recoil ratios with the existing absolute-relative floating-point comparison and compares all damage flags and values exactly; `EffectContext::operator==` compares the complete context, including active multipliers and their built-in position table.
+- Added shared EffectHandler test fixtures for critical-hit, STAB, targets, terrain, Pokemon, and move-registry setup. The helpers construct valid battle slots, contexts, registries, and metadata without duplicating setup in individual scenarios.
+
+### Changed
+
+- Reordered both `Pokemon` constructors to accept base stats as health, Attack, Defense, Special Attack, Special Defense, and Speed. Construction continues to initialize current and maximum health from the health argument, retain fixed move, ability, item, and type arrays, and derive the level damage factor from the supplied level.
+- Changed `DamageContext::mRecoilRatio` from `float` to `double`; recoil validation and damage calculation now use the double-precision value throughout while retaining non-finite, non-positive, zero-damage, and missing-user early exits.
+- Moved `EffectContext::getActiveMultipliers()` into the header as a `constexpr` accessor, preserving its ordered, non-owning read-only span contract.
+- Changed `BaseDamageHandler` to clear `mDamage` when a user or target is absent, move power is zero, or the computed attack statistic is non-finite or non-positive. Target defense is now clamped to at least `1.0` before division, allowing zero and negative defense modifiers to produce bounded damage instead of rejecting the calculation.
+- Renamed the built-in terrain enumerator from `Grass` to `Grassy` and updated terrain registration, terrain-effect matching, and the example program to use the corrected identifier; the stable enum position and `Grassy Terrain` metadata remain unchanged.
+- Tightened `TargetsHandler`'s registry precondition by directly reading the resolved move metadata after provider lookup; valid providers and registered move IDs retain the existing spread-target multiplier behavior.
+- Rewrote the base-damage, critical-hit, handler-interface, STAB, targets, and terrain handler suites around the shared fixtures. The scenarios now cover physical and special calculations, critical-stage rules, missing or invalid battle state, single versus spread targets, grounded and flying targets, forced grounding, and each supported terrain effect.
 
 ## [0.12.13] - 2026-08-31
 
@@ -12,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Added `Random::setSeed()` for reseeding the shared `std::mt19937` and constrained `Random::findSeed()` to search seed values until a nullary callable returns a requested result.
 - Added reusable test helpers for battle states, effect contexts, tagged-ID comparability, and Pokemon construction so unit suites can share valid domain fixtures.
+- Added `testInclude` to test-build and editor include paths so the shared test helpers resolve in unit suites and language tooling.
 
 ### Changed
 
@@ -19,7 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Default-initialized every `RegistryProvider` registry pointer to `nullptr`, allowing value initialization while retaining its non-owning dependency contract.
 - Changed fixed-registry batch registration to preserve the forwarding-reference factory rather than copying it before repeated invocation.
 - Simplified built-in item, move, multiplier, nature, Pokemon, terrain, type, and weather ID headers by importing the shared `ub` alias into their domain namespaces.
-- Added `testInclude` to test-build and editor include paths, rewrote the accuracy-check scenarios around deterministic seeded rolls and stage-difference behavior, and enabled dark-mode HTML coverage reports.
+- Rewrote the accuracy-check scenarios around deterministic seeded rolls and stage-difference behavior, and enabled dark-mode HTML coverage reports.
 
 ### Removed
 
@@ -1722,7 +1740,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.14]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.15]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.14]: https://github.com/Phaysik/pocketcore/commit/20da569d8a90c8d9486006cae57aa8c82622e22a
 [0.12.13]: https://github.com/Phaysik/pocketcore/commit/9f14ed4b0c53ee56dc191ce1028e87be11d6707a
 [0.12.12]: https://github.com/Phaysik/pocketcore/commit/bf7af55f51a6326138ba5e53a8926a4ee0781b60
 [0.12.11]: https://github.com/Phaysik/pocketcore/commit/9dff04af8ac262f716e5150476df7cb4329f0a58

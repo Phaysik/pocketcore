@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 08/26/2026
+	@date 09/01/2026
 	@since 0.4.0
-	@version 0.12.5
+	@version 0.12.15
 	@author Matthew Moore
 */
 
@@ -100,7 +100,7 @@ SCENARIO("Pokemon type identifiers")
 
 SCENARIO("Pokemon health bounds")
 {
-	Pokemon pokemon{"MissingNo", 1, 1, 100, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}};
+	Pokemon pokemon{"MissingNo", 100, 1, 1, 1, 1, 1, 10, {AbilityID{}}, {ItemID{}}};
 
 	GIVEN("a Pokemon constructed at full health")
 	{
@@ -129,8 +129,8 @@ SCENARIO("Pokemon stream output")
 		std::array<ub, 4> maxPP{15U, 20U, 25U, 30U};
 		std::array<ub, 4> currentPP{5U, 10U, 15U, 20U};
 		std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs{TypeID{2U}, TypeID{3U}};
-		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP,		  101U,			102U,	150U, 103U,
-						104U,		 105U,	  50U,	 {AbilityID{6U}}, {ItemID{7U}}, typeIDs};
+		Pokemon pokemon{"Streammon", moveIDs, maxPP, currentPP,		  150U,			101U,	102U, 104U,
+						105U,		 103U,	  50U,	 {AbilityID{6U}}, {ItemID{7U}}, typeIDs};
 		std::array<StatusID, MAX_STATUSES_PER_POKEMON> statusIDs{StatusID{20U}, StatusID{21U}, StatusID{22U}, StatusID{23U}, StatusID{24U}};
 		pokemon.setStatusesArray(statusIDs);
 
