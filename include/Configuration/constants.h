@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 08/27/2026
+	@date 09/02/2026
 	@since 0.1.0
-	@version 0.12.8
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -64,6 +64,9 @@ namespace PocketCore::Configuration
 
 	/*! @brief The maximum number of registered weather conditions. */
 	inline constexpr us MAX_WEATHERS{1'000};
+
+	/*! @brief The maximum number of active weather conditions allowed on the field simultaneously. */
+	inline constexpr us MAX_ACTIVE_WEATHERS_ON_FIELD{5};
 
 	/*! @brief The maximum number of registered terrain conditions. */
 	inline constexpr us MAX_TERRAINS{1'000};

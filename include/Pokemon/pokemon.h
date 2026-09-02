@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.3.0
-	@version 0.12.14
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -12,7 +12,6 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <cstddef>
 #include <ostream>
 #include <string_view>
 
@@ -20,13 +19,14 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Interaction/interactionHelpers.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Registry/registryProvider.h"
 #include "Registry/statusRegistry.h"
-#include "Status/statusHelpers.h"
 #include "Status/statusID.h"
+#include "Status/statusMeta.h"
 #include "Types/typeID.h"
 
 namespace PocketCore::Pokemon
@@ -43,20 +43,15 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Registry::Status::StatusRegistry;
-	using PocketCore::Status::hasInteraction;
 	using PocketCore::Status::NO_STATUS_ID;
-	using PocketCore::Status::shiftAndGetNextAvailableStatus;
-	using PocketCore::Status::statusAlreadyExists;
 	using PocketCore::Status::StatusID;
-	using PocketCore::Status::StatusInteractionAction;
-	using PocketCore::Status::statusRemoveHandler;
-	using PocketCore::Status::statusReplaceHandler;
-	using PocketCore::Status::willBlockIncoming;
+	using PocketCore::Status::StatusMeta;
 	using PocketCore::Type::TypeID;
 
 	/*! @class Pokemon Pokemon/pokemon.h
@@ -65,9 +60,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/01/2026
+		@date 09/02/2026
 		@since 0.3.0
-		@version 0.12.14
+		@version 0.12.16
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -738,47 +733,11 @@ namespace PocketCore::Pokemon
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
 				@since 0.9.11
-				@version 0.9.11
+				@version 0.12.16
 			*/
 			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry)
 			{
-				if (statusID == NO_STATUS_ID)
-				{
-					return;
-				}
-
-				if (statusAlreadyExists(statusID, mStatusIDs))
-				{
-					return;
-				}
-
-				if (willBlockIncoming(statusID, statusRegistry, mStatusIDs))
-				{
-					return;
-				}
-
-				const bool replacedCurrentStatus{statusReplaceHandler(statusID, statusRegistry, mStatusIDs)};
-
-				statusRemoveHandler(statusID, statusRegistry, mStatusIDs);
-
-				const std::size_t nextActiveStatusIndex{shiftAndGetNextAvailableStatus(mStatusIDs)};
-
-				for (std::size_t index{nextActiveStatusIndex}; index < mStatusIDs.size(); index++)
-				{
-					mStatusIDs.at(index) = NO_STATUS_ID;
-				}
-
-				if (replacedCurrentStatus)
-				{
-					return;
-				}
-
-				if (nextActiveStatusIndex >= mStatusIDs.size())
-				{
-					return;
-				}
-
-				mStatusIDs.at(nextActiveStatusIndex) = statusID;
+				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions);
 			}
 
 			/*! @brief Writes the Pokemon's raw identifier and statistic representation to a stream.

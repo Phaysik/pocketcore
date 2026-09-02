@@ -1,12 +1,14 @@
 /*! @file random.test.cpp
 	@brief Catch2 unit tests for `Utility::Random` utilities.
-	@date 08/31/2026
+	@date 09/02/2026
 	@version 0.8.7
-	@since 0.12.13
+	@since 0.12.16
 	@author Matthew Moore
 */
 
 #include "Utility/random.h"
+
+#include <cstddef>
 
 #include "Core/typedefs.h"
 
@@ -138,7 +140,7 @@ SCENARIO("Random")
 	{
 		Random::setSeed(20);
 
-		const auto trivial = []() -> std::size_t {
+		const auto trivial = [] -> std::size_t {
 			std::size_t lessThan100{0};
 
 			for (us i = 0; i < 100; ++i)

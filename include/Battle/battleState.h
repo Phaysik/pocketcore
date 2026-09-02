@@ -1,16 +1,18 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.3.0
-	@version 0.12.7
+	@version 0.12.16
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_BATTLE_BATTLESTATE_H
 #define INCLUDE_BATTLE_BATTLESTATE_H
 
+#include <array>
 #include <vector>
 
+#include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
@@ -19,6 +21,7 @@
 
 namespace PocketCore::Battle
 {
+	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
@@ -128,9 +131,9 @@ namespace PocketCore::Battle
 		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
 	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
 		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
-		@date 08/26/2026
+		@date 09/02/2026
 		@since 0.3.0
-		@version 0.12.7
+		@version 0.12.16
 		@author Matthew Moore
 	*/
 	struct BattleState
@@ -189,8 +192,9 @@ namespace PocketCore::Battle
 			/*! @brief Non-owning pointers to side B's party Pokemon. */
 			std::vector<Pokemon *> mPartyB{};
 
-			/*! @brief The battle-wide weather identifier. */
-			WeatherID mWeatherID{};
+			/*! @brief The battle-wide weather identifiers. */
+			std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> mWeatherIDs{};
+
 			/*! @brief The battle-wide terrain identifier. */
 			TerrainID mTerrainID{};
 

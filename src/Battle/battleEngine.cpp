@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 08/30/2026
+	@date 09/02/2026
 	@since 0.9.16
-	@version 0.12.11
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -50,6 +50,7 @@ namespace PocketCore::Battle
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
@@ -419,7 +420,7 @@ namespace PocketCore::Battle
 
 		const bool mayChangeWeather{effectMeta->mMayChangeWeather};
 		const bool mayChangeStatus{effectMeta->mMayChangeStatus};
-		const WeatherID previousWeatherID{mState.mWeatherID};
+		const std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> previousWeatherIDs{mState.mWeatherIDs};
 
 		Pokemon *statusTarget{nullptr};
 
@@ -434,7 +435,7 @@ namespace PocketCore::Battle
 
 		effectMeta->mApply(mState, context, *mProvider);
 
-		if (mayChangeWeather && mState.mWeatherID != previousWeatherID)
+		if (mayChangeWeather && mState.mWeatherIDs != previousWeatherIDs)
 		{
 			std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context](const Side side) {
 				const std::vector<BattleSlot> &slots{activeSlots(mState, side)};

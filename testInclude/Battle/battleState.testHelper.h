@@ -1,17 +1,19 @@
 /*! @file battleState.testHelper.h
 	@brief Test helper for dealing with BattleState concepts.
-	@date 08/31/2026
+	@date 09/02/2026
 	@since 0.12.13
-	@version 0.12.13
+	@version 0.12.16
 	@author Matthew Moore
 */
 
 #ifndef TEST_INCLUDE_BATTLE_BATTLESTATE_TEST_HELPER_H
 #define TEST_INCLUDE_BATTLE_BATTLESTATE_TEST_HELPER_H
 
+#include <array>
 #include <vector>
 
 #include "Battle/battleState.h"
+#include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Pokemon/pokemon.h"
 #include "Terrain/terrainID.h"
@@ -21,6 +23,7 @@ namespace PocketCore::Testing
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
+	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Core::ub;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Terrain::TerrainID;
@@ -35,7 +38,8 @@ namespace PocketCore::Testing
 			std::vector<Pokemon *> mPartyA{};
 			std::vector<Pokemon *> mPartyB{};
 
-			WeatherID mWeatherID{};
+			std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> mWeatherIDs{};
+
 			TerrainID mTerrainID{};
 
 			ub mSpikesPartyA{0};
@@ -57,7 +61,7 @@ namespace PocketCore::Testing
 		state.mSideB = data.mSideB;
 		state.mPartyA = data.mPartyA;
 		state.mPartyB = data.mPartyB;
-		state.mWeatherID = data.mWeatherID;
+		state.mWeatherIDs = data.mWeatherIDs;
 		state.mTerrainID = data.mTerrainID;
 		state.mSpikesPartyA = data.mSpikesPartyA;
 		state.mSpikesPartyB = data.mSpikesPartyB;

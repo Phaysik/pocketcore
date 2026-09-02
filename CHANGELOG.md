@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.16] - 2026-09-02
+
 ## [0.12.15] - 2026-09-01
+
+### Fixed
+
+- Updated Pokemon health-boundary and stream-output tests to pass constructor statistics in the health-first order introduced in 0.12.14. The corrected fixtures again initialize the intended maximum health, Attack, Defense, Special Attack, Special Defense, and Speed values, preserving the tests' health-clamping and serialized-stat expectations.
+
+### Removed
+
+- Removed the unused `RegisterMoveTestData` aggregate from the shared move-registry test helper and dropped its now-unneeded `<vector>` include. Test move registration continues to accept `MoveMeta` directly, assign the registry's next stable `MoveID`, copy every metadata field, and advance the registered-count and next-ID state.
 
 ## [0.12.14] - 2026-09-01
 
@@ -1740,7 +1750,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.15]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.16]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.15]: https://github.com/Phaysik/pocketcore/commit/026b606e93777a7709c87bbc42a9918a492c2672
 [0.12.14]: https://github.com/Phaysik/pocketcore/commit/20da569d8a90c8d9486006cae57aa8c82622e22a
 [0.12.13]: https://github.com/Phaysik/pocketcore/commit/9f14ed4b0c53ee56dc191ce1028e87be11d6707a
 [0.12.12]: https://github.com/Phaysik/pocketcore/commit/bf7af55f51a6326138ba5e53a8926a4ee0781b60

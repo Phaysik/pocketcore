@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.8.7
-	@version 0.12.14
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -290,7 +290,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK(context.mDamage.mDamage == 49);
+					CHECK((context.mDamage.mDamage == 49));
 				}
 			}
 

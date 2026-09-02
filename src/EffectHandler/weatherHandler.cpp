@@ -1,8 +1,8 @@
 /*! @file weatherHandler.cpp
 	@brief Contains the weather effect handler implementation
-	@date 08/30/2026
+	@date 09/02/2026
 	@since 0.9.8
-	@version 0.12.12
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -76,8 +76,8 @@ namespace PocketCore::Effect
 			}
 		}
 
-		const bool isRainy{state.mWeatherID == toWeatherID(BuiltinWeatherID::Rain)};
-		const bool isHarshSunlight{state.mWeatherID == toWeatherID(BuiltinWeatherID::HarshSunlight)};
+		const bool isRainy{std::ranges::contains(state.mWeatherIDs, toWeatherID(BuiltinWeatherID::Rain))};
+		const bool isHarshSunlight{std::ranges::contains(state.mWeatherIDs, toWeatherID(BuiltinWeatherID::HarshSunlight))};
 
 		const bool isWaterTypeMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Water)};
 		const bool isFireTypeMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Fire)};

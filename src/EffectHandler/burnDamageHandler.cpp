@@ -1,8 +1,8 @@
 /*! @file burnDamageHandler.cpp
 	@brief Contains the burn damage effect handler implementation
-	@date 08/30/2026
+	@date 09/02/2026
 	@since 0.9.5
-	@version 0.12.12
+	@version 0.12.16
 	@author Matthew Moore
 */
 
@@ -23,7 +23,6 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
 #include "Status/builtInStatusID.h"
-#include "Status/statusHelpers.h"
 
 namespace PocketCore::Effect
 {
@@ -52,7 +51,7 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		const bool isBurned{Status::statusAlreadyExists(toStatusID(BuiltinStatusID::Burn), userPokemon->getStatusesArray())};
+		const bool isBurned{std::ranges::contains(userPokemon->getStatusesArray(), toStatusID(BuiltinStatusID::Burn))};
 		const bool abilityIsntGuts{!std::ranges::contains(userPokemon->getAbilitiesArray(), toAbilityID(BuiltinAbilityID::Guts))};
 		const bool moveIsntFacade{context.mMoveID != toMoveID(BuiltinMoveID::Facade)};
 
