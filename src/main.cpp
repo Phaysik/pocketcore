@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.1.0
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -38,7 +38,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -60,7 +60,7 @@ int main()
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
@@ -109,11 +109,12 @@ int main()
 		50U,
 		{toAbilityID(BuiltinAbilityID::Drizzle)},
 		{toItemID(BuiltinItemID::CheriBerry)},
+		{toTypeID(BuiltinTypeID::Water)},
 	};
-	pokemonA.setMove(0U, toMoveID(BuiltinMoveID::Pound));
+	pokemonA.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonA.setMaxPP(0U, 35U);
 	pokemonA.setCurrentPP(0U, 35U);
-	pokemonA.setType(0, toTypeID(BuiltInTypeID::Water));
+	pokemonA.setTypeID(0, toTypeID(BuiltinTypeID::Water));
 
 	Pokemon pokemonB{
 		"Charizard",
@@ -126,12 +127,13 @@ int main()
 		50U,
 		{toAbilityID(BuiltinAbilityID::Stench)},
 		{toItemID(BuiltinItemID::ChestoBerry)},
+		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 	};
-	pokemonB.setMove(0U, toMoveID(BuiltinMoveID::Pound));
+	pokemonB.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonB.setMaxPP(0U, 35U);
 	pokemonB.setCurrentPP(0U, 35U);
-	pokemonB.setType(0, toTypeID(BuiltInTypeID::Fire));
-	pokemonB.setType(1, toTypeID(BuiltInTypeID::Flying));
+	pokemonB.setTypeID(0, toTypeID(BuiltinTypeID::Fire));
+	pokemonB.setTypeID(1, toTypeID(BuiltinTypeID::Flying));
 
 	const std::array<Pokemon *, 1> partyA{&pokemonA};
 	const std::array<Pokemon *, 1> partyB{&pokemonB};
@@ -162,11 +164,11 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "PartyA[0]: " << partyA.at(0)->getHealth() << '\n';
+	// std::cout << "PartyA[0]: " << partyA.at(0)->getHealth() << '\n';
 	// std::cout << "PartyA[0]:\n";
-	// printPokemonWithNames(std::cout, *partyA.at(0), registryProvider) << '\n';
+	printPokemonWithNames(std::cout, *partyA.at(0), registryProvider) << '\n';
 
-	std::cout << "PartyB[0]: " << partyB.at(0)->getHealth() << '\n';
+	// std::cout << "PartyB[0]: " << partyB.at(0)->getHealth() << '\n';
 	// std::cout << "PartyB[0]:\n";
 	// printPokemonWithNames(std::cout, *partyB.at(0), registryProvider) << '\n';
 

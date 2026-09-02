@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.9.14
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -366,7 +366,7 @@ namespace PocketCore::Battle
 		}
 
 		// Guard the fixed move array before retrieving the selected move ID.
-		if (action.mMoveSlotIndex >= userSlot.mPokemon->getMovesArray().size())
+		if (action.mMoveSlotIndex >= userSlot.mPokemon->getMoveIDsArray().size())
 		{
 			return std::unexpected{BattleEngineError::InvalidMoveSlot};
 		}
@@ -540,7 +540,7 @@ namespace PocketCore::Battle
 		// The selected move slot must exist in the Pokemon's fixed move array.
 		const Pokemon *userPokemon{userSlot.mPokemon};
 
-		if (action.mMoveSlotIndex >= userPokemon->getMovesArray().size())
+		if (action.mMoveSlotIndex >= userPokemon->getMoveIDsArray().size())
 		{
 			return std::unexpected{BattleEngineError::InvalidMoveSlot};
 		}

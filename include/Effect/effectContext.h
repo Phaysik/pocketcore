@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.3.0
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -126,9 +126,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 09/01/2026
+		@date 09/02/2026
 		@since 0.3.0
-		@version 0.12.14
+		@version 0.12.17
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -179,9 +179,17 @@ namespace PocketCore::Effect
 				@param[in] other The effect context to compare.
 				@return True when both contexts contain identical state; otherwise false.
 				@since 0.12.14
-				@version 0.12.14
+				@version 0.12.17
 			*/
-			constexpr bool operator==(const EffectContext &other) const noexcept = default;
+			constexpr bool operator==(const EffectContext &other) const noexcept
+			{
+				return mDamage == other.mDamage && mMoveTypeID == other.mMoveTypeID && mAbilityID == other.mAbilityID
+					&& mItemID == other.mItemID && mMoveID == other.mMoveID && mNatureID == other.mNatureID
+					&& mRangeOverride == other.mRangeOverride && mUserIndex == other.mUserIndex && mTargetIndex == other.mTargetIndex
+					&& mMoveBasePower == other.mMoveBasePower && mMoveAccuracy == other.mMoveAccuracy
+					&& mHitAttemptIndex == other.mHitAttemptIndex && mSourceType == other.mSourceType && mUserSide == other.mUserSide
+					&& mTargetSide == other.mTargetSide && mIsSpecial == other.mIsSpecial && mActiveMultipliers == other.mActiveMultipliers;
+			}
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 

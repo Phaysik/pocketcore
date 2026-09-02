@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 09/02/2026
 	@since 0.3.0
-	@version 0.12.16
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -62,7 +62,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 09/02/2026
 		@since 0.3.0
-		@version 0.12.16
+		@version 0.12.17
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -81,15 +81,15 @@ namespace PocketCore::Pokemon
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
-				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
+				@param[in] typeIDs Fixed type identifier slots
 				@since 0.3.0
-				@version 0.12.14
+				@version 0.12.17
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const us health, const us attack, const us defense, const us spAttack,
 									   const us spDefense, const us speed, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs)
 				: mName{name}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health},
 				  mAttack{attack}, mDefense{defense}, mSpAttack{spAttack}, mSpDefense{spDefense}, mSpeed{speed}
 			{
@@ -113,9 +113,9 @@ namespace PocketCore::Pokemon
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
-				@param[in] typeIDs Fixed type identifier slots; defaults to empty identifiers.
+				@param[in] typeIDs Fixed type identifier slots
 				@since 0.3.0
-				@version 0.12.14
+				@version 0.12.17
 			*/
 			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
@@ -123,7 +123,7 @@ namespace PocketCore::Pokemon
 									   const us defense, const us spAttack, const us spDefense, const us speed, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs = {})
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs)
 				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs},
 				  mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health}, mAttack{attack}, mDefense{defense}, mSpAttack{spAttack},
 				  mSpDefense{spDefense}, mSpeed{speed}
@@ -146,9 +146,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all status identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.9.11
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &getStatusesArray() const
+			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &getStatusIDsArray() const
 			{
 				return mStatusIDs;
 			}
@@ -156,11 +156,85 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all move identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMovesArray() const
+			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMoveIDsArray() const
 			{
 				return mMoveIDs;
+			}
+
+			/*! @brief Returns maximum PP for every move slot.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getMaxPPArray() const
+			{
+				return mMaxPP;
+			}
+
+			/*! @brief Returns current PP for every move slot.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getCurrentPPArray() const
+			{
+				return mCurrentPP;
+			}
+
+			/*! @brief Returns all type identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.4.0
+				@version 0.12.17
+			*/
+			ATTR_NODISCARD constexpr const std::array<TypeID, MAX_TYPES_PER_POKEMON> &getTypeIDsArray() const noexcept
+			{
+				return mTypeIDs;
+			}
+
+			/*! @brief Returns all ability identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.11.6
+				@version 0.12.17
+			*/
+			ATTR_NODISCARD constexpr const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &getAbilityIDsArray() const noexcept
+			{
+				return mAbilityIDs;
+			}
+
+			/*! @brief Returns all held-item identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.11.6
+				@version 0.12.17
+			*/
+			ATTR_NODISCARD constexpr const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &getItemsIDsArray() const noexcept
+			{
+				return mItemIDs;
+			}
+
+			/*! @brief Returns all nature identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.11.6
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr const std::array<NatureID, MAX_NATURES_PER_POKEMON> &getNatureIDsArray() const noexcept
+			{
+				return mNatureIDs;
+			}
+
+			/*! @brief Returns a status identifier by slot index.
+				@param[in] index Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
+				@return The status identifier stored in the slot.
+				@pre index < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
+				@since 0.8.1
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
+			{
+				assert(index < mStatusIDs.size());
+
+				return mStatusIDs.at(index);
 			}
 
 			/*! @brief Returns the move identifier at an indexed move slot.
@@ -177,16 +251,6 @@ namespace PocketCore::Pokemon
 				return mMoveIDs.at(index);
 			}
 
-			/*! @brief Returns maximum PP for every move slot.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getMaxPPArray() const
-			{
-				return mMaxPP;
-			}
-
 			/*! @brief Returns maximum PP for an indexed move slot.
 				@param[in] index Move slot index; must be less than MAX_MOVES_PER_POKEMON.
 				@return The slot's maximum PP.
@@ -201,16 +265,6 @@ namespace PocketCore::Pokemon
 				return mMaxPP.at(index);
 			}
 
-			/*! @brief Returns current PP for every move slot.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getCurrentPPArray() const
-			{
-				return mCurrentPP;
-			}
-
 			/*! @brief Returns current PP for an indexed move slot.
 				@param[in] index Move slot index; must be less than MAX_MOVES_PER_POKEMON.
 				@return The slot's current PP.
@@ -223,46 +277,6 @@ namespace PocketCore::Pokemon
 				assert(index < mCurrentPP.size());
 
 				return mCurrentPP.at(index);
-			}
-
-			/*! @brief Returns all type identifier slots.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.4.0
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<TypeID, MAX_TYPES_PER_POKEMON> &getTypesArray() const noexcept
-			{
-				return mTypeIDs;
-			}
-
-			/*! @brief Returns all ability identifier slots.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.11.6
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &getAbilitiesArray() const noexcept
-			{
-				return mAbilityIDs;
-			}
-
-			/*! @brief Returns all held-item identifier slots.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.11.6
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &getItemsArray() const noexcept
-			{
-				return mItemIDs;
-			}
-
-			/*! @brief Returns all nature identifier slots.
-				@return A read-only reference valid for the object's lifetime.
-				@since 0.11.6
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr const std::array<NatureID, MAX_NATURES_PER_POKEMON> &getNatureIDsArray() const noexcept
-			{
-				return mNatureIDs;
 			}
 
 			/*! @brief Returns a type identifier by slot index.
@@ -321,26 +335,6 @@ namespace PocketCore::Pokemon
 				return mNatureIDs.at(index);
 			}
 
-			/*! @brief Returns the base Attack statistic.
-				@return The Attack value.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr us getAttack() const
-			{
-				return mAttack;
-			}
-
-			/*! @brief Returns the base Defense statistic.
-				@return The Defense value.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr us getDefense() const
-			{
-				return mDefense;
-			}
-
 			/*! @brief Returns current health.
 				@return The current health value.
 				@since 0.3.0
@@ -361,14 +355,24 @@ namespace PocketCore::Pokemon
 				return mMaxHealth;
 			}
 
-			/*! @brief Returns the base Speed statistic.
-				@return The Speed value.
+			/*! @brief Returns the base Attack statistic.
+				@return The Attack value.
 				@since 0.3.0
 				@version 0.12.2
 			*/
-			ATTR_NODISCARD constexpr us getSpeed() const
+			ATTR_NODISCARD constexpr us getAttack() const
 			{
-				return mSpeed;
+				return mAttack;
+			}
+
+			/*! @brief Returns the base Defense statistic.
+				@return The Defense value.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr us getDefense() const
+			{
+				return mDefense;
 			}
 
 			/*! @brief Returns the base Special Attack statistic.
@@ -391,6 +395,16 @@ namespace PocketCore::Pokemon
 				return mSpDefense;
 			}
 
+			/*! @brief Returns the base Speed statistic.
+				@return The Speed value.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			ATTR_NODISCARD constexpr us getSpeed() const
+			{
+				return mSpeed;
+			}
+
 			/*! @brief Returns the Pokemon's level.
 				@return The level value.
 				@since 0.7.2
@@ -411,20 +425,6 @@ namespace PocketCore::Pokemon
 				return mLevelDamageFactor;
 			}
 
-			/*! @brief Returns a status identifier by slot index.
-				@param[in] index Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
-				@return The status identifier stored in the slot.
-				@pre index < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
-				@since 0.8.1
-				@version 0.12.2
-			*/
-			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
-			{
-				assert(index < mStatusIDs.size());
-
-				return mStatusIDs.at(index);
-			}
-
 			// Setters
 
 			/*! @brief Replaces the non-owning display-name view.
@@ -440,9 +440,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all status identifier slots.
 				@param[in] statusIDs The status identifiers to store.
 				@since 0.9.11
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setStatusesArray(const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &statusIDs)
+			constexpr void setStatusIDsArray(const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &statusIDs)
 			{
 				mStatusIDs = statusIDs;
 			}
@@ -450,25 +450,11 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all move identifier slots.
 				@param[in] moveIDs The move identifiers to store.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setMovesArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
+			constexpr void setMoveIDsArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
 			{
 				mMoveIDs = moveIDs;
-			}
-
-			/*! @brief Sets one move slot.
-				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@param[in] moveID The move identifier to store.
-				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			constexpr void setMove(const ub slotIndex, const MoveID moveID)
-			{
-				assert(slotIndex < mMoveIDs.size());
-
-				mMoveIDs.at(slotIndex) = moveID;
 			}
 
 			/*! @brief Replaces maximum PP for all move slots.
@@ -481,20 +467,6 @@ namespace PocketCore::Pokemon
 				mMaxPP = maxPP;
 			}
 
-			/*! @brief Sets maximum PP for one move slot.
-				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@param[in] maxPP The maximum PP value to store.
-				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			constexpr void setMaxPP(const ub slotIndex, const ub maxPP)
-			{
-				assert(slotIndex < mMaxPP.size());
-
-				mMaxPP.at(slotIndex) = maxPP;
-			}
-
 			/*! @brief Replaces current PP for all move slots.
 				@param[in] currentPP The current PP values to store.
 				@since 0.3.0
@@ -505,26 +477,12 @@ namespace PocketCore::Pokemon
 				mCurrentPP = currentPP;
 			}
 
-			/*! @brief Sets current PP for one move slot.
-				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@param[in] currentPP The current PP value to store.
-				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			constexpr void setCurrentPP(const ub slotIndex, const ub currentPP)
-			{
-				assert(slotIndex < mCurrentPP.size());
-
-				mCurrentPP.at(slotIndex) = currentPP;
-			}
-
 			/*! @brief Replaces all type identifier slots.
 				@param[in] typeIDs The type identifiers to store.
 				@since 0.4.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setTypesArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs)
+			constexpr void setTypeIDsArray(const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs)
 			{
 				mTypeIDs = typeIDs;
 			}
@@ -559,14 +517,70 @@ namespace PocketCore::Pokemon
 				mNatureIDs = natureIDs;
 			}
 
+			/*! @brief Sets one status slot.
+				@param[in] slotIndex Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
+				@param[in] statusID The status identifier to store.
+				@pre slotIndex < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
+				@since 0.12.17
+				@version 0.12.17
+			*/
+			constexpr void setStatusID(const ub slotIndex, const StatusID statusID)
+			{
+				assert(slotIndex < mStatusIDs.size());
+
+				mStatusIDs.at(slotIndex) = statusID;
+			}
+
+			/*! @brief Sets one move slot.
+				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
+				@param[in] moveID The move identifier to store.
+				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
+				@since 0.3.0
+				@version 0.12.17
+			*/
+			constexpr void setMoveID(const ub slotIndex, const MoveID moveID)
+			{
+				assert(slotIndex < mMoveIDs.size());
+
+				mMoveIDs.at(slotIndex) = moveID;
+			}
+
+			/*! @brief Sets maximum PP for one move slot.
+				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
+				@param[in] maxPP The maximum PP value to store.
+				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			constexpr void setMaxPP(const ub slotIndex, const ub maxPP)
+			{
+				assert(slotIndex < mMaxPP.size());
+
+				mMaxPP.at(slotIndex) = maxPP;
+			}
+
+			/*! @brief Sets current PP for one move slot.
+				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
+				@param[in] currentPP The current PP value to store.
+				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			constexpr void setCurrentPP(const ub slotIndex, const ub currentPP)
+			{
+				assert(slotIndex < mCurrentPP.size());
+
+				mCurrentPP.at(slotIndex) = currentPP;
+			}
+
 			/*! @brief Sets one type slot.
 				@param[in] slotIndex Type slot index; must be less than MAX_TYPES_PER_POKEMON.
 				@param[in] typeID The type identifier to store.
 				@pre slotIndex < MAX_TYPES_PER_POKEMON; violation triggers an assertion.
 				@since 0.4.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setType(const ub slotIndex, const TypeID typeID)
+			constexpr void setTypeID(const ub slotIndex, const TypeID typeID)
 			{
 				assert(slotIndex < mTypeIDs.size());
 
@@ -578,9 +592,9 @@ namespace PocketCore::Pokemon
 				@param[in] abilityID The ability identifier to store.
 				@pre slotIndex < MAX_ABILITIES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setAbility(const ub slotIndex, const AbilityID abilityID)
+			constexpr void setAbilityID(const ub slotIndex, const AbilityID abilityID)
 			{
 				assert(slotIndex < mAbilityIDs.size());
 
@@ -592,9 +606,9 @@ namespace PocketCore::Pokemon
 				@param[in] itemID The item identifier to store.
 				@pre slotIndex < MAX_ITEMS_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setItem(const ub slotIndex, const ItemID itemID)
+			constexpr void setItemID(const ub slotIndex, const ItemID itemID)
 			{
 				assert(slotIndex < mItemIDs.size());
 
@@ -606,33 +620,13 @@ namespace PocketCore::Pokemon
 				@param[in] natureID The nature identifier to store.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
-				@version 0.12.2
+				@version 0.12.17
 			*/
-			constexpr void setNature(const ub slotIndex, const NatureID natureID)
+			constexpr void setNatureID(const ub slotIndex, const NatureID natureID)
 			{
 				assert(slotIndex < mNatureIDs.size());
 
 				mNatureIDs.at(slotIndex) = natureID;
-			}
-
-			/*! @brief Replaces the base Attack statistic.
-				@param[in] attack The new Attack value.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			constexpr void setAttack(const us attack)
-			{
-				mAttack = attack;
-			}
-
-			/*! @brief Replaces the base Defense statistic.
-				@param[in] defense The new Defense value.
-				@since 0.3.0
-				@version 0.12.2
-			*/
-			constexpr void setDefense(const us defense)
-			{
-				mDefense = defense;
 			}
 
 			/*! @brief Sets current health, clamped to maximum health.
@@ -656,14 +650,24 @@ namespace PocketCore::Pokemon
 				mHealth = std::min(mHealth, mMaxHealth);
 			}
 
-			/*! @brief Replaces the base Speed statistic.
-				@param[in] speed The new Speed value.
+			/*! @brief Replaces the base Attack statistic.
+				@param[in] attack The new Attack value.
 				@since 0.3.0
 				@version 0.12.2
 			*/
-			constexpr void setSpeed(const us speed)
+			constexpr void setAttack(const us attack)
 			{
-				mSpeed = speed;
+				mAttack = attack;
+			}
+
+			/*! @brief Replaces the base Defense statistic.
+				@param[in] defense The new Defense value.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			constexpr void setDefense(const us defense)
+			{
+				mDefense = defense;
 			}
 
 			/*! @brief Replaces the base Special Attack statistic.
@@ -684,6 +688,16 @@ namespace PocketCore::Pokemon
 			constexpr void setSpDefense(const us spDefense)
 			{
 				mSpDefense = spDefense;
+			}
+
+			/*! @brief Replaces the base Speed statistic.
+				@param[in] speed The new Speed value.
+				@since 0.3.0
+				@version 0.12.2
+			*/
+			constexpr void setSpeed(const us speed)
+			{
+				mSpeed = speed;
 			}
 
 			/*! @brief Sets the level and recomputes its damage factor.
@@ -745,7 +759,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemon The Pokemon to write.
 				@return The supplied stream after writing the representation.
 				@since 0.11.2
-				@version 0.12.2
+				@version 0.12.17
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 
@@ -801,7 +815,7 @@ namespace PocketCore::Pokemon
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.11.2
-		@version 0.11.6
+		@version 0.12.17
 	*/
 	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Pokemon

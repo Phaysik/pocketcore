@@ -2,7 +2,7 @@
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
 	@date 09/02/2026
 	@since 0.9.16
-	@version 0.12.16
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -431,7 +431,7 @@ namespace PocketCore::Battle
 		}
 
 		const std::array<StatusID, MAX_STATUSES_PER_POKEMON> previousStatuses{
-			statusTarget != nullptr ? statusTarget->getStatusesArray() : decltype(statusTarget->getStatusesArray()){}};
+			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){}};
 
 		effectMeta->mApply(mState, context, *mProvider);
 
@@ -451,7 +451,7 @@ namespace PocketCore::Battle
 			});
 		}
 
-		if (statusTarget != nullptr && statusTarget->getStatusesArray() != previousStatuses)
+		if (statusTarget != nullptr && statusTarget->getStatusIDsArray() != previousStatuses)
 		{
 			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
 			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
@@ -849,13 +849,13 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilitiesArray()};
+		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilityIDsArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
 			return abilityID != NO_ABILITY_ID ? mProvider->abilityRegistry->getAbilityMetadata(abilityID) : nullptr;
 		});
 
-		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsArray()};
+		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsIDsArray()};
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
 			return itemID != NO_ITEM_ID ? mProvider->itemRegistry->getItemMetadata(itemID) : nullptr;

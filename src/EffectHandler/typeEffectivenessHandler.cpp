@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.cpp
 	@brief Contains the type effectiveness effect handler implementation
-	@date 08/28/2026
+	@date 09/02/2026
 	@since 0.9.2
-	@version 0.12.9
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -63,7 +63,7 @@ namespace PocketCore::Effect
 
 		double typeEffectivenessValue{1.0};
 
-		for (const TypeID &type : targetPokemon->getTypesArray())
+		for (const TypeID &type : targetPokemon->getTypeIDsArray())
 		{
 			if (type == NO_TYPE_ID)
 			{

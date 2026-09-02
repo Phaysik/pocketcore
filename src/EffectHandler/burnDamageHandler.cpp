@@ -2,7 +2,7 @@
 	@brief Contains the burn damage effect handler implementation
 	@date 09/02/2026
 	@since 0.9.5
-	@version 0.12.16
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -51,8 +51,8 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		const bool isBurned{std::ranges::contains(userPokemon->getStatusesArray(), toStatusID(BuiltinStatusID::Burn))};
-		const bool abilityIsntGuts{!std::ranges::contains(userPokemon->getAbilitiesArray(), toAbilityID(BuiltinAbilityID::Guts))};
+		const bool isBurned{std::ranges::contains(userPokemon->getStatusIDsArray(), toStatusID(BuiltinStatusID::Burn))};
+		const bool abilityIsntGuts{!std::ranges::contains(userPokemon->getAbilityIDsArray(), toAbilityID(BuiltinAbilityID::Guts))};
 		const bool moveIsntFacade{context.mMoveID != toMoveID(BuiltinMoveID::Facade)};
 
 		if (isBurned && !context.mIsSpecial && abilityIsntGuts && moveIsntFacade)

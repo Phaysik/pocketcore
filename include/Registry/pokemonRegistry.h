@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.11.6
-	@version 0.12.5
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -40,7 +40,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::FixedMetadataRegistry;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 
 	/*! @class PokemonRegistry Registry/pokemonRegistry.h
@@ -48,9 +48,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 08/22/2026
+		@date 09/02/2026
 		@since 0.11.6
-		@version 0.12.0
+		@version 0.12.17
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -62,70 +62,70 @@ namespace PocketCore::Registry::Pokemon
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID.
 				@since 0.11.6
-				@version 0.12.0
+				@version 0.12.17
 			 */
 			ATTR_NOINLINE explicit constexpr PokemonRegistry() : Base{toPokemonID(BuiltinPokemonID::FinalPokemon).getValue()}
 			{
 				addBuiltin({.mName = PocketCore::Pokemon::POKEMON_NAME_NONE, .mPokemonID = toPokemonID(BuiltinPokemonID::None)});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_BULBASAUR,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Grass), toTypeID(BuiltInTypeID::Poison)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_IVYSAUR,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Grass), toTypeID(BuiltInTypeID::Poison)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_VENUSAUR,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Grass), toTypeID(BuiltInTypeID::Poison)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_CHARMANDER,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Fire)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_CHARMELEON,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Fire)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_CHARIZARD,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Fire), toTypeID(BuiltInTypeID::Flying)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Water)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_WARTORTLE,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Water)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
 					.mAbilityPoolCount = 0,
 				});
 				addBuiltin({
 					.mName = PocketCore::Pokemon::POKEMON_NAME_BLASTOISE,
-					.mTypeIDs = {toTypeID(BuiltInTypeID::Water)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
 					.mAbilityPoolCount = 0,

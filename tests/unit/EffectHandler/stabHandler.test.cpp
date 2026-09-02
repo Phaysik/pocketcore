@@ -1,8 +1,8 @@
 /*! @file stabHandler.test.cpp
 	@brief C++ file for running tests for the StabHandler.
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.8.7
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -32,7 +32,7 @@ using PocketCore::Testing::hasStabMultiplier;
 using PocketCore::Testing::makeBattleState;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::makePokemon;
-using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
@@ -41,11 +41,11 @@ SCENARIO("StabHandler")
 {
 	StabHandler stabHandler{};
 	RegistryProvider provider{};
-	EffectContext context{makeEffectContext({.mMoveTypeID = toTypeID(BuiltInTypeID::Fire), .mUserIndex = 0, .mUserSide = Side::A})};
+	EffectContext context{makeEffectContext({.mMoveTypeID = toTypeID(BuiltinTypeID::Fire), .mUserIndex = 0, .mUserSide = Side::A})};
 
 	GIVEN("a user Pokemon with a matching move type")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Fire)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Fire)}})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}})};
 
@@ -62,7 +62,7 @@ SCENARIO("StabHandler")
 
 	GIVEN("a user Pokemon without a matching move type")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Water)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Water)}})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}})};
 

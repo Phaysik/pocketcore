@@ -1,15 +1,13 @@
 /*! @file typeID.h
 	@brief Defines the open identifier used for built-in and user-defined Pokemon types.
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.4.0
-	@version 0.12.5
+	@version 0.12.17
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_TYPES_TYPEID_H
 #define INCLUDE_TYPES_TYPEID_H
-
-#include <limits>
 
 #include "Core/typedefs.h"
 #include "ID/idInterface.h"
@@ -29,7 +27,7 @@ namespace PocketCore::Type
 		@details Values are assigned by the type registry. The type is open and represents both built-in @ref Types values and user-defined
 	   types without extending the built-in enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
 	*/
-	using TypeID = PocketCore::ID::IDInterface<Detail::typeID, std::numeric_limits<ub>::max()>;
+	using TypeID = PocketCore::ID::IDInterface<Detail::typeID, 0>;
 
 	/*! @brief The identifier used for an unassigned Pokemon type slot. */
 	inline constexpr TypeID NO_TYPE_ID{};

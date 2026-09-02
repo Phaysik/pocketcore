@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.9.14
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -314,7 +314,7 @@ namespace PocketCore::Battle
 		@return The selected active slots in deterministic side and slot order, or @ref BattleEngineError::InvalidActiveSlot, @ref
 	   BattleEngineError::MoveNotFound, or a target-resolution error.
 		@since 0.10.4
-		@version 0.10.9
+		@version 0.12.17
 	*/
 	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> getMoveTargets(const BattleState &state,
 																							  const MoveAction &action,
@@ -361,7 +361,7 @@ namespace PocketCore::Battle
 		@param[in] moveRegistry The move registry to grab the move metadata from.
 		@return Void when the action is valid, or the first applicable @ref BattleEngineError.
 		@since 0.10.4
-		@version 0.10.9
+		@version 0.12.17
 	*/
 	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
 																			 const BattlePhase phase, const MoveRegistry *moveRegistry);

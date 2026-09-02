@@ -1,8 +1,8 @@
 /*! @file stabHandler.h
 	@brief Contains the same type attack bonus damage effect handler
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.8.1
-	@version 0.12.7
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 			built-in STAB multiplier in @ref EffectContext.
 		@warning The context must identify a valid user slot containing a Pokemon.
 		@note The handler does not inspect or modify the target slot or registry provider.
-		@date 08/26/2026
+		@date 09/02/2026
 		@since 0.8.1
-		@version 0.12.7
+		@version 0.12.17
 		@author Matthew Moore
 	*/
 	class StabHandler : public IEffectHandler
@@ -44,7 +44,7 @@ namespace PocketCore::Effect
 				@post When the user's Pokemon has the move type, @p context contains the configured STAB multiplier. Otherwise, the active
 			   multipliers remain unchanged.
 				@since 0.8.1
-				@version 0.12.7
+				@version 0.12.17
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};

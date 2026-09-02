@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.17] - 2026-09-02
+
 ## [0.12.16] - 2026-09-02
+
+### Added
+
+- Added the generic `Interaction<ID>` metadata record and `InteractionAction` policy with `Coexist`, `ReplaceCurrent`, `RemoveCurrent`, and `BlockIncoming` outcomes. Interaction declarations are evaluated from an incoming identifier against identifiers already active in the same domain.
+- Added reusable constexpr interaction algorithms for matching declarations, detecting blockers, replacing or removing active identifiers, stably compacting fixed-capacity identifier ranges, and applying an incoming identifier through the complete policy. Empty and duplicate identifiers are ignored; blocking occurs before mutation; only the first replacement retains the incoming identifier; removals preserve the relative order of survivors; and insertion is skipped when no slot remains.
+- Added `MAX_ACTIVE_WEATHERS_ON_FIELD` with a fixed capacity of five and added `WeatherMeta::mWeatherInteractions`, allowing registered weather metadata to use the same interaction policy as statuses.
+- Added deterministic `Random::findSeed()` test coverage for requested integral and floating-point outcomes.
+
+### Changed
+
+- Replaced `BattleState::mWeatherID` with `mWeatherIDs`, a five-element active-weather array. Battle-state test fixtures, weather consumers, and weather-change detection now operate on the complete array; an effect flagged as weather-mutating dispatches `WeatherChanged` when any array element changes.
+- Changed the rain, harsh-sunlight, and sandstorm setters from unconditional scalar assignment to interaction-aware insertion through the configured `WeatherRegistry`. With the built-in weather metadata in this revision declaring no interactions, distinct setters coexist in insertion order until the five-weather array is full, while duplicate applications leave the array unchanged.
+- Changed `WeatherHandler` to detect rain and harsh sunlight by membership in the active-weather array. Air Lock and Cloud Nine still force a neutral weather multiplier; when rain and harsh sunlight coexist, rain retains precedence because it is evaluated first, and Hydro Steam retains its harsh-sunlight exception when rain is absent.
+- Generalized status metadata from `StatusInteraction` and `StatusInteractionAction` to `Interaction<StatusID>` and `InteractionAction`. `Pokemon::addStatus()` now delegates to the shared policy while preserving the built-in rules: Freeze blocks incoming Paralysis, Burn, Sleep, Poison, and Toxic; incoming Freeze removes Burn, Sleep, and Paralysis; and Toxic replaces Poison.
+- Simplified burn detection to search the Pokemon's active status array directly, preserving the existing physical-move, Guts, and Facade exclusions.
+
+### Removed
+
+- Removed the status-specific `statusHelpers.h` algorithms and the `StatusInteraction` and `StatusInteractionAction` types after their behavior moved to the generic interaction layer.
+- Removed the empty tracked `pokemon.log` artifact.
 
 ## [0.12.15] - 2026-09-01
 
@@ -629,7 +651,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Replaced `MoveMeta::mHitDistribution`, a `std::vector<std::pair<ub, float>>` defaulting to one certain hit, with `mHitCountPolicy`, which defaults to `FixedHitCount{1}`.
 - Replaced `EffectContext::mTotalHits` and `mCurrentHit` with the zero-initialized `ub mHitAttemptIndex` field.
 - Renamed `BattleState::mWeather` and `mTerrain` to `mWeatherID` and `mTerrainID`.
-- Renamed the `Types` enum to `BuiltInTypeID` and updated registry, configuration, Pokemon, handler, and test call sites.
+- Renamed the `Types` enum to `BuiltinTypeID` and updated registry, configuration, Pokemon, handler, and test call sites.
 - Changed Pound, Karate Chop, and test move definitions from `OnTarget` to `OnHit`.
 - Changed both `MoveRegistryConfiguration::updateMove()` overloads to copy each `MoveMeta` member explicitly, including the new hit-count policy.
 
@@ -637,7 +659,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Added the `ATTR_NOINLINE constexpr` `Detail::cloneMetadata()` helper and routed generic metadata mutation copies through it to avoid copy-related compiler inlining diagnostics.
 - Corrected the braced initialization in `randomizationHandler.cpp` and added the missing Catch2 `catch_matchers.hpp` include to `random.test.cpp`.
-- Updated move, type, registry, Pokemon, and configuration tests and includes for the trigger and `BuiltInTypeID` API changes.
+- Updated move, type, registry, Pokemon, and configuration tests and includes for the trigger and `BuiltinTypeID` API changes.
 
 ### Removed
 
@@ -1750,7 +1772,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.16]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.17]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.16]: https://github.com/Phaysik/pocketcore/commit/e622e64a29215e50a70788359c7ce87b9387c0f6
 [0.12.15]: https://github.com/Phaysik/pocketcore/commit/026b606e93777a7709c87bbc42a9918a492c2672
 [0.12.14]: https://github.com/Phaysik/pocketcore/commit/20da569d8a90c8d9486006cae57aa8c82622e22a
 [0.12.13]: https://github.com/Phaysik/pocketcore/commit/9f14ed4b0c53ee56dc191ce1028e87be11d6707a

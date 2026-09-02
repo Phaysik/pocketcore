@@ -2,7 +2,7 @@
 	@brief Contains the weather effect handler implementation
 	@date 09/02/2026
 	@since 0.9.8
-	@version 0.12.16
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -42,7 +42,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
@@ -53,7 +53,7 @@ namespace PocketCore::Effect
 
 		for (const Pokemon *pokemon : partyA)
 		{
-			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilitiesArray(), [](const AbilityID ability) {
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityIDsArray(), [](const AbilityID ability) {
 					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
 				}))
 			{
@@ -67,7 +67,7 @@ namespace PocketCore::Effect
 		for (const Pokemon *pokemon : partyB)
 		{
 
-			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilitiesArray(), [](const AbilityID ability) {
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityIDsArray(), [](const AbilityID ability) {
 					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
 				}))
 			{
@@ -79,8 +79,8 @@ namespace PocketCore::Effect
 		const bool isRainy{std::ranges::contains(state.mWeatherIDs, toWeatherID(BuiltinWeatherID::Rain))};
 		const bool isHarshSunlight{std::ranges::contains(state.mWeatherIDs, toWeatherID(BuiltinWeatherID::HarshSunlight))};
 
-		const bool isWaterTypeMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Water)};
-		const bool isFireTypeMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Fire)};
+		const bool isWaterTypeMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Water)};
+		const bool isFireTypeMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Fire)};
 
 		const bool isHydroSteamMove{context.mMoveID == toMoveID(BuiltinMoveID::HydroSteam)};
 

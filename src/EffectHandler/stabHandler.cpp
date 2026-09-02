@@ -1,8 +1,8 @@
 /*! @file stabHandler.cpp
 	@brief Contains the stab effect handler implementation
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.8.1
-	@version 0.12.7
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -33,7 +33,7 @@ namespace PocketCore::Effect
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 
-		if (std::ranges::contains(user.mPokemon->getTypesArray(), context.mMoveTypeID))
+		if (std::ranges::contains(user.mPokemon->getTypeIDsArray(), context.mMoveTypeID))
 		{
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Stab), STAB_HIT_MULTIPLIER_VALUE);
 		}

@@ -1,8 +1,8 @@
 /*! @file effectHandlerHelpers.h
 	@brief Contains the effect handler helpers
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.7.2
-	@version 0.12.7
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -36,7 +36,7 @@ namespace PocketCore::Effect
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::toItemID;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 	using PocketCore::Type::TypeID;
 
@@ -67,22 +67,45 @@ namespace PocketCore::Effect
 		return (side == Side::A) ? state.mSideA : state.mSideB;
 	}
 
+	/*! @brief Determines whether a battle slot's Pokemon has an type with a specified name.
+		@param[in] battleSlot The battle slot whose Pokemon is inspected.
+		@param[in] provider The registries used to resolve type identifiers to names.
+		@param[in] expectedName The type name to search for.
+		@return `true` when a resolved type name matches @p expectedName; otherwise, `false`.
+		@note Returns `false` when the slot has no Pokemon, the type registry is unavailable, or no type matches.
+		@since 0.12.17
+		@version 0.12.17
+	*/
+	ATTR_NODISCARD static inline bool battleSlotHasTypeByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
+															  const std::string_view &expectedName)
+	{
+		if (battleSlot.mPokemon == nullptr || provider.typeRegistry == nullptr)
+		{
+			return false;
+		}
+
+		return std::ranges::any_of(battleSlot.mPokemon->getTypeIDsArray(), [expectedName, &provider](const TypeID pokemonAbility) {
+			const std::optional<std::string_view> typeName{provider.typeRegistry->getTypeName(pokemonAbility)};
+			return typeName.has_value() && typeName.value() == expectedName;
+		});
+	}
+
 	/*! @brief Determines whether a battle slot's Pokemon has a specified type.
 		@param[in] battleSlot The battle slot whose Pokemon is inspected.
 		@param[in] queriedType The type identifier to search for.
 		@return `true` when the slot contains a Pokemon with @p queriedType; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
-	ATTR_NODISCARD static inline bool battleSlotHasType(const BattleSlot &battleSlot, const TypeID queriedType)
+	ATTR_NODISCARD static inline bool battleSlotHasTypeByID(const BattleSlot &battleSlot, const TypeID queriedType)
 	{
 		if (battleSlot.mPokemon == nullptr)
 		{
 			return false;
 		}
 
-		return std::ranges::any_of(battleSlot.mPokemon->getTypesArray(),
+		return std::ranges::any_of(battleSlot.mPokemon->getTypeIDsArray(),
 								   [queriedType](const TypeID pokemonType) { return pokemonType == queriedType; });
 	}
 
@@ -93,7 +116,7 @@ namespace PocketCore::Effect
 		@return `true` when a resolved ability name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the ability registry is unavailable, or no ability matches.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																 const std::string_view &expectedName)
@@ -103,7 +126,7 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		return std::ranges::any_of(battleSlot.mPokemon->getAbilitiesArray(), [expectedName, &provider](const AbilityID pokemonAbility) {
+		return std::ranges::any_of(battleSlot.mPokemon->getAbilityIDsArray(), [expectedName, &provider](const AbilityID pokemonAbility) {
 			const std::optional<std::string_view> abilityName{provider.abilityRegistry->getAbilityName(pokemonAbility)};
 			return abilityName.has_value() && abilityName.value() == expectedName;
 		});
@@ -115,7 +138,7 @@ namespace PocketCore::Effect
 		@return `true` when the slot contains a Pokemon with @p abilityID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByID(const BattleSlot &battleSlot, const AbilityID &abilityID)
 	{
@@ -123,7 +146,7 @@ namespace PocketCore::Effect
 		{
 			return false;
 		}
-		return std::ranges::contains(battleSlot.mPokemon->getAbilitiesArray(), abilityID);
+		return std::ranges::contains(battleSlot.mPokemon->getAbilityIDsArray(), abilityID);
 	}
 
 	/*! @brief Determines whether a battle slot's Pokemon holds an item with a specified name.
@@ -133,17 +156,17 @@ namespace PocketCore::Effect
 		@return `true` when a resolved item name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the item registry is unavailable, or no item matches.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
-	ATTR_NODISCARD static inline bool battleSlotHoldsItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																const std::string_view &expectedName)
+	ATTR_NODISCARD static inline bool battleSlotHasItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
+															  const std::string_view &expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.itemRegistry == nullptr)
 		{
 			return false;
 		}
 
-		return std::ranges::any_of(battleSlot.mPokemon->getItemsArray(), [expectedName, &provider](const ItemID pokemonItem) {
+		return std::ranges::any_of(battleSlot.mPokemon->getItemsIDsArray(), [expectedName, &provider](const ItemID pokemonItem) {
 			const std::optional<std::string_view> itemName{provider.itemRegistry->getItemName(pokemonItem)};
 			return itemName.has_value() && itemName.value() == expectedName;
 		});
@@ -155,16 +178,16 @@ namespace PocketCore::Effect
 		@return `true` when the slot contains a Pokemon holding @p itemID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
-	ATTR_NODISCARD static inline bool battleSlotHoldsItemByID(const BattleSlot &battleSlot, const ItemID itemID)
+	ATTR_NODISCARD static inline bool battleSlotHasItemByID(const BattleSlot &battleSlot, const ItemID itemID)
 	{
 		if (battleSlot.mPokemon == nullptr)
 		{
 			return false;
 		}
 
-		return std::ranges::contains(battleSlot.mPokemon->getItemsArray(), itemID);
+		return std::ranges::contains(battleSlot.mPokemon->getItemsIDsArray(), itemID);
 	}
 
 	/*! @brief Determines whether a battle slot's Pokemon has a nature with a specified name.
@@ -174,10 +197,10 @@ namespace PocketCore::Effect
 		@return `true` when a resolved nature name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the nature registry is unavailable, or no nature matches.
 		@since 0.11.6
-		@version 0.12.7
+		@version 0.12.17
 	*/
-	ATTR_NODISCARD static inline bool battleSlotHoldsNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																  const std::string_view &expectedName)
+	ATTR_NODISCARD static inline bool battleSlotHasNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
+																const std::string_view &expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.natureRegistry == nullptr)
 		{
@@ -196,9 +219,9 @@ namespace PocketCore::Effect
 		@return `true` when the slot contains a Pokemon with @p natureID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
 		@since 0.11.6
-		@version 0.12.7
+		@version 0.12.17
 	*/
-	ATTR_NODISCARD static inline bool battleSlotHoldsNatureByID(const BattleSlot &battleSlot, const NatureID natureID)
+	ATTR_NODISCARD static inline bool battleSlotHasNatureByID(const BattleSlot &battleSlot, const NatureID natureID)
 	{
 		if (battleSlot.mPokemon == nullptr)
 		{
@@ -213,7 +236,7 @@ namespace PocketCore::Effect
 		@return `true` when the slot is airborne because it is not grounded and its Pokemon has the Flying type; otherwise, `false`.
 		@note An empty slot is treated as grounded because it cannot satisfy the Flying-type condition.
 		@since 0.9.10
-		@version 0.12.7
+		@version 0.12.17
 	*/
 	ATTR_NODISCARD static inline bool isBattleSlotUngrounded(const BattleSlot &battleSlot)
 	{
@@ -222,7 +245,7 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		return battleSlotHasType(battleSlot, toTypeID(BuiltInTypeID::Flying));
+		return battleSlotHasTypeByID(battleSlot, toTypeID(BuiltinTypeID::Flying));
 	}
 
 	/*! @brief Determines whether a battle slot is grounded.

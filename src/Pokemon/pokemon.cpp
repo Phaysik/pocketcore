@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 08/24/2026
+	@date 09/02/2026
 	@since 0.3.0
-	@version 0.12.2
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -37,35 +37,42 @@ namespace PocketCore::Pokemon
 				  << "  Speed: " << pokemon.getSpeed() << '\n'
 				  << "  Type IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getTypesArray().size(); ++index)
+		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
 		{
 			outStream << (index == 0U ? "" : ", ") << pokemon.getTypeID(static_cast<ub>(index)).getValue();
 		}
 
+		outStream << "]\n  Nature IDs: [";
+
+		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
+		{
+			outStream << (index == 0U ? "" : ", ") << pokemon.getNatureID(static_cast<ub>(index)).getValue();
+		}
+
 		outStream << "]\n  Ability IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getAbilitiesArray().size(); ++index)
+		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
 		{
 			outStream << (index == 0U ? "" : ", ") << pokemon.getAbilityID(static_cast<ub>(index)).getValue();
 		}
 
 		outStream << "]\n  Item IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getItemsArray().size(); ++index)
+		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
 		{
 			outStream << (index == 0U ? "" : ", ") << pokemon.getItemID(static_cast<ub>(index)).getValue();
 		}
 
 		outStream << "]\n  Status IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getStatusesArray().size(); ++index)
+		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
 		{
 			outStream << (index == 0U ? "" : ", ") << pokemon.getStatusID(static_cast<us>(index)).getValue();
 		}
 
 		outStream << "]\n  Moves:\n";
 
-		for (std::size_t index{0}; index < pokemon.getMovesArray().size(); ++index)
+		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
 		{
 			const auto moveSlotIndex{static_cast<ub>(index)};
 			outStream << "    [" << index << "] ID: " << pokemon.getMoveID(moveSlotIndex).getValue()
@@ -85,6 +92,7 @@ namespace PocketCore::Pokemon
 										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
 			constexpr std::string_view unregisteredName{"<unregistered>"};
 			const std::optional<std::string_view> name{nameLookup(stableID)};
+			
 			outStream << indentation << "ID: " << stableID.getValue() << '\n' << indentation << "Name: " << name.value_or(unregisteredName);
 		};
 
@@ -99,66 +107,97 @@ namespace PocketCore::Pokemon
 				  << "  Special Defense: " << pokemon.getSpDefense() << '\n'
 				  << "  Speed: " << pokemon.getSpeed() << '\n';
 
-		outStream << "\n  Types:\n";
-		for (std::size_t index{0}; index < pokemon.getTypesArray().size(); ++index)
+		outStream << "  Types:\n";
+		
+		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
 		{
 			const TypeID typeID{pokemon.getTypeID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
+			
 			printIDAndName("      ", typeID, [&registryProvider](const TypeID identifier) {
 				return registryProvider.typeRegistry != nullptr ? registryProvider.typeRegistry->getTypeName(identifier) : std::nullopt;
 			});
+			
 			outStream << '\n';
 		}
 
-		outStream << "\n  Abilities:\n";
-		for (std::size_t index{0}; index < pokemon.getAbilitiesArray().size(); ++index)
+		outStream << "  Natures:\n";
+		
+		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
+		{
+			const NatureID natureID{pokemon.getNatureID(static_cast<ub>(index))};
+			outStream << "    [" << index << "]:\n";
+			
+			printIDAndName("      ", natureID, [&registryProvider](const NatureID identifier) {
+				return registryProvider.natureRegistry != nullptr ? registryProvider.natureRegistry->getNatureName(identifier)
+																  : std::nullopt;
+			});
+			
+			outStream << '\n';
+		}
+
+		outStream << "  Abilities:\n";
+		
+		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
 		{
 			const AbilityID abilityID{pokemon.getAbilityID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
+			
 			printIDAndName("      ", abilityID, [&registryProvider](const AbilityID identifier) {
 				return registryProvider.abilityRegistry != nullptr ? registryProvider.abilityRegistry->getAbilityName(identifier)
 																   : std::nullopt;
 			});
+			
 			outStream << '\n';
 		}
 
-		outStream << "\n  Items:\n";
-		for (std::size_t index{0}; index < pokemon.getItemsArray().size(); ++index)
+		outStream << "  Items:\n";
+		
+		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
 		{
 			const ItemID itemID{pokemon.getItemID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
+			
 			printIDAndName("      ", itemID, [&registryProvider](const ItemID identifier) {
 				return registryProvider.itemRegistry != nullptr ? registryProvider.itemRegistry->getItemName(identifier) : std::nullopt;
 			});
+			
 			outStream << '\n';
 		}
 
 		outStream << "  Statuses:\n";
-		for (std::size_t index{0}; index < pokemon.getStatusesArray().size(); ++index)
+		
+		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
 		{
 			const StatusID statusID{pokemon.getStatusID(static_cast<us>(index))};
 			outStream << "    [" << index << "]:\n";
+			
 			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
 				return registryProvider.statusRegistry != nullptr ? registryProvider.statusRegistry->getStatusName(identifier)
 																  : std::nullopt;
 			});
+			
 			outStream << '\n';
 		}
 
 		outStream << "  Moves:\n";
-		for (std::size_t index{0}; index < pokemon.getMovesArray().size(); ++index)
+		
+		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
 		{
 			const auto moveSlotIndex{static_cast<ub>(index)};
 			const MoveID moveID{pokemon.getMoveID(moveSlotIndex)};
 			outStream << "    [" << index << "]:\n";
+			
 			printIDAndName("      ", moveID, [&registryProvider](const MoveID identifier) {
 				return registryProvider.moveRegistry != nullptr ? registryProvider.moveRegistry->getMoveName(identifier) : std::nullopt;
 			});
+			
 			outStream << "\n      PP: " << static_cast<unsigned int>(pokemon.getCurrentPP(moveSlotIndex)) << '/'
 					  << static_cast<unsigned int>(pokemon.getMaxPP(moveSlotIndex)) << '\n';
 		}
 
 		outStream << '}';
+		
 		return outStream;
 	}
 

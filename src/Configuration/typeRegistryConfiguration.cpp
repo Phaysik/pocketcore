@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 08/30/2026
+	@date 09/02/2026
 	@since 0.2.0
-	@version 0.12.12
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -480,7 +480,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(
-		const PocketCore::Type::BuiltInTypeID type)
+		const PocketCore::Type::BuiltinTypeID type)
 	{
 		const TypeID typeID{PocketCore::Type::toTypeID(type)};
 

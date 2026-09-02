@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 08/27/2026
+	@date 09/02/2026
 	@since 0.2.0
-	@version 0.12.8
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -107,9 +107,9 @@ namespace PocketCore::Configuration
 		@details Provides a high-level API for adding, removing, renaming, and querying types and their matchup relationships. All mutation
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryErrorInfo. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
-		@date 08/27/2026
+		@date 09/02/2026
 		@since 0.1.0
-		@version 0.12.8
+		@version 0.12.17
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -324,9 +324,9 @@ namespace PocketCore::Configuration
 				@param[in] type The built-in @ref PocketCore::Type::Type enum value to remove.
 				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
 				@since 0.1.0
-				@version 0.9.13
+				@version 0.12.17
 			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Type::BuiltInTypeID type);
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Type::BuiltinTypeID type);
 
 			/*! @brief Removes a type from the registry by its stable type ID.
 				@details Useful for removing custom types using the ID returned by @ref addType.

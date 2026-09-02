@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 08/26/2026
+	@date 09/02/2026
 	@since 0.5.3
-	@version 0.12.6
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -41,7 +41,7 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Registry::FixedMetadataRegistry;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 
 	/*! @class MoveRegistry Registry/moveRegistry.h
@@ -50,9 +50,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 08/22/2026
+		@date 09/02/2026
 		@since 0.5.3
-		@version 0.11.6
+		@version 0.12.17
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -64,7 +64,7 @@ namespace PocketCore::Registry::Move
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.11.6
+				@version 0.12.17
 			 */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
 			{
@@ -84,7 +84,7 @@ namespace PocketCore::Registry::Move
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
-					.mTypeID = toTypeID(BuiltInTypeID::Normal),
+					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 					.mPower = 40,
 					.mTargetID = BattleTargetID::SingleOpponent,
 					.mRangeID = BattleRangeID::Adjacent,
@@ -105,13 +105,23 @@ namespace PocketCore::Registry::Move
 					},},
 					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
-					.mTypeID = toTypeID(BuiltInTypeID::Fighting),
+					.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 					.mPower = 50,
 					.mTargetID = BattleTargetID::SingleOpponent,
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
 					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = PocketCore::Move::MOVE_NAME_FACADE,
+					.mMoveID = toMoveID(BuiltinMoveID::Facade),
+				});
+
+				addBuiltin({
+					.mName = PocketCore::Move::MOVE_NAME_HYDRO_STEAM,
+					.mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
 				});
 
 				// NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)

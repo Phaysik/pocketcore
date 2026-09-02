@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.9.10
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -37,7 +37,7 @@ using PocketCore::Testing::hasPsychicBuffInTerrain;
 using PocketCore::Testing::makeBattleState;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::makePokemon;
-using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeID;
 
@@ -50,14 +50,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("electric terrain with an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Electric),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Electric),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -67,7 +67,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -84,7 +84,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -101,7 +101,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -119,14 +119,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("electric terrain without an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -136,7 +136,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -153,7 +153,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -170,7 +170,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -188,14 +188,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain with a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Grass),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Grass),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -205,7 +205,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -222,7 +222,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -239,7 +239,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -257,14 +257,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain without a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -274,7 +274,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -291,7 +291,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -308,7 +308,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -326,14 +326,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain with a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Psychic),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Psychic),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -343,7 +343,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -360,7 +360,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -377,7 +377,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -395,14 +395,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain without a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -412,7 +412,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -429,7 +429,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -446,7 +446,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -464,14 +464,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain with a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Dragon),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Dragon),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -481,7 +481,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -498,7 +498,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -515,7 +515,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -533,14 +533,14 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain without a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
 		};
 
 		EffectContext context{
 			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltInTypeID::Normal),
+				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mUserIndex = 0,
 				.mTargetIndex = 0,
 				.mUserSide = Side::A,
@@ -550,7 +550,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -567,7 +567,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -584,7 +584,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypes = {toTypeID(BuiltInTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 

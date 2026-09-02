@@ -1,8 +1,8 @@
 /*! @file terrainHandler.cpp
 	@brief Contains the terrain effect handler implementation
-	@date 09/01/2026
+	@date 09/02/2026
 	@since 0.9.10
-	@version 0.12.14
+	@version 0.12.17
 	@author Matthew Moore
 */
 
@@ -31,7 +31,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Terrain::BuiltinTerrainID;
 	using PocketCore::Terrain::toTerrainID;
-	using PocketCore::Type::BuiltInTypeID;
+	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 
 	void TerrainHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
@@ -49,10 +49,10 @@ namespace PocketCore::Effect
 		const bool isPsychicTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Psychic)};
 		const bool isMistyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Misty)};
 
-		const bool isElectricMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Electric)};
-		const bool isGrassMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Grass)};
-		const bool isPsychicMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Psychic)};
-		const bool isDragonMove{context.mMoveTypeID == toTypeID(BuiltInTypeID::Dragon)};
+		const bool isElectricMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Electric)};
+		const bool isGrassMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Grass)};
+		const bool isPsychicMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Psychic)};
+		const bool isDragonMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Dragon)};
 
 		if (isElectricTerrain && isElectricMove)
 		{
