@@ -1,21 +1,22 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
 #include "Pokemon/pokemon.h"
 
 #include <array>
-#include <optional>
+#include <expected>
 #include <sstream>
 #include <string_view>
 
 #include "Ability/abilityID.h"
 #include "Ability/builtInAbilityID.h"
 #include "Configuration/constants.h"
+#include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Interaction/interaction.h"
 #include "Item/builtInItemID.h"
@@ -25,6 +26,7 @@
 #include "Nature/builtInNatureID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.testHelper.h"
+#include "Registry/registryError.h"
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Registry/statusRegistry.h"
@@ -45,6 +47,7 @@ using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
 using PocketCore::Interaction::InteractionAction;
@@ -61,6 +64,7 @@ using PocketCore::Nature::NatureID;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::Pokemon;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
@@ -789,7 +793,9 @@ SCENARIO("Pokemon")
 
 	GIVEN("addStatus")
 	{
-		StatusRegistry registry{};
+		StatusRegistryConfiguration statusConfiguration{};
+		const StatusRegistry &registry{statusConfiguration.getRuntimeRegistry()};
+
 		Pokemon pokemon{
 			makePokemon({
 				.mName = "MissingNo",
@@ -844,18 +850,14 @@ SCENARIO("Pokemon")
 		GIVEN("several current statuses that the incoming status replaces")
 		{
 			StatusID incomingStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::optional<us> incomingStatusIndex{registry.findIndexByStatusID(incomingStatusID)};
-
-			REQUIRE(incomingStatusIndex.has_value());
-
-			registry.setEntry(incomingStatusIndex.value(), {
+			std::expected<void, RegistryErrorInfo> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
 			    .mStatusInteractions = {
 					{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::ReplaceCurrent},
 					{.mExistingID = toStatusID(BuiltinStatusID::Poison), .mAction = InteractionAction::ReplaceCurrent},
 				},
 				.mName = "Toxic",
-				.mStatusID = incomingStatusID,
-			});
+			}),};
+			REQUIRE(updateResult.has_value());
 
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
 			statusIDs.at(1) = toStatusID(BuiltinStatusID::Sleep);

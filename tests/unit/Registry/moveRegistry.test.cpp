@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 08/23/2026
+	@date 09/03/2026
 	@since 0.6.0
-	@version 0.12.1
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -43,7 +43,7 @@ SCENARIO("MoveRegistry")
 	{
 		THEN("all built-in move metadata is registered")
 		{
-			CHECK((registry.getAmountRegistered() == 3));
+			CHECK((registry.getAmountRegistered() == 5));
 			CHECK((registry.getNextMoveID() == 5));
 
 			std::optional<MoveID> poundIdentifier{registry.getMoveID(MOVE_NAME_POUND)};
@@ -79,48 +79,11 @@ SCENARIO("MoveRegistry")
 		THEN("the registered span contains exactly the built-in entries")
 		{
 			std::span<const MoveMeta> moves{registry.getRegisteredMoves()};
-			REQUIRE((moves.size() == 3U));
+			REQUIRE((moves.size() == 5));
 			CHECK((moves.front().mName == MOVE_NAME_NONE));
-			CHECK((moves.back().mName == MOVE_NAME_KARATE_CHOP));
+			CHECK((moves.back().mName == PocketCore::Move::MOVE_NAME_HYDRO_STEAM));
 			CHECK(registry.hasMove(toMoveID(BuiltinMoveID::Pound)));
 			CHECK(registry.hasMove(MOVE_NAME_KARATE_CHOP));
-		}
-
-		THEN("the registered amount can be restored directly")
-		{
-			registry.setAmountRegistered(2);
-			CHECK((registry.getAmountRegistered() == 2));
-		}
-
-		THEN("the next stable ID can be restored directly")
-		{
-			registry.setNextMoveID(42);
-			CHECK((registry.getNextMoveID() == 42));
-		}
-
-		THEN("the incrementNextMoveID() method increments the next stable ID")
-		{
-			registry.setNextMoveID(42);
-			registry.incrementNextMoveID();
-			CHECK((registry.getNextMoveID() == 43));
-		}
-
-		THEN("the shared registry mutators can update entries and counts")
-		{
-			CHECK((registry.getAmountRegistered() == 3));
-			registry.incrementAmountRegistered();
-			CHECK((registry.getAmountRegistered() == 4));
-
-			const MoveMeta &entry{registry.getEntry(0)};
-			CHECK((entry.mName == MOVE_NAME_NONE));
-
-			MoveMeta replacement{entry};
-			replacement.mName = "CustomMove";
-			registry.setEntry(0, replacement);
-			CHECK((registry.getEntry(0).mName == "CustomMove"));
-
-			registry.decrementAmountRegistered();
-			CHECK((registry.getAmountRegistered() == 3));
 		}
 	}
 }

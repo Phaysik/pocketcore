@@ -1,8 +1,8 @@
 /*! @file moveRegistry.testHelper.h
 	@brief Test helper for dealing with MoveRegistry concepts.
-	@date 09/01/2026
+	@date 09/03/2026
 	@since 0.12.14
-	@version 0.12.15
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -10,18 +10,19 @@
 #define TEST_INCLUDE_REGISTRY_MOVE_REGISTRY_TEST_HELPER_H
 
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/moveRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/effectTrigger.h"
 #include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Registry/moveRegistry.h"
 #include "Types/typeID.h"
 
 namespace PocketCore::Testing
 {
 	using PocketCore::Battle::BattleRangeID;
 	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Configuration::MoveRegistryConfiguration;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
@@ -30,32 +31,11 @@ namespace PocketCore::Testing
 	using PocketCore::Move::HitCountPolicy;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Type::TypeID;
 
-	constexpr MoveID registerMove(MoveRegistry &registry, const MoveMeta &meta)
+	inline MoveID registerMove(MoveRegistryConfiguration &configuration, const MoveMeta &meta)
 	{
-		const MoveID customMoveID{registry.getNextMoveID()};
-		const us customMoveIndex{registry.getAmountRegistered()};
-
-		registry.setEntry(customMoveIndex, MoveMeta{
-											   .mHitCountPolicy = meta.mHitCountPolicy,
-											   .mTriggers = meta.mTriggers,
-											   .mName = meta.mName,
-											   .mMoveID = customMoveID,
-											   .mTypeID = meta.mTypeID,
-											   .mPower = meta.mPower,
-											   .mTargetID = meta.mTargetID,
-											   .mRangeID = meta.mRangeID,
-											   .mAccuracy = meta.mAccuracy,
-											   .mPriority = meta.mPriority,
-											   .mSpecial = meta.mSpecial,
-										   });
-
-		registry.incrementAmountRegistered();
-		registry.incrementNextMoveID();
-
-		return customMoveID;
+		return configuration.addMove(meta).value();
 	}
 
 } // namespace PocketCore::Testing

@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.1.0
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -83,9 +83,9 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.1.0
-		@version 0.12.17
+		@version 0.12.18
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -198,24 +198,28 @@ namespace PocketCore::Registry::Type
 				// LCOV_EXCL_BR_STOP
 			}
 
+		protected:
+			using Base::addEntry;
+			using Base::Checkpoint;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::getMutableEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
 			using Base::getID;
 			using Base::getMetadata;
-			using Base::getMutableEntry;
 			using Base::getName;
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
-
 			// MARK: Getters
 
 			/*! @brief Returns a single cell from the type chart.
@@ -293,6 +297,7 @@ namespace PocketCore::Registry::Type
 				return getRegisteredEntries();
 			}
 
+		protected:
 			// MARK: Setters
 
 			/*! @brief Sets a single cell in the type chart.
@@ -325,16 +330,7 @@ namespace PocketCore::Registry::Type
 				getMutableEntry(row).mOffensiveMatchups = chart;
 			}
 
-			/*! @brief Sets the next type ID counter.
-				@param[in] nextId The value to assign to the next-type-ID counter.
-				@since 0.1.0
-				@version 0.12.5
-			*/
-			constexpr void setNextTypeID(const TypeID nextId) noexcept
-			{
-				setNextID(nextId.getValue());
-			}
-
+		public:
 			// MARK: Member Functions
 
 			/*! @brief Finds the internal array index of a type given its stable type ID.
@@ -371,15 +367,6 @@ namespace PocketCore::Registry::Type
 			ATTR_NODISCARD constexpr bool hasType(const TypeID typeID) const
 			{
 				return hasEntry(typeID);
-			}
-
-			/*! @brief Increments the next type ID counter by one.
-				@since 0.1.0
-				@version 0.12.5
-			 */
-			constexpr void incrementNextTypeID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Type

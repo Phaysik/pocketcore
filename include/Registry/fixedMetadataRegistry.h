@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 08/26/2026
+	@date 09/03/2026
 	@since 0.5.0
-	@version 0.12.5
+	@version 0.12.8
 	@author Matthew Moore
 */
 
@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -33,9 +34,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 08/26/2026
+		@date 09/03/2026
 		@since 0.5.0
-		@version 0.12.5
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -43,6 +44,45 @@ namespace PocketCore::Registry
 	class FixedMetadataRegistry
 	{
 		public:
+			/*! @class Checkpoint Registry/fixedMetadataRegistry.h
+				@brief Stores an opaque registry state that can be restored by @ref restoreCheckpoint.
+				@details Callers can preserve a valid state for atomic rollback without directly reading or mutating the stable-ID counter.
+				@date 09/03/2026
+				@since 0.12.18
+				@version 0.12.18
+				@author Matthew Moore
+			*/
+			class Checkpoint
+			{
+				private:
+					/*! @brief Captures registry state for append-only rollback.
+						@param[in] owner The non-owning registry instance that creates and may restore this checkpoint. Must not be nullptr.
+						@param[in] amountRegistered The number of registered entries at capture time.
+						@param[in] nextID The next stable ID available at capture time.
+						@param[in] mutationVersion The mutation version used to reject checkpoints invalidated by non-append mutations.
+						@since 0.12.18
+						@version 0.12.18
+					*/
+					constexpr Checkpoint(const FixedMetadataRegistry *const owner, const us amountRegistered, const us nextID,
+										 const std::size_t mutationVersion) noexcept
+						: mOwner{owner}, mAmountRegistered{amountRegistered}, mNextID{nextID}, mMutationVersion{mutationVersion}
+					{}
+
+					/*! @brief Non-owning pointer to the registry instance that created this checkpoint. */
+					const FixedMetadataRegistry *mOwner;
+
+					/*! @brief Number of registered entries captured by this checkpoint. */
+					us mAmountRegistered;
+
+					/*! @brief Next numeric stable ID captured by this checkpoint. */
+					us mNextID;
+
+					/*! @brief Registry mutation version captured for checkpoint validity checks. */
+					std::size_t mMutationVersion;
+
+					friend class FixedMetadataRegistry;
+			};
+
 			/*! @brief Returns metadata at an internal array index.
 				@pre @p index < Capacity.
 				@param[in] index The internal array index.
@@ -182,17 +222,19 @@ namespace PocketCore::Registry
 				return findEntryIndexByID(stableID) != mAmountRegistered;
 			}
 
+		protected:
 			/*! @brief Replaces metadata at an internal array index.
 				@pre @p index < Capacity.
 				@param[in] index The internal array index.
 				@param[in] metadata The complete metadata record to store.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.12.18
 			*/
 			ATTR_NOINLINE constexpr void setEntry(const us index, const Metadata &metadata)
 			{
 				assert(index < mEntries.size());
 				mEntries.at(index) = metadata;
+				++mMutationVersion;
 
 				if (index < mAmountRegistered)
 				{
@@ -204,7 +246,7 @@ namespace PocketCore::Registry
 				@pre @p index < getAmountRegistered().
 				@param[in] index The registered entry to remove.
 				@since 0.8.7
-				@version 0.9.0
+				@version 0.12.18
 			*/
 			ATTR_NOINLINE constexpr void eraseEntry(const us index)
 			{
@@ -217,63 +259,112 @@ namespace PocketCore::Registry
 
 				mEntries.at(static_cast<us>(mAmountRegistered - 1U)) = Metadata{};
 				--mAmountRegistered;
+				++mMutationVersion;
 				rebuildIDIndex();
 			}
 
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.12.18
 			*/
 			constexpr void setAmountRegistered(const us amount) noexcept
 			{
 				assert(amount <= mEntries.size());
 				mAmountRegistered = amount;
+				++mMutationVersion;
 				rebuildIDIndex();
 			}
 
-			/*! @brief Sets the next numeric stable ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.5.0
-				@version 0.5.0
+			/*! @brief Captures the current registry state for a later atomic rollback.
+				@return An opaque checkpoint bound to the current registered count and next stable ID.
+				@since 0.12.18
+				@version 0.12.18
 			*/
-			constexpr void setNextID(const us nextID) noexcept
+			ATTR_NODISCARD constexpr Checkpoint createCheckpoint() const noexcept
 			{
-				mNextID = nextID;
+				return {this, mAmountRegistered, mNextID, mMutationVersion};
+			}
+
+			/*! @brief Restores a previously captured registry state.
+				@details Erases entries appended after @p checkpoint and restores the corresponding next stable ID. A checkpoint cannot
+			   increase the registered count or supply an arbitrary ID.
+				@pre Since creating @p checkpoint, the registry has only been mutated by @ref addEntry.
+				@param[in] checkpoint The opaque state returned by @ref createCheckpoint.
+				@since 0.12.18
+				@version 0.12.18
+			*/
+			constexpr void restoreCheckpoint(const Checkpoint checkpoint)
+			{
+				assert(checkpoint.mOwner == this);
+				assert(checkpoint.mAmountRegistered <= mAmountRegistered);
+				assert(checkpoint.mMutationVersion == mMutationVersion);
+
+				if (checkpoint.mOwner != this || checkpoint.mAmountRegistered > mAmountRegistered
+					|| checkpoint.mMutationVersion != mMutationVersion)
+				{
+					return;
+				}
+
+				for (us index{checkpoint.mAmountRegistered}; index < mAmountRegistered; ++index)
+				{
+					mEntries.at(index) = Metadata{};
+				}
+
+				mAmountRegistered = checkpoint.mAmountRegistered;
+				mNextID = checkpoint.mNextID;
+				++mMutationVersion;
+				rebuildIDIndex();
 			}
 
 			/*! @brief Increments the registered count.
 				@since 0.5.0
-				@version 0.8.7
+				@version 0.12.18
 			 */
 			constexpr void incrementAmountRegistered() noexcept
 			{
 				assert(mAmountRegistered < mEntries.size());
 				insertIDIndex(mEntries.at(mAmountRegistered).*IDMember, mAmountRegistered);
 				++mAmountRegistered;
+				++mMutationVersion;
 			}
 
 			/*! @brief Decrements the registered count.
 				@since 0.5.0
-				@version 0.9.0
+				@version 0.12.18
 			 */
 			constexpr void decrementAmountRegistered() noexcept
 			{
 				assert(mAmountRegistered > 0U);
 				removeIDIndex(mEntries.at(static_cast<us>(mAmountRegistered - 1U)).*IDMember, static_cast<us>(mAmountRegistered - 1U));
 				--mAmountRegistered;
+				++mMutationVersion;
 			}
 
-			/*! @brief Increments the next stable ID counter.
-				@since 0.5.0
-				@version 0.5.0
-			 */
-			constexpr void incrementNextID() noexcept
+			/*! @brief Appends one metadata record, assigning it the next stable ID.
+				@details Stamps @p IDMember with the assigned ID, stores the record after the last registered entry, and advances both the
+			   registered count and the stable-ID counter together so the two can never drift apart.
+				@pre @ref getAmountRegistered() < Capacity.
+				@param[in] metadata The metadata record with name and domain-specific data populated.
+				@return The stable ID assigned to the appended record.
+				@since 0.12.18
+				@version 0.12.18
+			*/
+			ATTR_NOINLINE constexpr StableID addEntry(Metadata metadata)
 			{
+				assert(mAmountRegistered < mEntries.size());
+
+				const StableID assignedID{mNextID};
+				metadata.*IDMember = assignedID;
+
+				mEntries.at(mAmountRegistered) = std::move(metadata);
+				insertIDIndex(assignedID, mAmountRegistered);
+				++mAmountRegistered;
 				++mNextID;
+
+				return assignedID;
 			}
 
-		protected:
 			/*! @brief Returns mutable metadata at an internal array index without rebuilding lookup indexes.
 				@details Derived registries may use this only to update metadata fields that are not referenced by @p IDMember or @p
 			   NameMember.
@@ -436,9 +527,9 @@ namespace PocketCore::Registry
 				@details Regenerates @ref mIDIndex from @ref mEntries for all indices in [0, @ref mAmountRegistered),
 				then sorts the generated entries with @ref idIndexEntryLess.
 				@since 0.8.7
-				@version 0.9.1
+				@version 0.12.18
 			*/
-			constexpr void rebuildIDIndex() noexcept
+			ATTR_NOINLINE constexpr void rebuildIDIndex() noexcept
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
 				{
@@ -466,6 +557,9 @@ namespace PocketCore::Registry
 
 			/*! @brief Number of valid mappings currently populated in @ref mIDIndex. */
 			us mIndexedAmount{0};
+
+			/*! @brief Invalidates checkpoints after mutations other than append-only registration. */
+			std::size_t mMutationVersion{0};
 
 			/*! @brief Next numeric stable ID for caller-managed custom entry registration. */
 			us mNextID{0};

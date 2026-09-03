@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -90,8 +90,17 @@ namespace PocketCore::Registry::Ability
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -101,11 +110,6 @@ namespace PocketCore::Registry::Ability
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up ability metadata by stable ID.
 				@param[in] abilityID The stable ability identifier.
@@ -192,25 +196,6 @@ namespace PocketCore::Registry::Ability
 			ATTR_NODISCARD constexpr bool hasAbility(const AbilityID abilityID) const
 			{
 				return hasEntry(abilityID);
-			}
-
-			/*! @brief Sets the next custom ability ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.4.0
-				@version 0.5.0
-			*/
-			constexpr void setNextAbilityID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom ability ID counter.
-				@since 0.4.0
-				@version 0.5.0
-			 */
-			constexpr void incrementNextAbilityID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Ability

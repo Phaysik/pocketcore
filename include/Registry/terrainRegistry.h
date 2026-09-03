@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined terrains.
-	@date 09/01/2026
+	@date 09/03/2026
 	@since 0.8.0
-	@version 0.12.14
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -37,9 +37,9 @@ namespace PocketCore::Registry::Terrain
 		@details Built-in terrains are registered during construction with IDs derived from @ref BuiltinTerrainID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_TERRAINS.
-		@date 09/01/2026
+		@date 09/03/2026
 		@since 0.8.0
-		@version 0.12.14
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
@@ -76,8 +76,17 @@ namespace PocketCore::Registry::Terrain
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -87,11 +96,6 @@ namespace PocketCore::Registry::Terrain
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up terrain metadata by stable ID.
 				@param[in] terrainID The stable terrain identifier.
@@ -178,25 +182,6 @@ namespace PocketCore::Registry::Terrain
 			ATTR_NODISCARD constexpr bool hasTerrain(const TerrainID terrainID) const
 			{
 				return hasEntry(terrainID);
-			}
-
-			/*! @brief Sets the next custom terrain ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.8.0
-				@version 0.8.0
-			*/
-			constexpr void setNextTerrainID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom terrain ID counter.
-				@since 0.8.0
-				@version 0.8.0
-			 */
-			constexpr void incrementNextTerrainID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Terrain

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.benchmark.cpp
 	@brief Contains benchmarks for the fixed metadata registry
-	@date 08/27/2026
+	@date 09/03/2026
 	@since 0.8.7
-	@version 0.12.8
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -22,19 +22,23 @@ namespace
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Registry::Move::MoveRegistry;
+
+	class BenchmarkMoveRegistry : public MoveRegistry
+	{
+		public:
+			explicit BenchmarkMoveRegistry() = default;
+
+			using MoveRegistry::addEntry;
+	};
 } // namespace
 
-static MoveRegistry makeFullMoveRegistry() // NOLINT(misc-use-anonymous-namespace)
+static BenchmarkMoveRegistry makeFullMoveRegistry() // NOLINT(misc-use-anonymous-namespace)
 {
-	MoveRegistry registry{};
+	BenchmarkMoveRegistry registry{};
 
 	while (registry.getAmountRegistered() < MAX_MOVES)
 	{
-		const us index{registry.getAmountRegistered()};
-		const MoveID moveID{registry.getNextMoveID()};
-		registry.setEntry(index, MoveMeta{.mTriggers = {}, .mName = "Benchmark Move", .mMoveID = moveID});
-		registry.incrementAmountRegistered();
-		registry.incrementNextMoveID();
+		benchmark::DoNotOptimize(registry.addEntry(MoveMeta{.mTriggers = {}, .mName = "Benchmark Move"}));
 	}
 
 	return registry;
@@ -42,7 +46,7 @@ static MoveRegistry makeFullMoveRegistry() // NOLINT(misc-use-anonymous-namespac
 
 static void BM_FixedMetadataRegistry_FindMoveByID(benchmark::State &state) // NOLINT(misc-use-anonymous-namespace)
 {
-	const MoveRegistry registry{makeFullMoveRegistry()};
+	const BenchmarkMoveRegistry registry{makeFullMoveRegistry()};
 	const std::array lookupIDs{
 		MoveID{0U},
 		MoveID{static_cast<us>(MAX_MOVES / 2U)},

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 08/31/2026
+	@date 09/03/2026
 	@since 0.5.0
-	@version 0.12.13
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -52,7 +52,7 @@ namespace PocketCore::Configuration
 
 	/*! @class FixedMetadataRegistryConfiguration Configuration/fixedMetadataRegistryConfiguration.h
 		@brief Implements validated lifecycle operations shared by named metadata registry facades.
-		@details Owns one registry and centralizes lookup, monotonic ID assignment, duplicate and capacity validation, atomic batch
+		@details Inherits one registry and centralizes lookup, monotonic ID assignment, duplicate and capacity validation, atomic batch
 	   addition, renaming, removal with compaction, and metadata mutation. Domain facades provide user-facing names and construct their
 	   metadata.
 		@tparam Registry The concrete fixed metadata registry type.
@@ -61,13 +61,13 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 08/31/2026
+		@date 09/03/2026
 		@since 0.5.0
-		@version 0.12.13
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
-	class FixedMetadataRegistryConfiguration
+	class FixedMetadataRegistryConfiguration : protected Registry
 	{
 		protected:
 			/*! @brief Constructs a configuration containing the concrete registry's built-in metadata.
@@ -76,24 +76,24 @@ namespace PocketCore::Configuration
 			 */
 			constexpr FixedMetadataRegistryConfiguration() = default;
 
-			/*! @brief Returns mutable access to the owned concrete registry.
+			/*! @brief Returns mutable access to the inherited concrete registry.
 				@return A mutable reference to the underlying registry instance.
 				@since 0.9.0
-				@version 0.9.0
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr Registry &getRegistry() noexcept
 			{
-				return registry;
+				return *this;
 			}
 
-			/*! @brief Returns read-only access to the owned concrete registry.
+			/*! @brief Returns read-only access to the inherited concrete registry.
 				@return A const reference to the underlying registry instance.
 				@since 0.9.0
-				@version 0.9.0
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr const Registry &getRegistry() const noexcept
 			{
-				return registry;
+				return *this;
 			}
 
 			/*! @brief Looks up complete metadata by stable ID.
@@ -101,88 +101,88 @@ namespace PocketCore::Configuration
 				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
 			   configuration destruction.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr const Metadata *getMetadata(const StableID stableID) const
 			{
-				return registry.getMetadata(stableID);
+				return getRegistry().getMetadata(stableID);
 			}
 
 			/*! @brief Looks up a stable ID by display name.
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
 			{
-				return registry.getID(name);
+				return getRegistry().getID(name);
 			}
 
 			/*! @brief Looks up a display name by stable ID.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The display name if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr const std::optional<std::string_view> getName(const StableID stableID) const
 			{
-				return registry.getName(stableID);
+				return getRegistry().getName(stableID);
 			}
 
 			/*! @brief Returns all currently registered metadata records.
 				@return A read-only span that remains valid until mutation or destruction.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr const std::span<const Metadata> getRegisteredEntries() const noexcept
 			{
-				return registry.getRegisteredEntries();
+				return getRegistry().getRegisteredEntries();
 			}
 
 			/*! @brief Returns the number of registered built-in and custom records.
 				@return The current registry entry count.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr us getAmountRegistered() const noexcept
 			{
-				return registry.getAmountRegistered();
+				return getRegistry().getAmountRegistered();
 			}
 
 			/*! @brief Checks whether a display name is registered.
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
 			{
-				return registry.hasEntry(name);
+				return getRegistry().hasEntry(name);
 			}
 
 			/*! @brief Checks whether a stable ID is registered.
 				@param[in] stableID The built-in or custom stable identifier.
 				@return True if the ID is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD constexpr bool hasEntry(const StableID stableID) const
 			{
-				return registry.hasEntry(stableID);
+				return getRegistry().hasEntry(stableID);
 			}
 
 			/*! @brief Registers one complete metadata record and assigns its stable ID.
 				@param[in] metadata The metadata record with name and domain-specific data populated.
 				@return The assigned stable ID on success, or contextual registry error information.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> addMetadata(Metadata metadata)
 			{
 				const std::string_view name{metadata.mName};
 
-				if (registry.getAmountRegistered() >= Capacity || registry.getNextID() == std::numeric_limits<us>::max())
+				if (getAmountRegistered() >= Capacity || this->getNextID() == std::numeric_limits<us>::max())
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::add registry capacity or ID space exhausted. Cannot add {} '{}'.", Policy::configurationName,
@@ -192,7 +192,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, name, logResult.value_or(std::string_view{})}};
 				}
 
-				if (registry.hasEntry(name))
+				if (hasEntry(name))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::add duplicate {} '{}'.", Policy::configurationName, Policy::entityName, name),
@@ -201,15 +201,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, name, logResult.value_or(std::string_view{})}};
 				}
 
-				const us entryIndex{registry.getAmountRegistered()};
-				const StableID assignedID{registry.getNextID()};
-				metadata.*IDMember = assignedID;
-
-				registry.setEntry(entryIndex, metadata);
-				registry.incrementAmountRegistered();
-				registry.incrementNextID();
-
-				return assignedID;
+				return this->addEntry(std::move(metadata));
 			}
 
 			/*! @brief Registers multiple definitions atomically after converting each to metadata.
@@ -219,14 +211,14 @@ namespace PocketCore::Configuration
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
 				@since 0.5.0
-				@version 0.12.13
+				@version 0.12.18
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> addMetadataBatch(const std::span<const Definition> &definitions,
 																						 Factory &&factory)
 			{
-				if (definitions.size() > static_cast<std::size_t>(Capacity - registry.getAmountRegistered()))
+				if (definitions.size() > static_cast<std::size_t>(Capacity - this->getAmountRegistered()))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::addBatch cannot add {} {} entries: capacity is {}.", Policy::configurationName,
@@ -236,8 +228,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, {}, logResult.value_or(std::string_view{})}};
 				}
 
-				const us previousAmountRegistered{registry.getAmountRegistered()};
-				const us previousNextID{registry.getNextID()};
+				const auto checkpoint{this->createCheckpoint()};
 
 				Factory &&forwardedFactory{std::forward<Factory>(factory)};
 
@@ -249,12 +240,7 @@ namespace PocketCore::Configuration
 
 					if (!result.has_value())
 					{
-						while (registry.getAmountRegistered() > previousAmountRegistered)
-						{
-							registry.eraseEntry(static_cast<us>(registry.getAmountRegistered() - 1U));
-						}
-
-						registry.setNextID(previousNextID);
+						this->restoreCheckpoint(checkpoint);
 						return std::unexpected{result.error()};
 					}
 				}
@@ -269,7 +255,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.9.8
+				@version 0.12.18
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -284,12 +270,12 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata &currentMetadata{registry.getEntry(index.value())};
+				const Metadata &currentMetadata{this->getEntry(index.value())};
 				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
 				metadata.*IDMember = currentMetadata.*IDMember;
 
-				if (metadata.mName != currentMetadata.mName && registry.hasEntry(metadata.mName))
+				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -301,7 +287,7 @@ namespace PocketCore::Configuration
 					};
 				}
 
-				registry.setEntry(index.value(), metadata);
+				this->setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -309,7 +295,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.9.8
+				@version 0.12.18
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -324,12 +310,12 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata &currentMetadata{registry.getEntry(index.value())};
+				const Metadata &currentMetadata{this->getEntry(index.value())};
 				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
 				metadata.*IDMember = currentMetadata.*IDMember;
 
-				if (metadata.mName != currentMetadata.mName && registry.hasEntry(metadata.mName))
+				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -341,7 +327,7 @@ namespace PocketCore::Configuration
 					};
 				}
 
-				registry.setEntry(index.value(), metadata);
+				this->setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -351,7 +337,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.9.8
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)
@@ -363,7 +349,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				if (registry.hasEntry(newName))
+				if (hasEntry(newName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::rename target {} name '{}' already exists.", Policy::configurationName, Policy::entityName,
@@ -373,9 +359,9 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, newName, logResult.value_or(std::string_view{})}};
 				}
 
-				Metadata metadata{Detail::cloneMetadata(registry.getEntry(index.value()))};
+				Metadata metadata{Detail::cloneMetadata(this->getEntry(index.value()))};
 				metadata.mName = newName;
-				registry.setEntry(index.value(), metadata);
+				this->setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -384,18 +370,18 @@ namespace PocketCore::Configuration
 				@param[in] name The registered display name.
 				@return The removed stable ID on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const std::string_view &name)
 			{
-				const std::optional<StableID> stableID{registry.getID(name)};
+				const std::optional<StableID> stableID{getID(name)};
 
 				if (!stableID.has_value())
 				{
 					return std::unexpected{makeNotFoundError(name, "remove")};
 				}
 
-				const std::optional<us> index{registry.findIndexByID(stableID.value())};
+				const std::optional<us> index{this->findIndexByID(stableID.value())};
 				assert(index.has_value());
 				removeEntry(index.value());
 
@@ -430,12 +416,12 @@ namespace PocketCore::Configuration
 				@return The 0-based registry index on success, or a contextual registry error if name is not registered.
 				@note This function is exception-safe (noexcept); errors are communicated via std::expected.
 				@since 0.5.0
-				@version 0.12.3
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
 																				   const std::string_view &callerContext)
 			{
-				const std::optional<StableID> stableID{registry.getID(name)};
+				const std::optional<StableID> stableID{getID(name)};
 
 				if (!stableID.has_value())
 				{
@@ -443,7 +429,7 @@ namespace PocketCore::Configuration
 				}
 
 				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				return registry.findIndexByID(stableID.value())
+				return this->findIndexByID(stableID.value())
 					.value(); // LCOV_EXCL_BR - Cannot fail when getID just succeeded on the same registry
 			}
 
@@ -454,12 +440,12 @@ namespace PocketCore::Configuration
 				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
 				@return The 0-based registry index on success, or a contextual registry error if the stable ID is not registered.
 				@since 0.5.0
-				@version 0.12.3
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const StableID stableID,
 																				   const std::string_view &callerContext)
 			{
-				const std::optional<us> index{registry.findIndexByID(stableID)};
+				const std::optional<us> index{this->findIndexByID(stableID)};
 
 				if (!index.has_value())
 				{
@@ -494,16 +480,12 @@ namespace PocketCore::Configuration
 				@post The registry removes the entry and compacts any remaining entries as defined by @ref Registry::eraseEntry.
 				@note The underlying registry remains responsible for maintaining its entry count and index consistency.
 				@since 0.5.0
-				@version 0.12.3
+				@version 0.12.18
 			*/
 			void removeEntry(const us index)
 			{
-				registry.eraseEntry(index);
+				this->eraseEntry(index);
 			}
-
-		private:
-			/*! @brief Owns the concrete metadata registry used by the domain facade. */
-			Registry registry{};
 	};
 } // namespace PocketCore::Configuration
 

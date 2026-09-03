@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.6.4
-	@version 0.12.16
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.6.4
-		@version 0.12.16
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
@@ -105,9 +105,17 @@ namespace PocketCore::Registry::Status
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
-
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -117,11 +125,6 @@ namespace PocketCore::Registry::Status
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up status metadata by stable ID.
 				@param[in] statusID The stable status identifier.
@@ -208,25 +211,6 @@ namespace PocketCore::Registry::Status
 			ATTR_NODISCARD constexpr bool hasStatus(const StatusID statusID) const
 			{
 				return hasEntry(statusID);
-			}
-
-			/*! @brief Sets the next custom status ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.6.4
-				@version 0.6.4
-			*/
-			constexpr void setNextStatusID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom status ID counter.
-				@since 0.6.4
-				@version 0.6.4
-			 */
-			constexpr void incrementNextStatusID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Status

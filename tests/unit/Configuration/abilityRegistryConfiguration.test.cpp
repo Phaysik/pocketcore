@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 08/30/2026
+	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.12
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -94,7 +94,7 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 			auto result{configuration.addAbility(definition)};
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::DuplicateAbility));
-			CHECK((configuration.getAmountRegistered() == 3));
+			CHECK((configuration.getAmountRegistered() == 4));
 		}
 	}
 }
@@ -122,7 +122,7 @@ SCENARIO("AbilityRegistryConfiguration addAbilities")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
-				CHECK((configuration.getAmountRegistered() == 3));
+				CHECK((configuration.getAmountRegistered() == 4));
 				CHECK_FALSE(configuration.hasAbility("First Custom"));
 				CHECK_FALSE(configuration.hasAbility("Second Custom"));
 			}

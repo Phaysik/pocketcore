@@ -1,8 +1,8 @@
 /*! @file effectRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined effects.
-	@date 08/22/2026
+	@date 09/03/2026
 	@since 0.10.0
-	@version 0.11.6
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -215,8 +215,17 @@ namespace PocketCore::Registry::Effect
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -226,11 +235,6 @@ namespace PocketCore::Registry::Effect
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up effect metadata by stable ID.
 				@param[in] effectID The stable effect identifier.
@@ -317,25 +321,6 @@ namespace PocketCore::Registry::Effect
 			ATTR_NODISCARD constexpr bool hasEffect(const EffectID effectID) const
 			{
 				return hasEntry(effectID);
-			}
-
-			/*! @brief Sets the next custom effect ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.10.0
-				@version 0.10.0
-			*/
-			constexpr void setNextEffectID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom effect ID counter.
-				@since 0.10.0
-				@version 0.10.0
-			 */
-			constexpr void incrementNextEffectID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Effect

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 08/23/2026
+	@date 09/03/2026
 	@since 0.7.0
-	@version 0.12.1
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -69,6 +69,8 @@ namespace PocketCore::Test
 				addBuiltin({.mName = TEST3_NAME, .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test3)});
 			}
 
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
@@ -80,10 +82,9 @@ namespace PocketCore::Test
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
 			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
+			using Base::restoreCheckpoint;
 			using Base::setAmountRegistered;
 			using Base::setEntry;
-			using Base::setNextID;
 	};
 
 } // namespace PocketCore::Test
@@ -170,17 +171,23 @@ SCENARIO("FixedMetadataRegistry")
 			CHECK((registry.getAmountRegistered() == 2));
 		}
 
-		THEN("the next stable ID can be restored directly")
+		THEN("appended entries receive consecutive stable IDs")
 		{
-			registry.setNextID(42);
-			CHECK((registry.getNextID() == 42));
+			FixedMetaDataID firstID{registry.addEntry(Metadata{.mName = "Custom 1"})};
+			FixedMetaDataID secondID{registry.addEntry(Metadata{.mName = "Custom 2"})};
+			CHECK((secondID.getValue() == firstID.getValue() + 1U));
 		}
 
-		THEN("the incrementNextAbilityID() method increments the next stable ID")
+		THEN("restoring a checkpoint discards appended entries and restores ID assignment")
 		{
-			registry.setNextID(42);
-			registry.incrementNextID();
-			CHECK((registry.getNextID() == 43));
+			auto checkpoint{registry.createCheckpoint()};
+			FixedMetaDataID assignedID{registry.addEntry(Metadata{.mName = "Custom"})};
+
+			registry.restoreCheckpoint(checkpoint);
+
+			CHECK((registry.getAmountRegistered() == 4U));
+			CHECK_FALSE(registry.hasEntry(assignedID));
+			CHECK((registry.addEntry(Metadata{.mName = "Replacement"}) == assignedID));
 		}
 	}
 }

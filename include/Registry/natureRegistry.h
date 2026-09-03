@@ -1,8 +1,8 @@
 /*! @file natureRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined natures.
-	@date 08/23/2026
+	@date 09/03/2026
 	@since 0.11.6
-	@version 0.12.1
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -43,9 +43,9 @@ namespace PocketCore::Registry::Nature
 		@details Built-in natures are registered during construction with IDs derived from @ref BuiltinNatureID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_NATURES.
-		@date 08/23/2026
+		@date 09/03/2026
 		@since 0.11.6
-		@version 0.12.1
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class NatureRegistry : private FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>
@@ -242,8 +242,17 @@ namespace PocketCore::Registry::Nature
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -253,11 +262,6 @@ namespace PocketCore::Registry::Nature
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up nature metadata by stable ID.
 				@param[in] natureID The stable nature identifier.
@@ -344,25 +348,6 @@ namespace PocketCore::Registry::Nature
 			ATTR_NODISCARD constexpr bool hasNature(const NatureID natureID) const
 			{
 				return hasEntry(natureID);
-			}
-
-			/*! @brief Sets the next custom nature ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.11.6
-				@version 0.11.6
-			*/
-			constexpr void setNextNatureID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom nature ID counter.
-				@since 0.11.6
-				@version 0.11.6
-			 */
-			constexpr void incrementNextNatureID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Nature

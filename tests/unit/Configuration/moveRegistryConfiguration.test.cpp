@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 08/30/2026
+	@date 09/03/2026
 	@since 0.8.7
-	@version 0.12.12
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -107,7 +107,7 @@ SCENARIO("MoveRegistryConfiguration addMove")
 			auto result{configuration.addMove(definition)};
 			REQUIRE_FALSE(result.has_value());
 			CHECK((result.error().mKind == RegistryError::DuplicateMove));
-			CHECK((configuration.getAmountRegistered() == 3));
+			CHECK((configuration.getAmountRegistered() == 5));
 		}
 	}
 }
@@ -135,7 +135,7 @@ SCENARIO("MoveRegistryConfiguration addMoves")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateMove));
-				CHECK((configuration.getAmountRegistered() == 3));
+				CHECK((configuration.getAmountRegistered() == 5));
 				CHECK_FALSE(configuration.hasMove("Batch One"));
 				CHECK_FALSE(configuration.hasMove("Batch Two"));
 			}

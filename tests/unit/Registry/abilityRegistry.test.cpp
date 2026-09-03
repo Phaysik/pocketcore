@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 08/23/2026
+	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.1
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -36,6 +36,11 @@ using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
 
+template <typename Registry>
+concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
+
+static_assert(!PubliclyStructurallyMutable<AbilityRegistry>);
+
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
 SCENARIO("AbilityRegistry")
@@ -46,7 +51,7 @@ SCENARIO("AbilityRegistry")
 	{
 		THEN("all built-in abilities preserve their catalog identifiers")
 		{
-			CHECK((registry.getAmountRegistered() == 3));
+			CHECK((registry.getAmountRegistered() == 4));
 			CHECK((registry.getNextAbilityID() == 8));
 
 			std::optional<AbilityID> noneIdentifier{registry.getAbilityID(ABILITY_NAME_NONE)};
@@ -112,30 +117,11 @@ SCENARIO("AbilityRegistry")
 		THEN("the registered span contains exactly the built-in entries")
 		{
 			std::span<const AbilityMeta> abilities{registry.getRegisteredAbilities()};
-			REQUIRE((abilities.size() == 3U));
+			REQUIRE((abilities.size() == 4));
 			CHECK((abilities.front().mName == ABILITY_NAME_NONE));
-			CHECK((abilities.back().mName == ABILITY_NAME_DRIZZLE));
+			CHECK((abilities.back().mName == PocketCore::Ability::ABILITY_NAME_AIR_LOCK));
 			CHECK(registry.hasAbility(toAbilityID(BuiltinAbilityID::Stench)));
 			CHECK(registry.hasAbility(ABILITY_NAME_DRIZZLE));
-		}
-
-		THEN("the registered amount can be restored directly")
-		{
-			registry.setAmountRegistered(2);
-			CHECK((registry.getAmountRegistered() == 2));
-		}
-
-		THEN("the next stable ID can be restored directly")
-		{
-			registry.setNextAbilityID(42);
-			CHECK((registry.getNextAbilityID() == 42));
-		}
-
-		THEN("the incrementNextAbilityID() method increments the next stable ID")
-		{
-			registry.setNextAbilityID(42);
-			registry.incrementNextAbilityID();
-			CHECK((registry.getNextAbilityID() == 43));
 		}
 	}
 }

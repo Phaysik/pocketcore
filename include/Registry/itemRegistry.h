@@ -1,8 +1,8 @@
 /*! @file itemRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
-	@date 08/26/2026
+	@date 09/03/2026
 	@since 0.4.1
-	@version 0.12.6
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -44,9 +44,9 @@ namespace PocketCore::Registry::Item
 		@details Built-in items are registered during construction with IDs derived from @ref BuiltinItemID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
-		@date 08/22/2026
+		@date 09/03/2026
 		@since 0.4.1
-		@version 0.11.6
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
@@ -89,8 +89,17 @@ namespace PocketCore::Registry::Item
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -100,11 +109,6 @@ namespace PocketCore::Registry::Item
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up item metadata by stable ID.
 				@param[in] itemID The stable item identifier.
@@ -191,25 +195,6 @@ namespace PocketCore::Registry::Item
 			ATTR_NODISCARD constexpr bool hasItem(const ItemID itemID) const
 			{
 				return hasEntry(itemID);
-			}
-
-			/*! @brief Sets the next custom item ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.4.1
-				@version 0.5.0
-			*/
-			constexpr void setNextItemID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom item ID counter.
-				@since 0.4.1
-				@version 0.5.0
-			 */
-			constexpr void incrementNextItemID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Item

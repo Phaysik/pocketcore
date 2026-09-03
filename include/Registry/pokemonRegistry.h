@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.11.6
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -48,9 +48,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.11.6
-		@version 0.12.17
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -134,8 +134,17 @@ namespace PocketCore::Registry::Pokemon
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -145,11 +154,6 @@ namespace PocketCore::Registry::Pokemon
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up pokemon metadata by stable ID.
 				@param[in] pokemonID The stable pokemon identifier.
@@ -236,25 +240,6 @@ namespace PocketCore::Registry::Pokemon
 			ATTR_NODISCARD constexpr bool hasPokemon(const PokemonID pokemonID) const
 			{
 				return hasEntry(pokemonID);
-			}
-
-			/*! @brief Sets the next custom pokemon ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.11.6
-				@version 0.11.6
-			*/
-			constexpr void setNextPokemonID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom pokemon ID counter.
-				@since 0.11.6
-				@version 0.11.6
-			 */
-			constexpr void incrementNextPokemonID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Pokemon

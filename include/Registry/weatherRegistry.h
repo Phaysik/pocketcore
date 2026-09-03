@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 08/28/2026
+	@date 09/03/2026
 	@since 0.8.0
-	@version 0.12.9
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -37,9 +37,9 @@ namespace PocketCore::Registry::Weather
 		@details Built-in weathers are registered during construction with IDs derived from @ref BuiltinWeatherID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
-		@date 08/22/2026
+		@date 09/03/2026
 		@since 0.8.0
-		@version 0.11.6
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
@@ -100,8 +100,17 @@ namespace PocketCore::Registry::Weather
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -111,11 +120,6 @@ namespace PocketCore::Registry::Weather
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up weather metadata by stable ID.
 				@param[in] weatherID The stable weather identifier.
@@ -202,25 +206,6 @@ namespace PocketCore::Registry::Weather
 			ATTR_NODISCARD constexpr bool hasWeather(const WeatherID weatherID) const
 			{
 				return hasEntry(weatherID);
-			}
-
-			/*! @brief Sets the next custom weather ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.8.0
-				@version 0.8.0
-			*/
-			constexpr void setNextWeatherID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom weather ID counter.
-				@since 0.8.0
-				@version 0.8.0
-			 */
-			constexpr void incrementNextWeatherID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Weather

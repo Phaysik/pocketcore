@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.5.3
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -50,9 +50,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.5.3
-		@version 0.12.17
+		@version 0.12.18
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -129,8 +129,17 @@ namespace PocketCore::Registry::Move
 
 			// LCOV_EXCL_STOP
 
+		protected:
+			using Base::addEntry;
+			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
+			using Base::incrementAmountRegistered;
+			using Base::restoreCheckpoint;
+			using Base::setAmountRegistered;
+			using Base::setEntry;
+
+		public:
 			using Base::findIndexByID;
 			using Base::getAmountRegistered;
 			using Base::getEntry;
@@ -140,11 +149,6 @@ namespace PocketCore::Registry::Move
 			using Base::getNextID;
 			using Base::getRegisteredEntries;
 			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::incrementNextID;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-			using Base::setNextID;
 
 			/*! @brief Looks up move metadata by stable ID.
 				@param[in] moveID The stable move identifier.
@@ -231,25 +235,6 @@ namespace PocketCore::Registry::Move
 			ATTR_NODISCARD constexpr bool hasMove(const MoveID moveID) const
 			{
 				return hasEntry(moveID);
-			}
-
-			/*! @brief Sets the next custom move ID counter.
-				@param[in] nextID The next underlying ID value.
-				@since 0.5.3
-				@version 0.5.3
-			*/
-			constexpr void setNextMoveID(const us nextID) noexcept
-			{
-				setNextID(nextID);
-			}
-
-			/*! @brief Increments the next custom move ID counter.
-				@since 0.5.3
-				@version 0.5.3
-			 */
-			constexpr void incrementNextMoveID() noexcept
-			{
-				incrementNextID();
 			}
 	};
 } // namespace PocketCore::Registry::Move

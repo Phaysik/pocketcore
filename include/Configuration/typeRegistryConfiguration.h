@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.2.0
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -107,9 +107,9 @@ namespace PocketCore::Configuration
 		@details Provides a high-level API for adding, removing, renaming, and querying types and their matchup relationships. All mutation
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryErrorInfo. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.1.0
-		@version 0.12.17
+		@version 0.12.18
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -218,7 +218,7 @@ namespace PocketCore::Configuration
 				@param[in] value The @ref PocketCore::Type::TypeEffectiveness value to assign.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if either type is not found, or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchup(const std::string_view &attackerName,
 																			 const std::string_view &defenderName,
@@ -234,7 +234,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchupRow(const std::string_view &attackerName,
 																				const std::span<const TypeEffectiveness> &newRow);
@@ -247,7 +247,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the attacker or any referenced type is not
 			   found, or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchupRow(const std::string_view &attackerName,
 																				const std::span<const MatchupPair> &newRow);
@@ -262,7 +262,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found or the span is too large,
 			   or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setDefensiveColumn(const std::string_view &defenderName,
 																					 const std::span<const TypeEffectiveness> &newCol);
@@ -275,7 +275,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the defender or any referenced type is not
 			   found, or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setDefensiveColumn(const std::string_view &defenderName,
 																					 const std::span<const MatchupPair> &newCol);
@@ -293,7 +293,7 @@ namespace PocketCore::Configuration
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition,
 																			const UnspecifiedMatchup defaultBehavior
@@ -306,7 +306,7 @@ namespace PocketCore::Configuration
 				@param[in] defaultBehavior Controls how unspecified matchups are handled for every definition in the batch.
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error on failure, or void on success.
 				@since 0.1.0
-				@version 0.9.0
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addTypes(const std::span<const TypeDefinition> &definitions,
 																		   const UnspecifiedMatchup defaultBehavior
@@ -353,7 +353,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if @p oldName is not found or @p newName is a
 			   duplicate, or void on success.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameType(const std::string_view &oldName,
 																			 const std::string_view &newName);
@@ -408,41 +408,39 @@ namespace PocketCore::Configuration
 			/*! @brief Clears the offensive and defensive rows for a given type index in the type chart.
 				@param[in] typeIndex The index of the type to clear.
 				@since 0.3.2
-				@version 0.12.1
+				@version 0.12.18
 			*/
 			void constexpr clearRows(const us typeIndex)
 			{
-				TypeRegistry &typeRegistry{getRegistry()};
-				const us registered{typeRegistry.getAmountRegistered()};
+				const us registered{getRegistry().getAmountRegistered()};
 
 				// Clear offensive row
 				for (us col{0}; col < registered; ++col)
 				{
-					typeRegistry.setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					setTypeChartCell(typeIndex, col, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
 
 				// Clear defensive column
 				for (us row{0}; row < registered; ++row)
 				{
-					typeRegistry.setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+					setTypeChartCell(row, typeIndex, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 				}
 			}
 
 			/*! @brief Restores the registry to a prior state by discarding entries added after @p previousCount.
-				@details Used internally to implement atomic rollback for batch operations. Resets the registry's entry count and
-			   next-type-ID counter to the values captured before the batch began.
+				@details Clears the added type-chart rows and columns before restoring the registry checkpoint.
 				@param[in] previousCount The number of registered entries to revert to.
-				@param[in] previousNextTypeID The next-type-ID value to restore.
+				@param[in] checkpoint The opaque registry state captured before the batch began.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
-			void rollbackEntries(const us previousCount, const TypeID previousNextTypeID);
+			void rollbackEntries(const us previousCount, const TypeRegistry::Checkpoint checkpoint);
 
 			/*! @brief Removes a single entry from the registry by its internal array index.
 				@details Shifts subsequent entries down and clears the corresponding matchup row and column data.
 				@param[in] arrayIndex The zero-based position of the entry to remove.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.18
 			*/
 			void removeEntry(const us arrayIndex);
 

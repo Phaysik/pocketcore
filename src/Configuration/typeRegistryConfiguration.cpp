@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.2.0
-	@version 0.12.17
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -115,7 +115,7 @@ namespace PocketCore::Configuration
 			return std::unexpected{defenderIndex.error()};
 		}
 
-		getRegistry().setTypeChartCell(attackerIndex.value(), defenderIndex.value(), value);
+		setTypeChartCell(attackerIndex.value(), defenderIndex.value(), value);
 
 		return {};
 	}
@@ -144,8 +144,7 @@ namespace PocketCore::Configuration
 
 		for (us col{0}; col < registered; ++col)
 		{
-			getRegistry().setTypeChartCell(attackerIndex.value(), col,
-										   col < newRow.size() ? newRow.at(col) : TypeEffectiveness::NOT_DEFINED);
+			setTypeChartCell(attackerIndex.value(), col, col < newRow.size() ? newRow.at(col) : TypeEffectiveness::NOT_DEFINED);
 		}
 
 		return {};
@@ -179,7 +178,7 @@ namespace PocketCore::Configuration
 
 		for (us col{0}; col < registered; ++col)
 		{
-			getRegistry().setTypeChartCell(attackerIndex.value(), col, replacementRow.at(col));
+			setTypeChartCell(attackerIndex.value(), col, replacementRow.at(col));
 		}
 
 		return {};
@@ -209,8 +208,7 @@ namespace PocketCore::Configuration
 
 		for (us row{0}; row < registered; ++row)
 		{
-			getRegistry().setTypeChartCell(row, defenderIndex.value(),
-										   row < newCol.size() ? newCol.at(row) : TypeEffectiveness::NOT_DEFINED);
+			setTypeChartCell(row, defenderIndex.value(), row < newCol.size() ? newCol.at(row) : TypeEffectiveness::NOT_DEFINED);
 		}
 
 		return {};
@@ -244,7 +242,7 @@ namespace PocketCore::Configuration
 
 		for (us row{0}; row < registered; ++row)
 		{
-			getRegistry().setTypeChartCell(row, defenderIndex.value(), replacementColumn.at(row));
+			setTypeChartCell(row, defenderIndex.value(), replacementColumn.at(row));
 		}
 
 		return {};
@@ -366,22 +364,12 @@ namespace PocketCore::Configuration
 			defensiveRow.at(targetIndex.value()) = pairValue;
 		}
 
-		// Write directly to the registry — bypasses the positional overload's strict defined-count validation,
-		// which is not applicable when the fill policy has already been resolved by name-keyed logic.
-		getRegistry().setEntry(registered, TypeMeta{.mName = typeName, .mTypeID = getRegistry().getNextTypeID()});
+		const TypeID assignedTypeID{addEntry(TypeMeta{.mOffensiveMatchups = offensiveRow, .mName = typeName})};
 
 		for (us i{0}; i < registered; ++i)
 		{
-			getRegistry().setTypeChartCell(registered, i, offensiveRow.at(i));
-			getRegistry().setTypeChartCell(i, registered, defensiveRow.at(i));
+			setTypeChartCell(i, registered, defensiveRow.at(i));
 		}
-
-		getRegistry().setTypeChartCell(registered, registered, offensiveRow.at(registered));
-
-		const TypeID assignedTypeID{getRegistry().getNextTypeID()};
-
-		getRegistry().incrementAmountRegistered();
-		getRegistry().incrementNextTypeID();
 
 		return assignedTypeID;
 	}
@@ -390,7 +378,7 @@ namespace PocketCore::Configuration
 		const std::span<const TypeDefinition> &definitions, const UnspecifiedMatchup defaultBehavior)
 	{
 		const us currentCount{getRegistry().getAmountRegistered()};
-		const TypeID currentNextTypeID{getRegistry().getNextTypeID()};
+		const TypeRegistry::Checkpoint checkpoint{createCheckpoint()};
 
 		const us batchSize{static_cast<us>(definitions.size())};
 
@@ -423,7 +411,7 @@ namespace PocketCore::Configuration
 								 def.name),
 				};
 
-				rollbackEntries(currentCount, currentNextTypeID);
+				rollbackEntries(currentCount, checkpoint);
 
 				return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, def.name, logResult.value_or(std::string_view{})}};
 			}
@@ -437,7 +425,7 @@ namespace PocketCore::Configuration
 				static_cast<void>(Logger::warn(
 					"TypeRegistryConfiguration::addTypes Error adding type '{}'. Rolling back entries to previous safe state.", def.name));
 
-				rollbackEntries(currentCount, currentNextTypeID);
+				rollbackEntries(currentCount, checkpoint);
 
 				return std::unexpected{result.error()};
 			}
@@ -576,7 +564,7 @@ namespace PocketCore::Configuration
 
 		TypeMeta renamedEntry{getRegistry().getEntry(arrayIndex)};
 		renamedEntry.mName = newName;
-		getRegistry().setEntry(arrayIndex, renamedEntry); // LCOV_EXCL_BR
+		setEntry(arrayIndex, renamedEntry); // LCOV_EXCL_BR
 
 		return {};
 	}
@@ -621,32 +609,22 @@ namespace PocketCore::Configuration
 
 	// MARK: Private Member Function
 
-	void TypeRegistryConfiguration::rollbackEntries(const us previousCount, const TypeID previousNextTypeID)
+	void TypeRegistryConfiguration::rollbackEntries(const us previousCount, const TypeRegistry::Checkpoint checkpoint)
 	{
-		us registered{getRegistry().getAmountRegistered()};
+		const us registered{getRegistry().getAmountRegistered()};
 
-		for (us row{registered}; row > previousCount; --row)
+		for (us row{previousCount}; row < registered; ++row)
 		{
-			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
-			// those
-			// branches from ever being hit
-
-			getRegistry().setEntry(row, TypeMeta{});
-			getRegistry().setTypeChartRow(row, {});
-
-			// LCOV_EXCL_BR_STOP
+			setTypeChartRow(row, {});
 
 			for (us col{0}; col < registered; ++col)
 			{
-				// Clear the defensive matchup cell for this row and column
-
 				// NOLINTNEXTLINE(readability-suspicious-call-argument)
-				getRegistry().setTypeChartCell(col, row, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
+				setTypeChartCell(col, row, TypeEffectiveness::NOT_DEFINED); // LCOV_EXCL_BR
 			}
 		}
 
-		getRegistry().setAmountRegistered(previousCount);
-		getRegistry().setNextTypeID(previousNextTypeID); // LCOV_EXCL_BR
+		restoreCheckpoint(checkpoint);
 	}
 
 	void TypeRegistryConfiguration::removeEntry(const us arrayIndex)
@@ -657,8 +635,8 @@ namespace PocketCore::Configuration
 		// branches from ever being hit
 
 		// Set data to default
-		getRegistry().setEntry(arrayIndex, TypeMeta{});
-		getRegistry().setTypeChartRow(arrayIndex, {});
+		setEntry(arrayIndex, TypeMeta{});
+		setTypeChartRow(arrayIndex, {});
 
 		// LCOV_EXCL_BR_STOP
 
@@ -669,28 +647,28 @@ namespace PocketCore::Configuration
 			// branches from ever being hit
 
 			// Shift elements
-			getRegistry().setEntry(i, getRegistry().getEntry(i + 1));
-			getRegistry().setTypeChartRow(i, getRegistry().getTypeChartRow(i + 1));
+			setEntry(i, getRegistry().getEntry(i + 1));
+			setTypeChartRow(i, getRegistry().getTypeChartRow(i + 1));
 
 			// LCOV_EXCL_BR_STOP
 		}
 
-		getRegistry().decrementAmountRegistered();
+		decrementAmountRegistered();
 
 		const us newRegistered{getRegistry().getAmountRegistered()};
 
 		// Clear the vacated last row
-		getRegistry().setTypeChartRow(newRegistered, {}); // LCOV_EXCL_BR
+		setTypeChartRow(newRegistered, {}); // LCOV_EXCL_BR
 
 		for (us row{0}; row < newRegistered; ++row)
 		{
 			for (us col{arrayIndex}; col < newRegistered; ++col)
 			{
-				getRegistry().setTypeChartCell(row, col, getRegistry().getTypeChartCell(row, col + 1));
+				setTypeChartCell(row, col, getRegistry().getTypeChartCell(row, col + 1));
 			}
 
 			// Clear the vacated last column cell for this row
-			getRegistry().setTypeChartCell(row, newRegistered, TypeEffectiveness::NOT_DEFINED);
+			setTypeChartCell(row, newRegistered, TypeEffectiveness::NOT_DEFINED);
 		}
 	}
 

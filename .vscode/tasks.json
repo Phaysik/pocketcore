@@ -4,7 +4,7 @@
 			"type": "shell",
 			"label": "Release build",
 			"command": "make",
-			"args": ["release"],
+			"args": ["-j4 release"],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -15,7 +15,7 @@
 			"type": "shell",
 			"label": "Dev build",
 			"command": "make",
-			"args": ["dev"],
+			"args": ["-j4 dev"],
 			"group": {
 				"kind": "build"
 			},
@@ -25,7 +25,7 @@
 			"type": "shell",
 			"label": "Debug build",
 			"command": "make",
-			"args": ["debug"],
+			"args": ["-j4 debug"],
 			"group": {
 				"kind": "build"
 			},
@@ -35,7 +35,7 @@
 			"type": "shell",
 			"label": "Debug tests",
 			"command": "make",
-			"args": ["build_tests"],
+			"args": ["-j4 build_tests"],
 			"group": {
 				"kind": "build"
 			},

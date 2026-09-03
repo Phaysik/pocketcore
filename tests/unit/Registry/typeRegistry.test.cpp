@@ -1,8 +1,8 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 08/26/2026
+	@date 09/03/2026
 	@since 0.1.0
-	@version 0.12.5
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -27,12 +27,17 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Core::us;
 using PocketCore::Registry::Type::TypeMeta;
 using PocketCore::Registry::Type::TypeRegistry;
-using PocketCore::Type::BuiltInTypeID;
+using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeEffectiveness;
 using PocketCore::Type::TypeID;
 
 using enum TypeEffectiveness;
+
+template <typename Registry>
+concept PubliclyTypeChartMutable = requires(Registry &registry) { registry.setTypeChartCell(0, 0, E); };
+
+static_assert(!PubliclyTypeChartMutable<TypeRegistry>);
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -92,14 +97,14 @@ SCENARIO("TypeRegistry")
 		THEN("the first entry is Normal")
 		{
 			TypeMeta firstEntry{registry.getEntry(0)};
-			CHECK((firstEntry.mTypeID == toTypeID(BuiltInTypeID::Normal)));
+			CHECK((firstEntry.mTypeID == toTypeID(BuiltinTypeID::Normal)));
 			CHECK((firstEntry.mName == "Normal"));
 		}
 
 		THEN("the last builtin entry is Stellar")
 		{
 			TypeMeta lastEntry{registry.getEntry(18)};
-			CHECK((lastEntry.mTypeID == toTypeID(BuiltInTypeID::Stellar)));
+			CHECK((lastEntry.mTypeID == toTypeID(BuiltinTypeID::Stellar)));
 			CHECK((lastEntry.mName == "Stellar"));
 		}
 	}
@@ -193,54 +198,37 @@ SCENARIO("TypeRegistry")
 
 	GIVEN("getTypeID")
 	{
-		THEN("lookups work when the registry is at maximum capacity")
-		{
-			TypeID finalIdentifier{registry.getNextTypeID()};
-			registry.setEntry(19, TypeMeta{.mName = "Custom", .mTypeID = finalIdentifier});
-			registry.incrementAmountRegistered();
-
-			auto identifier{registry.getTypeID("Custom")};
-			auto name{registry.getTypeName(finalIdentifier)};
-
-			REQUIRE(identifier.has_value());
-			REQUIRE(name.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((identifier.value() == finalIdentifier));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((name.value() == "Custom"));
-		}
-
 		THEN("selected builtin ids match enum values")
 		{
 			std::optional<TypeID> normalIdentifier{registry.getTypeID("Normal")};
 			REQUIRE(normalIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((normalIdentifier.value() == toTypeID(BuiltInTypeID::Normal)));
+			CHECK((normalIdentifier.value() == toTypeID(BuiltinTypeID::Normal)));
 
 			std::optional<TypeID> fireIdentifier{registry.getTypeID("Fire")};
 			REQUIRE(fireIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fireIdentifier.value() == toTypeID(BuiltInTypeID::Fire)));
+			CHECK((fireIdentifier.value() == toTypeID(BuiltinTypeID::Fire)));
 
 			std::optional<TypeID> fightingIdentifier{registry.getTypeID("Fighting")};
 			REQUIRE(fightingIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((fightingIdentifier.value() == toTypeID(BuiltInTypeID::Fighting)));
+			CHECK((fightingIdentifier.value() == toTypeID(BuiltinTypeID::Fighting)));
 
 			std::optional<TypeID> waterIdentifier{registry.getTypeID("Water")};
 			REQUIRE(waterIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((waterIdentifier.value() == toTypeID(BuiltInTypeID::Water)));
+			CHECK((waterIdentifier.value() == toTypeID(BuiltinTypeID::Water)));
 
 			std::optional<TypeID> stellarIdentifier{registry.getTypeID("Stellar")};
 			REQUIRE(stellarIdentifier.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((stellarIdentifier.value() == toTypeID(BuiltInTypeID::Stellar)));
+			CHECK((stellarIdentifier.value() == toTypeID(BuiltinTypeID::Stellar)));
 		}
 
 		THEN("looking up a nonexistent name returns nullopt")
@@ -269,7 +257,7 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("looking up Normal id returns Normal")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltInTypeID::Normal))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltinTypeID::Normal))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -278,7 +266,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("looking up Fairy id returns Fairy")
 		{
-			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltInTypeID::Fairy))};
+			std::optional<std::string_view> typeName{registry.getTypeName(toTypeID(BuiltinTypeID::Fairy))};
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -318,113 +306,12 @@ SCENARIO("TypeRegistry")
 		}
 	}
 
-	GIVEN("setEntry")
-	{
-
-		THEN("setting an entry updates that entry")
-		{
-			TypeMeta replacementEntry{.mName = "Custom", .mTypeID = TypeID{99}};
-			registry.setEntry(0, replacementEntry);
-
-			TypeMeta updatedEntry{registry.getEntry(0)};
-			CHECK((updatedEntry.mTypeID == TypeID{99}));
-			CHECK((updatedEntry.mName == "Custom"));
-		}
-
-		THEN("setting an entry updates name lookups")
-		{
-			TypeMeta replacementEntry{.mName = "Cosmic", .mTypeID = TypeID{50}};
-			registry.setEntry(0, replacementEntry);
-
-			std::optional<TypeID> cosmicIdentifier{registry.getTypeID("Cosmic")};
-			REQUIRE(cosmicIdentifier.has_value());
-
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((cosmicIdentifier.value() == TypeID{50}));
-
-			std::optional<TypeID> formerIdentifier{registry.getTypeID("Normal")};
-			CHECK_FALSE(formerIdentifier.has_value());
-		}
-	}
-
-	GIVEN("setTypeChartCell")
-	{
-		THEN("setting a chart cell updates the value")
-		{
-			registry.setTypeChartCell(0, 0, SE);
-			TypeEffectiveness chartCell{registry.getTypeChartCell(0, 0)};
-			CHECK((chartCell == SE));
-		}
-
-		THEN("setting and getting one cell roundtrips")
-		{
-			registry.setTypeChartCell(0, 0, NE);
-			TypeEffectiveness firstReadback{registry.getTypeChartCell(0, 0)};
-			CHECK((firstReadback == NE));
-
-			registry.setTypeChartCell(0, 0, SE);
-			TypeEffectiveness secondReadback{registry.getTypeChartCell(0, 0)};
-			CHECK((secondReadback == SE));
-		}
-	}
-
-	GIVEN("setTypeChartRow")
-	{
-		THEN("setting a chart row updates all values")
-		{
-			std::array<TypeEffectiveness, MAX_TYPES> replacementRow{};
-			replacementRow.fill(SE);
-			registry.setTypeChartRow(0, replacementRow);
-
-			std::array<TypeEffectiveness, MAX_TYPES> updatedRow{registry.getTypeChartRow(0)};
-			for (std::size_t indexValue = 0; indexValue < MAX_TYPES; ++indexValue)
-			{
-				CHECK((updatedRow.at(indexValue) == SE));
-			}
-		}
-	}
-
-	GIVEN("setAmountRegistered")
-	{
-		THEN("setting amount registered changes the value")
-		{
-			registry.setAmountRegistered(5);
-			us amountRegistered{registry.getAmountRegistered()};
-			CHECK((amountRegistered == 5));
-		}
-	}
-
-	GIVEN("getNextTypeID")
-	{
-		THEN("multiple next type id increments are monotonic")
-		{
-			TypeID firstValue{registry.getNextTypeID()};
-			registry.incrementNextTypeID();
-			TypeID secondValue{registry.getNextTypeID()};
-			registry.incrementNextTypeID();
-			TypeID thirdValue{registry.getNextTypeID()};
-
-			CHECK((secondValue.getValue() == firstValue.getValue() + 1));
-			CHECK((thirdValue.getValue() == firstValue.getValue() + 2));
-		}
-	}
-
-	GIVEN("setNextTypeID")
-	{
-		THEN("setting next type id changes the value")
-		{
-			registry.setNextTypeID(TypeID{42});
-			TypeID nextTypeIdentifier{registry.getNextTypeID()};
-			CHECK((nextTypeIdentifier == TypeID{42}));
-		}
-	}
-
 	GIVEN("findIndexByTypeID")
 	{
 
 		THEN("finding index by Normal id returns zero")
 		{
-			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltInTypeID::Normal))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltinTypeID::Normal))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -433,7 +320,7 @@ SCENARIO("TypeRegistry")
 
 		THEN("finding index by Stellar id returns eighteen")
 		{
-			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltInTypeID::Stellar))};
+			std::optional<us> indexResult{registry.findIndexByTypeID(toTypeID(BuiltinTypeID::Stellar))};
 			REQUIRE(indexResult.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -478,13 +365,13 @@ SCENARIO("TypeRegistry")
 	{
 		THEN("hasType by id returns true for Normal")
 		{
-			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltInTypeID::Normal))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltinTypeID::Normal))};
 			CHECK(hasTypeByIdentifier);
 		}
 
 		THEN("hasType by id returns true for Stellar")
 		{
-			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltInTypeID::Stellar))};
+			bool hasTypeByIdentifier{registry.hasType(toTypeID(BuiltinTypeID::Stellar))};
 			CHECK(hasTypeByIdentifier);
 		}
 
@@ -493,51 +380,6 @@ SCENARIO("TypeRegistry")
 			TypeID nonexistentIdentifier{200};
 			bool hasTypeByIdentifier{registry.hasType(nonexistentIdentifier)};
 			CHECK_FALSE(hasTypeByIdentifier);
-		}
-	}
-
-	GIVEN("incrementNextTypeID")
-	{
-		THEN("incrementing next type id increases by one")
-		{
-			TypeID beforeIncrement{registry.getNextTypeID()};
-			registry.incrementNextTypeID();
-			TypeID afterIncrement{registry.getNextTypeID()};
-
-			CHECK((afterIncrement.getValue() == beforeIncrement.getValue() + 1));
-		}
-	}
-
-	GIVEN("incrementAmountRegistered")
-	{
-		THEN("incrementing amount registered increases by one")
-		{
-			us beforeIncrement{registry.getAmountRegistered()};
-			registry.incrementAmountRegistered();
-			us afterIncrement{registry.getAmountRegistered()};
-
-			CHECK((afterIncrement == beforeIncrement + 1));
-		}
-	}
-
-	GIVEN("decrementAmountRegistered")
-	{
-		THEN("decrementing amount registered decreases by one")
-		{
-			us beforeDecrement{registry.getAmountRegistered()};
-			registry.decrementAmountRegistered();
-			us afterDecrement{registry.getAmountRegistered()};
-
-			CHECK((afterDecrement == beforeDecrement - 1));
-		}
-
-		THEN("decrement then increment restores span growth")
-		{
-			registry.decrementAmountRegistered();
-			std::size_t sizeBefore{registry.getRegisteredTypes().size()};
-			registry.incrementAmountRegistered();
-			std::size_t sizeAfter{registry.getRegisteredTypes().size()};
-			CHECK((sizeAfter == sizeBefore + 1));
 		}
 	}
 }

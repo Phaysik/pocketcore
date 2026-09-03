@@ -4,7 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.18] - 2026-09-03
+
 ## [0.12.17] - 2026-09-02
+
+### Added
+
+- Added canonical names and runtime registry entries for the previously enum-only Air Lock ability and Facade and Hydro Steam moves. Air Lock is registered with no triggers; Facade and Hydro Steam are registered with their stable IDs and names while retaining the remaining `MoveMeta` defaults.
+- Added `battleSlotHasTypeByName()` for null-safe type-name lookup through `RegistryProvider`, and renamed the existing identifier lookup to `battleSlotHasTypeByID()` so type, ability, item, and nature predicates consistently distinguish name-based and ID-based queries.
+- Added indexed `Pokemon::setStatusID()` mutation with the same asserted fixed-array bounds contract as the existing move, type, ability, item, and nature slot setters.
+- Added a shared registry-provider test helper that owns static configurations for every domain registry and returns a fully initialized non-owning `RegistryProvider` for cross-registry unit tests.
+
+### Changed
+
+- Renamed `BuiltInTypeID` to `BuiltinTypeID` throughout type configuration, registries, battle code, effect handlers, tests, and the example program. The enumerator order and numeric values remain unchanged.
+- Changed the default and `NO_TYPE_ID` value of `TypeID` from `std::numeric_limits<ub>::max()` (255) to zero. Because `BuiltinTypeID::Normal` also converts to zero, an empty type slot and the built-in Normal type now have the same underlying stable-ID value in this revision.
+- Standardized Pokemon identifier APIs: array accessors and mutators now use `get...IDsArray()` and `set...IDsArray()`, while indexed mutators use `setStatusID()`, `setMoveID()`, `setTypeID()`, `setAbilityID()`, `setItemID()`, and `setNatureID()`. Battle execution, helpers, handlers, serialization, fixtures, tests, and the example were migrated to the renamed surface.
+- Renamed item predicates from `battleSlotHoldsItemByName/ID()` to `battleSlotHasItemByName/ID()` and nature predicates from `battleSlotHoldsNatureByName/ID()` to `battleSlotHasNatureByName/ID()`, retaining their null-registry and empty-slot behavior.
+- Changed `EffectContext::operator==` from compiler-defaulted member comparison to explicit comparison of damage state, source IDs, targeting and move fields, sides, damage category, and the ordered active-multiplier sequence. The private built-in multiplier-position cache is no longer part of equality, so contexts with equivalent observable state compare equal regardless of cache history.
+- Expanded `PokemonTestData` and `makePokemon()` to initialize statuses, moves, PP, types, abilities, items, natures, current health, and maximum health through the production API.
+- Rewrote the `EffectContext` suite to cover multiplier insertion and replacement, application policies, reset behavior, normalization and clamping, and equality differences across every observable field. Rewrote the Pokemon suite to cover both constructors, all whole-array and indexed accessors and mutators, stats, level-derived damage factors, PP consumption, fainting, status interactions, and numeric and registry-resolved output; STAB and terrain tests were updated to the standardized identifiers and fixtures.
+
+### Fixed
+
+- Added the previously omitted nature section to numeric `operator<<` output and to `printPokemonWithNames()`. Nature IDs are now serialized with the other identifier arrays, and named output resolves each nature through `RegistryProvider::natureRegistry` with the existing `<unregistered>` fallback; section spacing was normalized at the same time.
 
 ## [0.12.16] - 2026-09-02
 
@@ -1772,7 +1795,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.17]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.18]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.17]: https://github.com/Phaysik/pocketcore/commit/ea43b6b88f966bbb791798edf2de0432846d00b6
 [0.12.16]: https://github.com/Phaysik/pocketcore/commit/e622e64a29215e50a70788359c7ce87b9387c0f6
 [0.12.15]: https://github.com/Phaysik/pocketcore/commit/026b606e93777a7709c87bbc42a9918a492c2672
 [0.12.14]: https://github.com/Phaysik/pocketcore/commit/20da569d8a90c8d9486006cae57aa8c82622e22a

@@ -1,8 +1,8 @@
 /*! @file targetsHandler.test.cpp
 	@brief C++ file for running tests for the TargetsHandler.
-	@date 09/01/2026
+	@date 09/03/2026
 	@since 0.8.7
-	@version 0.12.14
+	@version 0.12.18
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/moveRegistryConfiguration.h"
 #include "Effect/effectContext.h"
 #include "Effect/effectContext.testHelper.h"
 #include "EffectHandler/targetsHandler.testHelper.h"
@@ -23,6 +24,7 @@
 
 using PocketCore::Battle::BattleState;
 using PocketCore::Battle::BattleTargetID;
+using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::TargetsHandler;
 using PocketCore::Move::BuiltinMoveID;
@@ -40,7 +42,8 @@ SCENARIO("TargetsHandler")
 {
 	TargetsHandler targetsHandler{};
 	BattleState battleState{};
-	MoveRegistry moveRegistry{};
+	MoveRegistryConfiguration moveConfiguration{};
+	const MoveRegistry &moveRegistry{moveConfiguration.getRuntimeRegistry()};
 	RegistryProvider provider{.moveRegistry = &moveRegistry};
 
 	GIVEN("a move that targets a single opponent")
@@ -60,7 +63,7 @@ SCENARIO("TargetsHandler")
 
 	GIVEN("a move that targets only self")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = registerMove(moveRegistry, {.mTargetID = BattleTargetID::Self})})};
+		EffectContext context{makeEffectContext({.mMoveID = registerMove(moveConfiguration, {.mTargetID = BattleTargetID::Self})})};
 
 		WHEN("applying target handling")
 		{
@@ -75,7 +78,9 @@ SCENARIO("TargetsHandler")
 
 	GIVEN("a move that can hit multiple targets")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = registerMove(moveRegistry, {.mTargetID = BattleTargetID::AllOpponents})})};
+		EffectContext context{
+			makeEffectContext({.mMoveID = registerMove(moveConfiguration, {.mTargetID = BattleTargetID::AllOpponents})}),
+		};
 
 		WHEN("applying target handling")
 		{
