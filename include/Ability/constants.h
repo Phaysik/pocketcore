@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the type registry.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.3.0
-	@version 0.12.17
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -18,7 +18,10 @@ namespace PocketCore::Ability
 	inline constexpr std::string_view ABILITY_NAME_STENCH{"Stench"};
 
 	inline constexpr std::string_view ABILITY_NAME_GUTS{"Guts"};
+	inline constexpr std::string_view ABILITY_NAME_LEVITATE{"Levitate"};
+	inline constexpr std::string_view ABILITY_NAME_ELEVATE{"Elevate"};
 	inline constexpr std::string_view ABILITY_NAME_AIR_LOCK{"Air Lock"};
+	inline constexpr std::string_view ABILITY_NAME_CLOUD_NINE{"Cloud Nine"};
 } // namespace PocketCore::Ability
 
 #endif

@@ -1,8 +1,8 @@
 /*! @file battleAction.h
 	@brief Defines actions for battle states.
-	@date 08/28/2026
+	@date 09/03/2026
 	@since 0.10.2
-	@version 0.12.9
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -23,16 +23,25 @@ namespace PocketCore::Battle
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::Side;
 
-	/*! @struct BattleTarget Battle/battleEngine.h
+	/*! @struct BattleTarget Battle/battleAction.h
 		@brief Identifies one active battle slot selected as an effect or move target.
-		@date 08/07/2026
+		@date 09/03/2026
 		@since 0.9.16
-		@version 0.9.16
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct BattleTarget
 	{
 		public:
+			/*! @brief Compares two BattleTarget instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The BattleTarget instance to compare.
+				@return True when both BattleTarget instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const BattleTarget &other) const noexcept = default;
+
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
 			/*! @brief The trainer side containing the selected slot. */
@@ -42,15 +51,13 @@ namespace PocketCore::Battle
 			ub mSlotIndex{0};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
-
-			ATTR_NODISCARD constexpr bool operator==(const BattleTarget &) const noexcept = default;
 	};
 
-	/*! @struct MoveAction Battle/battleEngine.h
+	/*! @struct MoveAction Battle/battleAction.h
 		@brief Describes one active Pokemon selecting a move during a turn.
-		@date 08/07/2026
+		@date 09/03/2026
 		@since 0.9.16
-		@version 0.9.16
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct MoveAction
@@ -69,11 +76,11 @@ namespace PocketCore::Battle
 			ub mMoveSlotIndex{0};
 	};
 
-	/*! @struct SwitchAction Battle/battleEngine.h
+	/*! @struct SwitchAction Battle/battleAction.h
 		@brief Describes replacing one active Pokemon with a party member.
-		@date 08/28/2026
+		@date 09/03/2026
 		@since 0.10.2
-		@version 0.12.9
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct SwitchAction

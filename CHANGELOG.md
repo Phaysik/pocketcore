@@ -4,7 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.19] - 2026-09-03
+
 ## [0.12.18] - 2026-09-03
+
+### Added
+
+- Added `FixedMetadataRegistry::addEntry()`, a protected atomic append operation that assigns the next stable ID, stamps it into the metadata record, stores the record, updates the sorted ID index and registered count, and advances the next-ID counter as one invariant-preserving operation.
+- Added opaque registry checkpoints through `createCheckpoint()` and `restoreCheckpoint()`. A checkpoint is bound to its originating registry and captures its registered count, next stable ID, and structural-mutation version; restoring a valid append-only checkpoint clears subsequently appended records, restores ID allocation state, and rebuilds the ID index. Foreign, forward-growing, or invalidated checkpoints assert and leave the registry unchanged in assertion-disabled builds.
+- Added compile-time tests confirming that domain registries and `TypeRegistry` no longer expose structural or type-chart mutation publicly, plus focused generic-registry tests for consecutive ID assignment and checkpoint rollback with ID reuse.
+
+### Changed
+
+- Changed `FixedMetadataRegistryConfiguration` from owning a separate registry data member to protected inheritance from its concrete registry. Configuration facades now invoke protected invariant-preserving mutation hooks directly while continuing to expose their runtime registries as read-only references.
+- Changed generic single-record registration to delegate to `addEntry()` instead of separately setting metadata, incrementing the registered count, and incrementing the next ID. Atomic batch registration now captures and restores an opaque checkpoint rather than manually erasing partial additions and assigning the previous next-ID value.
+- Moved raw structural mutation behind protected access in the ability, effect, item, move, multiplier, nature, Pokemon, status, terrain, type, and weather registries. Public metadata, name, ID, span, count, containment, and index queries remain available, while configuration facades retain controlled access to append, replacement, erasure, count restoration, and checkpoints.
+- Added mutation-version tracking to invalidate append-only checkpoints after entry replacement, erasure, or direct registered-count changes. ID-index rebuilding is now explicitly non-inlined and remains coupled to operations that can alter registered positions or stable IDs.
+- Moved `TypeRegistry` chart-cell and chart-row mutation to protected access. `TypeRegistryConfiguration` now stores a new type's complete offensive row in `TypeMeta` during atomic registration, applies its defensive column through inherited protected setters, and clears appended rows and columns before restoring a failed batch checkpoint.
+- Updated the fixed-registry benchmark and test-only registry adapters to derive from domain registries and selectively expose `addEntry()` for controlled setup. Registry suites now test observable query behavior and encapsulation instead of mutating counters, entries, type-chart cells, or next-ID state directly.
+- Changed the VS Code release, development, debug, and test build tasks to request four-job Make execution through `-j4` task arguments.
+
+### Removed
+
+- Removed public `setEntry()`, `eraseEntry()`, registered-count setters/incrementers/decrementers, and mutable type-chart access from runtime domain registries; these operations are now reserved for derived configuration and test/benchmark adapters.
+- Removed arbitrary next-ID mutation APIs, including generic `setNextID()` and `incrementNextID()` and the domain-specific `setNext...ID()` and `incrementNext...ID()` wrappers. Stable-ID progression is now coupled to `addEntry()`, with rollback available only through registry-issued checkpoints.
 
 ## [0.12.17] - 2026-09-02
 
@@ -1795,7 +1818,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.18]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.19]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.18]: https://github.com/Phaysik/pocketcore/commit/304cf2f9b864530f64e2820573585c4dc60c2bb4
 [0.12.17]: https://github.com/Phaysik/pocketcore/commit/ea43b6b88f966bbb791798edf2de0432846d00b6
 [0.12.16]: https://github.com/Phaysik/pocketcore/commit/e622e64a29215e50a70788359c7ce87b9387c0f6
 [0.12.15]: https://github.com/Phaysik/pocketcore/commit/026b606e93777a7709c87bbc42a9918a492c2672

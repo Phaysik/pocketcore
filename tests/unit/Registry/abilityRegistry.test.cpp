@@ -2,15 +2,15 @@
 	@brief C++ file for running tests for the AbilityRegistry.
 	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
 #include "Registry/abilityRegistry.h"
 
 #include <optional>
-#include <span>
 #include <string_view>
+#include <utility>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
@@ -28,9 +28,11 @@ using PocketCore::Ability::ABILITY_NAME_STENCH;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
+using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
+using PocketCore::Battle::BattleTargetID;
 using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
@@ -46,82 +48,188 @@ static_assert(!PubliclyStructurallyMutable<AbilityRegistry>);
 SCENARIO("AbilityRegistry")
 {
 	AbilityRegistry registry{};
+	ub finalAbilityUnderlyingValue{std::to_underlying(BuiltinAbilityID::FinalAbility)};
 
-	GIVEN("a default-constructed registry")
+	GIVEN("a default constructed ability registry")
 	{
-		THEN("all built-in abilities preserve their catalog identifiers")
+		THEN("Stench has the appropriate properties")
 		{
-			CHECK((registry.getAmountRegistered() == 4));
-			CHECK((registry.getNextAbilityID() == 8));
+			AbilityMeta expected{
+				.mTriggers = {{
+					.mEffects = {toEffectID(BuiltinEffectID::Flinch)},
+					.mTrigger = BattleEventID::Hit,
+					.mRole = BattleEventRole::User,
+				},},
+				.mName = ABILITY_NAME_STENCH,
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
+				.mTargetID = BattleTargetID::SingleOpponent,
+			};
 
-			std::optional<AbilityID> noneIdentifier{registry.getAbilityID(ABILITY_NAME_NONE)};
-			std::optional<AbilityID> stenchIdentifier{registry.getAbilityID(ABILITY_NAME_STENCH)};
-			std::optional<AbilityID> drizzleIdentifier{registry.getAbilityID(ABILITY_NAME_DRIZZLE)};
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Stench))};
 
-			REQUIRE(noneIdentifier.has_value());
-			REQUIRE(stenchIdentifier.has_value());
-			REQUIRE(drizzleIdentifier.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((noneIdentifier.value() == toAbilityID(BuiltinAbilityID::None)));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((stenchIdentifier.value() == toAbilityID(BuiltinAbilityID::Stench)));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((drizzleIdentifier.value() == toAbilityID(BuiltinAbilityID::Drizzle)));
+			CHECK((expected == *actual));
 		}
 
-		THEN("Stench retains its move-use flinch metadata")
+		THEN("Drizzle has the appropriate properties")
 		{
-			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Stench))};
-			REQUIRE((metadata != nullptr));
+			AbilityMeta expected{
+				.mTriggers = {{
+					.mEffects = {toEffectID(BuiltinEffectID::SetRain)},
+					.mTrigger = BattleEventID::SwitchIn,
+				},},
+				.mName = ABILITY_NAME_DRIZZLE,
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
+				.mTargetID = BattleTargetID::Self,
+			};
 
-			AbilityMeta stench{*metadata};
-			REQUIRE((stench.mTriggers.size() == 1U));
-			CHECK((stench.mTriggers.front().mTrigger == BattleEventID::Hit));
-			CHECK((stench.mTriggers.front().mRole == BattleEventRole::User));
-			REQUIRE((stench.mTriggers.front().mEffects.size() == 1U));
-			CHECK((stench.mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::Flinch)));
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Drizzle))};
+
+			CHECK((expected == *actual));
+		}
+	}
+
+	GIVEN("getAbilityMetadata")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK((registry.getAbilityMetadata(AbilityID{200}) == nullptr));
 		}
 
-		THEN("Drizzle retains its switch-in rain metadata")
+		THEN("the metadata is retrieved when accessed by a valid Ability ID")
 		{
-			const AbilityMeta *metadata{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Drizzle))};
-			REQUIRE((metadata != nullptr));
+			AbilityMeta expected{
+				.mTriggers = {},
+				.mName = ABILITY_NAME_NONE,
+				.mAbilityID = toAbilityID(BuiltinAbilityID::None),
+			};
 
-			AbilityMeta drizzle{*metadata};
-			REQUIRE((drizzle.mTriggers.size() == 1U));
-			CHECK((drizzle.mTriggers.front().mTrigger == BattleEventID::SwitchIn));
-			CHECK((drizzle.mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::SetRain)));
+			CHECK((expected == *registry.getAbilityMetadata(NO_ABILITY_ID)));
 		}
+	}
 
-		THEN("unknown names and IDs are absent")
+	GIVEN("getAbilityID")
+	{
+		THEN("unknown IDs are absent")
 		{
 			CHECK_FALSE(registry.getAbilityID("Unknown").has_value());
-			CHECK((registry.getAbilityMetadata(AbilityID{200}) == nullptr));
+		}
+
+		THEN("the Ability ID is retrieved by valid Ability name")
+		{
+			std::optional<AbilityID> abilityID{registry.getAbilityID(ABILITY_NAME_NONE)};
+
+			REQUIRE(abilityID.has_value());
+
+			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
+		}
+	}
+
+	GIVEN("getAbilityName")
+	{
+		THEN("unknown IDs are absent")
+		{
 			CHECK_FALSE(registry.getAbilityName(AbilityID{200}).has_value());
 		}
 
+		THEN("a registered ability name is returned by stable ID")
+		{
+			std::optional<std::string_view> abilityName{registry.getAbilityName(toAbilityID(BuiltinAbilityID::None))};
+
+			REQUIRE(abilityName.has_value());
+
+			CHECK((abilityName.value() == ABILITY_NAME_NONE));
+		}
+	}
+
+	GIVEN("getAmountRegistered")
+	{
+		THEN("the registered span contains the exact amount of built-in entries")
+		{
+			CHECK((registry.getAmountRegistered() == finalAbilityUnderlyingValue));
+		}
+	}
+
+	GIVEN("getEntry")
+	{
+		THEN("an invalid internal array index has no metadata")
+		{
+			CHECK((registry.getEntry(2'000) == nullptr));
+		}
+
+		THEN("a valid internal array index has metadata")
+		{
+			AbilityMeta expected{
+				.mTriggers = {},
+				.mName = ABILITY_NAME_NONE,
+				.mAbilityID = toAbilityID(BuiltinAbilityID::None),
+			};
+
+			const AbilityMeta *abilityMeta{registry.getEntry(0)};
+
+			REQUIRE((abilityMeta != nullptr));
+			CHECK((*abilityMeta == expected));
+		}
+	}
+
+	GIVEN("getRegisteredAbilities")
+	{
+		THEN("the amount of abilities returned matches the amount that are built-in")
+		{
+			CHECK((registry.getRegisteredAbilities().size() == finalAbilityUnderlyingValue));
+		}
+	}
+
+	GIVEN("getNextAbilityID")
+	{
+		THEN("the next available stable Ability ID is after all built in ability IDs")
+		{
+			CHECK((registry.getNextAbilityID() == finalAbilityUnderlyingValue));
+		}
+	}
+
+	GIVEN("findIndexByAbilityID")
+	{
 		THEN("an unknown stable ID has no internal index")
 		{
 			std::optional<ub> abilityIndex{registry.findIndexByAbilityID(AbilityID{200})};
 			CHECK_FALSE(abilityIndex.has_value());
 		}
 
-		THEN("a registered ability name is returned by stable ID")
+		THEN("the internal array index is retrieved by valid Ability ID")
 		{
-			std::optional<std::string_view> abilityName{registry.getAbilityName(toAbilityID(BuiltinAbilityID::Drizzle))};
-			REQUIRE(abilityName.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityName.value() == ABILITY_NAME_DRIZZLE));
+			std::optional<ub> abilityIndex{registry.findIndexByAbilityID(NO_ABILITY_ID)};
+
+			REQUIRE(abilityIndex.has_value());
+			CHECK((abilityIndex.value() == 0));
+		}
+	}
+
+	GIVEN("hasAbility")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown ability name has no entry")
+			{
+				CHECK_FALSE(registry.hasAbility("Unknown"));
+			}
+
+			THEN("a known ability name has an entry")
+			{
+				CHECK(registry.hasAbility(ABILITY_NAME_NONE));
+			}
 		}
 
-		THEN("the registered span contains exactly the built-in entries")
+		WHEN("calling the AbilityID overload")
 		{
-			std::span<const AbilityMeta> abilities{registry.getRegisteredAbilities()};
-			REQUIRE((abilities.size() == 4));
-			CHECK((abilities.front().mName == ABILITY_NAME_NONE));
-			CHECK((abilities.back().mName == PocketCore::Ability::ABILITY_NAME_AIR_LOCK));
-			CHECK(registry.hasAbility(toAbilityID(BuiltinAbilityID::Stench)));
-			CHECK(registry.hasAbility(ABILITY_NAME_DRIZZLE));
+			THEN("an unknown ability ID has no entry")
+			{
+				CHECK_FALSE(registry.hasAbility(AbilityID{200}));
+			}
+
+			THEN("a known ability ID has an entry")
+			{
+				CHECK(registry.hasAbility(NO_ABILITY_ID));
+			}
 		}
 	}
 }

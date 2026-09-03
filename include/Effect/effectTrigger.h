@@ -1,8 +1,8 @@
 /*! @file effectTrigger.h
 	@brief Defines shared event-driven effect trigger metadata.
-	@date 08/30/2026
+	@date 09/03/2026
 	@since 0.12.6
-	@version 0.12.11
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -31,14 +31,25 @@ namespace PocketCore::Effect
 		 @p mSuppressionRuleCount identifies how many entries are active. The trigger is eligible when its event and role match the
 		 current battle event.
 		@note @p mSuppressionRuleCount must not exceed @ref MAX_SUPPRESSION_RULES_PER_TRIGGER.
-		@date 08/30/2026
+		@date 09/03/2026
 		@since 0.12.6
-		@version 0.12.11
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct EffectTrigger
 	{
 		public:
+			/*! @brief Compares two EffectTrigger instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The EffectTrigger instance to compare.
+				@return True when both EffectTrigger instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const EffectTrigger &) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The fixed-capacity suppression rules associated with this trigger. */
 			std::array<SuppressionRule, MAX_SUPPRESSION_RULES_PER_TRIGGER> mSuppressionRules{};
 
@@ -53,6 +64,8 @@ namespace PocketCore::Effect
 
 			/*! @brief The number of entries in @ref mSuppressionRules that contain active suppression rules. */
 			ub mSuppressionRuleCount{0};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Effect
 

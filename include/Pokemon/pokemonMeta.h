@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 08/26/2026
+	@date 09/03/2026
 	@since 0.11.6
-	@version 0.12.5
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -38,14 +38,25 @@ namespace PocketCore::Pokemon
 		@brief Stores one pokemon's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 08/22/2026
+		@date 09/03/2026
 		@since 0.11.6
-		@version 0.11.6
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
 	{
 		public:
+			/*! @brief Compares two PokemonMeta instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The PokemonMeta instance to compare.
+				@return True when both instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const PokemonMeta &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
 
@@ -90,6 +101,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The amount of abilities in the Pokemon's ability pool that are valid and not empty data. */
 			ub mAbilityPoolCount{};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Pokemon
 

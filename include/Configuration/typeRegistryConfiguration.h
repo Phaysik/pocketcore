@@ -2,7 +2,7 @@
 	@brief Contains the function declarations for the user-configurable type registry facade.
 	@date 09/03/2026
 	@since 0.2.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -109,7 +109,7 @@ namespace PocketCore::Configuration
 	   provide all-or-nothing (atomic rollback) semantics.
 		@date 09/03/2026
 		@since 0.1.0
-		@version 0.12.18
+		@version 0.12.19
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -293,7 +293,7 @@ namespace PocketCore::Configuration
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
 				@since 0.1.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition,
 																			const UnspecifiedMatchup defaultBehavior
@@ -353,7 +353,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if @p oldName is not found or @p newName is a
 			   duplicate, or void on success.
 				@since 0.1.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameType(const std::string_view &oldName,
 																			 const std::string_view &newName);
@@ -440,7 +440,7 @@ namespace PocketCore::Configuration
 				@details Shifts subsequent entries down and clears the corresponding matchup row and column data.
 				@param[in] arrayIndex The zero-based position of the entry to remove.
 				@since 0.1.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			void removeEntry(const us arrayIndex);
 

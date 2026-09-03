@@ -1,14 +1,15 @@
 /*! @file interaction.h
 	@brief Defines reusable metadata interactions between objects of the same framework.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.12.16
-	@version 0.12.16
+	@version 0.12.19
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_CORE_INTERACTION_H
 #define INCLUDE_CORE_INTERACTION_H
 
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
 namespace PocketCore::Interaction
@@ -42,20 +43,32 @@ namespace PocketCore::Interaction
 	/*! @struct Interaction Core/interaction.h
 		@brief Associates an existing object with the action taken when another object is applied.
 		@tparam ID The stable identifier type shared by the incoming and existing objects.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.12.16
-		@version 0.12.16
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	template <typename ID>
 	struct Interaction
 	{
 		public:
+			/*! @brief Compares interactions by their existing object ID and action.
+				@param[in] other The interaction to compare.
+				@return True when both interactions contain the same existing ID and action; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const Interaction &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The stable identifier of the object that is already active. */
 			ID mExistingID{};
 
 			/*! @brief The action taken between the incoming object and the existing object. */
 			InteractionAction mAction{InteractionAction::Coexist};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Interaction
 

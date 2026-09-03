@@ -1,8 +1,8 @@
 /*! @file natureMeta.h
 	@brief Defines the metadata stored for built-in and user-defined natures.
-	@date 08/26/2026
+	@date 09/03/2026
 	@since 0.11.6
-	@version 0.12.6
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -29,14 +29,25 @@ namespace PocketCore::Nature
 		@brief Stores one nature's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 08/26/2026
+		@date 09/03/2026
 		@since 0.11.6
-		@version 0.12.6
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct NatureMeta
 	{
 		public:
+			/*! @brief Compares two NatureMeta instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The NatureMeta instance to compare.
+				@return True when both instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const NatureMeta &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The stat multipliers for HP, Attack, Defense, SpAttack, SpDefense, Speed. */
 			std::array<double, MAX_STAT_TYPES> mStatMultipliers{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
@@ -51,6 +62,8 @@ namespace PocketCore::Nature
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			NatureID mNatureID{};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Nature
 

@@ -2,7 +2,7 @@
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
 	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -44,9 +44,9 @@ namespace PocketCore::Registry::Ability
 		@details Built-in abilities are registered during construction with IDs derived from @ref BuiltinAbilityID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ABILITIES.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.4.0
-		@version 0.12.17
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	class AbilityRegistry : private FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
@@ -58,7 +58,7 @@ namespace PocketCore::Registry::Ability
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID.
 				@since 0.4.0
-				@version 0.12.17
+				@version 0.12.19
 			 */
 			ATTR_NOINLINE explicit constexpr AbilityRegistry() : Base{toAbilityID(BuiltinAbilityID::FinalAbility).getValue()}
 			{
@@ -83,8 +83,32 @@ namespace PocketCore::Registry::Ability
 
 				addBuiltin({
 					.mTriggers = {},
+					.mName = PocketCore::Ability::ABILITY_NAME_GUTS,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+				});
+
+				addBuiltin({
+					.mTriggers = {},
+					.mName = PocketCore::Ability::ABILITY_NAME_LEVITATE,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Levitate),
+				});
+
+				addBuiltin({
+					.mTriggers = {},
+					.mName = PocketCore::Ability::ABILITY_NAME_ELEVATE,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate),
+				});
+
+				addBuiltin({
+					.mTriggers = {},
 					.mName = PocketCore::Ability::ABILITY_NAME_AIR_LOCK,
 					.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock),
+				});
+
+				addBuiltin({
+					.mTriggers = {},
+					.mName = PocketCore::Ability::ABILITY_NAME_CLOUD_NINE,
+					.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
 				});
 			}
 

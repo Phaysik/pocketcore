@@ -1,8 +1,8 @@
 /*! @file effectSourceAndSuppression.h
-	@brief Contains the effect source and suppression
-	@date 08/28/2026
+	@brief Contains the effect source and suppression rules.
+	@date 09/03/2026
 	@since 0.9.13
-	@version 0.12.9
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -54,20 +54,31 @@ namespace PocketCore::Effect
 		Nature,
 	};
 
-	/*! @struct SuppressionRule Effect/effectSourceAndSuppresion.h
-		@brief Describes which effect triggers an active suppression blocks.
+	/*! @struct SuppressionRule Effect/effectSourceAndSuppression.h
+		@brief Describes which effect triggers an active suppression block.
 		@details A rule matches when the dispatched effect's source category, trigger, and role align with the rule's targets. The optional
 			identifiers narrow a rule to one specific ability, item, move, or nature; leaving one empty matches every entity of that source
 			category.
 		@note Only the optional identifier matching the rule's target source is consulted.
-		@date 08/28/2026
+		@date 09/03/2026
 		@since 0.9.13
-		@version 0.12.9
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct SuppressionRule
 	{
 		public:
+			/*! @brief Compares two SuppressionRule instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The SuppressionRule instance to compare.
+				@return True when both SuppressionRule instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const SuppressionRule &) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The specific ability to suppress, or empty to suppress every ability. */
 			std::optional<AbilityID> mTargetAbilityID{};
 			/*! @brief The specific item to suppress, or empty to suppress every item. */
@@ -82,6 +93,8 @@ namespace PocketCore::Effect
 			BattleEventRole mTargetRole{BattleEventRole::Any};
 			/*! @brief The source category the rule suppresses. */
 			EffectSource mTargetSource{};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Effect
 

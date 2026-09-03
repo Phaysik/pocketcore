@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/03/2026
 	@since 0.4.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -1037,10 +1037,10 @@ SCENARIO("Pokemon free function")
 					"  Speed: 105\n"
 					"  Types:\n"
 					"    [0]:\n"
-					"      ID: 1\n"
+					"      ID: 2\n"
 					"      Name: Fire\n"
 					"    [1]:\n"
-					"      ID: 12\n"
+					"      ID: 13\n"
 					"      Name: Bug\n"
 					"  Natures:\n"
 					"    [0]:\n"
@@ -1090,7 +1090,7 @@ SCENARIO("Pokemon free function")
 					"}",
 				};
 
-				CHECK(output.str() == expected);
+				CHECK((output.str() == expected));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file builtInTypeID.h
 	@brief Declares the canonical enumeration of Pokemon elemental types.
-	@date 09/02/2026
+	@date 09/03/2026
 	@since 0.9.2
-	@version 0.12.17
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -23,13 +23,14 @@ namespace PocketCore::Type
 		@brief Enumerates all supported elemental type categories.
 		@details Values map to compact, stable identifiers used by type metadata, move metadata, and type-effectiveness calculations.
 		@note The underlying type is @ref PocketCore::Core::ub to minimize storage overhead.
-		@date 09/02/2026
+		@date 09/03/2026
 		@since 0.4.0
-		@version 0.12.17
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	enum class BuiltinTypeID : ub
 	{
+		None,
 		Normal,
 		Fire,
 		Fighting,

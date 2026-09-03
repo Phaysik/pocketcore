@@ -2,7 +2,7 @@
 	@brief Contains the function definitions for creating a type registry configuration
 	@date 09/03/2026
 	@since 0.2.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -256,7 +256,7 @@ namespace PocketCore::Configuration
 		const us registered{getRegistry().getAmountRegistered()};
 		const std::string_view typeName{definition.name};
 
-		if (registered >= MAX_TYPES || getRegistry().getNextTypeID() == PocketCore::Type::NO_TYPE_ID)
+		if (registered >= MAX_TYPES || TypeID{getRegistry().getNextTypeID()} == PocketCore::Type::NO_TYPE_ID)
 		{
 			const std::optional<std::string_view> logResult{
 				Logger::warn("TypeRegistryConfiguration: registry capacity or type ID space exhausted. Cannot add type '{}'.", typeName),
@@ -562,7 +562,14 @@ namespace PocketCore::Configuration
 			getRegistry().findIndexByTypeID(typeValue).value(),
 		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
 
-		TypeMeta renamedEntry{getRegistry().getEntry(arrayIndex)};
+		const TypeMeta *currentMetadata{getRegistry().getEntry(arrayIndex)};
+
+		if (currentMetadata == nullptr)
+		{
+			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, {}}};
+		}
+
+		TypeMeta renamedEntry{*currentMetadata};
 		renamedEntry.mName = newName;
 		setEntry(arrayIndex, renamedEntry); // LCOV_EXCL_BR
 
@@ -647,7 +654,7 @@ namespace PocketCore::Configuration
 			// branches from ever being hit
 
 			// Shift elements
-			setEntry(i, getRegistry().getEntry(i + 1));
+			setEntry(i, *getRegistry().getEntry(i + 1));
 			setTypeChartRow(i, getRegistry().getTypeChartRow(i + 1));
 
 			// LCOV_EXCL_BR_STOP

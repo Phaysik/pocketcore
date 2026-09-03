@@ -1,8 +1,8 @@
 /*! @file multiplierMeta.h
 	@brief Defines the metadata stored for built-in and user-defined multipliers.
-	@date 08/21/2026
+	@date 09/03/2026
 	@since 0.8.1
-	@version 0.11.5
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -35,14 +35,25 @@ namespace PocketCore::Multiplier
 		@brief Stores one multiplier's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 08/21/2026
+		@date 09/03/2026
 		@since 0.8.1
-		@version 0.11.5
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	struct MultiplierMeta
 	{
 		public:
+			/*! @brief Compares two MultiplierMeta instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The MultiplierMeta instance to compare.
+				@return True when both instances contain equivalent metadata; otherwise false.
+				@since 0.12.19
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const MultiplierMeta &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The case-sensitive display name stored as a non-owning view. */
 			std::string_view mName{};
 
@@ -51,6 +62,8 @@ namespace PocketCore::Multiplier
 
 			/*! @brief The calculation policy used when applying this multiplier to damage. */
 			MultiplierApplicationPolicy mApplicationPolicy{MultiplierApplicationPolicy::RoundHalfDown};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Multiplier
 

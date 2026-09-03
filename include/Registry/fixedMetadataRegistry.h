@@ -2,7 +2,7 @@
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
 	@date 09/03/2026
 	@since 0.5.0
-	@version 0.12.8
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -36,7 +36,7 @@ namespace PocketCore::Registry
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
 		@date 09/03/2026
 		@since 0.5.0
-		@version 0.12.18
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -88,12 +88,16 @@ namespace PocketCore::Registry
 				@param[in] index The internal array index.
 				@return A const reference that remains valid until replacement or registry destruction.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.12.19
 			*/
-			ATTR_NODISCARD constexpr const Metadata &getEntry(const us index) const
+			ATTR_NODISCARD constexpr const Metadata *getEntry(const us index) const
 			{
-				assert(index < mEntries.size());
-				return mEntries.at(index);
+				if (index >= mEntries.size())
+				{
+					return nullptr;
+				}
+
+				return &mEntries.at(index);
 			}
 
 			/*! @brief Looks up metadata by stable ID.

@@ -2,7 +2,7 @@
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
 	@date 09/03/2026
 	@since 0.5.0
-	@version 0.12.18
+	@version 0.12.19
 	@author Matthew Moore
 */
 
@@ -63,7 +63,7 @@ namespace PocketCore::Configuration
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
 		@date 09/03/2026
 		@since 0.5.0
-		@version 0.12.18
+		@version 0.12.19
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -255,7 +255,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -270,12 +270,18 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata &currentMetadata{this->getEntry(index.value())};
-				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
-				std::invoke(std::forward<Mutator>(mutator), metadata);
-				metadata.*IDMember = currentMetadata.*IDMember;
+				const Metadata *currentMetadata{this->getEntry(index.value())};
 
-				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
+				if (currentMetadata == nullptr)
+				{
+					return std::unexpected{makeNotFoundError(name, callerContext)};
+				}
+
+				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
+				std::invoke(std::forward<Mutator>(mutator), metadata);
+				metadata.*IDMember = currentMetadata->*IDMember;
+
+				if (metadata.mName != currentMetadata->mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -295,7 +301,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -310,12 +316,18 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata &currentMetadata{this->getEntry(index.value())};
-				Metadata metadata{Detail::cloneMetadata(currentMetadata)};
-				std::invoke(std::forward<Mutator>(mutator), metadata);
-				metadata.*IDMember = currentMetadata.*IDMember;
+				const Metadata *currentMetadata{this->getEntry(index.value())};
 
-				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
+				if (currentMetadata == nullptr)
+				{
+					return std::unexpected{makeNotFoundError({}, callerContext)};
+				}
+
+				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
+				std::invoke(std::forward<Mutator>(mutator), metadata);
+				metadata.*IDMember = currentMetadata->*IDMember;
+
+				if (metadata.mName != currentMetadata->mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -337,7 +349,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.19
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)
@@ -359,7 +371,14 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, newName, logResult.value_or(std::string_view{})}};
 				}
 
-				Metadata metadata{Detail::cloneMetadata(this->getEntry(index.value()))};
+				const Metadata *currentMetadata{this->getEntry(index.value())};
+
+				if (currentMetadata == nullptr)
+				{
+					return std::unexpected{makeNotFoundError(oldName, "rename")};
+				}
+
+				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				metadata.mName = newName;
 				this->setEntry(index.value(), metadata);
 
