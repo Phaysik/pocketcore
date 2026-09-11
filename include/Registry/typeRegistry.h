@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.1.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -85,124 +85,132 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.1.0
-		@version 0.12.19
+		@version 0.12.20
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
-		public:
+		private:
 			using Base = FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>;
 
-			// MARK: Constructor
+		public:
+			/*! @brief Compares two TypeRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const TypeRegistry &other) const noexcept = default;
+
+			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
 
 			/*! @brief Constructs a registry pre-populated with all built-in @ref Types.
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 				@since 0.1.0
-				@version 0.12.19
+				@version 0.12.20
 			*/
 			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltinTypeID::FinalType).getValue()}
 			{
-				// LCOV_EXCL_BR_START - Built-in types are guaranteed to be registered, so branch coverage for the addBuiltin precondition
-				// is not applicable.
 				addBuiltin({
-					.mName = TYPE_NAME_NONE,
+					.mName = std::string(TYPE_NAME_NONE),
 					.mTypeID = toTypeID(BuiltinTypeID::None),
 				});
 				addBuiltin({
 					.mOffensiveMatchups = NORMAL_TYPE_MATCHUP,
-					.mName = TYPE_NAME_NORMAL,
+					.mName = std::string(TYPE_NAME_NORMAL),
 					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 				});
 				addBuiltin({
-					.mOffensiveMatchups = FIGHTING_TYPE_MATCHUP,
-					.mName = TYPE_NAME_FIGHTING,
-					.mTypeID = toTypeID(BuiltinTypeID::Fighting),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = FLYING_TYPE_MATCHUP,
-					.mName = TYPE_NAME_FLYING,
-					.mTypeID = toTypeID(BuiltinTypeID::Flying),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = POISON_TYPE_MATCHUP,
-					.mName = TYPE_NAME_POISON,
-					.mTypeID = toTypeID(BuiltinTypeID::Poison),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = GROUND_TYPE_MATCHUP,
-					.mName = TYPE_NAME_GROUND,
-					.mTypeID = toTypeID(BuiltinTypeID::Ground),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = ROCK_TYPE_MATCHUP,
-					.mName = TYPE_NAME_ROCK,
-					.mTypeID = toTypeID(BuiltinTypeID::Rock),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = BUG_TYPE_MATCHUP,
-					.mName = TYPE_NAME_BUG,
-					.mTypeID = toTypeID(BuiltinTypeID::Bug),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = GHOST_TYPE_MATCHUP,
-					.mName = TYPE_NAME_GHOST,
-					.mTypeID = toTypeID(BuiltinTypeID::Ghost),
-				});
-				addBuiltin({
-					.mOffensiveMatchups = STEEL_TYPE_MATCHUP,
-					.mName = TYPE_NAME_STEEL,
-					.mTypeID = toTypeID(BuiltinTypeID::Steel),
-				});
-				addBuiltin({
 					.mOffensiveMatchups = FIRE_TYPE_MATCHUP,
-					.mName = TYPE_NAME_FIRE,
+					.mName = std::string(TYPE_NAME_FIRE),
 					.mTypeID = toTypeID(BuiltinTypeID::Fire),
 				});
 				addBuiltin({
 					.mOffensiveMatchups = WATER_TYPE_MATCHUP,
-					.mName = TYPE_NAME_WATER,
+					.mName = std::string(TYPE_NAME_WATER),
 					.mTypeID = toTypeID(BuiltinTypeID::Water),
 				});
 				addBuiltin({
-					.mOffensiveMatchups = GRASS_TYPE_MATCHUP,
-					.mName = TYPE_NAME_GRASS,
-					.mTypeID = toTypeID(BuiltinTypeID::Grass),
-				});
-				addBuiltin({
 					.mOffensiveMatchups = ELECTRIC_TYPE_MATCHUP,
-					.mName = TYPE_NAME_ELECTRIC,
+					.mName = std::string(TYPE_NAME_ELECTRIC),
 					.mTypeID = toTypeID(BuiltinTypeID::Electric),
 				});
 				addBuiltin({
-					.mOffensiveMatchups = PSYCHIC_TYPE_MATCHUP,
-					.mName = TYPE_NAME_PSYCHIC,
-					.mTypeID = toTypeID(BuiltinTypeID::Psychic),
+					.mOffensiveMatchups = GRASS_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_GRASS),
+					.mTypeID = toTypeID(BuiltinTypeID::Grass),
 				});
 				addBuiltin({
 					.mOffensiveMatchups = ICE_TYPE_MATCHUP,
-					.mName = TYPE_NAME_ICE,
+					.mName = std::string(TYPE_NAME_ICE),
 					.mTypeID = toTypeID(BuiltinTypeID::Ice),
 				});
 				addBuiltin({
+					.mOffensiveMatchups = FIGHTING_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_FIGHTING),
+					.mTypeID = toTypeID(BuiltinTypeID::Fighting),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = POISON_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_POISON),
+					.mTypeID = toTypeID(BuiltinTypeID::Poison),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = GROUND_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_GROUND),
+					.mTypeID = toTypeID(BuiltinTypeID::Ground),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = FLYING_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_FLYING),
+					.mTypeID = toTypeID(BuiltinTypeID::Flying),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = PSYCHIC_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_PSYCHIC),
+					.mTypeID = toTypeID(BuiltinTypeID::Psychic),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = BUG_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_BUG),
+					.mTypeID = toTypeID(BuiltinTypeID::Bug),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = ROCK_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_ROCK),
+					.mTypeID = toTypeID(BuiltinTypeID::Rock),
+				});
+				addBuiltin({
+					.mOffensiveMatchups = GHOST_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_GHOST),
+					.mTypeID = toTypeID(BuiltinTypeID::Ghost),
+				});
+				addBuiltin({
 					.mOffensiveMatchups = DRAGON_TYPE_MATCHUP,
-					.mName = TYPE_NAME_DRAGON,
+					.mName = std::string(TYPE_NAME_DRAGON),
 					.mTypeID = toTypeID(BuiltinTypeID::Dragon),
 				});
 				addBuiltin({
 					.mOffensiveMatchups = DARK_TYPE_MATCHUP,
-					.mName = TYPE_NAME_DARK,
+					.mName = std::string(TYPE_NAME_DARK),
 					.mTypeID = toTypeID(BuiltinTypeID::Dark),
 				});
 				addBuiltin({
+					.mOffensiveMatchups = STEEL_TYPE_MATCHUP,
+					.mName = std::string(TYPE_NAME_STEEL),
+					.mTypeID = toTypeID(BuiltinTypeID::Steel),
+				});
+				addBuiltin({
 					.mOffensiveMatchups = FAIRY_TYPE_MATCHUP,
-					.mName = TYPE_NAME_FAIRY,
+					.mName = std::string(TYPE_NAME_FAIRY),
 					.mTypeID = toTypeID(BuiltinTypeID::Fairy),
 				});
-				addBuiltin({.mName = TYPE_NAME_STELLAR, .mTypeID = toTypeID(BuiltinTypeID::Stellar)});
-				// LCOV_EXCL_BR_STOP
+				addBuiltin({.mName = std::string(TYPE_NAME_STELLAR), .mTypeID = toTypeID(BuiltinTypeID::Stellar)});
 			}
+
+			// LCOV_EXCL_STOP
 
 		protected:
 			using Base::addEntry;
@@ -260,16 +268,11 @@ namespace PocketCore::Registry::Type
 				@param[in] attacker The row index.
 				@param[in] chart The full row of @ref TypeEffectiveness values to assign.
 				@since 0.1.0
-				@version 0.12.19
+				@version 0.12.20
 			*/
 			constexpr void setTypeChartRow(const us attacker, const std::array<TypeEffectiveness, MAX_TYPES> &chart)
 			{
 				assert(attacker < MAX_TYPES && ROW_OOB_SET_TYPE_CHART_ROW.data());
-
-				if (attacker >= MAX_TYPES)
-				{
-					return;
-				}
 
 				getMutableEntry(attacker).mOffensiveMatchups = chart;
 			}

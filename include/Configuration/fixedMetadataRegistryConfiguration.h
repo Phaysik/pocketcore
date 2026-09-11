@@ -255,7 +255,7 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.12.19
+				@version 0.12.20
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -274,7 +274,10 @@ namespace PocketCore::Configuration
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{makeNotFoundError(name, callerContext)};
+					return std::unexpected{
+						makeNotFoundError(name, callerContext),
+					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the
+					   // same registry. This is purely defensive programming
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
@@ -301,7 +304,7 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.12.19
+				@version 0.12.20
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
@@ -320,7 +323,10 @@ namespace PocketCore::Configuration
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{makeNotFoundError({}, callerContext)};
+					return std::unexpected{
+						makeNotFoundError({}, callerContext),
+					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the same
+					   // registry. This is purely defensive programming
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
@@ -349,7 +355,7 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.12.19
+				@version 0.12.20
 			*/
 			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
 																					   const std::string_view &newName)
@@ -375,7 +381,10 @@ namespace PocketCore::Configuration
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{makeNotFoundError(oldName, "rename")};
+					return std::unexpected{
+						makeNotFoundError(oldName, "rename"),
+					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the same
+					   // registry. This is purely defensive programming
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};

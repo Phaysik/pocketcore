@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.5.3
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -37,6 +37,11 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Move::baseAttackEffects;
 	using PocketCore::Move::BuiltinMoveID;
+	using PocketCore::Move::MOVE_NAME_FACADE;
+	using PocketCore::Move::MOVE_NAME_HYDRO_STEAM;
+	using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
+	using PocketCore::Move::MOVE_NAME_NONE;
+	using PocketCore::Move::MOVE_NAME_POUND;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;
@@ -50,9 +55,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.5.3
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -61,17 +66,27 @@ namespace PocketCore::Registry::Move
 			using Base = FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>;
 
 		public:
+			/*! @brief Compares two MoveRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const MoveRegistry &other) const = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.12.17
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
 			{
 				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
-				addBuiltin({.mTriggers = {}, .mName = PocketCore::Move::MOVE_NAME_NONE, .mMoveID = toMoveID(BuiltinMoveID::None)});
+				addBuiltin({.mName = std::string(MOVE_NAME_NONE), .mTriggers = {}, .mMoveID = toMoveID(BuiltinMoveID::None)});
 				addBuiltin({
+					.mName = std::string(MOVE_NAME_POUND),
 					.mTriggers = {{
 					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 					    .mTrigger = BattleEventID::BeforeHit,
@@ -82,7 +97,6 @@ namespace PocketCore::Registry::Move
 						.mTrigger = BattleEventID::Hit,
 						.mRole = BattleEventRole::Target,
 					},},
-					.mName = PocketCore::Move::MOVE_NAME_POUND,
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
 					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 					.mPower = 40,
@@ -93,6 +107,7 @@ namespace PocketCore::Registry::Move
 					.mSpecial = false,
 				});
 				addBuiltin({
+					.mName = std::string(MOVE_NAME_KARATE_CHOP),
 					.mTriggers = {{
 					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 					    .mTrigger = BattleEventID::BeforeHit,
@@ -103,7 +118,6 @@ namespace PocketCore::Registry::Move
 						.mTrigger = BattleEventID::Hit,
 						.mRole = BattleEventRole::Target,
 					},},
-					.mName = PocketCore::Move::MOVE_NAME_KARATE_CHOP,
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 					.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 					.mPower = 50,
@@ -115,12 +129,12 @@ namespace PocketCore::Registry::Move
 				});
 
 				addBuiltin({
-					.mName = PocketCore::Move::MOVE_NAME_FACADE,
+					.mName = std::string(MOVE_NAME_FACADE),
 					.mMoveID = toMoveID(BuiltinMoveID::Facade),
 				});
 
 				addBuiltin({
-					.mName = PocketCore::Move::MOVE_NAME_HYDRO_STEAM,
+					.mName = std::string(MOVE_NAME_HYDRO_STEAM),
 					.mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
 				});
 

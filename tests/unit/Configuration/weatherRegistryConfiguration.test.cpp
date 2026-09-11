@@ -1,236 +1,476 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 08/30/2026
+	@date 09/10/2026
 	@since 0.8.7
-	@version 0.12.12
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Configuration/weatherRegistryConfiguration.h"
 
-#include <algorithm>
-#include <array>
+#include <expected>
+#include <format>
+#include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
 #include "Registry/registryError.h"
-#include "Utility/Debug/Logging/logger.h"
+#include "Registry/weatherRegistry.h"
+#include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Weather/builtInWeatherID.h"
+#include "Weather/constants.h"
 #include "Weather/weatherID.h"
 #include "Weather/weatherMeta.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::MAX_WEATHERS;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::WeatherRegistryConfiguration;
-using PocketCore::Utility::Debug::Logging::Logger;
+using PocketCore::Core::ub;
+using PocketCore::Core::us;
+using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Registry::Weather::WeatherRegistry;
+using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Weather::BuiltinWeatherID;
+using PocketCore::Weather::NO_WEATHER_ID;
+using PocketCore::Weather::toWeatherID;
+using PocketCore::Weather::WEATHER_NAME_FOG;
+using PocketCore::Weather::WEATHER_NAME_NONE;
 using PocketCore::Weather::WeatherID;
 using PocketCore::Weather::WeatherMeta;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
-namespace
+SCENARIO("WeatherRegistryConfiguration")
 {
-	void ensureWeatherLoggerInitialized()
-	{
-		static bool initialized{false};
+	ensureLoggerInitialized("weather registry configuration test", "weatherRegistryConfiguration_test.log");
 
-		if (!initialized)
+	WeatherRegistryConfiguration config{};
+	WeatherRegistry registry{};
+	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinWeatherID::FinalWeather)};
+
+	GIVEN("getAmountRegistered")
+	{
+		THEN("the default registry returns the expected amount of built-in weathers")
 		{
-			initialized = Logger::initialize("wrc_test", "weatherRegistryConfiguration_test.log", true);
+			CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 		}
 	}
 
-	WeatherMeta makeWeather(const std::string_view &name)
+	GIVEN("getRuntimeRegistry")
 	{
-		return WeatherMeta{.mName = name};
-	}
-} // namespace
-
-SCENARIO("WeatherRegistryConfiguration addWeather")
-{
-	ensureWeatherLoggerInitialized();
-	WeatherRegistryConfiguration configuration{};
-
-	GIVEN("a unique weather definition")
-	{
-		auto result{configuration.addWeather(makeWeather("Custom Weather"))};
-
-		THEN("it is registered and queryable")
+		THEN("the runtime registry is the same as the default registry")
 		{
-			REQUIRE(result.has_value());
-			WeatherID customIdentifier{result.value()};
-			CHECK(configuration.hasWeather(customIdentifier));
-			CHECK(configuration.hasWeather("Custom Weather"));
+			CHECK((config.getRuntimeRegistry() == registry));
+		}
+	}
 
-			auto nameResult{configuration.getWeatherName(customIdentifier)};
-			REQUIRE(nameResult.has_value());
+	GIVEN("getWeatherMetadata")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK((config.getWeatherMetadata(WeatherID{200}) == nullptr));
+		}
+
+		THEN("the metadata is retrieved when accessed by a valid Weather ID")
+		{
+			WeatherMeta expected{
+				.mName = std::string(WEATHER_NAME_NONE),
+				.mWeatherID = toWeatherID(BuiltinWeatherID::None),
+			};
+
+			CHECK((expected == *config.getWeatherMetadata(NO_WEATHER_ID)));
+		}
+	}
+
+	GIVEN("getWeatherID")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK_FALSE(config.getWeatherID("Unknown").has_value());
+		}
+
+		THEN("the Weather ID is retrieved by valid Weather name")
+		{
+			std::optional<WeatherID> weatherID{config.getWeatherID(WEATHER_NAME_NONE)};
+
+			REQUIRE(weatherID.has_value());
+
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((nameResult.value() == "Custom Weather"));
-
-			const WeatherMeta *metadata{configuration.getWeatherMetadata(customIdentifier)};
-			REQUIRE((metadata != nullptr));
-			CHECK((metadata->mName == "Custom Weather"));
+			CHECK((weatherID.value() == toWeatherID(BuiltinWeatherID::None)));
 		}
 	}
 
-	GIVEN("a duplicate weather name")
+	GIVEN("getWeatherName")
 	{
-		auto firstResult{configuration.addWeather(makeWeather("Duplicate Weather"))};
-		REQUIRE(firstResult.has_value());
-
-		THEN("registration returns DuplicateWeather")
+		THEN("unknown IDs are absent")
 		{
-			auto secondResult{configuration.addWeather(makeWeather("Duplicate Weather"))};
-			REQUIRE_FALSE(secondResult.has_value());
-			CHECK((secondResult.error().mKind == RegistryError::DuplicateWeather));
+			CHECK_FALSE(config.getWeatherName(WeatherID{200}).has_value());
+		}
+
+		THEN("a registered weather name is returned by stable ID")
+		{
+			std::optional<std::string_view> weatherName{config.getWeatherName(toWeatherID(BuiltinWeatherID::None))};
+
+			REQUIRE(weatherName.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((weatherName.value() == WEATHER_NAME_NONE));
 		}
 	}
-}
 
-SCENARIO("WeatherRegistryConfiguration addWeathers")
-{
-	ensureWeatherLoggerInitialized();
-	WeatherRegistryConfiguration configuration{};
-
-	GIVEN("a batch with duplicate names")
+	GIVEN("getRegisteredWeathers")
 	{
-		std::array<WeatherMeta, 3> definitions{
+		THEN("the amount of weathers returned matches the amount that are built-in")
+		{
+			CHECK((config.getRegisteredWeathers().size() == finalWeatherUnderlyingValue));
+		}
+	}
+
+	GIVEN("hasWeather")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown weather name has no entry")
 			{
-				makeWeather("Batch One"),
-				makeWeather("Batch Two"),
-				makeWeather("Batch One"),
-			},
-		};
+				CHECK_FALSE(config.hasWeather("Unknown"));
+			}
 
-		WHEN("the batch is added")
+			THEN("a known weather name has an entry")
+			{
+				CHECK(config.hasWeather(WEATHER_NAME_NONE));
+			}
+		}
+
+		WHEN("calling the WeatherID overload")
 		{
-			auto result{configuration.addWeathers(definitions)};
+			THEN("an unknown weather ID has no entry")
+			{
+				CHECK_FALSE(config.hasWeather(WeatherID{200}));
+			}
 
-			THEN("all additions are rolled back")
+			THEN("a known weather ID has an entry")
+			{
+				CHECK(config.hasWeather(NO_WEATHER_ID));
+			}
+		}
+	}
+
+	GIVEN("addWeather")
+	{
+		WHEN("trying to add an weather past the capacity")
+		{
+			us newWeatherCount{finalWeatherUnderlyingValue};
+
+			for (us i{0}; i < MAX_WEATHERS - finalWeatherUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				WeatherMeta definition{.mName = name};
+				std::expected<WeatherID, RegistryErrorInfo> result{config.addWeather(definition)};
+
+				REQUIRE(result.has_value());
+
+				WeatherID assignedID{result.value()};
+				CHECK((assignedID.getValue() == newWeatherCount++));
+			}
+
+			std::string name{std::format("String_{:04}", MAX_WEATHERS + 1)};
+
+			WeatherMeta definition{.mName = name};
+			std::expected<WeatherID, RegistryErrorInfo> result{config.addWeather(definition)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == MAX_WEATHERS));
+			}
+		}
+
+		WHEN("an weather whose name is already in use is added")
+		{
+			WeatherMeta definition{.mName = std::string(WEATHER_NAME_FOG)};
+			std::expected<WeatherID, RegistryErrorInfo> result{config.addWeather(definition)};
+
+			THEN("registration reports a duplicate weather and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateWeather));
-				CHECK_FALSE(configuration.hasWeather("Batch One"));
-				CHECK_FALSE(configuration.hasWeather("Batch Two"));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique weather definition is added")
+		{
+			WeatherMeta definition{.mName = "TestWeatherName"};
+
+			std::expected<WeatherID, RegistryErrorInfo> result{config.addWeather(definition)};
+
+			THEN("it receives the first custom stable ID and owns its trigger data")
+			{
+				REQUIRE(result.has_value());
+				WeatherID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalWeatherUnderlyingValue));
+
+				const WeatherMeta *metadata{config.getWeatherMetadata(assignedID)};
+
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mName == "TestWeatherName"));
+			}
+		}
+	}
+
+	GIVEN("addWeathers")
+	{
+		WHEN("trying to add an weather past the capacity")
+		{
+			std::vector<WeatherMeta> weatherMetas;
+
+			for (us i{0}; i < MAX_WEATHERS - finalWeatherUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				weatherMetas.push_back({.mName = name});
+			}
+
+			std::string name{std::format("String_{:04}", MAX_WEATHERS + 1)};
+
+			weatherMetas.push_back({.mName = name});
+			std::expected<void, RegistryErrorInfo> result{config.addWeathers(weatherMetas)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+			}
+		}
+
+		WHEN("an weather whose name is already in use is added")
+		{
+			std::vector<WeatherMeta> weatherMetas{};
+
+			for (us i{0}; i < 20; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				weatherMetas.push_back({.mName = name});
+			}
+
+			weatherMetas.push_back({.mName = std::string(WEATHER_NAME_FOG)});
+			std::expected<void, RegistryErrorInfo> result{config.addWeathers(weatherMetas)};
+
+			THEN("registration reports a duplicate weather and the registry is rollback to the checkpoint before the erroneous addition")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateWeather));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique weather definition is added")
+		{
+			std::vector<WeatherMeta> weatherMetas{};
+
+			weatherMetas.push_back({.mName = "TestWeatherName"});
+
+			std::expected<void, RegistryErrorInfo> result{config.addWeathers(weatherMetas)};
+
+			THEN("the registry reports no error and all the weather definitions are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue + 1));
+			}
+		}
+	}
+
+	GIVEN("renameWeather")
+	{
+		WHEN("calling with an invalid weather name")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameWeather("ThisIsInvalid", "NewName")};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::WeatherNotFound));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+			}
+		}
+
+		WHEN("trying to rename to a name already in the registry")
+		{
+			std::expected<void, RegistryErrorInfo> result{
+				config.renameWeather(WEATHER_NAME_NONE, WEATHER_NAME_FOG),
+			};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateWeather));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+			}
+		}
+
+		WHEN("updating an existing weather definition")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameWeather(WEATHER_NAME_NONE, "NewName")};
+
+			THEN("the registry reports no error and the name is appropriately updated")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				CHECK((config.getWeatherMetadata(toWeatherID(BuiltinWeatherID::None))->mName == "NewName"));
+			}
+		}
+	}
+
+	GIVEN("updateWeather")
+	{
+		WeatherMeta definition{.mName = "TestWeatherName"};
+
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an invalid weather name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateWeather("ThisIsInvalid", definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::WeatherNotFound));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateWeather(WEATHER_NAME_NONE, {.mName = std::string(WEATHER_NAME_FOG)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateWeather));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing weather definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateWeather(WEATHER_NAME_NONE, definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+					CHECK((config.getWeatherMetadata(toWeatherID(BuiltinWeatherID::None))->mName == "TestWeatherName"));
+				}
+			}
+		}
+
+		WHEN("calling the WeatherID overload")
+		{
+			WHEN("calling with an invalid weather name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateWeather(WeatherID{200}, definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::WeatherNotFound));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateWeather(toWeatherID(BuiltinWeatherID::None), {.mName = std::string(WEATHER_NAME_FOG)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateWeather));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing weather definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateWeather(toWeatherID(BuiltinWeatherID::None), definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+					CHECK((config.getWeatherMetadata(toWeatherID(BuiltinWeatherID::None))->mName == "TestWeatherName"));
+				}
+			}
+		}
+	}
+
+	GIVEN("removeWeather")
+	{
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an unknown weather name")
+			{
+				std::expected<WeatherID, RegistryErrorInfo> result{config.removeWeather("Unknown")};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::WeatherNotFound));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known weather name")
+			{
+				std::expected<WeatherID, RegistryErrorInfo> result{config.removeWeather(WEATHER_NAME_NONE)};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == toWeatherID(BuiltinWeatherID::None)));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue - 1));
+				}
+			}
+		}
+
+		WHEN("calling the WeatherID overload")
+		{
+			WHEN("calling with an unknown weather ID")
+			{
+				std::expected<WeatherID, RegistryErrorInfo> result{config.removeWeather(WeatherID{200})};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::WeatherNotFound));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known weather ID")
+			{
+				std::expected<WeatherID, RegistryErrorInfo> result{config.removeWeather(toWeatherID(BuiltinWeatherID::None))};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == toWeatherID(BuiltinWeatherID::None)));
+					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue - 1));
+				}
 			}
 		}
 	}
 }
 
-SCENARIO("WeatherRegistryConfiguration metadata lifecycle")
-{
-	ensureWeatherLoggerInitialized();
-	WeatherRegistryConfiguration configuration{};
-
-	GIVEN("a registered custom weather")
-	{
-		auto addResult{configuration.addWeather(makeWeather("Custom Weather"))};
-		REQUIRE(addResult.has_value());
-		WeatherID customIdentifier{addResult.value()};
-
-		WHEN("it is renamed")
-		{
-			auto renameResult{configuration.renameWeather("Custom Weather", "Renamed Weather")};
-
-			THEN("the stable ID remains associated with renamed metadata")
-			{
-				REQUIRE(renameResult.has_value());
-				CHECK_FALSE(configuration.hasWeather("Custom Weather"));
-				CHECK(configuration.hasWeather("Renamed Weather"));
-
-				auto idResult{configuration.getWeatherID("Renamed Weather")};
-				REQUIRE(idResult.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((idResult.value() == customIdentifier));
-			}
-		}
-
-		WHEN("it is updated by name")
-		{
-			auto updateResult{configuration.updateWeather("Custom Weather", makeWeather("Replacement Weather"))};
-
-			THEN("replacement metadata is discoverable")
-			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasWeather("Replacement Weather"));
-				CHECK_FALSE(configuration.hasWeather("Custom Weather"));
-			}
-		}
-
-		WHEN("it is updated by stable ID")
-		{
-			auto updateResult{configuration.updateWeather(customIdentifier, makeWeather("Replacement By ID"))};
-
-			THEN("replacement metadata is discoverable")
-			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasWeather("Replacement By ID"));
-			}
-		}
-
-		WHEN("it is removed by name")
-		{
-			auto removeResult{configuration.removeWeather("Custom Weather")};
-
-			THEN("the removed ID is returned")
-			{
-				REQUIRE(removeResult.has_value());
-				CHECK((removeResult.value() == customIdentifier));
-				CHECK_FALSE(configuration.hasWeather(customIdentifier));
-			}
-		}
-
-		WHEN("it is removed then another entry is added")
-		{
-			auto removeResult{configuration.removeWeather(customIdentifier)};
-			REQUIRE(removeResult.has_value());
-
-			auto laterResult{configuration.addWeather(makeWeather("Later Weather"))};
-
-			THEN("the removed ID is not reused")
-			{
-				REQUIRE(laterResult.has_value());
-				CHECK((laterResult.value() != customIdentifier));
-				CHECK((configuration.getWeatherMetadata(customIdentifier) == nullptr));
-			}
-		}
-	}
-
-	GIVEN("an unknown weather")
-	{
-		THEN("rename update and remove report WeatherNotFound")
-		{
-			auto renameResult{configuration.renameWeather("Missing", "Renamed")};
-			auto updateResult{configuration.updateWeather("Missing", makeWeather("Updated"))};
-			auto removeResult{configuration.removeWeather("Missing")};
-
-			REQUIRE_FALSE(renameResult.has_value());
-			REQUIRE_FALSE(updateResult.has_value());
-			REQUIRE_FALSE(removeResult.has_value());
-			CHECK((renameResult.error().mKind == RegistryError::WeatherNotFound));
-			CHECK((updateResult.error().mKind == RegistryError::WeatherNotFound));
-			CHECK((removeResult.error().mKind == RegistryError::WeatherNotFound));
-		}
-	}
-}
-
-SCENARIO("WeatherRegistryConfiguration registered span")
-{
-	ensureWeatherLoggerInitialized();
-	WeatherRegistryConfiguration configuration{};
-
-	GIVEN("a custom registration")
-	{
-		auto addResult{configuration.addWeather(makeWeather("Span Weather"))};
-		REQUIRE(addResult.has_value());
-
-		THEN("registered span contains the new name")
-		{
-			const auto registeredWeathers{configuration.getRegisteredWeathers()};
-			auto found = std::ranges::find_if(registeredWeathers.begin(), registeredWeathers.end(),
-											  [](const WeatherMeta &metadata) { return metadata.mName == "Span Weather"; });
-			CHECK((found != registeredWeathers.end()));
-		}
-	}
-}
-
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

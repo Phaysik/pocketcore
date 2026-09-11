@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/02/2026
+	@date 09/10/2026
 	@since 0.1.0
-	@version 0.12.17
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Configuration/weatherRegistryConfiguration.h"
+#include "Effect/effectContext.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Move/builtInMoveID.h"

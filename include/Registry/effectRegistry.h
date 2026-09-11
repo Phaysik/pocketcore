@@ -1,8 +1,8 @@
 /*! @file effectRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined effects.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.10.0
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -72,6 +72,28 @@ namespace PocketCore::Registry::Effect
 	using PocketCore::Effect::applyTypeEffectiveness;
 	using PocketCore::Effect::applyWeather;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Effect::EFFECT_NAME_ACCURACY_CHECK;
+	using PocketCore::Effect::EFFECT_NAME_BASE_DAMAGE;
+	using PocketCore::Effect::EFFECT_NAME_BURN_DAMAGE_REDUCTION;
+	using PocketCore::Effect::EFFECT_NAME_CRITICAL_HIT;
+	using PocketCore::Effect::EFFECT_NAME_FLINCH;
+	using PocketCore::Effect::EFFECT_NAME_NONE;
+	using PocketCore::Effect::EFFECT_NAME_POPULATION_BOMB;
+	using PocketCore::Effect::EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK;
+	using PocketCore::Effect::EFFECT_NAME_RANDOMIZATION;
+	using PocketCore::Effect::EFFECT_NAME_RECOIL;
+	using PocketCore::Effect::EFFECT_NAME_SET_RAIN;
+	using PocketCore::Effect::EFFECT_NAME_SET_SANDSTORM;
+	using PocketCore::Effect::EFFECT_NAME_SET_SUN;
+	using PocketCore::Effect::EFFECT_NAME_STAB;
+	using PocketCore::Effect::EFFECT_NAME_STATUS_APPLY;
+	using PocketCore::Effect::EFFECT_NAME_STATUS_REMOVE;
+	using PocketCore::Effect::EFFECT_NAME_STATUS_TICK;
+	using PocketCore::Effect::EFFECT_NAME_STATUS_TURN_SKIP;
+	using PocketCore::Effect::EFFECT_NAME_TARGETS;
+	using PocketCore::Effect::EFFECT_NAME_TERRAIN;
+	using PocketCore::Effect::EFFECT_NAME_TYPE_EFFECTIVENESS;
+	using PocketCore::Effect::EFFECT_NAME_WEATHER;
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
 	using PocketCore::Effect::toEffectID;
@@ -82,9 +104,9 @@ namespace PocketCore::Registry::Effect
 		@details Built-in effects are registered during construction with IDs derived from @ref BuiltinEffectID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_EFFECTS.
-		@date 08/22/2026
+		@date 09/10/2026
 		@since 0.10.0
-		@version 0.11.6
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class EffectRegistry : private FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
@@ -93,121 +115,130 @@ namespace PocketCore::Registry::Effect
 			using Base = FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>;
 
 		public:
+			/*! @brief Compares two EffectRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const EffectRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID.
 				@since 0.10.0
-				@version 0.11.6
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
 			{
-				addBuiltin({.mName = PocketCore::Effect::EFFECT_NAME_NONE, .mEffectID = toEffectID(BuiltinEffectID::None)});
+				addBuiltin({.mName = std::string(EFFECT_NAME_NONE), .mEffectID = toEffectID(BuiltinEffectID::None)});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_CRITICAL_HIT,
+					.mName = std::string(EFFECT_NAME_CRITICAL_HIT),
 					.mApply = applyCriticalHit,
 					.mEffectID = toEffectID(BuiltinEffectID::CriticalHit),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_BASE_DAMAGE,
+					.mName = std::string(EFFECT_NAME_BASE_DAMAGE),
 					.mApply = applyBaseDamage,
 					.mEffectID = toEffectID(BuiltinEffectID::BaseDamage),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_TARGETS,
+					.mName = std::string(EFFECT_NAME_TARGETS),
 					.mApply = applyTargets,
 					.mEffectID = toEffectID(BuiltinEffectID::Targets),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_WEATHER,
+					.mName = std::string(EFFECT_NAME_WEATHER),
 					.mApply = applyWeather,
 					.mEffectID = toEffectID(BuiltinEffectID::Weather),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_TERRAIN,
+					.mName = std::string(EFFECT_NAME_TERRAIN),
 					.mApply = applyTerrain,
 					.mEffectID = toEffectID(BuiltinEffectID::Terrain),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_POPULATION_BOMB,
+					.mName = std::string(EFFECT_NAME_POPULATION_BOMB),
 					.mApply = applyPopulationBomb,
 					.mEffectID = toEffectID(BuiltinEffectID::PopulationBomb),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_RANDOMIZATION,
+					.mName = std::string(EFFECT_NAME_RANDOMIZATION),
 					.mApply = applyRandomization,
 					.mEffectID = toEffectID(BuiltinEffectID::Randomization),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_STAB,
+					.mName = std::string(EFFECT_NAME_STAB),
 					.mApply = applySTAB,
 					.mEffectID = toEffectID(BuiltinEffectID::Stab),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_TYPE_EFFECTIVENESS,
+					.mName = std::string(EFFECT_NAME_TYPE_EFFECTIVENESS),
 					.mApply = applyTypeEffectiveness,
 					.mEffectID = toEffectID(BuiltinEffectID::TypeEffectiveness),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_BURN_DAMAGE_REDUCTION,
+					.mName = std::string(EFFECT_NAME_BURN_DAMAGE_REDUCTION),
 					.mApply = applyBurnDamage,
 					.mEffectID = toEffectID(BuiltinEffectID::BurnDamageReduction),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_FLINCH,
+					.mName = std::string(EFFECT_NAME_FLINCH),
 					.mApply = applyFlinch,
 					.mEffectID = toEffectID(BuiltinEffectID::Flinch),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_RECOIL,
+					.mName = std::string(EFFECT_NAME_RECOIL),
 					.mApply = applyRecoil,
 					.mEffectID = toEffectID(BuiltinEffectID::Recoil),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_APPLY,
+					.mName = std::string(EFFECT_NAME_STATUS_APPLY),
 					.mApply = applyStatusApply,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusApply),
 					.mMayChangeStatus = true,
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_REMOVE,
+					.mName = std::string(EFFECT_NAME_STATUS_REMOVE),
 					.mApply = applyStatusRemove,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusRemove),
 					.mMayChangeStatus = true,
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_TURN_SKIP,
+					.mName = std::string(EFFECT_NAME_STATUS_TURN_SKIP),
 					.mApply = applyStatusTurnSkip,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusTurnSkip),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_STATUS_TICK,
+					.mName = std::string(EFFECT_NAME_STATUS_TICK),
 					.mApply = applyStatusTick,
 					.mEffectID = toEffectID(BuiltinEffectID::StatusTick),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_ACCURACY_CHECK,
+					.mName = std::string(EFFECT_NAME_ACCURACY_CHECK),
 					.mApply = applyAccuracyCheck,
 					.mEffectID = toEffectID(BuiltinEffectID::AccuracyCheck),
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_SET_SANDSTORM,
+					.mName = std::string(EFFECT_NAME_SET_SANDSTORM),
 					.mApply = applySetSandstorm,
 					.mEffectID = toEffectID(BuiltinEffectID::SetSandstorm),
 					.mMayChangeWeather = true,
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_SET_SUN,
+					.mName = std::string(EFFECT_NAME_SET_SUN),
 					.mApply = applySetSun,
 					.mEffectID = toEffectID(BuiltinEffectID::SetSun),
 					.mMayChangeWeather = true,
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_SET_RAIN,
+					.mName = std::string(EFFECT_NAME_SET_RAIN),
 					.mApply = applySetRain,
 					.mEffectID = toEffectID(BuiltinEffectID::SetRain),
 					.mMayChangeWeather = true,
 				});
 				addBuiltin({
-					.mName = PocketCore::Effect::EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK,
+					.mName = std::string(EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK),
 					.mApply = applyPsychicTerrainPriorityBlock,
 					.mEffectID = toEffectID(BuiltinEffectID::PsychicTerrainPriorityBlock),
 				});

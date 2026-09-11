@@ -1,13 +1,14 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.4.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Pokemon/pokemon.h"
 
+#include <algorithm>
 #include <array>
 #include <expected>
 #include <sstream>
@@ -851,11 +852,11 @@ SCENARIO("Pokemon")
 		{
 			StatusID incomingStatusID{toStatusID(BuiltinStatusID::Toxic)};
 			std::expected<void, RegistryErrorInfo> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
+				.mName = "Toxic",
 			    .mStatusInteractions = {
 					{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::ReplaceCurrent},
 					{.mExistingID = toStatusID(BuiltinStatusID::Poison), .mAction = InteractionAction::ReplaceCurrent},
 				},
-				.mName = "Toxic",
 			}),};
 			REQUIRE(updateResult.has_value());
 
@@ -1040,7 +1041,7 @@ SCENARIO("Pokemon free function")
 					"      ID: 2\n"
 					"      Name: Fire\n"
 					"    [1]:\n"
-					"      ID: 13\n"
+					"      ID: 12\n"
 					"      Name: Bug\n"
 					"  Natures:\n"
 					"    [0]:\n"

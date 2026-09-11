@@ -1,8 +1,8 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.5.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -10,7 +10,9 @@
 
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
+#include <utility>
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
@@ -55,12 +57,12 @@ SCENARIO("ItemRegistry")
 		THEN("Cheri Berry has the appropriate properties")
 		{
 			ItemMeta expected{
+			    .mName = std::string(ITEM_NAME_CHERI_BERRY),
 				.mTriggers = {{
 					.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
 					.mTrigger = BattleEventID::StatusChanged,
 					.mRole = BattleEventRole::Target,
 				},},
-				.mName = ITEM_NAME_CHERI_BERRY,
 				.mItemID = toItemID(BuiltinItemID::CheriBerry),
 				.mTargetID = BattleTargetID::Self,
 				.mIsConsumable = true,
@@ -74,12 +76,12 @@ SCENARIO("ItemRegistry")
 		THEN("Chesto Berry has the appropriate properties")
 		{
 			ItemMeta expected{
+			    .mName = std::string(ITEM_NAME_CHESTO_BERRY),
 				.mTriggers = {{
 					.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
 					.mTrigger = BattleEventID::StatusChanged,
 					.mRole = BattleEventRole::Target,
 				},},
-				.mName = ITEM_NAME_CHESTO_BERRY,
 				.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 				.mTargetID = BattleTargetID::Self,
 				.mIsConsumable = true,
@@ -101,8 +103,8 @@ SCENARIO("ItemRegistry")
 		THEN("the metadata is retrieved when accessed by a valid Item ID")
 		{
 			ItemMeta expected{
+				.mName = std::string(ITEM_NAME_NONE),
 				.mTriggers = {},
-				.mName = ITEM_NAME_NONE,
 				.mItemID = toItemID(BuiltinItemID::None),
 			};
 
@@ -123,6 +125,7 @@ SCENARIO("ItemRegistry")
 
 			REQUIRE(itemID.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((itemID.value() == toItemID(BuiltinItemID::None)));
 		}
 	}
@@ -140,6 +143,7 @@ SCENARIO("ItemRegistry")
 
 			REQUIRE(itemName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((itemName.value() == ITEM_NAME_NONE));
 		}
 	}
@@ -162,8 +166,8 @@ SCENARIO("ItemRegistry")
 		THEN("a valid internal array index has metadata")
 		{
 			ItemMeta expected{
+				.mName = std::string(ITEM_NAME_NONE),
 				.mTriggers = {},
-				.mName = ITEM_NAME_NONE,
 				.mItemID = toItemID(BuiltinItemID::None),
 			};
 
@@ -203,6 +207,7 @@ SCENARIO("ItemRegistry")
 			std::optional<ub> itemIndex{registry.findIndexByItemID(NO_ITEM_ID)};
 
 			REQUIRE(itemIndex.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((itemIndex.value() == 0));
 		}
 	}

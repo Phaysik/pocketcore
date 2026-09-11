@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined terrains.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.8.0
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -28,6 +28,11 @@ namespace PocketCore::Registry::Terrain
 	using PocketCore::Core::us;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Terrain::BuiltinTerrainID;
+	using PocketCore::Terrain::TERRAIN_NAME_ELECTRIC;
+	using PocketCore::Terrain::TERRAIN_NAME_GRASSY;
+	using PocketCore::Terrain::TERRAIN_NAME_MISTY;
+	using PocketCore::Terrain::TERRAIN_NAME_NONE;
+	using PocketCore::Terrain::TERRAIN_NAME_PSYCHIC;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Terrain::TerrainMeta;
 	using PocketCore::Terrain::toTerrainID;
@@ -37,9 +42,9 @@ namespace PocketCore::Registry::Terrain
 		@details Built-in terrains are registered during construction with IDs derived from @ref BuiltinTerrainID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_TERRAINS.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.8.0
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
@@ -48,28 +53,37 @@ namespace PocketCore::Registry::Terrain
 			using Base = FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>;
 
 		public:
+			/*! @brief Compares two TerrainRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const TerrainRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinTerrainID.
 				@since 0.8.0
-				@version 0.12.14
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr TerrainRegistry() : Base{toTerrainID(BuiltinTerrainID::FinalTerrain).getValue()}
 			{
-				addBuiltin({.mName = PocketCore::Terrain::TERRAIN_NAME_NONE, .mTerrainID = toTerrainID(BuiltinTerrainID::None)});
+				addBuiltin({.mName = std::string(TERRAIN_NAME_NONE), .mTerrainID = toTerrainID(BuiltinTerrainID::None)});
 				addBuiltin({
-					.mName = PocketCore::Terrain::TERRAIN_NAME_ELECTRIC,
+					.mName = std::string(TERRAIN_NAME_ELECTRIC),
 					.mTerrainID = toTerrainID(BuiltinTerrainID::Electric),
 				});
 				addBuiltin({
-					.mName = PocketCore::Terrain::TERRAIN_NAME_GRASS,
+					.mName = std::string(TERRAIN_NAME_GRASSY),
 					.mTerrainID = toTerrainID(BuiltinTerrainID::Grassy),
 				});
 				addBuiltin({
-					.mName = PocketCore::Terrain::TERRAIN_NAME_MISTY,
+					.mName = std::string(TERRAIN_NAME_MISTY),
 					.mTerrainID = toTerrainID(BuiltinTerrainID::Misty),
 				});
 				addBuiltin({
-					.mName = PocketCore::Terrain::TERRAIN_NAME_PSYCHIC,
+					.mName = std::string(TERRAIN_NAME_PSYCHIC),
 					.mTerrainID = toTerrainID(BuiltinTerrainID::Psychic),
 				});
 			}

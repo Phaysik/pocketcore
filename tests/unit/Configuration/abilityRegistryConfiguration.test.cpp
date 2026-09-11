@@ -1,61 +1,507 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.4.0
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Configuration/abilityRegistryConfiguration.h"
 
-#include <array>
+#include <expected>
+#include <format>
 #include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
+#include "Ability/builtInAbilityID.h"
+#include "Ability/constants.h"
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
 #include "Effect/effectTrigger.h"
+#include "Registry/abilityRegistry.h"
 #include "Registry/registryError.h"
-#include "Utility/Debug/Logging/logger.h"
+#include "Utility/Debug/Logging/logging.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
+using PocketCore::Ability::ABILITY_NAME_NONE;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
+using PocketCore::Ability::BuiltinAbilityID;
+using PocketCore::Ability::NO_ABILITY_ID;
+using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
 using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::AbilityRegistryConfiguration;
+using PocketCore::Configuration::MAX_ABILITIES;
 using PocketCore::Configuration::RegistryError;
+using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::EffectTrigger;
 using PocketCore::Effect::toEffectID;
-using PocketCore::Utility::Debug::Logging::Logger;
+using PocketCore::Registry::Ability::AbilityRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Testing::ensureLoggerInitialized;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
-namespace
+SCENARIO("AbilityRegistryConfiguration")
 {
-	void ensureAbilityLoggerInitialized()
-	{
-		static bool initialized{false};
+	ensureLoggerInitialized("ability registry configuration test", "abilityRegistryConfiguration_test.log");
 
-		if (!initialized)
+	AbilityRegistryConfiguration config{};
+	AbilityRegistry registry{};
+	ub finalAbilityUnderlyingValue{std::to_underlying(BuiltinAbilityID::FinalAbility)};
+
+	GIVEN("getAmountRegistered")
+	{
+		THEN("the default registry returns the expected amount of built-in abilities")
 		{
-			initialized = Logger::initialize("arc_test", "abilityRegistryConfiguration_test.log", true);
+			CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 		}
 	}
-} // namespace
 
-SCENARIO("AbilityRegistryConfiguration addAbility")
-{
-	ensureAbilityLoggerInitialized();
-	AbilityRegistryConfiguration configuration{};
+	GIVEN("getRuntimeRegistry")
+	{
+		THEN("the runtime registry is the same as the default registry")
+		{
+			CHECK((config.getRuntimeRegistry() == registry));
+		}
+	}
 
-	GIVEN("a unique ability definition")
+	GIVEN("getAbilityMetadata")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK((config.getAbilityMetadata(AbilityID{200}) == nullptr));
+		}
+
+		THEN("the metadata is retrieved when accessed by a valid Ability ID")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_NONE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::None),
+			};
+
+			CHECK((expected == *config.getAbilityMetadata(NO_ABILITY_ID)));
+		}
+	}
+
+	GIVEN("getAbilityID")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK_FALSE(config.getAbilityID("Unknown").has_value());
+		}
+
+		THEN("the Ability ID is retrieved by valid Ability name")
+		{
+			std::optional<AbilityID> abilityID{config.getAbilityID(ABILITY_NAME_NONE)};
+
+			REQUIRE(abilityID.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
+		}
+	}
+
+	GIVEN("getAbilityName")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK_FALSE(config.getAbilityName(AbilityID{200}).has_value());
+		}
+
+		THEN("a registered ability name is returned by stable ID")
+		{
+			std::optional<std::string_view> abilityName{config.getAbilityName(toAbilityID(BuiltinAbilityID::None))};
+
+			REQUIRE(abilityName.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((abilityName.value() == ABILITY_NAME_NONE));
+		}
+	}
+
+	GIVEN("getRegisteredAbilities")
+	{
+		THEN("the amount of abilities returned matches the amount that are built-in")
+		{
+			CHECK((config.getRegisteredAbilities().size() == finalAbilityUnderlyingValue));
+		}
+	}
+
+	GIVEN("hasAbility")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown ability name has no entry")
+			{
+				CHECK_FALSE(config.hasAbility("Unknown"));
+			}
+
+			THEN("a known ability name has an entry")
+			{
+				CHECK(config.hasAbility(ABILITY_NAME_NONE));
+			}
+		}
+
+		WHEN("calling the AbilityID overload")
+		{
+			THEN("an unknown ability ID has no entry")
+			{
+				CHECK_FALSE(config.hasAbility(AbilityID{200}));
+			}
+
+			THEN("a known ability ID has an entry")
+			{
+				CHECK(config.hasAbility(NO_ABILITY_ID));
+			}
+		}
+	}
+
+	GIVEN("addAbility")
+	{
+		WHEN("trying to add an ability past the capacity")
+		{
+			us newAbilityCount{finalAbilityUnderlyingValue};
+
+			for (us i{0}; i < MAX_ABILITIES - finalAbilityUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				AbilityMeta definition{.mName = name, .mTriggers = {}};
+				std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+
+				REQUIRE(result.has_value());
+
+				AbilityID assignedID{result.value()};
+				CHECK((assignedID.getValue() == newAbilityCount++));
+			}
+
+			std::string name{std::format("String_{:04}", MAX_ABILITIES + 1)};
+
+			AbilityMeta definition{.mName = name, .mTriggers = {}};
+			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == MAX_ABILITIES));
+			}
+		}
+
+		WHEN("an ability whose name is already in use is added")
+		{
+			AbilityMeta definition{.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = {}};
+			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+
+			THEN("registration reports a duplicate ability and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique ability definition is added")
+		{
+			std::vector<EffectTrigger> triggers{
+				{
+					.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+					.mTrigger = BattleEventID::TurnEnd,
+				},
+			};
+
+			AbilityMeta definition{.mName = "TestAbilityName", .mTriggers = triggers};
+
+			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+
+			THEN("it receives the first custom stable ID and owns its trigger data")
+			{
+				REQUIRE(result.has_value());
+				AbilityID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalAbilityUnderlyingValue));
+
+				triggers.clear();
+
+				const AbilityMeta *metadata{config.getAbilityMetadata(assignedID)};
+
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mName == "TestAbilityName"));
+				REQUIRE((metadata->mTriggers.size() == 1U));
+				CHECK((metadata->mTriggers.front().mEffects.size() == 2U));
+			}
+		}
+	}
+
+	GIVEN("addAbilities")
+	{
+		WHEN("trying to add an ability past the capacity")
+		{
+			std::vector<AbilityMeta> abilityMetas;
+
+			for (us i{0}; i < MAX_ABILITIES - finalAbilityUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				abilityMetas.push_back({.mName = name, .mTriggers = {}});
+			}
+
+			std::string name{std::format("String_{:04}", MAX_ABILITIES + 1)};
+
+			abilityMetas.push_back({.mName = name, .mTriggers = {}});
+			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+			}
+		}
+
+		WHEN("an ability whose name is already in use is added")
+		{
+			std::vector<AbilityMeta> abilityMetas{};
+
+			for (us i{0}; i < 20; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				abilityMetas.push_back({.mName = name, .mTriggers = {}});
+			}
+
+			abilityMetas.push_back({.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = {}});
+			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+
+			THEN("registration reports a duplicate ability and the registry is rollback to the checkpoint before the erroneous addition")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique ability definition is added")
+		{
+			std::vector<AbilityMeta> abilityMetas{};
+			std::vector<EffectTrigger> triggers{
+				{
+					.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+					.mTrigger = BattleEventID::TurnEnd,
+				},
+			};
+
+			abilityMetas.push_back({.mName = "TestAbilityName", .mTriggers = triggers});
+
+			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+
+			THEN("the registry reports no error and all the ability definitions are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue + 1));
+			}
+		}
+	}
+
+	GIVEN("setAbilityTriggers")
+	{
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an invalid ability name")
+			{
+				std::vector<EffectTrigger> triggers{
+					{
+						.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+						.mTrigger = BattleEventID::TurnEnd,
+					},
+				};
+
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers("ThisIsInvalid", triggers)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing ability definition")
+			{
+				std::vector<EffectTrigger> triggers{
+					{
+						.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+						.mTrigger = BattleEventID::TurnEnd,
+					},
+				};
+
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(ABILITY_NAME_NONE, triggers)};
+
+				THEN("the registry reports no error and the triggers are appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTriggers == triggers));
+				}
+			}
+		}
+
+		WHEN("calling the AbilityID overload")
+		{
+			WHEN("calling with an invalid ability name")
+			{
+				std::vector<EffectTrigger> triggers{
+					{
+						.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+						.mTrigger = BattleEventID::TurnEnd,
+					},
+				};
+
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(AbilityID{200}, triggers)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing ability definition")
+			{
+				std::vector<EffectTrigger> triggers{
+					{
+						.mEffects = {toEffectID(BuiltinEffectID::Recoil), toEffectID(BuiltinEffectID::StatusTick)},
+						.mTrigger = BattleEventID::TurnEnd,
+					},
+				};
+
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(toAbilityID(BuiltinAbilityID::None), triggers)};
+
+				THEN("the registry reports no error and the triggers are appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTriggers == triggers));
+				}
+			}
+		}
+	}
+
+	GIVEN("setAbilityTarget")
+	{
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an invalid ability name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing ability definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.setAbilityTarget(ABILITY_NAME_NONE, BattleTargetID::AllAllies),
+				};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID == BattleTargetID::AllAllies));
+				}
+			}
+		}
+
+		WHEN("calling the AbilityID overload")
+		{
+			WHEN("calling with an invalid ability name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setAbilityTarget(AbilityID{200}, BattleTargetID::AllAllies)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing ability definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.setAbilityTarget(toAbilityID(BuiltinAbilityID::None), BattleTargetID::AllAllies),
+				};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID == BattleTargetID::AllAllies));
+				}
+			}
+		}
+	}
+
+	GIVEN("renameAbility")
+	{
+		WHEN("calling with an invalid ability name")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameAbility("ThisIsInvalid", "NewName")};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+			}
+		}
+
+		WHEN("trying to rename to a name already in the registry")
+		{
+			std::expected<void, RegistryErrorInfo> result{
+				config.renameAbility(ABILITY_NAME_NONE, ABILITY_NAME_DRIZZLE),
+			};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+			}
+		}
+
+		WHEN("updating an existing ability definition")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameAbility(ABILITY_NAME_NONE, "NewName")};
+
+			THEN("the registry reports no error and the name is appropriately updated")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mName == "NewName"));
+			}
+		}
+	}
+
+	GIVEN("updateAbility")
 	{
 		std::vector<EffectTrigger> triggers{
 			{
@@ -63,245 +509,151 @@ SCENARIO("AbilityRegistryConfiguration addAbility")
 				.mTrigger = BattleEventID::TurnEnd,
 			},
 		};
-		AbilityMeta definition{.mTriggers = triggers, .mName = "Regenerator"};
 
-		WHEN("the ability is added")
+		AbilityMeta definition{.mName = "TestAbilityName", .mTriggers = triggers};
+
+		WHEN("calling the string_view overload")
 		{
-			auto result{configuration.addAbility(definition)};
-
-			THEN("it receives the first custom stable ID and owns its trigger data")
+			WHEN("calling with an invalid ability name")
 			{
-				REQUIRE(result.has_value());
-				AbilityID assignedIdentifier{result.value()};
-				CHECK((assignedIdentifier.getValue() == 8U));
+				std::expected<void, RegistryErrorInfo> result{config.updateAbility("ThisIsInvalid", definition)};
 
-				triggers.clear();
-				const AbilityMeta *metadata{configuration.getAbilityMetadata(assignedIdentifier)};
-				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mName == "Regenerator"));
-				REQUIRE((metadata->mTriggers.size() == 1U));
-				CHECK((metadata->mTriggers.front().mEffects.size() == 2U));
-			}
-		}
-	}
-
-	GIVEN("an ability whose name is already registered")
-	{
-		AbilityMeta definition{.mTriggers = {}, .mName = "Drizzle"};
-
-		THEN("registration reports a duplicate ability")
-		{
-			auto result{configuration.addAbility(definition)};
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::DuplicateAbility));
-			CHECK((configuration.getAmountRegistered() == 4));
-		}
-	}
-}
-
-SCENARIO("AbilityRegistryConfiguration addAbilities")
-{
-	ensureAbilityLoggerInitialized();
-	AbilityRegistryConfiguration configuration{};
-
-	GIVEN("a batch containing a duplicate name")
-	{
-		std::array<AbilityMeta, 3> definitions{
-			{
-				{.mTriggers = {}, .mName = "First Custom"},
-				{.mTriggers = {}, .mName = "Second Custom"},
-				{.mTriggers = {}, .mName = "First Custom"},
-			},
-		};
-
-		WHEN("the batch is added")
-		{
-			auto result{configuration.addAbilities(definitions)};
-
-			THEN("the entire batch is rolled back")
-			{
-				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
-				CHECK((configuration.getAmountRegistered() == 4));
-				CHECK_FALSE(configuration.hasAbility("First Custom"));
-				CHECK_FALSE(configuration.hasAbility("Second Custom"));
-			}
-		}
-	}
-}
-
-SCENARIO("AbilityRegistryConfiguration metadata mutation")
-{
-	ensureAbilityLoggerInitialized();
-	AbilityRegistryConfiguration configuration{};
-
-	GIVEN("a registered custom ability")
-	{
-		AbilityMeta definition{.mTriggers = {}, .mName = "Custom Ability"};
-		auto addResult{configuration.addAbility(definition)};
-		REQUIRE(addResult.has_value());
-		AbilityID customIdentifier{addResult.value()};
-
-		WHEN("its triggers are replaced by name")
-		{
-			std::array<EffectTrigger, 1> replacement{
+				THEN("the registry reports an error and there is no update to the registry")
 				{
-					{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::StatusChanged},
-				},
-			};
-			auto setResult{configuration.setAbilityTriggers("Custom Ability", replacement)};
-
-			THEN("the updated metadata is visible through its stable ID")
-			{
-				REQUIRE(setResult.has_value());
-				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
-				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == BattleEventID::StatusChanged));
-				CHECK((metadata->mTriggers.front().mEffects.front() == toEffectID(BuiltinEffectID::StatusApply)));
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
 			}
-		}
 
-		WHEN("its triggers are replaced by stable ID")
-		{
-			std::array<EffectTrigger, 1> replacement{
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateAbility(ABILITY_NAME_NONE, {.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = triggers}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
 				{
-					{.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)}, .mTrigger = BattleEventID::Faint},
-				},
-			};
-			auto setResult{configuration.setAbilityTriggers(customIdentifier, replacement)};
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
 
-			THEN("the trigger update remains associated with the same ID")
+			WHEN("updating an existing ability definition")
 			{
-				REQUIRE(setResult.has_value());
-				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
-				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTriggers.front().mTrigger == BattleEventID::Faint));
+				std::expected<void, RegistryErrorInfo> result{config.updateAbility(ABILITY_NAME_NONE, definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mName == "TestAbilityName"));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTriggers == triggers));
+				}
 			}
 		}
 
-		WHEN("its target is replaced by name")
+		WHEN("calling the AbilityID overload")
 		{
-			auto setResult{configuration.setAbilityTarget("Custom Ability", BattleTargetID::AllOpponents)};
-
-			THEN("target metadata changes")
+			WHEN("calling with an invalid ability name")
 			{
-				REQUIRE(setResult.has_value());
-				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
-				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == BattleTargetID::AllOpponents));
+				std::expected<void, RegistryErrorInfo> result{config.updateAbility(AbilityID{200}, definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
 			}
-		}
 
-		WHEN("its target is replaced by stable ID")
-		{
-			auto setResult{configuration.setAbilityTarget(customIdentifier, BattleTargetID::AllAllies)};
-
-			THEN("target metadata changes")
+			WHEN("trying to rename to a name already in the registry")
 			{
-				REQUIRE(setResult.has_value());
-				const AbilityMeta *metadata{configuration.getAbilityMetadata(customIdentifier)};
-				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mTargetID == BattleTargetID::AllAllies));
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateAbility(toAbilityID(BuiltinAbilityID::None),
+										 {.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = triggers}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
 			}
-		}
 
-		WHEN("it is renamed")
-		{
-			auto renameResult{configuration.renameAbility("Custom Ability", "Renamed Ability")};
-
-			THEN("the stable ID remains unchanged")
+			WHEN("updating an existing ability definition")
 			{
-				REQUIRE(renameResult.has_value());
-				CHECK_FALSE(configuration.hasAbility("Custom Ability"));
-				auto renamedIdentifier{configuration.getAbilityID("Renamed Ability")};
-				REQUIRE(renamedIdentifier.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((renamedIdentifier.value() == customIdentifier));
-			}
-		}
+				std::expected<void, RegistryErrorInfo> result{config.updateAbility(toAbilityID(BuiltinAbilityID::None), definition)};
 
-		WHEN("it is updated by name")
-		{
-			AbilityMeta replacement{
-				.mTriggers = {{.mEffects = {toEffectID(BuiltinEffectID::StatusApply)}, .mTrigger = BattleEventID::StatusChanged}},
-				.mName = "Replacement Ability",
-				.mTargetID = BattleTargetID::AllExceptSelf,
-			};
-			auto updateResult{configuration.updateAbility("Custom Ability", replacement)};
-
-			THEN("stored metadata is replaced")
-			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasAbility("Replacement Ability"));
-				CHECK_FALSE(configuration.hasAbility("Custom Ability"));
-			}
-		}
-
-		WHEN("it is updated by stable ID")
-		{
-			AbilityMeta replacement{
-				.mTriggers
-				= {{.mEffects = {toEffectID(BuiltinEffectID::Recoil)}, .mTrigger = BattleEventID::MoveUse, .mRole = BattleEventRole::User}},
-				.mName = "Replacement Ability By ID",
-				.mTargetID = BattleTargetID::Self,
-			};
-			auto updateResult{configuration.updateAbility(customIdentifier, replacement)};
-
-			THEN("stored metadata is replaced")
-			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasAbility("Replacement Ability By ID"));
-			}
-		}
-
-		WHEN("it is removed by name")
-		{
-			auto removeResult{configuration.removeAbility("Custom Ability")};
-
-			THEN("the removed stable ID is returned")
-			{
-				REQUIRE(removeResult.has_value());
-				CHECK((removeResult.value() == customIdentifier));
-				CHECK_FALSE(configuration.hasAbility(customIdentifier));
-			}
-		}
-
-		WHEN("it is removed and another ability is added")
-		{
-			auto removeResult{configuration.removeAbility(customIdentifier)};
-			REQUIRE(removeResult.has_value());
-
-			AbilityMeta laterDefinition{.mTriggers = {}, .mName = "Later Ability"};
-			auto laterResult{configuration.addAbility(laterDefinition)};
-
-			THEN("the removed ID is not reused")
-			{
-				REQUIRE(laterResult.has_value());
-				CHECK((laterResult.value() != customIdentifier));
-				CHECK((configuration.getAbilityMetadata(customIdentifier) == nullptr));
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mName == "TestAbilityName"));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTriggers == triggers));
+				}
 			}
 		}
 	}
 
-	GIVEN("an unknown ability")
+	GIVEN("removeAbility")
 	{
-		THEN("metadata mutation and removal report AbilityNotFound")
+		WHEN("calling the string_view overload")
 		{
-			auto setResult{configuration.setAbilityTriggers("Missing", {})};
-			auto setTargetResult{configuration.setAbilityTarget("Missing", BattleTargetID::Self)};
-			auto updateResult{configuration.updateAbility("Missing", {.mTriggers = {}, .mName = "Updated"})};
-			auto removeResult{configuration.removeAbility("Missing")};
+			WHEN("calling with an unknown ability name")
+			{
+				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility("Unknown")};
 
-			REQUIRE_FALSE(setResult.has_value());
-			REQUIRE_FALSE(setTargetResult.has_value());
-			REQUIRE_FALSE(updateResult.has_value());
-			REQUIRE_FALSE(removeResult.has_value());
-			CHECK((setResult.error().mKind == RegistryError::AbilityNotFound));
-			CHECK((setTargetResult.error().mKind == RegistryError::AbilityNotFound));
-			CHECK((updateResult.error().mKind == RegistryError::AbilityNotFound));
-			CHECK((removeResult.error().mKind == RegistryError::AbilityNotFound));
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known ability name")
+			{
+				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(ABILITY_NAME_NONE)};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toAbilityID(BuiltinAbilityID::None)));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue - 1));
+				}
+			}
+		}
+
+		WHEN("calling the AbilityID overload")
+		{
+			WHEN("calling with an unknown ability ID")
+			{
+				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(AbilityID{200})};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known ability ID")
+			{
+				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(toAbilityID(BuiltinAbilityID::None))};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toAbilityID(BuiltinAbilityID::None)));
+					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue - 1));
+				}
+			}
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

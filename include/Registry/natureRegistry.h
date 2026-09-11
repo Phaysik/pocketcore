@@ -1,8 +1,8 @@
 /*! @file natureRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined natures.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.11.6
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -33,6 +33,32 @@ namespace PocketCore::Registry::Nature
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Nature::BuiltinNatureID;
+	using PocketCore::Nature::NATURE_NAME_ADAMANT;
+	using PocketCore::Nature::NATURE_NAME_BASHFUL;
+	using PocketCore::Nature::NATURE_NAME_BOLD;
+	using PocketCore::Nature::NATURE_NAME_BRAVE;
+	using PocketCore::Nature::NATURE_NAME_CALM;
+	using PocketCore::Nature::NATURE_NAME_CAREFUL;
+	using PocketCore::Nature::NATURE_NAME_DOCILE;
+	using PocketCore::Nature::NATURE_NAME_GENTLE;
+	using PocketCore::Nature::NATURE_NAME_HARDY;
+	using PocketCore::Nature::NATURE_NAME_HASTY;
+	using PocketCore::Nature::NATURE_NAME_IMPISH;
+	using PocketCore::Nature::NATURE_NAME_JOLLY;
+	using PocketCore::Nature::NATURE_NAME_LAX;
+	using PocketCore::Nature::NATURE_NAME_LONELY;
+	using PocketCore::Nature::NATURE_NAME_MILD;
+	using PocketCore::Nature::NATURE_NAME_MODEST;
+	using PocketCore::Nature::NATURE_NAME_NAIVE;
+	using PocketCore::Nature::NATURE_NAME_NAUGHTY;
+	using PocketCore::Nature::NATURE_NAME_NONE;
+	using PocketCore::Nature::NATURE_NAME_QUIET;
+	using PocketCore::Nature::NATURE_NAME_QUIRKY;
+	using PocketCore::Nature::NATURE_NAME_RASH;
+	using PocketCore::Nature::NATURE_NAME_RELAXED;
+	using PocketCore::Nature::NATURE_NAME_SASSY;
+	using PocketCore::Nature::NATURE_NAME_SERIOUS;
+	using PocketCore::Nature::NATURE_NAME_TIMID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::toNatureID;
@@ -43,9 +69,9 @@ namespace PocketCore::Registry::Nature
 		@details Built-in natures are registered during construction with IDs derived from @ref BuiltinNatureID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_NATURES.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.11.6
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class NatureRegistry : private FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>
@@ -61,15 +87,24 @@ namespace PocketCore::Registry::Nature
 			}
 
 		public:
+			/*! @brief Compares two NatureRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const NatureRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinNatureID.
 				@since 0.11.6
-				@version 0.12.1
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr NatureRegistry() : Base{toNatureID(BuiltinNatureID::FinalNature).getValue()}
 			{
 				// --- Neutral natures (no triggers) ---
-				auto addNeutral = [this](const BuiltinNatureID natureID, const std::string_view &name) {
+				auto addNeutral = [this](const BuiltinNatureID natureID, const std::string &name) {
 					addBuiltin({
 						.mStatMultipliers = makeMultipliers(1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
 						.mName = name,
@@ -77,21 +112,21 @@ namespace PocketCore::Registry::Nature
 					});
 				};
 
-				addBuiltin({.mName = PocketCore::Nature::NATURE_NAME_NONE, .mNatureID = toNatureID(BuiltinNatureID::None)});
+				addBuiltin({.mName = std::string(NATURE_NAME_NONE), .mNatureID = toNatureID(BuiltinNatureID::None)});
 
 				// --- Standard Neutral natures ---
-				addNeutral(BuiltinNatureID::Hardy, PocketCore::Nature::NATURE_NAME_HARDY);
-				addNeutral(BuiltinNatureID::Docile, PocketCore::Nature::NATURE_NAME_DOCILE);
-				addNeutral(BuiltinNatureID::Serious, PocketCore::Nature::NATURE_NAME_SERIOUS);
-				addNeutral(BuiltinNatureID::Bashful, PocketCore::Nature::NATURE_NAME_BASHFUL);
-				addNeutral(BuiltinNatureID::Quirky, PocketCore::Nature::NATURE_NAME_QUIRKY);
+				addNeutral(BuiltinNatureID::Hardy, std::string(NATURE_NAME_HARDY));
+				addNeutral(BuiltinNatureID::Docile, std::string(NATURE_NAME_DOCILE));
+				addNeutral(BuiltinNatureID::Serious, std::string(NATURE_NAME_SERIOUS));
+				addNeutral(BuiltinNatureID::Bashful, std::string(NATURE_NAME_BASHFUL));
+				addNeutral(BuiltinNatureID::Quirky, std::string(NATURE_NAME_QUIRKY));
 
 				// --- Standard +Attack natures ---
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_LONELY,
+					.mName = std::string(NATURE_NAME_LONELY),
 					.mNatureID = toNatureID(BuiltinNatureID::Lonely),
 				});
 
@@ -99,21 +134,21 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_BRAVE,
+					.mName = std::string(NATURE_NAME_BRAVE),
 					.mNatureID = toNatureID(BuiltinNatureID::Brave),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_ADAMANT,
+					.mName = std::string(NATURE_NAME_ADAMANT),
 					.mNatureID = toNatureID(BuiltinNatureID::Adamant),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_NAUGHTY,
+					.mName = std::string(NATURE_NAME_NAUGHTY),
 					.mNatureID = toNatureID(BuiltinNatureID::Naughty),
 				});
 
@@ -122,7 +157,7 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_BOLD,
+					.mName = std::string(NATURE_NAME_BOLD),
 					.mNatureID = toNatureID(BuiltinNatureID::Bold),
 				});
 
@@ -130,21 +165,21 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_RELAXED,
+					.mName = std::string(NATURE_NAME_RELAXED),
 					.mNatureID = toNatureID(BuiltinNatureID::Relaxed),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
 									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_IMPISH,
+					.mName = std::string(NATURE_NAME_IMPISH),
 					.mNatureID = toNatureID(BuiltinNatureID::Impish),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_LAX,
+					.mName = std::string(NATURE_NAME_LAX),
 					.mNatureID = toNatureID(BuiltinNatureID::Lax),
 				});
 
@@ -153,14 +188,14 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_TIMID,
+					.mName = std::string(NATURE_NAME_TIMID),
 					.mNatureID = toNatureID(BuiltinNatureID::Timid),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_HASTY,
+					.mName = std::string(NATURE_NAME_HASTY),
 					.mNatureID = toNatureID(BuiltinNatureID::Hasty),
 				});
 
@@ -168,14 +203,14 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_JOLLY,
+					.mName = std::string(NATURE_NAME_JOLLY),
 					.mNatureID = toNatureID(BuiltinNatureID::Jolly),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_NAIVE,
+					.mName = std::string(NATURE_NAME_NAIVE),
 					.mNatureID = toNatureID(BuiltinNatureID::Naive),
 				});
 
@@ -184,28 +219,28 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_MODEST,
+					.mName = std::string(NATURE_NAME_MODEST),
 					.mNatureID = toNatureID(BuiltinNatureID::Modest),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
 									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_MILD,
+					.mName = std::string(NATURE_NAME_MILD),
 					.mNatureID = toNatureID(BuiltinNatureID::Mild),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_QUIET,
+					.mName = std::string(NATURE_NAME_QUIET),
 					.mNatureID = toNatureID(BuiltinNatureID::Quiet),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_RASH,
+					.mName = std::string(NATURE_NAME_RASH),
 					.mNatureID = toNatureID(BuiltinNatureID::Rash),
 				});
 
@@ -214,28 +249,28 @@ namespace PocketCore::Registry::Nature
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_CALM,
+					.mName = std::string(NATURE_NAME_CALM),
 					.mNatureID = toNatureID(BuiltinNatureID::Calm),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_GENTLE,
+					.mName = std::string(NATURE_NAME_GENTLE),
 					.mNatureID = toNatureID(BuiltinNatureID::Gentle),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_SASSY,
+					.mName = std::string(NATURE_NAME_SASSY),
 					.mNatureID = toNatureID(BuiltinNatureID::Sassy),
 				});
 				addBuiltin({
 					.mStatMultipliers
 					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
 									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
-					.mName = PocketCore::Nature::NATURE_NAME_CAREFUL,
+					.mName = std::string(NATURE_NAME_CAREFUL),
 					.mNatureID = toNatureID(BuiltinNatureID::Careful),
 				});
 			}

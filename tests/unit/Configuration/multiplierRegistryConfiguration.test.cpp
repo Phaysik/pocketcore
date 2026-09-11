@@ -1,317 +1,478 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 08/30/2026
+	@date 09/10/2026
 	@since 0.8.7
-	@version 0.12.12
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Configuration/multiplierRegistryConfiguration.h"
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
+#include <expected>
+#include <format>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Multiplier/builtInMultiplierID.h"
+#include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
+#include "Registry/multiplierRegistry.h"
 #include "Registry/registryError.h"
-#include "Utility/Debug/Logging/logger.h"
+#include "Utility/Debug/Logging/logging.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MAX_MULTIPLIERS;
 using PocketCore::Configuration::MultiplierRegistryConfiguration;
 using PocketCore::Configuration::RegistryError;
+using PocketCore::Core::ub;
+using PocketCore::Core::us;
+using PocketCore::Multiplier::BuiltinMultiplierID;
+using PocketCore::Multiplier::MULTIPLIER_NAME_CRITICAL;
+using PocketCore::Multiplier::MULTIPLIER_NAME_NONE;
 using PocketCore::Multiplier::MultiplierID;
 using PocketCore::Multiplier::MultiplierMeta;
-using PocketCore::Utility::Debug::Logging::Logger;
+using PocketCore::Multiplier::NO_MULTIPLIER_ID;
+using PocketCore::Multiplier::toMultiplierID;
+using PocketCore::Registry::Multiplier::MultiplierRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Testing::ensureLoggerInitialized;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
-namespace
+SCENARIO("MultiplierRegistryConfiguration")
 {
-	void ensureMultiplierLoggerInitialized()
-	{
-		static bool initialized{false};
+	ensureLoggerInitialized("multiplier registry configuration test", "multiplierRegistryConfiguration_test.log");
 
-		if (!initialized)
+	MultiplierRegistryConfiguration config{};
+	MultiplierRegistry registry{};
+	ub finalMultiplierUnderlyingValue{std::to_underlying(BuiltinMultiplierID::FinalMultiplier)};
+
+	GIVEN("getAmountRegistered")
+	{
+		THEN("the default registry returns the expected amount of built-in multipliers")
 		{
-			initialized = Logger::initialize("mulrc_test", "multiplierRegistryConfiguration_test.log", true);
+			CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 		}
 	}
 
-	MultiplierMeta makeMultiplier(const std::string_view &name)
+	GIVEN("getRuntimeRegistry")
 	{
-		return MultiplierMeta{.mName = name};
-	}
-} // namespace
-
-SCENARIO("MultiplierRegistryConfiguration addMultiplier")
-{
-	ensureMultiplierLoggerInitialized();
-	MultiplierRegistryConfiguration configuration{};
-
-	GIVEN("a unique multiplier definition")
-	{
-		auto result{configuration.addMultiplier(makeMultiplier("Custom Multiplier"))};
-
-		THEN("it is registered and queryable by ID and name")
+		THEN("the runtime registry is the same as the default registry")
 		{
-			REQUIRE(result.has_value());
-			MultiplierID customIdentifier{result.value()};
-			CHECK(configuration.hasMultiplier(customIdentifier));
-			CHECK(configuration.hasMultiplier("Custom Multiplier"));
+			CHECK((config.getRuntimeRegistry() == registry));
+		}
+	}
 
-			auto nameResult{configuration.getMultiplierName(customIdentifier)};
-			REQUIRE(nameResult.has_value());
+	GIVEN("getMultiplierMetadata")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK((config.getMultiplierMetadata(MultiplierID{200}) == nullptr));
+		}
+
+		THEN("the metadata is retrieved when accessed by a valid Multiplier ID")
+		{
+			MultiplierMeta expected{
+				.mName = std::string(MULTIPLIER_NAME_NONE),
+				.mMultiplierID = toMultiplierID(BuiltinMultiplierID::None),
+			};
+
+			CHECK((expected == *config.getMultiplierMetadata(NO_MULTIPLIER_ID)));
+		}
+	}
+
+	GIVEN("getMultiplierID")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK_FALSE(config.getMultiplierID("Unknown").has_value());
+		}
+
+		THEN("the Multiplier ID is retrieved by valid Multiplier name")
+		{
+			std::optional<MultiplierID> multiplierID{config.getMultiplierID(MULTIPLIER_NAME_NONE)};
+
+			REQUIRE(multiplierID.has_value());
+
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((nameResult.value() == "Custom Multiplier"));
-
-			const MultiplierMeta *metadata{configuration.getMultiplierMetadata(customIdentifier)};
-			REQUIRE((metadata != nullptr));
-			CHECK((metadata->mName == "Custom Multiplier"));
+			CHECK((multiplierID.value() == toMultiplierID(BuiltinMultiplierID::None)));
 		}
 	}
 
-	GIVEN("a duplicate multiplier name")
+	GIVEN("getMultiplierName")
 	{
-		auto firstResult{configuration.addMultiplier(makeMultiplier("Duplicate Multiplier"))};
-		REQUIRE(firstResult.has_value());
-
-		THEN("registration returns DuplicateMultiplier")
+		THEN("unknown IDs are absent")
 		{
-			auto secondResult{configuration.addMultiplier(makeMultiplier("Duplicate Multiplier"))};
-			REQUIRE_FALSE(secondResult.has_value());
-			CHECK((secondResult.error().mKind == RegistryError::DuplicateMultiplier));
+			CHECK_FALSE(config.getMultiplierName(MultiplierID{200}).has_value());
+		}
+
+		THEN("a registered multiplier name is returned by stable ID")
+		{
+			std::optional<std::string_view> multiplierName{config.getMultiplierName(toMultiplierID(BuiltinMultiplierID::None))};
+
+			REQUIRE(multiplierName.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((multiplierName.value() == MULTIPLIER_NAME_NONE));
 		}
 	}
-}
 
-SCENARIO("MultiplierRegistryConfiguration addMultipliers")
-{
-	ensureMultiplierLoggerInitialized();
-	MultiplierRegistryConfiguration configuration{};
-
-	GIVEN("a batch with duplicate names")
+	GIVEN("getRegisteredMultipliers")
 	{
-		std::array<MultiplierMeta, 3> definitions{
-			{
-				makeMultiplier("Batch One"),
-				makeMultiplier("Batch Two"),
-				makeMultiplier("Batch One"),
-			},
-		};
-
-		WHEN("the batch is added")
+		THEN("the amount of multipliers returned matches the amount that are built-in")
 		{
-			auto result{configuration.addMultipliers(definitions)};
+			CHECK((config.getRegisteredMultipliers().size() == finalMultiplierUnderlyingValue));
+		}
+	}
 
-			THEN("all additions are rolled back")
+	GIVEN("hasMultiplier")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown multiplier name has no entry")
 			{
-				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
-				CHECK_FALSE(configuration.hasMultiplier("Batch One"));
-				CHECK_FALSE(configuration.hasMultiplier("Batch Two"));
+				CHECK_FALSE(config.hasMultiplier("Unknown"));
+			}
+
+			THEN("a known multiplier name has an entry")
+			{
+				CHECK(config.hasMultiplier(MULTIPLIER_NAME_NONE));
+			}
+		}
+
+		WHEN("calling the MultiplierID overload")
+		{
+			THEN("an unknown multiplier ID has no entry")
+			{
+				CHECK_FALSE(config.hasMultiplier(MultiplierID{200}));
+			}
+
+			THEN("a known multiplier ID has an entry")
+			{
+				CHECK(config.hasMultiplier(NO_MULTIPLIER_ID));
 			}
 		}
 	}
 
-	GIVEN("a batch that exceeds remaining capacity")
+	GIVEN("addMultiplier")
 	{
-		std::vector<std::string> names{};
-		names.reserve(static_cast<std::size_t>(MAX_MULTIPLIERS));
-		std::vector<MultiplierMeta> definitions{};
-		definitions.reserve(static_cast<std::size_t>(MAX_MULTIPLIERS));
-
-		for (std::size_t index{0}; index < static_cast<std::size_t>(MAX_MULTIPLIERS); ++index)
+		WHEN("trying to add an multiplier past the capacity")
 		{
-			names.push_back("Overflow Batch " + std::to_string(index));
-			definitions.push_back(makeMultiplier(names.back()));
-		}
+			us newMultiplierCount{finalMultiplierUnderlyingValue};
 
-		WHEN("the oversized batch is added")
-		{
-			auto result{configuration.addMultipliers(definitions)};
+			for (us i{0}; i < MAX_MULTIPLIERS - finalMultiplierUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				MultiplierMeta definition{.mName = name};
+				std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
 
-			THEN("a MaxCapacity error is returned")
+				REQUIRE(result.has_value());
+
+				MultiplierID assignedID{result.value()};
+				CHECK((assignedID.getValue() == newMultiplierCount++));
+			}
+
+			std::string name{std::format("String_{:04}", MAX_MULTIPLIERS + 1)};
+
+			MultiplierMeta definition{.mName = name};
+			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+
+			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::MaxCapacity));
-			}
-		}
-	}
-}
-
-SCENARIO("MultiplierRegistryConfiguration metadata lifecycle")
-{
-	ensureMultiplierLoggerInitialized();
-	MultiplierRegistryConfiguration configuration{};
-
-	GIVEN("a registered custom multiplier")
-	{
-		auto addResult{configuration.addMultiplier(makeMultiplier("Custom Multiplier"))};
-		REQUIRE(addResult.has_value());
-		MultiplierID customIdentifier{addResult.value()};
-
-		WHEN("it is renamed")
-		{
-			auto renameResult{configuration.renameMultiplier("Custom Multiplier", "Renamed Multiplier")};
-
-			THEN("the stable ID remains associated with renamed metadata")
-			{
-				REQUIRE(renameResult.has_value());
-				CHECK_FALSE(configuration.hasMultiplier("Custom Multiplier"));
-				CHECK(configuration.hasMultiplier("Renamed Multiplier"));
-
-				auto idResult{configuration.getMultiplierID("Renamed Multiplier")};
-				REQUIRE(idResult.has_value());
-				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				CHECK((idResult.value() == customIdentifier));
+				CHECK((config.getAmountRegistered() == MAX_MULTIPLIERS));
 			}
 		}
 
-		WHEN("it is updated by name")
+		WHEN("an multiplier whose name is already in use is added")
 		{
-			auto updateResult{configuration.updateMultiplier("Custom Multiplier", makeMultiplier("Replacement Multiplier"))};
+			MultiplierMeta definition{.mName = std::string(MULTIPLIER_NAME_CRITICAL)};
+			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
 
-			THEN("replacement metadata is discoverable")
+			THEN("registration reports a duplicate multiplier and nothing is added")
 			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasMultiplier("Replacement Multiplier"));
-				CHECK_FALSE(configuration.hasMultiplier("Custom Multiplier"));
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 			}
 		}
 
-		WHEN("it is updated by stable ID")
+		WHEN("a unique multiplier definition is added")
 		{
-			auto updateResult{configuration.updateMultiplier(customIdentifier, makeMultiplier("Replacement By ID"))};
+			MultiplierMeta definition{.mName = "TestMultiplierName"};
 
-			THEN("replacement metadata is discoverable")
+			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+
+			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
-				REQUIRE(updateResult.has_value());
-				CHECK(configuration.hasMultiplier("Replacement By ID"));
-			}
-		}
+				REQUIRE(result.has_value());
+				MultiplierID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalMultiplierUnderlyingValue));
 
-		WHEN("it is removed by name")
-		{
-			auto removeResult{configuration.removeMultiplier("Custom Multiplier")};
+				const MultiplierMeta *metadata{config.getMultiplierMetadata(assignedID)};
 
-			THEN("the removed ID is returned")
-			{
-				REQUIRE(removeResult.has_value());
-				CHECK((removeResult.value() == customIdentifier));
-				CHECK_FALSE(configuration.hasMultiplier(customIdentifier));
-			}
-		}
-
-		WHEN("it is removed then another entry is added")
-		{
-			auto removeResult{configuration.removeMultiplier(customIdentifier)};
-			REQUIRE(removeResult.has_value());
-
-			auto laterResult{configuration.addMultiplier(makeMultiplier("Later Multiplier"))};
-
-			THEN("the removed ID is not reused")
-			{
-				REQUIRE(laterResult.has_value());
-				CHECK((laterResult.value() != customIdentifier));
-				CHECK((configuration.getMultiplierMetadata(customIdentifier) == nullptr));
-			}
-		}
-
-		WHEN("it is renamed to an existing built-in name")
-		{
-			auto renameResult{configuration.renameMultiplier("Custom Multiplier", "Ability")};
-
-			THEN("a duplicate error is returned")
-			{
-				REQUIRE_FALSE(renameResult.has_value());
-				CHECK((renameResult.error().mKind == RegistryError::DuplicateMultiplier));
+				REQUIRE((metadata != nullptr));
+				CHECK((metadata->mName == "TestMultiplierName"));
 			}
 		}
 	}
 
-	GIVEN("an unknown multiplier")
+	GIVEN("addMultipliers")
 	{
-		THEN("rename update and remove report MultiplierNotFound")
+		WHEN("trying to add an multiplier past the capacity")
 		{
-			const MultiplierID unknownIdentifier{250U};
-			auto renameResult{configuration.renameMultiplier("Missing", "Renamed")};
-			auto updateResult{configuration.updateMultiplier("Missing", makeMultiplier("Updated"))};
-			auto updateByIdentifierResult{configuration.updateMultiplier(unknownIdentifier, makeMultiplier("Updated"))};
-			auto removeResult{configuration.removeMultiplier("Missing")};
-			auto removeByIdentifierResult{configuration.removeMultiplier(unknownIdentifier)};
+			std::vector<MultiplierMeta> multiplierMetas;
 
-			REQUIRE_FALSE(renameResult.has_value());
-			REQUIRE_FALSE(updateResult.has_value());
-			REQUIRE_FALSE(updateByIdentifierResult.has_value());
-			REQUIRE_FALSE(removeResult.has_value());
-			REQUIRE_FALSE(removeByIdentifierResult.has_value());
-			CHECK((renameResult.error().mKind == RegistryError::MultiplierNotFound));
-			CHECK((updateResult.error().mKind == RegistryError::MultiplierNotFound));
-			CHECK((updateByIdentifierResult.error().mKind == RegistryError::MultiplierNotFound));
-			CHECK((removeResult.error().mKind == RegistryError::MultiplierNotFound));
-			CHECK((removeByIdentifierResult.error().mKind == RegistryError::MultiplierNotFound));
+			for (us i{0}; i < MAX_MULTIPLIERS - finalMultiplierUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				multiplierMetas.push_back({.mName = name});
+			}
+
+			std::string name{std::format("String_{:04}", MAX_MULTIPLIERS + 1)};
+
+			multiplierMetas.push_back({.mName = name});
+			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+			}
+		}
+
+		WHEN("an multiplier whose name is already in use is added")
+		{
+			std::vector<MultiplierMeta> multiplierMetas{};
+
+			for (us i{0}; i < 20; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				multiplierMetas.push_back({.mName = name});
+			}
+
+			multiplierMetas.push_back({.mName = std::string(MULTIPLIER_NAME_CRITICAL)});
+			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+
+			THEN("registration reports a duplicate multiplier and the registry is rollback to the checkpoint before the erroneous addition")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique multiplier definition is added")
+		{
+			std::vector<MultiplierMeta> multiplierMetas{};
+
+			multiplierMetas.push_back({.mName = "TestMultiplierName"});
+
+			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+
+			THEN("the registry reports no error and all the multiplier definitions are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue + 1));
+			}
 		}
 	}
 
-	GIVEN("registry at maximum capacity")
+	GIVEN("renameMultiplier")
 	{
-		std::vector<std::string> names{};
-		names.reserve(static_cast<std::size_t>(MAX_MULTIPLIERS));
-
-		while (true)
+		WHEN("calling with an invalid multiplier name")
 		{
-			names.push_back("Capacity Entry " + std::to_string(names.size()));
-			auto result{configuration.addMultiplier(makeMultiplier(names.back()))};
+			std::expected<void, RegistryErrorInfo> result{config.renameMultiplier("ThisIsInvalid", "NewName")};
 
-			if (!result.has_value())
+			THEN("the registry reports an error and there is no update to the registry")
 			{
-				THEN("adding another multiplier returns MaxCapacity")
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+			}
+		}
+
+		WHEN("trying to rename to a name already in the registry")
+		{
+			std::expected<void, RegistryErrorInfo> result{
+				config.renameMultiplier(MULTIPLIER_NAME_NONE, MULTIPLIER_NAME_CRITICAL),
+			};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+			}
+		}
+
+		WHEN("updating an existing multiplier definition")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameMultiplier(MULTIPLIER_NAME_NONE, "NewName")};
+
+			THEN("the registry reports no error and the name is appropriately updated")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				CHECK((config.getMultiplierMetadata(toMultiplierID(BuiltinMultiplierID::None))->mName == "NewName"));
+			}
+		}
+	}
+
+	GIVEN("updateMultiplier")
+	{
+		MultiplierMeta definition{.mName = "TestMultiplierName"};
+
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an invalid multiplier name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier("ThisIsInvalid", definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
 				{
-					CHECK((result.error().mKind == RegistryError::MaxCapacity));
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
+			}
 
-				break;
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateMultiplier(MULTIPLIER_NAME_NONE, {.mName = std::string(MULTIPLIER_NAME_CRITICAL)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing multiplier definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier(MULTIPLIER_NAME_NONE, definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+					CHECK((config.getMultiplierMetadata(toMultiplierID(BuiltinMultiplierID::None))->mName == "TestMultiplierName"));
+				}
+			}
+		}
+
+		WHEN("calling the MultiplierID overload")
+		{
+			WHEN("calling with an invalid multiplier name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier(MultiplierID{200}, definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				}
+			}
+
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = std::string(MULTIPLIER_NAME_CRITICAL)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing multiplier definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), definition),
+				};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+					CHECK((config.getMultiplierMetadata(toMultiplierID(BuiltinMultiplierID::None))->mName == "TestMultiplierName"));
+				}
 			}
 		}
 	}
 
-	GIVEN("built-in entries")
+	GIVEN("removeMultiplier")
 	{
-		THEN("removing a middle built-in entry shifts remaining entries")
+		WHEN("calling the string_view overload")
 		{
-			auto removeResult{configuration.removeMultiplier("Item")};
-			REQUIRE(removeResult.has_value());
-			CHECK_FALSE(configuration.hasMultiplier("Item"));
-			CHECK(configuration.hasMultiplier("Weather"));
+			WHEN("calling with an unknown multiplier name")
+			{
+				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier("Unknown")};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known multiplier name")
+			{
+				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(MULTIPLIER_NAME_NONE)};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toMultiplierID(BuiltinMultiplierID::None)));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue - 1));
+				}
+			}
+		}
+
+		WHEN("calling the MultiplierID overload")
+		{
+			WHEN("calling with an unknown multiplier ID")
+			{
+				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(MultiplierID{200})};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known multiplier ID")
+			{
+				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toMultiplierID(BuiltinMultiplierID::None)));
+					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue - 1));
+				}
+			}
 		}
 	}
 }
 
-SCENARIO("MultiplierRegistryConfiguration registered span")
-{
-	ensureMultiplierLoggerInitialized();
-	MultiplierRegistryConfiguration configuration{};
-
-	GIVEN("a custom registration")
-	{
-		auto addResult{configuration.addMultiplier(makeMultiplier("Span Multiplier"))};
-		REQUIRE(addResult.has_value());
-
-		THEN("registered span contains the new name")
-		{
-			const auto registeredMultipliers{configuration.getRegisteredMultipliers()};
-			auto found = std::ranges::find_if(registeredMultipliers.begin(), registeredMultipliers.end(),
-											  [](const MultiplierMeta &metadata) { return metadata.mName == "Span Multiplier"; });
-			CHECK((found != registeredMultipliers.end()));
-		}
-	}
-}
-
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

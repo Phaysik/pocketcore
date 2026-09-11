@@ -1,8 +1,8 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.1.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -12,7 +12,9 @@
 #include <cstddef>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
+#include <utility>
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
@@ -97,7 +99,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = NORMAL_TYPE_MATCHUP,
-				.mName = TYPE_NAME_NORMAL,
+				.mName = std::string(TYPE_NAME_NORMAL),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
 			};
 
@@ -110,7 +112,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = FIGHTING_TYPE_MATCHUP,
-				.mName = TYPE_NAME_FIGHTING,
+				.mName = std::string(TYPE_NAME_FIGHTING),
 				.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 			};
 
@@ -123,7 +125,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = FLYING_TYPE_MATCHUP,
-				.mName = TYPE_NAME_FLYING,
+				.mName = std::string(TYPE_NAME_FLYING),
 				.mTypeID = toTypeID(BuiltinTypeID::Flying),
 			};
 
@@ -136,7 +138,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = POISON_TYPE_MATCHUP,
-				.mName = TYPE_NAME_POISON,
+				.mName = std::string(TYPE_NAME_POISON),
 				.mTypeID = toTypeID(BuiltinTypeID::Poison),
 			};
 
@@ -149,7 +151,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = GROUND_TYPE_MATCHUP,
-				.mName = TYPE_NAME_GROUND,
+				.mName = std::string(TYPE_NAME_GROUND),
 				.mTypeID = toTypeID(BuiltinTypeID::Ground),
 			};
 
@@ -162,7 +164,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = ROCK_TYPE_MATCHUP,
-				.mName = TYPE_NAME_ROCK,
+				.mName = std::string(TYPE_NAME_ROCK),
 				.mTypeID = toTypeID(BuiltinTypeID::Rock),
 			};
 
@@ -175,7 +177,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = BUG_TYPE_MATCHUP,
-				.mName = TYPE_NAME_BUG,
+				.mName = std::string(TYPE_NAME_BUG),
 				.mTypeID = toTypeID(BuiltinTypeID::Bug),
 			};
 
@@ -188,7 +190,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = GHOST_TYPE_MATCHUP,
-				.mName = TYPE_NAME_GHOST,
+				.mName = std::string(TYPE_NAME_GHOST),
 				.mTypeID = toTypeID(BuiltinTypeID::Ghost),
 			};
 
@@ -201,7 +203,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = STEEL_TYPE_MATCHUP,
-				.mName = TYPE_NAME_STEEL,
+				.mName = std::string(TYPE_NAME_STEEL),
 				.mTypeID = toTypeID(BuiltinTypeID::Steel),
 			};
 
@@ -214,7 +216,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = FIRE_TYPE_MATCHUP,
-				.mName = TYPE_NAME_FIRE,
+				.mName = std::string(TYPE_NAME_FIRE),
 				.mTypeID = toTypeID(BuiltinTypeID::Fire),
 			};
 
@@ -227,7 +229,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = WATER_TYPE_MATCHUP,
-				.mName = TYPE_NAME_WATER,
+				.mName = std::string(TYPE_NAME_WATER),
 				.mTypeID = toTypeID(BuiltinTypeID::Water),
 			};
 
@@ -240,7 +242,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = GRASS_TYPE_MATCHUP,
-				.mName = TYPE_NAME_GRASS,
+				.mName = std::string(TYPE_NAME_GRASS),
 				.mTypeID = toTypeID(BuiltinTypeID::Grass),
 			};
 
@@ -253,7 +255,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = ELECTRIC_TYPE_MATCHUP,
-				.mName = TYPE_NAME_ELECTRIC,
+				.mName = std::string(TYPE_NAME_ELECTRIC),
 				.mTypeID = toTypeID(BuiltinTypeID::Electric),
 			};
 
@@ -266,7 +268,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = PSYCHIC_TYPE_MATCHUP,
-				.mName = TYPE_NAME_PSYCHIC,
+				.mName = std::string(TYPE_NAME_PSYCHIC),
 				.mTypeID = toTypeID(BuiltinTypeID::Psychic),
 			};
 
@@ -279,7 +281,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = ICE_TYPE_MATCHUP,
-				.mName = TYPE_NAME_ICE,
+				.mName = std::string(TYPE_NAME_ICE),
 				.mTypeID = toTypeID(BuiltinTypeID::Ice),
 			};
 
@@ -292,7 +294,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = DRAGON_TYPE_MATCHUP,
-				.mName = TYPE_NAME_DRAGON,
+				.mName = std::string(TYPE_NAME_DRAGON),
 				.mTypeID = toTypeID(BuiltinTypeID::Dragon),
 			};
 
@@ -305,7 +307,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = DARK_TYPE_MATCHUP,
-				.mName = TYPE_NAME_DARK,
+				.mName = std::string(TYPE_NAME_DARK),
 				.mTypeID = toTypeID(BuiltinTypeID::Dark),
 			};
 
@@ -318,7 +320,7 @@ SCENARIO("TypeRegistry")
 		{
 			TypeMeta expected{
 				.mOffensiveMatchups = FAIRY_TYPE_MATCHUP,
-				.mName = TYPE_NAME_FAIRY,
+				.mName = std::string(TYPE_NAME_FAIRY),
 				.mTypeID = toTypeID(BuiltinTypeID::Fairy),
 			};
 
@@ -330,7 +332,7 @@ SCENARIO("TypeRegistry")
 		THEN("Stellar has the appropriate properties")
 		{
 			TypeMeta expected{
-				.mName = TYPE_NAME_STELLAR,
+				.mName = std::string(TYPE_NAME_STELLAR),
 				.mTypeID = toTypeID(BuiltinTypeID::Stellar),
 			};
 
@@ -350,7 +352,7 @@ SCENARIO("TypeRegistry")
 		THEN("the metadata is retrieved when accessed by a valid Type ID")
 		{
 			TypeMeta expected{
-				.mName = TYPE_NAME_NONE,
+				.mName = std::string(TYPE_NAME_NONE),
 				.mTypeID = toTypeID(BuiltinTypeID::None),
 			};
 
@@ -371,6 +373,7 @@ SCENARIO("TypeRegistry")
 
 			REQUIRE(typeID.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((typeID.value() == toTypeID(BuiltinTypeID::None)));
 		}
 	}
@@ -388,6 +391,7 @@ SCENARIO("TypeRegistry")
 
 			REQUIRE(typeName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((typeName.value() == TYPE_NAME_NONE));
 		}
 	}
@@ -410,7 +414,7 @@ SCENARIO("TypeRegistry")
 		THEN("a valid internal array index has metadata")
 		{
 			TypeMeta expected{
-				.mName = TYPE_NAME_NONE,
+				.mName = std::string(TYPE_NAME_NONE),
 				.mTypeID = toTypeID(BuiltinTypeID::None),
 			};
 
@@ -450,6 +454,7 @@ SCENARIO("TypeRegistry")
 			std::optional<ub> typeIndex{registry.findIndexByTypeID(NO_TYPE_ID)};
 
 			REQUIRE(typeIndex.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((typeIndex.value() == 0));
 		}
 	}
@@ -511,19 +516,19 @@ SCENARIO("TypeRegistry")
 
 			THEN("Normal versus Rock is not very effective")
 			{
-				TypeEffectiveness chartCell{registry.getTypeChartCell(1, 6)};
+				TypeEffectiveness chartCell{registry.getTypeChartCell(1, 13)};
 				CHECK((chartCell == NVE));
 			}
 
 			THEN("Normal versus Ghost has no effect")
 			{
-				TypeEffectiveness chartCell{registry.getTypeChartCell(1, 8)};
+				TypeEffectiveness chartCell{registry.getTypeChartCell(1, 14)};
 				CHECK((chartCell == NE));
 			}
 
 			THEN("Grass versus Water is super effective")
 			{
-				TypeEffectiveness chartCell{registry.getTypeChartCell(12, 11)};
+				TypeEffectiveness chartCell{registry.getTypeChartCell(5, 3)};
 				CHECK((chartCell == SE));
 			}
 		}
@@ -591,9 +596,9 @@ SCENARIO("TypeRegistry")
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
-				CHECK((typeChartRow.at(6) == NVE)); // Rock
-				CHECK((typeChartRow.at(8) == NE));	// Ghost
-				CHECK((typeChartRow.at(9) == NVE)); // Steel
+				CHECK((typeChartRow.at(13) == NVE)); // Rock
+				CHECK((typeChartRow.at(14) == NE));	 // Ghost
+				CHECK((typeChartRow.at(17) == NVE)); // Steel
 			}
 		}
 
@@ -620,9 +625,9 @@ SCENARIO("TypeRegistry")
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
-				CHECK((typeChartRow.at(6) == NVE)); // Rock
-				CHECK((typeChartRow.at(8) == NE));	// Ghost
-				CHECK((typeChartRow.at(9) == NVE)); // Steel
+				CHECK((typeChartRow.at(13) == NVE)); // Rock
+				CHECK((typeChartRow.at(14) == NE));	 // Ghost
+				CHECK((typeChartRow.at(17) == NVE)); // Steel
 			}
 		}
 	}

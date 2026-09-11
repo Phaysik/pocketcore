@@ -1,15 +1,15 @@
 /*! @file multiplierMeta.h
 	@brief Defines the metadata stored for built-in and user-defined multipliers.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.8.1
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_MULTIPLIER_MULTIPLIERMETA_H
 #define INCLUDE_MULTIPLIER_MULTIPLIERMETA_H
 
-#include <string_view>
+#include <string>
 
 #include "Core/typedefs.h"
 
@@ -35,9 +35,9 @@ namespace PocketCore::Multiplier
 		@brief Stores one multiplier's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.8.1
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct MultiplierMeta
@@ -54,8 +54,8 @@ namespace PocketCore::Multiplier
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
-			/*! @brief The case-sensitive display name stored as a non-owning view. */
-			std::string_view mName{};
+			/*! @brief The case-sensitive display name stored. */
+			std::string mName{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			MultiplierID mMultiplierID{};

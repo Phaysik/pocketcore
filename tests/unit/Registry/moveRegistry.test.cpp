@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.6.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -10,7 +10,9 @@
 
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
+#include <utility>
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
@@ -60,6 +62,7 @@ SCENARIO("MoveRegistry")
 		THEN("Pound has the appropriate properties")
 		{
 			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_POUND),
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -70,7 +73,6 @@ SCENARIO("MoveRegistry")
 								  .mTrigger = BattleEventID::Hit,
 								  .mRole = BattleEventRole::Target,
 							  },},
-				.mName = MOVE_NAME_POUND,
 				.mMoveID = toMoveID(BuiltinMoveID::Pound),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mPower = 40,
@@ -89,6 +91,7 @@ SCENARIO("MoveRegistry")
 		THEN("Karate Chop has the appropriate properties")
 		{
 			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_KARATE_CHOP),
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -99,7 +102,6 @@ SCENARIO("MoveRegistry")
 								  .mTrigger = BattleEventID::Hit,
 								  .mRole = BattleEventRole::Target,
 							  },},
-				.mName = MOVE_NAME_KARATE_CHOP,
 				.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 				.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 				.mPower = 50,
@@ -126,8 +128,8 @@ SCENARIO("MoveRegistry")
 		THEN("the metadata is retrieved when accessed by a valid Move ID")
 		{
 			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_NONE),
 				.mTriggers = {},
-				.mName = MOVE_NAME_NONE,
 				.mMoveID = toMoveID(BuiltinMoveID::None),
 			};
 
@@ -148,6 +150,7 @@ SCENARIO("MoveRegistry")
 
 			REQUIRE(moveID.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((moveID.value() == toMoveID(BuiltinMoveID::None)));
 		}
 	}
@@ -165,6 +168,7 @@ SCENARIO("MoveRegistry")
 
 			REQUIRE(moveName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((moveName.value() == MOVE_NAME_NONE));
 		}
 	}
@@ -187,8 +191,8 @@ SCENARIO("MoveRegistry")
 		THEN("a valid internal array index has metadata")
 		{
 			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_NONE),
 				.mTriggers = {},
-				.mName = MOVE_NAME_NONE,
 				.mMoveID = toMoveID(BuiltinMoveID::None),
 			};
 
@@ -228,6 +232,7 @@ SCENARIO("MoveRegistry")
 			std::optional<ub> moveIndex{registry.findIndexByMoveID(NO_MOVE_ID)};
 
 			REQUIRE(moveIndex.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((moveIndex.value() == 0));
 		}
 	}

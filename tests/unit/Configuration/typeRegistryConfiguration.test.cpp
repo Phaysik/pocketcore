@@ -1,1174 +1,1013 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.2.19
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Configuration/typeRegistryConfiguration.h"
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <expected>
+#include <format>
 #include <optional>
-#include <span>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Registry/registryError.h"
+#include "Registry/typeRegistry.h"
 #include "Types/builtInTypeID.h"
+#include "Types/constants.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
-#include "Utility/Debug/Logging/logger.h"
+#include "Types/typeMeta.h"
+#include "Utility/Debug/Logging/logging.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MatchupPair;
 using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Configuration::RegistryError;
-using PocketCore::Configuration::RegistryErrorInfo;
 using PocketCore::Configuration::TypeDefinition;
 using PocketCore::Configuration::TypeRegistryConfiguration;
-using PocketCore::Configuration::UnspecifiedMatchup;
+using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Registry::Type::TypeRegistry;
+using PocketCore::Registry::UnspecifiedMatchup;
+using PocketCore::Testing::ensureLoggerInitialized;
 using PocketCore::Type::BuiltinTypeID;
+using PocketCore::Type::FIRE_TYPE_MATCHUP;
 using PocketCore::Type::NO_TYPE_ID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Type::TYPE_NAME_BUG;
+using PocketCore::Type::TYPE_NAME_FIRE;
+using PocketCore::Type::TYPE_NAME_NONE;
+using PocketCore::Type::TYPE_NAME_WATER;
 using PocketCore::Type::TypeEffectiveness;
 using PocketCore::Type::TypeID;
-using PocketCore::Utility::Debug::Logging::Logger;
-
+using PocketCore::Type::TypeMeta;
 using enum TypeEffectiveness;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
-namespace
+SCENARIO("TypeRegistryConfiguration")
 {
-	constexpr std::string_view LOG_FILE{"typeRegistryConfiguration_test.log"};
+	ensureLoggerInitialized("type registry configuration test", "typeRegistryConfiguration_test.log");
 
-	void ensureLoggerInitialized()
-	{
-		static bool initialized{false};
-
-		if (!initialized)
-		{
-			initialized = Logger::initialize("trc_test", LOG_FILE, true);
-		}
-	}
-} // namespace
-
-SCENARIO("TypeRegistryConfiguration getMatchup")
-{
-	ensureLoggerInitialized();
 	TypeRegistryConfiguration config{};
+	TypeRegistry registry{};
+	ub finalTypeUnderlyingValue{std::to_underlying(BuiltinTypeID::FinalType)};
 
-	GIVEN("two valid type names")
+	GIVEN("getAmountRegistered")
 	{
-		THEN("returns the correct effectiveness value")
+		THEN("the default registry returns the expected amount of built-in types")
 		{
-			auto result = config.getMatchup("Normal", "Normal");
-			REQUIRE(result.has_value());
-			CHECK((result.value() == E));
-		}
-
-		THEN("Normal versus Ghost has no effect")
-		{
-			auto result = config.getMatchup("Normal", "Ghost");
-			REQUIRE(result.has_value());
-			CHECK((result.value() == NE));
-		}
-
-		THEN("Fire versus Grass is super effective")
-		{
-			auto result = config.getMatchup("Fire", "Grass");
-			REQUIRE(result.has_value());
-			CHECK((result.value() == SE));
-		}
-
-		THEN("Water versus Fire is super effective")
-		{
-			auto result = config.getMatchup("Water", "Fire");
-			REQUIRE(result.has_value());
-			CHECK((result.value() == SE));
+			CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
 		}
 	}
 
-	GIVEN("an unknown attacker name")
+	GIVEN("getRuntimeRegistry")
 	{
-		THEN("returns TypeNotFound error")
+		THEN("the runtime registry is the same as the default registry")
 		{
-			auto result = config.getMatchup("Shadow", "Normal");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
+			CHECK((config.getRuntimeRegistry() == registry));
 		}
 	}
 
-	GIVEN("an unknown defender name")
+	GIVEN("getTypeMetadata")
 	{
-		THEN("returns TypeNotFound error")
+		THEN("unknown IDs are absent")
 		{
-			auto result = config.getMatchup("Normal", "Shadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
+			CHECK((config.getTypeMetadata(TypeID{200}) == nullptr));
 		}
-	}
-}
 
-SCENARIO("TypeRegistryConfiguration getMatchupRow")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name")
-	{
-		THEN("returns a row of effectiveness values")
+		THEN("the metadata is retrieved when accessed by a valid Type ID")
 		{
-			auto result = config.getMatchupRow("Normal");
-			REQUIRE(result.has_value());
-			auto row = result.value();
-			CHECK((row.at(0) == E));   // Normal vs Normal
-			CHECK((row.at(5) == NVE)); // Normal vs Rock
-			CHECK((row.at(7) == NE));  // Normal vs Ghost
+			TypeMeta expected{
+				.mName = std::string(TYPE_NAME_NONE),
+				.mTypeID = toTypeID(BuiltinTypeID::None),
+			};
+
+			CHECK((expected == *config.getTypeMetadata(NO_TYPE_ID)));
 		}
 	}
 
-	GIVEN("an unknown type name")
+	GIVEN("getMatchup")
 	{
-		THEN("returns TypeNotFound error")
+		WHEN("calling with an invalid attacker name")
 		{
-			auto result = config.getMatchupRow("Shadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
+			std::expected<TypeEffectiveness, RegistryErrorInfo> result{config.getMatchup("Unknown", TYPE_NAME_NONE)};
 
-SCENARIO("TypeRegistryConfiguration getDefensiveColumn")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name")
-	{
-		THEN("returns a column of effectiveness values")
-		{
-			auto result = config.getDefensiveColumn("Normal");
-			REQUIRE(result.has_value());
-			auto column = result.value();
-			// Fighting (index 1) vs Normal => SE
-			CHECK((column.at(1) == SE));
-			// Ghost (index 7) vs Normal => NE
-			CHECK((column.at(7) == NE));
-		}
-	}
-
-	GIVEN("an unknown type name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.getDefensiveColumn("Shadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration getTypeID and getTypeName")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid builtin type name")
-	{
-		THEN("getTypeID returns the correct id")
-		{
-			auto result = config.getTypeID("Normal");
-			REQUIRE(result.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((result.value() == toTypeID(BuiltinTypeID::Normal)));
-		}
-
-		THEN("getTypeName returns the correct name")
-		{
-			auto result = config.getTypeName(toTypeID(BuiltinTypeID::Fire));
-			REQUIRE(result.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((result.value() == "Fire"));
-		}
-	}
-
-	GIVEN("a nonexistent type")
-	{
-		THEN("getTypeID returns nullopt")
-		{
-			auto result = config.getTypeID("Shadow");
-			CHECK_FALSE(result.has_value());
-		}
-
-		THEN("getTypeName returns nullopt for unknown id")
-		{
-			auto result = config.getTypeName(TypeID{255});
-			CHECK_FALSE(result.has_value());
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration getRegisteredTypes and getAmountRegistered")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a default-constructed configuration")
-	{
-		THEN("amount registered is 19")
-		{
-			us count = config.getAmountRegistered();
-			CHECK((count == 19));
-		}
-
-		THEN("registered types span has 19 entries")
-		{
-			auto types = config.getRegisteredTypes();
-			CHECK((types.size() == 19U));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration setMatchup")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("two valid type names")
-	{
-		THEN("updates the effectiveness value")
-		{
-			auto setResult = config.setMatchup("Normal", "Normal", SE);
-			REQUIRE(setResult.has_value());
-
-			auto getResult = config.getMatchup("Normal", "Normal");
-			REQUIRE(getResult.has_value());
-			CHECK((getResult.value() == SE));
-		}
-	}
-
-	GIVEN("an unknown attacker name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.setMatchup("Shadow", "Normal", SE);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-
-	GIVEN("an unknown defender name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.setMatchup("Normal", "Shadow", SE);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration setMatchupRow with positional span")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name and a full row")
-	{
-		THEN("updates all values in the row")
-		{
-			std::array<TypeEffectiveness, MAX_TYPES> newRow{};
-			newRow.fill(SE);
-
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{newRow});
-			REQUIRE(result.has_value());
-
-			auto rowResult = config.getMatchupRow("Normal");
-			REQUIRE(rowResult.has_value());
-
-			us registered = config.getAmountRegistered();
-			for (us idx{0}; idx < registered; ++idx)
+			THEN("an error is returned")
 			{
-				CHECK((rowResult.value().at(idx) == SE));
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			}
+		}
+
+		WHEN("calling with an invalid defender name")
+		{
+			std::expected<TypeEffectiveness, RegistryErrorInfo> result{config.getMatchup(TYPE_NAME_NONE, "Unknown")};
+
+			THEN("an error is returned")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			}
+		}
+
+		WHEN("calling with valid identifiers")
+		{
+			std::expected<TypeEffectiveness, RegistryErrorInfo> result{config.getMatchup(TYPE_NAME_FIRE, TYPE_NAME_BUG)};
+
+			THEN("the appropriate type match is returned")
+			{
+				REQUIRE(result.has_value());
+				CHECK((result.value() == TypeEffectiveness::SE));
 			}
 		}
 	}
 
-	GIVEN("a span shorter than the registered count")
+	GIVEN("getMatchupRow")
 	{
-		THEN("fills remaining columns with NOT_DEFINED")
+		WHEN("calling with an invalid attacker name")
 		{
-			std::array<TypeEffectiveness, 3> shortRow{SE, NVE, E};
+			std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> result{config.getMatchupRow("Unknown")};
 
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{shortRow});
-			REQUIRE(result.has_value());
-
-			auto rowResult = config.getMatchupRow("Normal");
-			REQUIRE(rowResult.has_value());
-
-			us registered = config.getAmountRegistered();
-			for (us idx{0}; idx < 3; ++idx)
+			THEN("an error is returned")
 			{
-				CHECK((rowResult.value().at(idx) == shortRow.at(idx)));
-			}
-			for (us idx{3}; idx < registered; ++idx)
-			{
-				CHECK((rowResult.value().at(idx) == NOT_DEFINED));
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
 			}
 		}
-	}
 
-	GIVEN("a span larger than MAX_TYPES")
-	{
-		THEN("returns MatchupMismatch error")
+		WHEN("calling with a valid attacker name")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES + 1> oversized{};
-			auto result = config.setMatchupRow("Normal", std::span<const TypeEffectiveness>{oversized});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::MatchupMismatch));
-		}
-	}
+			std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> result{config.getMatchupRow(TYPE_NAME_FIRE)};
 
-	GIVEN("an unknown type name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<TypeEffectiveness, 1> smallRow{E};
-			auto result = config.setMatchupRow("Shadow", std::span<const TypeEffectiveness>{smallRow});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration setMatchupRow with MatchupPair span")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("valid name-keyed pairs")
-	{
-		THEN("updates the specified matchups and resets others to NOT_DEFINED")
-		{
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
-
-			auto result = config.setMatchupRow("Normal", std::span<const MatchupPair>{pairs});
-			REQUIRE(result.has_value());
-
-			auto fireMatchup = config.getMatchup("Normal", "Fire");
-			REQUIRE(fireMatchup.has_value());
-			CHECK((fireMatchup.value() == SE));
-
-			auto waterMatchup = config.getMatchup("Normal", "Water");
-			REQUIRE(waterMatchup.has_value());
-			CHECK((waterMatchup.value() == NVE));
-
-			// Unspecified matchups should be NOT_DEFINED
-			auto grassMatchup = config.getMatchup("Normal", "Grass");
-			REQUIRE(grassMatchup.has_value());
-			CHECK((grassMatchup.value() == NOT_DEFINED));
-		}
-	}
-
-	GIVEN("a pair referencing an unknown type")
-	{
-		THEN("returns TypeNotFound without changing the existing row")
-		{
-			auto originalFireMatchup = config.getMatchup("Normal", "Fire");
-			REQUIRE(originalFireMatchup.has_value());
-
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Shadow", .value = SE}}};
-			auto result = config.setMatchupRow("Normal", std::span<const MatchupPair>{pairs});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-
-			auto fireMatchup = config.getMatchup("Normal", "Fire");
-			REQUIRE(fireMatchup.has_value());
-			CHECK((fireMatchup.value() == originalFireMatchup.value()));
-		}
-	}
-
-	GIVEN("an unknown attacker name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = SE}}};
-			auto result = config.setMatchupRow("Shadow", std::span<const MatchupPair>{pairs});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration setDefensiveColumn with positional span")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name and a full column")
-	{
-		THEN("updates all values in the column")
-		{
-			std::array<TypeEffectiveness, MAX_TYPES> newCol{};
-			newCol.fill(NVE);
-
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{newCol});
-			REQUIRE(result.has_value());
-
-			auto colResult = config.getDefensiveColumn("Normal");
-			REQUIRE(colResult.has_value());
-
-			us registered = config.getAmountRegistered();
-			for (us idx{0}; idx < registered; ++idx)
+			THEN("the appropriate type match is returned")
 			{
-				CHECK((colResult.value().at(idx) == NVE));
+				REQUIRE(result.has_value());
+				CHECK((result.value() == FIRE_TYPE_MATCHUP));
 			}
 		}
 	}
 
-	GIVEN("a span shorter than the registered count")
+	GIVEN("getDefensiveColumn")
 	{
-		THEN("fills remaining rows with NOT_DEFINED")
+		WHEN("calling with an invalid defender name")
 		{
-			std::array<TypeEffectiveness, 3> shortCol{SE, NVE, E};
+			std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> result{config.getDefensiveColumn("Unknown")};
 
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{shortCol});
-			REQUIRE(result.has_value());
-
-			auto colResult = config.getDefensiveColumn("Normal");
-			REQUIRE(colResult.has_value());
-
-			us registered = config.getAmountRegistered();
-			for (us idx{0}; idx < 3; ++idx)
+			THEN("an error is returned")
 			{
-				CHECK((colResult.value().at(idx) == shortCol.at(idx)));
-			}
-			for (us idx{3}; idx < registered; ++idx)
-			{
-				CHECK((colResult.value().at(idx) == NOT_DEFINED));
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
 			}
 		}
-	}
 
-	GIVEN("a span larger than MAX_TYPES")
-	{
-		THEN("returns MatchupMismatch error")
+		WHEN("calling with a valid attacker name")
 		{
-			std::array<TypeEffectiveness, MAX_TYPES + 1> oversized{};
-			auto result = config.setDefensiveColumn("Normal", std::span<const TypeEffectiveness>{oversized});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::MatchupMismatch));
-		}
-	}
+			std::expected<std::array<TypeEffectiveness, MAX_TYPES>, RegistryErrorInfo> result{config.getDefensiveColumn(TYPE_NAME_FIRE)};
 
-	GIVEN("an unknown type name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<TypeEffectiveness, 1> smallCol{E};
-			auto result = config.setDefensiveColumn("Shadow", std::span<const TypeEffectiveness>{smallCol});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
+			std::array<TypeEffectiveness, MAX_TYPES> expectedMatchup{
+				NOT_DEFINED, E, NVE, SE, E, NVE, NVE, E, E, SE, E, E, NVE, SE, E, E, E, NVE, NVE, // NOLINT(readability-trailing-comma)
+			};
 
-SCENARIO("TypeRegistryConfiguration setDefensiveColumn with MatchupPair span")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("valid name-keyed pairs")
-	{
-		THEN("updates the specified matchups and resets others to NOT_DEFINED")
-		{
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
-
-			auto result = config.setDefensiveColumn("Normal", std::span<const MatchupPair>{pairs});
-			REQUIRE(result.has_value());
-
-			// Fire attacking Normal should be SE
-			auto fireVsNormal = config.getMatchup("Fire", "Normal");
-			REQUIRE(fireVsNormal.has_value());
-			CHECK((fireVsNormal.value() == SE));
-
-			// Water attacking Normal should be NVE
-			auto waterVsNormal = config.getMatchup("Water", "Normal");
-			REQUIRE(waterVsNormal.has_value());
-			CHECK((waterVsNormal.value() == NVE));
-
-			// Unspecified attackers should be NOT_DEFINED
-			auto grassVsNormal = config.getMatchup("Grass", "Normal");
-			REQUIRE(grassVsNormal.has_value());
-			CHECK((grassVsNormal.value() == NOT_DEFINED));
-		}
-	}
-
-	GIVEN("a pair referencing an unknown type")
-	{
-		THEN("returns TypeNotFound without changing the existing column")
-		{
-			auto originalFireMatchup = config.getMatchup("Fire", "Normal");
-			REQUIRE(originalFireMatchup.has_value());
-
-			std::array<MatchupPair, 2> pairs{{{.typeName = "Fire", .value = NVE}, {.typeName = "Shadow", .value = SE}}};
-			auto result = config.setDefensiveColumn("Normal", std::span<const MatchupPair>{pairs});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-
-			auto fireMatchup = config.getMatchup("Fire", "Normal");
-			REQUIRE(fireMatchup.has_value());
-			CHECK((fireMatchup.value() == originalFireMatchup.value()));
-		}
-	}
-
-	GIVEN("an unknown defender name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<MatchupPair, 1> pairs{{{.typeName = "Fire", .value = SE}}};
-			auto result = config.setDefensiveColumn("Shadow", std::span<const MatchupPair>{pairs});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration addType")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type definition with Neutral default behavior")
-	{
-		THEN("adds the type and returns its stable id")
-		{
-			// Remove Stellar to make room (keeps registered < MAX_TYPES after add)
-			auto removeResult = config.removeType("Stellar");
-			REQUIRE(removeResult.has_value());
-
-			std::array<MatchupPair, 2> offensive{{{.typeName = "Fire", .value = SE}, {.typeName = "Water", .value = NVE}}};
-			std::array<MatchupPair, 1> defensive{{{.typeName = "Fire", .value = NVE}}};
-
-			TypeDefinition definition{.name = "Custom", .offensiveMatchups = offensive, .defensiveMatchups = defensive};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE(result.has_value());
-
-			CHECK((config.getAmountRegistered() == 19));
-			CHECK(config.hasType("Custom"));
-
-			// Check specified offensive matchup
-			auto customVsFire = config.getMatchup("Custom", "Fire");
-			REQUIRE(customVsFire.has_value());
-			CHECK((customVsFire.value() == SE));
-
-			// Check unspecified offensive matchup filled with Neutral (E)
-			auto customVsGrass = config.getMatchup("Custom", "Grass");
-			REQUIRE(customVsGrass.has_value());
-			CHECK((customVsGrass.value() == E));
-
-			// Check specified defensive matchup
-			auto fireVsCustom = config.getMatchup("Fire", "Custom");
-			REQUIRE(fireVsCustom.has_value());
-			CHECK((fireVsCustom.value() == NVE));
-		}
-	}
-
-	GIVEN("a valid type definition with NotDefined default behavior")
-	{
-		THEN("fills unspecified matchups with NOT_DEFINED")
-		{
-			// Remove Stellar to make room
-			auto removeResult = config.removeType("Stellar");
-			REQUIRE(removeResult.has_value());
-
-			std::array<MatchupPair, 1> offensive{{{.typeName = "Fire", .value = SE}}};
-
-			TypeDefinition definition{.name = "Void", .offensiveMatchups = offensive, .defensiveMatchups = {}};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::NotDefined);
-			REQUIRE(result.has_value());
-
-			auto voidVsGrass = config.getMatchup("Void", "Grass");
-			REQUIRE(voidVsGrass.has_value());
-			CHECK((voidVsGrass.value() == NOT_DEFINED));
-
-			auto voidVsFire = config.getMatchup("Void", "Fire");
-			REQUIRE(voidVsFire.has_value());
-			CHECK((voidVsFire.value() == SE));
-		}
-	}
-
-	GIVEN("a type definition with a self-matchup in offensive pairs")
-	{
-		THEN("the self-matchup cell is set correctly")
-		{
-			// Remove Stellar to make room
-			auto removeResult = config.removeType("Stellar");
-			REQUIRE(removeResult.has_value());
-
-			std::array<MatchupPair, 1> offensive{{{.typeName = "SelfRef", .value = NVE}}};
-
-			TypeDefinition definition{.name = "SelfRef", .offensiveMatchups = offensive, .defensiveMatchups = {}};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE(result.has_value());
-
-			auto selfMatchup = config.getMatchup("SelfRef", "SelfRef");
-			REQUIRE(selfMatchup.has_value());
-			CHECK((selfMatchup.value() == NVE));
-		}
-	}
-
-	GIVEN("a duplicate type name")
-	{
-		THEN("returns DuplicateType error")
-		{
-			TypeDefinition definition{.name = "Normal", .offensiveMatchups = {}, .defensiveMatchups = {}};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::DuplicateType));
-			CHECK((result.error().mContext == "Normal"));
-		}
-	}
-
-	GIVEN("an offensive matchup referencing an unknown type")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<MatchupPair, 1> offensive{{{.typeName = "Shadow", .value = SE}}};
-
-			TypeDefinition definition{.name = "NewType", .offensiveMatchups = offensive, .defensiveMatchups = {}};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
-		}
-	}
-
-	GIVEN("a defensive matchup referencing an unknown type")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			std::array<MatchupPair, 1> defensive{{{.typeName = "Shadow", .value = SE}}};
-
-			TypeDefinition definition{.name = "NewType", .offensiveMatchups = {}, .defensiveMatchups = defensive};
-
-			auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration addTypes")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("an empty definitions span")
-	{
-		THEN("returns success with no changes")
-		{
-			std::span<const TypeDefinition> empty{};
-			auto result = config.addTypes(empty, UnspecifiedMatchup::Neutral);
-			REQUIRE(result.has_value());
-			CHECK((config.getAmountRegistered() == 19));
-		}
-	}
-
-	GIVEN("a single valid definition")
-	{
-		THEN("adds the type successfully")
-		{
-			// Remove Stellar to make room so hasType lookup works after add
-			auto removeResult = config.removeType("Stellar");
-			REQUIRE(removeResult.has_value());
-
-			TypeDefinition def{.name = "Custom", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			std::array<TypeDefinition, 1> defs{def};
-
-			auto result = config.addTypes(std::span<const TypeDefinition>{defs}, UnspecifiedMatchup::Neutral);
-			REQUIRE(result.has_value());
-			CHECK((config.getAmountRegistered() == 19));
-			CHECK(config.hasType("Custom"));
-		}
-	}
-
-	GIVEN("duplicate names within the batch")
-	{
-		THEN("returns DuplicateType error and rolls back")
-		{
-			// First remove a type to make room for 2
-			auto removeResult = config.removeType("Stellar");
-			REQUIRE(removeResult.has_value());
-
-			auto removeResult2 = config.removeType("Fairy");
-			REQUIRE(removeResult2.has_value());
-
-			us countBefore = config.getAmountRegistered();
-
-			TypeDefinition def1{.name = "Dup", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			TypeDefinition def2{.name = "Dup", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			std::array<TypeDefinition, 2> defs{def1, def2};
-
-			auto result = config.addTypes(std::span<const TypeDefinition>{defs}, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::DuplicateType));
-			CHECK((config.getAmountRegistered() == countBefore));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration removeType by name")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name")
-	{
-		THEN("removes the type and returns its id")
-		{
-			auto result = config.removeType("Normal");
-			REQUIRE(result.has_value());
-			CHECK((result.value() == toTypeID(BuiltinTypeID::Normal)));
-			CHECK((config.getAmountRegistered() == 18));
-			CHECK_FALSE(config.hasType("Normal"));
-		}
-	}
-
-	GIVEN("an unknown type name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.removeType("Shadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration removeType by enum")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid enum type")
-	{
-		THEN("removes the type and returns its id")
-		{
-			auto result = config.removeType(BuiltinTypeID::Fire);
-			REQUIRE(result.has_value());
-			CHECK((result.value() == toTypeID(BuiltinTypeID::Fire)));
-			CHECK_FALSE(config.hasType(toTypeID(BuiltinTypeID::Fire)));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration removeType by stable id")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid stable type id")
-	{
-		THEN("removes the type and returns its id")
-		{
-			TypeID normalId = toTypeID(BuiltinTypeID::Normal);
-			auto result = config.removeType(normalId);
-			REQUIRE(result.has_value());
-			CHECK((result.value() == normalId));
-			CHECK_FALSE(config.hasType("Normal"));
-		}
-	}
-
-	GIVEN("a nonexistent stable type id")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			TypeID invalidId{200};
-			auto result = config.removeType(invalidId);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration removeTypes")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a list of valid type names")
-	{
-		THEN("removes all types")
-		{
-			std::array<std::string_view, 2> names{{"Normal", "Fire"}};
-			auto result = config.removeTypes(std::span<const std::string_view>{names});
-			REQUIRE(result.has_value());
-			CHECK_FALSE(config.hasType("Normal"));
-			CHECK_FALSE(config.hasType("Fire"));
-			CHECK((config.getAmountRegistered() == 17));
-		}
-	}
-
-	GIVEN("a list containing an unknown type name")
-	{
-		THEN("rolls back all removals and returns error")
-		{
-			std::array<std::string_view, 2> names{{"Normal", "Shadow"}};
-			auto result = config.removeTypes(std::span<const std::string_view>{names});
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((result.error().mContext == "Shadow"));
-			// Rollback: Normal should still be present
-			CHECK(config.hasType("Normal"));
-			CHECK((config.getAmountRegistered() == 19));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration renameType")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid old name and new name")
-	{
-		THEN("renames the type successfully")
-		{
-			auto result = config.renameType("Normal", "Typeless");
-			REQUIRE(result.has_value());
-			CHECK(config.hasType("Typeless"));
-			CHECK_FALSE(config.hasType("Normal"));
-
-			// Matchup data should still work via new name
-			auto matchup = config.getMatchup("Typeless", "Typeless");
-			REQUIRE(matchup.has_value());
-			CHECK((matchup.value() == E));
-		}
-	}
-
-	GIVEN("an unknown old name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.renameType("Shadow", "NewShadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-
-	GIVEN("a new name that already exists")
-	{
-		THEN("returns DuplicateType error")
-		{
-			auto result = config.renameType("Normal", "Fire");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::DuplicateType));
-			CHECK((result.error().mContext == "Fire"));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration resetMatchups by name")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid type name")
-	{
-		THEN("clears all offensive and defensive matchups to NOT_DEFINED")
-		{
-			auto result = config.resetMatchups("Normal");
-			REQUIRE(result.has_value());
-
-			us registered = config.getAmountRegistered();
-
-			// Check offensive row is cleared
-			auto row = config.getMatchupRow("Normal");
-			REQUIRE(row.has_value());
-			for (us idx{0}; idx < registered; ++idx)
+			THEN("the appropriate type match is returned")
 			{
-				CHECK((row.value().at(idx) == NOT_DEFINED));
-			}
-
-			// Check defensive column is cleared
-			auto col = config.getDefensiveColumn("Normal");
-			REQUIRE(col.has_value());
-			for (us idx{0}; idx < registered; ++idx)
-			{
-				CHECK((col.value().at(idx) == NOT_DEFINED));
-			}
-
-			// Type should still exist
-			CHECK(config.hasType("Normal"));
-		}
-	}
-
-	GIVEN("an unknown type name")
-	{
-		THEN("returns TypeNotFound error")
-		{
-			auto result = config.resetMatchups("Shadow");
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration resetMatchups by stable id")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a valid stable type id")
-	{
-		THEN("clears all matchups to NOT_DEFINED")
-		{
-			TypeID normalId = toTypeID(BuiltinTypeID::Normal);
-			auto result = config.resetMatchups(normalId);
-			REQUIRE(result.has_value());
-
-			auto row = config.getMatchupRow("Normal");
-			REQUIRE(row.has_value());
-
-			us registered = config.getAmountRegistered();
-			for (us idx{0}; idx < registered; ++idx)
-			{
-				CHECK((row.value().at(idx) == NOT_DEFINED));
+				REQUIRE(result.has_value());
+				CHECK((result.value() == expectedMatchup));
 			}
 		}
 	}
 
-	GIVEN("a nonexistent stable type id")
+	GIVEN("getTypeID")
 	{
-		THEN("returns TypeNotFound error")
+		THEN("unknown IDs are absent")
 		{
-			TypeID invalidId{200};
-			auto result = config.resetMatchups(invalidId);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK(result.error().mContext.empty());
+			CHECK_FALSE(config.getTypeID("Unknown").has_value());
 		}
-	}
-}
 
-SCENARIO("TypeRegistryConfiguration hasType")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a builtin type name")
-	{
-		THEN("hasType by name returns true")
+		THEN("the Type ID is retrieved by valid Type name")
 		{
-			bool found = config.hasType("Fire");
-			CHECK(found);
+			std::optional<TypeID> typeID{config.getTypeID(TYPE_NAME_NONE)};
+
+			REQUIRE(typeID.has_value());
+
+			CHECK((typeID.value() == toTypeID(BuiltinTypeID::None)));
 		}
 	}
 
-	GIVEN("a nonexistent type name")
+	GIVEN("getTypeName")
 	{
-		THEN("hasType by name returns false")
+		THEN("unknown IDs are absent")
 		{
-			bool found = config.hasType("Shadow");
-			CHECK_FALSE(found);
+			CHECK_FALSE(config.getTypeName(TypeID{200}).has_value());
+		}
+
+		THEN("a registered type name is returned by stable ID")
+		{
+			std::optional<std::string_view> typeName{config.getTypeName(toTypeID(BuiltinTypeID::None))};
+
+			REQUIRE(typeName.has_value());
+
+			CHECK((typeName.value() == TYPE_NAME_NONE));
 		}
 	}
 
-	GIVEN("a builtin type id")
+	GIVEN("getRegisteredTypes")
 	{
-		THEN("hasType by id returns true")
+		THEN("the amount of types returned matches the amount that are built-in")
 		{
-			bool found = config.hasType(toTypeID(BuiltinTypeID::Fire));
-			CHECK(found);
+			CHECK((config.getRegisteredTypes().size() == finalTypeUnderlyingValue));
 		}
 	}
 
-	GIVEN("a nonexistent type id")
+	GIVEN("setMatchup")
 	{
-		THEN("hasType by id returns false")
+		WHEN("calling with an invalid attacker name")
 		{
-			TypeID invalidId{200};
-			bool found = config.hasType(invalidId);
-			CHECK_FALSE(found);
-		}
-	}
-}
+			std::expected<void, RegistryErrorInfo> result{config.setMatchup("Unknown", TYPE_NAME_NONE, SE)};
 
-SCENARIO("TypeRegistryConfiguration addType then removeType roundtrip")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a custom type is added")
-	{
-		WHEN("it is subsequently removed")
-		{
-			THEN("the registry count is restored")
+			THEN("an error is returned")
 			{
-				// Remove Stellar to make room
-				auto stellarRemove = config.removeType("Stellar");
-				REQUIRE(stellarRemove.has_value());
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			}
+		}
 
-				TypeDefinition definition{.name = "Cosmic", .offensiveMatchups = {}, .defensiveMatchups = {}};
-				auto addResult = config.addType(definition, UnspecifiedMatchup::Neutral);
-				REQUIRE(addResult.has_value());
-				CHECK((config.getAmountRegistered() == 19));
+		WHEN("calling with an invalid defender name")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.setMatchup(TYPE_NAME_NONE, "Unknown", SE)};
 
-				auto removeResult = config.removeType("Cosmic");
-				REQUIRE(removeResult.has_value());
-				CHECK((config.getAmountRegistered() == 18));
-				CHECK_FALSE(config.hasType("Cosmic"));
+			THEN("an error is returned")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+			}
+		}
+
+		WHEN("calling with valid identifiers")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.setMatchup(TYPE_NAME_FIRE, TYPE_NAME_BUG, NVE)};
+
+			THEN("the appropriate type match is returned")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getMatchup(TYPE_NAME_FIRE, TYPE_NAME_BUG) == NVE));
+			}
+		}
+	}
+
+	GIVEN("setMatchupRow")
+	{
+		WHEN("calling the TypeEffectiveness overload")
+		{
+			WHEN("calling with an a row greater than the capacity of the registry")
+			{
+				std::array<TypeEffectiveness, static_cast<std::size_t>(MAX_TYPES + 1)> matchupRow{};
+
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow(TYPE_NAME_FIRE, matchupRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MatchupMismatch));
+				}
+			}
+
+			WHEN("calling with an invalid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow("Unknown", FIRE_TYPE_MATCHUP)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				}
+			}
+
+			WHEN("calling with a valid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow(TYPE_NAME_NONE, FIRE_TYPE_MATCHUP)};
+
+				THEN("the appropriate type match is returned")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_NONE).has_value());
+					CHECK((config.getMatchupRow(TYPE_NAME_NONE).value() == FIRE_TYPE_MATCHUP));
+				}
+			}
+		}
+
+		WHEN("calling the MatchupPair overload")
+		{
+			std::array<MatchupPair, 3> matchupRow{};
+			matchupRow.at(0) = {.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE};
+			matchupRow.at(1) = {.mTypeName = std::string(TYPE_NAME_WATER), .mValue = NE};
+			matchupRow.at(2) = {.mTypeName = std::string(TYPE_NAME_BUG), .mValue = NVE};
+
+			WHEN("calling with an a row greater than the capacity of the registry")
+			{
+				std::array<MatchupPair, static_cast<std::size_t>(MAX_TYPES + 1)> overflowRow{};
+
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow(TYPE_NAME_FIRE, overflowRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MatchupMismatch));
+				}
+			}
+
+			WHEN("calling with an invalid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow("Unknown", matchupRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				}
+			}
+
+			WHEN("calling with an an invalid row name after some successful lookups")
+			{
+				matchupRow.at(0) = {.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE};
+				matchupRow.at(1) = {.mTypeName = std::string(TYPE_NAME_WATER), .mValue = NVE};
+				matchupRow.at(2) = {.mTypeName = "Unknown", .mValue = NVE};
+
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow(TYPE_NAME_FIRE, matchupRow)};
+
+				THEN("an error is returned and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_BUG).has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getMatchupRow(TYPE_NAME_FIRE).value() == FIRE_TYPE_MATCHUP));
+				}
+			}
+
+			WHEN("calling with a valid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setMatchupRow(TYPE_NAME_BUG, matchupRow)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expected{
+					NOT_DEFINED, E,	 SE,  NE, E,   SE, E,  NVE, NVE, E,
+					NVE,		 SE, NVE, E,  NVE, E,  SE, NVE, NVE, // NOLINT(readability-trailing-comma)
+				};
+
+				THEN("the appropriate type match is returned")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_BUG).has_value());
+					CHECK((config.getMatchupRow(TYPE_NAME_BUG).value() == expected));
+				}
+			}
+		}
+	}
+
+	GIVEN("setDefensiveColumn")
+	{
+		WHEN("calling the TypeEffectiveness overload")
+		{
+			WHEN("calling with an a row greater than the capacity of the registry")
+			{
+				std::array<TypeEffectiveness, static_cast<std::size_t>(MAX_TYPES + 1)> matchupRow{};
+
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn(TYPE_NAME_FIRE, matchupRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MatchupMismatch));
+				}
+			}
+
+			WHEN("calling with an invalid defender name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn("Unknown", FIRE_TYPE_MATCHUP)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				}
+			}
+
+			WHEN("calling with a valid defender name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn(TYPE_NAME_NONE, FIRE_TYPE_MATCHUP)};
+
+				THEN("the appropriate type match is returned")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_NONE).has_value());
+					CHECK((config.getDefensiveColumn(TYPE_NAME_NONE).value() == FIRE_TYPE_MATCHUP));
+				}
+			}
+		}
+
+		WHEN("calling the MatchupPair overload")
+		{
+			std::array<MatchupPair, 3> matchupRow{};
+			matchupRow.at(0) = {.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE};
+			matchupRow.at(1) = {.mTypeName = std::string(TYPE_NAME_WATER), .mValue = NE};
+			matchupRow.at(2) = {.mTypeName = std::string(TYPE_NAME_BUG), .mValue = NVE};
+
+			WHEN("calling with an a row greater than the capacity of the registry")
+			{
+				std::array<MatchupPair, static_cast<std::size_t>(MAX_TYPES + 1)> overflowRow{};
+
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn(TYPE_NAME_FIRE, overflowRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::MatchupMismatch));
+				}
+			}
+
+			WHEN("calling with an invalid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn("Unknown", matchupRow)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				}
+			}
+
+			WHEN("calling with an an invalid row name after some successful lookups")
+			{
+				matchupRow.at(0) = {.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE};
+				matchupRow.at(1) = {.mTypeName = std::string(TYPE_NAME_WATER), .mValue = NVE};
+				matchupRow.at(2) = {.mTypeName = "Unknown", .mValue = NVE};
+
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn(TYPE_NAME_FIRE, matchupRow)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expected{
+					NOT_DEFINED, E, NVE, SE, E, NVE, NVE, E, E, SE, E, E, NVE, SE, E, E, E, NVE, NVE, // NOLINT(readability-trailing-comma)
+				};
+
+				THEN("an error is returned and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_BUG).has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getDefensiveColumn(TYPE_NAME_FIRE).value() == expected));
+				}
+			}
+
+			WHEN("calling with a valid attacker name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.setDefensiveColumn(TYPE_NAME_BUG, matchupRow)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expected{
+					NOT_DEFINED, E, SE, NE, E, NVE, E, NVE, E, NVE, SE, E, NVE, SE, E, E, E, E, E, // NOLINT(readability-trailing-comma)
+				};
+
+				THEN("the appropriate type match is returned")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_BUG).has_value());
+					CHECK((config.getDefensiveColumn(TYPE_NAME_BUG).value() == expected));
+				}
+			}
+		}
+	}
+
+	GIVEN("hasType")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown type name has no entry")
+			{
+				CHECK_FALSE(config.hasType("Unknown"));
+			}
+
+			THEN("a known type name has an entry")
+			{
+				CHECK(config.hasType(TYPE_NAME_NONE));
+			}
+		}
+
+		WHEN("calling the TypeID overload")
+		{
+			THEN("an unknown type ID has no entry")
+			{
+				CHECK_FALSE(config.hasType(TypeID{200}));
+			}
+
+			THEN("a known type ID has an entry")
+			{
+				CHECK(config.hasType(NO_TYPE_ID));
+			}
+		}
+	}
+
+	GIVEN("addType")
+	{
+		WHEN("trying to add an type past the capacity")
+		{
+			us newTypeCount{finalTypeUnderlyingValue};
+
+			for (us i{0}; i < MAX_TYPES - finalTypeUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				TypeDefinition definition{.mName = name};
+				std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition)};
+
+				REQUIRE(result.has_value());
+
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == newTypeCount++));
+			}
+
+			std::string name{std::format("String_{:04}", MAX_TYPES + 1)};
+
+			TypeDefinition definition{.mName = name};
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == MAX_TYPES));
+			}
+		}
+
+		WHEN("an type whose name is already in use is added")
+		{
+			TypeDefinition definition{.mName = std::string(TYPE_NAME_BUG)};
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition)};
+
+			THEN("registration reports a duplicate type and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateType));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique type definition is added where default behavior is Neutral")
+		{
+			TypeDefinition definition{.mName = "TestTypeName"};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("it receives the first custom stable ID and the type matchups are defaulted to Effective (1x)")
+			{
+				REQUIRE(result.has_value());
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalTypeUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+
+				const TypeMeta *metadata{config.getTypeMetadata(assignedID)};
+
+				REQUIRE((metadata != nullptr));
+				REQUIRE(config.getMatchupRow("TestTypeName").has_value());
+				CHECK((metadata->mName == "TestTypeName"));
+				CHECK((std::ranges::all_of(config.getMatchupRow("TestTypeName").value(),
+										   [](TypeEffectiveness matchup) { return matchup == E; })));
+			}
+		}
+
+		WHEN("a unique type definition is added where default behavior is NotDefined")
+		{
+			TypeDefinition definition{.mName = "TestTypeName"};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::NotDefined)};
+
+			THEN("it receives the first custom stable ID and the type matchups are defaulted to NotDefined (0x)")
+			{
+				REQUIRE(result.has_value());
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalTypeUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+
+				const TypeMeta *metadata{config.getTypeMetadata(assignedID)};
+
+				REQUIRE((metadata != nullptr));
+				REQUIRE(config.getMatchupRow("TestTypeName").has_value());
+				CHECK((metadata->mName == "TestTypeName"));
+				CHECK((std::ranges::all_of(config.getMatchupRow("TestTypeName").value(),
+										   [](TypeEffectiveness matchup) { return matchup == NOT_DEFINED; })));
+			}
+		}
+
+		WHEN("a unique type definition is added where the offensive matchup is the self-matchup")
+		{
+			std::vector<MatchupPair> matchups{{.mTypeName = "TestTypeName", .mValue = SE}};
+
+			TypeDefinition definition{.mName = "TestTypeName", .mOffensiveMatchups = matchups};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("it receives the first custom stable ID and the type matchups are defaulted to Effective (1x)")
+			{
+				REQUIRE(result.has_value());
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalTypeUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+
+				const TypeMeta *metadata{config.getTypeMetadata(assignedID)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expectedMatchups{E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, SE};
+				std::ranges::for_each(expectedMatchups, [](TypeEffectiveness &matchup) {
+					if (matchup == NOT_DEFINED)
+					{
+						matchup = E;
+					}
+				});
+
+				REQUIRE((metadata != nullptr));
+				REQUIRE(config.getMatchupRow("TestTypeName").has_value());
+				CHECK((metadata->mName == "TestTypeName"));
+				CHECK((config.getMatchupRow("TestTypeName").value() == expectedMatchups));
+			}
+		}
+
+		WHEN("a unique type definition is added where the offensive matchup points to a non-existent type")
+		{
+			std::vector<MatchupPair> matchups{{.mTypeName = "Unknown", .mValue = SE}};
+
+			TypeDefinition definition{.mName = "TestTypeName", .mOffensiveMatchups = matchups};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("an error will be returned and the type will not be added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique type definition is added where the defensive matchup points to a non-existent type")
+		{
+			std::vector<MatchupPair> matchups{{.mTypeName = "Unknown", .mValue = SE}};
+
+			TypeDefinition definition{.mName = "TestTypeName", .mDefensiveMatchups = matchups};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("an error will be returned and the type will not be added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique type definition is added where the offensive matchup and defensive matchup point to the same type")
+		{
+			std::vector<MatchupPair> matchups{{.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE}};
+
+			TypeDefinition definition{.mName = "TestTypeName", .mOffensiveMatchups = matchups, .mDefensiveMatchups = matchups};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("it receives the first custom stable ID and the type matchups are defaulted to Effective (1x)")
+			{
+				REQUIRE(result.has_value());
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalTypeUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+
+				const TypeMeta *metadata{config.getTypeMetadata(assignedID)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expectedMatchupRow{E, E, SE, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
+				std::ranges::for_each(expectedMatchupRow, [](TypeEffectiveness &matchup) {
+					if (matchup == NOT_DEFINED)
+					{
+						matchup = E;
+					}
+				});
+
+				std::array<TypeEffectiveness, MAX_TYPES> expectedDefensiveColumn{
+					E, E, SE, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, // NOLINT(readability-trailing-comma)
+				};
+
+				REQUIRE((metadata != nullptr));
+				REQUIRE(config.getMatchupRow("TestTypeName").has_value());
+				REQUIRE(config.getDefensiveColumn("TestTypeName").has_value());
+				CHECK((metadata->mName == "TestTypeName"));
+				CHECK((config.getMatchupRow("TestTypeName").value() == expectedMatchupRow));
+				CHECK((config.getDefensiveColumn("TestTypeName").value() == expectedDefensiveColumn));
+			}
+		}
+
+		WHEN("a unique type definition is added where the offensive matchup and defensive matchup point to different types")
+		{
+			std::vector<MatchupPair> offensiveMatchups{{.mTypeName = std::string(TYPE_NAME_FIRE), .mValue = SE}};
+			std::vector<MatchupPair> defensiveMatchups{{.mTypeName = std::string(TYPE_NAME_WATER), .mValue = SE}};
+
+			TypeDefinition definition{
+				.mName = "TestTypeName",
+				.mOffensiveMatchups = offensiveMatchups,
+				.mDefensiveMatchups = defensiveMatchups,
+			};
+
+			std::expected<TypeID, RegistryErrorInfo> result{config.addType(definition, UnspecifiedMatchup::Neutral)};
+
+			THEN("it receives the first custom stable ID and the type matchups are defaulted to Effective (1x)")
+			{
+				REQUIRE(result.has_value());
+				TypeID assignedID{result.value()};
+				CHECK((assignedID.getValue() == finalTypeUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+
+				const TypeMeta *metadata{config.getTypeMetadata(assignedID)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expectedMatchupRow{E, E, SE, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
+				std::ranges::for_each(expectedMatchupRow, [](TypeEffectiveness &matchup) {
+					if (matchup == NOT_DEFINED)
+					{
+						matchup = E;
+					}
+				});
+
+				std::array<TypeEffectiveness, MAX_TYPES> expectedDefensiveColumn{
+					E, E, E, SE, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, // NOLINT(readability-trailing-comma)
+				};
+
+				REQUIRE((metadata != nullptr));
+				REQUIRE(config.getMatchupRow("TestTypeName").has_value());
+				REQUIRE(config.getDefensiveColumn("TestTypeName").has_value());
+				CHECK((metadata->mName == "TestTypeName"));
+				CHECK((config.getMatchupRow("TestTypeName").value() == expectedMatchupRow));
+				CHECK((config.getDefensiveColumn("TestTypeName").value() == expectedDefensiveColumn));
+			}
+		}
+	}
+
+	GIVEN("addTypes")
+	{
+		WHEN("trying to add no types")
+		{
+			std::array<TypeDefinition, 0> typeDefinitions{};
+			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeDefinitions)};
+
+			THEN("the registry reports no error and no types are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("trying to add an type past the capacity")
+		{
+			std::vector<TypeDefinition> typeMetas;
+
+			for (us i{0}; i < MAX_TYPES - finalTypeUnderlyingValue; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				typeMetas.push_back({.mName = name});
+			}
+
+			std::string name{std::format("String_{:04}", MAX_TYPES + 1)};
+
+			typeMetas.push_back({.mName = name});
+			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
+
+			THEN("registration reports a max capacity and nothing is added")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a type whose name is already in use is added")
+		{
+			std::vector<TypeDefinition> typeMetas{};
+
+			for (us i{0}; i < 20; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				typeMetas.push_back({.mName = name});
+			}
+
+			typeMetas.push_back({.mName = std::string(TYPE_NAME_BUG)});
+			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
+
+			THEN("registration reports a duplicate type and the registry is rollback to the checkpoint before the erroneous addition")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateType));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a type whose name is already was added in the batch beforehand is attempted to be added again")
+		{
+			std::vector<TypeDefinition> typeMetas{};
+
+			for (us i{0}; i < 20; ++i)
+			{
+				std::string name{std::format("String_{:04}", i)};
+				typeMetas.push_back({.mName = name});
+			}
+
+			std::string name{std::format("String_{:04}", 0)};
+			typeMetas.push_back({.mName = name});
+			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
+
+			THEN("registration reports a duplicate type and the registry is rollback to the checkpoint before the erroneous addition")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateType));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("a unique type definition is added")
+		{
+			std::vector<TypeDefinition> typeMetas{{.mName = "TestTypeName"}};
+
+			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
+
+			THEN("the registry reports no error and all the type definitions are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue + 1));
+			}
+		}
+	}
+
+	GIVEN("renameType")
+	{
+		WHEN("calling with an invalid type name")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameType("ThisIsInvalid", "NewName")};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::TypeNotFound));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("trying to rename to a name already in the registry")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameType(TYPE_NAME_NONE, TYPE_NAME_BUG)};
+
+			THEN("the registry reports an error and there is no update to the registry")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error().mKind == RegistryError::DuplicateType));
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+			}
+		}
+
+		WHEN("updating an existing type definition")
+		{
+			std::expected<void, RegistryErrorInfo> result{config.renameType(TYPE_NAME_NONE, "NewName")};
+
+			THEN("the registry reports no error and the name is appropriately updated")
+			{
+				REQUIRE(result.has_value());
+				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				CHECK((config.getTypeMetadata(toTypeID(BuiltinTypeID::None))->mName == "NewName"));
+			}
+		}
+	}
+
+	GIVEN("removeType")
+	{
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an unknown type name")
+			{
+				std::expected<TypeID, RegistryErrorInfo> result{config.removeType("Unknown")};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known type name")
+			{
+				std::expected<TypeID, RegistryErrorInfo> result{config.removeType(TYPE_NAME_NONE)};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toTypeID(BuiltinTypeID::None)));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue - 1));
+				}
+			}
+		}
+
+		WHEN("calling the TypeID overload")
+		{
+			WHEN("calling with an unknown type ID")
+			{
+				std::expected<TypeID, RegistryErrorInfo> result{config.removeType(TypeID{200})};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					CHECK_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known type ID")
+			{
+				std::expected<TypeID, RegistryErrorInfo> result{config.removeType(toTypeID(BuiltinTypeID::None))};
+
+				THEN("the result is a success and the registry is updated")
+				{
+					CHECK(result.has_value());
+					CHECK((result.value() == toTypeID(BuiltinTypeID::None)));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue - 1));
+				}
+			}
+		}
+	}
+
+	GIVEN("resetMatchups")
+	{
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an unknown type name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.resetMatchups("Unknown")};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known type name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.resetMatchups(TYPE_NAME_FIRE)};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expected{};
+				expected.fill(NOT_DEFINED);
+
+				THEN("the rows and column for the type are set to NOT_DEFINED")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_FIRE).has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_FIRE).has_value());
+					CHECK((config.getMatchupRow(TYPE_NAME_FIRE).value() == expected));
+					CHECK((config.getDefensiveColumn(TYPE_NAME_FIRE).value() == expected));
+				}
+			}
+		}
+
+		WHEN("calling the TypeID overload")
+		{
+			WHEN("calling with an unknown type ID")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.resetMatchups(TypeID{200})};
+
+				THEN("the result is an error and the registry is not updated")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("calling with a known type ID")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.resetMatchups(toTypeID(BuiltinTypeID::Fire))};
+
+				std::array<TypeEffectiveness, MAX_TYPES> expected{};
+				expected.fill(NOT_DEFINED);
+
+				THEN("the rows and column for the type are set to NOT_DEFINED")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_FIRE).has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_FIRE).has_value());
+					CHECK((config.getMatchupRow(TYPE_NAME_FIRE).value() == expected));
+					CHECK((config.getDefensiveColumn(TYPE_NAME_FIRE).value() == expected));
+				}
 			}
 		}
 	}
 }
 
-SCENARIO("TypeRegistryConfiguration stable identifier exhaustion")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("the custom identifier space is consumed through repeated registration")
-	{
-		auto stellarRemove = config.removeType("Stellar");
-		REQUIRE(stellarRemove.has_value());
-
-		for (unsigned int identifierValue{19}; identifierValue < NO_TYPE_ID.getValue(); ++identifierValue)
-		{
-			TypeDefinition definition{.name = "Transient", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			auto addResult = config.addType(definition, UnspecifiedMatchup::Neutral);
-			REQUIRE(addResult.has_value());
-			CHECK((addResult->getValue() == identifierValue));
-
-			auto removeResult = config.removeType(addResult.value());
-			REQUIRE(removeResult.has_value());
-		}
-
-		// THEN("the reserved unassigned identifier is never issued")
-		// {
-		// 	TypeDefinition definition{.name = "Overflow", .offensiveMatchups = {}, .defensiveMatchups = {}};
-		// 	auto result = config.addType(definition, UnspecifiedMatchup::Neutral);
-
-		// 	REQUIRE_FALSE(result.has_value());
-		// 	CHECK((result.error().mKind == RegistryError::MaxCapacity));
-		// 	CHECK_FALSE(config.hasType("Overflow"));
-		// }
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration RegistryErrorInfo fields")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("an error from a failed operation")
-	{
-		THEN("error info contains the correct kind and context")
-		{
-			auto result = config.getMatchup("Shadow", "Normal");
-			REQUIRE_FALSE(result.has_value());
-
-			RegistryErrorInfo errorInfo = result.error();
-			CHECK((errorInfo.mKind == RegistryError::TypeNotFound));
-			CHECK((errorInfo.mContext == "Shadow"));
-			CHECK((errorInfo.mErrorName == "TypeNotFound"));
-		}
-	}
-
-	GIVEN("a MaxCapacity error kind")
-	{
-		THEN("errorKindToString returns MaxCapacity")
-		{
-			RegistryErrorInfo capError{RegistryError::MaxCapacity, "cap_context"};
-			CHECK((capError.mErrorName == "MaxCapacity"));
-		}
-	}
-
-	GIVEN("a DuplicateType error kind")
-	{
-		THEN("errorKindToString returns DuplicateType")
-		{
-			RegistryErrorInfo dupError{RegistryError::DuplicateType, "dup_context"};
-			CHECK((dupError.mErrorName == "DuplicateType"));
-		}
-	}
-
-	GIVEN("a MatchupMismatch error kind")
-	{
-		THEN("errorKindToString returns MatchupMismatch")
-		{
-			RegistryErrorInfo mmError{RegistryError::MatchupMismatch, "mm_context"};
-			CHECK((mmError.mErrorName == "MatchupMismatch"));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration removeType by enum not found")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a type that has been removed by name")
-	{
-		THEN("removing it again by enum returns TypeNotFound")
-		{
-			auto firstRemove = config.removeType("Normal");
-			REQUIRE(firstRemove.has_value());
-
-			auto secondRemove = config.removeType(BuiltinTypeID::Normal);
-			REQUIRE_FALSE(secondRemove.has_value());
-			CHECK((secondRemove.error().mKind == RegistryError::TypeNotFound));
-		}
-	}
-}
-
-SCENARIO("TypeRegistryConfiguration addTypes with bad matchup reference")
-{
-	ensureLoggerInitialized();
-	TypeRegistryConfiguration config{};
-
-	GIVEN("a batch where one definition has an invalid offensive matchup")
-	{
-		THEN("the entire batch is rolled back")
-		{
-			// Remove two types to make room for the batch
-			auto removeResult1 = config.removeType("Stellar");
-			REQUIRE(removeResult1.has_value());
-			auto removeResult2 = config.removeType("Fairy");
-			REQUIRE(removeResult2.has_value());
-
-			us countBefore = config.getAmountRegistered();
-
-			std::array<MatchupPair, 1> badOffensive{{{.typeName = "NonExistent", .value = SE}}};
-
-			TypeDefinition goodDef{.name = "Good", .offensiveMatchups = {}, .defensiveMatchups = {}};
-			TypeDefinition badDef{.name = "Bad", .offensiveMatchups = badOffensive, .defensiveMatchups = {}};
-			std::array<TypeDefinition, 2> defs{goodDef, badDef};
-
-			auto result = config.addTypes(std::span<const TypeDefinition>{defs}, UnspecifiedMatchup::Neutral);
-			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error().mKind == RegistryError::TypeNotFound));
-			CHECK((config.getAmountRegistered() == countBefore));
-			CHECK_FALSE(config.hasType("Good"));
-			CHECK_FALSE(config.hasType("Bad"));
-		}
-	}
-}
-
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.6.4
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -30,6 +30,13 @@ namespace PocketCore::Registry::Status
 	using PocketCore::Interaction::InteractionAction;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Status::BuiltinStatusID;
+	using PocketCore::Status::STATUS_NAME_BURN;
+	using PocketCore::Status::STATUS_NAME_FREEZE;
+	using PocketCore::Status::STATUS_NAME_NONE;
+	using PocketCore::Status::STATUS_NAME_PARALYSIS;
+	using PocketCore::Status::STATUS_NAME_POISON;
+	using PocketCore::Status::STATUS_NAME_SLEEP;
+	using PocketCore::Status::STATUS_NAME_TOXIC;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Status::toStatusID;
@@ -39,9 +46,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.6.4
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
@@ -50,55 +57,64 @@ namespace PocketCore::Registry::Status
 			using Base = FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>;
 
 		public:
+			/*! @brief Compares two StatusRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const StatusRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID.
 				@since 0.6.4
-				@version 0.12.16
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
 			{
 				addBuiltin({
-					.mName = PocketCore::Status::STATUS_NAME_NONE,
+					.mName = std::string(STATUS_NAME_NONE),
 					.mStatusID = toStatusID(BuiltinStatusID::None),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_PARALYSIS),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
-					.mName = PocketCore::Status::STATUS_NAME_PARALYSIS,
 					.mStatusID = toStatusID(BuiltinStatusID::Paralysis),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_BURN),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
-					.mName = PocketCore::Status::STATUS_NAME_BURN,
 					.mStatusID = toStatusID(BuiltinStatusID::Burn),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_SLEEP),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
-					.mName = PocketCore::Status::STATUS_NAME_SLEEP,
 					.mStatusID = toStatusID(BuiltinStatusID::Sleep),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_FREEZE),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::RemoveCurrent},
 					   {.mExistingID = toStatusID(BuiltinStatusID::Sleep), .mAction = InteractionAction::RemoveCurrent},
 					   {.mExistingID = toStatusID(BuiltinStatusID::Paralysis), .mAction = InteractionAction::RemoveCurrent},
 					},
-					.mName = PocketCore::Status::STATUS_NAME_FREEZE,
 					.mStatusID = toStatusID(BuiltinStatusID::Freeze),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_POISON),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
-					.mName = PocketCore::Status::STATUS_NAME_POISON,
 					.mStatusID = toStatusID(BuiltinStatusID::Poison),
 				});
 				addBuiltin({
+					.mName = std::string(STATUS_NAME_TOXIC),
 					.mStatusInteractions
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming},
 					   {.mExistingID = toStatusID(BuiltinStatusID::Poison), .mAction = InteractionAction::ReplaceCurrent},},
-					.mName = PocketCore::Status::STATUS_NAME_TOXIC,
 					.mStatusID = toStatusID(BuiltinStatusID::Toxic),
 				});
 			}

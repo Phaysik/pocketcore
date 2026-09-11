@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.5.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -29,21 +29,29 @@ namespace PocketCore::Registry
 		@brief Stores named metadata with stable IDs in fixed-capacity contiguous storage.
 		@details Centralizes storage, counters, linear lookup, and mutation operations shared by registries such as abilities and items.
 	   Domain registries remain responsible for constructing built-in metadata and exposing domain-specific API names.
-		@tparam Metadata The metadata record type, including an mName member convertible to std::string_view.
+		@tparam Metadata The metadata record type, including an mName member of type std::string.
 		@tparam StableID The strongly typed stable identifier stored by each metadata record.
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.5.0
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
-			  std::string_view Metadata::*NameMember = &Metadata::mName>
+			  std::string Metadata::*NameMember = &Metadata::mName>
 	class FixedMetadataRegistry
 	{
 		public:
+			/*! @brief Compares two FixedMetadataRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const FixedMetadataRegistry &other) const = default;
+
 			/*! @class Checkpoint Registry/fixedMetadataRegistry.h
 				@brief Stores an opaque registry state that can be restored by @ref restoreCheckpoint.
 				@details Callers can preserve a valid state for atomic rollback without directly reading or mutating the stable-ID counter.
@@ -409,19 +417,31 @@ namespace PocketCore::Registry
 				@brief Stores one searchable stable-ID to entry-index mapping.
 				@details `mIDIndex` stores these entries sorted by stable ID, enabling binary-search lookup from stable ID to
 				internal storage index without scanning all registered metadata.
-				@date 08/03/2026
+				@date 09/20/2026
 				@since 0.8.7
-				@version 0.9.1
+				@version 0.12.20
 				@author Matthew Moore
 			*/
 			struct IDIndexEntry
 			{
 				public:
+					/*! @brief Compares two IDIndexEntry instances for equality.
+						@param[in] other The other registry to compare with.
+						@return true if the registries are equal, false otherwise.
+						@since 0.12.20
+						@version 0.12.20
+					*/
+					ATTR_NODISCARD constexpr bool operator==(const IDIndexEntry &other) const noexcept = default;
+
+					// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 					/*! @brief Stable identifier used as the binary-search key. */
 					StableID stableID{};
 
 					/*! @brief Internal index into @ref mEntries for the keyed metadata record. */
 					us entryIndex{};
+
+					// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 			};
 
 			/*! @brief Performs linear name lookup over registered entries.

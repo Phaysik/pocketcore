@@ -1,8 +1,8 @@
 /*! @file multiplierRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined multipliers.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.8.1
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -27,6 +27,17 @@ namespace PocketCore::Registry::Multiplier
 	using PocketCore::Configuration::MAX_MULTIPLIERS;
 	using PocketCore::Core::us;
 	using PocketCore::Multiplier::BuiltinMultiplierID;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_ABILITY;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_BURN;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_CRITICAL;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_ITEM;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_NONE;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_POPULATION_BOMB;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_RANDOMIZATION;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_STAB;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_TARGETS;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_TYPE_EFFECTIVENESS;
+	using PocketCore::Multiplier::MULTIPLIER_NAME_WEATHER;
 	using PocketCore::Multiplier::MultiplierApplicationPolicy;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
@@ -39,9 +50,9 @@ namespace PocketCore::Registry::Multiplier
 	   may append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MULTIPLIERS.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.8.1
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class MultiplierRegistry : private FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
@@ -50,60 +61,69 @@ namespace PocketCore::Registry::Multiplier
 			using Base = FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>;
 
 		public:
+			/*! @brief Compares two MultiplierRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const MultiplierRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID.
 				@since 0.8.1
-				@version 0.11.6
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr MultiplierRegistry() : Base{toMultiplierID(BuiltinMultiplierID::FinalMultiplier).getValue()}
 			{
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_NONE,
+					.mName = std::string(MULTIPLIER_NAME_NONE),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::None),
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_ABILITY,
+					.mName = std::string(MULTIPLIER_NAME_ABILITY),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Ability),
 					.mApplicationPolicy = MultiplierApplicationPolicy::Other,
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_ITEM,
+					.mName = std::string(MULTIPLIER_NAME_ITEM),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Item),
 					.mApplicationPolicy = MultiplierApplicationPolicy::Other,
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TARGETS,
+					.mName = std::string(MULTIPLIER_NAME_TARGETS),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Targets),
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_POPULATION_BOMB,
+					.mName = std::string(MULTIPLIER_NAME_POPULATION_BOMB),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::PopulationBomb),
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_WEATHER,
+					.mName = std::string(MULTIPLIER_NAME_WEATHER),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Weather),
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_CRITICAL,
+					.mName = std::string(MULTIPLIER_NAME_CRITICAL),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Critical),
 					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_RANDOMIZATION,
+					.mName = std::string(MULTIPLIER_NAME_RANDOMIZATION),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Randomization),
 					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_STAB,
+					.mName = std::string(MULTIPLIER_NAME_STAB),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Stab),
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_TYPE_EFFECTIVENESS,
+					.mName = std::string(MULTIPLIER_NAME_TYPE_EFFECTIVENESS),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::TypeEffectiveness),
 					.mApplicationPolicy = MultiplierApplicationPolicy::Floor,
 				});
 				addBuiltin({
-					.mName = PocketCore::Multiplier::MULTIPLIER_NAME_BURN,
+					.mName = std::string(MULTIPLIER_NAME_BURN),
 					.mMultiplierID = toMultiplierID(BuiltinMultiplierID::Burn),
 				});
 			}

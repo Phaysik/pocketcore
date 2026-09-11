@@ -1,15 +1,15 @@
 /*! @file effectMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.10.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_EFFECTMETA_H
 #define INCLUDE_EFFECT_EFFECTMETA_H
 
-#include <string_view>
+#include <string>
 
 #include "Battle/battleState.h"
 #include "Effect/builtInEffectID.h"
@@ -31,9 +31,9 @@ namespace PocketCore::Effect
 		@brief Stores one effect's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.10.0
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct EffectMeta
@@ -50,8 +50,8 @@ namespace PocketCore::Effect
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
-			/*! @brief The case-sensitive display name stored as a non-owning view. */
-			std::string_view mName{};
+			/*! @brief The case-sensitive display name stored. */
+			std::string mName{};
 
 			/*! @brief The function to apply this effect. */
 			EffectFunction mApply{};

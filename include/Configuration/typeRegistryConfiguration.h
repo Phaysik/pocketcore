@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.2.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -68,16 +68,16 @@ namespace PocketCore::Configuration
 		@details Used with the name-keyed overloads of @ref Configuration::addType and @ref Configuration::setMatchupRow to provide
 	   order-independent matchup specification.
 		@since 0.1.0
-		@version 0.5.1
+		@version 0.12.20
 	*/
 	struct MatchupPair
 	{
 		public:
 			/*! @brief The display name of the target type. */
-			std::string_view typeName{};
+			std::string mTypeName{};
 
 			/*! @brief The effectiveness multiplier for this matchup. */
-			TypeEffectiveness value;
+			TypeEffectiveness mValue;
 	};
 
 	/*! @struct TypeDefinition Configuration/typeRegistryConfiguration.h
@@ -85,19 +85,19 @@ namespace PocketCore::Configuration
 		@details Groups the type's display name with its offensive and defensive matchup pairs so that
 		@ref Configuration::addTypes can accept a single span of definitions instead of three parallel spans.
 		@since 0.1.0
-		@version 0.5.1
+		@version 0.12.20
 	*/
 	struct TypeDefinition
 	{
 		public:
 			/*! @brief The display name for the new type. */
-			std::string_view name{};
+			std::string mName{};
 
 			/*! @brief Name-keyed pairs describing how the new type attacks each existing type and itself. */
-			std::span<const MatchupPair> offensiveMatchups{};
+			std::span<const MatchupPair> mOffensiveMatchups{};
 
 			/*! @brief Name-keyed pairs describing how each existing type attacks the new type. */
-			std::span<const MatchupPair> defensiveMatchups{};
+			std::span<const MatchupPair> mDefensiveMatchups{};
 	};
 
 	// MARK: TypeRegistryConfiguration
@@ -107,9 +107,9 @@ namespace PocketCore::Configuration
 		@details Provides a high-level API for adding, removing, renaming, and querying types and their matchup relationships. All mutation
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryErrorInfo. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.1.0
-		@version 0.12.19
+		@version 0.12.20
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -140,6 +140,18 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD constexpr const TypeRegistry &getRuntimeRegistry() const noexcept
 			{
 				return getRegistry();
+			}
+
+			/*! @brief Looks up complete metadata by stable type ID.
+				@param[in] typeID The built-in or custom stable identifier.
+				@return A non-owning pointer to metadata if registered, or nullptr otherwise. The pointer remains valid until replacement or
+			   configuration destruction.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr const TypeMeta *getTypeMetadata(const TypeID typeID) const
+			{
+				return getMetadata(typeID);
 			}
 
 			/*! @brief Returns the effectiveness of one type attacking another, looked up by display name.
@@ -247,7 +259,7 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the attacker or any referenced type is not
 			   found, or void on success.
 				@since 0.1.0
-				@version 0.12.18
+				@version 0.12.20
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMatchupRow(const std::string_view &attackerName,
 																				const std::span<const MatchupPair> &newRow);
@@ -275,110 +287,12 @@ namespace PocketCore::Configuration
 				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the defender or any referenced type is not
 			   found, or void on success.
 				@since 0.1.0
-				@version 0.12.18
+				@version 0.12.20
 			*/
 			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setDefensiveColumn(const std::string_view &defenderName,
 																					 const std::span<const MatchupPair> &newCol);
 
 			// MARK: Member Functions
-
-			/*! @brief Adds a new custom type using name-keyed matchup pairs.
-				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry to determine its array index.
-			   This allows the caller to specify matchups in any order without knowing the internal registration sequence. The @p
-			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::NotDefined
-			   fails the call,
-			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Type::TypeEffectiveness::E, and
-			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED.
-				@param[in] definition A @ref TypeDefinition struct containing the display name and matchup pair spans for the new type.
-				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
-				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
-				@since 0.1.0
-				@version 0.12.19
-			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition,
-																			const UnspecifiedMatchup defaultBehavior
-																			= UnspecifiedMatchup::NotDefined);
-
-			/*! @brief Adds multiple new custom types using self-contained name-keyed definitions.
-				@details Registers each @ref TypeDefinition sequentially by delegating to the name-keyed @ref addType overload.
-			   If any registration fails the entire batch is rolled back.
-				@param[in] definitions A span of @ref TypeDefinition structs, each containing a name and matchup pair spans.
-				@param[in] defaultBehavior Controls how unspecified matchups are handled for every definition in the batch.
-				@return std::expected<void, @ref RegistryErrorInfo> containing the error on failure, or void on success.
-				@since 0.1.0
-				@version 0.12.18
-			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addTypes(const std::span<const TypeDefinition> &definitions,
-																		   const UnspecifiedMatchup defaultBehavior
-																		   = UnspecifiedMatchup::NotDefined);
-
-			/*! @brief Removes a type from the registry by name.
-				@param[in] typeName The display name of the type to remove.
-				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
-				@since 0.1.0
-				@version 0.9.8
-			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const std::string_view &typeName);
-
-			/*! @brief Removes a type from the registry by its enum value.
-				@param[in] type The built-in @ref PocketCore::Type::Type enum value to remove.
-				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
-				@since 0.1.0
-				@version 0.12.17
-			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const PocketCore::Type::BuiltinTypeID type);
-
-			/*! @brief Removes a type from the registry by its stable type ID.
-				@details Useful for removing custom types using the ID returned by @ref addType.
-				@param[in] typeID The stable type ID of the type to remove.
-				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
-				@since 0.1.0
-				@version 0.12.5
-			*/
-			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const TypeID typeID);
-			/*! @brief Removes multiple types from the registry by name with atomic rollback.
-				@details Resolves and removes each named type sequentially. If any removal fails, the entire registry is restored
-			   to its state before the batch began, guaranteeing all-or-nothing semantics.
-				@param[in] typeNames A span of display names identifying the types to remove.
-				@return std::expected<void, @ref RegistryErrorInfo> containing the error on failure, or void on success.
-				@since 0.1.0
-				@version 0.12.5
-			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> removeTypes(const std::span<const std::string_view> &typeNames);
-			/*! @brief Renames an existing type in the registry.
-				@details Looks up @p oldName, checks that @p newName is not already taken, and overwrites the entry's display name.
-			   The stable type ID, array position, and all matchup data remain unchanged.
-				@param[in] oldName The current display name of the type to rename.
-				@param[in] newName The new display name to assign.
-				@return std::expected<void, @ref RegistryErrorInfo> containing the error if @p oldName is not found or @p newName is a
-			   duplicate, or void on success.
-				@since 0.1.0
-				@version 0.12.19
-			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameType(const std::string_view &oldName,
-																			 const std::string_view &newName);
-
-			/*! @brief Resets all matchup data for a type identified by display name.
-				@details Clears the type's entire offensive row and defensive column to @ref
-			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
-			   and array position are preserved.
-				@param[in] typeName The display name of the type whose matchups will be cleared.
-				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
-				@since 0.1.0
-				@version 0.12.5
-			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(const std::string_view &typeName);
-
-			/*! @brief Resets all matchup data for a type identified by its stable type ID.
-				@details Clears the type's entire offensive row and defensive column to @ref
-			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
-			   and array position are preserved.
-				@param[in] typeID The stable type ID of the type whose matchups will be cleared.
-				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
-				@since 0.1.0
-				@version 0.12.5
-			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(const TypeID typeID);
 
 			/*! @brief Checks whether a type with the given name is registered.
 				@param[in] name The display name to check.
@@ -401,6 +315,88 @@ namespace PocketCore::Configuration
 			{
 				return hasEntry(typeID);
 			}
+
+			/*! @brief Adds a new custom type using name-keyed matchup pairs.
+				@details Resolves each @ref MatchupPair by looking up the referenced type name in the registry to determine its array index.
+			   This allows the caller to specify matchups in any order without knowing the internal registration sequence. The @p
+			   defaultBehavior parameter controls what happens to matchups not explicitly mentioned: @ref UnspecifiedMatchup::NotDefined
+			   fails the call,
+			   @ref UnspecifiedMatchup::Neutral fills with @ref PocketCore::Type::TypeEffectiveness::E, and
+			   @ref UnspecifiedMatchup::NotDefined fills with @ref PocketCore::Type::TypeEffectiveness::NOT_DEFINED.
+				@param[in] definition A @ref TypeDefinition struct containing the display name and matchup pair spans for the new type.
+				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
+				@return The stable type ID assigned to the new type on success, or @ref RegistryErrorInfo on failure.
+				@since 0.1.0
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> addType(const TypeDefinition &definition,
+																			const UnspecifiedMatchup defaultBehavior
+																			= UnspecifiedMatchup::NotDefined);
+
+			/*! @brief Adds multiple new custom types using self-contained name-keyed definitions.
+				@details Registers each @ref TypeDefinition sequentially by delegating to the name-keyed @ref addType overload.
+			   If any registration fails the entire batch is rolled back.
+				@param[in] definitions A span of @ref TypeDefinition structs, each containing a name and matchup pair spans.
+				@param[in] defaultBehavior Controls how unspecified matchups are handled for every definition in the batch.
+				@return std::expected<void, @ref RegistryErrorInfo> containing the error on failure, or void on success.
+				@since 0.1.0
+				@version 0.12.18
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addTypes(const std::span<const TypeDefinition> &definitions,
+																		   const UnspecifiedMatchup defaultBehavior
+																		   = UnspecifiedMatchup::NotDefined);
+
+			/*! @brief Renames an existing type in the registry.
+				@details Looks up @p oldName, checks that @p newName is not already taken, and overwrites the entry's display name.
+			   The stable type ID, array position, and all matchup data remain unchanged.
+				@param[in] oldName The current display name of the type to rename.
+				@param[in] newName The new display name to assign.
+				@return std::expected<void, @ref RegistryErrorInfo> containing the error if @p oldName is not found or @p newName is a
+			   duplicate, or void on success.
+				@since 0.1.0
+				@version 0.12.19
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameType(const std::string_view &oldName,
+																			 const std::string_view &newName);
+
+			/*! @brief Removes a type from the registry by name.
+				@param[in] typeName The display name of the type to remove.
+				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
+				@since 0.1.0
+				@version 0.9.8
+			*/
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const std::string_view &typeName);
+
+			/*! @brief Removes a type from the registry by its stable type ID.
+				@details Useful for removing custom types using the ID returned by @ref addType.
+				@param[in] typeID The stable type ID of the type to remove.
+				@return The stable type ID of the removed type on success, or @ref RegistryErrorInfo if the type is not found.
+				@since 0.1.0
+				@version 0.12.5
+			*/
+			ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> removeType(const TypeID typeID);
+
+			/*! @brief Resets all matchup data for a type identified by display name.
+				@details Clears the type's entire offensive row and defensive column to @ref
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   and array position are preserved.
+				@param[in] typeName The display name of the type whose matchups will be cleared.
+				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
+				@since 0.1.0
+				@version 0.12.5
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(const std::string_view &typeName);
+
+			/*! @brief Resets all matchup data for a type identified by its stable type ID.
+				@details Clears the type's entire offensive row and defensive column to @ref
+			   PocketCore::Type::TypeEffectiveness::NOT_DEFINED without removing the type from the registry. The type's entry, stable ID,
+			   and array position are preserved.
+				@param[in] typeID The stable type ID of the type whose matchups will be cleared.
+				@return std::expected<void, @ref RegistryErrorInfo> containing the error if the type is not found, or void on success.
+				@since 0.1.0
+				@version 0.12.5
+			*/
+			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> resetMatchups(const TypeID typeID);
 
 		private:
 			// MARK: Private Member Functions
@@ -435,14 +431,6 @@ namespace PocketCore::Configuration
 				@version 0.12.18
 			*/
 			void rollbackEntries(const us previousCount, const TypeRegistry::Checkpoint checkpoint);
-
-			/*! @brief Removes a single entry from the registry by its internal array index.
-				@details Shifts subsequent entries down and clears the corresponding matchup row and column data.
-				@param[in] arrayIndex The zero-based position of the entry to remove.
-				@since 0.1.0
-				@version 0.12.19
-			*/
-			void removeEntry(const us arrayIndex);
 
 			/*! @brief Resolves a type name to its internal array index, returning a @ref RegistryErrorInfo on failure.
 				@param[in] name The display name of the type.

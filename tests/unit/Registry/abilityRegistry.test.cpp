@@ -1,14 +1,15 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.4.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #include "Registry/abilityRegistry.h"
 
 #include <optional>
+#include <string>
 #include <string_view>
 #include <utility>
 
@@ -55,12 +56,12 @@ SCENARIO("AbilityRegistry")
 		THEN("Stench has the appropriate properties")
 		{
 			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_STENCH),
 				.mTriggers = {{
 					.mEffects = {toEffectID(BuiltinEffectID::Flinch)},
 					.mTrigger = BattleEventID::Hit,
 					.mRole = BattleEventRole::User,
 				},},
-				.mName = ABILITY_NAME_STENCH,
 				.mAbilityID = toAbilityID(BuiltinAbilityID::Stench),
 				.mTargetID = BattleTargetID::SingleOpponent,
 			};
@@ -73,11 +74,11 @@ SCENARIO("AbilityRegistry")
 		THEN("Drizzle has the appropriate properties")
 		{
 			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_DRIZZLE),
 				.mTriggers = {{
 					.mEffects = {toEffectID(BuiltinEffectID::SetRain)},
 					.mTrigger = BattleEventID::SwitchIn,
 				},},
-				.mName = ABILITY_NAME_DRIZZLE,
 				.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 				.mTargetID = BattleTargetID::Self,
 			};
@@ -98,8 +99,8 @@ SCENARIO("AbilityRegistry")
 		THEN("the metadata is retrieved when accessed by a valid Ability ID")
 		{
 			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_NONE),
 				.mTriggers = {},
-				.mName = ABILITY_NAME_NONE,
 				.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 			};
 
@@ -120,6 +121,7 @@ SCENARIO("AbilityRegistry")
 
 			REQUIRE(abilityID.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
 		}
 	}
@@ -137,6 +139,7 @@ SCENARIO("AbilityRegistry")
 
 			REQUIRE(abilityName.has_value());
 
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((abilityName.value() == ABILITY_NAME_NONE));
 		}
 	}
@@ -159,8 +162,8 @@ SCENARIO("AbilityRegistry")
 		THEN("a valid internal array index has metadata")
 		{
 			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_NONE),
 				.mTriggers = {},
-				.mName = ABILITY_NAME_NONE,
 				.mAbilityID = toAbilityID(BuiltinAbilityID::None),
 			};
 
@@ -200,6 +203,7 @@ SCENARIO("AbilityRegistry")
 			std::optional<ub> abilityIndex{registry.findIndexByAbilityID(NO_ABILITY_ID)};
 
 			REQUIRE(abilityIndex.has_value());
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
 			CHECK((abilityIndex.value() == 0));
 		}
 	}

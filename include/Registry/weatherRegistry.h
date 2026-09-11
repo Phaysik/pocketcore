@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.8.0
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -29,6 +29,17 @@ namespace PocketCore::Registry::Weather
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::toWeatherID;
+	using PocketCore::Weather::WEATHER_NAME_EXTREMELY_HARSH_SUNLIGHT;
+	using PocketCore::Weather::WEATHER_NAME_FOG;
+	using PocketCore::Weather::WEATHER_NAME_HAIL;
+	using PocketCore::Weather::WEATHER_NAME_HARSH_SUNLIGHT;
+	using PocketCore::Weather::WEATHER_NAME_HEAVY_RAIN;
+	using PocketCore::Weather::WEATHER_NAME_NONE;
+	using PocketCore::Weather::WEATHER_NAME_RAIN;
+	using PocketCore::Weather::WEATHER_NAME_SANDSTORM;
+	using PocketCore::Weather::WEATHER_NAME_SHADOWY_AURA;
+	using PocketCore::Weather::WEATHER_NAME_SNOW;
+	using PocketCore::Weather::WEATHER_NAME_STRONG_WINDS;
 	using PocketCore::Weather::WeatherID;
 	using PocketCore::Weather::WeatherMeta;
 
@@ -37,9 +48,9 @@ namespace PocketCore::Registry::Weather
 		@details Built-in weathers are registered during construction with IDs derived from @ref BuiltinWeatherID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.8.0
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
@@ -48,52 +59,61 @@ namespace PocketCore::Registry::Weather
 			using Base = FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>;
 
 		public:
+			/*! @brief Compares two WeatherRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const WeatherRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID.
 				@since 0.8.0
-				@version 0.11.6
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr WeatherRegistry() : Base{toWeatherID(BuiltinWeatherID::FinalWeather).getValue()}
 			{
-				addBuiltin({.mName = PocketCore::Weather::WEATHER_NAME_NONE, .mWeatherID = toWeatherID(BuiltinWeatherID::None)});
+				addBuiltin({.mName = std::string(WEATHER_NAME_NONE), .mWeatherID = toWeatherID(BuiltinWeatherID::None)});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_HARSH_SUNLIGHT,
+					.mName = std::string(WEATHER_NAME_HARSH_SUNLIGHT),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::HarshSunlight),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_RAIN,
+					.mName = std::string(WEATHER_NAME_RAIN),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::Rain),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_SANDSTORM,
+					.mName = std::string(WEATHER_NAME_SANDSTORM),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::Sandstorm),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_HAIL,
+					.mName = std::string(WEATHER_NAME_HAIL),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::Hail),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_SNOW,
+					.mName = std::string(WEATHER_NAME_SNOW),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::Snow),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_FOG,
+					.mName = std::string(WEATHER_NAME_FOG),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::Fog),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_EXTREMELY_HARSH_SUNLIGHT,
+					.mName = std::string(WEATHER_NAME_EXTREMELY_HARSH_SUNLIGHT),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::ExtremelyHarshSunlight),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_HEAVY_RAIN,
+					.mName = std::string(WEATHER_NAME_HEAVY_RAIN),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::HeavyRain),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_STRONG_WINDS,
+					.mName = std::string(WEATHER_NAME_STRONG_WINDS),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::StrongWinds),
 				});
 				addBuiltin({
-					.mName = PocketCore::Weather::WEATHER_NAME_SHADOWY_AURA,
+					.mName = std::string(WEATHER_NAME_SHADOWY_AURA),
 					.mWeatherID = toWeatherID(BuiltinWeatherID::ShadowyAura),
 				});
 			}

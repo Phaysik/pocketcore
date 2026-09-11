@@ -1,15 +1,15 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.3.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_ABILITY_ABILITYMETA_H
 #define INCLUDE_ABILITY_ABILITYMETA_H
 
-#include <string_view>
+#include <string>
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
@@ -28,9 +28,9 @@ namespace PocketCore::Ability
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.3.0
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct AbilityMeta
@@ -47,11 +47,11 @@ namespace PocketCore::Ability
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
-			/*! @brief The owned trigger and effect definitions for this ability. */
-			std::vector<EffectTrigger> mTriggers;
+			/*! @brief The case-sensitive display name. */
+			std::string mName{};
 
-			/*! @brief The case-sensitive display name stored as a non-owning view. */
-			std::string_view mName{};
+			/*! @brief The owned trigger and effect definitions for this ability. */
+			std::vector<EffectTrigger> mTriggers{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			AbilityID mAbilityID{};

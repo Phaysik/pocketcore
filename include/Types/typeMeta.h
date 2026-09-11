@@ -1,15 +1,15 @@
 /*! @file typeMeta.h
 	@brief Defines the metadata stored for built-in and user-defined types.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.12.5
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_TYPE_TYPEMETA_H
 #define INCLUDE_TYPE_TYPEMETA_H
 
-#include <string_view>
+#include <string>
 
 #include "Configuration/constants.h"
 
@@ -24,9 +24,9 @@ namespace PocketCore::Type
 		@brief Stores one type's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.12.5
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct TypeMeta
@@ -47,7 +47,7 @@ namespace PocketCore::Type
 			std::array<TypeEffectiveness, MAX_TYPES> mOffensiveMatchups{};
 
 			/*! @brief The display name for the type. */
-			std::string_view mName{};
+			std::string mName{};
 
 			/*! @brief The stable identifier for a built-in or user-defined type. */
 			TypeID mTypeID{};

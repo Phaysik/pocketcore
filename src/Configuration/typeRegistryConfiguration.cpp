@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.2.0
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -13,15 +13,17 @@
 #include <expected>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/registryError.h"
 #include "Registry/typeRegistry.h"
-#include "Types/builtInTypeID.h"
 #include "Types/typeEffectiveness.h"
 #include "Types/typeID.h"
 #include "Types/typeMeta.h"
@@ -153,6 +155,16 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setMatchupRow(
 		const std::string_view &attackerName, const std::span<const MatchupPair> &newRow)
 	{
+		if (newRow.size() > MAX_TYPES)
+		{
+			const std::optional<std::string_view> logResult{
+				Logger::warn("TypeRegistryConfiguration::setMatchupRow row span size ({}) exceeds MAX_TYPES ({}).", newRow.size(),
+							 MAX_TYPES),
+			};
+
+			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, attackerName, logResult.value_or(std::string_view{})}};
+		}
+
 		const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(attackerName, "setMatchupRow")}; // LCOV_EXCL_BR
 
 		if (!attackerIndex.has_value())
@@ -160,25 +172,24 @@ namespace PocketCore::Configuration
 			return std::unexpected{attackerIndex.error()};
 		}
 
-		const us registered{getRegistry().getAmountRegistered()};
-		std::array<TypeEffectiveness, MAX_TYPES> replacementRow{};
-		replacementRow.fill(TypeEffectiveness::NOT_DEFINED);
+		std::vector<std::pair<us, TypeEffectiveness>> updates;
+		updates.reserve(newRow.size());
 
 		for (const auto &[pairName, pairValue] : newRow)
 		{
-			const std::expected<us, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")}; // LCOV_EXCL_BR
+			const std::expected<us, RegistryErrorInfo> targetIndex{resolveIndex(pairName, "setMatchupRow")};
 
-			if (!targetIndex.has_value())
+			if (!targetIndex)
 			{
 				return std::unexpected{targetIndex.error()};
 			}
 
-			replacementRow.at(targetIndex.value()) = pairValue;
+			updates.emplace_back(targetIndex.value(), pairValue);
 		}
 
-		for (us col{0}; col < registered; ++col)
+		for (const auto &[targetIndex, value] : updates)
 		{
-			setTypeChartCell(attackerIndex.value(), col, replacementRow.at(col));
+			setTypeChartCell(attackerIndex.value(), targetIndex, value);
 		}
 
 		return {};
@@ -217,6 +228,16 @@ namespace PocketCore::Configuration
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::setDefensiveColumn(
 		const std::string_view &defenderName, const std::span<const MatchupPair> &newCol)
 	{
+		if (newCol.size() > MAX_TYPES)
+		{
+			const std::optional<std::string_view> logResult{
+				Logger::warn("TypeRegistryConfiguration::setDefensiveColumn column span size ({}) exceeds MAX_TYPES ({}).", newCol.size(),
+							 MAX_TYPES),
+			};
+
+			return std::unexpected{RegistryErrorInfo{RegistryError::MatchupMismatch, defenderName, logResult.value_or(std::string_view{})}};
+		}
+
 		const std::expected<us, RegistryErrorInfo> defenderIndex{resolveIndex(defenderName, "setDefensiveColumn")}; // LCOV_EXCL_BR
 
 		if (!defenderIndex.has_value())
@@ -224,25 +245,24 @@ namespace PocketCore::Configuration
 			return std::unexpected{defenderIndex.error()};
 		}
 
-		const us registered{getRegistry().getAmountRegistered()};
-		std::array<TypeEffectiveness, MAX_TYPES> replacementColumn{};
-		replacementColumn.fill(TypeEffectiveness::NOT_DEFINED);
+		std::vector<std::pair<us, TypeEffectiveness>> updates;
+		updates.reserve(newCol.size());
 
 		for (const auto &[pairName, pairValue] : newCol)
 		{
-			const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")}; // LCOV_EXCL_BR
+			const std::expected<us, RegistryErrorInfo> attackerIndex{resolveIndex(pairName, "setDefensiveColumn")};
 
-			if (!attackerIndex.has_value())
+			if (!attackerIndex)
 			{
 				return std::unexpected{attackerIndex.error()};
 			}
 
-			replacementColumn.at(attackerIndex.value()) = pairValue;
+			updates.emplace_back(attackerIndex.value(), pairValue);
 		}
 
-		for (us row{0}; row < registered; ++row)
+		for (const auto &[attackerIndex, value] : updates)
 		{
-			setTypeChartCell(row, defenderIndex.value(), replacementColumn.at(row));
+			setTypeChartCell(attackerIndex, defenderIndex.value(), value);
 		}
 
 		return {};
@@ -254,7 +274,7 @@ namespace PocketCore::Configuration
 																							   const UnspecifiedMatchup defaultBehavior)
 	{
 		const us registered{getRegistry().getAmountRegistered()};
-		const std::string_view typeName{definition.name};
+		const std::string typeName{definition.mName};
 
 		if (registered >= MAX_TYPES || TypeID{getRegistry().getNextTypeID()} == PocketCore::Type::NO_TYPE_ID)
 		{
@@ -290,7 +310,7 @@ namespace PocketCore::Configuration
 		std::array<TypeEffectiveness, MAX_TYPES> offensiveRow{};
 		offensiveRow.fill(fillValue);
 
-		for (const auto &[pairName, pairValue] : definition.offensiveMatchups)
+		for (const auto &[pairName, pairValue] : definition.mOffensiveMatchups)
 		{
 			if (pairName == typeName)
 			{
@@ -332,7 +352,7 @@ namespace PocketCore::Configuration
 		std::array<TypeEffectiveness, MAX_TYPES> defensiveRow{};
 		defensiveRow.fill(fillValue);
 
-		for (const auto &[pairName, pairValue] : definition.defensiveMatchups)
+		for (const auto &[pairName, pairValue] : definition.mDefensiveMatchups)
 		{
 			const std::optional<TypeID> targetId{getRegistry().getTypeID(pairName)}; // LCOV_EXCL_BR
 
@@ -403,27 +423,27 @@ namespace PocketCore::Configuration
 
 		for (const auto &def : definitions)
 		{
-			if (seenNames.contains(def.name))
+			if (seenNames.contains(def.mName))
 			{
 				const std::optional<std::string_view> logResult{
 					Logger::warn("TypeRegistryConfiguration::addTypes duplicate type '{}' found within batch. Rolling back entries to "
 								 "previous safe state.",
-								 def.name),
+								 def.mName),
 				};
 
 				rollbackEntries(currentCount, checkpoint);
 
-				return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, def.name, logResult.value_or(std::string_view{})}};
+				return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, def.mName, logResult.value_or(std::string_view{})}};
 			}
 
-			seenNames.insert(def.name);
+			seenNames.insert(def.mName);
 
 			const std::expected<TypeID, RegistryErrorInfo> result{addType(def, defaultBehavior)}; // LCOV_EXCL_BR
 
 			if (!result.has_value())
 			{
 				static_cast<void>(Logger::warn(
-					"TypeRegistryConfiguration::addTypes Error adding type '{}'. Rolling back entries to previous safe state.", def.name));
+					"TypeRegistryConfiguration::addTypes Error adding type '{}'. Rolling back entries to previous safe state.", def.mName));
 
 				rollbackEntries(currentCount, checkpoint);
 
@@ -436,144 +456,18 @@ namespace PocketCore::Configuration
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view &typeName)
 	{
-		const std::optional<TypeID> typeID{getRegistry().getTypeID(typeName)}; // LCOV_EXCL_BR
-
-		if (!typeID.has_value())
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by name, '{}'.", typeName),
-			};
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
-		}
-
-		const std::optional<us> arrayIndex{getRegistry().findIndexByTypeID(typeID.value())}; // LCOV_EXCL_BR
-
-		// LCOV_EXCL_START — Defensive: findIndexByTypeID cannot fail when getTypeID just succeeded on the same getRegistry().
-		if (!arrayIndex.has_value())
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType internal error: type ID found but array index missing for '{}'.",
-							 typeName),
-			};
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, typeName, logResult.value_or(std::string_view{})}};
-		}
-		// LCOV_EXCL_STOP
-
-		const TypeID removedId{typeID.value()};
-		removeEntry(arrayIndex.value());
-
-		return removedId;
-	}
-
-	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(
-		const PocketCore::Type::BuiltinTypeID type)
-	{
-		const TypeID typeID{PocketCore::Type::toTypeID(type)};
-
-		const std::optional<us> arrayIndex{getRegistry().findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
-
-		if (!arrayIndex.has_value())
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by ID, '{}'.", typeID.getValue()),
-			};
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
-		}
-
-		removeEntry(arrayIndex.value());
-
-		return typeID;
+		return removeMetadata(typeName);
 	}
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const TypeID typeID)
 	{
-		const std::optional<us> arrayIndex{getRegistry().findIndexByTypeID(typeID)}; // LCOV_EXCL_BR
-
-		if (!arrayIndex.has_value())
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::removeType type not found. Cannot remove type, by stable ID, '{}'.",
-							 typeID.getValue()),
-			};
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, {}, logResult.value_or(std::string_view{})}};
-		}
-
-		removeEntry(arrayIndex.value());
-
-		return typeID;
-	}
-
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::removeTypes(
-		const std::span<const std::string_view> &typeNames)
-	{
-		// Snapshot the entire registry for all-or-nothing rollback
-		const Registry::Type::TypeRegistry snapshot{getRegistry()};
-
-		for (const auto &name : typeNames)
-		{
-			const std::expected<TypeID, RegistryErrorInfo> result{removeType(name)}; // LCOV_EXCL_BR
-
-			if (!result.has_value())
-			{
-				static_cast<void>( // LCOV_EXCL_LINE
-					Logger::info("TypeRegistryConfiguration::removeTypes rolling back to previous state due to error on type '{}'.",
-								 name)); // LCOV_EXCL_BR_LINE
-
-				getRegistry() = snapshot;
-
-				return std::unexpected{result.error()};
-			}
-		}
-
-		return {};
+		return removeMetadata(typeID);
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::renameType(const std::string_view &oldName,
 																								const std::string_view &newName)
 	{
-		const std::optional<TypeID> typeID{getRegistry().getTypeID(oldName)}; // LCOV_EXCL_BR
-
-		if (!typeID.has_value())
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::info("TypeRegistryConfiguration::renameType type '{}' not found.", oldName),
-			}; // LCOV_EXCL_BR
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, logResult.value_or(std::string_view{})}};
-		}
-
-		if (getRegistry().hasType(newName)) // LCOV_EXCL_BR
-		{
-			const std::optional<std::string_view> logResult{
-				Logger::warn("TypeRegistryConfiguration::renameType target name '{}' already exists.", newName),
-			}; // LCOV_EXCL_BR
-
-			return std::unexpected{RegistryErrorInfo{RegistryError::DuplicateType, newName, logResult.value_or(std::string_view{})}};
-		}
-
-		const TypeID typeValue{typeID.value()}; // LCOV_EXCL_BR
-
-		const us arrayIndex{
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			getRegistry().findIndexByTypeID(typeValue).value(),
-		}; // LCOV_EXCL_BR - Cannot fail when getTypeID just succeeded on the same registry
-
-		const TypeMeta *currentMetadata{getRegistry().getEntry(arrayIndex)};
-
-		if (currentMetadata == nullptr)
-		{
-			return std::unexpected{RegistryErrorInfo{RegistryError::TypeNotFound, oldName, {}}};
-		}
-
-		TypeMeta renamedEntry{*currentMetadata};
-		renamedEntry.mName = newName;
-		setEntry(arrayIndex, renamedEntry); // LCOV_EXCL_BR
-
-		return {};
+		return renameMetadata(oldName, newName);
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::resetMatchups(const std::string_view &typeName)
@@ -632,51 +526,6 @@ namespace PocketCore::Configuration
 		}
 
 		restoreCheckpoint(checkpoint);
-	}
-
-	void TypeRegistryConfiguration::removeEntry(const us arrayIndex)
-	{
-		const us registered{getRegistry().getAmountRegistered()};
-
-		// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent those
-		// branches from ever being hit
-
-		// Set data to default
-		setEntry(arrayIndex, TypeMeta{});
-		setTypeChartRow(arrayIndex, {});
-
-		// LCOV_EXCL_BR_STOP
-
-		for (us i{arrayIndex}; i < registered - 1; ++i)
-		{
-			// LCOV_EXCL_BR_START - Has an error branch due to the functions calling .at(), but the asserts in the functions will prevent
-			// those
-			// branches from ever being hit
-
-			// Shift elements
-			setEntry(i, *getRegistry().getEntry(i + 1));
-			setTypeChartRow(i, getRegistry().getTypeChartRow(i + 1));
-
-			// LCOV_EXCL_BR_STOP
-		}
-
-		decrementAmountRegistered();
-
-		const us newRegistered{getRegistry().getAmountRegistered()};
-
-		// Clear the vacated last row
-		setTypeChartRow(newRegistered, {}); // LCOV_EXCL_BR
-
-		for (us row{0}; row < newRegistered; ++row)
-		{
-			for (us col{arrayIndex}; col < newRegistered; ++col)
-			{
-				setTypeChartCell(row, col, getRegistry().getTypeChartCell(row, col + 1));
-			}
-
-			// Clear the vacated last column cell for this row
-			setTypeChartCell(row, newRegistered, TypeEffectiveness::NOT_DEFINED);
-		}
 	}
 
 	ATTR_NODISCARD std::expected<us, RegistryErrorInfo> TypeRegistryConfiguration::resolveIndex(const std::string_view &name,

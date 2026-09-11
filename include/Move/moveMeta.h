@@ -1,8 +1,9 @@
+
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.5.2
-	@version 0.12.19
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -10,7 +11,7 @@
 #define INCLUDE_MOVE_MOVEMETA_H
 
 #include <span>
-#include <string_view>
+#include <string>
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
@@ -38,9 +39,9 @@ namespace PocketCore::Move
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.5.2
-		@version 0.12.19
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct MoveMeta
@@ -51,20 +52,20 @@ namespace PocketCore::Move
 				@param[in] other The MoveMeta instance to compare.
 				@return True when both instances contain equivalent metadata; otherwise false.
 				@since 0.12.19
-				@version 0.12.19
+				@version 0.12.20
 			*/
-			ATTR_NODISCARD constexpr bool operator==(const MoveMeta &other) const noexcept = default;
+			ATTR_NODISCARD constexpr bool operator==(const MoveMeta &other) const = default;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
 			/*! @brief The strategy used to determine the move's number of hit attempts. */
 			HitCountPolicy mHitCountPolicy{FixedHitCount{}};
 
+			/*! @brief The case-sensitive display name stored. */
+			std::string mName{};
+
 			/*! @brief The owned trigger and effect definitions for this move. */
 			std::vector<EffectTrigger> mTriggers{};
-
-			/*! @brief The case-sensitive display name stored as a non-owning view. */
-			std::string_view mName{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			MoveID mMoveID{};

@@ -1,8 +1,8 @@
 /*! @file itemRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
-	@date 09/03/2026
+	@date 09/10/2026
 	@since 0.4.1
-	@version 0.12.18
+	@version 0.12.20
 	@author Matthew Moore
 */
 
@@ -34,6 +34,9 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Item::BuiltinItemID;
+	using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
+	using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
+	using PocketCore::Item::ITEM_NAME_NONE;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::toItemID;
@@ -44,9 +47,9 @@ namespace PocketCore::Registry::Item
 		@details Built-in items are registered during construction with IDs derived from @ref BuiltinItemID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
-		@date 09/03/2026
+		@date 09/10/2026
 		@since 0.4.1
-		@version 0.12.18
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
@@ -55,32 +58,41 @@ namespace PocketCore::Registry::Item
 			using Base = FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>;
 
 		public:
+			/*! @brief Compares two ItemRegistry instances for equality.
+				@param[in] other The other registry to compare with.
+				@return true if the registries are equal, false otherwise.
+				@since 0.12.20
+				@version 0.12.20
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const ItemRegistry &other) const noexcept = default;
+
 			// LCOV_EXCL_START - If the built in additions fail, the program wouldn't work anyway
+
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID.
 				@since 0.4.1
-				@version 0.11.6
+				@version 0.12.20
 			 */
 			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{toItemID(BuiltinItemID::FinalItem).getValue()}
 			{
-				addBuiltin({.mTriggers = {}, .mName = PocketCore::Item::ITEM_NAME_NONE, .mItemID = toItemID(BuiltinItemID::None)});
+				addBuiltin({.mName = std::string(ITEM_NAME_NONE), .mTriggers = {}, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({
+					.mName = std::string(ITEM_NAME_CHERI_BERRY),
 					.mTriggers = {{
 						.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
 						.mTrigger = BattleEventID::StatusChanged,
 						.mRole = BattleEventRole::Target,
 					},},
-					.mName = PocketCore::Item::ITEM_NAME_CHERI_BERRY,
 					.mItemID = toItemID(BuiltinItemID::CheriBerry),
 					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
 				});
 				addBuiltin({
+				    .mName = std::string(ITEM_NAME_CHESTO_BERRY),
 					.mTriggers = {{
 						.mEffects = {toEffectID(BuiltinEffectID::StatusRemove)},
 						.mTrigger = BattleEventID::StatusChanged,
 						.mRole = BattleEventRole::Target,
 					},},
-					.mName = PocketCore::Item::ITEM_NAME_CHESTO_BERRY,
 					.mItemID = toItemID(BuiltinItemID::ChestoBerry),
 					.mTargetID = BattleTargetID::Self,
 					.mIsConsumable = true,
