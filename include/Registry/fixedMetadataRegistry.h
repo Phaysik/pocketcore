@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.5.0
-	@version 0.12.20
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -34,9 +34,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.5.0
-		@version 0.12.20
+		@version 0.12.22
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -304,14 +304,10 @@ namespace PocketCore::Registry
 				@pre Since creating @p checkpoint, the registry has only been mutated by @ref addEntry.
 				@param[in] checkpoint The opaque state returned by @ref createCheckpoint.
 				@since 0.12.18
-				@version 0.12.18
+				@version 0.12.22
 			*/
 			constexpr void restoreCheckpoint(const Checkpoint checkpoint)
 			{
-				assert(checkpoint.mOwner == this);
-				assert(checkpoint.mAmountRegistered <= mAmountRegistered);
-				assert(checkpoint.mMutationVersion == mMutationVersion);
-
 				if (checkpoint.mOwner != this || checkpoint.mAmountRegistered > mAmountRegistered
 					|| checkpoint.mMutationVersion != mMutationVersion)
 				{

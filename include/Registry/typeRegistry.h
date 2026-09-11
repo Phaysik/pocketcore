@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.1.0
-	@version 0.12.20
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -85,9 +85,9 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.1.0
-		@version 0.12.20
+		@version 0.12.22
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -241,28 +241,6 @@ namespace PocketCore::Registry::Type
 				getMutableEntry(attacker).mOffensiveMatchups.at(defender) = value;
 			}
 
-			/*! @brief Sets a single type-chart cell using stable type IDs.
-				@details Resolves both IDs to internal registry indices before updating the corresponding chart cell. The operation is
-			   ignored when either type is not registered.
-				@param[in] attacker The stable type identifier for the attacking type.
-				@param[in] defender The stable type identifier for the defending type.
-				@param[in] value The @ref TypeEffectiveness value to store.
-				@since 0.12.19
-				@version 0.12.19
-			*/
-			constexpr void setTypeChartCell(const TypeID attacker, const TypeID defender, const TypeEffectiveness value)
-			{
-				const std::optional<us> attackerIndex{findIndexByID(attacker)};
-				const std::optional<us> defenderIndex{findIndexByID(defender)};
-
-				if (!attackerIndex.has_value() || !defenderIndex.has_value())
-				{
-					return;
-				}
-
-				getMutableEntry(attackerIndex.value()).mOffensiveMatchups.at(defenderIndex.value()) = value;
-			}
-
 			/*! @brief Replaces an entire row in the type chart.
 				@pre @p attacker < @ref MAX_TYPES.
 				@param[in] attacker The row index.
@@ -275,26 +253,6 @@ namespace PocketCore::Registry::Type
 				assert(attacker < MAX_TYPES && ROW_OOB_SET_TYPE_CHART_ROW.data());
 
 				getMutableEntry(attacker).mOffensiveMatchups = chart;
-			}
-
-			/*! @brief Replaces an entire type-chart row using a stable type ID.
-				@details Resolves the attacker ID to its internal registry index before replacing the row. The operation is ignored when the
-				attacker is not registered.
-				@param[in] attacker The stable type identifier for the attacking type.
-				@param[in] chart The complete row of @ref TypeEffectiveness values to assign.
-				@since 0.12.19
-				@version 0.12.19
-			*/
-			constexpr void setTypeChartRow(const TypeID attacker, const std::array<TypeEffectiveness, MAX_TYPES> &chart)
-			{
-				const std::optional<us> attackerIndex{findIndexByID(attacker)};
-
-				if (!attackerIndex.has_value())
-				{
-					return;
-				}
-
-				getMutableEntry(attackerIndex.value()).mOffensiveMatchups = chart;
 			}
 
 		public:

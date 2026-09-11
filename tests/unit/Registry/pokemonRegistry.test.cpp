@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -27,7 +27,13 @@
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Core::ub;
+using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
 using PocketCore::Pokemon::BuiltinPokemonID;
+using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
+using PocketCore::Pokemon::CHARIZARD_BASE_STATS;
+using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
+using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
+using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 using PocketCore::Pokemon::NO_POKEMON_ID;
 using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
 using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
@@ -41,7 +47,10 @@ using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
 using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
+using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
 using PocketCore::Pokemon::toPokemonID;
+using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
+using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
@@ -64,8 +73,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = BULBASAUR_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
 				.mAbilityPoolCount = 0,
 			};
@@ -79,8 +89,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_IVYSAUR),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = IVYSAUR_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
 				.mAbilityPoolCount = 0,
 			};
@@ -94,8 +105,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_VENUSAUR),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = VENUSAUR_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
 				.mAbilityPoolCount = 0,
 			};
@@ -109,8 +121,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMANDER),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = CHARMANDER_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
 				.mAbilityPoolCount = 0,
 			};
@@ -124,8 +137,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMELEON),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = CHARMELEON_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
 				.mAbilityPoolCount = 0,
 			};
@@ -139,8 +153,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARIZARD),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = CHARIZARD_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 				.mAbilityPoolCount = 0,
 			};
@@ -154,8 +169,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_SQUIRTLE),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = SQUIRTLE_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
 				.mAbilityPoolCount = 0,
 			};
@@ -169,8 +185,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_WARTORTLE),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = WARTORTLE_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
 				.mAbilityPoolCount = 0,
 			};
@@ -184,8 +201,9 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BLASTOISE),
-				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mBaseStats = BLASTOISE_BASE_STATS,
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
 				.mAbilityPoolCount = 0,
 			};

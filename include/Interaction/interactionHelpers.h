@@ -1,8 +1,8 @@
 /*! @file interactionHelpers.h
 	@brief Defines reusable algorithms for applying metadata interactions.
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.12.16
-	@version 0.12.16
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -115,16 +115,19 @@ namespace PocketCore::Interaction
 		@param[in] emptyID The identifier representing an unused position.
 		@param[in,out] existingIDs The identifiers compacted in place.
 		@return The number of non-empty identifiers, which is also the offset of the first free position.
-		@post Non-empty identifiers occupy the leading positions in their original relative order and remaining positions contain @p emptyID.
+		@post Non-empty identifiers occupy the leading positions in their original relative order and remaining positions contain @p
+	   emptyID.
 		@note Runs in O(n) time and O(1) additional space, where n is the size of @p existingIDs.
 		@since 0.12.16
-		@version 0.12.16
+		@version 0.12.22
 	*/
 	template <typename ID, std::ranges::forward_range IDRange>
 	ATTR_NODISCARD constexpr std::size_t shiftAndGetNextAvailable(const ID emptyID, IDRange &existingIDs)
 	{
 		auto emptyIdentifiers{std::ranges::remove(existingIDs, emptyID)};
-		const std::size_t activeCount{static_cast<std::size_t>(std::ranges::distance(std::ranges::begin(existingIDs), emptyIdentifiers.begin()))};
+		const std::size_t activeCount{
+			static_cast<std::size_t>(std::ranges::distance(std::ranges::begin(existingIDs), emptyIdentifiers.begin())),
+		};
 		std::ranges::fill(emptyIdentifiers, emptyID);
 
 		return activeCount;
@@ -145,7 +148,7 @@ namespace PocketCore::Interaction
 		@note An unregistered non-empty identifier is inserted without applying interactions, preserving the behavior of the framework
 	   adapters.
 		@since 0.12.16
-		@version 0.12.16
+		@version 0.12.22
 	*/
 	template <typename ID, std::ranges::forward_range IDRange, typename Registry, typename Metadata,
 			  std::ranges::input_range InteractionRange>
@@ -171,14 +174,14 @@ namespace PocketCore::Interaction
 
 			replacedCurrent = replaceCurrent(incomingID, emptyID, existingIDs, interactions);
 			removeCurrent(emptyID, existingIDs, interactions);
-		}
 
-		const std::size_t nextAvailableIndex{shiftAndGetNextAvailable(emptyID, existingIDs)};
+			const std::size_t nextAvailableIndex{shiftAndGetNextAvailable(emptyID, existingIDs)};
 
-		if (!replacedCurrent && nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
-		{
-			const auto nextAvailable{std::ranges::find(existingIDs, emptyID)};
-			*nextAvailable = incomingID;
+			if (!replacedCurrent && nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
+			{
+				const auto nextAvailable{std::ranges::find(existingIDs, emptyID)};
+				*nextAvailable = incomingID;
+			}
 		}
 	}
 } // namespace PocketCore::Interaction

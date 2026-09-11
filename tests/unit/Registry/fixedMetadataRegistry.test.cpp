@@ -1,195 +1,250 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 09/03/2026
+	@date 09/11/2026
 	@since 0.7.0
-	@version 0.12.18
+	@version 0.12.22
 	@author Matthew Moore
 */
 
-#include "Registry/fixedMetadataRegistry.h"
-
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
+#include <utility>
 
-#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "ID/idInterface.h"
+#include "Registry/fixedMetadataRegistry.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Core::ub;
+using PocketCore::Testing::BuiltinFixedMetaDataID;
+using PocketCore::Testing::CheckpointRegistry;
+using PocketCore::Testing::FixedMetaDataID;
+using PocketCore::Testing::FixedRegistry;
+using PocketCore::Testing::Metadata;
+using PocketCore::Testing::NO_ID;
+using PocketCore::Testing::NONE_NAME;
+using PocketCore::Testing::TEST1_NAME;
+using PocketCore::Testing::TEST2_NAME;
+using PocketCore::Testing::TEST3_NAME;
+using PocketCore::Testing::toFixedMetaDataID;
 
-// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,misc-use-internal-linkage)
+template <typename Registry>
+concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
 
-namespace PocketCore::Test
-{
-	/*! @brief Distinguishes ability identifiers from all other stable identifier domains. */
-	struct FixedMetadataIDTag;
-	using FixedMetaDataID = PocketCore::ID::IDInterface<FixedMetadataIDTag, 0>;
-	constexpr PocketCore::Core::us CAPACITY{1'000};
+static_assert(!PubliclyStructurallyMutable<FixedRegistry>);
 
-	enum class BuiltinFixedMetaDataID : ub
-	{
-		None,
-		Test1,
-		Test2,
-		Test3,
-	};
-
-	constexpr std::string_view NONE_NAME{"None"};
-	constexpr std::string_view TEST1_NAME{"Test1"};
-	constexpr std::string_view TEST2_NAME{"Test2"};
-	constexpr std::string_view TEST3_NAME{"Test3"};
-
-	ATTR_NODISCARD constexpr FixedMetaDataID toFixedMetaDataID(const BuiltinFixedMetaDataID builtinFixedMetaDataID) noexcept
-	{
-		return FixedMetaDataID{static_cast<ub>(builtinFixedMetaDataID)};
-	}
-
-	struct Metadata
-	{
-		public:
-			std::string_view mName{};
-			FixedMetaDataID mID{};
-	};
-
-	class FixedRegistry : private PocketCore::Registry::FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>
-	{
-		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>;
-
-		public:
-			ATTR_NOINLINE explicit constexpr FixedRegistry()
-				: Base{static_cast<PocketCore::Core::us>(toFixedMetaDataID(BuiltinFixedMetaDataID::Test3).getValue() + 1U)}
-			{
-				addBuiltin({.mName = NONE_NAME, .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::None)});
-				addBuiltin({.mName = TEST1_NAME, .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)});
-				addBuiltin({.mName = TEST2_NAME, .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test2)});
-				addBuiltin({.mName = TEST3_NAME, .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test3)});
-			}
-
-			using Base::addEntry;
-			using Base::createCheckpoint;
-			using Base::decrementAmountRegistered;
-			using Base::findIndexByID;
-			using Base::getAmountRegistered;
-			using Base::getEntry;
-			using Base::getID;
-			using Base::getMetadata;
-			using Base::getName;
-			using Base::getNextID;
-			using Base::getRegisteredEntries;
-			using Base::hasEntry;
-			using Base::incrementAmountRegistered;
-			using Base::restoreCheckpoint;
-			using Base::setAmountRegistered;
-			using Base::setEntry;
-	};
-
-} // namespace PocketCore::Test
-
-using PocketCore::Test::BuiltinFixedMetaDataID;
-using PocketCore::Test::FixedMetaDataID;
-using PocketCore::Test::FixedRegistry;
-using PocketCore::Test::Metadata;
-using PocketCore::Test::NONE_NAME;
-using PocketCore::Test::TEST1_NAME;
-using PocketCore::Test::TEST2_NAME;
-using PocketCore::Test::TEST3_NAME;
-using PocketCore::Test::toFixedMetaDataID;
+// NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
 SCENARIO("FixedMetadataRegistry")
-
 {
 	FixedRegistry registry{};
+	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinFixedMetaDataID::Final)};
 
-	GIVEN("a default-constructed registry")
+	GIVEN("a default constructed FixedRegistry")
 	{
-		THEN("all built-in abilities preserve their catalog identifiers")
+		THEN("Test 1 has the appropriate properties")
 		{
-			CHECK((registry.getAmountRegistered() == 4));
-			CHECK((registry.getNextID() == 4));
+			Metadata expected{
+				.mName = std::string(TEST1_NAME),
+				.mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test1),
+			};
 
-			std::optional<FixedMetaDataID> noneIdentifier{registry.getID(NONE_NAME)};
-			std::optional<FixedMetaDataID> test1Identifier{registry.getID(TEST1_NAME)};
-			std::optional<FixedMetaDataID> test2Identifier{registry.getID(TEST2_NAME)};
+			const Metadata *actual{registry.getMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::Test1))};
 
-			REQUIRE(noneIdentifier.has_value());
-			REQUIRE(test1Identifier.has_value());
-			REQUIRE(test2Identifier.has_value());
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((noneIdentifier.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((test1Identifier.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)));
-			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((test2Identifier.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::Test2)));
+			CHECK((expected == *actual));
 		}
 
-		THEN("Check name is set properly")
+		THEN("Test 2 has the appropriate properties")
 		{
-			const Metadata *metadata{registry.getMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::Test1))};
-			REQUIRE((metadata != nullptr));
+			Metadata expected{
+				.mName = std::string(TEST2_NAME),
+				.mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test2),
+			};
 
-			CHECK((metadata->mName == TEST1_NAME));
+			const Metadata *actual{registry.getMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::Test2))};
+
+			CHECK((expected == *actual));
 		}
 
-		THEN("unknown names and IDs are absent")
+		THEN("Test 3 has the appropriate properties")
+		{
+			Metadata expected{
+				.mName = std::string(TEST3_NAME),
+				.mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test3),
+			};
+
+			const Metadata *actual{registry.getMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::Test3))};
+
+			CHECK((expected == *actual));
+		}
+	}
+
+	GIVEN("getMetadata")
+	{
+		THEN("unknown IDs are absent")
+		{
+			CHECK((registry.getMetadata(FixedMetaDataID{200}) == nullptr));
+		}
+
+		THEN("the metadata is retrieved when accessed by a valid Weather ID")
+		{
+			Metadata expected{
+				.mName = std::string(NONE_NAME),
+				.mID = toFixedMetaDataID(BuiltinFixedMetaDataID::None),
+			};
+
+			CHECK((expected == *registry.getMetadata(NO_ID)));
+		}
+	}
+
+	GIVEN("getID")
+	{
+		THEN("unknown IDs are absent")
 		{
 			CHECK_FALSE(registry.getID("Unknown").has_value());
-			CHECK((registry.getMetadata(FixedMetaDataID{200}) == nullptr));
+		}
+
+		THEN("the Weather ID is retrieved by valid Weather name")
+		{
+			std::optional<FixedMetaDataID> FixedMetaDataID{registry.getID(NONE_NAME)};
+
+			REQUIRE(FixedMetaDataID.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((FixedMetaDataID.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
+		}
+	}
+
+	GIVEN("getName")
+	{
+		THEN("unknown IDs are absent")
+		{
 			CHECK_FALSE(registry.getName(FixedMetaDataID{200}).has_value());
 		}
 
+		THEN("a registered weather name is returned by stable ID")
+		{
+			std::optional<std::string_view> weatherName{registry.getName(toFixedMetaDataID(BuiltinFixedMetaDataID::None))};
+
+			REQUIRE(weatherName.has_value());
+
+			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
+			CHECK((weatherName.value() == NONE_NAME));
+		}
+	}
+
+	GIVEN("getAmountRegistered")
+	{
+		THEN("the registered span contains the exact amount of built-in entries")
+		{
+			CHECK((registry.getAmountRegistered() == finalWeatherUnderlyingValue));
+		}
+	}
+
+	GIVEN("getEntry")
+	{
+		THEN("an invalid internal array index has no metadata")
+		{
+			CHECK((registry.getEntry(2'000) == nullptr));
+		}
+
+		THEN("a valid internal array index has metadata")
+		{
+			Metadata expected{
+				.mName = std::string(NONE_NAME),
+				.mID = toFixedMetaDataID(BuiltinFixedMetaDataID::None),
+			};
+
+			const Metadata *Metadata{registry.getEntry(0)};
+
+			REQUIRE((Metadata != nullptr));
+			CHECK((*Metadata == expected));
+		}
+	}
+
+	GIVEN("getRegisteredEntries")
+	{
+		THEN("the amount of weathers returned matches the amount that are built-in")
+		{
+			CHECK((registry.getRegisteredEntries().size() == finalWeatherUnderlyingValue));
+		}
+	}
+
+	GIVEN("getNextID")
+	{
+		THEN("the next available stable Weather ID is after all built in weather IDs")
+		{
+			CHECK((registry.getNextID() == finalWeatherUnderlyingValue));
+		}
+	}
+
+	GIVEN("findIndexByID")
+	{
 		THEN("an unknown stable ID has no internal index")
 		{
-			std::optional<ub> registryIndex{registry.findIndexByID(FixedMetaDataID{200})};
-			CHECK_FALSE(registryIndex.has_value());
+			std::optional<ub> weatherIndex{registry.findIndexByID(FixedMetaDataID{200})};
+			CHECK_FALSE(weatherIndex.has_value());
 		}
 
-		THEN("a registered registry name is returned by stable ID")
+		THEN("the internal array index is retrieved by valid Weather ID")
 		{
-			std::optional<std::string_view> registryName{registry.getName(toFixedMetaDataID(BuiltinFixedMetaDataID::Test2))};
-			REQUIRE(registryName.has_value());
+			std::optional<ub> weatherIndex{registry.findIndexByID(NO_ID)};
+
+			REQUIRE(weatherIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((registryName.value() == TEST2_NAME));
+			CHECK((weatherIndex.value() == 0));
+		}
+	}
+
+	GIVEN("hasEntry")
+	{
+		WHEN("calling the string_view overload")
+		{
+			THEN("an unknown weather name has no entry")
+			{
+				CHECK_FALSE(registry.hasEntry("Unknown"));
+			}
+
+			THEN("a known weather name has an entry")
+			{
+				CHECK(registry.hasEntry(NONE_NAME));
+			}
 		}
 
-		THEN("the registered span contains exactly the built-in entries")
+		WHEN("calling the FixedMetaDataID overload")
 		{
-			std::span<const Metadata> abilities{registry.getRegisteredEntries()};
-			REQUIRE((abilities.size() == 4U));
-			CHECK((abilities.front().mName == NONE_NAME));
-			CHECK((abilities.back().mName == TEST3_NAME));
-			CHECK(registry.hasEntry(toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)));
-			CHECK(registry.hasEntry(TEST2_NAME));
+			THEN("an unknown weather ID has no entry")
+			{
+				CHECK_FALSE(registry.hasEntry(FixedMetaDataID{200}));
+			}
+
+			THEN("a known weather ID has an entry")
+			{
+				CHECK(registry.hasEntry(NO_ID));
+			}
 		}
+	}
 
-		THEN("the registered amount can be restored directly")
+	GIVEN("restoreCheckpoint")
+	{
+		WHEN("restoring a checkpoint created by another registry")
 		{
-			registry.setAmountRegistered(2);
-			CHECK((registry.getAmountRegistered() == 2));
-		}
+			CheckpointRegistry sourceRegistry{};
+			CheckpointRegistry targetRegistry{};
+			auto checkpoint{sourceRegistry.createCheckpoint()};
+			targetRegistry.eraseEntry(0);
 
-		THEN("appended entries receive consecutive stable IDs")
-		{
-			FixedMetaDataID firstID{registry.addEntry(Metadata{.mName = "Custom 1"})};
-			FixedMetaDataID secondID{registry.addEntry(Metadata{.mName = "Custom 2"})};
-			CHECK((secondID.getValue() == firstID.getValue() + 1U));
-		}
+			targetRegistry.restoreCheckpoint(checkpoint);
 
-		THEN("restoring a checkpoint discards appended entries and restores ID assignment")
-		{
-			auto checkpoint{registry.createCheckpoint()};
-			FixedMetaDataID assignedID{registry.addEntry(Metadata{.mName = "Custom"})};
-
-			registry.restoreCheckpoint(checkpoint);
-
-			CHECK((registry.getAmountRegistered() == 4U));
-			CHECK_FALSE(registry.hasEntry(assignedID));
-			CHECK((registry.addEntry(Metadata{.mName = "Replacement"}) == assignedID));
+			THEN("the checkpoint does not apply and the target registry remains unchanged")
+			{
+				CHECK((targetRegistry.getAmountRegistered() == finalWeatherUnderlyingValue - 1));
+				CHECK_FALSE(targetRegistry.hasEntry(NO_ID));
+			}
 		}
 	}
 }
 
-// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,misc-use-internal-linkage)
+// NOLINTEND(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)

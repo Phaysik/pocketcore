@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.8.7
-	@version 0.12.20
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Interaction/interaction.h"
 #include "Registry/registryError.h"
 #include "Registry/weatherRegistry.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
@@ -33,6 +34,7 @@ using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::WeatherRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::Interaction::InteractionAction;
 using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Weather::WeatherRegistry;
 using PocketCore::Testing::ensureLoggerInitialized;
@@ -207,7 +209,10 @@ SCENARIO("WeatherRegistryConfiguration")
 
 		WHEN("a unique weather definition is added")
 		{
-			WeatherMeta definition{.mName = "TestWeatherName"};
+			WeatherMeta definition{
+				.mName = "TestWeatherName",
+				.mWeatherInteractions = {{.mExistingID = WeatherID{1}, .mAction = InteractionAction::BlockIncoming}},
+			};
 
 			std::expected<WeatherID, RegistryErrorInfo> result{config.addWeather(definition)};
 
@@ -220,7 +225,8 @@ SCENARIO("WeatherRegistryConfiguration")
 				const WeatherMeta *metadata{config.getWeatherMetadata(assignedID)};
 
 				REQUIRE((metadata != nullptr));
-				CHECK((metadata->mName == "TestWeatherName"));
+				definition.mWeatherID = assignedID;
+				CHECK((*metadata == definition));
 			}
 		}
 	}

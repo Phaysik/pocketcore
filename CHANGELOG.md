@@ -4,11 +4,62 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.22] - 2026-09-11
+
 ## [0.12.21] - 2026-09-10
+
+### Changed
+
+- Regenerated `.zed/compile_commands.json` from the current source graph. The database now includes `src/Configuration/effectRegistryConfiguration.cpp`, increasing tracked translation units from 39 to 40, and refreshes every existing command to remove the obsolete `-Winline` flag. No runtime code changed.
 
 ## [0.12.20] - 2026-09-10
 
+### Added
+
+- Added equality operators to `FixedMetadataRegistry`, its internal `IDIndexEntry`, and every concrete runtime registry so tests and configuration rollback checks can compare complete registry state, including metadata storage, ID indexes, registered counts, mutation versions, and next-ID allocation state.
+- Added complete unit suites for effect, multiplier, nature, Pokemon, status, terrain, and weather registries, plus configuration suites for effect, nature, and Pokemon. Existing ability, item, move, multiplier, status, terrain, type, and weather configuration and registry suites were rewritten to cover built-in catalogs, lookups, stable-ID behavior, duplicate and not-found errors, updates, removals, capacity limits, and atomic batch rollback.
+- Added a shared logging test helper that initializes the process-wide logger once for configuration suites that verify emitted `RegistryErrorInfo` context.
+
+### Changed
+
+- Changed every registry metadata name from non-owning `std::string_view` to owned `std::string`. Ability, effect, item, move, multiplier, nature, Pokemon, status, terrain, type, and weather registration now retain names independently of caller and constant lifetimes; built-in registries explicitly copy their canonical name constants into metadata.
+- Reordered `BuiltinTypeID` after `None` to the canonical catalog order `Normal`, `Fire`, `Water`, `Electric`, `Grass`, `Ice`, `Fighting`, `Poison`, `Ground`, `Flying`, `Psychic`, `Bug`, `Rock`, `Ghost`, `Dragon`, `Dark`, `Steel`, `Fairy`, and `Stellar`. Type registry insertion and all offensive matchup rows were realigned to those stable numeric IDs.
+- Added default equality to concrete registry types and adjusted metadata equality declarations for owned strings and dynamic members; `MoveMeta::operator==` is no longer declared `noexcept` because its vector and variant comparisons are not guaranteed not to throw.
+- Changed `TypeDefinition` fields to the member-prefixed `mName`, `mOffensiveMatchups`, and `mDefensiveMatchups` layout and updated type registration and tests accordingly.
+- Changed name-keyed `setMatchupRow()` and `setDefensiveColumn()` to validate all referenced names before mutation and then update only the supplied cells. Oversized pair spans now return `RegistryError::MatchupMismatch`; omitted existing matchups remain unchanged rather than being reset to `NOT_DEFINED`.
+- Changed type removal by name or stable ID and type renaming to delegate to the generic fixed-registry configuration operations, keeping entry compaction and stable-ID preservation centralized.
+- Removed `-Winline` from the GCC and Clang warning-as-error sets and simplified the benchmark warning filter accordingly; migrated the example and tests to the corrected built-in type order and metadata ownership model.
+
+### Fixed
+
+- Corrected built-in type matchup rows and registration order after `None` was introduced in 0.12.19, restoring each effectiveness value to the stable ID of its intended defender.
+- Corrected registry/configuration expectations introduced by the initial test rewrites, including full metadata equality, built-in names and counts, mutation encapsulation, duplicate handling, and rollback state.
+- Corrected the terrain display constant from `TERRAIN_NAME_GRASS` with value `"Grass"` to `TERRAIN_NAME_GRASSY` with value `"Grassy"`, matching the `BuiltinTerrainID::Grassy` catalog entry.
+
+### Removed
+
+- Removed the `TypeRegistryConfiguration::removeType(BuiltinTypeID)` convenience overload and atomic `removeTypes(std::span<const std::string_view>)` API; removal remains available by display name or stable `TypeID`.
+- Removed the type configuration's duplicate manual entry-compaction path in favor of generic `removeMetadata()` behavior.
+
 ## [0.12.19] - 2026-09-03
+
+### Added
+
+- Added value equality across the registry metadata graph: ability, effect, item, move, multiplier, nature, Pokemon, status, terrain, type, and weather metadata; battle targets; effect triggers and suppression rules; generic interactions; and fixed and weighted move hit-count records. Weighted outcomes compare floating-point weights with the existing absolute-relative tolerance.
+- Added canonical ability names and runtime metadata for Guts, Levitate, Elevate, and Cloud Nine. Together with the existing None, Stench, Drizzle, and Air Lock entries, `AbilityRegistry` now registers all eight built-in ability IDs.
+- Added `BuiltinTypeID::None` and `TYPE_NAME_NONE` as the explicit empty type at stable ID zero. Existing built-in type IDs shift by one, with Normal beginning at one and `FinalType` remaining the one-past-the-end constructor sentinel; every matchup row gains a leading `NOT_DEFINED` cell for None.
+- Added stable-ID overloads for type-chart cell and row access and mutation. Unregistered IDs produce `nullptr` or no mutation, while indexed row lookup returns `INVALID_TYPE_CHART_ROW` for an out-of-capacity index.
+- Added `TypeRegistry::getTypeMetadata()` and standardized type constants under the `TYPE_NAME_*` naming convention.
+
+### Changed
+
+- Changed `FixedMetadataRegistry::getEntry()` from an asserted reference return to a nullable pointer. Valid indices return a non-owning metadata pointer; indices at or beyond fixed capacity return `nullptr`. Generic configuration mutation and rename paths now handle that absence as a structured not-found error.
+- Changed `TypeRegistry::getNextTypeID()` to return the underlying unsigned numeric counter rather than a wrapped `TypeID`, matching the generic registry counter interface.
+- Expanded ability, item, move, and type registry suites into behavior-oriented coverage of built-in metadata, name/ID lookup, spans, containment, next-ID state, and invalid queries. Pokemon stream expectations were updated for the expanded registered catalogs.
+
+### Fixed
+
+- Separated the empty type sentinel from Normal after both represented stable ID zero in 0.12.17: `BuiltinTypeID::None` now owns zero and Normal and every later built-in type shift upward by one.
 
 ## [0.12.18] - 2026-09-03
 
@@ -1822,7 +1873,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.21]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.22]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.21]: https://github.com/Phaysik/pocketcore/commit/bc898a0034898977a70ed1f2fa01f357d056ae2f
 [0.12.20]: https://github.com/Phaysik/pocketcore/commit/8b24decacfaa5a040c50fa83168db4840c3cc980
 [0.12.19]: https://github.com/Phaysik/pocketcore/commit/e8c4cce5b8de43c856411db117e461379427d009
 [0.12.18]: https://github.com/Phaysik/pocketcore/commit/304cf2f9b864530f64e2820573585c4dc60c2bb4

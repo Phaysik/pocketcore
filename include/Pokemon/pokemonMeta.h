@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.11.6
-	@version 0.12.20
+	@version 0.12.22
 	@author Matthew Moore
 */
 
@@ -34,13 +34,57 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
 
+	/*! @struct BasePokemonStats Pokemon/pokemonMeta.h
+		@brief Stores one pokemon's base stats.
+		@details This struct contains the base stats for a pokemon, including health, attack, defense, special attack, special defense, and
+	   speed.
+		@date 09/11/2026
+		@since 0.12.22
+		@version 0.12.22
+		@author Matthew Moore
+	*/
+	struct BasePokemonStats
+	{
+		public:
+			/*! @brief Compares two BasePokemonStats instances for equivalent metadata.
+				@details Compares all fields exactly.
+				@param[in] other The BasePokemonStats instance to compare.
+				@return True when both instances contain equivalent metadata; otherwise false.
+				@since 0.12.22
+				@version 0.12.22
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const BasePokemonStats &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The Pokemon's base max health stat. */
+			us mBaseMaxHealth{};
+
+			/*! @brief The Pokemon's base attack stat. */
+			us mBaseAttack{};
+
+			/*! @brief The Pokemon's base defense stat. */
+			us mBaseDefense{};
+
+			/*! @brief The Pokemon's base special attack stat. */
+			us mBaseSpAttack{};
+
+			/*! @brief The Pokemon's base special defense stat. */
+			us mBaseSpDefense{};
+
+			/*! @brief The Pokemon's base speed stat. */
+			us mBaseSpeed{};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+	};
+
 	/*! @struct PokemonMeta Pokemon/pokemonMeta.h
 		@brief Stores one pokemon's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.11.6
-		@version 0.12.20
+		@version 0.12.22
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -60,6 +104,12 @@ namespace PocketCore::Pokemon
 			/*! @brief The case-sensitive display name stored. */
 			std::string mName{};
 
+			/*! @brief The Pokemon's pool of available abilities. */
+			std::array<AbilityID, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
+
+			/*! @brief The Pokemon's base stats. */
+			BasePokemonStats mBaseStats{};
+
 			/*! @brief The Pokemon's move IDs. */
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 
@@ -68,27 +118,6 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
-
-			/*! @brief The Pokemon's pool of available abilities. */
-			std::array<AbilityID, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
-
-			/*! @brief The Pokemon's base attack stat. */
-			us mBaseAttack{};
-
-			/*! @brief The Pokemon's base defense stat. */
-			us mBaseDefense{};
-
-			/*! @brief The Pokemon's base max health stat. */
-			us mBaseMaxHealth{};
-
-			/*! @brief The Pokemon's base speed stat. */
-			us mBaseSpeed{};
-
-			/*! @brief The Pokemon's base special attack stat. */
-			us mBaseSpAttack{};
-
-			/*! @brief The Pokemon's base special defense stat. */
-			us mBaseSpDefense{};
 
 			/*! @brief The Pokemon's level. */
 			us mLevel{};
