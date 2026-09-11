@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.cpp
 	@brief Contains the base damage effect handler implementation
-	@date 09/01/2026
+	@date 09/11/2026
 	@since 0.7.2
-	@version 0.12.14
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -27,6 +27,8 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
+	using PocketCore::Configuration::BASE_DAMAGE_DIVISOR;
+	using PocketCore::Configuration::BASE_DAMAGE_OFFSET;
 	using PocketCore::Configuration::CACHE_STAT_STAGE_MULTIPLIERS;
 	using PocketCore::Configuration::statStageCacheIndex;
 	using PocketCore::Core::sb;
@@ -78,9 +80,8 @@ namespace PocketCore::Effect
 		};
 
 		const double defenseStat{
-			std::max(static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense())
-						 * targetDefenseMult * targetDefenseModifier,
-					 1.0),
+			static_cast<double>(context.mIsSpecial ? targetPokemon->getSpDefense() : targetPokemon->getDefense()) * targetDefenseMult
+				* targetDefenseModifier,
 		};
 
 		if (!std::isfinite(attackStat) || !std::isfinite(defenseStat) || attackStat <= 0.0)
@@ -97,7 +98,7 @@ namespace PocketCore::Effect
 
 		const double numerator{std::floor(static_cast<double>(levelDamageFactor) * numeratorMultPart)};
 
-		const double baseDamageCalc{std::floor(numerator / 50.0) + 2.0};
+		const double baseDamageCalc{std::floor(numerator / BASE_DAMAGE_DIVISOR) + BASE_DAMAGE_OFFSET};
 
 		context.mDamage.mDamage = static_cast<us>(std::clamp(baseDamageCalc, 1.0, static_cast<double>(std::numeric_limits<us>::max())));
 	}

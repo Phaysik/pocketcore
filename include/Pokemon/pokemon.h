@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.3.0
-	@version 0.12.17
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -23,6 +23,8 @@
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
+#include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/registryProvider.h"
 #include "Registry/statusRegistry.h"
 #include "Status/statusID.h"
@@ -32,6 +34,11 @@
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Configuration::CALCULATED_EV_DIVISOR;
+	using PocketCore::Configuration::CALCULATED_HEALTH_OFFSET;
+	using PocketCore::Configuration::CALCULATED_NUMERATOR_DIVISOR;
+	using PocketCore::Configuration::CALCULATED_NUMERATOR_MULTIPLIER;
+	using PocketCore::Configuration::CALCULATED_STAT_OFFSET;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_DENOMINATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
@@ -42,6 +49,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
+	using PocketCore::Core::ui;
 	using PocketCore::Core::us;
 	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Item::ItemID;
@@ -60,9 +68,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/02/2026
+		@date 09/11/2026
 		@since 0.3.0
-		@version 0.12.17
+		@version 0.12.23
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -72,31 +80,35 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Constructs a Pokemon with empty move slots and zero move PP.
 				@param[in] name Non-owning display-name view whose backing storage must outlive the object.
-				@param[in] attack Base physical Attack statistic.
-				@param[in] defense Base physical Defense statistic.
-				@param[in] health Maximum and initial health value.
-				@param[in] speed Base Speed statistic.
-				@param[in] spAttack Base Special Attack statistic.
-				@param[in] spDefense Base Special Defense statistic.
+				@param[in] stats The base stats of the Pokemon.
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
-				@param[in] typeIDs Fixed type identifier slots
+				@param[in] typeIDs Fixed type identifier slots.
+				@param[in] natureIDs Fixed nature identifier slots.
+				@param[in] natureMultipliers Fixed nature multipliers for the Pokemon's base stats.
+				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
+				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.23
 			*/
-			explicit constexpr Pokemon(const std::string_view &name, const us health, const us attack, const us defense, const us spAttack,
-									   const us spDefense, const us speed, const us level,
-									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
-									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs)
-				: mName{name}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health},
-				  mAttack{attack}, mDefense{defense}, mSpAttack{spAttack}, mSpDefense{spDefense}, mSpeed{speed}
+			explicit constexpr Pokemon(const std::string_view &name, const PokemonStats &stats, const us level,
+									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
+									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
+				  mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mNatureIDs(natureIDs)
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
 				setLevel(level);
+				recomputeStats();
+				setHealth(mCalculatedStats.mMaxHealth);
 			}
 
 			/*! @brief Constructs a Pokemon from complete move and PP arrays.
@@ -104,31 +116,35 @@ namespace PocketCore::Pokemon
 				@param[in] moveIDs Fixed move identifier slots.
 				@param[in] maxPP Maximum PP for each move slot.
 				@param[in] currentPP Current PP for each move slot.
-				@param[in] attack Base physical Attack statistic.
-				@param[in] defense Base physical Defense statistic.
-				@param[in] health Maximum and initial health value.
-				@param[in] speed Base Speed statistic.
-				@param[in] spAttack Base Special Attack statistic.
-				@param[in] spDefense Base Special Defense statistic.
+				@param[in] stats The base stats of the Pokemon.
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
-				@param[in] typeIDs Fixed type identifier slots
+				@param[in] typeIDs Fixed type identifier slots.
+				@param[in] natureIDs Fixed nature identifier slots.
+				@param[in] natureMultipliers Fixed nature multipliers for the Pokemon's base stats.
+				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
+				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.23
 			*/
-			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs,
-									   const std::array<ub, MAX_MOVES_PER_POKEMON> maxPP,
-									   const std::array<ub, MAX_MOVES_PER_POKEMON> currentPP, const us health, const us attack,
-									   const us defense, const us spAttack, const us spDefense, const us speed, const us level,
-									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs,
-									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> typeIDs)
-				: mName{name}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs},
-				  mItemIDs{itemIDs}, mMaxHealth{health}, mHealth{health}, mAttack{attack}, mDefense{defense}, mSpAttack{spAttack},
-				  mSpDefense{spDefense}, mSpeed{speed}
+			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP, const PokemonStats &stats, const us level,
+									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
+									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
+				  mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
+				  mNatureIDs{natureIDs}
 			{
 				setLevel(level);
+				recomputeStats();
+				setHealth(mCalculatedStats.mMaxHealth);
 			}
 
 			// Getters
@@ -161,6 +177,26 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMoveIDsArray() const
 			{
 				return mMoveIDs;
+			}
+
+			/*! @brief Returns all individual value (IV) slots for the Pokemon's base stats.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			ATTR_NODISCARD constexpr const std::array<us, POKEMON_STAT_COUNT> &getPokemonIVsArray() const
+			{
+				return mPokemonIVs;
+			}
+
+			/*! @brief Returns all effort value (EV) slots for the Pokemon's base stats.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			ATTR_NODISCARD constexpr const std::array<us, POKEMON_STAT_COUNT> &getPokemonEVsArray() const
+			{
+				return mPokemonEVs;
 			}
 
 			/*! @brief Returns maximum PP for every move slot.
@@ -249,6 +285,34 @@ namespace PocketCore::Pokemon
 				assert(index < mMoveIDs.size());
 
 				return mMoveIDs.at(index);
+			}
+
+			/*! @brief Returns an individual value (IV) for an indexed base stat slot.
+				@param[in] index Base stat slot index; must be less than POKEMON_STAT_COUNT.
+				@return The individual value stored in the slot.
+				@pre index < POKEMON_STAT_COUNT; violation triggers an assertion.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			ATTR_NODISCARD constexpr us getPokemonIV(const us index) const
+			{
+				assert(index < mPokemonIVs.size());
+
+				return mPokemonIVs.at(index);
+			}
+
+			/*! @brief Returns an effort value (EV) for an indexed base stat slot.
+				@param[in] index Base stat slot index; must be less than POKEMON_STAT_COUNT.
+				@return The effort value stored in the slot.
+				@pre index < POKEMON_STAT_COUNT; violation triggers an assertion.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			ATTR_NODISCARD constexpr us getPokemonEV(const us index) const
+			{
+				assert(index < mPokemonEVs.size());
+
+				return mPokemonEVs.at(index);
 			}
 
 			/*! @brief Returns maximum PP for an indexed move slot.
@@ -348,61 +412,61 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns maximum health.
 				@return The maximum health value.
 				@since 0.9.14
-				@version 0.9.14
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getMaximumHealth() const
 			{
-				return mMaxHealth;
+				return mCalculatedStats.mMaxHealth;
 			}
 
 			/*! @brief Returns the base Attack statistic.
 				@return The Attack value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getAttack() const
 			{
-				return mAttack;
+				return mCalculatedStats.mAttack;
 			}
 
 			/*! @brief Returns the base Defense statistic.
 				@return The Defense value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getDefense() const
 			{
-				return mDefense;
+				return mCalculatedStats.mDefense;
 			}
 
 			/*! @brief Returns the base Special Attack statistic.
 				@return The Special Attack value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getSpAttack() const
 			{
-				return mSpAttack;
+				return mCalculatedStats.mSpAttack;
 			}
 
 			/*! @brief Returns the base Special Defense statistic.
 				@return The Special Defense value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getSpDefense() const
 			{
-				return mSpDefense;
+				return mCalculatedStats.mSpDefense;
 			}
 
 			/*! @brief Returns the base Speed statistic.
 				@return The Speed value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			ATTR_NODISCARD constexpr us getSpeed() const
 			{
-				return mSpeed;
+				return mCalculatedStats.mSpeed;
 			}
 
 			/*! @brief Returns the Pokemon's level.
@@ -423,6 +487,16 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr us getLevelDamageFactor() const
 			{
 				return mLevelDamageFactor;
+			}
+
+			/*! @brief Returns the stable identifier for the Pokemon species.
+				@return The PokemonID value.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			ATTR_NODISCARD constexpr PokemonID getPokemonID() const
+			{
+				return mPokemonID;
 			}
 
 			// Setters
@@ -455,6 +529,26 @@ namespace PocketCore::Pokemon
 			constexpr void setMoveIDsArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
 			{
 				mMoveIDs = moveIDs;
+			}
+
+			/*! @brief Replaces all individual value (IV) slots for the Pokemon's base stats.
+				@param[in] pokemonIVs The individual values to store.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void setPokemonIVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs)
+			{
+				mPokemonIVs = pokemonIVs;
+			}
+
+			/*! @brief Replaces all effort value (EV) slots for the Pokemon's base stats.
+				@param[in] pokemonEVs The effort values to store.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void setPokemonEVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+			{
+				mPokemonEVs = pokemonEVs;
 			}
 
 			/*! @brief Replaces maximum PP for all move slots.
@@ -545,6 +639,36 @@ namespace PocketCore::Pokemon
 				mMoveIDs.at(slotIndex) = moveID;
 			}
 
+			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
+				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
+				@param[in] pokemonIV The individual value to store.
+				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void setPokemonIV(const ub slotIndex, const ub pokemonIV)
+			{
+				assert(slotIndex < mPokemonIVs.size());
+
+				mPokemonIVs.at(slotIndex) = pokemonIV;
+				recomputeStats();
+			}
+
+			/*! @brief Sets one effort value (EV) slot for the Pokemon's base stats.
+				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
+				@param[in] pokemonEV The effort value to store.
+				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void setPokemonEV(const ub slotIndex, const ub pokemonEV)
+			{
+				assert(slotIndex < mPokemonEVs.size());
+
+				mPokemonEVs.at(slotIndex) = pokemonEV;
+				recomputeStats();
+			}
+
 			/*! @brief Sets maximum PP for one move slot.
 				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
 				@param[in] maxPP The maximum PP value to store.
@@ -632,72 +756,78 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets current health, clamped to maximum health.
 				@param[in] health The requested current health value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setHealth(const us health)
 			{
-				mHealth = std::min(health, mMaxHealth);
+				mHealth = std::min(health, mCalculatedStats.mMaxHealth);
 			}
 
 			/*! @brief Sets maximum health and clamps current health to the new maximum.
 				@param[in] maximumHealth The new maximum health value.
 				@since 0.9.14
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setMaximumHealth(const us maximumHealth)
 			{
-				mMaxHealth = maximumHealth;
-				mHealth = std::min(mHealth, mMaxHealth);
+				mBaseStats.mMaxHealth = maximumHealth;
+				recomputeStats();
+				mHealth = std::min(mHealth, mCalculatedStats.mMaxHealth);
 			}
 
 			/*! @brief Replaces the base Attack statistic.
 				@param[in] attack The new Attack value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setAttack(const us attack)
 			{
-				mAttack = attack;
+				mBaseStats.mAttack = attack;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces the base Defense statistic.
 				@param[in] defense The new Defense value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setDefense(const us defense)
 			{
-				mDefense = defense;
+				mBaseStats.mDefense = defense;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces the base Special Attack statistic.
 				@param[in] spAttack The new Special Attack value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setSpAttack(const us spAttack)
 			{
-				mSpAttack = spAttack;
+				mBaseStats.mSpAttack = spAttack;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces the base Special Defense statistic.
 				@param[in] spDefense The new Special Defense value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setSpDefense(const us spDefense)
 			{
-				mSpDefense = spDefense;
+				mBaseStats.mSpDefense = spDefense;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces the base Speed statistic.
 				@param[in] speed The new Speed value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.23
 			*/
 			constexpr void setSpeed(const us speed)
 			{
-				mSpeed = speed;
+				mBaseStats.mSpeed = speed;
+				recomputeStats();
 			}
 
 			/*! @brief Sets the level and recomputes its damage factor.
@@ -710,6 +840,17 @@ namespace PocketCore::Pokemon
 				mLevel = level;
 				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
 													 + LEVEL_DAMAGE_FACTOR_OFFSET);
+				recomputeStats();
+			}
+
+			/*! @brief Sets the stable identifier for the Pokemon species.
+				@param[in] pokemonID The new PokemonID value.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void setPokemonID(const PokemonID pokemonID)
+			{
+				mPokemonID = pokemonID;
 			}
 
 			// Utility Functions
@@ -764,8 +905,67 @@ namespace PocketCore::Pokemon
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 
 		private:
+			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, and nature multipliers.
+				@details This function recalculates each of the Pokemon's stats using the formulae defined for base stats, individual values
+			   (IVs), effort values (EVs), level, and nature multipliers. It ensures that the calculated stats are up-to-date whenever any
+			   of the contributing factors change.
+				@since 0.12.23
+				@version 0.12.23
+			*/
+			constexpr void recomputeStats()
+			{
+				const auto getBaseComponent = [this](const ub index, const us baseStat) -> us {
+					const ui ivAndEvCalc{
+						mPokemonIVs.at(index) + static_cast<ui>(std::floor(mPokemonEVs.at(index) / CALCULATED_EV_DIVISOR)),
+					};
+
+					const ui numerator{((CALCULATED_NUMERATOR_MULTIPLIER * baseStat) + ivAndEvCalc) * mLevel};
+
+					return static_cast<us>(std::floor(numerator / CALCULATED_NUMERATOR_DIVISOR));
+				};
+
+				constexpr std::size_t healthIndex{toIndex(PokemonStat::Health)};
+				constexpr std::size_t attackIndex{toIndex(PokemonStat::Attack)};
+				constexpr std::size_t defenseIndex{toIndex(PokemonStat::Defense)};
+				constexpr std::size_t specialAttackIndex{toIndex(PokemonStat::SpecialAttack)};
+				constexpr std::size_t specialDefenseIndex{toIndex(PokemonStat::SpecialDefense)};
+				constexpr std::size_t speedIndex{toIndex(PokemonStat::Speed)};
+
+				mCalculatedStats.mMaxHealth
+					= static_cast<us>((getBaseComponent(healthIndex, mBaseStats.mMaxHealth) + mLevel + CALCULATED_HEALTH_OFFSET)
+									  * mNatureMultipliers.at(healthIndex));
+
+				mCalculatedStats.mAttack = static_cast<us>((getBaseComponent(attackIndex, mBaseStats.mAttack) + CALCULATED_STAT_OFFSET)
+														   * mNatureMultipliers.at(attackIndex));
+				mCalculatedStats.mDefense = static_cast<us>((getBaseComponent(defenseIndex, mBaseStats.mDefense) + CALCULATED_STAT_OFFSET)
+															* mNatureMultipliers.at(defenseIndex));
+				mCalculatedStats.mSpAttack
+					= static_cast<us>((getBaseComponent(specialAttackIndex, mBaseStats.mSpAttack) + CALCULATED_STAT_OFFSET)
+									  * mNatureMultipliers.at(specialAttackIndex));
+				mCalculatedStats.mSpDefense
+					= static_cast<us>((getBaseComponent(specialDefenseIndex, mBaseStats.mSpDefense) + CALCULATED_STAT_OFFSET)
+									  * mNatureMultipliers.at(specialDefenseIndex));
+				mCalculatedStats.mSpeed = static_cast<us>((getBaseComponent(speedIndex, mBaseStats.mSpeed) + CALCULATED_STAT_OFFSET)
+														  * mNatureMultipliers.at(speedIndex));
+			}
+
+		private:
+			/*! @brief The nature multipliers affecting the Pokemon's stats. */
+			std::array<double, POKEMON_STAT_COUNT> mNatureMultipliers{};
+
 			/*! @brief The non-owning display name. */
 			std::string_view mName{};
+
+			/*! @brief The base stats for the Pokemon species. */
+			PokemonStats mBaseStats{};
+
+			/*! @brief The calculated stats for the Pokemon, considering IVs, EVs, and other modifiers. */
+			PokemonStats mCalculatedStats{};
+
+			/*! @brief The individual values (IVs) for the Pokemon's stats. */
+			std::array<us, POKEMON_STAT_COUNT> mPokemonIVs{};
+			/*! @brief The effort values (EVs) for the Pokemon's stats. */
+			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
 
 			/*! @brief The owned status identifier slots. */
 			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{};
@@ -787,24 +987,17 @@ namespace PocketCore::Pokemon
 			/*! @brief The owned nature identifier slots. */
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{};
 
-			/*! @brief The maximum health value. */
-			us mMaxHealth{};
-			/*! @brief The current health value. */
+			/*! @brief The current health value for the Pokemon. */
 			us mHealth{};
-			/*! @brief The base Attack statistic. */
-			us mAttack{};
-			/*! @brief The base Defense statistic. */
-			us mDefense{};
-			/*! @brief The base Special Attack statistic. */
-			us mSpAttack{};
-			/*! @brief The base Special Defense statistic. */
-			us mSpDefense{};
-			/*! @brief The base Speed statistic. */
-			us mSpeed{};
-			/*! @brief The current level. */
+
+			/*! @brief The current level of the Pokemon. */
 			us mLevel{};
+
 			/*! @brief The derived factor used by level-scaled damage calculations. */
 			us mLevelDamageFactor{};
+
+			/*! @brief The stable identifier for the Pokemon species. */
+			PokemonID mPokemonID{};
 	};
 
 	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.

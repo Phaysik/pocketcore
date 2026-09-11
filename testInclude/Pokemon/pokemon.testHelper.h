@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.12.13
-	@version 0.12.17
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -32,6 +32,8 @@ namespace PocketCore::Testing
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
+	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
@@ -42,6 +44,8 @@ namespace PocketCore::Testing
 	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
+	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonStats;
 	using PocketCore::Status::NO_STATUS_ID;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Type::NO_TYPE_ID;
@@ -50,11 +54,26 @@ namespace PocketCore::Testing
 	struct PokemonTestData
 	{
 		public:
+			std::array<double, POKEMON_STAT_COUNT> mNatureMultipliers{
+				NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+				NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+			};
+
 			std::string_view mName{POKEMON_NAME_BULBASAUR};
+
+			PokemonStats mStats{};
 
 			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{NO_STATUS_ID};
 
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{NO_MOVE_ID};
+
+			std::array<us, POKEMON_STAT_COUNT> mPokemonIVs{
+				MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE,
+				MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE, // NOLINT(readability-trailing-comma)
+			};
+
+			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
+
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{0};
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{0};
 
@@ -64,25 +83,19 @@ namespace PocketCore::Testing
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{NO_NATURE_ID};
 
 			us mHealth{0};
-			us mMaximumHealth{0};
-			us mAttack{0};
-			us mDefense{0};
-			us mSpecialAttack{0};
-			us mSpecialDefense{0};
-			us mSpeed{0};
-			
-			us mLevel{0};
+
+			us mLevel{1};
 	};
 
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
-		Pokemon pokemon{data.mName,	  data.mMoveIDs,	data.mMaxPP,		 data.mCurrentPP,	   data.mHealth,
-						data.mAttack, data.mDefense,	data.mSpecialAttack, data.mSpecialDefense, data.mSpeed,
-						data.mLevel,  data.mAbilityIDs, data.mItemIDs,		 data.mTypesIDs};
+		Pokemon pokemon{
+			data.mName,	   data.mMoveIDs,  data.mMaxPP,		data.mCurrentPP,		 data.mStats,	   data.mLevel,		 data.mAbilityIDs,
+			data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureMultipliers, data.mPokemonIVs, data.mPokemonEVs,
+		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);
-		pokemon.setNatureIDsArray(data.mNatureIDs);
-		pokemon.setMaximumHealth(data.mMaximumHealth);
+		pokemon.setHealth(data.mHealth);
 
 		return pokemon;
 	}

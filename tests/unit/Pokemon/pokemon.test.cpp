@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.4.0
-	@version 0.12.20
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -48,6 +48,7 @@ using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
@@ -87,17 +88,26 @@ SCENARIO("Pokemon")
 	{
 		WHEN("creating a Pokemon with empty move slots and zero move PP")
 		{
-			Pokemon pokemon{"TestMon",
-							100,
-							100,
-							100,
-							100,
-							100,
-							100,
-							100,
-							{toAbilityID(BuiltinAbilityID::CloudNine)},
-							{toItemID(BuiltinItemID::ChestoBerry)},
-							{toTypeID(BuiltinTypeID::Dark)}};
+			Pokemon pokemon{
+				"TestMon",
+				{
+					.mMaxHealth = 100,
+					.mAttack = 100,
+					.mDefense = 100,
+					.mSpAttack = 100,
+					.mSpDefense = 100,
+					.mSpeed = 100,
+				},
+				100,
+				{toAbilityID(BuiltinAbilityID::CloudNine)},
+				{toItemID(BuiltinItemID::ChestoBerry)},
+				{toTypeID(BuiltinTypeID::Dark)},
+				{toNatureID(BuiltinNatureID::Hardy)},
+				{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+				 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+				{},
+				{},
+			};
 
 			THEN("the fields are properly defaulted")
 			{
@@ -119,16 +129,23 @@ SCENARIO("Pokemon")
 							},
 							{10, 10, 10, 10},
 							{10, 10, 10, 10},
-							100,
-							100,
-							100,
-							100,
-							100,
-							100,
+							{
+								.mMaxHealth = 100,
+								.mAttack = 100,
+								.mDefense = 100,
+								.mSpAttack = 100,
+								.mSpDefense = 100,
+								.mSpeed = 100,
+							},
 							100,
 							{toAbilityID(BuiltinAbilityID::CloudNine)},
 							{toItemID(BuiltinItemID::ChestoBerry)},
-							{toTypeID(BuiltinTypeID::Dark)}};
+							{toTypeID(BuiltinTypeID::Dark)},
+							{toNatureID(BuiltinNatureID::Hardy)},
+							{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+							 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+							{},
+							{}};
 
 			THEN("the fields are properly defaulted")
 			{
@@ -548,7 +565,7 @@ SCENARIO("Pokemon")
 	{
 		GIVEN("health")
 		{
-			Pokemon pokemon{makePokemon({.mHealth = 15, .mMaximumHealth = 30})};
+			Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 30}, .mHealth = 15, .mLevel = 50})};
 
 			WHEN("calling getHealth")
 			{
@@ -570,41 +587,41 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setHealth with more health than the maximum health")
 			{
-				pokemon.setHealth(50);
+				pokemon.setHealth(100);
 
-				THEN("the pokemon's health is clamped to the maximum")
+				THEN("the pokemon's health is clamped to the maximum calculated health")
 				{
-					CHECK((30 == pokemon.getHealth()));
+					CHECK((90 == pokemon.getHealth()));
 				}
 			}
 		}
 
 		GIVEN("maximumHealth")
 		{
-			Pokemon pokemon{makePokemon({.mMaximumHealth = 5})};
+			Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 5}})};
 
 			WHEN("calling getMaximumHealth")
 			{
 				THEN("the maximumHealth matches")
 				{
-					CHECK((5 == pokemon.getMaximumHealth()));
+					CHECK((11 == pokemon.getMaximumHealth()));
 				}
 			}
 
 			WHEN("calling setMaximumHealth")
 			{
-				pokemon.setMaximumHealth(10);
+				pokemon.setMaximumHealth(100);
 
 				THEN("the pokemon's maximum health is properly updated")
 				{
-					CHECK((10 == pokemon.getMaximumHealth()));
+					CHECK((13 == pokemon.getMaximumHealth()));
 				}
 			}
 		}
 
 		GIVEN("attack")
 		{
-			Pokemon pokemon{makePokemon({.mAttack = 5})};
+			Pokemon pokemon{makePokemon({.mStats = {.mAttack = 5}})};
 
 			WHEN("calling getAttack")
 			{
@@ -616,103 +633,103 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setAttack")
 			{
-				pokemon.setAttack(10);
+				pokemon.setAttack(100);
 
 				THEN("the pokemon's attack is properly updated")
 				{
-					CHECK((10 == pokemon.getAttack()));
+					CHECK((7 == pokemon.getAttack()));
 				}
 			}
 		}
 
 		GIVEN("defense")
 		{
-			Pokemon pokemon{makePokemon({.mDefense = 10})};
+			Pokemon pokemon{makePokemon({.mStats = {.mDefense = 10}})};
 
 			WHEN("calling getDefense")
 			{
 				THEN("the defense matches")
 				{
-					CHECK((10 == pokemon.getDefense()));
+					CHECK((5 == pokemon.getDefense()));
 				}
 			}
 
 			WHEN("calling setDefense")
 			{
-				pokemon.setDefense(20);
+				pokemon.setDefense(200);
 
 				THEN("the pokemon's defense is properly updated")
 				{
-					CHECK((20 == pokemon.getDefense()));
+					CHECK((9 == pokemon.getDefense()));
 				}
 			}
 		}
 
 		GIVEN("special attack")
 		{
-			Pokemon pokemon{makePokemon({.mSpecialAttack = 9})};
+			Pokemon pokemon{makePokemon({.mStats = {.mSpAttack = 9}})};
 
 			WHEN("calling getSpAttack")
 			{
 				THEN("the spAttack matches")
 				{
-					CHECK((9 == pokemon.getSpAttack()));
+					CHECK((5 == pokemon.getSpAttack()));
 				}
 			}
 
 			WHEN("calling setSpAttack")
 			{
-				pokemon.setSpAttack(18);
+				pokemon.setSpAttack(300);
 
 				THEN("the pokemon's special attack is properly updated")
 				{
-					CHECK((18 == pokemon.getSpAttack()));
+					CHECK((11 == pokemon.getSpAttack()));
 				}
 			}
 		}
 
 		GIVEN("special defense")
 		{
-			Pokemon pokemon{makePokemon({.mSpecialDefense = 8})};
+			Pokemon pokemon{makePokemon({.mStats = {.mSpDefense = 8}})};
 
 			WHEN("calling getSpDefense")
 			{
 				THEN("the spDefense matches")
 				{
-					CHECK((8 == pokemon.getSpDefense()));
+					CHECK((5 == pokemon.getSpDefense()));
 				}
 			}
 
 			WHEN("calling setSpDefense")
 			{
-				pokemon.setSpDefense(16);
+				pokemon.setSpDefense(400);
 
 				THEN("the pokemon's special defense is properly updated")
 				{
-					CHECK((16 == pokemon.getSpDefense()));
+					CHECK((13 == pokemon.getSpDefense()));
 				}
 			}
 		}
 
 		GIVEN("speed")
 		{
-			Pokemon pokemon{makePokemon({.mSpeed = 12})};
+			Pokemon pokemon{makePokemon({.mStats = {.mSpeed = 12}})};
 
 			WHEN("calling getSpeed")
 			{
 				THEN("the speed matches")
 				{
-					CHECK((12 == pokemon.getSpeed()));
+					CHECK((5 == pokemon.getSpeed()));
 				}
 			}
 
 			WHEN("calling setSpeed")
 			{
-				pokemon.setSpeed(24);
+				pokemon.setSpeed(500);
 
 				THEN("the pokemon's speed is properly updated")
 				{
-					CHECK((24 == pokemon.getSpeed()));
+					CHECK((15 == pokemon.getSpeed()));
 				}
 			}
 		}
@@ -771,7 +788,7 @@ SCENARIO("Pokemon")
 
 	GIVEN("isFainted")
 	{
-		Pokemon pokemon{makePokemon({.mHealth = 5, .mMaximumHealth = 10})};
+		Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 10}, .mHealth = 5})};
 
 		WHEN("the pokemon has health")
 		{
@@ -800,14 +817,16 @@ SCENARIO("Pokemon")
 		Pokemon pokemon{
 			makePokemon({
 				.mName = "MissingNo",
+				.mStats = {
+					.mMaxHealth = 1,
+					.mAttack = 1,
+					.mDefense = 1,
+					.mSpAttack = 1,
+					.mSpDefense = 1,
+				},
 				.mAbilityIDs = {AbilityID{}},
 				.mItemIDs = {ItemID{}},
 				.mHealth = 1,
-				.mMaximumHealth = 1,
-				.mAttack = 1,
-				.mDefense = 1,
-				.mSpecialAttack = 1,
-				.mSpecialDefense = 1,
 				.mLevel = 10,
 			}),
 		};
@@ -932,6 +951,14 @@ SCENARIO("Pokemon")
 		Pokemon pokemon{
 			makePokemon({
 				.mName = "TestMon",
+				.mStats = {
+					.mMaxHealth = 150,
+					.mAttack = 101,
+					.mDefense = 102,
+					.mSpAttack = 103,
+					.mSpDefense = 104,
+					.mSpeed = 105,
+				},
 				.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
 				.mMoveIDs = {MoveID{10}, MoveID{11}, MoveID{12}, MoveID{13}},
 				.mMaxPP = {15, 20, 25, 30},
@@ -939,14 +966,8 @@ SCENARIO("Pokemon")
 				.mTypesIDs = {TypeID{2}, TypeID{3}},
 				.mAbilityIDs = {AbilityID{6}},
 				.mItemIDs = {ItemID{7}},
-				.mNatureIDs = {NatureID{5}},
+				.mNatureIDs = {NatureID{1}},
 				.mHealth = 150,
-				.mMaximumHealth = 150,
-				.mAttack = 101,
-				.mDefense = 102,
-				.mSpecialAttack = 103,
-				.mSpecialDefense = 104,
-				.mSpeed = 105,
 				.mLevel = 50,
 			}),
 		};
@@ -963,14 +984,26 @@ SCENARIO("Pokemon")
 					"  Name: TestMon\n"
 					"  Level: 50\n"
 					"  Level Damage Factor: 22\n"
-					"  Health: 150/150\n"
-					"  Attack: 101\n"
-					"  Defense: 102\n"
-					"  Special Attack: 103\n"
-					"  Special Defense: 104\n"
-					"  Speed: 105\n"
+					"  Health: 150/210\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Attack: 106\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Defense: 107\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Special Attack: 108\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Special Defense: 109\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Speed: 110\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
 					"  Type IDs: [2, 3]\n"
-					"  Nature IDs: [5]\n"
+					"  Nature IDs: [1]\n"
 					"  Ability IDs: [6]\n"
 					"  Item IDs: [7]\n"
 					"  Status IDs: [20, 21, 22, 23, 24]\n"
@@ -995,6 +1028,14 @@ SCENARIO("Pokemon free function")
 		Pokemon pokemon{
 			makePokemon({
 				.mName = "TestMon",
+				.mStats = {
+					.mMaxHealth = 150,
+					.mAttack = 101,
+					.mDefense = 102,
+					.mSpAttack = 103,
+					.mSpDefense = 104,
+					.mSpeed = 105,
+				},
 				.mStatusIDs
 				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
 				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
@@ -1004,14 +1045,8 @@ SCENARIO("Pokemon free function")
 				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
 				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
 				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
-				.mNatureIDs = {toNatureID(BuiltinNatureID::Adamant)},
+				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
 				.mHealth = 150,
-				.mMaximumHealth = 150,
-				.mAttack = 101,
-				.mDefense = 102,
-				.mSpecialAttack = 103,
-				.mSpecialDefense = 104,
-				.mSpeed = 105,
 				.mLevel = 50,
 			}),
 		};
@@ -1030,12 +1065,24 @@ SCENARIO("Pokemon free function")
 					"  Name: TestMon\n"
 					"  Level: 50\n"
 					"  Level Damage Factor: 22\n"
-					"  Health: 150/150\n"
-					"  Attack: 101\n"
-					"  Defense: 102\n"
-					"  Special Attack: 103\n"
-					"  Special Defense: 104\n"
-					"  Speed: 105\n"
+					"  Health: 150/210\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Attack: 106\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Defense: 107\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Special Attack: 108\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Special Defense: 109\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
+					"  Speed: 110\n"
+					"    IV: 1\n"
+					"    EV: 0\n"
 					"  Types:\n"
 					"    [0]:\n"
 					"      ID: 2\n"
@@ -1045,8 +1092,8 @@ SCENARIO("Pokemon free function")
 					"      Name: Bug\n"
 					"  Natures:\n"
 					"    [0]:\n"
-					"      ID: 4\n"
-					"      Name: Adamant\n"
+					"      ID: 1\n"
+					"      Name: Hardy\n"
 					"  Abilities:\n"
 					"    [0]:\n"
 					"      ID: 6\n"

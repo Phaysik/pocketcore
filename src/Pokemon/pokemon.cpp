@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.3.0
-	@version 0.12.17
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <ostream>
 #include <string_view>
 
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/registryProvider.h"
 
 namespace PocketCore::Pokemon
@@ -30,11 +31,23 @@ namespace PocketCore::Pokemon
 				  << "  Level: " << pokemon.getLevel() << '\n'
 				  << "  Level Damage Factor: " << pokemon.getLevelDamageFactor() << '\n'
 				  << "  Health: " << pokemon.getHealth() << '/' << pokemon.getMaximumHealth() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Health)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Health)) << '\n'
 				  << "  Attack: " << pokemon.getAttack() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Attack)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Attack)) << '\n'
 				  << "  Defense: " << pokemon.getDefense() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Defense)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Defense)) << '\n'
 				  << "  Special Attack: " << pokemon.getSpAttack() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::SpecialAttack)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::SpecialAttack)) << '\n'
 				  << "  Special Defense: " << pokemon.getSpDefense() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::SpecialDefense)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::SpecialDefense)) << '\n'
 				  << "  Speed: " << pokemon.getSpeed() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Speed)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Speed)) << '\n'
 				  << "  Type IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
@@ -92,7 +105,7 @@ namespace PocketCore::Pokemon
 										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
 			constexpr std::string_view unregisteredName{"<unregistered>"};
 			const std::optional<std::string_view> name{nameLookup(stableID)};
-			
+
 			outStream << indentation << "ID: " << stableID.getValue() << '\n' << indentation << "Name: " << name.value_or(unregisteredName);
 		};
 
@@ -101,103 +114,115 @@ namespace PocketCore::Pokemon
 				  << "  Level: " << pokemon.getLevel() << '\n'
 				  << "  Level Damage Factor: " << pokemon.getLevelDamageFactor() << '\n'
 				  << "  Health: " << pokemon.getHealth() << '/' << pokemon.getMaximumHealth() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Health)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Health)) << '\n'
 				  << "  Attack: " << pokemon.getAttack() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Attack)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Attack)) << '\n'
 				  << "  Defense: " << pokemon.getDefense() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Defense)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Defense)) << '\n'
 				  << "  Special Attack: " << pokemon.getSpAttack() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::SpecialAttack)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::SpecialAttack)) << '\n'
 				  << "  Special Defense: " << pokemon.getSpDefense() << '\n'
-				  << "  Speed: " << pokemon.getSpeed() << '\n';
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::SpecialDefense)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::SpecialDefense)) << '\n'
+				  << "  Speed: " << pokemon.getSpeed() << '\n'
+				  << "    IV: " << pokemon.getPokemonIV(toIndex(PokemonStat::Speed)) << '\n'
+				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Speed)) << '\n';
 
 		outStream << "  Types:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
 		{
 			const TypeID typeID{pokemon.getTypeID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", typeID, [&registryProvider](const TypeID identifier) {
 				return registryProvider.typeRegistry != nullptr ? registryProvider.typeRegistry->getTypeName(identifier) : std::nullopt;
 			});
-			
+
 			outStream << '\n';
 		}
 
 		outStream << "  Natures:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
 		{
 			const NatureID natureID{pokemon.getNatureID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", natureID, [&registryProvider](const NatureID identifier) {
 				return registryProvider.natureRegistry != nullptr ? registryProvider.natureRegistry->getNatureName(identifier)
 																  : std::nullopt;
 			});
-			
+
 			outStream << '\n';
 		}
 
 		outStream << "  Abilities:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
 		{
 			const AbilityID abilityID{pokemon.getAbilityID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", abilityID, [&registryProvider](const AbilityID identifier) {
 				return registryProvider.abilityRegistry != nullptr ? registryProvider.abilityRegistry->getAbilityName(identifier)
 																   : std::nullopt;
 			});
-			
+
 			outStream << '\n';
 		}
 
 		outStream << "  Items:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
 		{
 			const ItemID itemID{pokemon.getItemID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", itemID, [&registryProvider](const ItemID identifier) {
 				return registryProvider.itemRegistry != nullptr ? registryProvider.itemRegistry->getItemName(identifier) : std::nullopt;
 			});
-			
+
 			outStream << '\n';
 		}
 
 		outStream << "  Statuses:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
 		{
 			const StatusID statusID{pokemon.getStatusID(static_cast<us>(index))};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
 				return registryProvider.statusRegistry != nullptr ? registryProvider.statusRegistry->getStatusName(identifier)
 																  : std::nullopt;
 			});
-			
+
 			outStream << '\n';
 		}
 
 		outStream << "  Moves:\n";
-		
+
 		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
 		{
 			const auto moveSlotIndex{static_cast<ub>(index)};
 			const MoveID moveID{pokemon.getMoveID(moveSlotIndex)};
 			outStream << "    [" << index << "]:\n";
-			
+
 			printIDAndName("      ", moveID, [&registryProvider](const MoveID identifier) {
 				return registryProvider.moveRegistry != nullptr ? registryProvider.moveRegistry->getMoveName(identifier) : std::nullopt;
 			});
-			
+
 			outStream << "\n      PP: " << static_cast<unsigned int>(pokemon.getCurrentPP(moveSlotIndex)) << '/'
 					  << static_cast<unsigned int>(pokemon.getMaxPP(moveSlotIndex)) << '\n';
 		}
 
 		outStream << '}';
-		
+
 		return outStream;
 	}
 

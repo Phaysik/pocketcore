@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.1.0
-	@version 0.12.16
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -208,6 +208,28 @@ namespace PocketCore::Configuration
 
 	/*! @brief The number of entries in each stat-stage multiplier cache. */
 	inline constexpr sb MAX_STAGE_CACHE{(MAX_STAT_STAGES * 2) + 1};
+
+	/*! @brief The offset added to the base damage calculation. */
+	inline constexpr double BASE_DAMAGE_OFFSET{2.0};
+
+	/*! @brief The divisor used in the base damage calculation. */
+	inline constexpr double BASE_DAMAGE_DIVISOR{50.0};
+
+	/*! @brief The multiplier used in the calculated numerator for stat calculation. */
+	inline constexpr us CALCULATED_NUMERATOR_MULTIPLIER{2};
+	/*! @brief The divisor used in the calculated numerator for stat calculation. */
+	inline constexpr us CALCULATED_NUMERATOR_DIVISOR{100};
+	/*! @brief The divisor used to calculate the contribution of effort values (EVs) to the final stat. */
+	inline constexpr us CALCULATED_EV_DIVISOR{4};
+	/*! @brief The health offset used in the calculated health stat for stat calculation. */
+	inline constexpr us CALCULATED_HEALTH_OFFSET{10};
+	/*! @brief The stat offset used in every calculated stat aside from health for stat calculation. */
+	inline constexpr us CALCULATED_STAT_OFFSET{5};
+
+	/*! @brief The minimum individual value (IV) for a Pokemon's stat. */
+	inline constexpr ub MIN_IV_STAT_VALUE{1};
+	/*! @brief The maximum individual value (IV) for a Pokemon's stat. */
+	inline constexpr ub MAX_IV_STAT_VALUE{31};
 } // namespace PocketCore::Configuration
 
 #endif

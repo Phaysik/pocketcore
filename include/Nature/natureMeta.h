@@ -1,8 +1,8 @@
 /*! @file natureMeta.h
 	@brief Defines the metadata stored for built-in and user-defined natures.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.11.6
-	@version 0.12.20
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -14,8 +14,8 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/effectTrigger.h"
+#include "Pokemon/pokemonMeta.h"
 
-#include "constants.h"
 #include "natureID.h"
 
 namespace PocketCore::Nature
@@ -24,14 +24,15 @@ namespace PocketCore::Nature
 	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Effect::EffectTrigger;
+	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 
 	/*! @struct NatureMeta Nature/natureMeta.h
 		@brief Stores one nature's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.11.6
-		@version 0.12.20
+		@version 0.12.23
 		@author Matthew Moore
 	*/
 	struct NatureMeta
@@ -49,7 +50,7 @@ namespace PocketCore::Nature
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
 			/*! @brief The stat multipliers for HP, Attack, Defense, SpAttack, SpDefense, Speed. */
-			std::array<double, MAX_STAT_TYPES> mStatMultipliers{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+			std::array<double, POKEMON_STAT_COUNT> mStatMultipliers{1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
 			/*! @brief The case-sensitive display name stored. */
 			std::string mName{};

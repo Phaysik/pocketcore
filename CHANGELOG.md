@@ -4,7 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.23] - 2026-09-11
+
 ## [0.12.22] - 2026-09-11
+
+### Added
+
+- Added `BasePokemonStats`, an equality-comparable value record containing base maximum health, Attack, Defense, Special Attack, Special Defense, and Speed. `PokemonMeta` now stores these six values as one `mBaseStats` member.
+- Added canonical base-stat constants for Bulbasaur, Ivysaur, Venusaur, Charmander, Charmeleon, Charizard, Squirtle, Wartortle, and Blastoise. `PokemonRegistry` now includes the appropriate base-stat record in every starter-family built-in while retaining the existing names, typings, ability pools, and stable IDs.
+- Added shared test fixtures for interaction metadata/lookup and fixed metadata registries, including a derived checkpoint adapter that exposes only the protected mutation operations needed by registry tests.
+- Added dedicated Catch2 suites for `Interaction`, all reusable interaction-helper algorithms, and fixed and weighted move hit-count policies. Expanded `MoveMeta` coverage to compare every member and verify the exact order and shared prefix of base, recoil, status, and flinch effect lists.
+
+### Changed
+
+- Changed `applyInteractions()` so only an incoming ID with registered metadata can replace, remove, compact, or insert values. Empty IDs, duplicates, blocked IDs, unregistered IDs, and registered IDs targeting a full array without a replacement now leave the active identifier range unchanged.
+- Reworked the fixed-metadata registry suite around reusable test-only metadata and registry types. Coverage now specifies built-in records, metadata/name/ID queries, registered spans and counts, next-ID state, containment, invalid indexed access, and foreign-checkpoint rejection through public behavior.
+- Expanded Pokemon registry coverage to require the canonical base stats for all nine starter-family species, and strengthened weather configuration registration coverage to compare the complete stored metadata, including interaction declarations and assigned stable ID.
+
+### Fixed
+
+- Changed `FixedMetadataRegistry::restoreCheckpoint()` to validate checkpoint ownership, captured count, and mutation version before doing any work without first asserting those conditions. Invalid or stale checkpoints now return without mutation in both assertion-enabled and assertion-disabled builds instead of terminating debug/test execution.
+
+### Removed
+
+- Removed the protected `TypeRegistry::setTypeChartCell(TypeID, TypeID, ...)` and `setTypeChartRow(TypeID, ...)` convenience overloads. Configuration code continues to resolve stable IDs before using the remaining index-based chart mutation primitives.
 
 ## [0.12.21] - 2026-09-10
 
@@ -1873,7 +1896,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.22]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.23]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.22]: https://github.com/Phaysik/pocketcore/commit/2637b01aa91d4a713b19b6d1864df9bdd7547b78
 [0.12.21]: https://github.com/Phaysik/pocketcore/commit/bc898a0034898977a70ed1f2fa01f357d056ae2f
 [0.12.20]: https://github.com/Phaysik/pocketcore/commit/8b24decacfaa5a040c50fa83168db4840c3cc980
 [0.12.19]: https://github.com/Phaysik/pocketcore/commit/e8c4cce5b8de43c856411db117e461379427d009

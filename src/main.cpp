@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.1.0
-	@version 0.12.20
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -30,6 +30,7 @@
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Move/builtInMoveID.h"
+#include "Nature/builtInNatureID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
@@ -39,7 +40,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.17
+	@version 0.12.23
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -52,12 +53,15 @@ int main()
 	using PocketCore::Battle::BattleEngine;
 	using PocketCore::Battle::BattleTarget;
 	using PocketCore::Battle::MoveAction;
+	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Effect::Side;
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Item::toItemID;
 	using PocketCore::Move::BuiltinMoveID;
 	using PocketCore::Move::toMoveID;
+	using PocketCore::Nature::BuiltinNatureID;
+	using PocketCore::Nature::toNatureID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
@@ -101,16 +105,23 @@ int main()
 
 	Pokemon pokemonA{
 		"Feraligatr",
-		100U,
-		100U,
-		100U,
-		100U,
-		100U,
-		90U,
+		{
+			.mMaxHealth = 100U,
+			.mAttack = 100U,
+			.mDefense = 100U,
+			.mSpAttack = 100U,
+			.mSpDefense = 100U,
+			.mSpeed = 90U,
+		},
 		50U,
 		{toAbilityID(BuiltinAbilityID::Drizzle)},
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toTypeID(BuiltinTypeID::Water)},
+		{toNatureID(BuiltinNatureID::Hardy)},
+		{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+		 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+		{},
+		{},
 	};
 	pokemonA.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonA.setMaxPP(0U, 35U);
@@ -119,16 +130,23 @@ int main()
 
 	Pokemon pokemonB{
 		"Charizard",
-		100U,
-		100U,
-		100U,
-		100U,
-		100U,
-		80U,
+		{
+			.mMaxHealth = 100U,
+			.mAttack = 100U,
+			.mDefense = 100U,
+			.mSpAttack = 100U,
+			.mSpDefense = 100U,
+			.mSpeed = 80U,
+		},
 		50U,
 		{toAbilityID(BuiltinAbilityID::Stench)},
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
+		{toNatureID(BuiltinNatureID::Hardy)},
+		{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+		 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+		{},
+		{},
 	};
 	pokemonB.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
 	pokemonB.setMaxPP(0U, 35U);

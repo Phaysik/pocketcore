@@ -1,8 +1,8 @@
 /*! @file natureRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined natures.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.11.6
-	@version 0.12.20
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -26,13 +26,29 @@
 namespace PocketCore::Registry::Nature
 {
 	using PocketCore::Configuration::MAX_NATURES;
-	using PocketCore::Configuration::MAX_STAT_STAGES;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Configuration::NATURE_STAT_BOOST_MULTIPLIER;
 	using PocketCore::Configuration::NATURE_STAT_WEAKNESS_MULTIPLIER;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::Nature::ADAMANT_STAT_MULTIPLIERS;
+	using PocketCore::Nature::BASHFUL_STAT_MULTIPLIERS;
+	using PocketCore::Nature::BOLD_STAT_MULTIPLIERS;
+	using PocketCore::Nature::BRAVE_STAT_MULTIPLIERS;
 	using PocketCore::Nature::BuiltinNatureID;
+	using PocketCore::Nature::CALM_STAT_MULTIPLIERS;
+	using PocketCore::Nature::CAREFUL_STAT_MULTIPLIERS;
+	using PocketCore::Nature::DOCILE_STAT_MULTIPLIERS;
+	using PocketCore::Nature::GENTLE_STAT_MULTIPLIERS;
+	using PocketCore::Nature::HARDY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::HASTY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::IMPISH_STAT_MULTIPLIERS;
+	using PocketCore::Nature::JOLLY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::LAX_STAT_MULTIPLIERS;
+	using PocketCore::Nature::LONELY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::MILD_STAT_MULTIPLIERS;
+	using PocketCore::Nature::MODEST_STAT_MULTIPLIERS;
+	using PocketCore::Nature::NAIVE_STAT_MULTIPLIERS;
 	using PocketCore::Nature::NATURE_NAME_ADAMANT;
 	using PocketCore::Nature::NATURE_NAME_BASHFUL;
 	using PocketCore::Nature::NATURE_NAME_BOLD;
@@ -61,6 +77,14 @@ namespace PocketCore::Registry::Nature
 	using PocketCore::Nature::NATURE_NAME_TIMID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
+	using PocketCore::Nature::NAUGHTY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::QUIET_STAT_MULTIPLIERS;
+	using PocketCore::Nature::QUIRKY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::RASH_STAT_MULTIPLIERS;
+	using PocketCore::Nature::RELAXED_STAT_MULTIPLIERS;
+	using PocketCore::Nature::SASSY_STAT_MULTIPLIERS;
+	using PocketCore::Nature::SERIOUS_STAT_MULTIPLIERS;
+	using PocketCore::Nature::TIMID_STAT_MULTIPLIERS;
 	using PocketCore::Nature::toNatureID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 
@@ -69,22 +93,15 @@ namespace PocketCore::Registry::Nature
 		@details Built-in natures are registered during construction with IDs derived from @ref BuiltinNatureID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_NATURES.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.11.6
-		@version 0.12.20
+		@version 0.12.23
 		@author Matthew Moore
 	*/
 	class NatureRegistry : private FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>
 	{
 		private:
 			using Base = FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>;
-
-			static constexpr std::array<double, MAX_STAT_STAGES> makeMultipliers(const double health, const double attack,
-																				 const double defense, const double spAttack,
-																				 const double spDefense, const double speed) noexcept
-			{
-				return {health, attack, defense, spAttack, spDefense, speed};
-			}
 
 		public:
 			/*! @brief Compares two NatureRegistry instances for equality.
@@ -99,177 +116,148 @@ namespace PocketCore::Registry::Nature
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinNatureID.
 				@since 0.11.6
-				@version 0.12.20
+				@version 0.12.23
 			 */
 			ATTR_NOINLINE explicit constexpr NatureRegistry() : Base{toNatureID(BuiltinNatureID::FinalNature).getValue()}
 			{
-				// --- Neutral natures (no triggers) ---
-				auto addNeutral = [this](const BuiltinNatureID natureID, const std::string &name) {
-					addBuiltin({
-						.mStatMultipliers = makeMultipliers(1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
-						.mName = name,
-						.mNatureID = toNatureID(natureID),
-					});
-				};
-
 				addBuiltin({.mName = std::string(NATURE_NAME_NONE), .mNatureID = toNatureID(BuiltinNatureID::None)});
 
 				// --- Standard Neutral natures ---
-				addNeutral(BuiltinNatureID::Hardy, std::string(NATURE_NAME_HARDY));
-				addNeutral(BuiltinNatureID::Docile, std::string(NATURE_NAME_DOCILE));
-				addNeutral(BuiltinNatureID::Serious, std::string(NATURE_NAME_SERIOUS));
-				addNeutral(BuiltinNatureID::Bashful, std::string(NATURE_NAME_BASHFUL));
-				addNeutral(BuiltinNatureID::Quirky, std::string(NATURE_NAME_QUIRKY));
+				addBuiltin({
+					.mStatMultipliers = HARDY_STAT_MULTIPLIERS,
+					.mName = std::string(NATURE_NAME_HARDY),
+					.mNatureID = toNatureID(BuiltinNatureID::Hardy),
+				});
+				addBuiltin({
+					.mStatMultipliers = DOCILE_STAT_MULTIPLIERS,
+					.mName = std::string(NATURE_NAME_DOCILE),
+					.mNatureID = toNatureID(BuiltinNatureID::Docile),
+				});
+				addBuiltin({
+					.mStatMultipliers = SERIOUS_STAT_MULTIPLIERS,
+					.mName = std::string(NATURE_NAME_SERIOUS),
+					.mNatureID = toNatureID(BuiltinNatureID::Serious),
+				});
+				addBuiltin({
+					.mStatMultipliers = BASHFUL_STAT_MULTIPLIERS,
+					.mName = std::string(NATURE_NAME_BASHFUL),
+					.mNatureID = toNatureID(BuiltinNatureID::Bashful),
+				});
+				addBuiltin({
+					.mStatMultipliers = QUIRKY_STAT_MULTIPLIERS,
+					.mName = std::string(NATURE_NAME_QUIRKY),
+					.mNatureID = toNatureID(BuiltinNatureID::Quirky),
+				});
 
 				// --- Standard +Attack natures ---
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = LONELY_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_LONELY),
 					.mNatureID = toNatureID(BuiltinNatureID::Lonely),
 				});
 
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
+					.mStatMultipliers = BRAVE_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_BRAVE),
 					.mNatureID = toNatureID(BuiltinNatureID::Brave),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = ADAMANT_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_ADAMANT),
 					.mNatureID = toNatureID(BuiltinNatureID::Adamant),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = NAUGHTY_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_NAUGHTY),
 					.mNatureID = toNatureID(BuiltinNatureID::Naughty),
 				});
 
 				// --- Standard +Defense natures ---
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = BOLD_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_BOLD),
 					.mNatureID = toNatureID(BuiltinNatureID::Bold),
 				});
 
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
+					.mStatMultipliers = RELAXED_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_RELAXED),
 					.mNatureID = toNatureID(BuiltinNatureID::Relaxed),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
-									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = IMPISH_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_IMPISH),
 					.mNatureID = toNatureID(BuiltinNatureID::Impish),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = LAX_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_LAX),
 					.mNatureID = toNatureID(BuiltinNatureID::Lax),
 				});
 
 				// --- Standard +Speed natures ---
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
+					.mStatMultipliers = TIMID_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_TIMID),
 					.mNatureID = toNatureID(BuiltinNatureID::Timid),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
+					.mStatMultipliers = HASTY_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_HASTY),
 					.mNatureID = toNatureID(BuiltinNatureID::Hasty),
 				});
 
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
+					.mStatMultipliers = JOLLY_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_JOLLY),
 					.mNatureID = toNatureID(BuiltinNatureID::Jolly),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER),
+					.mStatMultipliers = NAIVE_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_NAIVE),
 					.mNatureID = toNatureID(BuiltinNatureID::Naive),
 				});
 
 				// --- Standard +SpAttack natures ---
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = MODEST_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_MODEST),
 					.mNatureID = toNatureID(BuiltinNatureID::Modest),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
-									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = MILD_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_MILD),
 					.mNatureID = toNatureID(BuiltinNatureID::Mild),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
+					.mStatMultipliers = QUIET_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_QUIET),
 					.mNatureID = toNatureID(BuiltinNatureID::Quiet),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = RASH_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_RASH),
 					.mNatureID = toNatureID(BuiltinNatureID::Rash),
 				});
 
 				// --- Standard +SpDefense natures ---
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = CALM_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_CALM),
 					.mNatureID = toNatureID(BuiltinNatureID::Calm),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = GENTLE_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_GENTLE),
 					.mNatureID = toNatureID(BuiltinNatureID::Gentle),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_WEAKNESS_MULTIPLIER),
+					.mStatMultipliers = SASSY_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_SASSY),
 					.mNatureID = toNatureID(BuiltinNatureID::Sassy),
 				});
 				addBuiltin({
-					.mStatMultipliers
-					= makeMultipliers(NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-									  NATURE_STAT_WEAKNESS_MULTIPLIER, NATURE_STAT_BOOST_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER),
+					.mStatMultipliers = CAREFUL_STAT_MULTIPLIERS,
 					.mName = std::string(NATURE_NAME_CAREFUL),
 					.mNatureID = toNatureID(BuiltinNatureID::Careful),
 				});

@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 09/02/2026
+	@date 09/11/2026
 	@since 0.8.7
-	@version 0.12.16
+	@version 0.12.23
 	@author Matthew Moore
 */
 
@@ -88,8 +88,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("no move base power")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
@@ -106,30 +106,10 @@ SCENARIO("BaseDamageHandler")
 		}
 	}
 
-	GIVEN("a target with 0 defense")
-	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 0, .mLevel = 50})};
-
-		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
-
-		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
-
-		WHEN("base damage is applied before external modifiers")
-		{
-			baseDamageHandler.apply(battleState, context, provider);
-
-			THEN("the initial damage calculation clamps the defense to 1.0")
-			{
-				CHECK((context.mDamage.mDamage == 5'118));
-			}
-		}
-	}
-
 	GIVEN("a user with a non-finite modifiers")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
 
 		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
@@ -182,8 +162,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a user has a positive attack stat")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
 
 		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
@@ -230,8 +210,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("the Generation V onward")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mSpecialAttack = 100, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mSpecialDefense = 124, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123, .mSpAttack = 100}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163, .mSpDefense = 124}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
@@ -245,7 +225,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 33));
+					CHECK((context.mDamage.mDamage == 49));
 				}
 			}
 		}
@@ -262,7 +242,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 35));
+					CHECK((context.mDamage.mDamage == 51));
 				}
 			}
 		}
@@ -270,8 +250,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("modified stat stages")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 123, .mSpecialAttack = 100, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 163, .mSpecialDefense = 124, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123, .mSpAttack = 100}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163, .mSpDefense = 124}, .mLevel = 50})};
 
 		GIVEN("user has increased attack stages and target has increased defense stages")
 		{
@@ -290,7 +270,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 49));
+					CHECK((context.mDamage.mDamage == 72));
 				}
 			}
 
@@ -305,7 +285,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 96));
+					CHECK((context.mDamage.mDamage == 143));
 				}
 			}
 		}
@@ -327,7 +307,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 7));
+					CHECK((context.mDamage.mDamage == 9));
 				}
 			}
 
@@ -342,7 +322,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 33));
+					CHECK((context.mDamage.mDamage == 49));
 				}
 			}
 		}
@@ -364,7 +344,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 190));
+					CHECK((context.mDamage.mDamage == 284));
 				}
 			}
 
@@ -379,7 +359,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the base damage does not change")
 				{
-					CHECK((context.mDamage.mDamage == 190));
+					CHECK((context.mDamage.mDamage == 284));
 				}
 			}
 		}
@@ -403,7 +383,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 55));
+					CHECK((context.mDamage.mDamage == 81));
 				}
 			}
 
@@ -423,7 +403,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 136));
+					CHECK((context.mDamage.mDamage == 201));
 				}
 			}
 		}
@@ -447,7 +427,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 8));
+					CHECK((context.mDamage.mDamage == 11));
 				}
 			}
 
@@ -467,7 +447,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 35));
+					CHECK((context.mDamage.mDamage == 51));
 				}
 			}
 		}
@@ -491,7 +471,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 337));
+					CHECK((context.mDamage.mDamage == 501));
 				}
 			}
 
@@ -511,7 +491,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the base damage does not change")
 				{
-					CHECK((context.mDamage.mDamage == 337));
+					CHECK((context.mDamage.mDamage == 501));
 				}
 			}
 		}
@@ -519,8 +499,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a damage calculation that exceeds the result type")
 	{
-		Pokemon userPokemon{makePokemon({.mAttack = 65'535, .mLevel = 65'535})};
-		Pokemon targetPokemon{makePokemon({.mDefense = 1, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 65'535}, .mLevel = 65'535})};
+		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 1}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
