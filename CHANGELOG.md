@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 ## [0.12.23] - 2026-09-11
 
+### Added
+
+- Added `PokemonStat` with Health, Attack, Defense, Special Attack, Special Defense, and Speed indices, plus `toIndex()` and `POKEMON_STAT_COUNT` for consistently indexing all stat-related arrays.
+- Added equality-comparable `PokemonStats` as the shared six-stat record for both species base stats and runtime calculated stats, replacing the earlier `BasePokemonStats`-only representation.
+- Added per-stat IV and EV storage to runtime Pokemon, with whole-array and indexed accessors and mutators. IV constants define the supported range as 1 through 31, constructors receive explicit six-element IV and EV arrays, and test fixtures default IVs to one and EVs to zero.
+- Added compile-time six-stat multiplier arrays for all 25 standard natures. Neutral natures use `1.0` throughout; non-neutral natures apply the established `1.1` boost and `0.9` reduction to their canonical stat pair. `NatureRegistry` now registers built-ins from these named arrays instead of constructing multiplier rows inline.
+- Added stable Pokemon species identity to runtime Pokemon through `getPokemonID()` and `setPokemonID()`.
+
+### Changed
+
+- Changed both `Pokemon` constructors to accept a `PokemonStats` base-stat record, nature IDs, a six-element nature-multiplier array, IVs, and EVs. Construction now calculates all battle stats immediately and initializes current health to the calculated maximum; the complete-move constructor continues to preserve supplied move and PP arrays.
+- Changed runtime stat storage from six directly assigned scalar values to separate base and calculated `PokemonStats` records. Public maximum-health, Attack, Defense, Special Attack, Special Defense, and Speed getters now return calculated values.
+- Implemented the level/IV/EV stat formulas. For each stat, the base component is `floor(((2 * base) + IV + floor(EV / 4)) * level / 100)`; maximum health adds level and 10, while every other stat adds 5 and then applies its nature multiplier before conversion to `us`.
+- Changed individual base-stat setters, indexed IV/EV setters, and `setLevel()` to recompute all calculated stats. `setMaximumHealth()` additionally clamps current health to the recalculated maximum. Whole-array IV/EV setters replace their arrays without triggering recalculation in this revision.
+- Kept nature identity and nature multipliers as independently supplied runtime data: changing nature IDs does not resolve metadata or replace the multiplier array automatically.
+- Changed `BaseDamageHandler` to consume the newly calculated Attack, Defense, Special Attack, and Special Defense values. The formula's literal divisor and offset moved to `BASE_DAMAGE_DIVISOR` and `BASE_DAMAGE_OFFSET`; defense is no longer clamped to `1.0` before division, while non-finite results and non-positive attack still clear damage.
+- Extended numeric and registry-resolved Pokemon stream output with the IV and EV used for each displayed calculated stat. Updated the example, shared Pokemon fixture, Pokemon tests, and base-damage expectations for the new constructor and calculated-stat behavior.
+
+### Removed
+
+- Removed the six standalone runtime stat members and direct-stat constructor parameters from `Pokemon`; callers now provide one `PokemonStats` base-stat record and receive derived values through the existing stat getters.
+- Removed `NatureRegistry`'s internal `makeMultipliers()` helper and inline multiplier construction in favor of named compile-time nature arrays.
+
 ## [0.12.22] - 2026-09-11
 
 ### Added
@@ -1896,7 +1919,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.23]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.23]: https://github.com/Phaysik/pocketcore/commit/be8cf09165f65efb8ada46d079b836dc6de43ff1
 [0.12.22]: https://github.com/Phaysik/pocketcore/commit/2637b01aa91d4a713b19b6d1864df9bdd7547b78
 [0.12.21]: https://github.com/Phaysik/pocketcore/commit/bc898a0034898977a70ed1f2fa01f357d056ae2f
 [0.12.20]: https://github.com/Phaysik/pocketcore/commit/8b24decacfaa5a040c50fa83168db4840c3cc980
