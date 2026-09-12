@@ -2,7 +2,7 @@
 	@brief Houses free functions that aide in handling natures.
 	@date 09/11/2026
 	@since 0.12.26
-	@version 0.12.26
+	@version 0.12.27
 	@author Matthew Moore
 */
 
@@ -11,9 +11,9 @@
 
 #include <utility>
 
-#include "Configuration/natureRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Registry/natureRegistry.h"
 #include "Utility/random.h"
 
 #include "builtInNatureID.h"
@@ -21,8 +21,8 @@
 
 namespace PocketCore::Nature
 {
-	using PocketCore::Configuration::NatureRegistryConfiguration;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Utility::Random;
 
 	/*! @brief Gets a random nature ID from the built-in natures.
@@ -40,9 +40,9 @@ namespace PocketCore::Nature
 		@param[in] config The configuration to get the random nature ID from.
 		@return The random nature ID.
 		@since 0.12.26
-		@version 0.12.26
+		@version 0.12.27
 	*/
-	ATTR_NODISCARD constexpr NatureID getRandomNatureIDFromConfiguration(const NatureRegistryConfiguration &config)
+	ATTR_NODISCARD constexpr NatureID getRandomNatureIDFromConfiguration(const NatureRegistry &config)
 	{
 		return NatureID(Random::get<us>(std::to_underlying(BuiltinNatureID::None) + 1, config.getAmountRegistered()));
 	}

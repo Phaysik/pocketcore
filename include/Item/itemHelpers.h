@@ -2,7 +2,7 @@
 	@brief Houses free functions that aide in handling items.
 	@date 09/11/2026
 	@since 0.12.26
-	@version 0.12.26
+	@version 0.12.27
 	@author Matthew Moore
 */
 
@@ -11,9 +11,9 @@
 
 #include <utility>
 
-#include "Configuration/itemRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Registry/itemRegistry.h"
 #include "Utility/random.h"
 
 #include "builtInItemID.h"
@@ -21,8 +21,8 @@
 
 namespace PocketCore::Item
 {
-	using PocketCore::Configuration::ItemRegistryConfiguration;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Item::ItemRegistry;
 	using PocketCore::Utility::Random;
 
 	/*! @brief Gets a random item ID from the built-in items.
@@ -39,9 +39,9 @@ namespace PocketCore::Item
 		@param[in] config The configuration to get the random item ID from.
 		@return The random item ID.
 		@since 0.12.26
-		@version 0.12.26
+		@version 0.12.27
 	*/
-	ATTR_NODISCARD constexpr ItemID getRandomItemIDFromConfiguration(const ItemRegistryConfiguration &config)
+	ATTR_NODISCARD constexpr ItemID getRandomItemIDFromConfiguration(const ItemRegistry &config)
 	{
 		return ItemID(Random::get<us>(std::to_underlying(BuiltinItemID::None) + 1, config.getAmountRegistered()));
 	}

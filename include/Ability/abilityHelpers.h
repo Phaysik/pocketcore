@@ -1,8 +1,8 @@
 /*! @file abilityHelpers.h
 	@brief Houses free functions that aide in handling abilities.
-	@date 09/11/2026
+	@date 09/12/2026
 	@since 0.12.26
-	@version 0.12.26
+	@version 0.12.27
 	@author Matthew Moore
 */
 
@@ -11,9 +11,9 @@
 
 #include <utility>
 
-#include "Configuration/abilityRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Registry/abilityRegistry.h"
 #include "Utility/random.h"
 
 #include "abilityID.h"
@@ -21,8 +21,8 @@
 
 namespace PocketCore::Ability
 {
-	using PocketCore::Configuration::AbilityRegistryConfiguration;
 	using PocketCore::Core::us;
+	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Utility::Random;
 
 	/*! @brief Gets a random ability ID from the built-in abilitys.
@@ -40,9 +40,9 @@ namespace PocketCore::Ability
 		@param[in] config The configuration to get the random ability ID from.
 		@return The random ability ID.
 		@since 0.12.26
-		@version 0.12.26
+		@version 0.12.27
 	*/
-	ATTR_NODISCARD constexpr AbilityID getRandomAbilityIDFromConfiguration(const AbilityRegistryConfiguration &config)
+	ATTR_NODISCARD constexpr AbilityID getRandomAbilityIDFromConfiguration(const AbilityRegistry &config)
 	{
 		return AbilityID(Random::get<us>(std::to_underlying(BuiltinAbilityID::None) + 1, config.getAmountRegistered()));
 	}
