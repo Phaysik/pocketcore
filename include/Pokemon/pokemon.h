@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/11/2026
+	@date 09/12/2026
 	@since 0.3.0
-	@version 0.12.25
+	@version 0.12.28
 	@author Matthew Moore
 */
 
@@ -25,7 +25,6 @@
 #include "Nature/natureID.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
-#include "Registry/registryProvider.h"
 #include "Registry/statusRegistry.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
@@ -55,7 +54,6 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
-	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Status::NO_STATUS_ID;
 	using PocketCore::Status::StatusID;
@@ -1017,18 +1015,6 @@ namespace PocketCore::Pokemon
 			/*! @brief The stable identifier for the Pokemon species. */
 			PokemonID mPokemonID{};
 	};
-
-	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.
-		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
-	   printed as `<unregistered>`.
-		@param[in,out] outStream The stream receiving the formatted Pokemon state.
-		@param[in] pokemon The Pokemon whose state is printed.
-		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
-		@return The supplied stream after writing the complete representation.
-		@since 0.11.2
-		@version 0.12.17
-	*/
-	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Pokemon
 
 #endif

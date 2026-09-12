@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/11/2026
+	@date 09/12/2026
 	@since 0.1.0
-	@version 0.12.24
+	@version 0.12.28
 	@author Matthew Moore
 */
 
@@ -42,7 +42,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.24
+	@version 0.12.28
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -133,8 +133,8 @@ int main()
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toTypeID(BuiltinTypeID::Water)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-		 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+		{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+		   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
 		{},
 		{},
 	};
@@ -159,8 +159,8 @@ int main()
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-		 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+		{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+		   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
 		{},
 		{},
 	};
