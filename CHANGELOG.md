@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.26] - 2026-09-11
+
+## [0.12.25] - 2026-09-11
+
 ## [0.12.24] - 2026-09-11
 
 ## [0.12.23] - 2026-09-11
@@ -1921,7 +1925,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.24]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.26]: https://github.com/Phaysik/pocketcore/commit/dafe722cb00fab6cd0905bf6a8f61cb9bfd7b564
+[0.12.25]: https://github.com/Phaysik/pocketcore/commit/dafe722cb00fab6cd0905bf6a8f61cb9bfd7b564
+[0.12.24]: https://github.com/Phaysik/pocketcore/commit/66981e482d09567ebb8dcaf1d2d9a2bf502215c4
 [0.12.23]: https://github.com/Phaysik/pocketcore/commit/be8cf09165f65efb8ada46d079b836dc6de43ff1
 [0.12.22]: https://github.com/Phaysik/pocketcore/commit/2637b01aa91d4a713b19b6d1864df9bdd7547b78
 [0.12.21]: https://github.com/Phaysik/pocketcore/commit/bc898a0034898977a70ed1f2fa01f357d056ae2f

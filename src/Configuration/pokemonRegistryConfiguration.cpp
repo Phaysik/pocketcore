@@ -2,29 +2,24 @@
 	@brief Defines validated user customization operations for the pokemon registry.
 	@date 09/11/2026
 	@since 0.12.0
-	@version 0.12.24
+	@version 0.12.26
 	@author Matthew Moore
 */
 
 #include "Configuration/pokemonRegistryConfiguration.h"
 
-#include <algorithm>
 #include <array>
 #include <expected>
 #include <span>
 #include <string_view>
 
 #include "Ability/abilityID.h"
-#include "Ability/abilityMeta.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
-#include "Item/itemMeta.h"
 #include "Move/moveID.h"
-#include "Move/moveMeta.h"
 #include "Nature/natureID.h"
-#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
@@ -33,14 +28,10 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
-	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
-	using PocketCore::Item::ItemMeta;
 	using PocketCore::Move::MoveID;
-	using PocketCore::Move::MoveMeta;
 	using PocketCore::Nature::NatureID;
-	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonID;
@@ -108,51 +99,24 @@ namespace PocketCore::Configuration
 				RegistryError::PokemonNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing pokemon metadata"}};
 		}
 
-		const auto missingMetadata
-			= [](const auto *metas) { return std::ranges::any_of(*metas, [](const auto *meta) { return meta == nullptr; }); };
-
-		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
-		std::ranges::transform(*natureIDs, natureMetas.begin(), [&dependencyRegistries](const NatureID natureID) {
-			return dependencyRegistries->natureRegistry->getNatureMetadata(natureID);
-		});
-
-		if (missingMetadata(&natureMetas))
+		if (const std::expected<void, RegistryErrorInfo> error{validateNatureMetadata(natureIDs, *dependencyRegistries)})
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::NatureNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing nature metadata"}};
+			return std::unexpected{error.error()};
 		}
 
-		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
-		std::ranges::transform(*abilityIDs, abilityMetas.begin(), [&dependencyRegistries](const AbilityID abilityID) {
-			return dependencyRegistries->abilityRegistry->getAbilityMetadata(abilityID);
-		});
-
-		if (missingMetadata(&abilityMetas))
+		if (const std::expected<void, RegistryErrorInfo> error{validateAbilityMetadata(abilityIDs, *dependencyRegistries)})
 		{
-			return std::unexpected{RegistryErrorInfo{
-				RegistryError::AbilityNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing ability metadata"}};
+			return std::unexpected{error.error()};
 		}
 
-		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
-		std::ranges::transform(*itemIDs, itemMetas.begin(), [&dependencyRegistries](const ItemID itemID) {
-			return dependencyRegistries->itemRegistry->getItemMetadata(itemID);
-		});
-
-		if (missingMetadata(&itemMetas))
+		if (const std::expected<void, RegistryErrorInfo> error{validateItemMetadata(itemIDs, *dependencyRegistries)})
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::ItemNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing item metadata"}};
+			return std::unexpected{error.error()};
 		}
 
-		std::array<const MoveMeta *, MAX_MOVES_PER_POKEMON> moveMetas{};
-		std::ranges::transform(*moveIDs, moveMetas.begin(), [&dependencyRegistries](const MoveID moveID) {
-			return dependencyRegistries->moveRegistry->getMoveMetadata(moveID);
-		});
-
-		if (missingMetadata(&moveMetas))
+		if (const std::expected<void, RegistryErrorInfo> error{validateMoveMetadata(moveIDs, *dependencyRegistries)})
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::MoveNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing move metadata"}};
+			return std::unexpected{error.error()};
 		}
 
 		return Pokemon{

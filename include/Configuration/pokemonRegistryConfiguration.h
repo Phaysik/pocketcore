@@ -2,24 +2,30 @@
 	@brief Declares the user-facing facade for configuring pokemon metadata.
 	@date 09/11/2026
 	@since 0.12.0
-	@version 0.12.24
+	@version 0.12.26
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_CONFIGURATION_POKEMON_REGISTRY_CONFIGURATION_H
 #define INCLUDE_CONFIGURATION_POKEMON_REGISTRY_CONFIGURATION_H
 
+#include <algorithm>
 #include <expected>
 #include <optional>
 #include <span>
+#include <string>
 #include <string_view>
 
 #include "Ability/abilityID.h"
+#include "Ability/abilityMeta.h"
 #include "Configuration/constants.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Item/itemMeta.h"
+#include "Move/moveMeta.h"
 #include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
@@ -33,6 +39,7 @@
 namespace PocketCore::Configuration
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -41,8 +48,11 @@ namespace PocketCore::Configuration
 	using PocketCore::Configuration::MIN_EV_STAT_VALUE;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
+	using PocketCore::Item::ItemMeta;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Move::MoveMeta;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonID;
@@ -123,7 +133,7 @@ namespace PocketCore::Configuration
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
 		@date 09/11/2026
 		@since 0.12.0
-		@version 0.12.24
+		@version 0.12.26
 		@author Matthew Moore
 	*/
 	class PokemonRegistryConfiguration
@@ -294,8 +304,8 @@ namespace PocketCore::Configuration
 				@param[in] itemIDs The item IDs of the Pokemon. Defaults to nullptr.
 				@param[in] movesIDs The move IDs of the Pokemon. Defaults to nullptr.
 				@return The instantiated Pokemon on success, or @ref RegistryErrorInfo if no matching pokemon exists.
-				@since 0.12.0
-				@version 0.12.0
+				@since 0.12.24
+				@version 0.12.26
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> instantiate(
 				const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
@@ -306,6 +316,133 @@ namespace PocketCore::Configuration
 				const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs = nullptr,
 				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs = nullptr,
 				const std::array<MoveID, MAX_MOVES_PER_POKEMON> *moveIDs = nullptr) const;
+
+		private:
+			/*! Validates that all metas in the given array are not null.
+				@tparam Meta The type of the meta to validate.
+				@tparam N The number of metas in the array.
+				@param[in] metas The array of metas to validate.
+				@param[in] code The error code to return if any metas are null.
+				@param[in] message The error message to return if any metas are null.
+				@return A @ref RegistryErrorInfo if any metas are null, or std::nullopt if all metas are valid.
+				@since 0.12.26
+				@version 0.12.26
+			 */
+			template <typename Meta, std::size_t N>
+			ATTR_NODISCARD constexpr std::optional<RegistryErrorInfo> validateMetas(const std::array<const Meta *, N> &metas,
+																					const RegistryError code,
+																					const std::string_view &message) const
+			{
+				const bool missing{std::ranges::any_of(metas, [](const Meta *meta) { return meta == nullptr; })};
+
+				if (missing)
+				{
+					return RegistryErrorInfo{code, {}, std::string{message}};
+				}
+
+				return std::nullopt;
+			}
+
+			/*! @brief Validates the metadata for the given nature IDs.
+				@param[in] natureIDs The array of nature IDs to validate.
+				@param[in] dependencyRegistries The dependency registries containing the nature metadata.
+				@return A @ref RegistryErrorInfo if any nature IDs are invalid, or std::nullopt if all are valid.
+				@since 0.12.26
+				@version 0.12.26
+			 */
+			ATTR_NODISCARD constexpr std::expected<void, RegistryErrorInfo> validateNatureMetadata(
+				const std::array<NatureID, MAX_NATURES_PER_POKEMON> *natureIDs,
+				const PokemonInstantiationDependencies &dependencyRegistries) const
+			{
+				std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
+				std::ranges::transform(*natureIDs, natureMetas.begin(), [&dependencyRegistries](const NatureID natureID) {
+					return dependencyRegistries.natureRegistry->getNatureMetadata(natureID);
+				});
+
+				if (const std::optional<RegistryErrorInfo> error{validateMetas(
+						natureMetas, RegistryError::NatureNotFound, "PokemonRegistryConfiguration::instantiate: missing nature metadata")})
+				{
+					return std::unexpected{error.value()};
+				}
+
+				return {};
+			}
+
+			/*! @brief Validates the metadata for the given item IDs.
+				@param[in] itemIDs The array of item IDs to validate.
+				@param[in] dependencyRegistries The dependency registries containing the item metadata.
+				@return A @ref RegistryErrorInfo if any item IDs are invalid, or std::nullopt if all are valid.
+				@since 0.12.26
+				@version 0.12.26
+			 */
+			ATTR_NODISCARD constexpr std::expected<void, RegistryErrorInfo> validateItemMetadata(
+				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs,
+				const PokemonInstantiationDependencies &dependencyRegistries) const
+			{
+				std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
+				std::ranges::transform(*itemIDs, itemMetas.begin(), [&dependencyRegistries](const ItemID itemID) {
+					return dependencyRegistries.itemRegistry->getItemMetadata(itemID);
+				});
+
+				if (const std::optional<RegistryErrorInfo> error{validateMetas(
+						itemMetas, RegistryError::ItemNotFound, "PokemonRegistryConfiguration::instantiate: missing item metadata")})
+				{
+					return std::unexpected{error.value()};
+				}
+
+				return {};
+			}
+
+			/*! @brief Validates the metadata for the given ability IDs.
+				@param[in] abilityIDs The array of ability IDs to validate.
+				@param[in] dependencyRegistries The dependency registries containing the ability metadata.
+				@return A @ref RegistryErrorInfo if any ability IDs are invalid, or std::nullopt if all are valid.
+				@since 0.12.26
+				@version 0.12.26
+			 */
+			ATTR_NODISCARD constexpr std::expected<void, RegistryErrorInfo> validateAbilityMetadata(
+				const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
+				const PokemonInstantiationDependencies &dependencyRegistries) const
+			{
+				std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
+				std::ranges::transform(*abilityIDs, abilityMetas.begin(), [&dependencyRegistries](const AbilityID abilityID) {
+					return dependencyRegistries.abilityRegistry->getAbilityMetadata(abilityID);
+				});
+
+				if (const std::optional<RegistryErrorInfo> error{
+						validateMetas(abilityMetas, RegistryError::AbilityNotFound,
+									  "PokemonRegistryConfiguration::instantiate: missing ability metadata")})
+				{
+					return std::unexpected{error.value()};
+				}
+
+				return {};
+			}
+
+			/*! @brief Validates the metadata for the given move IDs.
+				@param[in] moveIDs The array of move IDs to validate.
+				@param[in] dependencyRegistries The dependency registries containing the move metadata.
+				@return A @ref RegistryErrorInfo if any move IDs are invalid, or std::nullopt if all are valid.
+				@since 0.12.26
+				@version 0.12.26
+			 */
+			ATTR_NODISCARD constexpr std::expected<void, RegistryErrorInfo> validateMoveMetadata(
+				const std::array<MoveID, MAX_MOVES_PER_POKEMON> *moveIDs,
+				const PokemonInstantiationDependencies &dependencyRegistries) const
+			{
+				std::array<const MoveMeta *, MAX_MOVES_PER_POKEMON> moveMetas{};
+				std::ranges::transform(*moveIDs, moveMetas.begin(), [&dependencyRegistries](const MoveID moveID) {
+					return dependencyRegistries.moveRegistry->getMoveMetadata(moveID);
+				});
+
+				if (const std::optional<RegistryErrorInfo> error{validateMetas(
+						moveMetas, RegistryError::MoveNotFound, "PokemonRegistryConfiguration::instantiate: missing move metadata")})
+				{
+					return std::unexpected{error.value()};
+				}
+
+				return {};
+			}
 	};
 } // namespace PocketCore::Configuration
 
