@@ -47,6 +47,7 @@ words = [
     "lookups",
     "matchers",
     "matchups",
+    "metas",
     "noexcept",
     "nonnull",
     "nproc",

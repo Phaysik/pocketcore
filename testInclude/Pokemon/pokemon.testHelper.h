@@ -2,7 +2,7 @@
 	@brief Test helper for dealing with Pokemon concepts.
 	@date 09/11/2026
 	@since 0.12.13
-	@version 0.12.24
+	@version 0.12.25
 	@author Matthew Moore
 */
 
@@ -57,9 +57,17 @@ namespace PocketCore::Testing
 	struct PokemonTestData
 	{
 		public:
-			std::array<double, POKEMON_STAT_COUNT> mNatureMultipliers{
-				NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-				NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{
+				{
+					{
+						NATURE_STAT_BASE_MULTIPLIER,
+						NATURE_STAT_BASE_MULTIPLIER,
+						NATURE_STAT_BASE_MULTIPLIER,
+						NATURE_STAT_BASE_MULTIPLIER,
+						NATURE_STAT_BASE_MULTIPLIER,
+						NATURE_STAT_BASE_MULTIPLIER,
+					},
+				},
 			};
 
 			std::string_view mName{POKEMON_NAME_BULBASAUR};

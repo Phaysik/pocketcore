@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/11/2026
 	@since 0.4.0
-	@version 0.12.24
+	@version 0.12.25
 	@author Matthew Moore
 */
 
@@ -107,8 +107,8 @@ SCENARIO("Pokemon")
 				{toItemID(BuiltinItemID::ChestoBerry)},
 				{toTypeID(BuiltinTypeID::Dark)},
 				{toNatureID(BuiltinNatureID::Hardy)},
-				{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-				 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+				{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+				   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
 				{},
 				{},
 			};
@@ -147,8 +147,8 @@ SCENARIO("Pokemon")
 							{toItemID(BuiltinItemID::ChestoBerry)},
 							{toTypeID(BuiltinTypeID::Dark)},
 							{toNatureID(BuiltinNatureID::Hardy)},
-							{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-							 NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER},
+							{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+							   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
 							{},
 							{}};
 
@@ -368,7 +368,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureIDsArray")
 			{
-				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, {NATURE_STAT_BASE_MULTIPLIER});
+				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, {{{NATURE_STAT_BASE_MULTIPLIER}}});
 
 				THEN("the pokemon's natures are properly updated")
 				{
@@ -556,7 +556,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureID")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), NATURE_STAT_BASE_MULTIPLIER);
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), {NATURE_STAT_BASE_MULTIPLIER});
 
 				THEN("the pokemon's nature is properly updated")
 				{

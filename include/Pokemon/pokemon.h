@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 09/11/2026
 	@since 0.3.0
-	@version 0.12.24
+	@version 0.12.25
 	@author Matthew Moore
 */
 
@@ -70,7 +70,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 09/11/2026
 		@since 0.3.0
-		@version 0.12.24
+		@version 0.12.25
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -91,14 +91,14 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.24
+				@version 0.12.25
 			*/
 			explicit constexpr Pokemon(const PokemonID pokemonID, const std::string_view &name, const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers,
+									   const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
@@ -128,7 +128,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.24
+				@version 0.12.25
 			*/
 			explicit constexpr Pokemon(
 				const PokemonID pokemonID, const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
@@ -136,8 +136,8 @@ namespace PocketCore::Pokemon
 				const PokemonStats &stats, const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
 				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-				const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers, const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-				const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+				const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers,
+				const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs, const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
 				  mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
 				  mNatureIDs{natureIDs}, mPokemonID(pokemonID)
@@ -607,10 +607,11 @@ namespace PocketCore::Pokemon
 				@param[in] natureIDs The nature identifiers to store.
 				@param[in] natureMultipliers The nature multipliers to store.
 				@since 0.11.6
-				@version 0.12.24
+				@version 0.12.25
 			*/
-			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-											 const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers)
+			constexpr void setNatureIDsArray(
+				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+				const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers)
 			{
 				mNatureIDs = natureIDs;
 				mNatureMultipliers = natureMultipliers;
@@ -748,17 +749,18 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets one nature slot.
 				@param[in] slotIndex Nature slot index; must be less than MAX_NATURES_PER_POKEMON.
 				@param[in] natureID The nature identifier to store.
-				@param[in] natureMultiplier The nature multiplier to store.
+				@param[in] natureMultipliers The nature multipliers to store at the given slot index.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
-				@version 0.12.24
+				@version 0.12.25
 			*/
-			constexpr void setNatureID(const ub slotIndex, const NatureID natureID, const double natureMultiplier)
+			constexpr void setNatureID(const ub slotIndex, const NatureID natureID,
+									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers)
 			{
 				assert(slotIndex < mNatureIDs.size());
 
 				mNatureIDs.at(slotIndex) = natureID;
-				mNatureMultipliers.at(slotIndex) = natureMultiplier;
+				mNatureMultipliers.at(slotIndex) = natureMultipliers;
 				recomputeStats();
 			}
 
@@ -922,7 +924,7 @@ namespace PocketCore::Pokemon
 			   (IVs), effort values (EVs), level, and nature multipliers. It ensures that the calculated stats are up-to-date whenever any
 			   of the contributing factors change.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.25
 			*/
 			constexpr void recomputeStats()
 			{
@@ -944,26 +946,30 @@ namespace PocketCore::Pokemon
 				constexpr std::size_t speedIndex{toIndex(PokemonStat::Speed)};
 
 				mCalculatedStats.mMaxHealth
-					= static_cast<us>((getBaseComponent(healthIndex, mBaseStats.mMaxHealth) + mLevel + CALCULATED_HEALTH_OFFSET)
-									  * mNatureMultipliers.at(healthIndex));
+					= static_cast<us>(getBaseComponent(healthIndex, mBaseStats.mMaxHealth) + mLevel + CALCULATED_HEALTH_OFFSET);
 
-				mCalculatedStats.mAttack = static_cast<us>((getBaseComponent(attackIndex, mBaseStats.mAttack) + CALCULATED_STAT_OFFSET)
-														   * mNatureMultipliers.at(attackIndex));
-				mCalculatedStats.mDefense = static_cast<us>((getBaseComponent(defenseIndex, mBaseStats.mDefense) + CALCULATED_STAT_OFFSET)
-															* mNatureMultipliers.at(defenseIndex));
+				mCalculatedStats.mAttack = static_cast<us>(getBaseComponent(attackIndex, mBaseStats.mAttack) + CALCULATED_STAT_OFFSET);
+				mCalculatedStats.mDefense = static_cast<us>(getBaseComponent(defenseIndex, mBaseStats.mDefense) + CALCULATED_STAT_OFFSET);
 				mCalculatedStats.mSpAttack
-					= static_cast<us>((getBaseComponent(specialAttackIndex, mBaseStats.mSpAttack) + CALCULATED_STAT_OFFSET)
-									  * mNatureMultipliers.at(specialAttackIndex));
+					= static_cast<us>(getBaseComponent(specialAttackIndex, mBaseStats.mSpAttack) + CALCULATED_STAT_OFFSET);
 				mCalculatedStats.mSpDefense
-					= static_cast<us>((getBaseComponent(specialDefenseIndex, mBaseStats.mSpDefense) + CALCULATED_STAT_OFFSET)
-									  * mNatureMultipliers.at(specialDefenseIndex));
-				mCalculatedStats.mSpeed = static_cast<us>((getBaseComponent(speedIndex, mBaseStats.mSpeed) + CALCULATED_STAT_OFFSET)
-														  * mNatureMultipliers.at(speedIndex));
+					= static_cast<us>(getBaseComponent(specialDefenseIndex, mBaseStats.mSpDefense) + CALCULATED_STAT_OFFSET);
+				mCalculatedStats.mSpeed = static_cast<us>(getBaseComponent(speedIndex, mBaseStats.mSpeed) + CALCULATED_STAT_OFFSET);
+
+				for (const std::array<double, POKEMON_STAT_COUNT> &natureMultiplier : mNatureMultipliers)
+				{
+					mCalculatedStats.mMaxHealth *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Health)));
+					mCalculatedStats.mAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Attack)));
+					mCalculatedStats.mDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Defense)));
+					mCalculatedStats.mSpAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialAttack)));
+					mCalculatedStats.mSpDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
+					mCalculatedStats.mSpeed *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Speed)));
+				}
 			}
 
 		private:
 			/*! @brief The nature multipliers affecting the Pokemon's stats. */
-			std::array<double, POKEMON_STAT_COUNT> mNatureMultipliers{};
+			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{};
 
 			/*! @brief The non-owning display name. */
 			std::string_view mName{};
