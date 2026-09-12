@@ -2,11 +2,13 @@
 	@brief C++ file for running tests for the Pokemon helper functions.
 	@date 09/12/2026
 	@since 0.12.28
-	@version 0.12.28
+	@version 0.12.29
 	@author Matthew Moore
 */
 
 #include "Pokemon/pokemonHelpers.h"
+
+#include <sstream>
 
 #include "Ability/builtInAbilityID.h"
 #include "Item/builtInItemID.h"

@@ -2,7 +2,7 @@
 	@brief Contains the pokemon registry implementation
 	@date 09/12/2026
 	@since 0.12.28
-	@version 0.12.28
+	@version 0.12.29
 	@author Matthew Moore
 */
 
@@ -45,11 +45,12 @@ namespace PocketCore::Registry::Pokemon
 		const std::array<NatureID, MAX_NATURES_PER_POKEMON> *natureIDs, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
 		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs, const std::array<MoveID, MAX_MOVES_PER_POKEMON> *moveIDs) const
 	{
-		if (dependencyRegistries->abilityRegistry == nullptr || dependencyRegistries->itemRegistry == nullptr
-			|| dependencyRegistries->moveRegistry == nullptr || dependencyRegistries->natureRegistry == nullptr)
+		if (dependencyRegistries == nullptr || dependencyRegistries->abilityRegistry == nullptr
+			|| dependencyRegistries->itemRegistry == nullptr || dependencyRegistries->moveRegistry == nullptr
+			|| dependencyRegistries->natureRegistry == nullptr)
 		{
 			return std::unexpected{RegistryErrorInfo{
-				RegistryError::MaxCapacity, {}, "PokemonRegistryConfiguration::instantiate: missing registry dependency"}};
+				RegistryError::MaxCapacity, {}, "PokemonRegistry::instantiate: missing registry dependency"}};
 		}
 
 		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonID)};
@@ -57,25 +58,25 @@ namespace PocketCore::Registry::Pokemon
 		if (pokemonMeta == nullptr)
 		{
 			return std::unexpected{RegistryErrorInfo{
-				RegistryError::PokemonNotFound, {}, "PokemonRegistryConfiguration::instantiate: missing pokemon metadata"}};
+				RegistryError::PokemonNotFound, {}, "PokemonRegistry::instantiate: missing pokemon metadata"}};
 		}
 
-		if (const std::expected<void, RegistryErrorInfo> error{validateNatureMetadata(natureIDs, *dependencyRegistries)})
+		if (const std::expected<void, RegistryErrorInfo> error{validateNatureMetadata(natureIDs, *dependencyRegistries)}; !error)
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, RegistryErrorInfo> error{validateAbilityMetadata(abilityIDs, *dependencyRegistries)})
+		if (const std::expected<void, RegistryErrorInfo> error{validateAbilityMetadata(abilityIDs, *dependencyRegistries)}; !error)
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, RegistryErrorInfo> error{validateItemMetadata(itemIDs, *dependencyRegistries)})
+		if (const std::expected<void, RegistryErrorInfo> error{validateItemMetadata(itemIDs, *dependencyRegistries)}; !error)
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, RegistryErrorInfo> error{validateMoveMetadata(moveIDs, *dependencyRegistries)})
+		if (const std::expected<void, RegistryErrorInfo> error{validateMoveMetadata(moveIDs, *dependencyRegistries)}; !error)
 		{
 			return std::unexpected{error.error()};
 		}
