@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/11/2026
 	@since 0.12.20
-	@version 0.12.22
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -77,7 +77,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = BULBASAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Bulbasaur))};
@@ -93,7 +92,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = IVYSAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Ivysaur))};
@@ -109,7 +107,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = VENUSAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Venusaur))};
@@ -125,7 +122,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARMANDER_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charmander))};
@@ -141,7 +137,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARMELEON_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charmeleon))};
@@ -157,7 +152,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARIZARD_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charizard))};
@@ -173,7 +167,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = SQUIRTLE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Squirtle))};
@@ -189,7 +182,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = WARTORTLE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Wartortle))};
@@ -205,7 +197,6 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = BLASTOISE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
-				.mAbilityPoolCount = 0,
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Blastoise))};

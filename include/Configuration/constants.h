@@ -2,7 +2,7 @@
 	@brief Defines configuration constants.
 	@date 09/11/2026
 	@since 0.1.0
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -227,9 +227,12 @@ namespace PocketCore::Configuration
 	inline constexpr us CALCULATED_STAT_OFFSET{5};
 
 	/*! @brief The minimum individual value (IV) for a Pokemon's stat. */
-	inline constexpr ub MIN_IV_STAT_VALUE{1};
+	inline constexpr ub MIN_IV_STAT_VALUE{0};
 	/*! @brief The maximum individual value (IV) for a Pokemon's stat. */
 	inline constexpr ub MAX_IV_STAT_VALUE{31};
+
+	/*! @brief The minimum individual value (EV) for a Pokemon's stat. */
+	inline constexpr ub MIN_EV_STAT_VALUE{0};
 } // namespace PocketCore::Configuration
 
 #endif

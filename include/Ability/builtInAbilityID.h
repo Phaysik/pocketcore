@@ -1,17 +1,18 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 08/22/2026
+	@date 09/11/2026
 	@since 0.4.0
-	@version 0.11.6
+	@version 0.12.24
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_ABILITY_BUILTIN_ABILITY_ID_H
 #define INCLUDE_ABILITY_BUILTIN_ABILITY_ID_H
 
-#include "Ability/abilityID.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+
+#include "abilityID.h"
 
 namespace PocketCore::Ability
 {

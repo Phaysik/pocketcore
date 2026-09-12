@@ -1,8 +1,8 @@
 /*! @file builtinWeatherID.h
 	@brief Defines identifiers for weathers compiled into PocketCore.
-	@date 08/31/2026
+	@date 09/11/2026
 	@since 0.8.0
-	@version 0.12.13
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -11,7 +11,8 @@
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Weather/weatherID.h"
+
+#include "weatherID.h"
 
 namespace PocketCore::Weather
 {

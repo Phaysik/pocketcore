@@ -1,8 +1,8 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 08/31/2026
+	@date 09/11/2026
 	@since 0.5.2
-	@version 0.12.13
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -11,7 +11,8 @@
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Move/moveID.h"
+
+#include "moveID.h"
 
 namespace PocketCore::Move
 {

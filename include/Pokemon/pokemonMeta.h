@@ -2,7 +2,7 @@
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
 	@date 09/11/2026
 	@since 0.11.6
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -16,6 +16,7 @@
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Types/typeID.h"
 
@@ -31,6 +32,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
+	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
 
@@ -118,7 +120,7 @@ namespace PocketCore::Pokemon
 	   must remain valid while this metadata is registered.
 		@date 09/11/2026
 		@since 0.11.6
-		@version 0.12.22
+		@version 0.12.24
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -144,26 +146,17 @@ namespace PocketCore::Pokemon
 			/*! @brief The Pokemon's base stats. */
 			PokemonStats mBaseStats{};
 
-			/*! @brief The Pokemon's move IDs. */
-			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
-
-			/*! @brief The Pokemon's max PP values. */
-			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
-
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
 
 			/*! @brief The Pokemon's level. */
 			us mLevel{};
 
-			/*! @brief The Pokemon's item ID. */
-			ItemID mItemID{NO_ITEM_ID};
-
 			/*! @brief The stable built-in or user-assigned identifier. */
 			PokemonID mPokemonID{};
 
-			/*! @brief The amount of abilities in the Pokemon's ability pool that are valid and not empty data. */
-			ub mAbilityPoolCount{};
+			/*! @brief The learnset ID associated with the Pokemon. */
+			LearnsetID mLearnsetID{};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};

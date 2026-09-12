@@ -1,9 +1,9 @@
 
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.5.2
-	@version 0.12.20
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Move
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.5.2
-		@version 0.12.20
+		@version 0.12.24
 		@author Matthew Moore
 	*/
 	struct MoveMeta
@@ -87,6 +87,12 @@ namespace PocketCore::Move
 
 			/*! @brief The move's priority. */
 			sb mPriority{};
+
+			/*! @brief The move's max PP value. This can only be achieved with items. */
+			ub mPPMaxAmount{};
+
+			/*! @brief The move's default PP amount. */
+			ub mPPDefaultAmount{};
 
 			/*! @brief Whether the move is a special move. */
 			bool mSpecial{};

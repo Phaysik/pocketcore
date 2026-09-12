@@ -1,8 +1,8 @@
 /*! @file builtinTerrainID.h
 	@brief Defines identifiers for terrains compiled into PocketCore.
-	@date 09/01/2026
+	@date 09/11/2026
 	@since 0.8.0
-	@version 0.12.14
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -11,7 +11,8 @@
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Terrain/terrainID.h"
+
+#include "terrainID.h"
 
 namespace PocketCore::Terrain
 {

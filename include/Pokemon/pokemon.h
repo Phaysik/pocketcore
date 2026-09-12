@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 09/11/2026
 	@since 0.3.0
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -70,7 +70,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 09/11/2026
 		@since 0.3.0
-		@version 0.12.23
+		@version 0.12.24
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -79,6 +79,7 @@ namespace PocketCore::Pokemon
 			// Constructors
 
 			/*! @brief Constructs a Pokemon with empty move slots and zero move PP.
+				@param[in] pokemonID The ID of the Pokemon.
 				@param[in] name Non-owning display-name view whose backing storage must outlive the object.
 				@param[in] stats The base stats of the Pokemon.
 				@param[in] level Pokemon level used to compute the level damage factor.
@@ -90,9 +91,9 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.24
 			*/
-			explicit constexpr Pokemon(const std::string_view &name, const PokemonStats &stats, const us level,
+			explicit constexpr Pokemon(const PokemonID pokemonID, const std::string_view &name, const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
@@ -101,7 +102,7 @@ namespace PocketCore::Pokemon
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
-				  mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mNatureIDs(natureIDs)
+				  mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mNatureIDs(natureIDs), mPokemonID(pokemonID)
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -112,6 +113,7 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Constructs a Pokemon from complete move and PP arrays.
+				@param[in] pokemonID The ID of the Pokemon.
 				@param[in] name Non-owning display-name view whose backing storage must outlive the object.
 				@param[in] moveIDs Fixed move identifier slots.
 				@param[in] maxPP Maximum PP for each move slot.
@@ -126,21 +128,19 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.24
 			*/
-			explicit constexpr Pokemon(const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
-									   const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP,
-									   const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP, const PokemonStats &stats, const us level,
-									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
-									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
-									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
-									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+			explicit constexpr Pokemon(
+				const PokemonID pokemonID, const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
+				const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP, const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP,
+				const PokemonStats &stats, const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
+				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+				const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers, const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
+				const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
 				  mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
-				  mNatureIDs{natureIDs}
+				  mNatureIDs{natureIDs}, mPokemonID(pokemonID)
 			{
 				setLevel(level);
 				recomputeStats();
@@ -534,21 +534,23 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all individual value (IV) slots for the Pokemon's base stats.
 				@param[in] pokemonIVs The individual values to store.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.24
 			*/
 			constexpr void setPokemonIVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs)
 			{
 				mPokemonIVs = pokemonIVs;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces all effort value (EV) slots for the Pokemon's base stats.
 				@param[in] pokemonEVs The effort values to store.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.24
 			*/
 			constexpr void setPokemonEVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 			{
 				mPokemonEVs = pokemonEVs;
+				recomputeStats();
 			}
 
 			/*! @brief Replaces maximum PP for all move slots.
@@ -603,12 +605,16 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Replaces all nature identifier slots.
 				@param[in] natureIDs The nature identifiers to store.
+				@param[in] natureMultipliers The nature multipliers to store.
 				@since 0.11.6
-				@version 0.12.2
+				@version 0.12.24
 			*/
-			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs)
+			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+											 const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers)
 			{
 				mNatureIDs = natureIDs;
+				mNatureMultipliers = natureMultipliers;
+				recomputeStats();
 			}
 
 			/*! @brief Sets one status slot.
@@ -742,15 +748,18 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets one nature slot.
 				@param[in] slotIndex Nature slot index; must be less than MAX_NATURES_PER_POKEMON.
 				@param[in] natureID The nature identifier to store.
+				@param[in] natureMultiplier The nature multiplier to store.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
-				@version 0.12.17
+				@version 0.12.24
 			*/
-			constexpr void setNatureID(const ub slotIndex, const NatureID natureID)
+			constexpr void setNatureID(const ub slotIndex, const NatureID natureID, const double natureMultiplier)
 			{
 				assert(slotIndex < mNatureIDs.size());
 
 				mNatureIDs.at(slotIndex) = natureID;
+				mNatureMultipliers.at(slotIndex) = natureMultiplier;
+				recomputeStats();
 			}
 
 			/*! @brief Sets current health, clamped to maximum health.
@@ -845,12 +854,15 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets the stable identifier for the Pokemon species.
 				@param[in] pokemonID The new PokemonID value.
+				@param[in] baseStats The new base stats to use.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.24
 			*/
-			constexpr void setPokemonID(const PokemonID pokemonID)
+			constexpr void setPokemonID(const PokemonID pokemonID, const PokemonStats &baseStats)
 			{
 				mPokemonID = pokemonID;
+				mBaseStats = baseStats;
+				recomputeStats();
 			}
 
 			// Utility Functions

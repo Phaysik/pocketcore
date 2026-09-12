@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/11/2026
 	@since 0.4.0
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Move/moveID.h"
 #include "Nature/builtInNatureID.h"
 #include "Nature/natureID.h"
+#include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryError.h"
 #include "Registry/registryProvider.h"
@@ -65,7 +66,9 @@ using PocketCore::Nature::BuiltinNatureID;
 using PocketCore::Nature::NatureID;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
+using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
+using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Registry::Status::StatusRegistry;
@@ -89,6 +92,7 @@ SCENARIO("Pokemon")
 		WHEN("creating a Pokemon with empty move slots and zero move PP")
 		{
 			Pokemon pokemon{
+				toPokemonID(BuiltinPokemonID::None),
 				"TestMon",
 				{
 					.mMaxHealth = 100,
@@ -120,7 +124,8 @@ SCENARIO("Pokemon")
 
 		WHEN("creating a Pokemon with move slots and move PP")
 		{
-			Pokemon pokemon{"TestMon",
+			Pokemon pokemon{toPokemonID(BuiltinPokemonID::None),
+							"TestMon",
 							{
 								toMoveID(BuiltinMoveID::Facade),
 								toMoveID(BuiltinMoveID::Facade),
@@ -363,7 +368,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureIDsArray")
 			{
-				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)});
+				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, {NATURE_STAT_BASE_MULTIPLIER});
 
 				THEN("the pokemon's natures are properly updated")
 				{
@@ -390,7 +395,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setStatusID")
 			{
-				pokemon.setStatusID(0, {toStatusID(BuiltinStatusID::Burn)});
+				pokemon.setStatusID(0, toStatusID(BuiltinStatusID::Burn));
 
 				THEN("the pokemon's status is properly updated")
 				{
@@ -413,7 +418,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setMoveID")
 			{
-				pokemon.setMoveIDsArray({toMoveID(BuiltinMoveID::Facade)});
+				pokemon.setMoveID(0, toMoveID(BuiltinMoveID::Facade));
 
 				THEN("the pokemon's move is properly updated")
 				{
@@ -434,9 +439,9 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMaxPPArray")
+			WHEN("calling setMaxPP")
 			{
-				pokemon.setMaxPPArray({1});
+				pokemon.setMaxPP(0, 1);
 
 				THEN("the pokemon's max pp is properly updated")
 				{
@@ -457,9 +462,9 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setCurrentPPArray")
+			WHEN("calling setCurrentPP")
 			{
-				pokemon.setCurrentPPArray({1});
+				pokemon.setCurrentPP(0, 1);
 
 				THEN("the pokemon's current pp is properly updated")
 				{
@@ -482,7 +487,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setTypeID")
 			{
-				pokemon.setTypeID(0, {toTypeID(BuiltinTypeID::Fire)});
+				pokemon.setTypeID(0, toTypeID(BuiltinTypeID::Fire));
 
 				THEN("the pokemon's type is properly updated")
 				{
@@ -505,7 +510,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setAbilityID")
 			{
-				pokemon.setAbilityID(0, {toAbilityID(BuiltinAbilityID::CloudNine)});
+				pokemon.setAbilityID(0, toAbilityID(BuiltinAbilityID::CloudNine));
 
 				THEN("the pokemon's ability is properly updated")
 				{
@@ -528,7 +533,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setItemID")
 			{
-				pokemon.setItemID(0, {toItemID(BuiltinItemID::ChestoBerry)});
+				pokemon.setItemID(0, toItemID(BuiltinItemID::ChestoBerry));
 
 				THEN("the pokemon's item is properly updated")
 				{
@@ -551,7 +556,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureID")
 			{
-				pokemon.setNatureID(0, {toNatureID(BuiltinNatureID::Lonely)});
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), NATURE_STAT_BASE_MULTIPLIER);
 
 				THEN("the pokemon's nature is properly updated")
 				{
@@ -985,22 +990,22 @@ SCENARIO("Pokemon")
 					"  Level: 50\n"
 					"  Level Damage Factor: 22\n"
 					"  Health: 150/210\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Attack: 106\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Defense: 107\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Special Attack: 108\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Special Defense: 109\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Speed: 110\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Type IDs: [2, 3]\n"
 					"  Nature IDs: [1]\n"
@@ -1066,22 +1071,22 @@ SCENARIO("Pokemon free function")
 					"  Level: 50\n"
 					"  Level Damage Factor: 22\n"
 					"  Health: 150/210\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Attack: 106\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Defense: 107\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Special Attack: 108\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Special Defense: 109\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Speed: 110\n"
-					"    IV: 1\n"
+					"    IV: 0\n"
 					"    EV: 0\n"
 					"  Types:\n"
 					"    [0]:\n"

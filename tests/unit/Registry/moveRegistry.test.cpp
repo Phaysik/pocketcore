@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.6.0
-	@version 0.12.20
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -80,6 +80,8 @@ SCENARIO("MoveRegistry")
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 0,
+				.mPPMaxAmount = 56,
+				.mPPDefaultAmount = 35,
 				.mSpecial = false,
 			};
 
@@ -109,6 +111,8 @@ SCENARIO("MoveRegistry")
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 0,
+				.mPPMaxAmount = 40,
+				.mPPDefaultAmount = 25,
 				.mSpecial = false,
 			};
 

@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the BaseDamageHandler.
 	@date 09/11/2026
 	@since 0.8.7
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -225,7 +225,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 49));
+					CHECK((context.mDamage.mDamage == 48));
 				}
 			}
 		}
@@ -285,7 +285,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 143));
+					CHECK((context.mDamage.mDamage == 142));
 				}
 			}
 		}
@@ -322,7 +322,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
 				{
-					CHECK((context.mDamage.mDamage == 49));
+					CHECK((context.mDamage.mDamage == 48));
 				}
 			}
 		}
@@ -344,7 +344,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
-					CHECK((context.mDamage.mDamage == 284));
+					CHECK((context.mDamage.mDamage == 282));
 				}
 			}
 
@@ -359,7 +359,7 @@ SCENARIO("BaseDamageHandler")
 
 				THEN("the base damage does not change")
 				{
-					CHECK((context.mDamage.mDamage == 284));
+					CHECK((context.mDamage.mDamage == 282));
 				}
 			}
 		}

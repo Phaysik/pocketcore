@@ -1,8 +1,8 @@
 /*! @file builtinStatusID.h
 	@brief Defines identifiers for statuses compiled into PocketCore.
-	@date 08/22/2026
+	@date 09/11/2026
 	@since 0.7.0
-	@version 0.11.6
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -11,7 +11,8 @@
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Status/statusID.h"
+
+#include "statusID.h"
 
 namespace PocketCore::Status
 {

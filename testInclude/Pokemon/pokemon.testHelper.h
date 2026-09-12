@@ -2,7 +2,7 @@
 	@brief Test helper for dealing with Pokemon concepts.
 	@date 09/11/2026
 	@since 0.12.13
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Nature/natureID.h"
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonID.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
 
@@ -42,9 +43,11 @@ namespace PocketCore::Testing
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NO_NATURE_ID;
+	using PocketCore::Pokemon::NO_POKEMON_ID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonStats;
 	using PocketCore::Status::NO_STATUS_ID;
 	using PocketCore::Status::StatusID;
@@ -85,13 +88,15 @@ namespace PocketCore::Testing
 			us mHealth{0};
 
 			us mLevel{1};
+
+			PokemonID mPokemonID{NO_POKEMON_ID};
 	};
 
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
 		Pokemon pokemon{
-			data.mName,	   data.mMoveIDs,  data.mMaxPP,		data.mCurrentPP,		 data.mStats,	   data.mLevel,		 data.mAbilityIDs,
-			data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureMultipliers, data.mPokemonIVs, data.mPokemonEVs,
+			data.mPokemonID,  data.mName,	 data.mMoveIDs,	 data.mMaxPP,	  data.mCurrentPP,		   data.mStats,		 data.mLevel,
+			data.mAbilityIDs, data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureMultipliers, data.mPokemonIVs, data.mPokemonEVs,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

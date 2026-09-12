@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 09/10/2026
+	@date 09/11/2026
 	@since 0.5.3
-	@version 0.12.20
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -55,9 +55,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 09/10/2026
+		@date 09/11/2026
 		@since 0.5.3
-		@version 0.12.20
+		@version 0.12.24
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -78,7 +78,7 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.12.20
+				@version 0.12.24
 			 */
 			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
 			{
@@ -104,6 +104,8 @@ namespace PocketCore::Registry::Move
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
+					.mPPMaxAmount = 56,
+					.mPPDefaultAmount = 35,
 					.mSpecial = false,
 				});
 				addBuiltin({
@@ -125,6 +127,8 @@ namespace PocketCore::Registry::Move
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
+					.mPPMaxAmount = 40,
+					.mPPDefaultAmount = 25,
 					.mSpecial = false,
 				});
 

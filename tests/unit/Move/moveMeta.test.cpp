@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the MoveMeta.
 	@date 09/11/2026
 	@since 0.8.7
-	@version 0.12.22
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -165,6 +165,26 @@ SCENARIO("MoveMeta")
 		GIVEN("for mPriority modified in one move meta")
 		{
 			MoveMeta other{.mPriority = 1};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mPPMaxAmount modified in one move meta")
+		{
+			MoveMeta other{.mPPMaxAmount = 20};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mPPDefaultAmount modified in one move meta")
+		{
+			MoveMeta other{.mPPDefaultAmount = 20};
 
 			THEN("they are not equal")
 			{

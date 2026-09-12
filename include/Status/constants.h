@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the status registry.
-	@date 07/30/2026
+	@date 09/11/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -13,13 +13,13 @@
 
 namespace PocketCore::Status
 {
-	constexpr std::string_view STATUS_NAME_NONE{"None"};
-	constexpr std::string_view STATUS_NAME_PARALYSIS{"Paralysis"};
-	constexpr std::string_view STATUS_NAME_BURN{"Burn"};
-	constexpr std::string_view STATUS_NAME_SLEEP{"Sleep"};
-	constexpr std::string_view STATUS_NAME_FREEZE{"Freeze"};
-	constexpr std::string_view STATUS_NAME_POISON{"Poison"};
-	constexpr std::string_view STATUS_NAME_TOXIC{"Toxic"};
+	inline constexpr std::string_view STATUS_NAME_NONE{"None"};
+	inline constexpr std::string_view STATUS_NAME_PARALYSIS{"Paralysis"};
+	inline constexpr std::string_view STATUS_NAME_BURN{"Burn"};
+	inline constexpr std::string_view STATUS_NAME_SLEEP{"Sleep"};
+	inline constexpr std::string_view STATUS_NAME_FREEZE{"Freeze"};
+	inline constexpr std::string_view STATUS_NAME_POISON{"Poison"};
+	inline constexpr std::string_view STATUS_NAME_TOXIC{"Toxic"};
 } // namespace PocketCore::Status
 
 #endif

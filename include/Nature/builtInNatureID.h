@@ -1,8 +1,8 @@
 /*! @file builtinNatureID.h
 	@brief Defines identifiers for natures compiled into PocketCore.
-	@date 08/31/2026
+	@date 09/11/2026
 	@since 0.11.6
-	@version 0.12.13
+	@version 0.12.24
 	@author Matthew Moore
 */
 
@@ -11,7 +11,8 @@
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Nature/natureID.h"
+
+#include "natureID.h"
 
 namespace PocketCore::Nature
 {

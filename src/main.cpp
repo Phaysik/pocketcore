@@ -2,13 +2,14 @@
 	@brief Contains the function definitions for creating a main
 	@date 09/11/2026
 	@since 0.1.0
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 */
 
 #include <array>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <string_view>
 
 #include "Ability/abilityID.h"
@@ -31,6 +32,7 @@
 #include "Item/itemID.h"
 #include "Move/builtInMoveID.h"
 #include "Nature/builtInNatureID.h"
+#include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
@@ -40,7 +42,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.23
+	@version 0.12.24
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -53,7 +55,18 @@ int main()
 	using PocketCore::Battle::BattleEngine;
 	using PocketCore::Battle::BattleTarget;
 	using PocketCore::Battle::MoveAction;
+	using PocketCore::Configuration::AbilityRegistryConfiguration;
+	using PocketCore::Configuration::EffectRegistryConfiguration;
+	using PocketCore::Configuration::ItemRegistryConfiguration;
+	using PocketCore::Configuration::MoveRegistryConfiguration;
+	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
+	using PocketCore::Configuration::NatureRegistryConfiguration;
+	using PocketCore::Configuration::PokemonRegistryConfiguration;
+	using PocketCore::Configuration::StatusRegistryConfiguration;
+	using PocketCore::Configuration::TerrainRegistryConfiguration;
+	using PocketCore::Configuration::TypeRegistryConfiguration;
+	using PocketCore::Configuration::WeatherRegistryConfiguration;
 	using PocketCore::Effect::Side;
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::NO_ITEM_ID;
@@ -62,12 +75,13 @@ int main()
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Nature::BuiltinNatureID;
 	using PocketCore::Nature::toNatureID;
+	using PocketCore::Pokemon::BuiltinPokemonID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
-	namespace Configuration = PocketCore::Configuration;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
 
 	const bool initialized{Logging::Logger::initialize(Logging::LOGGING_LOGGER_NAME, Logging::LOGGING_FILE_NAME, true)};
@@ -77,34 +91,35 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	const Configuration::TypeRegistryConfiguration typeRegistryConfig{};
-	const Configuration::AbilityRegistryConfiguration abilityRegistryConfig{};
-	const Configuration::ItemRegistryConfiguration itemRegistryConfig{};
-	const Configuration::MoveRegistryConfiguration moveRegistryConfig{};
-	const Configuration::StatusRegistryConfiguration statusRegistryConfig{};
-	const Configuration::TerrainRegistryConfiguration terrainRegistryConfig{};
-	const Configuration::WeatherRegistryConfiguration weatherRegistryConfig{};
-	const Configuration::MultiplierRegistryConfiguration multiplierRegistryConfig{};
-	const Configuration::EffectRegistryConfiguration effectRegistryConfig{};
-	const Configuration::NatureRegistryConfiguration natureRegistryConfig{};
-	const Configuration::PokemonRegistryConfiguration pokemonRegistryConfig{};
+	std::unique_ptr<TypeRegistryConfiguration> typeRegistryConfig{std::make_unique<TypeRegistryConfiguration>()};
+	std::unique_ptr<AbilityRegistryConfiguration> abilityRegistryConfig{std::make_unique<AbilityRegistryConfiguration>()};
+	std::unique_ptr<ItemRegistryConfiguration> itemRegistryConfig{std::make_unique<ItemRegistryConfiguration>()};
+	std::unique_ptr<MoveRegistryConfiguration> moveRegistryConfig{std::make_unique<MoveRegistryConfiguration>()};
+	std::unique_ptr<StatusRegistryConfiguration> statusRegistryConfig{std::make_unique<StatusRegistryConfiguration>()};
+	std::unique_ptr<TerrainRegistryConfiguration> terrainRegistryConfig{std::make_unique<TerrainRegistryConfiguration>()};
+	std::unique_ptr<WeatherRegistryConfiguration> weatherRegistryConfig{std::make_unique<WeatherRegistryConfiguration>()};
+	std::unique_ptr<MultiplierRegistryConfiguration> multiplierRegistryConfig{std::make_unique<MultiplierRegistryConfiguration>()};
+	std::unique_ptr<EffectRegistryConfiguration> effectRegistryConfig{std::make_unique<EffectRegistryConfiguration>()};
+	std::unique_ptr<NatureRegistryConfiguration> natureRegistryConfig{std::make_unique<NatureRegistryConfiguration>()};
+	std::unique_ptr<PokemonRegistryConfiguration> pokemonRegistryConfig{std::make_unique<PokemonRegistryConfiguration>()};
 
 	const RegistryProvider registryProvider{
-		.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-		.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-		.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-		.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-		.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-		.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-		.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-		.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-		.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-		.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+		.abilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
+		.moveRegistry = &moveRegistryConfig->getRuntimeRegistry(),
+		.itemRegistry = &itemRegistryConfig->getRuntimeRegistry(),
+		.typeRegistry = &typeRegistryConfig->getRuntimeRegistry(),
+		.statusRegistry = &statusRegistryConfig->getRuntimeRegistry(),
+		.weatherRegistry = &weatherRegistryConfig->getRuntimeRegistry(),
+		.terrainRegistry = &terrainRegistryConfig->getRuntimeRegistry(),
+		.multiplierRegistry = &multiplierRegistryConfig->getRuntimeRegistry(),
+		.natureRegistry = &natureRegistryConfig->getRuntimeRegistry(),
+		.pokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
 	};
-	const EffectRegistry &effectRegistry{effectRegistryConfig.getRuntimeRegistry()};
+	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 
 	Pokemon pokemonA{
-		"Feraligatr",
+		toPokemonID(BuiltinPokemonID::Blastoise),
+		"Blastoise",
 		{
 			.mMaxHealth = 100U,
 			.mAttack = 100U,
@@ -129,6 +144,7 @@ int main()
 	pokemonA.setTypeID(0, toTypeID(BuiltinTypeID::Water));
 
 	Pokemon pokemonB{
+		toPokemonID(BuiltinPokemonID::Charizard),
 		"Charizard",
 		{
 			.mMaxHealth = 100U,
@@ -183,11 +199,11 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-	// std::cout << "PartyA[0]: " << partyA.at(0)->getHealth() << '\n';
+	std::cout << "PartyA[0]: " << partyA.at(0)->getHealth() << '\n';
 	// std::cout << "PartyA[0]:\n";
-	printPokemonWithNames(std::cout, *partyA.at(0), registryProvider) << '\n';
+	// printPokemonWithNames(std::cout, *partyA.at(0), registryProvider) << '\n';
 
-	// std::cout << "PartyB[0]: " << partyB.at(0)->getHealth() << '\n';
+	std::cout << "PartyB[0]: " << partyB.at(0)->getHealth() << '\n';
 	// std::cout << "PartyB[0]:\n";
 	// printPokemonWithNames(std::cout, *partyB.at(0), registryProvider) << '\n';
 
