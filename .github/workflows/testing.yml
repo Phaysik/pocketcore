@@ -7,6 +7,21 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      [
+        '**.c',
+        '**.cpp',
+        '**.h',
+        '**.hpp',
+        '**.cxx',
+        '**.hxx',
+        '**.cc',
+        '**.hh',
+        'Makefile',
+        '**CMakeLists.txt',
+        'meson.build',
+        '**.cmake',
+      ] 
 
 jobs:
   test:
