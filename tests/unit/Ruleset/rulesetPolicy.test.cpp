@@ -102,7 +102,7 @@ SCENARIO("RulesetPolicy")
 
 		GIVEN("for mAllowTera modified in one ruleset policy")
 		{
-			RulesetPolicy other{.mAllowTera = true};
+			RulesetPolicy other{.mAllowTera = false};
 
 			THEN("they are not equal")
 			{
@@ -112,7 +112,7 @@ SCENARIO("RulesetPolicy")
 
 		GIVEN("for mAllowMega modified in one ruleset policy")
 		{
-			RulesetPolicy other{.mAllowMega = false};
+			RulesetPolicy other{.mAllowMega = true};
 
 			THEN("they are not equal")
 			{
@@ -122,7 +122,7 @@ SCENARIO("RulesetPolicy")
 
 		GIVEN("for mAllowGmax modified in one ruleset policy")
 		{
-			RulesetPolicy other{.mAllowGmax = false};
+			RulesetPolicy other{.mAllowGmax = true};
 
 			THEN("they are not equal")
 			{
@@ -132,7 +132,7 @@ SCENARIO("RulesetPolicy")
 
 		GIVEN("for mAllowZMoves modified in one ruleset policy")
 		{
-			RulesetPolicy other{.mAllowZMoves = false};
+			RulesetPolicy other{.mAllowZMoves = true};
 
 			THEN("they are not equal")
 			{
