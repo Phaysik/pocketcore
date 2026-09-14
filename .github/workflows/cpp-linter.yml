@@ -33,5 +33,5 @@ jobs:
           tidy-review: "true" # Enables pull requet reviews from clang-tidy
 
       - name: Fail fast?!
-        if: steps.linter.outputs.checks-failed > 0 ||
+        if: steps.linter.outputs.checks-failed > 0
         run: exit 1
