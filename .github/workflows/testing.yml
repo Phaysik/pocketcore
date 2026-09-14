@@ -1,4 +1,4 @@
-name: 'Run Google Test Suite'
+name: 'Run Catch2 Test Suite'
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Catch2-Test-Suite
     runs-on: ubuntu-latest
     permissions:
       actions: read
