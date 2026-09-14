@@ -3,7 +3,7 @@
 	@details The policy describes legal battle mechanics and semantic limits independently of physical storage capacity.
 	@date 09/14/2026
 	@since 0.12.30
-	@version 0.12.30
+	@version 0.12.31
 	@author Matthew Moore
 */
 
@@ -22,11 +22,11 @@ namespace PocketCore::Ruleset
 	/*! @struct RulesetPolicy rulesetPolicy.h Ruleset/rulesetPolicy.h
 		@brief Stores symmetric, battle-wide rules for one battle.
 		@details Owns only value-based semantic limits and mechanic permissions; it owns no registry entries, Pokemon, battle state, or
-	   storage. Its limits do not control array extents in @ref PocketCore::Configuration::constants.h.
+	   storage. Its limits do not control array extents in \c Configuration/constants.h.
 		@note Per-side permissions are intentionally excluded. @ref SideConstraints is reserved for that responsibility in version 0.14.0.
 		@date 09/14/2026
 		@since 0.12.30
-		@version 0.12.30
+		@version 0.12.31
 		@author Matthew Moore
 	*/
 	struct RulesetPolicy
@@ -46,7 +46,7 @@ namespace PocketCore::Ruleset
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
 			/*! @brief Stores the maximum number of Pokemon permitted on either side. */
-			ub mMaxSideSize{RULESET_DEFAULT_MAX_SIZE_SIZE};
+			ub mMaxSideSize{RULESET_DEFAULT_MAX_SIDE_SIZE};
 			/*! @brief Stores the maximum number of simultaneous non-volatile statuses on one Pokemon. */
 			ub mMaxNonVolatileStatuses{RULESET_DEFAULT_MAX_NON_VOLATILE_STATUSES};
 			/*! @brief Stores the maximum number of simultaneous volatile statuses on one Pokemon. */
@@ -63,7 +63,7 @@ namespace PocketCore::Ruleset
 			/*! @brief Determines whether Gigantamax is legal. */
 			bool mAllowGmax{RULESET_DEFAULT_ALLOW_GMAX};
 			/*! @brief Determines whether Z-Moves are legal. */
-			bool mAllowZ{RULESET_DEFAULT_ALLOW_Z_MOVES};
+			bool mAllowZMoves{RULESET_DEFAULT_ALLOW_Z_MOVES};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
