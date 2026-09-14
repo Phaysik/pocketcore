@@ -3,10 +3,36 @@ name: cpp-linter
 on:
   pull_request:
     branches: [main, master, develop]
-    paths: ['**.c', '**.cpp', '**.h', '**.hpp', '**.cxx', '**.hxx', '**.cc', '**.hh', '**CMakeLists.txt', 'meson.build', '**.cmake']
+    paths:
+      [
+        '**.c',
+        '**.cpp',
+        '**.h',
+        '**.hpp',
+        '**.cxx',
+        '**.hxx',
+        '**.cc',
+        '**.hh',
+        '**CMakeLists.txt',
+        'meson.build',
+        '**.cmake',
+      ]
   push:
     branches: [main, master, develop]
-    paths: ['**.c', '**.cpp', '**.h', '**.hpp', '**.cxx', '**.hxx', '**.cc', '**.hh', '**CMakeLists.txt', 'meson.build', '**.cmake']
+    paths:
+      [
+        '**.c',
+        '**.cpp',
+        '**.h',
+        '**.hpp',
+        '**.cxx',
+        '**.hxx',
+        '**.cc',
+        '**.hh',
+        '**CMakeLists.txt',
+        'meson.build',
+        '**.cmake',
+      ]
 
 jobs:
   cpp-linter:
@@ -201,20 +227,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bear
           mkdir -p .zed
-          bear --output .zed/compile_commands.json -- make -j$(nproc) release -B
+          bear --output .zed/compile_commands.json -- make -j$(nproc) compile -B
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          style: 'file'  # Use .clang-format config file.
+          style: 'file' # Use .clang-format config file.
           tidy-checks: '' # Use .clang-tidy config file.
-          version: "23" # Use the latest support llvm toolchain version
+          version: '23' # Use the latest support llvm toolchain version
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }} # only 'update' a single comment in a pull request's thread.
-          step-summary: "true" # append content as part of the workflow's job summary
-          database: ".zed" # The location of the compile_commands.json
-          tidy-review: "true" # Enables pull requet reviews from clang-tidy
+          step-summary: 'true' # append content as part of the workflow's job summary
+          database: '.zed' # The location of the compile_commands.json
+          tidy-review: 'true' # Enables pull requet reviews from clang-tidy
 
       - name: Save Apt Packages Cache
         run: |
