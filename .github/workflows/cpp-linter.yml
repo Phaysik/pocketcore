@@ -17,7 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # ... optionally setup build env to create a compilation database
+      - name: Generate compilation database
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bear
+          mkdir -p .zed
+          bear --output .zed/compile_commands.json -- make -j$(nproc) release -B
 
       - uses: cpp-linter/cpp-linter-action@v2
         id: linter
