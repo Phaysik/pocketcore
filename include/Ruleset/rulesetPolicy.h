@@ -3,7 +3,7 @@
 	@details The policy describes legal battle mechanics and semantic limits independently of physical storage capacity.
 	@date 09/14/2026
 	@since 0.12.30
-	@version 0.12.31
+	@version 0.12.32
 	@author Matthew Moore
 */
 
@@ -26,7 +26,7 @@ namespace PocketCore::Ruleset
 		@note Per-side permissions are intentionally excluded. @ref SideConstraints is reserved for that responsibility in version 0.14.0.
 		@date 09/14/2026
 		@since 0.12.30
-		@version 0.12.31
+		@version 0.12.32
 		@author Matthew Moore
 	*/
 	struct RulesetPolicy
@@ -58,12 +58,12 @@ namespace PocketCore::Ruleset
 
 			/*! @brief Determines whether Terastallization is legal. */
 			bool mAllowTera{RULESET_DEFAULT_ALLOW_TERA};
-			/*! @brief Determines whether Mega Evolution is legal. */
-			bool mAllowMega{RULESET_DEFAULT_ALLOW_MEGA};
 			/*! @brief Determines whether Gigantamax is legal. */
 			bool mAllowGmax{RULESET_DEFAULT_ALLOW_GMAX};
 			/*! @brief Determines whether Z-Moves are legal. */
 			bool mAllowZMoves{RULESET_DEFAULT_ALLOW_Z_MOVES};
+			/*! @brief Determines whether Mega Evolution is legal. */
+			bool mAllowMega{RULESET_DEFAULT_ALLOW_MEGA};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
