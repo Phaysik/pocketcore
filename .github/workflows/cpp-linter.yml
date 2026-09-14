@@ -217,7 +217,8 @@ jobs:
           step-summary: 'true' # append content as part of the workflow's job summary
           database: '.zed' # The location of the compile_commands.json
           files-changed-only: 'false' # Match the local tidy target by analyzing every source file.
-          ignore: '*|!src/**|!tests/**|!include/**|!testInclude/**'
+          extensions: 'cpp,h'
+          ignore: '**|!src/**|!tests/**|!include/**|!testInclude/**'
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
           extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
