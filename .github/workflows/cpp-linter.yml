@@ -241,6 +241,7 @@ jobs:
           step-summary: 'true' # append content as part of the workflow's job summary
           database: '.zed' # The location of the compile_commands.json
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
+          extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
       - name: Save Apt Packages Cache
         run: |
