@@ -4,35 +4,11 @@ on:
   pull_request:
     branches: [main, master, develop]
     paths:
-      [
-        '**.c',
-        '**.cpp',
-        '**.h',
-        '**.hpp',
-        '**.cxx',
-        '**.hxx',
-        '**.cc',
-        '**.hh',
-        '**CMakeLists.txt',
-        'meson.build',
-        '**.cmake',
-      ]
+      ['src/**/*.cpp', 'tests/**/*.cpp', 'include/**/*.h', 'testInclude/**/*.h']
   push:
     branches: [main, master, develop]
     paths:
-      [
-        '**.c',
-        '**.cpp',
-        '**.h',
-        '**.hpp',
-        '**.cxx',
-        '**.hxx',
-        '**.cc',
-        '**.hh',
-        '**CMakeLists.txt',
-        'meson.build',
-        '**.cmake',
-      ]
+      ['src/**/*.cpp', 'tests/**/*.cpp', 'include/**/*.h', 'testInclude/**/*.h']
 
 jobs:
   cpp-linter:
@@ -241,6 +217,7 @@ jobs:
           step-summary: 'true' # append content as part of the workflow's job summary
           database: '.zed' # The location of the compile_commands.json
           files-changed-only: 'false' # Match the local tidy target by analyzing every source file.
+          ignore: '*|!src/**|!tests/**|!include/**|!testInclude/**'
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
           extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
