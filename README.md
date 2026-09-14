@@ -1,3 +1,8 @@
+[![CodeQL Advanced](https://github.com/Phaysik/pocketcore/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/codeql-analysis.yml)
+[![Clang Format & Clang Tidy](https://github.com/Phaysik/pocketcore/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/cpp-linter.yml)
+[![Tests](https://github.com/Phaysik/pocketcore/actions/workflows/testing.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/testing.yml)
+[![No Memory Leaks](https://github.com/Phaysik/pocketcore/actions/workflows/valgrind.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/valgrind.yml)
+
 # pocketcore
 
 ## Program Requirements
