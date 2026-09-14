@@ -18,6 +18,21 @@ on:
   pull_request:
     branches:
     - master
+    paths:
+      [
+        '**.c',
+        '**.cpp',
+        '**.h',
+        '**.hpp',
+        '**.cxx',
+        '**.hxx',
+        '**.cc',
+        '**.hh',
+        'Makefile',
+        '**CMakeLists.txt',
+        'meson.build',
+        '**.cmake',
+      ]
   schedule:
     - cron: '15 8 * * 6'
 
