@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the RulesetPolicy.
 	@date 09/14/2026
 	@since 0.12.31
-	@version 0.12.31
+	@version 0.12.33
 	@author Matthew Moore
 */
 
@@ -40,9 +40,9 @@ SCENARIO("RulesetPolicy")
 				.mMaxWeathers = RULESET_DEFAULT_MAX_WEATHERS,
 				.mMaxTerrains = RULESET_DEFAULT_MAX_TERRAINS,
 				.mAllowTera = RULESET_DEFAULT_ALLOW_TERA,
-				.mAllowMega = RULESET_DEFAULT_ALLOW_MEGA,
 				.mAllowGmax = RULESET_DEFAULT_ALLOW_GMAX,
 				.mAllowZMoves = RULESET_DEFAULT_ALLOW_Z_MOVES,
+				.mAllowMega = RULESET_DEFAULT_ALLOW_MEGA,
 			};
 
 			CHECK((policy == expected));
