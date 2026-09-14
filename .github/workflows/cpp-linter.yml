@@ -242,6 +242,7 @@ jobs:
           database: '.zed' # The location of the compile_commands.json
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
           lines-changed-only: 'true' # Only lines in the diff that contain additions are analyzed
+          extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
       - name: Save Apt Packages Cache
         run: |
