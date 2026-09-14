@@ -2,10 +2,11 @@ name: 'Run Google Test Suite'
 
 on:
   push:
-    branches-ignore: [master]
+    branches:
+    - master
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [master]
+    branches:
+    - master
 
 jobs:
   test:
