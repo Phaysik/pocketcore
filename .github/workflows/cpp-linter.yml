@@ -240,6 +240,7 @@ jobs:
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }} # only 'update' a single comment in a pull request's thread.
           step-summary: 'true' # append content as part of the workflow's job summary
           database: '.zed' # The location of the compile_commands.json
+          files-changed-only: 'false' # Match the local tidy target by analyzing every source file.
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
           extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
