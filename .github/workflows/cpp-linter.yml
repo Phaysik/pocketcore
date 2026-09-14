@@ -218,7 +218,7 @@ jobs:
           database: '.zed' # The location of the compile_commands.json
           files-changed-only: 'false' # Match the local tidy target by analyzing every source file.
           extensions: 'cpp,h'
-          ignore: '**|!src/**|!tests/**|!include/**|!testInclude/**'
+          ignore: '|!src|!tests|!include|!testInclude'
           tidy-review: 'true' # Enables pull requet reviews from clang-tidy
           extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
