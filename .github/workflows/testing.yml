@@ -217,6 +217,10 @@ jobs:
 
       - name: Install Testing Frameworks
         run: |
+            wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+            sudo chmod +x llvm.sh
+            sudo ./llvm.sh 24
+            rm llvm.sh
             sudo apt-get install python3-pip libgmock-dev catch2 clang-24 -y
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
             pip3 install cmake --break-system-packages
