@@ -216,10 +216,17 @@ jobs:
         run: sudo bash $GITHUB_WORKSPACE/makefileDependencies.sh a
 
       - name: Install Testing Frameworks
-        run: sudo apt-get install libgmock-dev catch2 -y
+        run: sudo apt-get install libgmock-dev catch2 cmake -y
 
-      - name: Make project
-        run: make -j$(nproc) build_tests
+      - name: Run GCC Tests
+        run: |
+            cmake --preset gcc-tests
+            cmake --build --preset gcc-tests
+
+      - name: Run Clang Tests
+        run: |
+            cmake --preset clang-tests
+            cmake --build --preset clang-tests
 
       - name: Save Apt Packages Cache
         run: |

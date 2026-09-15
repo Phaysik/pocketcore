@@ -311,7 +311,9 @@ main() {
 
 		echo "Installing all the required packages for all commands used in the Makefile"
 
-		sudo apt-get install make cmake libgtest-dev libgmock-dev python3-pip docker-compose catch2 -y
+		sudo apt-get install make libgtest-dev libgmock-dev python3-pip docker-compose catch2 -y
+
+		pip3 install cmake --break-system-packages
 
 		sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 10
 		sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-14 14
