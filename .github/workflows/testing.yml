@@ -216,7 +216,9 @@ jobs:
         run: sudo bash $GITHUB_WORKSPACE/makefileDependencies.sh a
 
       - name: Install Testing Frameworks
-        run: sudo apt-get install libgmock-dev catch2 cmake -y
+        run: |
+            sudo apt-get install python3-pip libgmock-dev catch2 -y
+            pip3 install cmake --break-system-packages
 
       - name: Run GCC Tests
         run: |
