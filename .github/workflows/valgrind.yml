@@ -229,7 +229,7 @@ jobs:
 
       - name: Run Valgrind
         run: |
-            cmake --preset gcc-debug
+            cmake --preset gcc-valgrind
             cmake --build --preset valgrind
 
       - name: Save Apt Packages Cache
