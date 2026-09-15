@@ -217,7 +217,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-            wget llvm.sh https://apt.llvm.org/llvm.sh
+            wget -qO llvm.sh https://apt.llvm.org/llvm.sh
             sudo chmod +x llvm.sh
             sudo ./llvm.sh 24
             rm llvm.sh
