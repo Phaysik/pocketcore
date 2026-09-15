@@ -53,7 +53,7 @@ setUpClang() {
 	sudo ./llvm.sh "$1"
 	rm -rf ./llvm.sh
 	sudo apt-get update
-	sudo apt-get install -y clang-format-24 clang-tidy-24 clangd-24 clang++-24
+	sudo apt-get install -y clang-format-"$1" clang-tidy-"$1" clangd-"$1" clang++-"$1"
 
 	sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-"$1" "$1"
 	sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-"$1" "$1"
