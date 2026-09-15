@@ -309,7 +309,7 @@ main() {
 	# a or 'A' for automated running (For Github workflows ignoring long documentation, linting, and formatting installation)
 	if [[ ${response,,} == "y" ]] || [[ ${1,,} == "y" ]] || [[ ${response,,} == "a" ]] || [[ ${1,,} == "a" ]]; then
 		echo "Update and upgrading your packages (will require an elevated user's password)"
-		sudo apt-get update && sudo apt-get upgrade -y
+		sudo apt-get update
 
 		echo "Installing all the required packages for all commands used in the Makefile"
 
