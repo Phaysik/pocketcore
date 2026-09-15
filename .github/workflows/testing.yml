@@ -21,7 +21,7 @@ on:
         '**CMakeLists.txt',
         'meson.build',
         '**.cmake',
-      ] 
+      ]
 
 jobs:
   test:
@@ -217,7 +217,8 @@ jobs:
 
       - name: Install Testing Frameworks
         run: |
-            sudo apt-get install python3-pip libgmock-dev catch2 clang++ -y
+            sudo apt-get install python3-pip libgmock-dev catch2 clang++-24 -y
+           	sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
             pip3 install cmake --break-system-packages
 
       - name: Run GCC Tests
