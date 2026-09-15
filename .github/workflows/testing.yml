@@ -217,7 +217,7 @@ jobs:
 
       - name: Install Testing Frameworks
         run: |
-            sudo apt-get install python3-pip libgmock-dev catch2 -y
+            sudo apt-get install python3-pip libgmock-dev catch2 clang++ -y
             pip3 install cmake --break-system-packages
 
       - name: Run GCC Tests
