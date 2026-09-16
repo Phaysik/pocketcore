@@ -238,15 +238,15 @@ jobs:
 
       - name: Install Tooling Dependencies
         run: |
-          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
-          sudo chmod +x llvm.sh
-          sudo ./llvm.sh 24
-          rm llvm.sh
-          sudo apt update
-          sudo apt-get install valgrind clang++-24 -y
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
-          sudo update-alternatives --set clang++ /usr/bin/clang++-24
-          pip3 install cmake --break-system-packages
+            wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+            sudo chmod +x llvm.sh
+            sudo ./llvm.sh 24
+            rm llvm.sh
+            sudo apt update
+            sudo apt-get install python3-pip libgmock-dev catch2 clang++-24 -y
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
+            sudo update-alternatives --set clang++ /usr/bin/clang++-24
+            pip3 install cmake --break-system-packages
 
       - name: Build & run coverage
         run: |
