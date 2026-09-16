@@ -4,6 +4,22 @@ on:
   push:
     branches:
       - master
+    paths:
+      [
+        '**.c',
+        '**.cpp',
+        '**.h',
+        '**.hpp',
+        '**.cxx',
+        '**.hxx',
+        '**.cc',
+        '**.hh',
+        'Makefile',
+        '**CMakeLists.txt',
+        'meson.build',
+        '**.cmake',
+        '**CMakePresets.json',
+      ]
   pull_request:
     branches:
       - master
@@ -21,6 +37,7 @@ on:
         '**CMakeLists.txt',
         'meson.build',
         '**.cmake',
+        '**CMakePresets.json',
       ]
 
 jobs:
