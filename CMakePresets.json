@@ -177,7 +177,7 @@
             "targets": [
                 "main_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "gcc-debug",
@@ -185,7 +185,7 @@
             "targets": [
                 "dev_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "clang-release",
@@ -193,7 +193,7 @@
             "targets": [
                 "main_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "clang-debug",
@@ -201,7 +201,7 @@
             "targets": [
                 "dev_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "msvc-release",
@@ -209,7 +209,7 @@
             "targets": [
                 "main_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "msvc-debug",
@@ -217,7 +217,7 @@
             "targets": [
                 "dev_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "benchmarks",
@@ -225,7 +225,7 @@
             "targets": [
                 "benchmark_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "tracy",
@@ -233,7 +233,7 @@
             "targets": [
                 "tracy_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "coverage",
@@ -241,7 +241,7 @@
             "targets": [
                 "coverage"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "genhtml",
@@ -249,7 +249,7 @@
             "targets": [
                 "genhtml"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "valgrind",
@@ -257,7 +257,7 @@
             "targets": [
                 "run_valgrind"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "tidy",
@@ -265,7 +265,7 @@
             "targets": [
                 "tidy"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "run_tidy",
@@ -273,7 +273,7 @@
             "targets": [
                 "run_tidy"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "check",
@@ -281,7 +281,7 @@
             "targets": [
                 "check"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "flawfinder",
@@ -289,7 +289,7 @@
             "targets": [
                 "flawfinder"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "format",
@@ -297,7 +297,7 @@
             "targets": [
                 "format"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "format_check",
@@ -305,7 +305,7 @@
             "targets": [
                 "format_check"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "analysis",
@@ -313,7 +313,7 @@
             "targets": [
                 "analysis"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "gcc-tests",
@@ -321,7 +321,7 @@
             "targets": [
                 "test_app"
             ],
-            "jobs": 4
+            "jobs": 8
         },
         {
             "name": "clang-tests",
@@ -329,7 +329,7 @@
             "targets": [
                 "test_app"
             ],
-            "jobs": 4
+            "jobs": 8
         }
     ],
     "testPresets": [
