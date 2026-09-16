@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 09/02/2026
+	@date 09/16/2026
 	@since 0.10.3
-	@version 0.12.17
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -55,9 +55,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 09/02/2026
+		@date 09/16/2026
 		@since 0.10.3
-		@version 0.12.17
+		@version 0.12.36
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -239,7 +239,7 @@ namespace PocketCore::Battle
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
 				@since 0.10.3
-				@version 0.12.17
+				@version 0.12.36
 			*/
 			void executeEffect(const EffectID effect, EffectContext &context);
 

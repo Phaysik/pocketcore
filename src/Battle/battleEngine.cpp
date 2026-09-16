@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 09/02/2026
+	@date 09/16/2026
 	@since 0.9.16
-	@version 0.12.17
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -53,7 +53,7 @@ namespace PocketCore::Battle
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
@@ -430,7 +430,7 @@ namespace PocketCore::Battle
 			statusTarget = targetSlot != nullptr ? targetSlot->mPokemon : nullptr;
 		}
 
-		const std::array<StatusID, MAX_STATUSES_PER_POKEMON> previousStatuses{
+		const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> previousStatuses{
 			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){}};
 
 		effectMeta->mApply(mState, context, *mProvider);

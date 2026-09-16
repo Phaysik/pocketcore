@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 09/11/2026
+	@date 09/16/2026
 	@since 0.1.0
-	@version 0.12.24
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -47,8 +47,17 @@ namespace PocketCore::Configuration
 	/*! @brief The maximum number of registered statuses. */
 	inline constexpr us MAX_STATUSES{1'000};
 
-	/*! @brief The maximum number of statuses assigned to one Pokemon. */
-	inline constexpr us MAX_STATUSES_PER_POKEMON{5};
+	/*! @brief The storage capacity for non-volatile statuses assigned to one Pokemon.
+		@details This active capacity is distinct from the @ref MAX_STATUSES registry capacity. @ref PocketCore::Ruleset::RulesetPolicy::mMaxNonVolatileStatuses
+		selects the ruleset's semantic limit without exceeding this value.
+	*/
+	inline constexpr us MAX_NON_VOLATILE_STATUSES_PER_POKEMON{5};
+
+	/*! @brief The storage capacity for volatile statuses assigned to one Pokemon.
+		@details This active capacity is distinct from the @ref MAX_STATUSES registry capacity. @ref PocketCore::Ruleset::RulesetPolicy::mMaxVolatileStatuses
+		selects the ruleset's semantic limit without exceeding this value.
+	*/
+	inline constexpr us MAX_VOLATILE_STATUSES_PER_POKEMON{8};
 
 	/*! @brief The maximum number of registered natures. */
 	inline constexpr us MAX_NATURES{1'000};
@@ -65,8 +74,17 @@ namespace PocketCore::Configuration
 	/*! @brief The maximum number of registered weather conditions. */
 	inline constexpr us MAX_WEATHERS{1'000};
 
-	/*! @brief The maximum number of active weather conditions allowed on the field simultaneously. */
+	/*! @brief The storage capacity for weather conditions active on the field simultaneously.
+		@details This active capacity is distinct from the @ref MAX_WEATHERS registry capacity. @ref PocketCore::Ruleset::RulesetPolicy::mMaxWeathers selects
+		the ruleset's semantic limit without exceeding this value.
+	*/
 	inline constexpr us MAX_ACTIVE_WEATHERS_ON_FIELD{5};
+
+	/*! @brief The storage capacity for terrain conditions active on the field simultaneously.
+		@details This active capacity is distinct from the @ref MAX_TERRAINS registry capacity. @ref PocketCore::Ruleset::RulesetPolicy::mMaxTerrains selects
+		the ruleset's semantic limit without exceeding this value.
+	*/
+	inline constexpr us MAX_ACTIVE_TERRAINS_ON_FIELD{5};
 
 	/*! @brief The maximum number of registered terrain conditions. */
 	inline constexpr us MAX_TERRAINS{1'000};
@@ -233,6 +251,12 @@ namespace PocketCore::Configuration
 
 	/*! @brief The minimum individual value (EV) for a Pokemon's stat. */
 	inline constexpr ub MIN_EV_STAT_VALUE{0};
+
+	/*! @brief The storage capacity for active slots on each side of a battle.
+		@details This physical capacity does not select a battle format. @ref PocketCore::Ruleset::RulesetPolicy::mMaxSideSize selects the ruleset's semantic limit
+		without exceeding this value.
+	*/
+	inline constexpr ub MAX_ACTIVE_SLOTS_PER_SIDE{6};
 } // namespace PocketCore::Configuration
 
 #endif
