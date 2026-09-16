@@ -55,32 +55,6 @@ namespace PocketCore::Registry::Pokemon
 
 		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonID)};
 
-		if (pokemonMeta == nullptr)
-		{
-			return std::unexpected{RegistryErrorInfo{
-				RegistryError::PokemonNotFound, {}, "PokemonRegistry::instantiate: missing pokemon metadata"}};
-		}
-
-		if (const std::expected<void, RegistryErrorInfo> error{validateNatureMetadata(natureIDs, *dependencyRegistries)}; !error)
-		{
-			return std::unexpected{error.error()};
-		}
-
-		if (const std::expected<void, RegistryErrorInfo> error{validateAbilityMetadata(abilityIDs, *dependencyRegistries)}; !error)
-		{
-			return std::unexpected{error.error()};
-		}
-
-		if (const std::expected<void, RegistryErrorInfo> error{validateItemMetadata(itemIDs, *dependencyRegistries)}; !error)
-		{
-			return std::unexpected{error.error()};
-		}
-
-		if (const std::expected<void, RegistryErrorInfo> error{validateMoveMetadata(moveIDs, *dependencyRegistries)}; !error)
-		{
-			return std::unexpected{error.error()};
-		}
-
 		return Pokemon{
 			pokemonID,
 			pokemonMeta->mName,
