@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/12/2026
+	@date 09/16/2026
 	@since 0.4.0
-	@version 0.12.28
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -45,7 +45,7 @@ using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
+using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 using PocketCore::Configuration::StatusRegistryConfiguration;
@@ -192,7 +192,7 @@ SCENARIO("Pokemon")
 			{
 				THEN("the statuses match")
 				{
-					CHECK((std::array<StatusID, MAX_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Freeze)}
+					CHECK((std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Freeze)}
 						   == pokemon.getStatusIDsArray()));
 				}
 			}
@@ -203,8 +203,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's statuses are properly updated")
 				{
-					CHECK(
-						(std::array<StatusID, MAX_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Burn)} == pokemon.getStatusIDsArray()));
+					CHECK((std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Burn)}
+						   == pokemon.getStatusIDsArray()));
 				}
 			}
 		}
@@ -832,7 +832,7 @@ SCENARIO("Pokemon")
 			}),
 		};
 
-		std::array<StatusID, MAX_STATUSES_PER_POKEMON> statusIDs{};
+		std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> statusIDs{};
 
 		GIVEN("a current status that blocks the incoming status")
 		{
@@ -893,7 +893,7 @@ SCENARIO("Pokemon")
 
 				THEN("only the first replacement slot receives the incoming status")
 				{
-					std::array<StatusID, MAX_STATUSES_PER_POKEMON> expectedStatusIDs{
+					std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> expectedStatusIDs{
 						incomingStatusID,
 						toStatusID(BuiltinStatusID::Sleep),
 						toStatusID(BuiltinStatusID::Paralysis),

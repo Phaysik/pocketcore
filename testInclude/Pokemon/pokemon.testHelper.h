@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 09/11/2026
+	@date 09/16/2026
 	@since 0.12.13
-	@version 0.12.25
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -31,7 +31,7 @@ namespace PocketCore::Testing
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
@@ -74,7 +74,7 @@ namespace PocketCore::Testing
 
 			PokemonStats mStats{};
 
-			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{NO_STATUS_ID};
+			std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> mStatusIDs{NO_STATUS_ID};
 
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{NO_MOVE_ID};
 
