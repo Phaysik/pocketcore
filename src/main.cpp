@@ -128,7 +128,7 @@ int main()
 			.mSpDefense = 100U,
 			.mSpeed = 90U,
 		},
-		60U,
+		50U,
 		{toAbilityID(BuiltinAbilityID::Drizzle)},
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toTypeID(BuiltinTypeID::Water)},
