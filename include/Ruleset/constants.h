@@ -39,18 +39,14 @@ namespace PocketCore::Ruleset
 		"RulesetPolicy default terrains on field must match the canonical ruleset constant."};
 	inline constexpr std::string_view RULESET_POLICY_FIELD_COUNT_ERROR_MESSAGE{
 		"RulesetPolicy bounded fields and field-specific errors must stay synchronized."};
-	inline constexpr std::string_view GEN9_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{
-		"GEN9_BASE_GAME must satisfy the ruleset policy bounds."};
+	inline constexpr std::string_view GEN9_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN9_BASE_GAME must satisfy the ruleset policy bounds."};
 	inline constexpr std::string_view GEN9_VGC_DOUBLES_RULESET_POLICY_ERROR_MESSAGE{
 		"GEN9_VGC_DOUBLES must satisfy the ruleset policy bounds."};
 	inline constexpr std::string_view GEN9_SMOGON_SINGLES_RULESET_POLICY_ERROR_MESSAGE{
 		"GEN9_SMOGON_SINGLES must satisfy the ruleset policy bounds."};
-	inline constexpr std::string_view GEN8_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{
-		"GEN8_BASE_GAME must satisfy the ruleset policy bounds."};
-	inline constexpr std::string_view GEN7_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{
-		"GEN7_BASE_GAME must satisfy the ruleset policy bounds."};
-	inline constexpr std::string_view GEN6_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{
-		"GEN6_BASE_GAME must satisfy the ruleset policy bounds."};
+	inline constexpr std::string_view GEN8_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN8_BASE_GAME must satisfy the ruleset policy bounds."};
+	inline constexpr std::string_view GEN7_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN7_BASE_GAME must satisfy the ruleset policy bounds."};
+	inline constexpr std::string_view GEN6_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN6_BASE_GAME must satisfy the ruleset policy bounds."};
 } // namespace PocketCore::Ruleset
 
 #endif
