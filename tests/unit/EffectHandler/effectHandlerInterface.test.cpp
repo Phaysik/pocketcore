@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.test.cpp
 	@brief C++ file for running tests for the EffectHandlerInterface.
-	@date 09/01/2026
+	@date 09/16/2026
 	@since 0.8.7
-	@version 0.12.14
+	@version 0.12.34
 	@author Matthew Moore
 */
 
@@ -48,8 +48,13 @@ SCENARIO("IEffectHandler")
 		}
 	}
 
-	BattleState battleState{makeBattleState({.mSideA = {{}}, .mSideB = {{}}})};
-	EffectContext context{makeEffectContext({.mUserIndex = 0, .mTargetIndex = 0, .mUserSide = Side::A, .mTargetSide = Side::B})};
+	BattleSlot sideAOne{};
+	BattleSlot sideATwo{.mFaintProcessed = true};
+	BattleSlot sideBOne{.mPosition = 4, .mIsGrounded = false};
+	BattleSlot sideBTwo{.mIsProtected = true, .mIsFlinched = true};
+
+	BattleState battleState{makeBattleState({.mSideA = {sideAOne, sideATwo}, .mSideB = {sideBOne, sideBTwo}})};
+	EffectContext context{makeEffectContext({.mUserIndex = 0, .mTargetIndex = 1, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
 	GIVEN("get user battle slot")
 	{
@@ -75,14 +80,14 @@ SCENARIO("IEffectHandler")
 		{
 			const BattleSlot &targetSlot{IEffectHandler::getConstTargetBattleSlot(battleState, context)};
 
-			CHECK((&targetSlot == &battleState.mSideB.at(0)));
+			CHECK((&targetSlot == &battleState.mSideB.at(1)));
 		}
 
 		THEN("without constness")
 		{
 			BattleSlot &targetSlot{IEffectHandler::getTargetBattleSlot(battleState, context)};
 
-			CHECK((&targetSlot == &battleState.mSideB.at(0)));
+			CHECK((&targetSlot == &battleState.mSideB.at(1)));
 		}
 	}
 }
