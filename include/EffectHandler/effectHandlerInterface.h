@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 08/26/2026
+	@date 09/16/2026
 	@since 0.7.2
-	@version 0.12.7
+	@version 0.12.34
 	@author Matthew Moore
 */
 
@@ -122,14 +122,14 @@ namespace PocketCore::Effect
 				@pre `context.mTargetIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.8.7
-				@version 0.12.7
+				@version 0.12.34
 			*/
 			static BattleSlot &getTargetBattleSlot(BattleState &state, EffectContext &context)
 			{
 				std::vector<BattleSlot> &targetTeam{getTeam(state, context.mTargetSide)};
 				assert(context.mTargetIndex < targetTeam.size());
 
-				return targetTeam.at(context.mUserIndex);
+				return targetTeam.at(context.mTargetIndex);
 			}
 
 			/*! @brief Returns the read-only battle slot selected as the effect target.
