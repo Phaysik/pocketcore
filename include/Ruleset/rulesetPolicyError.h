@@ -3,7 +3,7 @@
 	@details Provides a set of error codes corresponding to violations of the ruleset policy.
 	@date 09/17/2026
 	@since 0.12.36
-	@version 0.12.36
+	@version 0.12.37
 	@author Matthew Moore
 */
 
@@ -111,7 +111,7 @@ namespace PocketCore::Ruleset
 		@note The validation performs a single pass over the policy fields and has constant time and space complexity.
 		@throws No exceptions; the function is @c noexcept.
 		@since 0.12.36
-		@version 0.12.36
+		@version 0.12.37
 	*/
 	ATTR_NODISCARD constexpr std::expected<void, RulesetPolicyError> validateRulesetPolicy(const RulesetPolicy &policy) noexcept
 	{
@@ -119,7 +119,7 @@ namespace PocketCore::Ruleset
 		{
 			if (policy.*fieldBound.mField > fieldBound.mMaximum)
 			{
-				return std::unexpected<RulesetPolicyError>(fieldBound.mError);
+				return std::unexpected{fieldBound.mError};
 			}
 		}
 

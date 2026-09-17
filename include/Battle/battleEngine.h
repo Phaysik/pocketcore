@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 09/16/2026
+	@date 09/17/2026
 	@since 0.10.3
-	@version 0.12.36
+	@version 0.12.37
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Ruleset/rulesetPolicy.h"
 
 #include "battleAction.h"
 #include "battleHelpers.h"
@@ -47,6 +48,7 @@ namespace PocketCore::Battle
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Ruleset::RulesetPolicy;
 
 	/*! @class BattleEngine Battle/battleEngine_copy.h
 		@brief Orchestrates turns, switching, targeting, and metadata triggers for two sides of Pokemon trainers.
@@ -109,14 +111,15 @@ namespace PocketCore::Battle
 			/*! @brief Starts a battle and assigns the first healthy party members to active slots.
 				@param[in] partyA Side A's non-owning Pokemon pointers in party order.
 				@param[in] partyB Side B's non-owning Pokemon pointers in party order.
+				@param[in] ruleset The symmetric ruleset policy that limits the battle's mechanics and values.
 				@param[in] activePokemonPerSide Number of simultaneously active Pokemon required from each party. Must be greater than zero.
 				@return Void on success, or a validation error without starting the battle.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.37
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> startBattle(const std::span<Pokemon *const> &partyA,
 																			  const std::span<Pokemon *const> &partyB,
-																			  ub activePokemonPerSide = 1U);
+																			  const RulesetPolicy &ruleset, ub activePokemonPerSide = 1U);
 
 			/*! @brief Resolves and executes one complete turn of trainer actions.
 				@details Every action is validated before the first action executes. Each active slot may submit at most one action.
