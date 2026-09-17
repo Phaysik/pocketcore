@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/12/2026
+	@date 09/17/2026
 	@since 0.3.0
-	@version 0.12.28
+	@version 0.12.36
 	@author Matthew Moore
 */
 
@@ -45,7 +45,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-	using PocketCore::Configuration::MAX_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
@@ -66,9 +66,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/11/2026
+		@date 09/17/2026
 		@since 0.3.0
-		@version 0.12.25
+		@version 0.12.36
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -160,9 +160,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all status identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.9.11
-				@version 0.12.17
+				@version 0.12.36
 			*/
-			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &getStatusIDsArray() const
+			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> &getStatusIDsArray() const
 			{
 				return mStatusIDs;
 			}
@@ -258,11 +258,11 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Returns a status identifier by slot index.
-				@param[in] index Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
+				@param[in] index Status slot index; must be less than MAX_NON_VOLATILE_STATUSES_PER_POKEMON.
 				@return The status identifier stored in the slot.
-				@pre index < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
+				@pre index < MAX_NON_VOLATILE_STATUSES_PER_POKEMON; violation triggers an assertion.
 				@since 0.8.1
-				@version 0.12.2
+				@version 0.12.36
 			*/
 			ATTR_NODISCARD constexpr StatusID getStatusID(const us index) const
 			{
@@ -512,9 +512,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all status identifier slots.
 				@param[in] statusIDs The status identifiers to store.
 				@since 0.9.11
-				@version 0.12.17
+				@version 0.12.36
 			*/
-			constexpr void setStatusIDsArray(const std::array<StatusID, MAX_STATUSES_PER_POKEMON> &statusIDs)
+			constexpr void setStatusIDsArray(const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> &statusIDs)
 			{
 				mStatusIDs = statusIDs;
 			}
@@ -617,11 +617,11 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets one status slot.
-				@param[in] slotIndex Status slot index; must be less than MAX_STATUSES_PER_POKEMON.
+				@param[in] slotIndex Status slot index; must be less than MAX_NON_VOLATILE_STATUSES_PER_POKEMON.
 				@param[in] statusID The status identifier to store.
-				@pre slotIndex < MAX_STATUSES_PER_POKEMON; violation triggers an assertion.
+				@pre slotIndex < MAX_NON_VOLATILE_STATUSES_PER_POKEMON; violation triggers an assertion.
 				@since 0.12.17
-				@version 0.12.17
+				@version 0.12.36
 			*/
 			constexpr void setStatusID(const ub slotIndex, const StatusID statusID)
 			{
@@ -984,7 +984,7 @@ namespace PocketCore::Pokemon
 			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
 
 			/*! @brief The owned status identifier slots. */
-			std::array<StatusID, MAX_STATUSES_PER_POKEMON> mStatusIDs{};
+			std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> mStatusIDs{};
 
 			/*! @brief The owned move identifier slots. */
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};

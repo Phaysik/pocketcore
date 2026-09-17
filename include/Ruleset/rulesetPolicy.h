@@ -1,15 +1,16 @@
 /*! @file rulesetPolicy.h
 	@brief Defines the runtime value type for symmetric, battle-wide rules.
 	@details The policy describes legal battle mechanics and semantic limits independently of physical storage capacity.
-	@date 09/14/2026
+	@date 09/17/2026
 	@since 0.12.30
-	@version 0.12.32
+	@version 0.12.36
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_RULESET_RULESET_POLICY_H
 #define INCLUDE_RULESET_RULESET_POLICY_H
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -17,6 +18,11 @@
 
 namespace PocketCore::Ruleset
 {
+	using PocketCore::Configuration::MAX_ACTIVE_SLOTS_PER_SIDE;
+	using PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD;
+	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
+	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @struct RulesetPolicy rulesetPolicy.h Ruleset/rulesetPolicy.h
@@ -24,9 +30,9 @@ namespace PocketCore::Ruleset
 		@details Owns only value-based semantic limits and mechanic permissions; it owns no registry entries, Pokemon, battle state, or
 	   storage. Its limits do not control array extents in \c Configuration/constants.h.
 		@note Per-side permissions are intentionally excluded. @ref SideConstraints is reserved for that responsibility in version 0.14.0.
-		@date 09/14/2026
+		@date 09/16/2026
 		@since 0.12.30
-		@version 0.12.32
+		@version 0.12.36
 		@author Matthew Moore
 	*/
 	struct RulesetPolicy
@@ -45,15 +51,25 @@ namespace PocketCore::Ruleset
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
-			/*! @brief Stores the maximum number of Pokemon permitted on either side. */
+			/*! @brief Stores the maximum number of Pokemon permitted on either side.
+				@details Accepts values from 0 through @ref PocketCore::Configuration::MAX_ACTIVE_SLOTS_PER_SIDE (6), inclusive.
+			*/
 			ub mMaxSideSize{RULESET_DEFAULT_MAX_SIDE_SIZE};
-			/*! @brief Stores the maximum number of simultaneous non-volatile statuses on one Pokemon. */
+			/*! @brief Stores the maximum number of simultaneous non-volatile statuses on one Pokemon.
+				@details Accepts values from 0 through @ref PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON (5), inclusive.
+			*/
 			ub mMaxNonVolatileStatuses{RULESET_DEFAULT_MAX_NON_VOLATILE_STATUSES};
-			/*! @brief Stores the maximum number of simultaneous volatile statuses on one Pokemon. */
+			/*! @brief Stores the maximum number of simultaneous volatile statuses on one Pokemon.
+				@details Accepts values from 0 through @ref PocketCore::Configuration::MAX_VOLATILE_STATUSES_PER_POKEMON (8), inclusive.
+			*/
 			ub mMaxVolatileStatuses{RULESET_DEFAULT_MAX_VOLATILE_STATUSES};
-			/*! @brief Stores the maximum number of simultaneous weather conditions on the field. */
+			/*! @brief Stores the maximum number of simultaneous weather conditions on the field.
+				@details Accepts values from 0 through @ref PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD (5), inclusive.
+			*/
 			ub mMaxWeathers{RULESET_DEFAULT_MAX_WEATHERS};
-			/*! @brief Stores the maximum number of simultaneous terrain conditions on the field. */
+			/*! @brief Stores the maximum number of simultaneous terrain conditions on the field.
+				@details Accepts values from 0 through @ref PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD (5), inclusive.
+			*/
 			ub mMaxTerrains{RULESET_DEFAULT_MAX_TERRAINS};
 
 			/*! @brief Determines whether Terastallization is legal. */
@@ -67,6 +83,13 @@ namespace PocketCore::Ruleset
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
+
+	static_assert(RulesetPolicy{}.mMaxSideSize <= MAX_ACTIVE_SLOTS_PER_SIDE, MAX_SIDE_SLOT_ERROR_MESSAGE);
+	static_assert(RulesetPolicy{}.mMaxNonVolatileStatuses <= MAX_NON_VOLATILE_STATUSES_PER_POKEMON,
+				  MAX_NON_VOLATILE_PER_POKEMON_ERROR_MESSAGE);
+	static_assert(RulesetPolicy{}.mMaxVolatileStatuses <= MAX_VOLATILE_STATUSES_PER_POKEMON, MAX_VOLATILE_PER_POKEMON_ERROR_MESSAGE);
+	static_assert(RulesetPolicy{}.mMaxWeathers <= MAX_ACTIVE_WEATHERS_ON_FIELD, MAX_WEATHERS_ON_FIELD_ERROR_MESSAGE);
+	static_assert(RulesetPolicy{}.mMaxTerrains <= MAX_ACTIVE_TERRAINS_ON_FIELD, MAX_TERRAINS_ON_FIELD_ERROR_MESSAGE);
 } // namespace PocketCore::Ruleset
 
 #endif
