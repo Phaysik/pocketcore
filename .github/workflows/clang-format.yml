@@ -1,4 +1,4 @@
-name: cpp-linter
+name: Clang format
 
 on:
   pull_request:
@@ -39,7 +39,7 @@ on:
       ]
 
 jobs:
-  cpp-linter:
+  clang-format:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -244,7 +244,7 @@ jobs:
           thread-comments: ${{ github.event_name == 'pull_request' && 'update' }} # only 'update' a single comment in a pull request's thread.
           step-summary: 'true' # append content as part of the workflow's job summary
           database: '.zed' # The location of the compile_commands.json
-          tidy-review: 'true' # Enables pull requet reviews from clang-tidy
+          format-review: 'true' # Enables pull requet reviews from clang-tidy
           lines-changed-only: 'true' # Only lines in the diff that contain additions are analyzed
           extra-args: '-Dcatch2 -Iinclude -ItestInclude'
 
