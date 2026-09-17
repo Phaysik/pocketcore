@@ -1,7 +1,7 @@
 /*! @file rulesetPolicy.h
 	@brief Defines the runtime value type for symmetric, battle-wide rules.
 	@details The policy describes legal battle mechanics and semantic limits independently of physical storage capacity.
-	@date 09/14/2026
+	@date 09/17/2026
 	@since 0.12.30
 	@version 0.12.36
 	@author Matthew Moore
@@ -86,8 +86,8 @@ namespace PocketCore::Ruleset
 
 	static_assert(RulesetPolicy{}.mMaxSideSize <= MAX_ACTIVE_SLOTS_PER_SIDE, MAX_SIDE_SLOT_ERROR_MESSAGE);
 	static_assert(RulesetPolicy{}.mMaxNonVolatileStatuses <= MAX_NON_VOLATILE_STATUSES_PER_POKEMON,
-				  MAX_NON_VOLATIVE_PER_POKEMON_ERROR_MESSAGE);
-	static_assert(RulesetPolicy{}.mMaxVolatileStatuses <= MAX_VOLATILE_STATUSES_PER_POKEMON, MAX_VOLATIVE_PER_POKEMON_ERROR_MESSAGE);
+				  MAX_NON_VOLATILE_PER_POKEMON_ERROR_MESSAGE);
+	static_assert(RulesetPolicy{}.mMaxVolatileStatuses <= MAX_VOLATILE_STATUSES_PER_POKEMON, MAX_VOLATILE_PER_POKEMON_ERROR_MESSAGE);
 	static_assert(RulesetPolicy{}.mMaxWeathers <= MAX_ACTIVE_WEATHERS_ON_FIELD, MAX_WEATHERS_ON_FIELD_ERROR_MESSAGE);
 	static_assert(RulesetPolicy{}.mMaxTerrains <= MAX_ACTIVE_TERRAINS_ON_FIELD, MAX_TERRAINS_ON_FIELD_ERROR_MESSAGE);
 } // namespace PocketCore::Ruleset

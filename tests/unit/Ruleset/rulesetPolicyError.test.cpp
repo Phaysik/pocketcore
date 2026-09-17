@@ -79,7 +79,7 @@ SCENARIO("validatePolicyError")
 	{
 		GIVEN("mMaxSideSize")
 		{
-			policy.mMaxSideSize = 2;
+			policy.mMaxSideSize = 6;
 
 			THEN("it is a valid object")
 			{
@@ -148,7 +148,7 @@ SCENARIO("validatePolicyError")
 			THEN("it is a valid object")
 			{
 				REQUIRE_FALSE(validateRulesetPolicy(policy).has_value());
-				CHECK((validateRulesetPolicy(policy).error() == RulesetPolicyError::MAX_NON_VOLATIVE_STATUSES_ERROR));
+				CHECK((validateRulesetPolicy(policy).error() == RulesetPolicyError::MAX_NON_VOLATILE_STATUSES_ERROR));
 			}
 		}
 

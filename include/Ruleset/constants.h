@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Defines default constants for the ruleset policy.
-	@date 09/16/2026
+	@date 09/17/2026
 	@since 0.12.30
 	@version 0.12.36
 	@author Matthew Moore
@@ -29,9 +29,9 @@ namespace PocketCore::Ruleset
 
 	inline constexpr std::string_view MAX_SIDE_SLOT_ERROR_MESSAGE{
 		"RulesetPolicy default side size must match the canonical ruleset constant."};
-	inline constexpr std::string_view MAX_NON_VOLATIVE_PER_POKEMON_ERROR_MESSAGE{
+	inline constexpr std::string_view MAX_NON_VOLATILE_PER_POKEMON_ERROR_MESSAGE{
 		"RulesetPolicy default non-volatile statuses per Pokemon must match the canonical ruleset constant."};
-	inline constexpr std::string_view MAX_VOLATIVE_PER_POKEMON_ERROR_MESSAGE{
+	inline constexpr std::string_view MAX_VOLATILE_PER_POKEMON_ERROR_MESSAGE{
 		"RulesetPolicy default volatile statuses per Pokemon must match the canonical ruleset constant."};
 	inline constexpr std::string_view MAX_WEATHERS_ON_FIELD_ERROR_MESSAGE{
 		"RulesetPolicy default weathers on field must match the canonical ruleset constant."};

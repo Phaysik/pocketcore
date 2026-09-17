@@ -44,7 +44,7 @@ namespace PocketCore::Ruleset
 		/*! @brief Indicates that the maximum side size was exceeded. */
 		MAX_SIDE_SIZE_ERROR,
 		/*! @brief Indicates that the maximum number of non-volatile statuses was exceeded. */
-		MAX_NON_VOLATIVE_STATUSES_ERROR,
+		MAX_NON_VOLATILE_STATUSES_ERROR,
 		/*! @brief Indicates that the maximum number of volatile statuses was exceeded. */
 		MAX_VOLATILE_STATUSES_ERROR,
 		/*! @brief Indicates that the maximum number of weathers on the field was exceeded. */
@@ -80,7 +80,7 @@ namespace PocketCore::Ruleset
 		RulesetPolicyFieldBound{
 			.mField = &RulesetPolicy::mMaxNonVolatileStatuses,
 			.mMaximum = MAX_NON_VOLATILE_STATUSES_PER_POKEMON,
-			.mError = RulesetPolicyError::MAX_NON_VOLATIVE_STATUSES_ERROR,
+			.mError = RulesetPolicyError::MAX_NON_VOLATILE_STATUSES_ERROR,
 		},
 		RulesetPolicyFieldBound{
 			.mField = &RulesetPolicy::mMaxVolatileStatuses,
