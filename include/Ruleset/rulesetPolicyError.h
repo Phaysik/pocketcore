@@ -1,7 +1,7 @@
 /*! @file rulesetPolicyError.h
 	@brief Defines error codes for ruleset policy violations.
 	@details Provides a set of error codes corresponding to violations of the ruleset policy.
-	@date 09/16/2026
+	@date 09/17/2026
 	@since 0.12.36
 	@version 0.12.36
 	@author Matthew Moore
@@ -12,6 +12,7 @@
 
 #include <array>
 #include <expected>
+#include <utility>
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -71,24 +72,34 @@ namespace PocketCore::Ruleset
 	};
 
 	inline constexpr std::array RULESET_POLICY_FIELD_BOUNDS{
-		RulesetPolicyFieldBound{.mField = &RulesetPolicy::mMaxSideSize,
-								.mMaximum = MAX_ACTIVE_SLOTS_PER_SIDE,
-								.mError = RulesetPolicyError::MAX_SIDE_SIZE_ERROR},
-		RulesetPolicyFieldBound{.mField = &RulesetPolicy::mMaxNonVolatileStatuses,
-								.mMaximum = MAX_NON_VOLATILE_STATUSES_PER_POKEMON,
-								.mError = RulesetPolicyError::MAX_NON_VOLATIVE_STATUSES_ERROR},
-		RulesetPolicyFieldBound{.mField = &RulesetPolicy::mMaxVolatileStatuses,
-								.mMaximum = MAX_VOLATILE_STATUSES_PER_POKEMON,
-								.mError = RulesetPolicyError::MAX_VOLATILE_STATUSES_ERROR},
-		RulesetPolicyFieldBound{.mField = &RulesetPolicy::mMaxWeathers,
-								.mMaximum = MAX_ACTIVE_WEATHERS_ON_FIELD,
-								.mError = RulesetPolicyError::MAX_WEATHERS_ON_FIELD_ERROR},
-		RulesetPolicyFieldBound{.mField = &RulesetPolicy::mMaxTerrains,
-								.mMaximum = MAX_ACTIVE_TERRAINS_ON_FIELD,
-								.mError = RulesetPolicyError::MAX_TERRAINS_ON_FIELD_ERROR},
+		RulesetPolicyFieldBound{
+			.mField = &RulesetPolicy::mMaxSideSize,
+			.mMaximum = MAX_ACTIVE_SLOTS_PER_SIDE,
+			.mError = RulesetPolicyError::MAX_SIDE_SIZE_ERROR,
+		},
+		RulesetPolicyFieldBound{
+			.mField = &RulesetPolicy::mMaxNonVolatileStatuses,
+			.mMaximum = MAX_NON_VOLATILE_STATUSES_PER_POKEMON,
+			.mError = RulesetPolicyError::MAX_NON_VOLATIVE_STATUSES_ERROR,
+		},
+		RulesetPolicyFieldBound{
+			.mField = &RulesetPolicy::mMaxVolatileStatuses,
+			.mMaximum = MAX_VOLATILE_STATUSES_PER_POKEMON,
+			.mError = RulesetPolicyError::MAX_VOLATILE_STATUSES_ERROR,
+		},
+		RulesetPolicyFieldBound{
+			.mField = &RulesetPolicy::mMaxWeathers,
+			.mMaximum = MAX_ACTIVE_WEATHERS_ON_FIELD,
+			.mError = RulesetPolicyError::MAX_WEATHERS_ON_FIELD_ERROR,
+		},
+		RulesetPolicyFieldBound{
+			.mField = &RulesetPolicy::mMaxTerrains,
+			.mMaximum = MAX_ACTIVE_TERRAINS_ON_FIELD,
+			.mError = RulesetPolicyError::MAX_TERRAINS_ON_FIELD_ERROR,
+		},
 	};
 
-	static_assert(RULESET_POLICY_FIELD_BOUNDS.size() == static_cast<std::size_t>(RulesetPolicyError::UNKNOWN_FIELD_ERROR),
+	static_assert(RULESET_POLICY_FIELD_BOUNDS.size() == std::to_underlying(RulesetPolicyError::UNKNOWN_FIELD_ERROR),
 				  RULESET_POLICY_FIELD_COUNT_ERROR_MESSAGE);
 
 	/*! @brief Validates a ruleset against the configured policy limits.
