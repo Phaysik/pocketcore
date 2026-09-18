@@ -57,9 +57,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 09/16/2026
+		@date 09/17/2026
 		@since 0.10.3
-		@version 0.12.36
+		@version 0.12.37
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -138,6 +138,16 @@ namespace PocketCore::Battle
 				@version 0.10.6
 			*/
 			ATTR_NODISCARD ATTR_CONST const BattleState &getState() const noexcept;
+
+			/*! @brief Returns the current phase of the battle
+				@return A read-only reference valid for the lifetime of the engine.
+				@since 0.12.37
+				@version 0.12.37
+			*/
+			ATTR_NODISCARD constexpr const BattlePhase &getPhase() const noexcept
+			{
+				return mPhase;
+			}
 
 		private:
 			/*! @enum SlotTriggerTargeting

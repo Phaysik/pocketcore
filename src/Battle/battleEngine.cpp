@@ -93,7 +93,7 @@ namespace PocketCore::Battle
 		if (mProvider == nullptr || mEffectRegistry == nullptr || mProvider->abilityRegistry == nullptr
 			|| mProvider->moveRegistry == nullptr || mProvider->itemRegistry == nullptr || mProvider->typeRegistry == nullptr
 			|| mProvider->statusRegistry == nullptr || mProvider->weatherRegistry == nullptr || mProvider->terrainRegistry == nullptr
-			|| mProvider->multiplierRegistry == nullptr)
+			|| mProvider->multiplierRegistry == nullptr || mProvider->natureRegistry == nullptr || mProvider->pokemonRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}
