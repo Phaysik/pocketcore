@@ -249,7 +249,7 @@ jobs:
             pip3 install --upgrade pip --break-system-packages
             pip3 install cmake --break-system-packages
             sudo apt install python3-sphinx
-            sudo pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo sphinx-rtd-theme --break-system-packages
+            sudo pip3 install sphinx-rtd-theme --break-system-packages
             curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v2.5/lcov-2.5.tar.gz
             mkdir -p lcov-latest
             tar -xvzf lcov-latest.tar.gz -C lcov-latest --strip-components=1
