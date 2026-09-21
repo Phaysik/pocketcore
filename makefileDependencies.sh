@@ -83,7 +83,7 @@ installDoxygen() {
 }
 
 checkSphinx() {
-	packages=("sphinx" "breathe" "sphinx-book-theme" "sphinx-copybutton" "sphinx-autobuild" "sphinx-last-updated-by-git" "sphinx-notfound-page" "sphinxcontrib-spelling" "furo")
+	packages=("sphinx" "breathe" "sphinx-book-theme" "sphinx-copybutton" "sphinx-autobuild" "sphinx-last-updated-by-git" "sphinx-notfound-page" "sphinxcontrib-spelling" "furo" "sphinx-rtd-theme")
 
 	all_packages_installed=true
 
@@ -99,6 +99,21 @@ checkSphinx() {
 	else
 		return 1 # Some packages missing
 	fi
+}
+
+setUpLCOV() {
+	echo "Setting up gcc, g++, and gcov"
+
+	curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v"$1"/lcov-"$1".tar.gz
+	mkdir -p lcov-latest
+	tar -xvzf lcov-latest.tar.gz -C lcov-latest --strip-components=1
+	sudo rm -rf lcov-latest.tar.gz
+
+	cd lcov-latest
+	sudo GIT_DIR=/dev/null make install
+
+	cd ..
+	rm -rf lcov-latest
 }
 
 setUpTracy() {
@@ -372,6 +387,34 @@ main() {
 			installSpdlog
 		fi
 
+		checkSphinx
+		status=$?
+
+		if [[ ${status} -eq 0 ]]; then
+			echo "All Sphinx packages are installed"
+		else
+			echo "Installing Sphinx and it's dependencies for documentation"
+			sudo apt install python3-sphinx
+			pip3 install --upgrade pip --break-system-packages
+			sudo pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo sphinx-rtd-theme --break-system-packages
+		fi
+
+		lcov_desired_version="2.5-0"
+		lcov_priority="2.5"
+
+		if [[ "$(command lcov --version | grep -oP '\d+\.\d+-\d+' || true)" == "${lcov_desired_version}" ]]; then
+			echo "g++-${lcov_desired_version} exists"
+		else
+			setUpLCOV "${lcov_priority}"
+		fi
+		setUpLCOV "${lcov_desired_version}"
+
+		if [[ -x "$(command -v flawfinder || true)" ]]; then
+			echo "Flawfinder already exists"
+		else
+			pip3 install flawfinder --break-system-packages
+		fi
+
 		# If not 'a' or 'A', set up documentation, formatting, and linting tools
 		if [[ ${response,,} == "y" ]] || [[ ${1,,} == "y" ]]; then
 			sudo apt-get install binutils valgrind graphviz flex bison libpcre3 libpcre3-dev lcov cppcheck xterm bear -y
@@ -389,23 +432,6 @@ main() {
 				fi
 			else
 				installDoxygen "${doxygen_desired_version}"
-			fi
-
-			checkSphinx
-			status=$?
-
-			if [[ ${status} -eq 0 ]]; then
-				echo "All Sphinx packages are installed"
-			else
-				echo "Installing Sphinx and it's dependencies for documentation"
-				pip3 install --upgrade pip --break-system-packages
-				pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
-			fi
-
-			if [[ -x "$(command -v flawfinder || true)" ]]; then
-				echo "Flawfinder already exists"
-			else
-				pip3 install flawfinder --break-system-packages
 			fi
 
 			if [[ -x "$(command -v tracy-profiler || true)" ]]; then
