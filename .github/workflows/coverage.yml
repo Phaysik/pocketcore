@@ -257,7 +257,7 @@ jobs:
             cd lcov-latest
             sudo GIT_DIR=/dev/null make install
             cd ..
-            rm -rf lcov-latest
+            sudo rm -rf lcov-latest
 
       - name: Build & run coverage
         run: |
