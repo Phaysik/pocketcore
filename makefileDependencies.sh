@@ -350,8 +350,7 @@ main() {
 		if [[ "$(command g++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${gpp_desired_version}" ]]; then
 			echo "g++-${gpp_desired_version} exists"
 		else
-		    echo "g++-${gpp_desired_version} exists"
-			# setUpGCC "${gpp_desired_version}" "${gpp_priority}"
+			setUpGCC "${gpp_desired_version}" "${gpp_priority}"
 		fi
 
 		clang_desired_version="24.0.0"
