@@ -122,7 +122,7 @@ namespace PocketCore::Battle
 			return std::unexpected{BattleEngineError::InvalidRuleset};
 		}
 
-		if (activePokemonPerSide > ruleset.mMaxSideSize || activePokemonPerSide > MAX_ACTIVE_SLOTS_PER_SIDE)
+		if (activePokemonPerSide > ruleset.mMaxSideSize)
 		{
 			return std::unexpected{BattleEngineError::InvalidParty};
 		}

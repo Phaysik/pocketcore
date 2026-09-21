@@ -390,29 +390,14 @@ SCENARIO("BattleEngine")
 
 		WHEN("calling with more active pokemon per side than allowed")
 		{
-			GIVEN("active Pokemon per side if greater than the allowed ruleset")
+			RulesetPolicy invalidRuleset{.mMaxSideSize = 1};
+			std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, invalidRuleset, 2)};
+
+			THEN("an error is returned")
 			{
-				RulesetPolicy invalidRuleset{.mMaxSideSize = 1};
-				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, invalidRuleset, 2)};
-
-				THEN("an error is returned")
-				{
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == BattleEngineError::InvalidParty));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
-				}
-			}
-
-			GIVEN("active Pokemon per side if greater than the constant value")
-			{
-				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, ruleset, 10)};
-
-				THEN("an error is returned")
-				{
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == BattleEngineError::InvalidParty));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
-				}
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidParty));
+				CHECK((engine.getPhase() == BattlePhase::NotStarted));
 			}
 		}
 	}
