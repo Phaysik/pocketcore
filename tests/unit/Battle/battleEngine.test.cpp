@@ -9,6 +9,7 @@
 #include "Battle/battleEngine.h"
 
 #include <array>
+#include <expected>
 
 #include "Battle/battleValidation.h"
 #include "Pokemon/pokemon.h"
@@ -242,6 +243,174 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+		}
+
+		WHEN("calling with invalid party sizes")
+		{
+			GIVEN("no active pokemon allowed per side")
+			{
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, ruleset, 0)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party A's size is less than the required amount per side")
+			{
+				std::array<Pokemon *const, 1> newPartyA{&partyAOne};
+				std::expected<void, BattleEngineError> result{engine.startBattle(newPartyA, pokemonB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party B's size is less than the required amount per side")
+			{
+				std::array<Pokemon *const, 1> newPartyB{&partyBOne};
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, newPartyB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party A has a nullptr")
+			{
+				std::array<Pokemon *const, 2> newPartyA{&partyAOne, nullptr};
+				std::expected<void, BattleEngineError> result{engine.startBattle(newPartyA, pokemonB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party B has a nullptr")
+			{
+				std::array<Pokemon *const, 2> newPartyB{&partyBOne, nullptr};
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, newPartyB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+		}
+
+		WHEN("calling with duplicate pokemon pointers")
+		{
+			GIVEN("party A has a duplicate pointer from party B")
+			{
+				std::array<Pokemon *const, 2> newPartyA{&partyAOne, &partyBOne};
+				std::expected<void, BattleEngineError> result{engine.startBattle(newPartyA, pokemonB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party B has a duplicate pointer from party A")
+			{
+				std::array<Pokemon *const, 2> newPartyB{&partyBOne, &partyAOne};
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, newPartyB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+		}
+
+		WHEN("calling with fainted pokemon")
+		{
+			GIVEN("party A has less healthy pokemon than the battle amount")
+			{
+				Pokemon faintedPartyA{makePokemon({.mHealth = 0})};
+				std::array<Pokemon *const, 2> newPartyA{&partyAOne, &faintedPartyA};
+				std::expected<void, BattleEngineError> result{engine.startBattle(newPartyA, pokemonB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("party B has less healthy pokemon than the battle amount")
+			{
+				Pokemon faintedPartyB{makePokemon({.mHealth = 0})};
+				std::array<Pokemon *const, 2> newPartyB{&partyBOne, &faintedPartyB};
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, newPartyB, ruleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+		}
+
+		WHEN("calling with an invalid ruleset")
+		{
+			RulesetPolicy invalidRuleset{.mMaxWeathers = 10};
+			std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, invalidRuleset)};
+
+			THEN("an error is returned")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidRuleset));
+				CHECK((engine.getPhase() == BattlePhase::NotStarted));
+			}
+		}
+
+		WHEN("calling with more active pokemon per side than allowed")
+		{
+			GIVEN("active Pokemon per side if greater than the allowed ruleset")
+			{
+				RulesetPolicy invalidRuleset{.mMaxSideSize = 1};
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, invalidRuleset, 2)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
+					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("active Pokemon per side if greater than the constant value")
+			{
+				std::expected<void, BattleEngineError> result{engine.startBattle(pokemonA, pokemonB, ruleset, 10)};
+
+				THEN("an error is returned")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::InvalidParty));
 					CHECK((engine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
