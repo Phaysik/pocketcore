@@ -102,7 +102,7 @@ checkSphinx() {
 }
 
 setUpLCOV() {
-	echo "Setting up gcc, g++, and gcov"
+	echo "Setting up lcov"
 
 	curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v"$1"/lcov-"$1".tar.gz
 	mkdir -p lcov-latest
@@ -350,7 +350,8 @@ main() {
 		if [[ "$(command g++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${gpp_desired_version}" ]]; then
 			echo "g++-${gpp_desired_version} exists"
 		else
-			setUpGCC "${gpp_desired_version}" "${gpp_priority}"
+		    echo "g++-${gpp_desired_version} exists"
+			# setUpGCC "${gpp_desired_version}" "${gpp_priority}"
 		fi
 
 		clang_desired_version="24.0.0"
@@ -358,7 +359,7 @@ main() {
 		echo "Setting up clang tooling"
 
 		if [[ "$(command clang++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${clang_desired_version}" ]]; then
-			echo "g++-${clang_desired_version} exists"
+			echo "clang-${clang_desired_version} exists"
 		else
 			setUpClang "${clang_priority}"
 		fi
@@ -403,11 +404,10 @@ main() {
 		lcov_priority="2.5"
 
 		if [[ "$(command lcov --version | grep -oP '\d+\.\d+-\d+' || true)" == "${lcov_desired_version}" ]]; then
-			echo "g++-${lcov_desired_version} exists"
+			echo "LCOV ${lcov_desired_version} exists"
 		else
 			setUpLCOV "${lcov_priority}"
 		fi
-		setUpLCOV "${lcov_desired_version}"
 
 		if [[ -x "$(command -v flawfinder || true)" ]]; then
 			echo "Flawfinder already exists"
