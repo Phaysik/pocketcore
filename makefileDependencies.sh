@@ -114,6 +114,22 @@ setUpLCOV() {
 
 	cd ..
 	rm -rf lcov-latest
+
+	sudo rm -rf /usr/bin/lcov
+	sudo update-alternatives --install /usr/bin/lcov lcov /usr/local/bin/lcov 25
+	sudo rm -rf /usr/bin/genhtml
+	sudo update-alternatives --install /usr/bin/genhtml genhtml /usr/local/bin/genhtml 25
+	sudo rm -rf /usr/bin/geninfo
+	sudo update-alternatives --install /usr/bin/geninfo geninfo /usr/local/bin/geninfo 25
+	sudo rm -rf /usr/bin/genpng
+	sudo update-alternatives --install /usr/bin/genpng genpng /usr/local/bin/genpng 25
+	sudo rm -rf /usr/bin/gendesc
+	sudo update-alternatives --install /usr/bin/gendesc gendesc /usr/local/bin/gendesc 25
+	sudo update-alternatives --install /usr/bin/perl2lcov perl2lcov /usr/local/bin/perl2lcov 25
+	sudo update-alternatives --install /usr/bin/py2lcov py2lcov /usr/local/bin/py2lcov 25
+	sudo update-alternatives --install /usr/bin/xml2lcov xml2lcov /usr/local/bin/xml2lcov 25
+	sudo update-alternatives --install /usr/bin/xml2lcovutil.py xml2lcovutil.py /usr/local/bin/xml2lcovutil.py 25
+	sudo update-alternatives --install /usr/bin/llvm2lcov llvm2lcov /usr/local/bin/llvm2lcov 25
 }
 
 setUpTracy() {
