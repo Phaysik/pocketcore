@@ -83,7 +83,7 @@ installDoxygen() {
 }
 
 checkSphinx() {
-	packages=("sphinx" "breathe" "sphinx-book-theme" "sphinx-copybutton" "sphinx-autobuild" "sphinx-last-updated-by-git" "sphinx-notfound-page" "sphinxcontrib-spelling" "furo")
+	packages=("sphinx" "breathe" "sphinx-book-theme" "sphinx-copybutton" "sphinx-autobuild" "sphinx-last-updated-by-git" "sphinx-notfound-page" "sphinxcontrib-spelling" "furo" "sphinx-rtd-theme")
 
 	all_packages_installed=true
 
@@ -99,6 +99,37 @@ checkSphinx() {
 	else
 		return 1 # Some packages missing
 	fi
+}
+
+setUpLCOV() {
+	echo "Setting up lcov"
+
+	curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v"$1"/lcov-"$1".tar.gz
+	mkdir -p lcov-latest
+	tar -xvzf lcov-latest.tar.gz -C lcov-latest --strip-components=1
+	sudo rm -rf lcov-latest.tar.gz
+
+	cd lcov-latest
+	sudo GIT_DIR=/dev/null make install
+
+	cd ..
+	rm -rf lcov-latest
+
+	sudo rm -rf /usr/bin/lcov
+	sudo update-alternatives --install /usr/bin/lcov lcov /usr/local/bin/lcov 25
+	sudo rm -rf /usr/bin/genhtml
+	sudo update-alternatives --install /usr/bin/genhtml genhtml /usr/local/bin/genhtml 25
+	sudo rm -rf /usr/bin/geninfo
+	sudo update-alternatives --install /usr/bin/geninfo geninfo /usr/local/bin/geninfo 25
+	sudo rm -rf /usr/bin/genpng
+	sudo update-alternatives --install /usr/bin/genpng genpng /usr/local/bin/genpng 25
+	sudo rm -rf /usr/bin/gendesc
+	sudo update-alternatives --install /usr/bin/gendesc gendesc /usr/local/bin/gendesc 25
+	sudo update-alternatives --install /usr/bin/perl2lcov perl2lcov /usr/local/bin/perl2lcov 25
+	sudo update-alternatives --install /usr/bin/py2lcov py2lcov /usr/local/bin/py2lcov 25
+	sudo update-alternatives --install /usr/bin/xml2lcov xml2lcov /usr/local/bin/xml2lcov 25
+	sudo update-alternatives --install /usr/bin/xml2lcovutil.py xml2lcovutil.py /usr/local/bin/xml2lcovutil.py 25
+	sudo update-alternatives --install /usr/bin/llvm2lcov llvm2lcov /usr/local/bin/llvm2lcov 25
 }
 
 setUpTracy() {
@@ -343,7 +374,7 @@ main() {
 		echo "Setting up clang tooling"
 
 		if [[ "$(command clang++ --version | grep -oP '\d+\.\d+\.\d+' || true)" == "${clang_desired_version}" ]]; then
-			echo "g++-${clang_desired_version} exists"
+			echo "clang-${clang_desired_version} exists"
 		else
 			setUpClang "${clang_priority}"
 		fi
@@ -372,6 +403,33 @@ main() {
 			installSpdlog
 		fi
 
+		checkSphinx
+		status=$?
+
+		if [[ ${status} -eq 0 ]]; then
+			echo "All Sphinx packages are installed"
+		else
+			echo "Installing Sphinx and it's dependencies for documentation"
+			sudo apt install python3-sphinx
+			pip3 install --upgrade pip --break-system-packages
+			sudo pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo sphinx-rtd-theme --break-system-packages
+		fi
+
+		lcov_desired_version="2.5-0"
+		lcov_priority="2.5"
+
+		if [[ "$(command lcov --version | grep -oP '\d+\.\d+-\d+' || true)" == "${lcov_desired_version}" ]]; then
+			echo "LCOV ${lcov_desired_version} exists"
+		else
+			setUpLCOV "${lcov_priority}"
+		fi
+
+		if [[ -x "$(command -v flawfinder || true)" ]]; then
+			echo "Flawfinder already exists"
+		else
+			pip3 install flawfinder --break-system-packages
+		fi
+
 		# If not 'a' or 'A', set up documentation, formatting, and linting tools
 		if [[ ${response,,} == "y" ]] || [[ ${1,,} == "y" ]]; then
 			sudo apt-get install binutils valgrind graphviz flex bison libpcre3 libpcre3-dev lcov cppcheck xterm bear -y
@@ -389,23 +447,6 @@ main() {
 				fi
 			else
 				installDoxygen "${doxygen_desired_version}"
-			fi
-
-			checkSphinx
-			status=$?
-
-			if [[ ${status} -eq 0 ]]; then
-				echo "All Sphinx packages are installed"
-			else
-				echo "Installing Sphinx and it's dependencies for documentation"
-				pip3 install --upgrade pip --break-system-packages
-				pip3 install sphinx breathe sphinx-book-theme sphinx-copybutton sphinx-autobuild sphinx-last-updated-by-git sphinx-notfound-page sphinxcontrib-spelling furo --break-system-packages
-			fi
-
-			if [[ -x "$(command -v flawfinder || true)" ]]; then
-				echo "Flawfinder already exists"
-			else
-				pip3 install flawfinder --break-system-packages
 			fi
 
 			if [[ -x "$(command -v tracy-profiler || true)" ]]; then

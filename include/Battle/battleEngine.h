@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 09/16/2026
+	@date 09/17/2026
 	@since 0.10.3
-	@version 0.12.36
+	@version 0.12.37
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Ruleset/rulesetPolicy.h"
 
 #include "battleAction.h"
 #include "battleHelpers.h"
@@ -47,6 +48,7 @@ namespace PocketCore::Battle
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Ruleset::RulesetPolicy;
 
 	/*! @class BattleEngine Battle/battleEngine_copy.h
 		@brief Orchestrates turns, switching, targeting, and metadata triggers for two sides of Pokemon trainers.
@@ -55,9 +57,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 09/16/2026
+		@date 09/17/2026
 		@since 0.10.3
-		@version 0.12.36
+		@version 0.12.37
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -109,14 +111,15 @@ namespace PocketCore::Battle
 			/*! @brief Starts a battle and assigns the first healthy party members to active slots.
 				@param[in] partyA Side A's non-owning Pokemon pointers in party order.
 				@param[in] partyB Side B's non-owning Pokemon pointers in party order.
+				@param[in] ruleset The symmetric ruleset policy that limits the battle's mechanics and values.
 				@param[in] activePokemonPerSide Number of simultaneously active Pokemon required from each party. Must be greater than zero.
 				@return Void on success, or a validation error without starting the battle.
 				@since 0.10.3
-				@version 0.10.8
+				@version 0.12.37
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> startBattle(const std::span<Pokemon *const> &partyA,
 																			  const std::span<Pokemon *const> &partyB,
-																			  ub activePokemonPerSide = 1U);
+																			  const RulesetPolicy &ruleset, ub activePokemonPerSide = 1U);
 
 			/*! @brief Resolves and executes one complete turn of trainer actions.
 				@details Every action is validated before the first action executes. Each active slot may submit at most one action.
@@ -135,6 +138,16 @@ namespace PocketCore::Battle
 				@version 0.10.6
 			*/
 			ATTR_NODISCARD ATTR_CONST const BattleState &getState() const noexcept;
+
+			/*! @brief Returns the current phase of the battle
+				@return A read-only reference valid for the lifetime of the engine.
+				@since 0.12.37
+				@version 0.12.37
+			*/
+			ATTR_NODISCARD constexpr const BattlePhase &getPhase() const noexcept
+			{
+				return mPhase;
+			}
 
 		private:
 			/*! @enum SlotTriggerTargeting

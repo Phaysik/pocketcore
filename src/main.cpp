@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/12/2026
+	@date 09/17/2026
 	@since 0.1.0
-	@version 0.12.28
+	@version 0.12.37
 	@author Matthew Moore
 */
 
@@ -36,13 +36,15 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Ruleset/rulesetPolicy.h"
+#include "Ruleset/rulesetPresets.h"
 #include "Types/builtInTypeID.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.28
+	@version 0.12.37
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -80,6 +82,8 @@ int main()
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Ruleset::GEN9_BASE_GAME;
+	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 	namespace Logging = PocketCore::Utility::Debug::Logging;
@@ -173,8 +177,9 @@ int main()
 	const std::array<Pokemon *, 1> partyA{&pokemonA};
 	const std::array<Pokemon *, 1> partyB{&pokemonB};
 	BattleEngine engine{registryProvider, effectRegistry};
+	RulesetPolicy ruleset{GEN9_BASE_GAME};
 
-	if (!engine.startBattle(partyA, partyB).has_value())
+	if (!engine.startBattle(partyA, partyB, ruleset).has_value())
 	{
 		return EXIT_FAILURE;
 	}

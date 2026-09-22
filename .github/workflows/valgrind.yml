@@ -232,7 +232,7 @@ jobs:
         if: steps.cache-apt-packages.outputs.cache-hit != 'true' || steps.cache-apt-lists.outputs.cache-hit != 'true' || steps.cache-google-tests.outputs.cache-hit != 'true' || steps.cache-config-cat.outputs.cache-hit != 'true' || steps.cache-curl.outputs.cache-hit != 'true' || steps.cache-hash-library.outputs.cache-hit != 'true' || steps.cache-gcc-latest.outputs.cache-hit != 'true' || steps.cache-spdlog.outputs.cache-hit != 'true'
         run: sudo bash $GITHUB_WORKSPACE/makefileDependencies.sh a
 
-      - name: Install Dependencies
+      - name: Install Valgrind Dependencies
         run: |
           wget -qO llvm.sh https://apt.llvm.org/llvm.sh
           sudo chmod +x llvm.sh

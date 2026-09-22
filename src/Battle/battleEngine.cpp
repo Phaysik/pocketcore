@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 09/16/2026
+	@date 09/17/2026
 	@since 0.9.16
-	@version 0.12.36
+	@version 0.12.37
 	@author Matthew Moore
 */
 
@@ -41,6 +41,8 @@
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Ruleset/rulesetPolicy.h"
+#include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
 #include "Weather/weatherID.h"
 
@@ -50,6 +52,7 @@ namespace PocketCore::Battle
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ACTIVE_SLOTS_PER_SIDE;
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -69,11 +72,15 @@ namespace PocketCore::Battle
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Ruleset::RulesetPolicy;
+	using PocketCore::Ruleset::RulesetPolicyError;
+	using PocketCore::Ruleset::validateRulesetPolicy;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Weather::WeatherID;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
 																					const std::span<Pokemon *const> &partyB,
+																					const RulesetPolicy &ruleset,
 																					const ub activePokemonPerSide)
 	{
 		// Starting twice would discard live battle state, so reject the request before validating new input
@@ -86,7 +93,7 @@ namespace PocketCore::Battle
 		if (mProvider == nullptr || mEffectRegistry == nullptr || mProvider->abilityRegistry == nullptr
 			|| mProvider->moveRegistry == nullptr || mProvider->itemRegistry == nullptr || mProvider->typeRegistry == nullptr
 			|| mProvider->statusRegistry == nullptr || mProvider->weatherRegistry == nullptr || mProvider->terrainRegistry == nullptr
-			|| mProvider->multiplierRegistry == nullptr)
+			|| mProvider->multiplierRegistry == nullptr || mProvider->natureRegistry == nullptr || mProvider->pokemonRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}
@@ -110,12 +117,23 @@ namespace PocketCore::Battle
 			return std::unexpected{BattleEngineError::InvalidParty};
 		}
 
+		if (const std::expected<void, RulesetPolicyError> result{validateRulesetPolicy(ruleset)}; !result)
+		{
+			return std::unexpected{BattleEngineError::InvalidRuleset};
+		}
+
+		if (activePokemonPerSide > ruleset.mMaxSideSize)
+		{
+			return std::unexpected{BattleEngineError::InvalidParty};
+		}
+
 		// Build locally so allocation failures cannot leave partially initialized engine state.
 		BattleState newState{};
 		newState.mPartyA.assign(partyA.begin(), partyA.end());
 		newState.mPartyB.assign(partyB.begin(), partyB.end());
 		newState.mSideA.reserve(activePokemonPerSide);
 		newState.mSideB.reserve(activePokemonPerSide);
+		newState.mRuleset = ruleset;
 
 		// Walk the party in its declared order so the first eligible Pokemon fill the battlefield from slot zero onward.
 		assignActiveSlots(partyA, newState.mSideA, activePokemonPerSide);
