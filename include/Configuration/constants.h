@@ -72,14 +72,14 @@ namespace PocketCore::Configuration
 	   PocketCore::Ruleset::RulesetPolicy::mMaxNonVolatileStatuses selects the ruleset's semantic limit without exceeding this value.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr us MAX_NON_VOLATILE_STATUSES_PER_POKEMON{5};
+	inline constexpr ub MAX_NON_VOLATILE_STATUSES_PER_POKEMON{5};
 
 	/*! @brief The storage capacity for volatile statuses assigned to one Pokemon.
 		@details This active capacity is distinct from the @ref MAX_STATUSES registry capacity. @ref
 	   PocketCore::Ruleset::RulesetPolicy::mMaxVolatileStatuses selects the ruleset's semantic limit without exceeding this value.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr us MAX_VOLATILE_STATUSES_PER_POKEMON{8};
+	inline constexpr ub MAX_VOLATILE_STATUSES_PER_POKEMON{8};
 
 	/*! @brief The maximum number of registered natures.
 		@see docs/config-boundary.md
@@ -111,14 +111,14 @@ namespace PocketCore::Configuration
 	   PocketCore::Ruleset::RulesetPolicy::mMaxWeathers selects the ruleset's semantic limit without exceeding this value.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr us MAX_ACTIVE_WEATHERS_ON_FIELD{5};
+	inline constexpr ub MAX_ACTIVE_WEATHERS_ON_FIELD{5};
 
 	/*! @brief The storage capacity for terrain conditions active on the field simultaneously.
 		@details This active capacity is distinct from the @ref MAX_TERRAINS registry capacity. @ref
 	   PocketCore::Ruleset::RulesetPolicy::mMaxTerrains selects the ruleset's semantic limit without exceeding this value.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr us MAX_ACTIVE_TERRAINS_ON_FIELD{5};
+	inline constexpr ub MAX_ACTIVE_TERRAINS_ON_FIELD{5};
 
 	/*! @brief The maximum number of registered terrain conditions.
 		@see docs/config-boundary.md
