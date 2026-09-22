@@ -1,8 +1,9 @@
-[![CodeQL Advanced](https://github.com/Phaysik/pocketcore/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/codeql-analysis.yml)
-[![Clang format](https://github.com/Phaysik/pocketcore/actions/workflows/clang-format.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/clang-format.yml)
-[![Tests](https://github.com/Phaysik/pocketcore/actions/workflows/testing.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/testing.yml)
-[![Code Coverage](https://github.com/Phaysik/pocketcore/actions/workflows/coverage.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/coverage.yml)
-[![No Memory Leaks](https://github.com/Phaysik/pocketcore/actions/workflows/valgrind.yml/badge.svg)](https://github.com/Phaysik/pocketcore/actions/workflows/valgrind.yml)
+[![badge](https://shieldcn.dev/github/vercel/next.js/ci.svg?theme=gray&logo=cplusplusbuilder&split=true&label=CodeQL&statusDot=true)](https://github.com/Phaysik/pocketcore/actions/workflows/codeql-analysis.yml)
+[![badge](https://shieldcn.dev/github/vercel/next.js/ci.svg?theme=gray&logo=llvm&split=true&label=Clang-Format&statusDot=true)](https://github.com/Phaysik/pocketcore/actions/workflows/clang-format.yml)
+[![badge](https://shieldcn.dev/github/vercel/next.js/ci.svg?theme=gray&logo=ri%3APiTestTube&split=true&label=Tests+Pass&statusDot=true)](https://github.com/Phaysik/pocketcore/actions/workflows/testing.yml)
+
+[![badge](https://shieldcn.dev/github/vercel/next.js/ci.svg?theme=gray&logo=codecov&split=true&label=Code+Coverage&statusDot=true)](https://github.com/Phaysik/pocketcore/actions/workflows/coverage.yml)
+[![badge](https://shieldcn.dev/github/vercel/next.js/ci.svg?theme=gray&logo=ri%3AFaMemory&split=true&label=Memory+Leak+Free&statusDot=true)](https://github.com/Phaysik/pocketcore/actions/workflows/valgrind.yml)
 
 # pocketcore
 
