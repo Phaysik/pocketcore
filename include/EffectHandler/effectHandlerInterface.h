@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 09/16/2026
+	@date 09/22/2026
 	@since 0.7.2
-	@version 0.12.34
+	@version 0.12.38
 	@author Matthew Moore
 */
 
@@ -26,9 +26,9 @@ namespace PocketCore::Effect
 		 metadata. The static accessors resolve the user or target slot identified by the context.
 		@warning The context indexes must refer to existing slots in the selected side's team.
 		@note The class is not copyable or movable.
-		@date 08/04/2026
+		@date 09/22/2026
 		@since 0.7.2
-		@version 0.12.7
+		@version 0.12.38
 		@author Matthew Moore
 	*/
 	class IEffectHandler
@@ -55,15 +55,15 @@ namespace PocketCore::Effect
 
 			/*! @brief Prevents copy assignment of an effect handler.
 				@since 0.7.2
-				@version 0.12.7
+				@version 0.12.38
 			 */
-			IEffectHandler operator=(const IEffectHandler &) = delete;
+			IEffectHandler &operator=(const IEffectHandler &) = delete;
 
 			/*! @brief Prevents move assignment of an effect handler.
 				@since 0.7.2
-				@version 0.12.7
+				@version 0.12.38
 			 */
-			IEffectHandler operator=(IEffectHandler &&) = delete;
+			IEffectHandler &operator=(IEffectHandler &&) = delete;
 
 			/*! @brief Destroys an effect handler through the interface.
 				@since 0.7.2
