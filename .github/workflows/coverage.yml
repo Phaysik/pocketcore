@@ -243,12 +243,11 @@ jobs:
             sudo ./llvm.sh 24
             rm llvm.sh
             sudo apt update
-            sudo apt-get install python3-pip libgmock-dev catch2 clang++-24 -y
+            sudo apt-get install python3-pip libgmock-dev catch2 clang++-24 python3-sphinx build-essential -y
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
             sudo update-alternatives --set clang++ /usr/bin/clang++-24
             pip3 install --upgrade pip --break-system-packages
             pip3 install cmake --break-system-packages
-            sudo apt install python3-sphinx
             sudo pip3 install sphinx-rtd-theme --break-system-packages
             curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v2.5/lcov-2.5.tar.gz
             mkdir -p lcov-latest
@@ -258,6 +257,7 @@ jobs:
             sudo GIT_DIR=/dev/null make install
             cd ..
             sudo rm -rf lcov-latest
+            cpan Capture::Tiny
 
       - name: Build & run coverage
         run: |
