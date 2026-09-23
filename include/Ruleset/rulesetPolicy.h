@@ -1,9 +1,9 @@
 /*! @file rulesetPolicy.h
 	@brief Defines the runtime value type for symmetric, battle-wide rules.
 	@details The policy describes legal battle mechanics and semantic limits independently of physical storage capacity.
-	@date 09/17/2026
+	@date 09/22/2026
 	@since 0.12.30
-	@version 0.12.36
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -30,9 +30,9 @@ namespace PocketCore::Ruleset
 		@details Owns only value-based semantic limits and mechanic permissions; it owns no registry entries, Pokemon, battle state, or
 	   storage. Its limits do not control array extents in \c Configuration/constants.h.
 		@note Per-side permissions are intentionally excluded. @ref SideConstraints is reserved for that responsibility in version 0.14.0.
-		@date 09/16/2026
+		@date 09/22/2026
 		@since 0.12.30
-		@version 0.12.36
+		@version 0.12.41
 		@author Matthew Moore
 	*/
 	struct RulesetPolicy
@@ -80,6 +80,15 @@ namespace PocketCore::Ruleset
 			bool mAllowZMoves{RULESET_DEFAULT_ALLOW_Z_MOVES};
 			/*! @brief Determines whether Mega Evolution is legal. */
 			bool mAllowMega{RULESET_DEFAULT_ALLOW_MEGA};
+
+			/*! @brief Determines whether non-volatile statuses should be replaced when the status list is full. */
+			bool mReplaceNonVolatileStatusWhenFull{RULESET_DEFAULT_ALLOW_NON_VOLATILE_STATUS_REPLACEMENT};
+
+			/*! @brief Determines whether weather should be replaced when the weather list is full. */
+			bool mReplaceWeatherWhenFull{RULESET_DEFAULT_ALLOW_WEATHER_REPLACEMENT};
+
+			/*! @brief Determines whether terrain should be replaced when the terrain list is full. */
+			bool mReplaceTerrainWhenFull{RULESET_DEFAULT_ALLOW_TERRAIN_REPLACEMENT};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};

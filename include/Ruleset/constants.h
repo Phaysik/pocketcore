@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines default constants for the ruleset policy.
-	@date 09/17/2026
+	@date 09/22/2026
 	@since 0.12.30
-	@version 0.12.36
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -26,6 +26,9 @@ namespace PocketCore::Ruleset
 	inline constexpr bool RULESET_DEFAULT_ALLOW_MEGA{false};
 	inline constexpr bool RULESET_DEFAULT_ALLOW_GMAX{false};
 	inline constexpr bool RULESET_DEFAULT_ALLOW_Z_MOVES{false};
+	inline constexpr bool RULESET_DEFAULT_ALLOW_NON_VOLATILE_STATUS_REPLACEMENT{false};
+	inline constexpr bool RULESET_DEFAULT_ALLOW_WEATHER_REPLACEMENT{true};
+	inline constexpr bool RULESET_DEFAULT_ALLOW_TERRAIN_REPLACEMENT{true};
 
 	inline constexpr std::string_view MAX_SIDE_SLOT_ERROR_MESSAGE{
 		"RulesetPolicy default side size must match the canonical ruleset constant."};

@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/22/2026
 	@since 0.4.0
-	@version 0.12.40
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -30,6 +30,7 @@
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryError.h"
 #include "Registry/statusRegistry.h"
+#include "Ruleset/rulesetPolicy.h"
 #include "Status/builtInStatusID.h"
 #include "Status/statusID.h"
 #include "Types/builtInTypeID.h"
@@ -69,6 +70,7 @@ using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
+using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
 using PocketCore::Status::StatusID;
@@ -853,7 +855,7 @@ SCENARIO("Pokemon")
 		};
 
 		std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> statusIDs{};
-		ub maxActive{5};
+		RulesetPolicy policy{.mMaxNonVolatileStatuses = 5, .mReplaceNonVolatileStatusWhenFull = false};
 
 		GIVEN("a current status that blocks the incoming status")
 		{
@@ -863,7 +865,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the blocked status would otherwise replace another current status")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, maxActive);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy);
 
 				THEN("the incoming status is rejected before any current status changes")
 				{
@@ -879,7 +881,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, maxActive);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy);
 
 				THEN("the incoming status occupies the replaced status slot")
 				{
@@ -910,7 +912,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(incomingStatusID, registry, maxActive);
+				pokemon.addStatus(incomingStatusID, registry, policy);
 
 				THEN("only the first replacement slot receives the incoming status")
 				{
@@ -935,7 +937,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Freeze), registry, maxActive);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Freeze), registry, policy);
 
 				THEN("the remaining statuses shift down and the incoming status uses the first empty slot")
 				{
@@ -958,7 +960,7 @@ SCENARIO("Pokemon")
 
 			WHEN("another coexisting status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Paralysis), registry, maxActive);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Paralysis), registry, policy);
 
 				THEN("the full status array remains unchanged")
 				{
