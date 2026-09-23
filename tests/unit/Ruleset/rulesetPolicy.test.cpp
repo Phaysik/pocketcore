@@ -1,8 +1,8 @@
 /*! @file rulesetPolicy.test.cpp
 	@brief C++ file for running tests for the RulesetPolicy.
-	@date 09/14/2026
+	@date 09/22/2026
 	@since 0.12.31
-	@version 0.12.35
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -133,6 +133,36 @@ SCENARIO("RulesetPolicy")
 		GIVEN("for mAllowZMoves modified in one ruleset policy")
 		{
 			RulesetPolicy other{.mAllowZMoves = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((policy != other));
+			}
+		}
+
+		GIVEN("for mReplaceNonVolatileStatusWhenFull modified in one ruleset policy")
+		{
+			RulesetPolicy other{.mReplaceNonVolatileStatusWhenFull = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((policy != other));
+			}
+		}
+
+		GIVEN("for mReplaceWeatherWhenFull modified in one ruleset policy")
+		{
+			RulesetPolicy other{.mReplaceWeatherWhenFull = false};
+
+			THEN("they are not equal")
+			{
+				CHECK((policy != other));
+			}
+		}
+
+		GIVEN("for mReplaceTerrainWhenFull modified in one ruleset policy")
+		{
+			RulesetPolicy other{.mReplaceTerrainWhenFull = false};
 
 			THEN("they are not equal")
 			{

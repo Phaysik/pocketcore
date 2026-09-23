@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 09/22/2026
 	@since 0.3.0
-	@version 0.12.40
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Registry/statusRegistry.h"
+#include "Ruleset/rulesetPolicy.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Types/typeID.h"
@@ -55,6 +56,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Registry::Status::StatusRegistry;
+	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Status::NO_STATUS_ID;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
@@ -68,7 +70,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 09/22/2026
 		@since 0.3.0
-		@version 0.12.40
+		@version 0.12.41
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -899,13 +901,15 @@ namespace PocketCore::Pokemon
 			   removal interactions clear matching statuses and compact the remaining active statuses before insertion.
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
-				@param[in] maxActiveStatuses The maximum number of active statuses allowed.
+				@param[in] policy The ruleset policy governing status interactions, including the maximum number of active statuses and
+			   replacement behavior when full.
 				@since 0.9.11
-				@version 0.12.40
+				@version 0.12.41
 			*/
-			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry, const ub maxActiveStatuses)
+			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry, const RulesetPolicy &policy)
 			{
-				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions, maxActiveStatuses);
+				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions,
+								  policy.mMaxNonVolatileStatuses, policy.mReplaceNonVolatileStatusWhenFull);
 			}
 
 			/*! @brief Writes the Pokemon's raw identifier and statistic representation to a stream.

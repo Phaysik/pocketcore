@@ -2,12 +2,12 @@
 	@brief Defines reusable algorithms for applying metadata interactions.
 	@date 09/22/2026
 	@since 0.12.16
-	@version 0.12.40
+	@version 0.12.41
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_CORE_INTERACTION_HELPERS_H
-#define INCLUDE_CORE_INTERACTION_HELPERS_H
+#ifndef INCLUDE_INTERACTION_INTERACTION_HELPERS_H
+#define INCLUDE_INTERACTION_INTERACTION_HELPERS_H
 
 #include <algorithm>
 #include <cstddef>
@@ -145,16 +145,17 @@ namespace PocketCore::Interaction
 		@param[in,out] existingIDs The active identifiers updated in place.
 		@param[in] interactionsMember Member pointer selecting the metadata's interaction range.
 		@param[in] maxActive The maximum number of active identifiers allowed.
+		@param[in] replaceWhenFull Whether to replace the oldest active identifier when the active list is full.
 		@post Blocking interactions leave @p existingIDs unchanged. Replacement and removal interactions are applied before insertion.
 		@note An unregistered non-empty identifier is inserted without applying interactions, preserving the behavior of the framework
 	   adapters.
 		@since 0.12.16
-		@version 0.12.40
+		@version 0.12.41
 	*/
 	template <typename ID, std::ranges::forward_range IDRange, typename Registry, typename Metadata,
 			  std::ranges::input_range InteractionRange>
 	constexpr void applyInteractions(const ID incomingID, const ID emptyID, const Registry &registry, IDRange &existingIDs,
-									 InteractionRange Metadata::*interactionsMember, const ub maxActive)
+									 InteractionRange Metadata::*interactionsMember, const ub maxActive, const bool replaceWhenFull)
 	{
 		if (incomingID == emptyID || std::ranges::contains(existingIDs, incomingID))
 		{
@@ -180,6 +181,12 @@ namespace PocketCore::Interaction
 
 			if (maxActive == 0)
 			{
+				return;
+			}
+
+			if (replaceWhenFull && nextAvailableIndex >= maxActive)
+			{
+				*std::ranges::begin(existingIDs) = incomingID;
 				return;
 			}
 

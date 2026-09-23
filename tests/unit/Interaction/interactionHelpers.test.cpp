@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the Interaction application functions.
 	@date 09/22/2026
 	@since 0.12.22
-	@version 0.12.40
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -212,8 +212,8 @@ SCENARIO("Interaction Helpers")
 		WHEN("the incoming ID is empty or already active")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 0};
-			applyInteractions(0, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4);
-			applyInteractions(2, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4);
+			applyInteractions(0, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
+			applyInteractions(2, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
 
 			THEN("the active IDs are unchanged")
 			{
@@ -224,7 +224,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("the incoming ID is unregistered")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 0};
-			applyInteractions(15, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4);
+			applyInteractions(15, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
 
 			THEN("the active IDs remain unchanged")
 			{
@@ -235,7 +235,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("an active ID blocks the incoming ID")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 0};
-			applyInteractions(4, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4);
+			applyInteractions(4, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
 
 			THEN("the active IDs remain unchanged")
 			{
@@ -246,7 +246,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("replacement and removal interactions apply")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 0};
-			applyInteractions(TEST_INCOMING_ID, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4);
+			applyInteractions(TEST_INCOMING_ID, 0, interactionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
 
 			THEN("the incoming ID replaces the targeted ID and removed IDs are compacted")
 			{
@@ -257,7 +257,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("the active count is zero")
 		{
 			std::array<si, 4> IDs{1, 0, 0, 0};
-			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 0);
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 0, false);
 
 			THEN("the incoming ID is not inserted")
 			{
@@ -268,7 +268,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("the active count reaches a one-entry cap")
 		{
 			std::array<si, 4> IDs{1, 0, 0, 0};
-			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 1);
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 1, false);
 
 			THEN("the incoming ID is not inserted")
 			{
@@ -279,7 +279,7 @@ SCENARIO("Interaction Helpers")
 		WHEN("the active count is below the array-size cap")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 0};
-			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 4);
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 4, false);
 
 			THEN("the incoming ID is inserted into the next available position")
 			{
@@ -287,10 +287,43 @@ SCENARIO("Interaction Helpers")
 			}
 		}
 
+		WHEN("replaceWhenFull is enabled with capacity below the cap")
+		{
+			std::array<si, 4> IDs{1, 0, 0, 0};
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 2, true);
+
+			THEN("the incoming ID is inserted into the next available position")
+			{
+				CHECK((IDs == std::array{1, TEST_INCOMING_ID, 0, 0}));
+			}
+		}
+
+		WHEN("replaceWhenFull is enabled at the cap")
+		{
+			std::array<si, 4> IDs{1, 2, 0, 0};
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 2, true);
+
+			THEN("the oldest active ID is replaced")
+			{
+				CHECK((IDs == std::array{TEST_INCOMING_ID, 2, 0, 0}));
+			}
+		}
+
+		WHEN("replaceWhenFull is disabled at the cap")
+		{
+			std::array<si, 4> IDs{1, 2, 0, 0};
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 2, false);
+
+			THEN("the active IDs remain unchanged")
+			{
+				CHECK((IDs == std::array{1, 2, 0, 0}));
+			}
+		}
+
 		WHEN("the cap is larger than the physical array")
 		{
 			std::array<si, 4> IDs{1, 2, 3, 4};
-			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 5);
+			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 5, false);
 
 			THEN("the incoming ID is rejected without exceeding the physical array extent")
 			{

@@ -2,7 +2,7 @@
 	@brief Contains the setSun effect handler
 	@date 09/22/2026
 	@since 0.10.0
-	@version 0.12.40
+	@version 0.12.41
 	@author Matthew Moore
 */
 
@@ -29,7 +29,7 @@ namespace PocketCore::Effect
 		@note The handler does not inspect the effect context or registry provider.
 		@date 09/22/2026
 		@since 0.10.0
-		@version 0.12.40
+		@version 0.12.41
 		@author Matthew Moore
 	*/
 	class SetSunHandler : public IEffectHandler
@@ -41,7 +41,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registry provider, which is not used by this handler.
 				@post @p state reports harsh sunlight as the active weather.
 				@since 0.10.0
-				@version 0.12.40
+				@version 0.12.41
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
