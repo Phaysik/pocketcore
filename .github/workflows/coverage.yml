@@ -271,6 +271,8 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           files: build/coverage/coverage.info
+          disable_search: true # only upload the curated coverage.info, don't scan the repo
+          plugins: noop # don't run the gcov plugin, which would re-derive coverage (incl. tests/) from build artifacts
           flags: unittests
           name: gcc-coverage
           fail_ci_if_error: true
