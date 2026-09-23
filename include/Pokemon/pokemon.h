@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/17/2026
+	@date 09/22/2026
 	@since 0.3.0
-	@version 0.12.36
+	@version 0.12.40
 	@author Matthew Moore
 */
 
@@ -66,9 +66,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/17/2026
+		@date 09/22/2026
 		@since 0.3.0
-		@version 0.12.36
+		@version 0.12.40
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -899,12 +899,13 @@ namespace PocketCore::Pokemon
 			   removal interactions clear matching statuses and compact the remaining active statuses before insertion.
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
+				@param[in] maxActiveStatuses The maximum number of active statuses allowed.
 				@since 0.9.11
-				@version 0.12.16
+				@version 0.12.40
 			*/
-			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry)
+			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry, const ub maxActiveStatuses)
 			{
-				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions);
+				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions, maxActiveStatuses);
 			}
 
 			/*! @brief Writes the Pokemon's raw identifier and statistic representation to a stream.

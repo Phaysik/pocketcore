@@ -1,8 +1,8 @@
 /*! @file setSandstormHandler.cpp
 	@brief Contains the set sandstorm effect handler implementation
-	@date 09/02/2026
+	@date 09/22/2026
 	@since 0.10.0
-	@version 0.12.16
+	@version 0.12.40
 	@author Matthew Moore
 */
 
@@ -34,6 +34,6 @@ namespace PocketCore::Effect
 	void SetSandstormHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const
 	{
 		applyInteractions(toWeatherID(BuiltinWeatherID::Sandstorm), NO_WEATHER_ID, *provider.weatherRegistry, state.mWeatherIDs,
-						  &WeatherMeta::mWeatherInteractions);
+						  &WeatherMeta::mWeatherInteractions, state.mRuleset.mMaxWeathers);
 	}
 } // namespace PocketCore::Effect
