@@ -1,8 +1,8 @@
 /*! @file attributeMacros.h
 	@brief Declares portable compiler-attribute macros used across PocketCore.
-	@date 08/03/2026
+	@date 09/22/2026
 	@since 0.1.0
-	@version 0.9.1
+	@version 0.12.42
 	@author Matthew Moore
 */
 
@@ -287,6 +287,42 @@
 	#else
 		#define ATTR_NOINLINE
 	#endif
+#else
+	// Non-GNU, non-Clang compilers (MSVC, Intel, etc.) don't support
+	// these attributes.  Define everything as empty so the macros still
+	// exist and expand to nothing.
+
+	#define ATTR_CONST
+	#define ATTR_PURE
+	#define ATTR_RETURNS_NONNULL
+	#define ATTR_FLAG_ENUM
+	#define ATTR_ALWAYS_INLINE
+	#define ATTR_ARTIFICIAL
+	#define ATTR_ASSUME_ALIGNED_EX(alignment, offset)
+	#define ATTR_ASSUME_ALIGNED(alignment)
+	#define ATTR_COLD
+	#define ATTR_HOT
+	#define ATTR_NONNULL(...)
+#endif
+
+#ifdef ATTR_MSVC
+	/*! @def ATTR_NOINLINE
+		@brief Portable macro for the compiler `noinline` attribute.
+		@details Expands to `[[msvc::noinline]]` on MSVC, and to an empty token on other compilers.
+		The `noinline` attribute prevents the compiler from inlining a function at its call sites. This is useful when inlining
+		a function would cause excessive code-size growth (e.g. exceeding `--param inline-unit-growth`) or when the function
+		should remain a discrete call for profiling or debugging purposes. The attribute is compatible with `constexpr`;
+		compile-time evaluation is unaffected.
+		@warning Preventing inlining of small, hot functions can degrade performance. Apply only when inlining is known to
+		cause problems (e.g. build failures due to inline-unit-growth limits or measurable code-size bloat).
+		@example
+		@code{.cpp}
+		ATTR_NOINLINE void expensive_path() { // large function body }
+		@endcode
+		@since 0.12.42
+		@version 0.12.42
+	*/
+	#define ATTR_NOINLINE [[msvc::noinline]]
 #endif
 
 #ifdef ATTR_CLANG
@@ -685,7 +721,7 @@
 		The `[[likely]]` attribute indicates that the a code path is more likely to be executed than the others.
 		@example
 		@code{.cpp}
-		constexpr double pow(doulbe x, uint64_t n) noexcept {
+		constexpr double pow(double x, uint64_t n) noexcept {
 			if (n > 0) ATTR_LIKELY
 				return x * pow(x, n - 1);
 			else ATTR_UNLIKELY
@@ -708,9 +744,9 @@
 		@example
 		@code{.cpp}
 		constexpr double pow(doulbe x, uint64_t n) noexcept {
-			if (n > 0) ATTR_UNLIKELY
+			if (n > 0) ATTR_LIKELY
 				return x * pow(x, n - 1);
-			else ATTR_UNUNLIKELY
+			else ATTR_UNLIKELY
 				return 1;
 		}
 		@endcode
@@ -720,6 +756,30 @@
 	#define ATTR_UNLIKELY [[unlikely]]
 #else
 	#define ATTR_UNLIKELY
+#endif
+
+#if defined(__cpp_deleted_function) && __cpp_deleted_function >= 202'403L
+	#define ATTR_DELETE_REASON(reason) = delete (reason)
+#else
+	#define ATTR_DELETE_REASON(reason) = delete
+#endif
+
+#if defined(ATTR_GCC) && !defined(ATTR_MSVC) && !defined(ATTR_CLANG)
+	#define ATTR_ONLY_GCC 1
+#else
+	#define ATTR_ONLY_GCC 0
+#endif
+
+#if defined(ATTR_CLANG) && !defined(ATTR_MSVC)
+	#define ATTR_ONLY_CLANG 1
+#else
+	#define ATTR_ONLY_CLANG 0
+#endif
+
+#if defined(ATTR_MSVC) && !defined(ATTR_CLANG) && !defined(ATTR_GCC)
+	#define ATTR_ONLY_MSVC 1
+#else
+	#define ATTR_ONLY_MSVC 0
 #endif
 
 #endif

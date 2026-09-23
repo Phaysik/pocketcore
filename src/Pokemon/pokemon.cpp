@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 09/12/2026
+	@date 09/22/2026
 	@since 0.3.0
-	@version 0.12.28
+	@version 0.12.42
 	@author Matthew Moore
 */
 
@@ -16,7 +16,7 @@
 
 namespace PocketCore::Pokemon
 {
-#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+#if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
@@ -96,7 +96,7 @@ namespace PocketCore::Pokemon
 		return outStream;
 	}
 
-#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+#if ATTR_ONLY_GCC
 	#pragma GCC diagnostic pop
 #endif
 } // namespace PocketCore::Pokemon

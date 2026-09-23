@@ -14,3 +14,4 @@
 *.spv
 gmon.out
 *.log
+third_party

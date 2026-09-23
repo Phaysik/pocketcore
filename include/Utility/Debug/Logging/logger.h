@@ -40,37 +40,37 @@ namespace PocketCore::Utility::Debug::Logging
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			Logger() = delete ("Logger is not instantiable");
+			Logger() ATTR_DELETE_REASON("Logger is not instantiable");
 
 			/*! @brief Copy constructor is deleted to prevent instantiation.
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			Logger(const Logger &) = delete ("Logger is not copyable");
+			Logger(const Logger &) ATTR_DELETE_REASON("Logger is not copyable");
 
 			/*! @brief Move constructor is deleted to prevent instantiation.
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			Logger(Logger &&) = delete ("Logger is not movable");
+			Logger(Logger &&) ATTR_DELETE_REASON("Logger is not movable");
 
 			/*! @brief Copy assignment operator is deleted to prevent instantiation.
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			Logger &operator=(const Logger &) = delete ("Logger is not copyable");
+			Logger &operator=(const Logger &) ATTR_DELETE_REASON("Logger is not copyable");
 
 			/*! @brief Move assignment operator is deleted to prevent instantiation.
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			Logger &operator=(Logger &&) = delete ("Logger is not movable");
+			Logger &operator=(Logger &&) ATTR_DELETE_REASON("Logger is not movable");
 
 			/*! @brief Destructor is deleted to prevent instantiation.
 				@since 0.1.0
 				@version 0.1.0
 			 */
-			~Logger() = delete ("Logger is not instantiable");
+			~Logger() ATTR_DELETE_REASON("Logger is not instantiable");
 
 			// MARK: Getter
 

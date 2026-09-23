@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 09/17/2026
+	@date 09/22/2026
 	@since 0.9.16
-	@version 0.12.37
+	@version 0.12.42
 	@author Matthew Moore
 */
 
@@ -283,7 +283,7 @@ namespace PocketCore::Battle
 		return {};
 	}
 
-#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+#if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
@@ -294,7 +294,7 @@ namespace PocketCore::Battle
 		return mState;
 	}
 
-#if defined(ATTR_GCC) && !defined(ATTR_CLANG)
+#if ATTR_ONLY_GCC
 	#pragma GCC diagnostic pop
 #endif
 
