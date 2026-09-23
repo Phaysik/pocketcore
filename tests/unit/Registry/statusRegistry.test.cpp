@@ -35,6 +35,7 @@ using PocketCore::Status::STATUS_NAME_PARALYSIS;
 using PocketCore::Status::STATUS_NAME_POISON;
 using PocketCore::Status::STATUS_NAME_SLEEP;
 using PocketCore::Status::STATUS_NAME_TOXIC;
+using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Status::toStatusID;
@@ -59,6 +60,7 @@ SCENARIO("StatusRegistry")
 				.mName = std::string(STATUS_NAME_PARALYSIS),
 				.mStatusInteractions = {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
 				.mStatusID = toStatusID(BuiltinStatusID::Paralysis),
+				.mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Paralysis))};
@@ -72,6 +74,7 @@ SCENARIO("StatusRegistry")
 				.mName = std::string(STATUS_NAME_BURN),
 				.mStatusInteractions = {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
 				.mStatusID = toStatusID(BuiltinStatusID::Burn),
+				.mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Burn))};
@@ -85,6 +88,7 @@ SCENARIO("StatusRegistry")
 				.mName = std::string(STATUS_NAME_SLEEP),
 				.mStatusInteractions = {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
 				.mStatusID = toStatusID(BuiltinStatusID::Sleep),
+				.mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Sleep))};
@@ -102,6 +106,7 @@ SCENARIO("StatusRegistry")
     			   {.mExistingID = toStatusID(BuiltinStatusID::Paralysis), .mAction = InteractionAction::RemoveCurrent},
     			},
     			.mStatusID = toStatusID(BuiltinStatusID::Freeze),
+       .mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Freeze))};
@@ -115,6 +120,7 @@ SCENARIO("StatusRegistry")
 				.mName = std::string(STATUS_NAME_POISON),
 				.mStatusInteractions = {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming}},
 				.mStatusID = toStatusID(BuiltinStatusID::Poison),
+				.mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Poison))};
@@ -130,6 +136,7 @@ SCENARIO("StatusRegistry")
     			= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming},
     			   {.mExistingID = toStatusID(BuiltinStatusID::Poison), .mAction = InteractionAction::ReplaceCurrent},},
     			.mStatusID = toStatusID(BuiltinStatusID::Toxic),
+       .mStatusClassification = StatusClassification::NonVolatile,
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Toxic))};
