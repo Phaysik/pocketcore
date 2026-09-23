@@ -1,13 +1,14 @@
 /*! @file terrainHandler.cpp
 	@brief Contains the terrain effect handler implementation
-	@date 09/02/2026
+	@date 09/23/2026
 	@since 0.9.10
-	@version 0.12.17
+	@version 0.12.43
 	@author Matthew Moore
 */
 
 #include "EffectHandler/terrainHandler.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "Battle/battleState.h"
@@ -44,29 +45,29 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		const bool isElectricTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Electric)};
-		const bool isGrassyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Grassy)};
-		const bool isPsychicTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Psychic)};
-		const bool isMistyTerrain{state.mTerrainID == toTerrainID(BuiltinTerrainID::Misty)};
+		const bool hasElectricTerrain{std::ranges::contains(state.mTerrainIDs, toTerrainID(BuiltinTerrainID::Electric))};
+		const bool hasGrassyTerrain{std::ranges::contains(state.mTerrainIDs, toTerrainID(BuiltinTerrainID::Grassy))};
+		const bool hasPsychicTerrain{std::ranges::contains(state.mTerrainIDs, toTerrainID(BuiltinTerrainID::Psychic))};
+		const bool hasMistyTerrain{std::ranges::contains(state.mTerrainIDs, toTerrainID(BuiltinTerrainID::Misty))};
 
 		const bool isElectricMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Electric)};
 		const bool isGrassMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Grass)};
 		const bool isPsychicMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Psychic)};
 		const bool isDragonMove{context.mMoveTypeID == toTypeID(BuiltinTypeID::Dragon)};
 
-		if (isElectricTerrain && isElectricMove)
+		if (hasElectricTerrain && isElectricMove)
 		{
 			user.mDamageFormulaModifiers.mAttackModifier *= ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
 		}
-		else if (isGrassyTerrain && isGrassMove)
+		else if (hasGrassyTerrain && isGrassMove)
 		{
 			user.mDamageFormulaModifiers.mAttackModifier *= GRASS_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
 		}
-		else if (isPsychicTerrain && isPsychicMove)
+		else if (hasPsychicTerrain && isPsychicMove)
 		{
 			user.mDamageFormulaModifiers.mAttackModifier *= PSYCHIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
 		}
-		else if (isMistyTerrain && isDragonMove)
+		else if (hasMistyTerrain && isDragonMove)
 		{
 			user.mDamageFormulaModifiers.mAttackModifier *= DRAGON_DEBUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
 		}

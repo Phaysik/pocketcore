@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 09/17/2026
+	@date 09/23/2026
 	@since 0.3.0
-	@version 0.12.37
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -22,6 +22,7 @@
 
 namespace PocketCore::Battle
 {
+	using PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
@@ -133,9 +134,9 @@ namespace PocketCore::Battle
 		@details The side vectors own their @ref BattleSlot values. The party vectors contain non-owning pointers to Pokemon objects.
 	   Weather, terrain, entry hazards, and battle-start state are stored alongside the active side and party information.
 		@warning BattleState does not own the Pokemon objects referenced by mPartyA, mPartyB, or the BattleSlot mPokemon members.
-		@date 09/17/2026
+		@date 09/23/2026
 		@since 0.3.0
-		@version 0.12.37
+		@version 0.12.43
 		@author Matthew Moore
 	*/
 	struct BattleState
@@ -196,12 +197,11 @@ namespace PocketCore::Battle
 
 			/*! @brief The battle-wide weather identifiers. */
 			std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> mWeatherIDs{};
+			/*! @brief The battle-wide terrain identifiers. */
+			std::array<TerrainID, MAX_ACTIVE_TERRAINS_ON_FIELD> mTerrainIDs{};
 
 			/*! @brief The ruleset policy for this slot. */
 			RulesetPolicy mRuleset{};
-
-			/*! @brief The battle-wide terrain identifier. */
-			TerrainID mTerrainID{};
 
 			// Spikes can have 0-3 layers
 
