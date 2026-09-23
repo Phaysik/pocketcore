@@ -1,8 +1,8 @@
 /*! @file battleState.testHelper.h
 	@brief Test helper for dealing with BattleState concepts.
-	@date 09/02/2026
+	@date 09/23/2026
 	@since 0.12.13
-	@version 0.12.16
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -23,6 +23,7 @@ namespace PocketCore::Testing
 {
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
+	using PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Core::ub;
 	using PocketCore::Pokemon::Pokemon;
@@ -39,8 +40,7 @@ namespace PocketCore::Testing
 			std::vector<Pokemon *> mPartyB{};
 
 			std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> mWeatherIDs{};
-
-			TerrainID mTerrainID{};
+			std::array<TerrainID, MAX_ACTIVE_TERRAINS_ON_FIELD> mTerrainIDs{};
 
 			ub mSpikesPartyA{0};
 			ub mSpikesPartyB{0};
@@ -62,7 +62,7 @@ namespace PocketCore::Testing
 		state.mPartyA = data.mPartyA;
 		state.mPartyB = data.mPartyB;
 		state.mWeatherIDs = data.mWeatherIDs;
-		state.mTerrainID = data.mTerrainID;
+		state.mTerrainIDs = data.mTerrainIDs;
 		state.mSpikesPartyA = data.mSpikesPartyA;
 		state.mSpikesPartyB = data.mSpikesPartyB;
 		state.mToxicSpikesPartyA = data.mToxicSpikesPartyA;

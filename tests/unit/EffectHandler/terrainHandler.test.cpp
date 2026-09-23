@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 09/02/2026
+	@date 09/23/2026
 	@since 0.9.10
-	@version 0.12.17
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -52,7 +52,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
 		};
 
 		EffectContext context{
@@ -121,7 +121,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Electric)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
 		};
 
 		EffectContext context{
@@ -190,7 +190,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
 		};
 
 		EffectContext context{
@@ -259,7 +259,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Grassy)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
 		};
 
 		EffectContext context{
@@ -328,7 +328,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
 		};
 
 		EffectContext context{
@@ -397,7 +397,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Psychic)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
 		};
 
 		EffectContext context{
@@ -466,7 +466,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
 		};
 
 		EffectContext context{
@@ -535,7 +535,7 @@ SCENARIO("TerrainHandler")
 	{
 		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
 		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainID = toTerrainID(BuiltinTerrainID::Misty)}),
+			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
 		};
 
 		EffectContext context{

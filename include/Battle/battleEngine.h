@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 09/17/2026
+	@date 09/23/2026
 	@since 0.10.3
-	@version 0.12.37
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -252,7 +252,7 @@ namespace PocketCore::Battle
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
 				@since 0.10.3
-				@version 0.12.36
+				@version 0.12.43
 			*/
 			void executeEffect(const EffectID effect, EffectContext &context);
 
@@ -410,6 +410,19 @@ namespace PocketCore::Battle
 			*/
 			void triggerSlotInContext(const BattleTarget &owner, const BattleEventID eventID, EffectContext &context,
 									  BattleEventRole role = BattleEventRole::Any);
+
+			/*! @brief Dispatches a field-wide trigger to every healthy active slot after battle-field state changes.
+				@details Notifies side A's slots before side B's, and within each side processes slots in ascending index order to keep the
+			   resulting effects deterministic. Only healthy occupants receive the trigger, and each is dispatched with @ref
+			   BattleEventRole::Any through the shared context so it can react to the new weather, terrain, or status. Intended to be
+			   invoked by @ref executeEffect once an applied effect has actually mutated the relevant field condition.
+				@param[in] triggerID The trigger dispatched to every healthy active slot, such as @ref BattleEventID::WeatherChanged or @ref
+			   BattleEventID::TerrainChanged.
+				@param[in,out] context The shared effect context supplied to each notified slot's ability, item, and nature sources.
+				@since 0.12.43
+				@version 0.12.43
+			*/
+			void triggerWhenStateChanged(const BattleEventID triggerID, EffectContext &context);
 
 			/*! @brief Dispatches an occupant's ability and item sources through an existing effect context.
 				@details Resolves source metadata, activates matching suppression rules, executes ability effects before item effects, and

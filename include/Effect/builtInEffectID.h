@@ -1,8 +1,8 @@
 /*! @file builtInEffectID.h
 	@brief Contains the effect types
-	@date 08/28/2026
+	@date 09/23/2026
 	@since 0.10.0
-	@version 0.12.9
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@ namespace PocketCore::Effect
 		@details Each value maps to a stable @ref EffectID through @ref toEffectID, and the enumerator order defines the built-in
 			identifier values. Existing enumerators must not be reordered because their numeric values are stable identifiers.
 		@note All enum values must be handled exhaustively when dispatching on a built-in effect.
-		@date 08/28/2026
+		@date 09/23/2026
 		@since 0.10.0
-		@version 0.12.9
+		@version 0.12.43
 		@author Matthew Moore
 	*/
 	enum class BuiltinEffectID : ub
@@ -73,6 +73,14 @@ namespace PocketCore::Effect
 		SetSun,
 		/*! @brief Sets the battle-wide weather to rain. */
 		SetRain,
+		/*! @brief Sets the battle-wide terrain to electric. */
+		SetElectricTerrain,
+		/*! @brief Sets the battle-wide terrain to misty. */
+		SetMistyTerrain,
+		/*! @brief Sets the battle-wide terrain to grassy. */
+		SetGrassyTerrain,
+		/*! @brief Sets the battle-wide terrain to psychic. */
+		SetPsychicTerrain,
 		/*! @brief Blocks increased priority moves in psychic terrain. */
 		PsychicTerrainPriorityBlock,
 		/*! @brief Marks the end of the built-in catalog and equals the number of built-in effects. */

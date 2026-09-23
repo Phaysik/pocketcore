@@ -1,8 +1,8 @@
 /*! @file effectRegistry.test.cpp
 	@brief C++ file for running tests for the EffectRegistry.
-	@date 09/10/2026
+	@date 09/23/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -28,9 +28,11 @@
 #include "EffectHandler/psychicTerrainPriorityBlockHandler.h"
 #include "EffectHandler/randomizationHandler.h"
 #include "EffectHandler/recoilHandler.h"
+#include "EffectHandler/setElectricTerrainHandler.h"
+#include "EffectHandler/setGrassyTerrainHandler.h"
+#include "EffectHandler/setHarshSunlightHandler.h"
 #include "EffectHandler/setRainHandler.h"
 #include "EffectHandler/setSandstormHandler.h"
-#include "EffectHandler/setSunHandler.h"
 #include "EffectHandler/stabHandler.h"
 #include "EffectHandler/statusApplyHandler.h"
 #include "EffectHandler/statusRemoveHandler.h"
@@ -53,9 +55,13 @@ using PocketCore::Effect::applyPopulationBomb;
 using PocketCore::Effect::applyPsychicTerrainPriorityBlock;
 using PocketCore::Effect::applyRandomization;
 using PocketCore::Effect::applyRecoil;
+using PocketCore::Effect::applySetElectric;
+using PocketCore::Effect::applySetGrassy;
+using PocketCore::Effect::applySetHarshSunlight;
+using PocketCore::Effect::applySetMisty;
+using PocketCore::Effect::applySetPsychic;
 using PocketCore::Effect::applySetRain;
 using PocketCore::Effect::applySetSandstorm;
-using PocketCore::Effect::applySetSun;
 using PocketCore::Effect::applySTAB;
 using PocketCore::Effect::applyStatusApply;
 using PocketCore::Effect::applyStatusRemove;
@@ -76,9 +82,13 @@ using PocketCore::Effect::EFFECT_NAME_POPULATION_BOMB;
 using PocketCore::Effect::EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK;
 using PocketCore::Effect::EFFECT_NAME_RANDOMIZATION;
 using PocketCore::Effect::EFFECT_NAME_RECOIL;
+using PocketCore::Effect::EFFECT_NAME_SET_ELECTRIC_TERRAIN;
+using PocketCore::Effect::EFFECT_NAME_SET_GRASSY_TERRAIN;
+using PocketCore::Effect::EFFECT_NAME_SET_HARSH_SUNLIGHT;
+using PocketCore::Effect::EFFECT_NAME_SET_MISTY_TERRAIN;
+using PocketCore::Effect::EFFECT_NAME_SET_PSYCHIC_TERRAIN;
 using PocketCore::Effect::EFFECT_NAME_SET_RAIN;
 using PocketCore::Effect::EFFECT_NAME_SET_SANDSTORM;
-using PocketCore::Effect::EFFECT_NAME_SET_SUN;
 using PocketCore::Effect::EFFECT_NAME_STAB;
 using PocketCore::Effect::EFFECT_NAME_STATUS_APPLY;
 using PocketCore::Effect::EFFECT_NAME_STATUS_REMOVE;
@@ -345,11 +355,11 @@ SCENARIO("EffectRegistry")
 			CHECK((expected == *actual));
 		}
 
-		THEN("Set Sun has the appropriate properties")
+		THEN("Set Harsh Sunlight has the appropriate properties")
 		{
 			EffectMeta expected{
-				.mName = std::string(EFFECT_NAME_SET_SUN),
-				.mApply = applySetSun,
+				.mName = std::string(EFFECT_NAME_SET_HARSH_SUNLIGHT),
+				.mApply = applySetHarshSunlight,
 				.mEffectID = toEffectID(BuiltinEffectID::SetSun),
 				.mMayChangeWeather = true,
 			};
@@ -369,6 +379,62 @@ SCENARIO("EffectRegistry")
 			};
 
 			const EffectMeta *actual{registry.getEffectMetadata(toEffectID(BuiltinEffectID::SetRain))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Set Grassy Terrain has the appropriate properties")
+		{
+			EffectMeta expected{
+				.mName = std::string(EFFECT_NAME_SET_GRASSY_TERRAIN),
+				.mApply = applySetGrassy,
+				.mEffectID = toEffectID(BuiltinEffectID::SetGrassyTerrain),
+				.mMayChangeTerrain = true,
+			};
+
+			const EffectMeta *actual{registry.getEffectMetadata(toEffectID(BuiltinEffectID::SetGrassyTerrain))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Set Misty Terrain has the appropriate properties")
+		{
+			EffectMeta expected{
+				.mName = std::string(EFFECT_NAME_SET_MISTY_TERRAIN),
+				.mApply = applySetMisty,
+				.mEffectID = toEffectID(BuiltinEffectID::SetMistyTerrain),
+				.mMayChangeTerrain = true,
+			};
+
+			const EffectMeta *actual{registry.getEffectMetadata(toEffectID(BuiltinEffectID::SetMistyTerrain))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Set Electric Terrain has the appropriate properties")
+		{
+			EffectMeta expected{
+				.mName = std::string(EFFECT_NAME_SET_ELECTRIC_TERRAIN),
+				.mApply = applySetElectric,
+				.mEffectID = toEffectID(BuiltinEffectID::SetElectricTerrain),
+				.mMayChangeTerrain = true,
+			};
+
+			const EffectMeta *actual{registry.getEffectMetadata(toEffectID(BuiltinEffectID::SetElectricTerrain))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Set Psychic Terrain has the appropriate properties")
+		{
+			EffectMeta expected{
+				.mName = std::string(EFFECT_NAME_SET_PSYCHIC_TERRAIN),
+				.mApply = applySetPsychic,
+				.mEffectID = toEffectID(BuiltinEffectID::SetPsychicTerrain),
+				.mMayChangeTerrain = true,
+			};
+
+			const EffectMeta *actual{registry.getEffectMetadata(toEffectID(BuiltinEffectID::SetPsychicTerrain))};
 
 			CHECK((expected == *actual));
 		}

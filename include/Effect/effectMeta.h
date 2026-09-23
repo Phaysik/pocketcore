@@ -1,8 +1,8 @@
 /*! @file effectMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 09/10/2026
+	@date 09/23/2026
 	@since 0.10.0
-	@version 0.12.20
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -31,9 +31,9 @@ namespace PocketCore::Effect
 		@brief Stores one effect's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/10/2026
+		@date 09/23/2026
 		@since 0.10.0
-		@version 0.12.20
+		@version 0.12.43
 		@author Matthew Moore
 	*/
 	struct EffectMeta
@@ -46,7 +46,7 @@ namespace PocketCore::Effect
 				@since 0.12.19
 				@version 0.12.19
 			*/
-			ATTR_NODISCARD constexpr bool operator==(const EffectMeta &other) const noexcept = default;
+			ATTR_NODISCARD constexpr bool operator==(const EffectMeta &other) const = default;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
@@ -61,6 +61,9 @@ namespace PocketCore::Effect
 
 			/*! @brief Whether applying this effect may change the active weather. */
 			bool mMayChangeWeather{};
+
+			/*! @brief Whether applying this effect may change the active terrain. */
+			bool mMayChangeTerrain{};
 
 			/*! @brief Whether applying this effect may change the targeted Pokemon's statuses. */
 			bool mMayChangeStatus{};

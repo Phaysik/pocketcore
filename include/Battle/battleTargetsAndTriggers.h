@@ -1,8 +1,8 @@
 /*! @file battleTargetsAndTriggers.h
 	@brief Defines the shared battle targets, triggers, and ranges.
-	@date 08/21/2026
+	@date 09/23/2026
 	@since 0.9.14
-	@version 0.10.9
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@ namespace PocketCore::Battle
 		@brief Identifies an event that can trigger a battle effect.
 		@date 08/05/2026
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.43
 		@author Matthew Moore
 	*/
 	enum class BattleEventID : ub
@@ -34,6 +34,7 @@ namespace PocketCore::Battle
 		AfterHit,		   /*!< Fires after a move hit and its associated effects resolve. */
 		Faint,			   /*!< Fires once when an active Pokemon faints. */
 		WeatherChanged,	   /*!< Fires when the active weather changes. */
+		TerrainChanged,	   /*!< Fires when the active terrain changes. */
 		StatusChanged,	   /*!< Fires when a Pokemon's status changes. */
 	};
 
