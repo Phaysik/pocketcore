@@ -254,7 +254,7 @@ SCENARIO("Interaction Helpers")
 			}
 		}
 
-		WHEN("the active count is below a zero cap")
+		WHEN("the active count is zero")
 		{
 			std::array<si, 4> IDs{1, 0, 0, 0};
 			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 0);
@@ -289,12 +289,12 @@ SCENARIO("Interaction Helpers")
 
 		WHEN("the cap is larger than the physical array")
 		{
-			std::array<si, 4> IDs{1, 2, 3, 0};
+			std::array<si, 4> IDs{1, 2, 3, 4};
 			applyInteractions(TEST_INCOMING_ID, 0, insertionRegistry, IDs, &TestMetadata::mInteractions, 5);
 
-			THEN("the incoming ID is inserted without exceeding the physical array extent")
+			THEN("the incoming ID is rejected without exceeding the physical array extent")
 			{
-				CHECK((IDs == std::array{1, 2, 3, TEST_INCOMING_ID}));
+				CHECK((IDs == std::array{1, 2, 3, 4}));
 			}
 		}
 	}
