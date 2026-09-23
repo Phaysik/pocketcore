@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
+using PocketCore::Effect::applySetElectric;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::SetElectricTerrainHandler;
 using PocketCore::Registry::RegistryProvider;

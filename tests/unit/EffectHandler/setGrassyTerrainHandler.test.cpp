@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
+using PocketCore::Effect::applySetGrassy;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::SetGrassyTerrainHandler;
 using PocketCore::Registry::RegistryProvider;

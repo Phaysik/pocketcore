@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
+using PocketCore::Effect::applySetMisty;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::SetMistyTerrainHandler;
 using PocketCore::Registry::RegistryProvider;
