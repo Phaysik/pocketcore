@@ -2,7 +2,7 @@
 	@brief Defines default constants for the ruleset policy.
 	@date 09/22/2026
 	@since 0.12.30
-	@version 0.12.41
+	@version 0.12.42
 	@author Matthew Moore
 */
 
@@ -30,6 +30,7 @@ namespace PocketCore::Ruleset
 	inline constexpr bool RULESET_DEFAULT_ALLOW_WEATHER_REPLACEMENT{true};
 	inline constexpr bool RULESET_DEFAULT_ALLOW_TERRAIN_REPLACEMENT{true};
 
+#ifndef ATTR_ONLY_MSVC
 	inline constexpr std::string_view MAX_SIDE_SLOT_ERROR_MESSAGE{
 		"RulesetPolicy default side size must match the canonical ruleset constant."};
 	inline constexpr std::string_view MAX_NON_VOLATILE_PER_POKEMON_ERROR_MESSAGE{
@@ -50,6 +51,23 @@ namespace PocketCore::Ruleset
 	inline constexpr std::string_view GEN8_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN8_BASE_GAME must satisfy the ruleset policy bounds."};
 	inline constexpr std::string_view GEN7_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN7_BASE_GAME must satisfy the ruleset policy bounds."};
 	inline constexpr std::string_view GEN6_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE{"GEN6_BASE_GAME must satisfy the ruleset policy bounds."};
+#else
+	#define MAX_SIDE_SLOT_ERROR_MESSAGE "RulesetPolicy default side size must match the canonical ruleset constant."
+	#define MAX_NON_VOLATILE_PER_POKEMON_ERROR_MESSAGE \
+		"RulesetPolicy default non-volatile statuses per Pokemon must match the canonical ruleset constant."
+	#define MAX_VOLATILE_PER_POKEMON_ERROR_MESSAGE \
+		"RulesetPolicy default volatile statuses per Pokemon must match the canonical ruleset constant."
+	#define MAX_WEATHERS_ON_FIELD_ERROR_MESSAGE			"RulesetPolicy default weathers on field must match the canonical ruleset constant."
+	#define MAX_TERRAINS_ON_FIELD_ERROR_MESSAGE			"RulesetPolicy default terrains on field must match the canonical ruleset constant."
+	#define RULESET_POLICY_FIELD_COUNT_ERROR_MESSAGE	"RulesetPolicy bounded fields and field-specific errors must stay synchronized."
+	#define GEN9_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE "GEN9_BASE_GAME must satisfy the ruleset policy bounds."
+	#define GEN9_VGC_DOUBLES_RULESET_POLICY_ERROR_MESSAGE	 "GEN9_VGC_DOUBLES must satisfy the ruleset policy bounds."
+	#define GEN9_SMOGON_SINGLES_RULESET_POLICY_ERROR_MESSAGE "GEN9_SMOGON_SINGLES must satisfy the ruleset policy bounds."
+	#define GEN8_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE		 "GEN8_BASE_GAME must satisfy the ruleset policy bounds."
+	#define GEN7_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE		 "GEN7_BASE_GAME must satisfy the ruleset policy bounds."
+	#define GEN6_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE		 "GEN6_BASE_GAME must satisfy the ruleset policy bounds."
+#endif
+
 } // namespace PocketCore::Ruleset
 
 #endif
