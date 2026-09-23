@@ -10,6 +10,7 @@
 #define INCLUDE_TERRAIN_TERRAINMETA_H
 
 #include <string>
+#include <vector>
 
 #include "Interaction/interaction.h"
 

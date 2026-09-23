@@ -1,8 +1,8 @@
 /*! @file effectRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined effects.
-	@date 09/10/2026
+	@date 09/23/2026
 	@since 0.10.0
-	@version 0.12.20
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -30,9 +30,13 @@
 #include "EffectHandler/psychicTerrainPriorityBlockHandler.h"
 #include "EffectHandler/randomizationHandler.h"
 #include "EffectHandler/recoilHandler.h"
+#include "EffectHandler/setElectricTerrainHandler.h"
+#include "EffectHandler/setGrassyTerrainHandler.h"
+#include "EffectHandler/setHarshSunlightHandler.h"
+#include "EffectHandler/setMistyTerrainHandler.h"
+#include "EffectHandler/setPsychicTerrainHandler.h"
 #include "EffectHandler/setRainHandler.h"
 #include "EffectHandler/setSandstormHandler.h"
-#include "EffectHandler/setSunHandler.h"
 #include "EffectHandler/stabHandler.h"
 #include "EffectHandler/statusApplyHandler.h"
 #include "EffectHandler/statusRemoveHandler.h"
@@ -59,9 +63,13 @@ namespace PocketCore::Registry::Effect
 	using PocketCore::Effect::applyPsychicTerrainPriorityBlock;
 	using PocketCore::Effect::applyRandomization;
 	using PocketCore::Effect::applyRecoil;
+	using PocketCore::Effect::applySetElectric;
+	using PocketCore::Effect::applySetGrassy;
+	using PocketCore::Effect::applySetHarshSunlight;
+	using PocketCore::Effect::applySetMisty;
+	using PocketCore::Effect::applySetPsychic;
 	using PocketCore::Effect::applySetRain;
 	using PocketCore::Effect::applySetSandstorm;
-	using PocketCore::Effect::applySetSun;
 	using PocketCore::Effect::applySTAB;
 	using PocketCore::Effect::applyStatusApply;
 	using PocketCore::Effect::applyStatusRemove;
@@ -82,9 +90,13 @@ namespace PocketCore::Registry::Effect
 	using PocketCore::Effect::EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK;
 	using PocketCore::Effect::EFFECT_NAME_RANDOMIZATION;
 	using PocketCore::Effect::EFFECT_NAME_RECOIL;
+	using PocketCore::Effect::EFFECT_NAME_SET_ELECTRIC_TERRAIN;
+	using PocketCore::Effect::EFFECT_NAME_SET_GRASSY_TERRAIN;
+	using PocketCore::Effect::EFFECT_NAME_SET_HARSH_SUNLIGHT;
+	using PocketCore::Effect::EFFECT_NAME_SET_MISTY_TERRAIN;
+	using PocketCore::Effect::EFFECT_NAME_SET_PSYCHIC_TERRAIN;
 	using PocketCore::Effect::EFFECT_NAME_SET_RAIN;
 	using PocketCore::Effect::EFFECT_NAME_SET_SANDSTORM;
-	using PocketCore::Effect::EFFECT_NAME_SET_SUN;
 	using PocketCore::Effect::EFFECT_NAME_STAB;
 	using PocketCore::Effect::EFFECT_NAME_STATUS_APPLY;
 	using PocketCore::Effect::EFFECT_NAME_STATUS_REMOVE;
@@ -104,9 +116,9 @@ namespace PocketCore::Registry::Effect
 		@details Built-in effects are registered during construction with IDs derived from @ref BuiltinEffectID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_EFFECTS.
-		@date 09/10/2026
+		@date 09/23/2026
 		@since 0.10.0
-		@version 0.12.20
+		@version 0.12.43
 		@author Matthew Moore
 	*/
 	class EffectRegistry : private FixedMetadataRegistry<EffectMeta, EffectID, MAX_EFFECTS, &EffectMeta::mEffectID>
@@ -127,7 +139,7 @@ namespace PocketCore::Registry::Effect
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID.
 				@since 0.10.0
-				@version 0.12.20
+				@version 0.12.43
 			 */
 			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
 			{
@@ -226,8 +238,8 @@ namespace PocketCore::Registry::Effect
 					.mMayChangeWeather = true,
 				});
 				addBuiltin({
-					.mName = std::string(EFFECT_NAME_SET_SUN),
-					.mApply = applySetSun,
+					.mName = std::string(EFFECT_NAME_SET_HARSH_SUNLIGHT),
+					.mApply = applySetHarshSunlight,
 					.mEffectID = toEffectID(BuiltinEffectID::SetSun),
 					.mMayChangeWeather = true,
 				});
@@ -236,6 +248,30 @@ namespace PocketCore::Registry::Effect
 					.mApply = applySetRain,
 					.mEffectID = toEffectID(BuiltinEffectID::SetRain),
 					.mMayChangeWeather = true,
+				});
+				addBuiltin({
+					.mName = std::string(EFFECT_NAME_SET_ELECTRIC_TERRAIN),
+					.mApply = applySetElectric,
+					.mEffectID = toEffectID(BuiltinEffectID::SetElectricTerrain),
+					.mMayChangeTerrain = true,
+				});
+				addBuiltin({
+					.mName = std::string(EFFECT_NAME_SET_MISTY_TERRAIN),
+					.mApply = applySetMisty,
+					.mEffectID = toEffectID(BuiltinEffectID::SetMistyTerrain),
+					.mMayChangeTerrain = true,
+				});
+				addBuiltin({
+					.mName = std::string(EFFECT_NAME_SET_GRASSY_TERRAIN),
+					.mApply = applySetGrassy,
+					.mEffectID = toEffectID(BuiltinEffectID::SetGrassyTerrain),
+					.mMayChangeTerrain = true,
+				});
+				addBuiltin({
+					.mName = std::string(EFFECT_NAME_SET_PSYCHIC_TERRAIN),
+					.mApply = applySetPsychic,
+					.mEffectID = toEffectID(BuiltinEffectID::SetPsychicTerrain),
+					.mMayChangeTerrain = true,
 				});
 				addBuiltin({
 					.mName = std::string(EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK),

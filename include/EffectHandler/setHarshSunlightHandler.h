@@ -1,13 +1,13 @@
-/*! @file setSunHandler.h
-	@brief Contains the setSun effect handler
-	@date 09/22/2026
+/*! @file setHarshSunlightHandler.h
+	@brief Contains the setHarshSunlight effect handler
+	@date 09/23/2026
 	@since 0.10.0
-	@version 0.12.41
+	@version 0.12.43
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_EFFECT_SETSUNHANDLER_H
-#define INCLUDE_EFFECT_SETSUNHANDLER_H
+#ifndef INCLUDE_EFFECT_SET_HARSH_SUNLIGHT_HANDLER_H
+#define INCLUDE_EFFECT_SET_HARSH_SUNLIGHT_HANDLER_H
 
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
@@ -22,17 +22,17 @@ namespace PocketCore::Effect
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
 
-	/*! @class SetSunHandler EffectHandler/setSunHandler.h
+	/*! @class SetHarshSunlightHandler EffectHandler/setHarshSunlightHandler.h
 		@brief Sets the battle-wide weather to harsh sunlight.
 		@details The handler unconditionally replaces the current weather identifier with the built-in harsh sunlight identifier.
 		@warning Any previously active weather is overwritten without checking for immunity or duration.
 		@note The handler does not inspect the effect context or registry provider.
-		@date 09/22/2026
+		@date 09/23/2026
 		@since 0.10.0
-		@version 0.12.41
+		@version 0.12.43
 		@author Matthew Moore
 	*/
-	class SetSunHandler : public IEffectHandler
+	class SetHarshSunlightHandler : public IEffectHandler
 	{
 		public:
 			/*! @brief Replaces the active weather with harsh sunlight.
@@ -41,7 +41,7 @@ namespace PocketCore::Effect
 				@param[in] provider The registry provider, which is not used by this handler.
 				@post @p state reports harsh sunlight as the active weather.
 				@since 0.10.0
-				@version 0.12.41
+				@version 0.12.43
 			*/
 			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
 	};
@@ -52,11 +52,11 @@ namespace PocketCore::Effect
 		@param[in] provider The registry provider, which is not used by this handler.
 		@post @p state reports harsh sunlight as the active weather.
 		@since 0.10.0
-		@version 0.12.9
+		@version 0.12.43
 	*/
-	inline void applySetSun(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applySetHarshSunlight(BattleState &state, EffectContext &context, const RegistryProvider &provider)
 	{
-		SetSunHandler{}.apply(state, context, provider);
+		SetHarshSunlightHandler{}.apply(state, context, provider);
 	}
 } // namespace PocketCore::Effect
 

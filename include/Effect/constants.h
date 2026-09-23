@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the type registry.
-	@date 08/12/2026
+	@date 09/23/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.43
 	@author Matthew Moore
 */
 
@@ -32,8 +32,12 @@ namespace PocketCore::Effect
 	inline constexpr std::string_view EFFECT_NAME_STATUS_TICK{"Status Tick"};
 	inline constexpr std::string_view EFFECT_NAME_ACCURACY_CHECK{"Accuracy Check"};
 	inline constexpr std::string_view EFFECT_NAME_SET_SANDSTORM{"Set Sandstorm"};
-	inline constexpr std::string_view EFFECT_NAME_SET_SUN{"Set Sun"};
+	inline constexpr std::string_view EFFECT_NAME_SET_HARSH_SUNLIGHT{"Set Harsh Sunlight"};
 	inline constexpr std::string_view EFFECT_NAME_SET_RAIN{"Set Rain"};
+	inline constexpr std::string_view EFFECT_NAME_SET_ELECTRIC_TERRAIN{"Set Electric Terrain"};
+	inline constexpr std::string_view EFFECT_NAME_SET_MISTY_TERRAIN{"Set Misty Terrain"};
+	inline constexpr std::string_view EFFECT_NAME_SET_GRASSY_TERRAIN{"Set Grassy Terrain"};
+	inline constexpr std::string_view EFFECT_NAME_SET_PSYCHIC_TERRAIN{"Set Psychic Terrain"};
 	inline constexpr std::string_view EFFECT_NAME_PSYCHIC_TERRAIN_PRIORITY_BLOCK{"Psychic Terrain Priority Block"};
 } // namespace PocketCore::Effect
 

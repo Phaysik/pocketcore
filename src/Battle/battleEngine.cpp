@@ -44,6 +44,7 @@
 #include "Ruleset/rulesetPolicy.h"
 #include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
+#include "Terrain/terrainID.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
@@ -53,6 +54,7 @@ namespace PocketCore::Battle
 	using PocketCore::Ability::NO_ABILITY_ID;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ACTIVE_SLOTS_PER_SIDE;
+	using PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -76,6 +78,7 @@ namespace PocketCore::Battle
 	using PocketCore::Ruleset::RulesetPolicyError;
 	using PocketCore::Ruleset::validateRulesetPolicy;
 	using PocketCore::Status::StatusID;
+	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Weather::WeatherID;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
@@ -437,8 +440,10 @@ namespace PocketCore::Battle
 		}
 
 		const bool mayChangeWeather{effectMeta->mMayChangeWeather};
+		const bool mayChangeTerrain{effectMeta->mMayChangeTerrain};
 		const bool mayChangeStatus{effectMeta->mMayChangeStatus};
 		const std::array<WeatherID, MAX_ACTIVE_WEATHERS_ON_FIELD> previousWeatherIDs{mState.mWeatherIDs};
+		const std::array<TerrainID, MAX_ACTIVE_TERRAINS_ON_FIELD> previousTerrainIDs{mState.mTerrainIDs};
 
 		Pokemon *statusTarget{nullptr};
 
@@ -455,18 +460,12 @@ namespace PocketCore::Battle
 
 		if (mayChangeWeather && mState.mWeatherIDs != previousWeatherIDs)
 		{
-			std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context](const Side side) {
-				const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
+			triggerWhenStateChanged(BattleEventID::WeatherChanged, context);
+		}
 
-				for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
-				{
-					if (isHealthy(slots.at(slotIndex)))
-					{
-						triggerSlotInContext(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)},
-											 BattleEventID::WeatherChanged, context, BattleEventRole::Any);
-					}
-				}
-			});
+		if (mayChangeTerrain && mState.mTerrainIDs != previousTerrainIDs)
+		{
+			triggerWhenStateChanged(BattleEventID::TerrainChanged, context);
 		}
 
 		if (statusTarget != nullptr && statusTarget->getStatusIDsArray() != previousStatuses)
@@ -474,6 +473,22 @@ namespace PocketCore::Battle
 			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
 			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
 		}
+	}
+
+	void BattleEngine::triggerWhenStateChanged(const BattleEventID triggerID, EffectContext &context)
+	{
+		std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context, &triggerID](const Side side) {
+			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
+
+			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			{
+				if (isHealthy(slots.at(slotIndex)))
+				{
+					triggerSlotInContext(BattleTarget{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)}, triggerID, context,
+										 BattleEventRole::Any);
+				}
+			}
+		});
 	}
 
 	void BattleEngine::executeEffects(const std::span<const EffectID> &effects, EffectContext &context)
