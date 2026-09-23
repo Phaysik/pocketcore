@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleState;
+using PocketCore::Effect::applySetPsychic;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::SetPsychicTerrainHandler;
 using PocketCore::Registry::RegistryProvider;
@@ -139,6 +140,76 @@ SCENARIO("SetPsychicTerrainHandler")
 			THEN("no terrain becomes active")
 			{
 				CHECK_FALSE(std::ranges::contains(battleState.mTerrainIDs, psychicID));
+			}
+		}
+	}
+
+	GIVEN("the free function and the handler operate on equivalent states")
+	{
+		BattleState handlerState{};
+		BattleState freeFunctionState{};
+		EffectContext handlerContext{};
+		EffectContext freeFunctionContext{};
+
+		WHEN("applied to empty active terrains")
+		{
+			setPsychicTerrainHandler.apply(handlerState, handlerContext, provider);
+			applySetPsychic(freeFunctionState, freeFunctionContext, provider);
+
+			THEN("the free function yields the same active terrains as the handler")
+			{
+				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+				CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, psychicID));
+			}
+		}
+
+		WHEN("psychic terrain is already active")
+		{
+			handlerState.mTerrainIDs = {psychicID};
+			freeFunctionState.mTerrainIDs = {psychicID};
+
+			setPsychicTerrainHandler.apply(handlerState, handlerContext, provider);
+			applySetPsychic(freeFunctionState, freeFunctionContext, provider);
+
+			THEN("both leave psychic terrain active exactly once")
+			{
+				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+				CHECK((std::ranges::count(freeFunctionState.mTerrainIDs, psychicID) == 1));
+			}
+		}
+
+		WHEN("a different terrain is active and replacement is allowed")
+		{
+			handlerState.mTerrainIDs = {electricID};
+			handlerState.mRuleset.mMaxTerrains = 1;
+			handlerState.mRuleset.mReplaceTerrainWhenFull = true;
+			freeFunctionState.mTerrainIDs = {electricID};
+			freeFunctionState.mRuleset.mMaxTerrains = 1;
+			freeFunctionState.mRuleset.mReplaceTerrainWhenFull = true;
+
+			setPsychicTerrainHandler.apply(handlerState, handlerContext, provider);
+			applySetPsychic(freeFunctionState, freeFunctionContext, provider);
+
+			THEN("both replace the existing terrain identically")
+			{
+				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+				CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, psychicID));
+				CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, electricID));
+			}
+		}
+
+		WHEN("the ruleset permits no active terrains")
+		{
+			handlerState.mRuleset.mMaxTerrains = 0;
+			freeFunctionState.mRuleset.mMaxTerrains = 0;
+
+			setPsychicTerrainHandler.apply(handlerState, handlerContext, provider);
+			applySetPsychic(freeFunctionState, freeFunctionContext, provider);
+
+			THEN("neither activates a terrain")
+			{
+				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+				CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, psychicID));
 			}
 		}
 	}
