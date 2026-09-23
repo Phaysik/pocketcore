@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/16/2026
+	@date 09/22/2026
 	@since 0.4.0
-	@version 0.12.36
+	@version 0.12.40
 	@author Matthew Moore
 */
 
@@ -103,8 +103,18 @@ SCENARIO("Pokemon")
 				{toItemID(BuiltinItemID::ChestoBerry)},
 				{toTypeID(BuiltinTypeID::Dark)},
 				{toNatureID(BuiltinNatureID::Hardy)},
-				{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-				   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
+				{
+					{
+						{
+							NATURE_STAT_BASE_MULTIPLIER,
+							NATURE_STAT_BASE_MULTIPLIER,
+							NATURE_STAT_BASE_MULTIPLIER,
+							NATURE_STAT_BASE_MULTIPLIER,
+							NATURE_STAT_BASE_MULTIPLIER,
+							NATURE_STAT_BASE_MULTIPLIER,
+						},
+					},
+				},
 				{},
 				{},
 			};
@@ -143,8 +153,18 @@ SCENARIO("Pokemon")
 							{toItemID(BuiltinItemID::ChestoBerry)},
 							{toTypeID(BuiltinTypeID::Dark)},
 							{toNatureID(BuiltinNatureID::Hardy)},
-							{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-							   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
+							{
+								{
+									{
+										NATURE_STAT_BASE_MULTIPLIER,
+										NATURE_STAT_BASE_MULTIPLIER,
+										NATURE_STAT_BASE_MULTIPLIER,
+										NATURE_STAT_BASE_MULTIPLIER,
+										NATURE_STAT_BASE_MULTIPLIER,
+										NATURE_STAT_BASE_MULTIPLIER,
+									},
+								},
+							},
 							{},
 							{}};
 
@@ -833,6 +853,7 @@ SCENARIO("Pokemon")
 		};
 
 		std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> statusIDs{};
+		ub maxActive{5};
 
 		GIVEN("a current status that blocks the incoming status")
 		{
@@ -842,7 +863,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the blocked status would otherwise replace another current status")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, maxActive);
 
 				THEN("the incoming status is rejected before any current status changes")
 				{
@@ -858,7 +879,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, maxActive);
 
 				THEN("the incoming status occupies the replaced status slot")
 				{
@@ -889,7 +910,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(incomingStatusID, registry);
+				pokemon.addStatus(incomingStatusID, registry, maxActive);
 
 				THEN("only the first replacement slot receives the incoming status")
 				{
@@ -914,7 +935,7 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Freeze), registry);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Freeze), registry, maxActive);
 
 				THEN("the remaining statuses shift down and the incoming status uses the first empty slot")
 				{
@@ -937,7 +958,7 @@ SCENARIO("Pokemon")
 
 			WHEN("another coexisting status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Paralysis), registry);
+				pokemon.addStatus(toStatusID(BuiltinStatusID::Paralysis), registry, maxActive);
 
 				THEN("the full status array remains unchanged")
 				{

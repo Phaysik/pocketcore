@@ -1,8 +1,8 @@
 /*! @file interactionHelpers.h
 	@brief Defines reusable algorithms for applying metadata interactions.
-	@date 09/11/2026
+	@date 09/22/2026
 	@since 0.12.16
-	@version 0.12.22
+	@version 0.12.40
 	@author Matthew Moore
 */
 
@@ -144,16 +144,17 @@ namespace PocketCore::Interaction
 		@param[in] registry The registry used to resolve metadata for @p incomingID.
 		@param[in,out] existingIDs The active identifiers updated in place.
 		@param[in] interactionsMember Member pointer selecting the metadata's interaction range.
+		@param[in] maxActive The maximum number of active identifiers allowed.
 		@post Blocking interactions leave @p existingIDs unchanged. Replacement and removal interactions are applied before insertion.
 		@note An unregistered non-empty identifier is inserted without applying interactions, preserving the behavior of the framework
 	   adapters.
 		@since 0.12.16
-		@version 0.12.22
+		@version 0.12.40
 	*/
 	template <typename ID, std::ranges::forward_range IDRange, typename Registry, typename Metadata,
 			  std::ranges::input_range InteractionRange>
 	constexpr void applyInteractions(const ID incomingID, const ID emptyID, const Registry &registry, IDRange &existingIDs,
-									 InteractionRange Metadata::*interactionsMember)
+									 InteractionRange Metadata::*interactionsMember, const ub maxActive)
 	{
 		if (incomingID == emptyID || std::ranges::contains(existingIDs, incomingID))
 		{
@@ -177,7 +178,13 @@ namespace PocketCore::Interaction
 
 			const std::size_t nextAvailableIndex{shiftAndGetNextAvailable(emptyID, existingIDs)};
 
-			if (!replacedCurrent && nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
+			if (maxActive == 0)
+			{
+				return;
+			}
+
+			if (nextAvailableIndex < maxActive && !replacedCurrent
+				&& nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
 			{
 				const auto nextAvailable{std::ranges::find(existingIDs, emptyID)};
 				*nextAvailable = incomingID;
