@@ -31,7 +31,8 @@ namespace PocketCore::Effect
 	using PocketCore::Weather::toWeatherID;
 	using PocketCore::Weather::WeatherMeta;
 
-	void SetHarshSunlightHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const
+	void SetHarshSunlightHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context,
+										const RegistryProvider &provider) const
 	{
 		applyInteractions(toWeatherID(BuiltinWeatherID::HarshSunlight), NO_WEATHER_ID, *provider.weatherRegistry, state.mWeatherIDs,
 						  &WeatherMeta::mWeatherInteractions, state.mRuleset.mMaxWeathers, state.mRuleset.mReplaceWeatherWhenFull);

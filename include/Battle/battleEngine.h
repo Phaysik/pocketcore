@@ -414,8 +414,8 @@ namespace PocketCore::Battle
 			/*! @brief Dispatches a field-wide trigger to every healthy active slot after battle-field state changes.
 				@details Notifies side A's slots before side B's, and within each side processes slots in ascending index order to keep the
 			   resulting effects deterministic. Only healthy occupants receive the trigger, and each is dispatched with @ref
-			   BattleEventRole::Any through the shared context so it can react to the new weather, terrain, or status. Intended to be invoked
-			   by @ref executeEffect once an applied effect has actually mutated the relevant field condition.
+			   BattleEventRole::Any through the shared context so it can react to the new weather, terrain, or status. Intended to be
+			   invoked by @ref executeEffect once an applied effect has actually mutated the relevant field condition.
 				@param[in] triggerID The trigger dispatched to every healthy active slot, such as @ref BattleEventID::WeatherChanged or @ref
 			   BattleEventID::TerrainChanged.
 				@param[in,out] context The shared effect context supplied to each notified slot's ability, item, and nature sources.
