@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 09/12/2026
+	@date 09/27/2026
 	@since 0.12.28
-	@version 0.12.29
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -123,7 +123,7 @@ SCENARIO("Pokemon free function")
 					"    [0]:\n"
 					"      ID: 1\n"
 					"      Name: Cheri Berry\n"
-					"  Statuses:\n"
+					"  Non-Volatile Statuses:\n"
 					"    [0]:\n"
 					"      ID: 5\n"
 					"      Name: Poison\n"

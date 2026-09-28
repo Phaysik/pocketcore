@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/22/2026
+	@date 09/27/2026
 	@since 0.3.0
-	@version 0.12.41
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -68,9 +68,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/22/2026
+		@date 09/27/2026
 		@since 0.3.0
-		@version 0.12.41
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -917,7 +917,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemon The Pokemon to write.
 				@return The supplied stream after writing the representation.
 				@since 0.11.2
-				@version 0.12.17
+				@version 0.12.45
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 

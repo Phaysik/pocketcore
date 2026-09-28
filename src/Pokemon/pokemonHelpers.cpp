@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 09/22/2026
+	@date 09/27/2026
 	@since 0.12.28
-	@version 0.12.42
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -117,7 +117,7 @@ namespace PocketCore::Pokemon
 			outStream << '\n';
 		}
 
-		outStream << "  Statuses:\n";
+		outStream << "  Non-Volatile Statuses:\n";
 
 		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
 		{

@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/22/2026
+	@date 09/27/2026
 	@since 0.4.0
-	@version 0.12.41
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -1030,7 +1030,7 @@ SCENARIO("Pokemon")
 					"  Nature IDs: [1]\n"
 					"  Ability IDs: [6]\n"
 					"  Item IDs: [7]\n"
-					"  Status IDs: [20, 21, 22, 23, 24]\n"
+					"  Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"  Moves:\n"
 					"    [0] ID: 10, PP: 5/15\n"
 					"    [1] ID: 11, PP: 10/20\n"

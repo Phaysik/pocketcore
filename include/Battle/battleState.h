@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 09/23/2026
+	@date 09/27/2026
 	@since 0.3.0
-	@version 0.12.43
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -17,6 +17,7 @@
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
 #include "Ruleset/rulesetPolicy.h"
+#include "Status/statusID.h"
 #include "Terrain/terrainID.h"
 #include "Weather/weatherID.h"
 
@@ -24,12 +25,14 @@ namespace PocketCore::Battle
 {
 	using PocketCore::Configuration::MAX_ACTIVE_TERRAINS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
+	using PocketCore::Configuration::MAX_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Ruleset::RulesetPolicy;
+	using PocketCore::Status::StatusID;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Weather::WeatherID;
 
@@ -90,9 +93,9 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 08/24/2026
+		@date 09/27/2026
 		@since 0.3.0
-		@version 0.12.2
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	struct BattleSlot
@@ -100,6 +103,9 @@ namespace PocketCore::Battle
 		public:
 			/*! @brief The temporary modifiers used by damage and battle calculations. */
 			DamageFormulaModifiers mDamageFormulaModifiers{};
+
+			/*! @brief The volatile statuses currently affecting this slot's Pokemon. */
+			std::array<StatusID, MAX_VOLATILE_STATUSES_PER_POKEMON> mVolatileStatuses{};
 
 			/*! @brief The non-owning Pokemon occupying this slot, or nullptr when unoccupied. */
 			Pokemon *mPokemon{nullptr};
