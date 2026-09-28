@@ -1,46 +1,42 @@
 {
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "Release build",
-			"command": "make",
-			"args": ["-j4 release"],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
-			"problemMatcher": ["$gcc"]
-		},
-		{
-			"type": "shell",
-			"label": "Dev build",
-			"command": "make",
-			"args": ["-j4 dev"],
-			"group": {
-				"kind": "build"
-			},
-			"problemMatcher": ["$gcc"]
-		},
-		{
-			"type": "shell",
-			"label": "Debug build",
-			"command": "make",
-			"args": ["-j4 debug"],
-			"group": {
-				"kind": "build"
-			},
-			"problemMatcher": ["$gcc"]
-		},
-		{
-			"type": "shell",
-			"label": "Debug tests",
-			"command": "make",
-			"args": ["-j4 build_tests"],
-			"group": {
-				"kind": "build"
-			},
-			"problemMatcher": ["$gcc"]
-		}
-	],
-	"version": "2.0.0"
+    "options": {
+        "cwd": "${workspaceFolder}"
+    },
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Release build",
+            "command": "export PATH=\"$HOME/.local/bin:$PATH\" && cmake --preset gcc-release && cmake --build --preset gcc-release",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Debug build",
+            "command": "export PATH=\"$HOME/.local/bin:$PATH\" && cmake --preset gcc-debug && cmake --build --preset gcc-debug",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Debug tests",
+            "command": "export PATH=\"$HOME/.local/bin:$PATH\" && cmake --preset gcc-tests && cmake --build --preset gcc-tests",
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ],
+    "version": "2.0.0"
 }

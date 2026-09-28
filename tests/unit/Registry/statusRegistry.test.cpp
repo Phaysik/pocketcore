@@ -1,8 +1,8 @@
 /*! @file statusRegistry.test.cpp
 	@brief C++ file for running tests for the StatusRegistry.
-	@date 09/10/2026
+	@date 09/28/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -28,6 +28,8 @@ using PocketCore::Interaction::InteractionAction;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
+using PocketCore::Status::STATUS_NAME_AQUA_RING;
+using PocketCore::Status::STATUS_NAME_AUTOTOMIZE;
 using PocketCore::Status::STATUS_NAME_BURN;
 using PocketCore::Status::STATUS_NAME_FREEZE;
 using PocketCore::Status::STATUS_NAME_NONE;
@@ -140,6 +142,32 @@ SCENARIO("StatusRegistry")
 			};
 
 			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Toxic))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Autotomize has the appropriate properties")
+		{
+			StatusMeta expected{
+				.mName = std::string(STATUS_NAME_AUTOTOMIZE),
+				.mStatusID = toStatusID(BuiltinStatusID::Autotomize),
+				.mStatusClassification = StatusClassification::Volatile,
+			};
+
+			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::Autotomize))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Aqua Ring has the appropriate properties")
+		{
+			StatusMeta expected{
+				.mName = std::string(STATUS_NAME_AQUA_RING),
+				.mStatusID = toStatusID(BuiltinStatusID::AquaRing),
+				.mStatusClassification = StatusClassification::Volatile,
+			};
+
+			const StatusMeta *actual{registry.getStatusMetadata(toStatusID(BuiltinStatusID::AquaRing))};
 
 			CHECK((expected == *actual));
 		}

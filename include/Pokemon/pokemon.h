@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/22/2026
+	@date 09/28/2026
 	@since 0.3.0
-	@version 0.12.41
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -58,6 +58,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Status::NO_STATUS_ID;
+	using PocketCore::Status::StatusClassification;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Type::TypeID;
@@ -68,9 +69,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/22/2026
+		@date 09/28/2026
 		@since 0.3.0
-		@version 0.12.41
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -896,18 +897,28 @@ namespace PocketCore::Pokemon
 				return mHealth == 0;
 			}
 
-			/*! @brief Applies a registered status according to its interactions with the current statuses.
+			/*! @brief Applies a registered non-volatile status according to its interactions with the current statuses.
 				@details Blocking interactions leave the array unchanged. Replacement interactions store the incoming status in place, while
-			   removal interactions clear matching statuses and compact the remaining active statuses before insertion.
+			   removal interactions clear matching statuses and compact the remaining active statuses before insertion. A status whose
+			   registry metadata classifies it as @ref PocketCore::Status::StatusClassification::Volatile is battle-slot-owned and is
+			   rejected here, leaving the non-volatile array unchanged.
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
 				@param[in] policy The ruleset policy governing status interactions, including the maximum number of active statuses and
 			   replacement behavior when full.
 				@since 0.9.11
-				@version 0.12.41
+				@version 0.12.45
 			*/
 			constexpr void addStatus(const StatusID statusID, const StatusRegistry &statusRegistry, const RulesetPolicy &policy)
 			{
+				const StatusMeta *metadata{statusRegistry.getStatusMetadata(statusID)};
+
+				// A volatile status belongs to the battle slot; it must never occupy Pokemon-owned non-volatile storage.
+				if (metadata != nullptr && metadata->mStatusClassification == StatusClassification::Volatile)
+				{
+					return;
+				}
+
 				applyInteractions(statusID, NO_STATUS_ID, statusRegistry, mStatusIDs, &StatusMeta::mStatusInteractions,
 								  policy.mMaxNonVolatileStatuses, policy.mReplaceNonVolatileStatusWhenFull);
 			}
@@ -917,7 +928,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemon The Pokemon to write.
 				@return The supplied stream after writing the representation.
 				@since 0.11.2
-				@version 0.12.17
+				@version 0.12.45
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 

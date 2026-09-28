@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/22/2026
+	@date 09/28/2026
 	@since 0.4.0
-	@version 0.12.41
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -33,6 +33,7 @@
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/builtInStatusID.h"
 #include "Status/statusID.h"
+#include "Status/statusMeta.h"
 #include "Types/builtInTypeID.h"
 #include "Types/typeID.h"
 
@@ -73,6 +74,7 @@ using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
+using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::toStatusID;
 using PocketCore::Testing::makePokemon;
@@ -857,6 +859,52 @@ SCENARIO("Pokemon")
 		std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> statusIDs{};
 		RulesetPolicy policy{.mMaxNonVolatileStatuses = 5, .mReplaceNonVolatileStatusWhenFull = false};
 
+		GIVEN("an incoming status classified as volatile")
+		{
+			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
+			std::expected<void, RegistryErrorInfo> updateResult{
+				statusConfiguration.updateStatus(volatileStatusID,
+												 {
+													 .mName = "Confusion",
+													 .mStatusID = volatileStatusID,
+													 .mStatusClassification = StatusClassification::Volatile,
+												 }),
+			};
+
+			REQUIRE(updateResult.has_value());
+
+			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
+			pokemon.setStatusIDsArray(statusIDs);
+
+			WHEN("the volatile status is applied to non-volatile storage")
+			{
+				pokemon.addStatus(volatileStatusID, registry, policy);
+
+				THEN("the non-volatile status array is left unchanged")
+				{
+					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				}
+			}
+		}
+
+		GIVEN("an incoming status with no registered metadata")
+		{
+			const StatusID unregisteredStatusID{900};
+
+			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
+			pokemon.setStatusIDsArray(statusIDs);
+
+			WHEN("the unregistered status is applied")
+			{
+				pokemon.addStatus(unregisteredStatusID, registry, policy);
+
+				THEN("the volatile classification guard is skipped and the non-volatile array is unchanged")
+				{
+					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				}
+			}
+		}
+
 		GIVEN("a current status that blocks the incoming status")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Freeze);
@@ -1030,7 +1078,7 @@ SCENARIO("Pokemon")
 					"  Nature IDs: [1]\n"
 					"  Ability IDs: [6]\n"
 					"  Item IDs: [7]\n"
-					"  Status IDs: [20, 21, 22, 23, 24]\n"
+					"  Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"  Moves:\n"
 					"    [0] ID: 10, PP: 5/15\n"
 					"    [1] ID: 11, PP: 10/20\n"

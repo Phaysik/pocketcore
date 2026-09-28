@@ -1,8 +1,8 @@
 /*! @file builtinStatusID.h
 	@brief Defines identifiers for statuses compiled into PocketCore.
-	@date 09/11/2026
+	@date 09/28/2026
 	@since 0.7.0
-	@version 0.12.24
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@ namespace PocketCore::Status
 		@details This closed enum is only a catalog of built-in statuses. Runtime state and user-facing APIs use the open @ref StatusID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 09/28/2026
 		@since 0.7.0
-		@version 0.11.6
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	enum class BuiltinStatusID : ub
@@ -38,6 +38,8 @@ namespace PocketCore::Status
 		Freeze,
 		Poison,
 		Toxic,
+		Autotomize,
+		AquaRing,
 		FinalStatus,
 	};
 
