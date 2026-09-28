@@ -665,6 +665,12 @@ namespace PocketCore::Battle
 		return result;
 	}
 
+#if ATTR_ONLY_GCC
+	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
+#endif
+
 	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider)
 	{
 		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
@@ -716,4 +722,8 @@ namespace PocketCore::Battle
 
 		return outStream;
 	}
+
+#if ATTR_ONLY_GCC
+	#pragma GCC diagnostic pop
+#endif
 } // namespace PocketCore::Battle
