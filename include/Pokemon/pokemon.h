@@ -899,9 +899,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Applies a registered non-volatile status according to its interactions with the current statuses.
 				@details Blocking interactions leave the array unchanged. Replacement interactions store the incoming status in place, while
-			   removal interactions clear matching statuses and compact the remaining active statuses before insertion. A status whose registry
-			   metadata classifies it as @ref PocketCore::Status::StatusClassification::Volatile is battle-slot-owned and is rejected here,
-			   leaving the non-volatile array unchanged.
+			   removal interactions clear matching statuses and compact the remaining active statuses before insertion. A status whose
+			   registry metadata classifies it as @ref PocketCore::Status::StatusClassification::Volatile is battle-slot-owned and is
+			   rejected here, leaving the non-volatile array unchanged.
 				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
 				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
 				@param[in] policy The ruleset policy governing status interactions, including the maximum number of active statuses and
