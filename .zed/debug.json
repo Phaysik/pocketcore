@@ -1,0 +1,34 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+	{
+		"label": "Debug Project",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "$ZED_WORKTREE_ROOT/build/clang-debug/dev",
+		"cwd": "$ZED_WORKTREE_ROOT",
+		"env": {
+			"ASAN_OPTIONS": "detect_leaks=0"
+		},
+		"build": {
+			"command": "export PATH=\"$HOME/.local/bin:$PATH\" && cmake --preset clang-debug && cmake --build --preset clang-debug",
+			"cwd": "$ZED_WORKTREE_ROOT"
+		}
+	},
+	{
+		"label": "Debug Tests",
+		"adapter": "CodeLLDB",
+		"request": "launch",
+		"program": "$ZED_WORKTREE_ROOT/build/clang-tests/tests",
+		"cwd": "$ZED_WORKTREE_ROOT",
+		"env": {
+			"ASAN_OPTIONS": "detect_leaks=0"
+		},
+		"build": {
+			"command": "export PATH=\"$HOME/.local/bin:$PATH\" && cmake --preset clang-tests && cmake --build --preset clang-tests",
+			"cwd": "$ZED_WORKTREE_ROOT"
+		}
+	}
+]
