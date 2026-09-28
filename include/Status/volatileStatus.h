@@ -27,10 +27,23 @@ namespace PocketCore::Status
 	struct VolatileStatus
 	{
 		public:
+			/*! @brief Compares two MoveMeta instances for equivalent metadata.
+					@details Compares all fields exactly.
+					@param[in] other The MoveMeta instance to compare.
+					@return True when both instances contain equivalent metadata; otherwise false.
+					@since 0.12.45
+					@version 0.12.45
+				*/
+			ATTR_NODISCARD constexpr bool operator==(const VolatileStatus &other) const = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The wrapped registry status identifier.
 				@details Defaults to @ref NO_STATUS_ID to represent an unoccupied volatile-status slot.
 			*/
 			StatusID mStatusID{NO_STATUS_ID};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 } // namespace PocketCore::Status
 

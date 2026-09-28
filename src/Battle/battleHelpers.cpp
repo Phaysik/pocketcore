@@ -689,7 +689,7 @@ namespace PocketCore::Battle
 
 		for (std::size_t index{0}; index < battleSlot.mVolatileStatuses.size(); ++index)
 		{
-			const StatusID statusID{battleSlot.mVolatileStatuses.at(index).mStatusID.getValue()};
+			const StatusID statusID{battleSlot.mVolatileStatuses.at(index).mStatusID};
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
