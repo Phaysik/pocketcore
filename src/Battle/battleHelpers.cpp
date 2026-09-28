@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 09/22/2026
+	@date 09/28/2026
 	@since 0.9.14
-	@version 0.12.42
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -14,7 +14,10 @@
 #include <expected>
 #include <limits>
 #include <optional>
+#include <ostream>
 #include <span>
+#include <sstream>
+#include <string>
 #include <type_traits>
 #include <variant>
 #include <vector>
@@ -32,7 +35,10 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonHelpers.h"
 #include "Registry/moveRegistry.h"
+#include "Registry/registryProvider.h"
+#include "Status/statusID.h"
 #include "Utility/random.h"
 
 namespace PocketCore::Battle
@@ -50,7 +56,10 @@ namespace PocketCore::Battle
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::printPokemonWithNames;
 	using PocketCore::Registry::Move::MoveRegistry;
+	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Status::StatusID;
 	using PocketCore::Utility::Random;
 
 #if ATTR_ONLY_GCC
@@ -637,5 +646,74 @@ namespace PocketCore::Battle
 
 			return false;
 		});
+	}
+
+	std::string indentBlock(const std::string &block)
+	{
+		std::string result{"  "};
+
+		for (const char character : block)
+		{
+			result += character;
+
+			if (character == '\n')
+			{
+				result += "  ";
+			}
+		}
+
+		return result;
+	}
+
+	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider)
+	{
+		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
+										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
+			constexpr std::string_view unregisteredName{"<unregistered>"};
+			const std::optional<std::string_view> name{nameLookup(stableID)};
+
+			outStream << indentation << "ID: " << stableID.getValue() << '\n' << indentation << "Name: " << name.value_or(unregisteredName);
+		};
+
+		std::ostringstream modifiersStream;
+		modifiersStream << battleSlot.mDamageFormulaModifiers;
+
+		std::ostringstream pokemonStream;
+		printPokemonWithNames(pokemonStream, *battleSlot.mPokemon, registryProvider);
+
+		std::ostringstream statStagesStream;
+		statStagesStream << battleSlot.mStatStages;
+
+		outStream << "Battle Slot {\n" << indentBlock(modifiersStream.str()) << '\n';
+		outStream << "  Volatile Statuses:\n";
+
+		for (std::size_t index{0}; index < battleSlot.mVolatileStatuses.size(); ++index)
+		{
+			const StatusID statusID{battleSlot.mVolatileStatuses.at(index).mStatusID.getValue()};
+			outStream << "    [" << index << "]:\n";
+
+			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
+				return registryProvider.statusRegistry != nullptr ? registryProvider.statusRegistry->getStatusName(identifier)
+																  : std::nullopt;
+			});
+
+			outStream << '\n';
+		}
+
+		outStream << std::boolalpha << indentBlock(pokemonStream.str()) << '\n'
+				  << indentBlock(statStagesStream.str()) << '\n'
+				  << "  Choice Locked Move ID: " << battleSlot.mChoiceLockedMove.getValue() << '\n'
+				  << "  Position: " << static_cast<us>(battleSlot.mPosition) << '\n'
+				  << "  Sleep: " << static_cast<us>(battleSlot.mSleepCounter) << '\n'
+				  << "  Toxic: " << static_cast<us>(battleSlot.mToxicCounter) << '\n'
+				  << "  Protection: " << static_cast<us>(battleSlot.mProtectionCounter) << '\n'
+				  << "  Is Protected: " << battleSlot.mIsProtected << '\n'
+				  << "  Is Flinched: " << battleSlot.mIsFlinched << '\n'
+				  << "  Is Grounded: " << battleSlot.mIsGrounded << '\n'
+				  << "  Faint Processed: " << battleSlot.mFaintProcessed << '\n';
+
+		outStream << '}';
+
+		return outStream;
 	}
 } // namespace PocketCore::Battle

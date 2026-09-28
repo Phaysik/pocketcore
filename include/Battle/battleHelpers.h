@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 09/02/2026
+	@date 09/28/2026
 	@since 0.9.14
-	@version 0.12.17
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <expected>
 #include <span>
+#include <string>
 #include <vector>
 
 #include "Battle/battleState.h"
@@ -22,6 +23,7 @@
 #include "Effect/effectContext.h"
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
+#include "Registry/registryProvider.h"
 
 #include "battleAction.h"
 #include "battleValidation.h"
@@ -35,6 +37,7 @@ namespace PocketCore::Battle
 	using PocketCore::Effect::Side;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Registry::Move::MoveRegistry;
+	using PocketCore::Registry::RegistryProvider;
 
 	/*! @brief Returns the side opposing the supplied battle side.
 		@param[in] side The battle side to invert.
@@ -402,6 +405,29 @@ namespace PocketCore::Battle
 		@version 0.10.9
 	*/
 	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry);
+
+	/*! @brief Indents every line of a text block by two spaces.
+		@details Prepends two spaces to the start of the block and inserts two spaces after each newline, shifting every line two columns to
+	   the right. A trailing newline yields a final two-space-indented empty line.
+		@param[in] block The multi-line text to indent.
+		@return A copy of @p block with two spaces prefixed to every line.
+		@note Time complexity is O(n), where n is @p block.size().
+		@since 0.12.45
+		@version 0.12.45
+	*/
+	std::string indentBlock(const std::string &block);
+
+	/*! @brief Writes a BattleSlot with stable identifier names resolved from runtime registries.
+		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
+		   printed as `<unregistered>`.
+		@param[in,out] outStream The stream receiving the formatted BattleSlot state.
+		@param[in] battleSlot The BattleSlot whose state is printed.
+		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
+		@return The supplied stream after writing the complete representation.
+		@since 0.12.45
+		@version 0.12.45
+	*/
+	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Battle
 
 #endif

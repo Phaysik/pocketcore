@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 09/10/2026
+	@date 09/28/2026
 	@since 0.6.4
-	@version 0.12.20
+	@version 0.12.45
 	@author Matthew Moore
 */
 
@@ -30,6 +30,8 @@ namespace PocketCore::Registry::Status
 	using PocketCore::Interaction::InteractionAction;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Status::BuiltinStatusID;
+	using PocketCore::Status::STATUS_NAME_AQUA_RING;
+	using PocketCore::Status::STATUS_NAME_AUTOTOMIZE;
 	using PocketCore::Status::STATUS_NAME_BURN;
 	using PocketCore::Status::STATUS_NAME_FREEZE;
 	using PocketCore::Status::STATUS_NAME_NONE;
@@ -37,6 +39,7 @@ namespace PocketCore::Registry::Status
 	using PocketCore::Status::STATUS_NAME_POISON;
 	using PocketCore::Status::STATUS_NAME_SLEEP;
 	using PocketCore::Status::STATUS_NAME_TOXIC;
+	using PocketCore::Status::StatusClassification;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Status::toStatusID;
@@ -46,9 +49,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 09/10/2026
+		@date 09/28/2026
 		@since 0.6.4
-		@version 0.12.20
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
@@ -69,10 +72,12 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID.
 				@since 0.6.4
-				@version 0.12.20
+				@version 0.12.45
 			 */
 			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
 			{
+				// Non-Volatile Statuses
+
 				addBuiltin({
 					.mName = std::string(STATUS_NAME_NONE),
 					.mStatusID = toStatusID(BuiltinStatusID::None),
@@ -116,6 +121,19 @@ namespace PocketCore::Registry::Status
 					= {{.mExistingID = toStatusID(BuiltinStatusID::Freeze), .mAction = InteractionAction::BlockIncoming},
 					   {.mExistingID = toStatusID(BuiltinStatusID::Poison), .mAction = InteractionAction::ReplaceCurrent},},
 					.mStatusID = toStatusID(BuiltinStatusID::Toxic),
+				});
+
+				// Volatile Statuses
+
+				addBuiltin({
+					.mName = std::string(STATUS_NAME_AUTOTOMIZE),
+					.mStatusID = toStatusID(BuiltinStatusID::Autotomize),
+					.mStatusClassification = StatusClassification::Volatile,
+				});
+				addBuiltin({
+					.mName = std::string(STATUS_NAME_AQUA_RING),
+					.mStatusID = toStatusID(BuiltinStatusID::AquaRing),
+					.mStatusClassification = StatusClassification::Volatile,
 				});
 			}
 

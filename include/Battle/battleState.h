@@ -39,13 +39,23 @@ namespace PocketCore::Battle
 	/*! @struct StatStages Battle/battleState.h
 		@brief Stores a battler's temporary stat stage changes.
 		@details Each signed stage applies to the corresponding stat during battle calculations.
-		@date 08/24/2026
+		@date 09/28/2026
 		@since 0.3.0
-		@version 0.12.2
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	struct StatStages
 	{
+		public:
+			/*! @brief Writes the StatStages' raw identifier and statistic representation to a stream.
+				@param[in,out] outStream The stream receiving the representation.
+				@param[in] statStages The StatStages to write.
+				@return The supplied stream after writing the representation.
+				@since 0.12.45
+				@version 0.12.45
+			*/
+			friend std::ostream &operator<<(std::ostream &outStream, const StatStages &statStages);
+
 		public:
 			/*! @brief The temporary Attack stage. */
 			sb mAttack{0};
@@ -66,13 +76,23 @@ namespace PocketCore::Battle
 	/*! @struct DamageFormulaModifiers Battle/battleState.h
 		@brief Stores multiplicative modifiers applied to damage-formula statistics.
 		@details A default-constructed instance leaves every supported statistic unchanged by initializing each modifier to 1.0.
-		@date 08/24/2026
+		@date 09/28/2026
 		@since 0.8.5
-		@version 0.12.2
+		@version 0.12.45
 		@author Matthew Moore
 	*/
 	struct DamageFormulaModifiers
 	{
+		public:
+			/*! @brief Writes the DamageFormulaModifiers' raw identifier and statistic representation to a stream.
+				@param[in,out] outStream The stream receiving the representation.
+				@param[in] damageFormulaModifiers The DamageFormulaModifiers to write.
+				@return The supplied stream after writing the representation.
+				@since 0.12.45
+				@version 0.12.45
+			*/
+			friend std::ostream &operator<<(std::ostream &outStream, const DamageFormulaModifiers &damageFormulaModifiers);
+
 		public:
 			/*! @brief The multiplicative modifier applied to health. */
 			double mHealthModifier{1.0};
@@ -93,13 +113,23 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 09/28/2026m
+		@date 09/28/2026
 		@since 0.3.0
 		@version 0.12.45
 		@author Matthew Moore
 	*/
 	struct BattleSlot
 	{
+		public:
+			/*! @brief Writes the BattleSlot's raw identifier and statistic representation to a stream.
+				@param[in,out] outStream The stream receiving the representation.
+				@param[in] battleSlot The BattleSlot to write.
+				@return The supplied stream after writing the representation.
+				@since 0.12.45
+				@version 0.12.45
+			*/
+			friend std::ostream &operator<<(std::ostream &outStream, const BattleSlot &battleSlot);
+
 		public:
 			/*! @brief The temporary modifiers used by damage and battle calculations. */
 			DamageFormulaModifiers mDamageFormulaModifiers{};

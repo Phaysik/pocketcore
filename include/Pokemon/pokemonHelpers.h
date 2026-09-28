@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 09/27/2026
+	@date 09/28/2026
 	@since 0.12.28
 	@version 0.12.45
 	@author Matthew Moore
@@ -16,6 +16,7 @@
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Registry::RegistryProvider;
+
 	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.
 		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
 		   printed as `<unregistered>`.
