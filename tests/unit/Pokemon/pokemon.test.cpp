@@ -887,6 +887,24 @@ SCENARIO("Pokemon")
 			}
 		}
 
+		GIVEN("an incoming status with no registered metadata")
+		{
+			const StatusID unregisteredStatusID{900};
+
+			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
+			pokemon.setStatusIDsArray(statusIDs);
+
+			WHEN("the unregistered status is applied")
+			{
+				pokemon.addStatus(unregisteredStatusID, registry, policy);
+
+				THEN("the volatile classification guard is skipped and the non-volatile array is unchanged")
+				{
+					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				}
+			}
+		}
+
 		GIVEN("a current status that blocks the incoming status")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Freeze);
