@@ -59,6 +59,11 @@ namespace PocketCore::Battle
 
 	std::ostream &operator<<(std::ostream &outStream, const BattleSlot &battleSlot)
 	{
+		if (battleSlot.mPokemon == nullptr)
+		{
+			return outStream;
+		}
+
 		std::ostringstream modifiersStream;
 		modifiersStream << battleSlot.mDamageFormulaModifiers;
 

@@ -104,6 +104,19 @@ SCENARIO("Battle free function")
 
 		RegistryProvider provider{getDefaultInitializedRegistryProvider()};
 
+		WHEN("the pokemon is a nullptr")
+		{
+			std::ostringstream output;
+			printBattleSlotWithNames(output, {.mPokemon = nullptr}, provider);
+
+			THEN("nothing is returned")
+			{
+				std::string_view expected{};
+
+				CHECK((output.str() == expected));
+			}
+		}
+
 		WHEN("the BattleSlot is written to a stream")
 		{
 			std::ostringstream output;

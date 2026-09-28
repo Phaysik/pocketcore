@@ -673,6 +673,11 @@ namespace PocketCore::Battle
 
 	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider)
 	{
+		if (battleSlot.mPokemon == nullptr)
+		{
+			return outStream;
+		}
+
 		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
 										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
 			constexpr std::string_view unregisteredName{"<unregistered>"};

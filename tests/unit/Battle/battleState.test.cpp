@@ -8,6 +8,8 @@
 
 #include "Battle/battleState.h"
 
+#include <sstream>
+
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Item/itemID.h"
@@ -152,6 +154,21 @@ SCENARIO("BattleSlot")
 			.mIsGrounded = true,
 			.mFaintProcessed = false,
 		};
+
+		WHEN("the pokemon is a nullptr")
+		{
+			std::ostringstream output;
+			BattleSlot newSlot{.mPokemon = nullptr};
+
+			output << newSlot;
+
+			THEN("nothing is returned")
+			{
+				std::string_view expected{};
+
+				CHECK((output.str() == expected));
+			}
+		}
 
 		WHEN("the BattleSlot are written to a stream")
 		{
