@@ -612,7 +612,8 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces all nature identifier slots.
-			    @details Resolves the nature multipliers from the nature registry and recomputes the Pokemon's stats. If there is an unresolved nature, the default multipliers are set and no other state updates are made.
+				@details Resolves the nature multipliers from the nature registry and recomputes the Pokemon's stats. If there is an
+			   unresolved nature, the default multipliers are set and no other state updates are made.
 				@param[in] natureIDs The nature identifiers to store.
 				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@since 0.11.6
