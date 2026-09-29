@@ -915,8 +915,8 @@ namespace PocketCore::Pokemon
 				@version 0.12.46
 			*/
 			constexpr std::expected<void, InteractionApplicationError> addNonVolatileStatus(const StatusID statusID,
-																					   const StatusRegistry &statusRegistry,
-																					   const RulesetPolicy &policy)
+																							const StatusRegistry &statusRegistry,
+																							const RulesetPolicy &policy)
 			{
 				const StatusMeta *metadata{statusRegistry.getStatusMetadata(statusID)};
 

@@ -150,8 +150,8 @@ namespace PocketCore::Battle
 				@version 0.12.46
 			*/
 			constexpr std::expected<void, InteractionApplicationError> addVolatileStatus(const StatusID statusID,
-																					const StatusRegistry &statusRegistry,
-																					const RulesetPolicy &policy)
+																						 const StatusRegistry &statusRegistry,
+																						 const RulesetPolicy &policy)
 			{
 				const StatusMeta *metadata{statusRegistry.getStatusMetadata(statusID)};
 
