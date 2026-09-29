@@ -152,10 +152,14 @@ namespace PocketCore::Interaction
 		@param[in] interactionsMember Member pointer selecting the metadata's interaction range.
 		@param[in] maxActive The maximum number of active identifiers allowed.
 		@param[in] replaceWhenFull Whether to replace the oldest active identifier when the active list is full.
-		@post A blocking interaction leaves @p existingIDs unchanged. Otherwise, matching replacement and removal interactions are applied before insertion.
-		@note An empty identifier, an identifier already present in @p existingIDs, or an identifier without registered metadata is rejected.
-		@note A @ref PocketCore::Interaction::InteractionApplicationError::CapReached result may be returned after replacement or removal interactions have modified @p existingIDs.
-		@return An empty result when the incoming identifier is applied; otherwise an unexpected @ref InteractionApplicationError describing the rejection.
+		@post A blocking interaction leaves @p existingIDs unchanged. Otherwise, matching replacement and removal interactions are applied
+	   before insertion.
+		@note An empty identifier, an identifier already present in @p existingIDs, or an identifier without registered metadata is
+	   rejected.
+		@note A @ref PocketCore::Interaction::InteractionApplicationError::CapReached result may be returned after replacement or removal
+	   interactions have modified @p existingIDs.
+		@return An empty result when the incoming identifier is applied; otherwise an unexpected @ref InteractionApplicationError describing
+	   the rejection.
 		@since 0.12.16
 		@version 0.12.46
 	*/
