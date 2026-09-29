@@ -53,7 +53,6 @@ using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
-using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
@@ -379,12 +378,26 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureIDsArray")
 			{
-				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, natureRegistry);
-
-				THEN("the pokemon's natures are properly updated")
+				GIVEN("valid metadata")
 				{
-					CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)}
-						   == pokemon.getNatureIDsArray()));
+					pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, natureRegistry);
+
+					THEN("the pokemon's natures are properly updated")
+					{
+						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)}
+							   == pokemon.getNatureIDsArray()));
+					}
+				}
+
+				GIVEN("invalid metadata")
+				{
+					pokemon.setNatureIDsArray({NatureID{200}}, natureRegistry);
+
+					THEN("the pokemon's natures are properly updated")
+					{
+						CHECK((pokemon.getNatureIDsArray()
+							   == std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)}));
+					}
 				}
 			}
 		}
@@ -1172,6 +1185,191 @@ SCENARIO("Pokemon")
 				};
 
 				CHECK((output.str() == expected));
+			}
+		}
+	}
+
+	GIVEN("resolveNatureMetadata and recomputeStats")
+	{
+		Pokemon pokemon{
+    		makePokemon({
+        		.mNatureRegistry = natureRegistry,
+    			.mName = "MissingNo",
+    			.mStats = {
+    				.mMaxHealth = 100,
+    				.mAttack = 100,
+    				.mDefense = 100,
+    				.mSpAttack = 100,
+    				.mSpDefense = 100,
+                    .mSpeed = 100,
+    			},
+    			.mAbilityIDs = {AbilityID{}},
+    			.mItemIDs = {ItemID{}},
+    			.mHealth = 1,
+    			.mLevel = 20,
+    		}),
+    	};
+
+		us expectedHealth{1};
+
+		GIVEN("neutral natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedAttack{45};
+			us expectedDefense{45};
+			us expectedSpAttack{45};
+			us expectedSpDefense{45};
+			us expectedSpeed{45};
+
+			WHEN("having a hardy nature")
+			{
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Hardy), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
+			}
+		}
+
+		GIVEN("attack boosting natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedAttack{49};
+
+			WHEN("having a Lonely nature")
+			{
+				us expectedDefense{40};
+				us expectedSpAttack{45};
+				us expectedSpDefense{45};
+				us expectedSpeed{45};
+
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
+			}
+		}
+
+		GIVEN("defense boosting natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedDefense{49};
+
+			WHEN("having a Bold nature")
+			{
+				us expectedAttack{40};
+				us expectedSpAttack{45};
+				us expectedSpDefense{45};
+				us expectedSpeed{45};
+
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Bold), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
+			}
+		}
+
+		GIVEN("speed boosting natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedSpeed{49};
+
+			WHEN("having a Timid nature")
+			{
+				us expectedAttack{40};
+				us expectedDefense{45};
+				us expectedSpAttack{45};
+				us expectedSpDefense{45};
+
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Timid), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
+			}
+		}
+
+		GIVEN("special attack boosting natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedSpAttack{49};
+
+			WHEN("having a Modest nature")
+			{
+				us expectedAttack{40};
+				us expectedDefense{45};
+				us expectedSpDefense{45};
+				us expectedSpeed{45};
+
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Modest), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
+			}
+		}
+
+		GIVEN("special defense boosting natures")
+		{
+			us expectedMaxHealth{70};
+			us expectedSpDefense{49};
+
+			WHEN("having a Calm nature")
+			{
+				us expectedAttack{40};
+				us expectedDefense{45};
+				us expectedSpAttack{45};
+				us expectedSpeed{45};
+
+				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Calm), natureRegistry);
+
+				THEN("the computed stats aren't modified")
+				{
+					CHECK((pokemon.getMaximumHealth() == expectedMaxHealth));
+					CHECK((pokemon.getHealth() == expectedHealth));
+					CHECK((pokemon.getAttack() == expectedAttack));
+					CHECK((pokemon.getDefense() == expectedDefense));
+					CHECK((pokemon.getSpAttack() == expectedSpAttack));
+					CHECK((pokemon.getSpDefense() == expectedSpDefense));
+					CHECK((pokemon.getSpeed() == expectedSpeed));
+				}
 			}
 		}
 	}

@@ -952,7 +952,7 @@ namespace PocketCore::Pokemon
 			   (IVs), effort values (EVs), level, and nature multipliers. It ensures that the calculated stats are up-to-date whenever any
 			   of the contributing factors change.
 				@since 0.12.23
-				@version 0.12.25
+				@version 0.12.47
 			*/
 			constexpr void recomputeStats()
 			{
@@ -986,12 +986,17 @@ namespace PocketCore::Pokemon
 
 				for (const std::array<double, POKEMON_STAT_COUNT> &natureMultiplier : mNatureMultipliers)
 				{
-					mCalculatedStats.mMaxHealth *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Health)));
-					mCalculatedStats.mAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Attack)));
-					mCalculatedStats.mDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Defense)));
-					mCalculatedStats.mSpAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialAttack)));
-					mCalculatedStats.mSpDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
-					mCalculatedStats.mSpeed *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Speed)));
+					mCalculatedStats.mMaxHealth
+						= static_cast<us>(mCalculatedStats.mMaxHealth * natureMultiplier.at(toIndex(PokemonStat::Health)));
+					mCalculatedStats.mAttack
+						= static_cast<us>(mCalculatedStats.mAttack * natureMultiplier.at(toIndex(PokemonStat::Attack)));
+					mCalculatedStats.mDefense
+						= static_cast<us>(mCalculatedStats.mDefense * natureMultiplier.at(toIndex(PokemonStat::Defense)));
+					mCalculatedStats.mSpAttack
+						= static_cast<us>(mCalculatedStats.mSpAttack * natureMultiplier.at(toIndex(PokemonStat::SpecialAttack)));
+					mCalculatedStats.mSpDefense
+						= static_cast<us>(mCalculatedStats.mSpDefense * natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
+					mCalculatedStats.mSpeed = static_cast<us>(mCalculatedStats.mSpeed * natureMultiplier.at(toIndex(PokemonStat::Speed)));
 				}
 			}
 
