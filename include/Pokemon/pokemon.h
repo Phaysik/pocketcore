@@ -52,6 +52,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
 	using PocketCore::Core::us;
@@ -95,7 +96,7 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
-				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
+				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
@@ -611,8 +612,9 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces all nature identifier slots.
+			    @details Resolves the nature multipliers from the nature registry and recomputes the Pokemon's stats. If there is an unresolved nature, the default multipliers are set and no other state updates are made.
 				@param[in] natureIDs The nature identifiers to store.
-				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
+				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@since 0.11.6
 				@version 0.12.47
 			*/
@@ -1026,6 +1028,9 @@ namespace PocketCore::Pokemon
 
 					if (metadata == nullptr)
 					{
+						std::array<double, POKEMON_STAT_COUNT> defaultMultipliers{};
+						defaultMultipliers.fill(NATURE_STAT_BASE_MULTIPLIER);
+						mNatureMultipliers.fill(defaultMultipliers);
 						return;
 					}
 

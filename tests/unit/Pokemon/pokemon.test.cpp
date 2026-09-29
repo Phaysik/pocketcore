@@ -1223,7 +1223,7 @@ SCENARIO("Pokemon")
 
 			WHEN("having a hardy nature")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Hardy), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Hardy)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1239,7 +1239,7 @@ SCENARIO("Pokemon")
 
 			WHEN("having a docile nature")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Docile), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Docile)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1255,7 +1255,7 @@ SCENARIO("Pokemon")
 
 			WHEN("having a serious nature")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Serious), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Serious)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1271,7 +1271,7 @@ SCENARIO("Pokemon")
 
 			WHEN("having a bashful nature")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Bashful), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Bashful)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1287,7 +1287,7 @@ SCENARIO("Pokemon")
 
 			WHEN("having a quirky nature")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Quirky), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Quirky)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1314,7 +1314,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Lonely)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1335,7 +1335,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{40};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Brave), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Brave)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1356,7 +1356,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Adamant), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Adamant)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1377,7 +1377,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{40};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Naughty), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Naughty)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1404,7 +1404,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Bold), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Bold)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1425,7 +1425,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{40};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Relaxed), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Relaxed)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1446,7 +1446,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Impish), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Impish)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1467,7 +1467,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{40};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lax), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Lax)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1494,7 +1494,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpDefense{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Timid), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Timid)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1515,7 +1515,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpDefense{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Hasty), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Hasty)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1536,7 +1536,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{40};
 				us expectedSpDefense{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Jolly), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Jolly)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1557,7 +1557,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpDefense{40};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Naive), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Naive)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1584,7 +1584,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Modest), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Modest)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1605,7 +1605,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Mild), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Mild)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1626,7 +1626,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{45};
 				us expectedSpeed{40};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Quiet), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Quiet)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1647,7 +1647,7 @@ SCENARIO("Pokemon")
 				us expectedSpDefense{40};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Rash), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Rash)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1674,7 +1674,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Calm), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Calm)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1695,7 +1695,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Gentle), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Gentle)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1716,7 +1716,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{45};
 				us expectedSpeed{40};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Sassy), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Sassy)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
@@ -1737,7 +1737,7 @@ SCENARIO("Pokemon")
 				us expectedSpAttack{40};
 				us expectedSpeed{45};
 
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Careful), natureRegistry);
+				pokemon.setNatureIDsArray({{toNatureID(BuiltinNatureID::Careful)}}, natureRegistry);
 
 				THEN("the computed stats aren't modified")
 				{
