@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 09/02/2026
+	@date 09/29/2026
 	@since 0.3.0
-	@version 0.12.17
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/effectSourceAndSuppression.h"
+#include "Interaction/interactionApplicationError.h"
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Multiplier/builtInMultiplierID.h"
@@ -41,6 +42,7 @@ namespace PocketCore::Effect
 	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Multiplier::BuiltinMultiplierID;
@@ -122,13 +124,50 @@ namespace PocketCore::Effect
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
+	/*! @struct InteractionOutcome Effect/effectContext.h
+		@brief Stores the result of the most recent interaction application during an effect dispatch.
+		@details Records whether a status, weather, or terrain interaction was applied and, when rejected, the @ref
+		 PocketCore::Interaction::InteractionApplicationError describing why. The record is intentionally identifier-agnostic so status,
+		 weather, and terrain handlers can all report through the same field; the handler that writes the outcome already holds the applied
+		 identifier.
+		@date 09/29/2026
+		@since 0.12.46
+		@version 0.12.46
+		@author Matthew Moore
+	*/
+	struct InteractionOutcome
+	{
+		public:
+			/*! @brief Compares two interaction outcomes for equivalent application state.
+				@details Compares the rejection reason and applied flag exactly.
+				@param[in] other The interaction outcome to compare.
+				@return True when both outcomes contain equivalent application state; otherwise false.
+				@since 0.12.46
+				@version 0.12.46
+			*/
+			constexpr bool operator==(const InteractionOutcome &other) const noexcept
+			{
+				return mError == other.mError && mApplied == other.mApplied;
+			}
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The rejection reason when the interaction was not applied, or empty on success or a benign no-op. */
+			std::optional<InteractionApplicationError> mError{};
+
+			/*! @brief Indicates whether the incoming identifier was applied to its active list. */
+			bool mApplied{false};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+	};
+
 	/*! @struct EffectContext Effect/effectContext.h
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 09/02/2026
+		@date 09/29/2026
 		@since 0.3.0
-		@version 0.12.17
+		@version 0.12.46
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -179,14 +218,14 @@ namespace PocketCore::Effect
 				@param[in] other The effect context to compare.
 				@return True when both contexts contain identical state; otherwise false.
 				@since 0.12.14
-				@version 0.12.17
+				@version 0.12.46
 			*/
 			constexpr bool operator==(const EffectContext &other) const noexcept
 			{
-				return mDamage == other.mDamage && mMoveTypeID == other.mMoveTypeID && mAbilityID == other.mAbilityID
-					&& mItemID == other.mItemID && mMoveID == other.mMoveID && mNatureID == other.mNatureID
-					&& mRangeOverride == other.mRangeOverride && mUserIndex == other.mUserIndex && mTargetIndex == other.mTargetIndex
-					&& mMoveBasePower == other.mMoveBasePower && mMoveAccuracy == other.mMoveAccuracy
+				return mDamage == other.mDamage && mInteractionOutcome == other.mInteractionOutcome && mMoveTypeID == other.mMoveTypeID
+					&& mAbilityID == other.mAbilityID && mItemID == other.mItemID && mMoveID == other.mMoveID
+					&& mNatureID == other.mNatureID && mRangeOverride == other.mRangeOverride && mUserIndex == other.mUserIndex
+					&& mTargetIndex == other.mTargetIndex && mMoveBasePower == other.mMoveBasePower && mMoveAccuracy == other.mMoveAccuracy
 					&& mHitAttemptIndex == other.mHitAttemptIndex && mSourceType == other.mSourceType && mUserSide == other.mUserSide
 					&& mTargetSide == other.mTargetSide && mIsSpecial == other.mIsSpecial && mActiveMultipliers == other.mActiveMultipliers;
 			}
@@ -195,6 +234,10 @@ namespace PocketCore::Effect
 
 			/*! @brief The damage calculation state and effect-processing control flags. */
 			DamageContext mDamage{};
+
+			/*! @brief The outcome of the most recent interaction application. */
+			InteractionOutcome mInteractionOutcome{};
+
 			/*! @brief The type identifier associated with the current effect source. */
 			TypeID mMoveTypeID{};
 

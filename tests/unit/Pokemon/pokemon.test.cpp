@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/28/2026
+	@date 09/29/2026
 	@since 0.4.0
-	@version 0.12.45
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -20,6 +20,7 @@
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Interaction/interaction.h"
+#include "Interaction/interactionApplicationError.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Move/builtInMoveID.h"
@@ -54,6 +55,7 @@ using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
 using PocketCore::Interaction::InteractionAction;
+using PocketCore::Interaction::InteractionApplicationError;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::NO_ITEM_ID;
@@ -834,7 +836,7 @@ SCENARIO("Pokemon")
 		}
 	}
 
-	GIVEN("addStatus")
+	GIVEN("addNonVolatileStatus")
 	{
 		StatusRegistryConfiguration statusConfiguration{};
 		const StatusRegistry &registry{statusConfiguration.getRuntimeRegistry()};
@@ -859,6 +861,22 @@ SCENARIO("Pokemon")
 		std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> statusIDs{};
 		RulesetPolicy policy{.mMaxNonVolatileStatuses = 5, .mReplaceNonVolatileStatusWhenFull = false};
 
+		WHEN("the active count is zero")
+		{
+			RulesetPolicy newPolicy{.mMaxNonVolatileStatuses = 0, .mReplaceNonVolatileStatusWhenFull = false};
+			std::array<StatusID, 1> IDs{toStatusID(BuiltinStatusID::Toxic)};
+			const std::expected<void, InteractionApplicationError> result{
+				pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Burn), registry, newPolicy),
+			};
+
+			THEN("the incoming ID is not inserted")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == InteractionApplicationError::CapReached));
+				CHECK((IDs == std::array{toStatusID(BuiltinStatusID::Toxic)}));
+			}
+		}
+
 		GIVEN("an incoming status classified as volatile")
 		{
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
@@ -878,10 +896,54 @@ SCENARIO("Pokemon")
 
 			WHEN("the volatile status is applied to non-volatile storage")
 			{
-				pokemon.addStatus(volatileStatusID, registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(volatileStatusID, registry, policy),
+				};
 
 				THEN("the non-volatile status array is left unchanged")
 				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::WrongClassification));
+					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				}
+			}
+		}
+
+		GIVEN("the incoming ID is the same as the empty ID")
+		{
+			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
+			pokemon.setStatusIDsArray(statusIDs);
+
+			WHEN("the id is applied")
+			{
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(NO_STATUS_ID, registry, policy),
+				};
+
+				THEN("the non-volatile status array is left unchanged")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::SameAsEmptyID));
+					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				}
+			}
+		}
+
+		GIVEN("the incoming ID is a duplicate ID")
+		{
+			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
+			pokemon.setStatusIDsArray(statusIDs);
+
+			WHEN("the id is applied")
+			{
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Burn), registry, policy),
+				};
+
+				THEN("the non-volatile status array is left unchanged")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::Duplicate));
 					CHECK((pokemon.getStatusIDsArray() == statusIDs));
 				}
 			}
@@ -896,10 +958,14 @@ SCENARIO("Pokemon")
 
 			WHEN("the unregistered status is applied")
 			{
-				pokemon.addStatus(unregisteredStatusID, registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(unregisteredStatusID, registry, policy),
+				};
 
 				THEN("the volatile classification guard is skipped and the non-volatile array is unchanged")
 				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::MissingMetadata));
 					CHECK((pokemon.getStatusIDsArray() == statusIDs));
 				}
 			}
@@ -913,10 +979,14 @@ SCENARIO("Pokemon")
 
 			WHEN("the blocked status would otherwise replace another current status")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy),
+				};
 
 				THEN("the incoming status is rejected before any current status changes")
 				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::Blocked));
 					CHECK((pokemon.getStatusIDsArray() == statusIDs));
 				}
 			}
@@ -929,10 +999,13 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Toxic), registry, policy),
+				};
 
 				THEN("the incoming status occupies the replaced status slot")
 				{
+					REQUIRE(result.has_value());
 					CHECK((pokemon.getStatusID(0) == toStatusID(BuiltinStatusID::Toxic)));
 					CHECK((pokemon.getStatusID(1) == NO_STATUS_ID));
 				}
@@ -960,10 +1033,13 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(incomingStatusID, registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(incomingStatusID, registry, policy),
+				};
 
 				THEN("only the first replacement slot receives the incoming status")
 				{
+					REQUIRE(result.has_value());
 					std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> expectedStatusIDs{
 						incomingStatusID,
 						toStatusID(BuiltinStatusID::Sleep),
@@ -985,10 +1061,13 @@ SCENARIO("Pokemon")
 
 			WHEN("the incoming status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Freeze), registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Freeze), registry, policy),
+				};
 
 				THEN("the remaining statuses shift down and the incoming status uses the first empty slot")
 				{
+					REQUIRE(result.has_value());
 					CHECK((pokemon.getStatusID(0) == toStatusID(BuiltinStatusID::Toxic)));
 					CHECK((pokemon.getStatusID(1) == toStatusID(BuiltinStatusID::Freeze)));
 					CHECK((pokemon.getStatusID(2) == NO_STATUS_ID));
@@ -1008,10 +1087,14 @@ SCENARIO("Pokemon")
 
 			WHEN("another coexisting status is applied")
 			{
-				pokemon.addStatus(toStatusID(BuiltinStatusID::Paralysis), registry, policy);
+				const std::expected<void, InteractionApplicationError> result{
+					pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Paralysis), registry, policy),
+				};
 
 				THEN("the full status array remains unchanged")
 				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == InteractionApplicationError::CapReached));
 					CHECK((pokemon.getStatusIDsArray() == statusIDs));
 				}
 			}

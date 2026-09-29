@@ -1,8 +1,8 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 09/02/2026
+	@date 09/29/2026
 	@since 0.8.7
-	@version 0.12.17
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -16,6 +16,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/effectContext.testHelper.h"
 #include "Effect/effectSourceAndSuppression.h"
+#include "Interaction/interactionApplicationError.h"
 #include "Item/builtInItemID.h"
 #include "Move/builtInMoveID.h"
 #include "Multiplier/builtInMultiplierID.h"
@@ -33,7 +34,9 @@ using PocketCore::Battle::BattleRangeID;
 using PocketCore::Effect::DamageContext;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::EffectSource;
+using PocketCore::Effect::InteractionOutcome;
 using PocketCore::Effect::Side;
+using PocketCore::Interaction::InteractionApplicationError;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::toItemID;
 using PocketCore::Move::BuiltinMoveID;
@@ -135,6 +138,55 @@ SCENARIO("DamageContext")
 			THEN("they are equal")
 			{
 				CHECK((context == other));
+			}
+		}
+	}
+}
+
+SCENARIO("InteractionOutcome")
+{
+	InteractionOutcome outcome{};
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed outcomes")
+		{
+			InteractionOutcome other{};
+
+			THEN("they are equal")
+			{
+				CHECK((outcome == other));
+			}
+		}
+
+		GIVEN("for mError modified in one outcome")
+		{
+			InteractionOutcome other{.mError = InteractionApplicationError::Duplicate};
+
+			THEN("they are not equal")
+			{
+				CHECK((outcome != other));
+			}
+		}
+
+		GIVEN("for mApplied modified in one outcome")
+		{
+			InteractionOutcome other{.mApplied = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((outcome != other));
+			}
+		}
+
+		GIVEN("two outcomes modified the same way")
+		{
+			InteractionOutcome other{.mApplied = true};
+			outcome.mApplied = true;
+
+			THEN("they are equal")
+			{
+				CHECK((outcome == other));
 			}
 		}
 	}
@@ -360,6 +412,16 @@ SCENARIO("EffectContext")
 		GIVEN("for mDamage modified in one context")
 		{
 			EffectContext other{makeEffectContext({.mDamage = {.mDamage = 1}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((context != other));
+			}
+		}
+
+		GIVEN("for mInteractionOutcome modified in one context")
+		{
+			EffectContext other{makeEffectContext({.mInteractionOutcome = {.mApplied = true}})};
 
 			THEN("they are not equal")
 			{

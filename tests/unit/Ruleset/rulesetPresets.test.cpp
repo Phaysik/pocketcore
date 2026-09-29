@@ -1,8 +1,8 @@
 /*! @file rulesetPolicy.test.cpp
 	@brief C++ file for running tests for the RulesetPresets.
-	@date 09/14/2026
+	@date 09/29/2026
 	@since 0.12.33
-	@version 0.12.33
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -38,6 +38,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = false,
 				.mAllowZMoves = false,
 				.mAllowMega = false,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")
@@ -58,6 +62,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = true,
 				.mAllowZMoves = false,
 				.mAllowMega = false,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")
@@ -78,6 +86,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = false,
 				.mAllowZMoves = true,
 				.mAllowMega = true,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")
@@ -98,6 +110,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = false,
 				.mAllowZMoves = false,
 				.mAllowMega = true,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")
@@ -121,6 +137,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = false,
 				.mAllowZMoves = false,
 				.mAllowMega = false,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")
@@ -144,6 +164,10 @@ SCENARIO("RulesetPresets")
 				.mAllowGmax = false,
 				.mAllowZMoves = false,
 				.mAllowMega = false,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			THEN("the defaults are properly assigned")

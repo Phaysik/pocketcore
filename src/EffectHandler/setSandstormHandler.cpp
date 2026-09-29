@@ -9,12 +9,15 @@
 #include "EffectHandler/setSandstormHandler.h"
 
 #include <cassert>
+#include <expected>
+#include <optional>
 
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
 #include "EffectHandler/effectHandlerInterface.h"
+#include "Interaction/interactionApplicationError.h"
 #include "Interaction/interactionHelpers.h"
 #include "Registry/registryProvider.h"
 #include "Weather/builtInWeatherID.h"
@@ -25,6 +28,7 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Interaction::applyInteractions;
+	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Weather::BuiltinWeatherID;
 	using PocketCore::Weather::NO_WEATHER_ID;
@@ -33,7 +37,14 @@ namespace PocketCore::Effect
 
 	void SetSandstormHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const
 	{
-		applyInteractions(toWeatherID(BuiltinWeatherID::Sandstorm), NO_WEATHER_ID, *provider.weatherRegistry, state.mWeatherIDs,
-						  &WeatherMeta::mWeatherInteractions, state.mRuleset.mMaxWeathers, state.mRuleset.mReplaceWeatherWhenFull);
+		const std::expected<void, InteractionApplicationError> result{
+			applyInteractions(toWeatherID(BuiltinWeatherID::Sandstorm), NO_WEATHER_ID, *provider.weatherRegistry, state.mWeatherIDs,
+							  &WeatherMeta::mWeatherInteractions, state.mRuleset.mMaxWeathers, state.mRuleset.mReplaceWeatherWhenFull),
+		};
+
+		context.mInteractionOutcome = {
+			.mError = result ? std::nullopt : std::optional{result.error()},
+			.mApplied = result.has_value(),
+		};
 	}
 } // namespace PocketCore::Effect

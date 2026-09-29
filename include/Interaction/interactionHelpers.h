@@ -1,8 +1,8 @@
 /*! @file interactionHelpers.h
 	@brief Defines reusable algorithms for applying metadata interactions.
-	@date 09/22/2026
+	@date 09/29/2026
 	@since 0.12.16
-	@version 0.12.41
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -11,14 +11,20 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <expected>
 #include <ranges>
 
 #include "Core/attributeMacros.h"
+#include "Core/typedefs.h"
+#include "Interaction/interactionApplicationError.h"
 
 #include "interaction.h"
 
 namespace PocketCore::Interaction
 {
+	using PocketCore::Core::ub;
+	using PocketCore::Interaction::InteractionApplicationError;
+
 	/*! @brief Determines whether an interaction range declares an action against an existing object.
 		@tparam ID The stable identifier type shared by the interacting objects.
 		@tparam InteractionRange The input range containing @ref Interaction objects.
@@ -147,56 +153,72 @@ namespace PocketCore::Interaction
 		@param[in] maxActive The maximum number of active identifiers allowed.
 		@param[in] replaceWhenFull Whether to replace the oldest active identifier when the active list is full.
 		@post Blocking interactions leave @p existingIDs unchanged. Replacement and removal interactions are applied before insertion.
-		@note An unregistered non-empty identifier is inserted without applying interactions, preserving the behavior of the framework
-	   adapters.
+		@note An empty or unregistered identifier performs no insertion and is reported as success.
+		@return An empty result when the incoming identifier is applied or is a benign no-op; otherwise the @ref
+	   PocketCore::Status::InteractionApplicationError describing the rejection.
 		@since 0.12.16
-		@version 0.12.41
+		@version 0.12.46
 	*/
 	template <typename ID, std::ranges::forward_range IDRange, typename Registry, typename Metadata,
 			  std::ranges::input_range InteractionRange>
-	constexpr void applyInteractions(const ID incomingID, const ID emptyID, const Registry &registry, IDRange &existingIDs,
-									 InteractionRange Metadata::*interactionsMember, const ub maxActive, const bool replaceWhenFull)
+	constexpr std::expected<void, InteractionApplicationError> applyInteractions(const ID incomingID, const ID emptyID,
+																				 const Registry &registry, IDRange &existingIDs,
+																				 InteractionRange Metadata::*interactionsMember,
+																				 const ub maxActive, const bool replaceWhenFull)
 	{
-		if (incomingID == emptyID || std::ranges::contains(existingIDs, incomingID))
+		if (incomingID == emptyID)
 		{
-			return;
+			return std::unexpected(InteractionApplicationError::SameAsEmptyID);
+		}
+
+		if (std::ranges::contains(existingIDs, incomingID))
+		{
+			return std::unexpected(InteractionApplicationError::Duplicate);
 		}
 
 		const Metadata *metadata{registry.getMetadata(incomingID)};
-		bool replacedCurrent{false};
 
-		if (metadata != nullptr)
+		if (metadata == nullptr)
 		{
-			const InteractionRange &interactions{metadata->*interactionsMember};
-
-			if (willBlockIncoming(existingIDs, interactions))
-			{
-				return;
-			}
-
-			replacedCurrent = replaceCurrent(incomingID, emptyID, existingIDs, interactions);
-			removeCurrent(emptyID, existingIDs, interactions);
-
-			const std::size_t nextAvailableIndex{shiftAndGetNextAvailable(emptyID, existingIDs)};
-
-			if (maxActive == 0)
-			{
-				return;
-			}
-
-			if (replaceWhenFull && nextAvailableIndex >= maxActive)
-			{
-				*std::ranges::begin(existingIDs) = incomingID;
-				return;
-			}
-
-			if (nextAvailableIndex < maxActive && !replacedCurrent
-				&& nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
-			{
-				const auto nextAvailable{std::ranges::find(existingIDs, emptyID)};
-				*nextAvailable = incomingID;
-			}
+			return std::unexpected(InteractionApplicationError::MissingMetadata);
 		}
+
+		const InteractionRange &interactions{metadata->*interactionsMember};
+
+		if (willBlockIncoming(existingIDs, interactions))
+		{
+			return std::unexpected(InteractionApplicationError::Blocked);
+		}
+
+		const bool replacedCurrent{replaceCurrent(incomingID, emptyID, existingIDs, interactions)};
+		removeCurrent(emptyID, existingIDs, interactions);
+
+		const std::size_t nextAvailableIndex{shiftAndGetNextAvailable(emptyID, existingIDs)};
+
+		if (maxActive == 0)
+		{
+			return std::unexpected(InteractionApplicationError::CapReached);
+		}
+
+		if (replaceWhenFull && nextAvailableIndex >= maxActive)
+		{
+			*std::ranges::begin(existingIDs) = incomingID;
+			return {};
+		}
+
+		if (replacedCurrent)
+		{
+			return {};
+		}
+
+		if (nextAvailableIndex < maxActive && nextAvailableIndex < static_cast<std::size_t>(std::ranges::distance(existingIDs)))
+		{
+			const auto nextAvailable{std::ranges::find(existingIDs, emptyID)};
+			*nextAvailable = incomingID;
+			return {};
+		}
+
+		return std::unexpected(InteractionApplicationError::CapReached);
 	}
 } // namespace PocketCore::Interaction
 
