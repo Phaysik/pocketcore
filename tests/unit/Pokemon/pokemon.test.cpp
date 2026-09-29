@@ -864,7 +864,6 @@ SCENARIO("Pokemon")
 		WHEN("the active count is zero")
 		{
 			RulesetPolicy newPolicy{.mMaxNonVolatileStatuses = 0, .mReplaceNonVolatileStatusWhenFull = false};
-			std::array<StatusID, 1> IDs{toStatusID(BuiltinStatusID::Toxic)};
 			const std::expected<void, InteractionApplicationError> result{
 				pokemon.addNonVolatileStatus(toStatusID(BuiltinStatusID::Burn), registry, newPolicy),
 			};
@@ -873,7 +872,7 @@ SCENARIO("Pokemon")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error() == InteractionApplicationError::CapReached));
-				CHECK((IDs == std::array{toStatusID(BuiltinStatusID::Toxic)}));
+				CHECK((pokemon.getStatusIDsArray() == statusIDs));
 			}
 		}
 

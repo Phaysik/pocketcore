@@ -191,7 +191,6 @@ SCENARIO("BattleSlot")
 													 .mStatusClassification = StatusClassification::Volatile,
 												 }),
 			};
-			std::array<VolatileStatus, 1> IDs{VolatileStatus{volatileStatusID}};
 
 			REQUIRE(updateResult.has_value());
 
@@ -203,7 +202,7 @@ SCENARIO("BattleSlot")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error() == InteractionApplicationError::CapReached));
-				CHECK((IDs == std::array{VolatileStatus{toStatusID(BuiltinStatusID::Paralysis)}}));
+				CHECK((slot.mVolatileStatuses == volatileStatuses));
 			}
 		}
 
@@ -522,8 +521,10 @@ SCENARIO("BattleSlot")
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
-													 .mStatusInteractions = {{.mExistingID = toStatusID(BuiltinStatusID::Freeze),
-																			  .mAction = InteractionAction::BlockIncoming}},
+													 .mStatusInteractions = {{
+														 .mExistingID = toStatusID(BuiltinStatusID::Freeze),
+														 .mAction = InteractionAction::BlockIncoming,
+													 },},
 													 .mStatusID = volatileStatusID,
 													 .mStatusClassification = StatusClassification::Volatile,
 												 }),

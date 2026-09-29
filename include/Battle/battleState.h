@@ -145,7 +145,7 @@ namespace PocketCore::Battle
 				@param[in] policy The ruleset policy governing status interactions, including the maximum number of active statuses and
 			   replacement behavior when full.
 				@return An empty result when the status is applied or is a benign no-op; otherwise the @ref
-			   PocketCore::Status::InteractionApplicationError describing the rejection.
+			   PocketCore::Interaction::InteractionApplicationError describing the rejection.
 				@since 0.12.46
 				@version 0.12.46
 			*/
