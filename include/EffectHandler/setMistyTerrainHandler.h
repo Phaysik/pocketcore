@@ -1,8 +1,8 @@
 /*! @file setMistyTerrainHandler.h
 	@brief Contains the setMistyTerrain effect handler
-	@date 09/23/2026
+	@date 09/29/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -30,9 +30,9 @@ namespace PocketCore::Effect
 	   RulesetPolicy::mReplaceTerrainWhenFull is true. Blocking interactions leave the active terrains unchanged, and misty terrain is
 	   never inserted twice.
 		@note The handler does not inspect the effect context, but it does use the provider's terrain registry.
-		@date 09/23/2026
+		@date 09/29/2026
 		@since 0.12.43
-		@version 0.12.43
+		@version 0.12.46
 		@author Matthew Moore
 	*/
 	class SetMistyTerrainHandler : public IEffectHandler
@@ -45,7 +45,7 @@ namespace PocketCore::Effect
 				@post @p state reports misty terrain among its active terrains unless a blocking interaction prevented insertion or the
 			   terrain list was full and @ref RulesetPolicy::mReplaceTerrainWhenFull is false.
 				@since 0.12.43
-				@version 0.12.43
+				@version 0.12.46
 			*/
 			void apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const override;
 	};

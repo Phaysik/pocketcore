@@ -1,8 +1,8 @@
 /*! @file effectContext.testHelper.h
 	@brief Test helper for dealing with EffectContext concepts.
-	@date 08/31/2026
+	@date 09/29/2026
 	@since 0.12.13
-	@version 0.12.13
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -31,6 +31,7 @@ namespace PocketCore::Testing
 	using PocketCore::Effect::DamageContext;
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Effect::EffectSource;
+	using PocketCore::Effect::InteractionOutcome;
 	using PocketCore::Effect::Side;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
@@ -44,6 +45,8 @@ namespace PocketCore::Testing
 	{
 		public:
 			DamageContext mDamage{};
+
+			InteractionOutcome mInteractionOutcome{};
 
 			TypeID mMoveTypeID{};
 			AbilityID mAbilityID{};
@@ -71,6 +74,7 @@ namespace PocketCore::Testing
 	{
 		EffectContext context{};
 		context.mDamage = data.mDamage;
+		context.mInteractionOutcome = data.mInteractionOutcome;
 		context.mMoveTypeID = data.mMoveTypeID;
 		context.mAbilityID = data.mAbilityID;
 		context.mItemID = data.mItemID;

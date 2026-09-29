@@ -1,8 +1,8 @@
 /*! @file rulesetPolicy.test.cpp
 	@brief C++ file for running tests for the RulesetPolicy.
-	@date 09/22/2026
+	@date 09/29/2026
 	@since 0.12.31
-	@version 0.12.41
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -32,6 +32,10 @@ SCENARIO("RulesetPolicy")
 				.mAllowGmax = false,
 				.mAllowZMoves = false,
 				.mAllowMega = false,
+				.mReplaceNonVolatileStatusWhenFull = false,
+				.mReplaceVolatileStatusWhenFull = false,
+				.mReplaceWeatherWhenFull = true,
+				.mReplaceTerrainWhenFull = true,
 			};
 
 			CHECK((policy == expected));
@@ -143,6 +147,16 @@ SCENARIO("RulesetPolicy")
 		GIVEN("for mReplaceNonVolatileStatusWhenFull modified in one ruleset policy")
 		{
 			RulesetPolicy other{.mReplaceNonVolatileStatusWhenFull = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((policy != other));
+			}
+		}
+
+		GIVEN("for mReplaceVolatileStatusWhenFull modified in one ruleset policy")
+		{
+			RulesetPolicy other{.mReplaceVolatileStatusWhenFull = true};
 
 			THEN("they are not equal")
 			{

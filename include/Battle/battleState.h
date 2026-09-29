@@ -1,22 +1,29 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 09/28/2026
+	@date 09/29/2026
 	@since 0.3.0
-	@version 0.12.45
+	@version 0.12.46
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_BATTLE_BATTLESTATE_H
 #define INCLUDE_BATTLE_BATTLESTATE_H
 
+#include <algorithm>
 #include <array>
+#include <expected>
 #include <vector>
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "Interaction/interactionApplicationError.h"
+#include "Interaction/interactionHelpers.h"
 #include "Move/moveID.h"
 #include "Pokemon/pokemon.h"
+#include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
+#include "Status/statusID.h"
+#include "Status/statusMeta.h"
 #include "Status/volatileStatus.h"
 #include "Terrain/terrainID.h"
 #include "Weather/weatherID.h"
@@ -29,9 +36,16 @@ namespace PocketCore::Battle
 	using PocketCore::Core::sb;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::Interaction::applyInteractions;
+	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Ruleset::RulesetPolicy;
+	using PocketCore::Status::NO_STATUS_ID;
+	using PocketCore::Status::StatusClassification;
+	using PocketCore::Status::StatusID;
+	using PocketCore::Status::StatusMeta;
 	using PocketCore::Status::VolatileStatus;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Weather::WeatherID;
@@ -113,14 +127,55 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 09/28/2026
+		@date 09/29/2026
 		@since 0.3.0
-		@version 0.12.45
+		@version 0.12.46
 		@author Matthew Moore
 	*/
 	struct BattleSlot
 	{
 		public:
+			/*! @brief Applies a registered volatile status according to its interactions with the current statuses.
+				@details Blocking interactions leave the array unchanged. Replacement interactions store the incoming status in place, while
+			   removal interactions clear matching statuses and compact the remaining active statuses before insertion. A status whose
+			   registry metadata classifies it as @ref PocketCore::Status::StatusClassification::NonVolatile is Pokemon-owned and is
+			   rejected here, leaving the battle-slot array unchanged.
+				@param[in] statusID The registered status identifier to apply. @ref NO_STATUS_ID is ignored.
+				@param[in] statusRegistry The registry used to resolve the incoming status metadata.
+				@param[in] policy The ruleset policy governing status interactions, including the maximum number of active statuses and
+			   replacement behavior when full.
+				@return An empty result when the status is applied or is a benign no-op; otherwise the @ref
+			   PocketCore::Interaction::InteractionApplicationError describing the rejection.
+				@since 0.12.46
+				@version 0.12.46
+			*/
+			constexpr std::expected<void, InteractionApplicationError> addVolatileStatus(const StatusID statusID,
+																						 const StatusRegistry &statusRegistry,
+																						 const RulesetPolicy &policy)
+			{
+				const StatusMeta *metadata{statusRegistry.getStatusMetadata(statusID)};
+
+				// A non-volatile status belongs to the Pokemon; it must never occupy battle-slot storage.
+				if (metadata != nullptr && metadata->mStatusClassification == StatusClassification::NonVolatile)
+				{
+					return std::unexpected(InteractionApplicationError::WrongClassification);
+				}
+
+				std::array<StatusID, MAX_VOLATILE_STATUSES_PER_POKEMON> volatileStatusIDs{};
+				std::ranges::transform(mVolatileStatuses, volatileStatusIDs.begin(),
+									   [](const VolatileStatus &volatileStatus) { return volatileStatus.mStatusID; });
+
+				const std::expected<void, InteractionApplicationError> result{
+					applyInteractions(statusID, NO_STATUS_ID, statusRegistry, volatileStatusIDs, &StatusMeta::mStatusInteractions,
+									  policy.mMaxVolatileStatuses, policy.mReplaceVolatileStatusWhenFull),
+				};
+
+				std::ranges::transform(volatileStatusIDs, mVolatileStatuses.begin(),
+									   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
+
+				return result;
+			}
+
 			/*! @brief Writes the BattleSlot's raw identifier and statistic representation to a stream.
 				@param[in,out] outStream The stream receiving the representation.
 				@param[in] battleSlot The BattleSlot to write.
@@ -131,6 +186,8 @@ namespace PocketCore::Battle
 			friend std::ostream &operator<<(std::ostream &outStream, const BattleSlot &battleSlot);
 
 		public:
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The temporary modifiers used by damage and battle calculations. */
 			DamageFormulaModifiers mDamageFormulaModifiers{};
 
@@ -163,6 +220,8 @@ namespace PocketCore::Battle
 			bool mIsGrounded{false};
 			/*! @brief Indicates whether faint processing has already occurred for this slot. */
 			bool mFaintProcessed{false};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	/*! @struct BattleState Battle/battleState.h

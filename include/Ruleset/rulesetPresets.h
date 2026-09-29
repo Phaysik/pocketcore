@@ -1,8 +1,8 @@
 /*! @file rulesetPresets.h
 	@brief Defines preset ruleset policies for various generations and formats.
-	@date 09/16/2026
+	@date 09/29/2026
 	@since 0.12.32
-	@version 0.12.36
+	@version 0.12.46
 	@author Matthew Moore
 */
 
@@ -25,6 +25,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = false,
 		.mAllowZMoves = false,
 		.mAllowMega = false,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN9_BASE_GAME).has_value(), GEN9_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE);
 
@@ -38,6 +42,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = false,
 		.mAllowZMoves = false,
 		.mAllowMega = false,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN9_VGC_DOUBLES).has_value(), GEN9_VGC_DOUBLES_RULESET_POLICY_ERROR_MESSAGE);
 
@@ -51,6 +59,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = false,
 		.mAllowZMoves = false,
 		.mAllowMega = false,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN9_SMOGON_SINGLES).has_value(), GEN9_SMOGON_SINGLES_RULESET_POLICY_ERROR_MESSAGE);
 
@@ -64,6 +76,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = true,
 		.mAllowZMoves = false,
 		.mAllowMega = false,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN8_BASE_GAME).has_value(), GEN8_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE);
 
@@ -77,6 +93,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = false,
 		.mAllowZMoves = true,
 		.mAllowMega = true,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN7_BASE_GAME).has_value(), GEN7_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE);
 
@@ -90,6 +110,10 @@ namespace PocketCore::Ruleset
 		.mAllowGmax = false,
 		.mAllowZMoves = false,
 		.mAllowMega = true,
+		.mReplaceNonVolatileStatusWhenFull = false,
+		.mReplaceVolatileStatusWhenFull = false,
+		.mReplaceWeatherWhenFull = true,
+		.mReplaceTerrainWhenFull = true,
 	};
 	static_assert(validateRulesetPolicy(GEN6_BASE_GAME).has_value(), GEN6_BASE_GAME_RULESET_POLICY_ERROR_MESSAGE);
 } // namespace PocketCore::Ruleset
