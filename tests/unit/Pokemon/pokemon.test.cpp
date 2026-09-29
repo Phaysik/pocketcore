@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 09/29/2026
 	@since 0.4.0
-	@version 0.12.46
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -29,7 +29,10 @@
 #include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.testHelper.h"
+#include "Registry/natureRegistry.h"
 #include "Registry/registryError.h"
+#include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 #include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/builtInStatusID.h"
@@ -71,7 +74,9 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::toPokemonID;
+using PocketCore::Registry::Nature::NatureRegistry;
 using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Registry::RegistryProvider;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Status::BuiltinStatusID;
@@ -79,6 +84,7 @@ using PocketCore::Status::NO_STATUS_ID;
 using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::toStatusID;
+using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::NO_TYPE_ID;
@@ -89,6 +95,9 @@ using PocketCore::Type::TypeID;
 
 SCENARIO("Pokemon")
 {
+	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	const NatureRegistry natureRegistry{*provider.natureRegistry};
+
 	GIVEN("constructors")
 	{
 		WHEN("creating a Pokemon with empty move slots and zero move PP")
@@ -109,18 +118,7 @@ SCENARIO("Pokemon")
 				{toItemID(BuiltinItemID::ChestoBerry)},
 				{toTypeID(BuiltinTypeID::Dark)},
 				{toNatureID(BuiltinNatureID::Hardy)},
-				{
-					{
-						{
-							NATURE_STAT_BASE_MULTIPLIER,
-							NATURE_STAT_BASE_MULTIPLIER,
-							NATURE_STAT_BASE_MULTIPLIER,
-							NATURE_STAT_BASE_MULTIPLIER,
-							NATURE_STAT_BASE_MULTIPLIER,
-							NATURE_STAT_BASE_MULTIPLIER,
-						},
-					},
-				},
+				natureRegistry,
 				{},
 				{},
 			};
@@ -136,43 +134,34 @@ SCENARIO("Pokemon")
 
 		WHEN("creating a Pokemon with move slots and move PP")
 		{
-			Pokemon pokemon{toPokemonID(BuiltinPokemonID::None),
-							"TestMon",
-							{
-								toMoveID(BuiltinMoveID::Facade),
-								toMoveID(BuiltinMoveID::Facade),
-								toMoveID(BuiltinMoveID::Facade),
-								toMoveID(BuiltinMoveID::Facade),
-							},
-							{10, 10, 10, 10},
-							{10, 10, 10, 10},
-							{
-								.mMaxHealth = 100,
-								.mAttack = 100,
-								.mDefense = 100,
-								.mSpAttack = 100,
-								.mSpDefense = 100,
-								.mSpeed = 100,
-							},
-							100,
-							{toAbilityID(BuiltinAbilityID::CloudNine)},
-							{toItemID(BuiltinItemID::ChestoBerry)},
-							{toTypeID(BuiltinTypeID::Dark)},
-							{toNatureID(BuiltinNatureID::Hardy)},
-							{
-								{
-									{
-										NATURE_STAT_BASE_MULTIPLIER,
-										NATURE_STAT_BASE_MULTIPLIER,
-										NATURE_STAT_BASE_MULTIPLIER,
-										NATURE_STAT_BASE_MULTIPLIER,
-										NATURE_STAT_BASE_MULTIPLIER,
-										NATURE_STAT_BASE_MULTIPLIER,
-									},
-								},
-							},
-							{},
-							{}};
+			Pokemon pokemon{
+				toPokemonID(BuiltinPokemonID::None),
+				"TestMon",
+				{
+					toMoveID(BuiltinMoveID::Facade),
+					toMoveID(BuiltinMoveID::Facade),
+					toMoveID(BuiltinMoveID::Facade),
+					toMoveID(BuiltinMoveID::Facade),
+				},
+				{10, 10, 10, 10},
+				{10, 10, 10, 10},
+				{
+					.mMaxHealth = 100,
+					.mAttack = 100,
+					.mDefense = 100,
+					.mSpAttack = 100,
+					.mSpDefense = 100,
+					.mSpeed = 100,
+				},
+				100,
+				{toAbilityID(BuiltinAbilityID::CloudNine)},
+				{toItemID(BuiltinItemID::ChestoBerry)},
+				{toTypeID(BuiltinTypeID::Dark)},
+				{toNatureID(BuiltinNatureID::Hardy)},
+				natureRegistry,
+				{},
+				{},
+			};
 
 			THEN("the fields are properly defaulted")
 			{
@@ -390,7 +379,7 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureIDsArray")
 			{
-				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, {{{NATURE_STAT_BASE_MULTIPLIER}}});
+				pokemon.setNatureIDsArray({toNatureID(BuiltinNatureID::Lonely)}, natureRegistry);
 
 				THEN("the pokemon's natures are properly updated")
 				{
@@ -578,11 +567,24 @@ SCENARIO("Pokemon")
 
 			WHEN("calling setNatureID")
 			{
-				pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), {NATURE_STAT_BASE_MULTIPLIER});
-
-				THEN("the pokemon's nature is properly updated")
+				GIVEN("valid metadata")
 				{
-					CHECK((toNatureID(BuiltinNatureID::Lonely) == pokemon.getNatureID(0)));
+					pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lonely), natureRegistry);
+
+					THEN("the pokemon's nature is properly updated")
+					{
+						CHECK((toNatureID(BuiltinNatureID::Lonely) == pokemon.getNatureID(0)));
+					}
+				}
+
+				GIVEN("invalid metadata")
+				{
+					pokemon.setNatureID(0, NatureID{500}, natureRegistry);
+
+					THEN("the pokemon's nature is not updated")
+					{
+						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Hasty)));
+					}
 				}
 			}
 		}

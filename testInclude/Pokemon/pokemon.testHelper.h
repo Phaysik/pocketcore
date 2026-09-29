@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 09/16/2026
+	@date 09/29/2026
 	@since 0.12.13
-	@version 0.12.36
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -20,6 +20,7 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
+#include "Registry/natureRegistry.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
 
@@ -49,6 +50,7 @@ namespace PocketCore::Testing
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonStats;
+	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Status::NO_STATUS_ID;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Type::NO_TYPE_ID;
@@ -57,18 +59,7 @@ namespace PocketCore::Testing
 	struct PokemonTestData
 	{
 		public:
-			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{
-				{
-					{
-						NATURE_STAT_BASE_MULTIPLIER,
-						NATURE_STAT_BASE_MULTIPLIER,
-						NATURE_STAT_BASE_MULTIPLIER,
-						NATURE_STAT_BASE_MULTIPLIER,
-						NATURE_STAT_BASE_MULTIPLIER,
-						NATURE_STAT_BASE_MULTIPLIER,
-					},
-				},
-			};
+			NatureRegistry mNatureRegistry{};
 
 			std::string_view mName{POKEMON_NAME_BULBASAUR};
 
@@ -103,8 +94,8 @@ namespace PocketCore::Testing
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
 		Pokemon pokemon{
-			data.mPokemonID,  data.mName,	 data.mMoveIDs,	 data.mMaxPP,	  data.mCurrentPP,		   data.mStats,		 data.mLevel,
-			data.mAbilityIDs, data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureMultipliers, data.mPokemonIVs, data.mPokemonEVs,
+			data.mPokemonID,  data.mName,	 data.mMoveIDs,	 data.mMaxPP,	  data.mCurrentPP,		data.mStats,	  data.mLevel,
+			data.mAbilityIDs, data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureRegistry, data.mPokemonIVs, data.mPokemonEVs,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

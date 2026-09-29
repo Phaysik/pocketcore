@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 09/12/2026
+	@date 09/29/2026
 	@since 0.12.28
-	@version 0.12.29
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -49,16 +49,16 @@ namespace PocketCore::Registry::Pokemon
 			|| dependencyRegistries->itemRegistry == nullptr || dependencyRegistries->moveRegistry == nullptr
 			|| dependencyRegistries->natureRegistry == nullptr)
 		{
-			return std::unexpected{RegistryErrorInfo{
-				RegistryError::MaxCapacity, {}, "PokemonRegistry::instantiate: missing registry dependency"}};
+			return std::unexpected{
+				RegistryErrorInfo{RegistryError::MaxCapacity, {}, "PokemonRegistry::instantiate: missing registry dependency"}};
 		}
 
 		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonID)};
 
 		if (pokemonMeta == nullptr)
 		{
-			return std::unexpected{RegistryErrorInfo{
-				RegistryError::PokemonNotFound, {}, "PokemonRegistry::instantiate: missing pokemon metadata"}};
+			return std::unexpected{
+				RegistryErrorInfo{RegistryError::PokemonNotFound, {}, "PokemonRegistry::instantiate: missing pokemon metadata"}};
 		}
 
 		if (const std::expected<void, RegistryErrorInfo> error{validateNatureMetadata(natureIDs, *dependencyRegistries)}; !error)
@@ -93,7 +93,7 @@ namespace PocketCore::Registry::Pokemon
 			*itemIDs,
 			pokemonMeta->mTypeIDs,
 			*natureIDs,
-			{},
+			*dependencyRegistries->natureRegistry,
 			*ivs,
 			evs,
 		};
