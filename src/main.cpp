@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/17/2026
+	@date 09/29/2026
 	@since 0.1.0
-	@version 0.12.37
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -137,8 +137,7 @@ int main()
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toTypeID(BuiltinTypeID::Water)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-		   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
+		*registryProvider.natureRegistry,
 		{},
 		{},
 	};
@@ -163,8 +162,7 @@ int main()
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		{{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-		   NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}},
+		*registryProvider.natureRegistry,
 		{},
 		{},
 	};

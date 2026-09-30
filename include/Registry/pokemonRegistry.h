@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 09/12/2026
+	@date 09/29/2026
 	@since 0.11.6
-	@version 0.12.29
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -139,9 +139,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 09/12/2026
+		@date 09/29/2026
 		@since 0.11.6
-		@version 0.12.29
+		@version 0.12.47
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -353,7 +353,7 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] movesIDs The move IDs of the Pokemon. Defaults to nullptr.
 				@return The instantiated Pokemon on success, or @ref RegistryErrorInfo if no matching pokemon exists.
 				@since 0.12.24
-				@version 0.12.29
+				@version 0.12.47
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> instantiate(
 				const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries = nullptr,

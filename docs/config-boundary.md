@@ -1,11 +1,6 @@
 # Configuration Boundary
 
-This document defines the boundary between compile-time storage capacities in
-`include/Configuration/constants.h` and runtime semantic rules. A storage
-capacity describes the shape of an object or registry and must remain a
-compile-time constant. A semantic rule describes what a battle permits and
-belongs in `PocketCore::Ruleset::RulesetPolicy` when it is intended to vary by
-ruleset.
+This document defines the boundary between compile-time storage capacities in `include/Configuration/constants.h` and runtime semantic rules. A storage capacity describes the shape of an object or registry and must remain a compile-time constant. A semantic rule describes what a battle permits and belongs in `PocketCore::Ruleset::RulesetPolicy` when it is intended to vary by ruleset.
 
 ## Audit
 

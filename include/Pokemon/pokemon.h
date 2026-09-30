@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 09/29/2026
 	@since 0.3.0
-	@version 0.12.46
+	@version 0.12.47
 	@author Matthew Moore
 */
 
@@ -25,8 +25,10 @@
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/natureRegistry.h"
 #include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/statusID.h"
@@ -50,6 +52,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
 	using PocketCore::Core::us;
@@ -58,6 +61,8 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NatureMeta;
+	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Status::NO_STATUS_ID;
@@ -74,7 +79,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 09/29/2026
 		@since 0.3.0
-		@version 0.12.46
+		@version 0.12.47
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -91,26 +96,26 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
-				@param[in] natureMultipliers Fixed nature multipliers for the Pokemon's base stats.
+				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.25
+				@version 0.12.47
 			*/
 			explicit constexpr Pokemon(const PokemonID pokemonID, const std::string_view &name, const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
-									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-									   const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers,
+									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
-				  mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mNatureIDs(natureIDs), mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs), mTypeIDs{typeIDs},
+				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
+				resolveNatureMultipliers(natureIDs, natureRegistry);
 				setLevel(level);
 				recomputeStats();
 				setHealth(mCalculatedStats.mMaxHealth);
@@ -128,24 +133,23 @@ namespace PocketCore::Pokemon
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] typeIDs Fixed type identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
-				@param[in] natureMultipliers Fixed nature multipliers for the Pokemon's base stats.
+				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.25
+				@version 0.12.47
 			*/
 			explicit constexpr Pokemon(
 				const PokemonID pokemonID, const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
 				const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP, const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP,
 				const PokemonStats &stats, const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
-				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-				const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers,
+				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 				const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs, const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mNatureMultipliers{natureMultipliers}, mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs),
-				  mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
-				  mNatureIDs{natureIDs}, mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs), mMoveIDs{moveIDs}, mMaxPP{maxPP},
+				  mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
 			{
+				resolveNatureMultipliers(natureIDs, natureRegistry);
 				setLevel(level);
 				recomputeStats();
 				setHealth(mCalculatedStats.mMaxHealth);
@@ -608,17 +612,17 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces all nature identifier slots.
+				@details Resolves the nature multipliers from the nature registry and recomputes the Pokemon's stats. If there is an
+			   unresolved nature, the default multipliers are set and no other state updates are made.
 				@param[in] natureIDs The nature identifiers to store.
-				@param[in] natureMultipliers The nature multipliers to store.
+				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@since 0.11.6
-				@version 0.12.25
+				@version 0.12.47
 			*/
-			constexpr void setNatureIDsArray(
-				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
-				const std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> &natureMultipliers)
+			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+											 const NatureRegistry &natureRegistry)
 			{
-				mNatureIDs = natureIDs;
-				mNatureMultipliers = natureMultipliers;
+				resolveNatureMultipliers(natureIDs, natureRegistry);
 				recomputeStats();
 			}
 
@@ -753,18 +757,24 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets one nature slot.
 				@param[in] slotIndex Nature slot index; must be less than MAX_NATURES_PER_POKEMON.
 				@param[in] natureID The nature identifier to store.
-				@param[in] natureMultipliers The nature multipliers to store at the given slot index.
+				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
-				@version 0.12.25
+				@version 0.12.47
 			*/
-			constexpr void setNatureID(const ub slotIndex, const NatureID natureID,
-									   const std::array<double, POKEMON_STAT_COUNT> &natureMultipliers)
+			constexpr void setNatureID(const ub slotIndex, const NatureID natureID, const NatureRegistry &natureRegistry)
 			{
 				assert(slotIndex < mNatureIDs.size());
 
+				const NatureMeta *metadata{natureRegistry.getNatureMetadata(natureID)};
+
+				if (metadata == nullptr)
+				{
+					return;
+				}
+
 				mNatureIDs.at(slotIndex) = natureID;
-				mNatureMultipliers.at(slotIndex) = natureMultipliers;
+				mNatureMultipliers.at(slotIndex) = metadata->mStatMultipliers;
 				recomputeStats();
 			}
 
@@ -945,7 +955,7 @@ namespace PocketCore::Pokemon
 			   (IVs), effort values (EVs), level, and nature multipliers. It ensures that the calculated stats are up-to-date whenever any
 			   of the contributing factors change.
 				@since 0.12.23
-				@version 0.12.25
+				@version 0.12.47
 			*/
 			constexpr void recomputeStats()
 			{
@@ -979,13 +989,57 @@ namespace PocketCore::Pokemon
 
 				for (const std::array<double, POKEMON_STAT_COUNT> &natureMultiplier : mNatureMultipliers)
 				{
-					mCalculatedStats.mMaxHealth *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Health)));
-					mCalculatedStats.mAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Attack)));
-					mCalculatedStats.mDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Defense)));
-					mCalculatedStats.mSpAttack *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialAttack)));
-					mCalculatedStats.mSpDefense *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
-					mCalculatedStats.mSpeed *= static_cast<us>(natureMultiplier.at(toIndex(PokemonStat::Speed)));
+					mCalculatedStats.mMaxHealth
+						= static_cast<us>(mCalculatedStats.mMaxHealth * natureMultiplier.at(toIndex(PokemonStat::Health)));
+					mCalculatedStats.mAttack
+						= static_cast<us>(mCalculatedStats.mAttack * natureMultiplier.at(toIndex(PokemonStat::Attack)));
+					mCalculatedStats.mDefense
+						= static_cast<us>(mCalculatedStats.mDefense * natureMultiplier.at(toIndex(PokemonStat::Defense)));
+					mCalculatedStats.mSpAttack
+						= static_cast<us>(mCalculatedStats.mSpAttack * natureMultiplier.at(toIndex(PokemonStat::SpecialAttack)));
+					mCalculatedStats.mSpDefense
+						= static_cast<us>(mCalculatedStats.mSpDefense * natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
+					mCalculatedStats.mSpeed = static_cast<us>(mCalculatedStats.mSpeed * natureMultiplier.at(toIndex(PokemonStat::Speed)));
 				}
+			}
+
+			/*! @brief Resolves and stores the nature multipliers for the supplied nature identifiers.
+				@details Looks up each nature's metadata in @p natureRegistry and stages its stat multipliers before committing. The
+			   Pokemon's nature identifiers and multipliers are only replaced once every lookup succeeds, so a single unresolved nature
+			   leaves both
+			   @ref mNatureIDs and @ref mNatureMultipliers unchanged. Callers are responsible for invoking @ref recomputeStats afterward
+			   when the resolved multipliers must be reflected in the calculated stats.
+				@pre @p natureRegistry must outlive this call; @ref Pokemon does not own the registry.
+				@post On success, @ref mNatureIDs equals @p natureIDs and @ref mNatureMultipliers holds the resolved multipliers; on
+			   failure, both remain unchanged.
+				@param[in] natureIDs The nature identifier slots to resolve.
+				@param[in] natureRegistry The registry used to resolve each nature's stat multipliers.
+				@note Provides the strong exception guarantee: state is committed only after all lookups succeed.
+				@since 0.12.47
+				@version 0.12.47
+			*/
+			constexpr void resolveNatureMultipliers(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
+													const NatureRegistry &natureRegistry)
+			{
+				std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> tempValues{};
+
+				for (std::size_t i{0}; i < natureIDs.size(); ++i)
+				{
+					const NatureMeta *metadata{natureRegistry.getNatureMetadata(natureIDs.at(i))};
+
+					if (metadata == nullptr)
+					{
+						std::array<double, POKEMON_STAT_COUNT> defaultMultipliers{};
+						defaultMultipliers.fill(NATURE_STAT_BASE_MULTIPLIER);
+						mNatureMultipliers.fill(defaultMultipliers);
+						return;
+					}
+
+					tempValues.at(i) = metadata->mStatMultipliers;
+				}
+
+				mNatureIDs = natureIDs;
+				mNatureMultipliers = tempValues;
 			}
 
 		private:
