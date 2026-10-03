@@ -1,0 +1,38 @@
+{
+    "dependencies": [
+        {
+            "name": "spdlog",
+            "version>=": "1.17.0#1"
+        }
+    ],
+    "features": {
+        "with-tests": {
+            "description": "Dependencies needed only for testing",
+            "dependencies": [
+                {
+                    "name": "catch2",
+                    "version>=": "3.16.0"
+                }
+            ]
+        },
+        "with-benchmarks": {
+            "description": "Dependencies needed only for benchmarking",
+            "dependencies": [
+                {
+                    "name": "benchmark",
+                    "version>=": "1.9.5"
+                }
+            ]
+        },
+        "with-tracy": {
+            "description": "Dependencies needed only for building with tracy profiling",
+            "dependencies": [
+                {
+                    "name": "tracy",
+                    "version>=": "0.14.1#1"
+                }
+            ]
+        }
+    },
+    "builtin-baseline": "c748cb44f2a435fcf015c35225c9d5545fe0021c"
+}
