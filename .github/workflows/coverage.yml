@@ -19,6 +19,8 @@ on:
         'meson.build',
         '**.cmake',
         '**CMakePresets.json',
+        '.github/workflows/coverage.yml',
+        'vcpkg.json',
       ]
   pull_request:
     branches:
@@ -38,6 +40,8 @@ on:
         'meson.build',
         '**.cmake',
         '**CMakePresets.json',
+        '.github/workflows/coverage.yml',
+        'vcpkg.json',
       ]
 
 jobs:
@@ -56,6 +60,14 @@ jobs:
         uses: actions/checkout@v6
         with:
             fetch-depth: 0
+
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ runner.temp }}/vcpkg'
+
+      - name: Set VCPKG_ROOT
+        run: echo "VCPKG_ROOT=${{ runner.temp }}/vcpkg" >> "$GITHUB_ENV"
 
       - name: Set up Cache Site
         run: mkdir -p ./cache
