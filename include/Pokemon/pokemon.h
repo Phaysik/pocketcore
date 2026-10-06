@@ -657,11 +657,11 @@ namespace PocketCore::Pokemon
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonIV The individual value to store.
-				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
+				@pre slotIndex < POKEMON_STAT_COUNT; violation trigger8s an assertion.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.48
 			*/
-			constexpr void setPokemonIV(const ub slotIndex, const ub pokemonIV)
+			constexpr void setPokemonIV(const ub slotIndex, const us pokemonIV)
 			{
 				assert(slotIndex < mPokemonIVs.size());
 
@@ -674,9 +674,9 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonEV The effort value to store.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.48
 			*/
-			constexpr void setPokemonEV(const ub slotIndex, const ub pokemonEV)
+			constexpr void setPokemonEV(const ub slotIndex, const us pokemonEV)
 			{
 				assert(slotIndex < mPokemonEVs.size());
 
