@@ -1,6 +1,6 @@
 /*! @file pokemonError.h
-	@brief Contains the error codes for the Pokmone validation results.
-	@date 10/06/2026
+	@brief Contains the error codes for the Pokemon validation results.
+	@date 10/07/2026
 	@since 0.12.48
 	@version 0.12.48
 	@author Matthew Moore

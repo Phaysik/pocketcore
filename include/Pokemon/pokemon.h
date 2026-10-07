@@ -162,8 +162,8 @@ namespace PocketCore::Pokemon
 				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
 				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 				const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs, const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs), mMoveIDs{moveIDs}, mMaxPP{maxPP},
-				  mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs},
+				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
 			{
 				resolveNatureMultipliers(natureIDs, natureRegistry);
 
@@ -562,7 +562,7 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets all individual values (IVs) and immediately recomputes the calculated stats.
 				@details Delegates validation and storage to @ref updatePokemonIVsArray. Valid arrays are stored unchanged; if any value is
-				invalid, every IV is replaced with a randomly generated value within the configured IV bounds.
+				invalid, the existing IV array is left unchanged.
 				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
 				@post The calculated stats reflect the stored IVs after either validation outcome.
 				@since 0.12.23

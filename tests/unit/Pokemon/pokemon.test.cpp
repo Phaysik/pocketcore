@@ -484,7 +484,7 @@ SCENARIO("Pokemon")
 
 				GIVEN("an array with a sum EV total more than 510")
 				{
-					pokemon.setPokemonEVsArray({10, 40, 253, 90, 54, 70});
+					pokemon.setPokemonEVsArray({10, 40, 250, 90, 54, 70});
 					std::array<us, POKEMON_STAT_COUNT> expected{30, 52, 85, 47, 241, 50};
 
 					THEN("the EV array is unchanged")
@@ -1020,7 +1020,7 @@ SCENARIO("Pokemon")
 			}
 		}
 
-		WHEN("calling setLevel")
+		WHEN("calling setPokemonID")
 		{
 			pokemon.setPokemonID(toPokemonID(BuiltinPokemonID::Blastoise), {});
 
