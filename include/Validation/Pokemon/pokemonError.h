@@ -15,6 +15,18 @@ namespace PocketCore::Validation::Pokemon
 {
 	using PocketCore::Core::ub;
 
+	/*! @enum PokemonError
+		@showenumvalues
+		@brief Identifies validation failures in Pokemon creation and configuration.
+		@details Serves as the error type in the validation functions' std::expected results. Each enumerator describes a rejected input
+		or violated constraint. The error codes can be extended as validation expands to additional Pokemon creation parameters.
+		@note No enumerator represents success; a successful validation result has a value and contains no error.
+		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
+		@date 10/07/2026
+		@since 0.12.48
+		@version 0.12.48
+		@author Matthew Moore
+	*/
 	enum class PokemonError : ub
 	{
 		/*! @brief Indicates the passed in IV is below the set minimum. */
