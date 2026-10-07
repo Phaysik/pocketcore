@@ -684,7 +684,8 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
-				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated. Recomputes the Pokemon's calculated stats after either outcome.
+				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated.
+			   Recomputes the Pokemon's calculated stats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
