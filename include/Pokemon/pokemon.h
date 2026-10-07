@@ -53,12 +53,10 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
-	using PocketCore::Configuration::MAX_IV_STAT_VALUE;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
-	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
