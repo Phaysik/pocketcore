@@ -406,7 +406,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("IV array")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonIVsArray")
 			{
@@ -415,6 +422,13 @@ SCENARIO("Pokemon")
 				THEN("the IV array matches")
 				{
 					CHECK((pokemon.getPokemonIVsArray() == expected));
+					CHECK((pokemon.getMaximumHealth() == 40));
+					CHECK((pokemon.getHealth() == 40));
+					CHECK((pokemon.getAttack() == 26));
+					CHECK((pokemon.getDefense() == 28));
+					CHECK((pokemon.getSpAttack() == 27));
+					CHECK((pokemon.getSpDefense() == 25));
+					CHECK((pokemon.getSpeed() == 25));
 				}
 			}
 
@@ -863,6 +877,24 @@ SCENARIO("Pokemon")
 				THEN("the pokemon's maximum health is properly updated")
 				{
 					CHECK((13 == pokemon.getMaximumHealth()));
+				}
+			}
+
+			WHEN("lowering base HP so calculated maximum health falls below current health")
+			{
+				pokemon.setLevel(50);
+				pokemon.setMaximumHealth(100);
+				pokemon.setHealth(150);
+
+				REQUIRE((pokemon.getMaximumHealth() == 160));
+				REQUIRE((pokemon.getHealth() == 150));
+
+				pokemon.setMaximumHealth(20);
+
+				THEN("maximum health is recalculated and current health is clamped to it")
+				{
+					CHECK((pokemon.getMaximumHealth() == 80));
+					CHECK((pokemon.getHealth() == pokemon.getMaximumHealth()));
 				}
 			}
 		}

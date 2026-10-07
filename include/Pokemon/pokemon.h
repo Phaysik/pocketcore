@@ -438,7 +438,7 @@ namespace PocketCore::Pokemon
 				return mHealth;
 			}
 
-			/*! @brief Returns maximum health.
+			/*! @brief Returns the calculated maximum health.
 				@return The maximum health value.
 				@since 0.9.14
 				@version 0.12.23
@@ -448,7 +448,7 @@ namespace PocketCore::Pokemon
 				return mCalculatedStats.mMaxHealth;
 			}
 
-			/*! @brief Returns the base Attack statistic.
+			/*! @brief Returns the calculated Attack statistic.
 				@return The Attack value.
 				@since 0.3.0
 				@version 0.12.23
@@ -458,7 +458,7 @@ namespace PocketCore::Pokemon
 				return mCalculatedStats.mAttack;
 			}
 
-			/*! @brief Returns the base Defense statistic.
+			/*! @brief Returns the calculated Defense statistic.
 				@return The Defense value.
 				@since 0.3.0
 				@version 0.12.23
@@ -468,7 +468,7 @@ namespace PocketCore::Pokemon
 				return mCalculatedStats.mDefense;
 			}
 
-			/*! @brief Returns the base Special Attack statistic.
+			/*! @brief Returns the calculated Special Attack statistic.
 				@return The Special Attack value.
 				@since 0.3.0
 				@version 0.12.23
@@ -478,7 +478,7 @@ namespace PocketCore::Pokemon
 				return mCalculatedStats.mSpAttack;
 			}
 
-			/*! @brief Returns the base Special Defense statistic.
+			/*! @brief Returns the calculated Special Defense statistic.
 				@return The Special Defense value.
 				@since 0.3.0
 				@version 0.12.23
@@ -488,7 +488,7 @@ namespace PocketCore::Pokemon
 				return mCalculatedStats.mSpDefense;
 			}
 
-			/*! @brief Returns the base Speed statistic.
+			/*! @brief Returns the calculated Speed statistic.
 				@return The Speed value.
 				@since 0.3.0
 				@version 0.12.23
@@ -562,7 +562,7 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets all individual values (IVs) and immediately recomputes the calculated stats.
 				@details Delegates validation and storage to @ref updatePokemonIVsArray. Valid arrays are stored unchanged; if any value is
-				invalid, the existing IV array is left unchanged.
+				invalid, the existing IV array is left unchanged. Invokes @ref recomputeStats after either outcome.
 				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
 				@post The calculated stats reflect the stored IVs after either validation outcome.
 				@since 0.12.23
@@ -577,7 +577,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets all effort values (EVs) and immediately recomputes the calculated stats.
 				@details Delegates validation and storage to @ref updatePokemonEVsArray. Valid arrays are stored unchanged; an array that
-				violates the configured per-stat or aggregate EV limits clears every EV to zero.
+				violates the configured per-stat or aggregate EV limits leaves the existing EV array unchanged. Invokes @ref recomputeStats
+				after either outcome.
 				@param[in] pokemonEVs The effort values to validate and copy; no reference to the input is retained.
 				@post The calculated stats reflect the stored EVs after either validation outcome.
 				@since 0.12.23
@@ -640,11 +641,12 @@ namespace PocketCore::Pokemon
 				mItemIDs = itemIDs;
 			}
 
-			/*! @brief Replaces all nature identifier slots.
-				@details Resolves the nature multipliers from the nature registry and recomputes the Pokemon's stats. If there is an
-			   unresolved nature, the default multipliers are set and no other state updates are made.
+			/*! @brief Resolves all nature slots and immediately recomputes the calculated stats.
+				@details Resolves nature multipliers from the registry, then invokes @ref recomputeStats. If any nature is unregistered,
+			   retains the existing identifiers, resets all multiplier rows to neutral values, and recomputes using those values.
 				@param[in] natureIDs The nature identifiers to store.
-				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
+				@param[in] natureRegistry Non-owning registry reference used during this call; no reference is retained.
+				@post The calculated stats reflect the stored nature multipliers after either lookup outcome.
 				@since 0.11.6
 				@version 0.12.47
 			*/
@@ -685,7 +687,7 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
 				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated.
-			   Recomputes the Pokemon's calculated stats after either outcome.
+			   Immediately invokes @ref recomputeStats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
@@ -708,8 +710,7 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets one effort value (EV) slot for the Pokemon's base stats.
 				@details Validates the supplied value against the configured per-stat EV bounds and the sum of the other EV slots. Stores it
-				when valid; otherwise, the slot is not updated. Recomputes the
-				Pokemon's calculated stats after either outcome.
+				when valid; otherwise, the slot is not updated. Immediately invokes @ref recomputeStats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonEV The effort value to store, subject to the per-stat and aggregate EV limits.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
@@ -802,10 +803,12 @@ namespace PocketCore::Pokemon
 				mItemIDs.at(slotIndex) = itemID;
 			}
 
-			/*! @brief Sets one nature slot.
+			/*! @brief Sets one registered nature slot and immediately recomputes the calculated stats.
+				@details Stores the identifier and its registry-resolved multipliers, then invokes @ref recomputeStats. An unregistered
+			   nature leaves all state unchanged and returns without recalculating.
 				@param[in] slotIndex Nature slot index; must be less than MAX_NATURES_PER_POKEMON.
 				@param[in] natureID The nature identifier to store.
-				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
+				@param[in] natureRegistry Non-owning registry reference used during this call; no reference is retained.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
 				@version 0.12.47
@@ -827,6 +830,7 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets current health, clamped to maximum health.
+				@details Uses the existing calculated maximum; does not invoke @ref recomputeStats or change stat inputs.
 				@param[in] health The requested current health value.
 				@since 0.3.0
 				@version 0.12.23
@@ -836,8 +840,11 @@ namespace PocketCore::Pokemon
 				mHealth = std::min(health, mCalculatedStats.mMaxHealth);
 			}
 
-			/*! @brief Sets maximum health and clamps current health to the new maximum.
-				@param[in] maximumHealth The new maximum health value.
+			/*! @brief Replaces base HP, immediately recomputes all calculated stats, and clamps current health.
+				@details Invokes @ref recomputeStats before clamping current health to the new calculated maximum. Does not heal the Pokemon
+			   or assign the calculated maximum directly.
+				@param[in] maximumHealth The new base HP value used by the stat calculation.
+				@post Current health does not exceed @ref getMaximumHealth and does not increase.
 				@since 0.9.14
 				@version 0.12.23
 			*/
@@ -848,8 +855,9 @@ namespace PocketCore::Pokemon
 				mHealth = std::min(mHealth, mCalculatedStats.mMaxHealth);
 			}
 
-			/*! @brief Replaces the base Attack statistic.
-				@param[in] attack The new Attack value.
+			/*! @brief Replaces base Attack and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats after storing the base stat.
+				@param[in] attack The new base Attack value.
 				@since 0.3.0
 				@version 0.12.23
 			*/
@@ -859,8 +867,9 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Replaces the base Defense statistic.
-				@param[in] defense The new Defense value.
+			/*! @brief Replaces base Defense and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats after storing the base stat.
+				@param[in] defense The new base Defense value.
 				@since 0.3.0
 				@version 0.12.23
 			*/
@@ -870,8 +879,9 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Replaces the base Special Attack statistic.
-				@param[in] spAttack The new Special Attack value.
+			/*! @brief Replaces base Special Attack and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats after storing the base stat.
+				@param[in] spAttack The new base Special Attack value.
 				@since 0.3.0
 				@version 0.12.23
 			*/
@@ -881,8 +891,9 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Replaces the base Special Defense statistic.
-				@param[in] spDefense The new Special Defense value.
+			/*! @brief Replaces base Special Defense and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats after storing the base stat.
+				@param[in] spDefense The new base Special Defense value.
 				@since 0.3.0
 				@version 0.12.23
 			*/
@@ -892,8 +903,9 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Replaces the base Speed statistic.
-				@param[in] speed The new Speed value.
+			/*! @brief Replaces base Speed and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats after storing the base stat.
+				@param[in] speed The new base Speed value.
 				@since 0.3.0
 				@version 0.12.23
 			*/
@@ -916,9 +928,10 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Sets the stable identifier for the Pokemon species.
+			/*! @brief Replaces species identity and base stats, then immediately recomputes all calculated stats.
+				@details Copies the supplied base-stat record and invokes @ref recomputeStats; does not resolve species metadata.
 				@param[in] pokemonID The new PokemonID value.
-				@param[in] baseStats The new base stats to use.
+				@param[in] baseStats The new base stats to copy; no reference is retained.
 				@since 0.12.23
 				@version 0.12.24
 			*/
@@ -999,9 +1012,9 @@ namespace PocketCore::Pokemon
 
 		private:
 			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, and nature multipliers.
-				@details This function recalculates each of the Pokemon's stats using the formulae defined for base stats, individual values
-			   (IVs), effort values (EVs), level, and nature multipliers. It ensures that the calculated stats are up-to-date whenever any
-			   of the contributing factors change.
+				@details Owns the stat calculation formula. Constructors and public stat-input setters invoke this function after updating
+			   inputs so calculated stats are immediately consistent on return. Does not change current health; @ref setMaximumHealth
+			   clamps it after recalculation.
 				@since 0.12.23
 				@version 0.12.47
 			*/
@@ -1053,16 +1066,14 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Resolves and stores the nature multipliers for the supplied nature identifiers.
 				@details Looks up each nature's metadata in @p natureRegistry and stages its stat multipliers before committing. The
-			   Pokemon's nature identifiers and multipliers are only replaced once every lookup succeeds, so a single unresolved nature
-			   leaves both
-			   @ref mNatureIDs and @ref mNatureMultipliers unchanged. Callers are responsible for invoking @ref recomputeStats afterward
-			   when the resolved multipliers must be reflected in the calculated stats.
+			   identifiers and resolved multipliers are replaced once every lookup succeeds. An unregistered nature retains the existing
+			   identifiers but resets all multiplier rows to neutral values. Does not recalculate stats; callers invoke @ref recomputeStats
+			   after either lookup outcome.
 				@pre @p natureRegistry must outlive this call; @ref Pokemon does not own the registry.
 				@post On success, @ref mNatureIDs equals @p natureIDs and @ref mNatureMultipliers holds the resolved multipliers; on
-			   failure, both remain unchanged.
+			   lookup failure, identifiers are unchanged and multipliers are neutral.
 				@param[in] natureIDs The nature identifier slots to resolve.
 				@param[in] natureRegistry The registry used to resolve each nature's stat multipliers.
-				@note Provides the strong exception guarantee: state is committed only after all lookups succeed.
 				@since 0.12.47
 				@version 0.12.47
 			*/

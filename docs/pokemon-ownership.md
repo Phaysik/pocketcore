@@ -73,6 +73,29 @@ Authoritative source for a **single Pokemon instance**. It splits into three gro
 - **Derived/cache state:** `mCalculatedStats` (recomputed from base stats, IVs, EVs, level, and nature multipliers by `recomputeStats`) and `mLevelDamageFactor` (recomputed from level by `setLevel`). These are never written directly by callers; they are regenerated whenever a contributing input changes.
 - **Non-owning reference:** `mName` is a `std::string_view` into a caller-owned backing string (typically `PokemonMeta::mName`). Its backing storage must outlive the `Pokemon`.
 
+#### Stat recalculation contract
+
+> Any mutation that changes the inputs to the stat calculation must leave calculated stats immediately consistent with the new inputs.
+
+`Pokemon::recomputeStats()` is the single authoritative calculation function. Public stat-input setters invoke it before returning; callers do not need a separate refresh. Private input-update helpers may defer recalculation while constructors initialize inputs, but construction recomputes before exposing the instance.
+
+| Mutation API                                                                   | Recalculation behavior                                                                                                                                                                  |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `setPokemonIV()`                                                               | Recomputes after validation, whether the value is accepted or rejected.                                                                                                                 |
+| `setPokemonIVsArray()`                                                         | Recomputes after validation, whether the array is accepted or rejected.                                                                                                                 |
+| `setPokemonEV()`                                                               | Recomputes after validation, whether the value is accepted or rejected.                                                                                                                 |
+| `setPokemonEVsArray()`                                                         | Recomputes after validation, whether the array is accepted or rejected.                                                                                                                 |
+| `setLevel()`                                                                   | Updates the level damage factor and recomputes all calculated stats.                                                                                                                    |
+| `setAttack()`, `setDefense()`, `setSpAttack()`, `setSpDefense()`, `setSpeed()` | Replaces the corresponding base stat and recomputes all calculated stats.                                                                                                               |
+| `setPokemonID()`                                                               | Replaces species identity and the supplied base-stat record, then recomputes.                                                                                                           |
+| `setNatureID()`                                                                | Resolves and stores the nature's multipliers, then recomputes. An unregistered ID leaves state unchanged and does not recompute.                                                        |
+| `setNatureIDsArray()`                                                          | Resolves multipliers and recomputes. If any ID is unregistered, existing IDs are retained, all multiplier rows become neutral, and stats are recomputed from those neutral multipliers. |
+| `setMaximumHealth()`                                                           | Replaces base HP, recomputes all calculated stats, and clamps current HP to the new calculated maximum without healing.                                                                 |
+
+Invalid IV/EV values and arrays leave the corresponding stored inputs unchanged. Calculated stats still reflect those retained inputs on return.
+
+`setMaximumHealth()` accepts **base HP**, not the desired calculated maximum: `getMaximumHealth()` returns the value derived from base HP, IVs, EVs, level, and nature multipliers. Other stat-input setters do not adjust current HP, even when recalculation lowers the maximum. `setHealth()` clamps its argument to the existing calculated maximum without recalculating stats.
+
 ### `BattleSlot` (`include/Battle/battleState.h`)
 
 Authoritative source for the **transient state of one active battle position**. It owns `mDamageFormulaModifiers`, `mVolatileStatuses`, `mStatStages`, `mChoiceLockedMove`, `mPosition`, `mSleepCounter`, `mToxicCounter`, `mProtectionCounter`, `mIsProtected`, `mIsFlinched`, `mIsGrounded`, and `mFaintProcessed`. Volatile statuses live here and only here; `BattleSlot::addVolatileStatus` rejects any status the registry classifies as non-volatile, keeping the volatile/non-volatile boundary with `Pokemon` clean.
