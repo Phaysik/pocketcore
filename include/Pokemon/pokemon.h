@@ -1,18 +1,20 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 09/29/2026
+	@date 10/07/2026
 	@since 0.3.0
-	@version 0.12.47
+	@version 0.12.48
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_POKEMON_POKEMON_H
 #define INCLUDE_POKEMON_POKEMON_H
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <expected>
+#include <functional>
 #include <ostream>
 #include <string_view>
 
@@ -34,6 +36,9 @@
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Types/typeID.h"
+#include "Utility/random.h"
+#include "Validation/Pokemon/pokemonError.h"
+#include "Validation/Pokemon/pokemonValidation.h"
 
 namespace PocketCore::Pokemon
 {
@@ -70,6 +75,12 @@ namespace PocketCore::Pokemon
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Type::TypeID;
+	using PocketCore::Utility::Random;
+	using PocketCore::Validation::Pokemon::isValidPokemonEV;
+	using PocketCore::Validation::Pokemon::isValidPokemonEVArray;
+	using PocketCore::Validation::Pokemon::isValidPokemonIV;
+	using PocketCore::Validation::Pokemon::isValidPokemonIVArray;
+	using PocketCore::Validation::Pokemon::PokemonError;
 
 	/*! @class Pokemon Pokemon/pokemon.h
 		@brief Stores a Pokemon's identity, battle statistics, moves, held items, abilities, types, natures, and statuses.
@@ -77,9 +88,9 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 09/29/2026
+		@date 10/07/2026
 		@since 0.3.0
-		@version 0.12.47
+		@version 0.12.48
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -100,7 +111,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.47
+				@version 0.12.48
 			*/
 			explicit constexpr Pokemon(const PokemonID pokemonID, const std::string_view &name, const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
@@ -109,15 +120,20 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs), mTypeIDs{typeIDs},
-				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
+
 				resolveNatureMultipliers(natureIDs, natureRegistry);
-				setLevel(level);
+
+				updateLevel(level);
+				updatePokemonIVsArray(pokemonIVs);
+				updatePokemonEVsArray(pokemonEVs);
+
 				recomputeStats();
+
 				setHealth(mCalculatedStats.mMaxHealth);
 			}
 
@@ -137,7 +153,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.47
+				@version 0.12.48
 			*/
 			explicit constexpr Pokemon(
 				const PokemonID pokemonID, const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
@@ -146,12 +162,17 @@ namespace PocketCore::Pokemon
 				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
 				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 				const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs, const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{name}, mBaseStats{stats}, mPokemonIVs(pokemonIVs), mPokemonEVs(pokemonEVs), mMoveIDs{moveIDs}, mMaxPP{maxPP},
-				  mCurrentPP{currentPP}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs},
+				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
 			{
 				resolveNatureMultipliers(natureIDs, natureRegistry);
-				setLevel(level);
+
+				updateLevel(level);
+				updatePokemonIVsArray(pokemonIVs);
+				updatePokemonEVsArray(pokemonEVs);
+
 				recomputeStats();
+
 				setHealth(mCalculatedStats.mMaxHealth);
 			}
 
@@ -539,25 +560,33 @@ namespace PocketCore::Pokemon
 				mMoveIDs = moveIDs;
 			}
 
-			/*! @brief Replaces all individual value (IV) slots for the Pokemon's base stats.
-				@param[in] pokemonIVs The individual values to store.
+			/*! @brief Sets all individual values (IVs) and immediately recomputes the calculated stats.
+				@details Delegates validation and storage to @ref updatePokemonIVsArray. Valid arrays are stored unchanged; if any value is
+				invalid, the existing IV array is left unchanged.
+				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
+				@post The calculated stats reflect the stored IVs after either validation outcome.
 				@since 0.12.23
-				@version 0.12.24
+				@version 0.12.48
 			*/
 			constexpr void setPokemonIVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs)
 			{
-				mPokemonIVs = pokemonIVs;
+				updatePokemonIVsArray(pokemonIVs);
+
 				recomputeStats();
 			}
 
-			/*! @brief Replaces all effort value (EV) slots for the Pokemon's base stats.
-				@param[in] pokemonEVs The effort values to store.
+			/*! @brief Sets all effort values (EVs) and immediately recomputes the calculated stats.
+				@details Delegates validation and storage to @ref updatePokemonEVsArray. Valid arrays are stored unchanged; an array that
+				violates the configured per-stat or aggregate EV limits clears every EV to zero.
+				@param[in] pokemonEVs The effort values to validate and copy; no reference to the input is retained.
+				@post The calculated stats reflect the stored EVs after either validation outcome.
 				@since 0.12.23
-				@version 0.12.24
+				@version 0.12.48
 			*/
 			constexpr void setPokemonEVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 			{
-				mPokemonEVs = pokemonEVs;
+				updatePokemonEVsArray(pokemonEVs);
+
 				recomputeStats();
 			}
 
@@ -655,32 +684,51 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
+				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated.
+			   Recomputes the Pokemon's calculated stats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
-				@param[in] pokemonIV The individual value to store.
+				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.48
 			*/
-			constexpr void setPokemonIV(const ub slotIndex, const ub pokemonIV)
+			constexpr void setPokemonIV(const ub slotIndex, const us pokemonIV)
 			{
 				assert(slotIndex < mPokemonIVs.size());
 
-				mPokemonIVs.at(slotIndex) = pokemonIV;
+				const std::expected<void, PokemonError> result{isValidPokemonIV(pokemonIV)};
+
+				if (result.has_value())
+				{
+					mPokemonIVs.at(slotIndex) = pokemonIV;
+				}
+
 				recomputeStats();
 			}
 
 			/*! @brief Sets one effort value (EV) slot for the Pokemon's base stats.
+				@details Validates the supplied value against the configured per-stat EV bounds and the sum of the other EV slots. Stores it
+				when valid; otherwise, the slot is not updated. Recomputes the
+				Pokemon's calculated stats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
-				@param[in] pokemonEV The effort value to store.
+				@param[in] pokemonEV The effort value to store, subject to the per-stat and aggregate EV limits.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.48
 			*/
-			constexpr void setPokemonEV(const ub slotIndex, const ub pokemonEV)
+			constexpr void setPokemonEV(const ub slotIndex, const us pokemonEV)
 			{
 				assert(slotIndex < mPokemonEVs.size());
 
-				mPokemonEVs.at(slotIndex) = pokemonEV;
+				const us statTotal{static_cast<us>(std::ranges::fold_left(mPokemonEVs, 0, std::plus<>()) - mPokemonEVs.at(slotIndex))};
+
+				const std::expected<void, PokemonError> result{isValidPokemonEV(pokemonEV, statTotal)};
+
+				if (result.has_value())
+				{
+					mPokemonEVs.at(slotIndex) = pokemonEV;
+				}
+
 				recomputeStats();
 			}
 
@@ -855,16 +903,16 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Sets the level and recomputes its damage factor.
+			/*! @brief Sets the level and immediately recomputes the damage factor and calculated stats.
+				@details Updates the level and damage factor through @ref updateLevel, then invokes @ref recomputeStats.
 				@param[in] level The new Pokemon level.
+				@post The damage factor and calculated stats reflect the new level.
 				@since 0.7.2
-				@version 0.12.2
+				@version 0.12.48
 			*/
 			constexpr void setLevel(const us level)
 			{
-				mLevel = level;
-				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
-													 + LEVEL_DAMAGE_FACTOR_OFFSET);
+				updateLevel(level);
 				recomputeStats();
 			}
 
@@ -1040,6 +1088,53 @@ namespace PocketCore::Pokemon
 
 				mNatureIDs = natureIDs;
 				mNatureMultipliers = tempValues;
+			}
+
+			/*! @details Stores the level and recomputes its damage factor without updating the calculated stats.
+				@param[in] level The new Pokemon level.
+				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
+				@since 0.12.48
+				@version 0.12.48
+			*/
+			constexpr void updateLevel(const us level)
+			{
+				mLevel = level;
+				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
+													 + LEVEL_DAMAGE_FACTOR_OFFSET);
+			}
+
+			/*! @details Validates and stores all IVs without updating the calculated stats. Valid arrays are copied unchanged; if any
+				value is invalid, the array is not changed.
+				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
+				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
+				@since 0.12.48
+				@version 0.12.48
+			*/
+			constexpr void updatePokemonIVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs)
+			{
+				const std::expected<void, PokemonError> result{isValidPokemonIVArray(pokemonIVs)};
+
+				if (result.has_value())
+				{
+					mPokemonIVs = pokemonIVs;
+				}
+			}
+
+			/*! @details Validates and stores all EVs without updating the calculated stats. Valid arrays are copied unchanged; an array
+				that violates the configured per-stat or aggregate EV limits does not change the array.
+				@param[in] pokemonEVs The effort values to validate and copy; no reference to the input is retained.
+				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
+				@since 0.12.48
+				@version 0.12.48
+			*/
+			constexpr void updatePokemonEVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+			{
+				const std::expected<void, PokemonError> result{isValidPokemonEVArray(pokemonEVs)};
+
+				if (result.has_value())
+				{
+					mPokemonEVs = pokemonEVs;
+				}
 			}
 
 		private:

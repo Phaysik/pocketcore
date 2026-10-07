@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 09/22/2026
+	@date 10/06/2026
 	@since 0.1.0
-	@version 0.12.39
+	@version 0.12.48
 	@author Matthew Moore
 */
 
@@ -297,14 +297,18 @@ namespace PocketCore::Configuration
 	inline constexpr us CALCULATED_STAT_OFFSET{5};
 
 	/*! @brief The minimum individual value (IV) for a Pokemon's stat. */
-	inline constexpr ub MIN_IV_STAT_VALUE{0};
+	inline constexpr us MIN_IV_STAT_VALUE{0};
 	/*! @brief The maximum individual value (IV) for a Pokemon's stat.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr ub MAX_IV_STAT_VALUE{31};
+	inline constexpr us MAX_IV_STAT_VALUE{31};
 
 	/*! @brief The minimum individual value (EV) for a Pokemon's stat. */
-	inline constexpr ub MIN_EV_STAT_VALUE{0};
+	inline constexpr us MIN_EV_STAT_VALUE{0};
+	/*! @brief The maximum effort value (EV) for a Pokemon's stat. */
+	inline constexpr us MAX_EV_STAT_VALUE{252};
+	/*! @brief The maximum effort value (EV) for all a Pokemon's stats. */
+	inline constexpr us MAX_TOTAL_EV_STAT_VALUE{510};
 
 	/*! @brief The storage capacity for active slots on each side of a battle.
 		@details This physical capacity does not select a battle format. @ref PocketCore::Ruleset::RulesetPolicy::mMaxSideSize selects the
