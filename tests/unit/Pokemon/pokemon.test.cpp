@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/29/2026
+	@date 10/07/2026
 	@since 0.4.0
-	@version 0.12.47
+	@version 0.12.48
 	@author Matthew Moore
 */
 
@@ -29,6 +29,7 @@
 #include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.testHelper.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/natureRegistry.h"
 #include "Registry/registryError.h"
 #include "Registry/registryProvider.h"
@@ -72,6 +73,7 @@ using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
+using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::Nature::NatureRegistry;
 using PocketCore::Registry::RegistryErrorInfo;
@@ -401,6 +403,97 @@ SCENARIO("Pokemon")
 				}
 			}
 		}
+
+		GIVEN("IV array")
+		{
+			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+
+			WHEN("calling getPokemonIVsArray")
+			{
+				std::array<us, POKEMON_STAT_COUNT> expected{0, 15, 30, 20, 2, 5};
+
+				THEN("the IV array matches")
+				{
+					CHECK((pokemon.getPokemonIVsArray() == expected));
+				}
+			}
+
+			WHEN("calling setPokemonIVsArray")
+			{
+				GIVEN("a valid set of IVs")
+				{
+					pokemon.setPokemonIVsArray({0, 3, 8, 9, 31, 22});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 3, 8, 9, 31, 22};
+
+					THEN("the IV array is properly set")
+					{
+						CHECK((pokemon.getPokemonIVsArray() == expected));
+					}
+				}
+
+				GIVEN("an array with an IV of 32")
+				{
+					pokemon.setPokemonIVsArray({0, 3, 8, 9, 32, 22});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 15, 30, 20, 2, 5};
+
+					THEN("the IV array is unchanged")
+					{
+						CHECK((pokemon.getPokemonIVsArray() == expected));
+					}
+				}
+			}
+		}
+
+		GIVEN("EV array")
+		{
+			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+
+			WHEN("calling getPokemonEV")
+			{
+				std::array<us, POKEMON_STAT_COUNT> expected{30, 52, 85, 47, 241, 50};
+
+				THEN("the EV array matches")
+				{
+					CHECK((pokemon.getPokemonEVsArray() == expected));
+				}
+			}
+
+			WHEN("calling setPokemonEVsArray")
+			{
+				GIVEN("a valid set of EVs")
+				{
+					pokemon.setPokemonEVsArray({0, 3, 8, 9, 31, 22});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 3, 8, 9, 31, 22};
+
+					THEN("the EV array is properly set")
+					{
+						CHECK((pokemon.getPokemonEVsArray() == expected));
+					}
+				}
+
+				GIVEN("an array with an EV of 253")
+				{
+					pokemon.setPokemonEVsArray({0, 3, 253, 9, 32, 22});
+					std::array<us, POKEMON_STAT_COUNT> expected{30, 52, 85, 47, 241, 50};
+
+					THEN("the EV array is unchanged")
+					{
+						CHECK((pokemon.getPokemonEVsArray() == expected));
+					}
+				}
+
+				GIVEN("an array with a sum EV total more than 510")
+				{
+					pokemon.setPokemonEVsArray({10, 40, 253, 90, 54, 70});
+					std::array<us, POKEMON_STAT_COUNT> expected{30, 52, 85, 47, 241, 50};
+
+					THEN("the EV array is unchanged")
+					{
+						CHECK((pokemon.getPokemonEVsArray() == expected));
+					}
+				}
+			}
+		}
 	}
 
 	GIVEN("get/set array index")
@@ -597,6 +690,119 @@ SCENARIO("Pokemon")
 					THEN("the pokemon's nature is not updated")
 					{
 						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Hasty)));
+					}
+				}
+			}
+		}
+
+		GIVEN("IV index")
+		{
+			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+
+			WHEN("calling getPokemonIV")
+			{
+				THEN("the IV matches")
+				{
+					CHECK((pokemon.getPokemonIV(0) == 0));
+					CHECK((pokemon.getPokemonIV(1) == 15));
+					CHECK((pokemon.getPokemonIV(2) == 30));
+					CHECK((pokemon.getPokemonIV(3) == 20));
+					CHECK((pokemon.getPokemonIV(4) == 2));
+					CHECK((pokemon.getPokemonIV(5) == 5));
+				}
+			}
+
+			WHEN("calling setPokemonIV")
+			{
+				GIVEN("an IV of 13")
+				{
+					pokemon.setPokemonIV(0, 13);
+
+					THEN("the IV is properly set")
+					{
+						CHECK((pokemon.getPokemonIV(0) == 13));
+					}
+				}
+
+				GIVEN("an IV of 31")
+				{
+					pokemon.setPokemonIV(0, 31);
+
+					THEN("the IV is properly set")
+					{
+						CHECK((pokemon.getPokemonIV(0) == 31));
+					}
+				}
+
+				GIVEN("an IV of 32")
+				{
+					pokemon.setPokemonIV(0, 32);
+
+					THEN("the IV is unchanged")
+					{
+						CHECK((pokemon.getPokemonIV(0) == 0));
+					}
+				}
+			}
+		}
+
+		GIVEN("EV index")
+		{
+			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+
+			WHEN("calling getPokemonEV")
+			{
+				THEN("the EV matches")
+				{
+					CHECK((pokemon.getPokemonEV(0) == 30));
+					CHECK((pokemon.getPokemonEV(1) == 52));
+					CHECK((pokemon.getPokemonEV(2) == 85));
+					CHECK((pokemon.getPokemonEV(3) == 47));
+					CHECK((pokemon.getPokemonEV(4) == 241));
+					CHECK((pokemon.getPokemonEV(5) == 50));
+				}
+			}
+
+			WHEN("calling setPokemonEV")
+			{
+				GIVEN("an EV of 13")
+				{
+					pokemon.setPokemonEV(0, 13);
+
+					THEN("the EV is properly set")
+					{
+						CHECK((pokemon.getPokemonEV(0) == 13));
+					}
+				}
+
+				GIVEN("an EV of 31")
+				{
+					pokemon.setPokemonEV(0, 31);
+
+					THEN("the EV is properly set")
+					{
+						CHECK((pokemon.getPokemonEV(0) == 31));
+					}
+				}
+
+				GIVEN("an EV of 253 which is more than the stat total allowed")
+				{
+					pokemon.setPokemonEV(4, 0);
+					pokemon.setPokemonEV(0, 253);
+
+					THEN("the EV is unchanged")
+					{
+						CHECK((pokemon.getPokemonEV(0) == 30));
+					}
+				}
+
+				GIVEN("an EV of 50 which is more than the sum total allowed")
+				{
+					pokemon.setPokemonEV(0, 50);
+
+					THEN("the EV is unchanged")
+					{
+						CHECK((pokemon.getPokemonEV(0) == 30));
 					}
 				}
 			}
@@ -798,6 +1004,29 @@ SCENARIO("Pokemon")
 			{
 				CHECK((30 == pokemon.getLevel()));
 				CHECK((14 == pokemon.getLevelDamageFactor()));
+			}
+		}
+	}
+
+	GIVEN("get/set Pokemon ID")
+	{
+		Pokemon pokemon{makePokemon({.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard)})};
+
+		WHEN("calling getPokemonID")
+		{
+			THEN("the expected ID is returned")
+			{
+				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Charizard)));
+			}
+		}
+
+		WHEN("calling setLevel")
+		{
+			pokemon.setPokemonID(toPokemonID(BuiltinPokemonID::Blastoise), {});
+
+			THEN("the ID is properly updated")
+			{
+				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Blastoise)));
 			}
 		}
 	}

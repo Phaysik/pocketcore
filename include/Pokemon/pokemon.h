@@ -686,8 +686,7 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
-				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, replaces this slot with a randomly
-				generated value within those bounds. Recomputes the Pokemon's calculated stats after either outcome.
+				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated. Recomputes the Pokemon's calculated stats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
@@ -704,17 +703,13 @@ namespace PocketCore::Pokemon
 				{
 					mPokemonIVs.at(slotIndex) = pokemonIV;
 				}
-				else
-				{
-					mPokemonIVs.at(slotIndex) = Random::get(MIN_IV_STAT_VALUE, MAX_IV_STAT_VALUE);
-				}
 
 				recomputeStats();
 			}
 
 			/*! @brief Sets one effort value (EV) slot for the Pokemon's base stats.
 				@details Validates the supplied value against the configured per-stat EV bounds and the sum of the other EV slots. Stores it
-				when valid; otherwise, replaces this slot with a randomly generated value within the configured IV bounds. Recomputes the
+				when valid; otherwise, the slot is not updated. Recomputes the
 				Pokemon's calculated stats after either outcome.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonEV The effort value to store, subject to the per-stat and aggregate EV limits.
@@ -733,10 +728,6 @@ namespace PocketCore::Pokemon
 				if (result.has_value())
 				{
 					mPokemonEVs.at(slotIndex) = pokemonEV;
-				}
-				else
-				{
-					mPokemonEVs.at(slotIndex) = Random::get(MIN_IV_STAT_VALUE, MAX_IV_STAT_VALUE);
 				}
 
 				recomputeStats();
@@ -1114,7 +1105,7 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @details Validates and stores all IVs without updating the calculated stats. Valid arrays are copied unchanged; if any
-				value is invalid, every IV is replaced with a randomly generated value within the configured IV bounds.
+				value is invalid, the array is not changed.
 				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
 				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
 				@since 0.12.48
@@ -1128,14 +1119,10 @@ namespace PocketCore::Pokemon
 				{
 					mPokemonIVs = pokemonIVs;
 				}
-				else
-				{
-					std::ranges::generate(mPokemonIVs, [] { return Random::get(MIN_IV_STAT_VALUE, MAX_IV_STAT_VALUE); });
-				}
 			}
 
 			/*! @details Validates and stores all EVs without updating the calculated stats. Valid arrays are copied unchanged; an array
-				that violates the configured per-stat or aggregate EV limits clears every EV to zero.
+				that violates the configured per-stat or aggregate EV limits does not change the array.
 				@param[in] pokemonEVs The effort values to validate and copy; no reference to the input is retained.
 				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
 				@since 0.12.48
@@ -1148,10 +1135,6 @@ namespace PocketCore::Pokemon
 				if (result.has_value())
 				{
 					mPokemonEVs = pokemonEVs;
-				}
-				else
-				{
-					mPokemonEVs.fill(0);
 				}
 			}
 
