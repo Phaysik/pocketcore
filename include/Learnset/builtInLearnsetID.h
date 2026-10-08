@@ -34,12 +34,12 @@ namespace PocketCore::Learnset
 		BulbasaurLearnset,
 		IvysaurLearnset,
 		VenusaurLearnset,
-		SquirtleLearnset,
-		WartortleLearnset,
-		BlastoiseLearnset,
 		CharmanderLearnset,
 		CharmeleonLearnset,
 		CharizardLearnset,
+		SquirtleLearnset,
+		WartortleLearnset,
+		BlastoiseLearnset,
 		FinalLearnset,
 	};
 

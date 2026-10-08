@@ -164,7 +164,7 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID.
 				@since 0.11.6
-				@version 0.12.24
+				@version 0.12.50
 			 */
 			ATTR_NOINLINE explicit constexpr PokemonRegistry() : Base{toPokemonID(BuiltinPokemonID::FinalPokemon).getValue()}
 			{
@@ -175,6 +175,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = BULBASAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
@@ -182,6 +183,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = IVYSAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
@@ -189,6 +191,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = VENUSAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
@@ -196,6 +199,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARMANDER_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
@@ -203,6 +207,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARMELEON_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
@@ -210,6 +215,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARIZARD_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
@@ -217,6 +223,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = SQUIRTLE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
@@ -224,6 +231,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = WARTORTLE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
@@ -231,6 +239,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = BLASTOISE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 				});
 			}
 
@@ -346,7 +355,6 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier.
-				@param[in] learnsetID The built-in or custom stable identifier.
 				@param[in] natureRegistry The nature registry to use for resolving nature IDs. Defaults to nullptr.
 				@param[in] ivs The IVs of the Pokemon. Defaults to nullptr.
 				@param[in] evs The EVs of the Pokemon. Defaults to @ref MIN_EV_STAT_VALUE.
@@ -359,8 +367,7 @@ namespace PocketCore::Registry::Pokemon
 				@version 0.12.50
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> instantiate(
-				const PokemonID pokemonID, const LearnsetID learnsetID,
-				const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
+				const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
 				const std::array<us, POKEMON_STAT_COUNT> *ivs = nullptr,
 				const std::array<us, POKEMON_STAT_COUNT> &evs
 				= {MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE},

@@ -17,12 +17,12 @@ namespace PocketCore::Learnset
 	inline constexpr std::string_view LEARNSET_NAME_BULBASAUR{"Bulbasaur Learnset"};
 	inline constexpr std::string_view LEARNSET_NAME_IVYSAUR{"Ivysaur Learnset"};
 	inline constexpr std::string_view LEARNSET_NAME_VENUSAUR{"Venusaur Learnset"};
-	inline constexpr std::string_view LEARNSET_NAME_SQUIRTLE{"Squirtle Learnset"};
-	inline constexpr std::string_view LEARNSET_NAME_WARTORTLE{"Wartortle Learnset"};
-	inline constexpr std::string_view LEARNSET_NAME_BLASTOISE{"Blastoise Learnset"};
 	inline constexpr std::string_view LEARNSET_NAME_CHARMANDER{"Charmander Learnset"};
 	inline constexpr std::string_view LEARNSET_NAME_CHARMELEON{"Charmeleon Learnset"};
 	inline constexpr std::string_view LEARNSET_NAME_CHARIZARD{"Charizard Learnset"};
+	inline constexpr std::string_view LEARNSET_NAME_SQUIRTLE{"Squirtle Learnset"};
+	inline constexpr std::string_view LEARNSET_NAME_WARTORTLE{"Wartortle Learnset"};
+	inline constexpr std::string_view LEARNSET_NAME_BLASTOISE{"Blastoise Learnset"};
 } // namespace PocketCore::Learnset
 
 #endif

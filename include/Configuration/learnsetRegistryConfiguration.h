@@ -97,8 +97,8 @@ namespace PocketCore::Configuration
 
 			/*! @brief Looks up complete metadata by stable learnset ID.
 				@param[in] learnsetID The built-in or custom stable identifier.
-				@return A non-owning pointer to registry-owned metadata if registered, or nullptr otherwise. The pointer must not be retained
-			   across configuration mutations or destruction, as mutations can replace metadata or compact storage.
+				@return A non-owning pointer to registry-owned metadata if registered, or nullptr otherwise. The pointer must not be
+			   retained across configuration mutations or destruction, as mutations can replace metadata or compact storage.
 				@since 0.12.50
 				@version 0.12.50
 			*/
@@ -196,10 +196,10 @@ namespace PocketCore::Configuration
 
 			/*! @brief Replaces a learnset's name and move learn entries selected by display name, preserving its stable ID.
 				@param[in] learnsetName The registered display name.
-				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source metadata
-			   does not need to outlive this call.
-				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in use
-			   by another learnset.
+				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source
+			   metadata does not need to outlive this call.
+				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in
+			   use by another learnset.
 				@since 0.12.50
 				@version 0.12.50
 			*/
@@ -209,10 +209,10 @@ namespace PocketCore::Configuration
 			/*! @overload std::expected<void, RegistryErrorInfo> updateLearnset(LearnsetID, const LearnsetMeta &learnsetMeta)
 				@brief Replaces a learnset's name and move learn entries selected by stable ID, preserving that ID.
 				@param[in] learnsetID The built-in or custom stable identifier.
-				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source metadata
-			   does not need to outlive this call.
-				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in use
-			   by another learnset.
+				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source
+			   metadata does not need to outlive this call.
+				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in
+			   use by another learnset.
 				@since 0.12.50
 				@version 0.12.50
 			*/

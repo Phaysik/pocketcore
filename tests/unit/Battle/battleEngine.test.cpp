@@ -90,7 +90,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -104,7 +104,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -118,7 +118,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -132,7 +132,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -146,7 +146,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -160,7 +160,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -174,7 +174,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -188,7 +188,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -202,7 +202,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -216,7 +216,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -230,7 +230,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -244,7 +244,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 
@@ -258,7 +258,7 @@ SCENARIO("BattleEngine")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == BattleEngineError::MissingRegistry));
-					CHECK((engine.getPhase() == BattlePhase::NotStarted));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
 				}
 			}
 		}

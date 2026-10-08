@@ -119,8 +119,8 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Looks up learnset metadata by stable ID.
 				@param[in] learnsetID The stable learnset identifier.
-				@return A non-owning pointer to registry-owned metadata if registered, or nullptr otherwise. The pointer must not be retained
-			   across registry mutations or destruction, as mutations can replace metadata or compact storage.
+				@return A non-owning pointer to registry-owned metadata if registered, or nullptr otherwise. The pointer must not be
+			   retained across registry mutations or destruction, as mutations can replace metadata or compact storage.
 				@since 0.12.50
 				@version 0.12.50
 			*/
