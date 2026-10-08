@@ -86,6 +86,7 @@ using PocketCore::Status::NO_STATUS_ID;
 using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::toStatusID;
+using PocketCore::Testing::checkStats;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
@@ -386,13 +387,7 @@ SCENARIO("Pokemon")
 					CHECK(
 						(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)} == pokemon.getNatureIDsArray()));
 
-					CHECK((pokemon.getMaximumHealth() == 71));
-					CHECK((pokemon.getHealth() == 71));
-					CHECK((pokemon.getAttack() == 50));
-					CHECK((pokemon.getDefense() == 49));
-					CHECK((pokemon.getSpAttack() == 51));
-					CHECK((pokemon.getSpDefense() == 57));
-					CHECK((pokemon.getSpeed() == 52));
+					CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 				}
 			}
 
@@ -407,13 +402,7 @@ SCENARIO("Pokemon")
 						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)}
 							   == pokemon.getNatureIDsArray()));
 
-						CHECK((pokemon.getMaximumHealth() == 71));
-						CHECK((pokemon.getHealth() == 71));
-						CHECK((pokemon.getAttack() == 55));
-						CHECK((pokemon.getDefense() == 49));
-						CHECK((pokemon.getSpAttack() == 51));
-						CHECK((pokemon.getSpDefense() == 57));
-						CHECK((pokemon.getSpeed() == 48));
+						CHECK(checkStats(pokemon, 71, 71, 55, 49, 51, 57, 48));
 					}
 				}
 
@@ -421,18 +410,12 @@ SCENARIO("Pokemon")
 				{
 					pokemon.setNatureIDsArray({NatureID{200}}, natureRegistry);
 
-					THEN("the pokemon's natures is not updated")
+					THEN("the pokemon's natures are not updated")
 					{
 						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)}
 							   == pokemon.getNatureIDsArray()));
 
-						CHECK((pokemon.getMaximumHealth() == 71));
-						CHECK((pokemon.getHealth() == 71));
-						CHECK((pokemon.getAttack() == 50));
-						CHECK((pokemon.getDefense() == 49));
-						CHECK((pokemon.getSpAttack() == 51));
-						CHECK((pokemon.getSpDefense() == 57));
-						CHECK((pokemon.getSpeed() == 52));
+						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
 				}
 			}
@@ -456,13 +439,8 @@ SCENARIO("Pokemon")
 				THEN("the IV array matches")
 				{
 					CHECK((pokemon.getPokemonIVsArray() == expected));
-					CHECK((pokemon.getMaximumHealth() == 40));
-					CHECK((pokemon.getHealth() == 40));
-					CHECK((pokemon.getAttack() == 26));
-					CHECK((pokemon.getDefense() == 28));
-					CHECK((pokemon.getSpAttack() == 27));
-					CHECK((pokemon.getSpDefense() == 25));
-					CHECK((pokemon.getSpeed() == 25));
+
+					CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 				}
 			}
 
@@ -476,13 +454,8 @@ SCENARIO("Pokemon")
 					THEN("the IV array is properly set")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 25));
-						CHECK((pokemon.getDefense() == 25));
-						CHECK((pokemon.getSpAttack() == 25));
-						CHECK((pokemon.getSpDefense() == 28));
-						CHECK((pokemon.getSpeed() == 27));
+
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 28, 27));
 					}
 				}
 
@@ -494,13 +467,8 @@ SCENARIO("Pokemon")
 					THEN("the IV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 28));
-						CHECK((pokemon.getSpAttack() == 27));
-						CHECK((pokemon.getSpDefense() == 25));
-						CHECK((pokemon.getSpeed() == 25));
+
+						CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 					}
 				}
 			}
@@ -524,13 +492,8 @@ SCENARIO("Pokemon")
 				THEN("the EV array matches")
 				{
 					CHECK((pokemon.getPokemonEVsArray() == expected));
-					CHECK((pokemon.getMaximumHealth() == 40));
-					CHECK((pokemon.getHealth() == 40));
-					CHECK((pokemon.getAttack() == 26));
-					CHECK((pokemon.getDefense() == 27));
-					CHECK((pokemon.getSpAttack() == 26));
-					CHECK((pokemon.getSpDefense() == 31));
-					CHECK((pokemon.getSpeed() == 26));
+
+					CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 				}
 			}
 
@@ -544,13 +507,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is properly set")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 25));
-						CHECK((pokemon.getDefense() == 25));
-						CHECK((pokemon.getSpAttack() == 25));
-						CHECK((pokemon.getSpDefense() == 25));
-						CHECK((pokemon.getSpeed() == 25));
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 25, 25));
 					}
 				}
 
@@ -562,13 +519,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 27));
-						CHECK((pokemon.getSpAttack() == 26));
-						CHECK((pokemon.getSpDefense() == 31));
-						CHECK((pokemon.getSpeed() == 26));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 
@@ -580,13 +531,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 27));
-						CHECK((pokemon.getSpAttack() == 26));
-						CHECK((pokemon.getSpDefense() == 31));
-						CHECK((pokemon.getSpeed() == 26));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 			}
@@ -775,13 +720,7 @@ SCENARIO("Pokemon")
 				{
 					CHECK((toNatureID(BuiltinNatureID::Hasty) == pokemon.getNatureID(0)));
 
-					CHECK((pokemon.getMaximumHealth() == 71));
-					CHECK((pokemon.getHealth() == 71));
-					CHECK((pokemon.getAttack() == 50));
-					CHECK((pokemon.getDefense() == 49));
-					CHECK((pokemon.getSpAttack() == 51));
-					CHECK((pokemon.getSpDefense() == 57));
-					CHECK((pokemon.getSpeed() == 52));
+					CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 				}
 			}
 
@@ -795,13 +734,7 @@ SCENARIO("Pokemon")
 					{
 						CHECK((toNatureID(BuiltinNatureID::Lonely) == pokemon.getNatureID(0)));
 
-						CHECK((pokemon.getMaximumHealth() == 71));
-						CHECK((pokemon.getHealth() == 71));
-						CHECK((pokemon.getAttack() == 55));
-						CHECK((pokemon.getDefense() == 49));
-						CHECK((pokemon.getSpAttack() == 51));
-						CHECK((pokemon.getSpDefense() == 57));
-						CHECK((pokemon.getSpeed() == 48));
+						CHECK(checkStats(pokemon, 71, 71, 55, 49, 51, 57, 48));
 					}
 				}
 
@@ -813,13 +746,7 @@ SCENARIO("Pokemon")
 					{
 						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Hasty)));
 
-						CHECK((pokemon.getMaximumHealth() == 71));
-						CHECK((pokemon.getHealth() == 71));
-						CHECK((pokemon.getAttack() == 50));
-						CHECK((pokemon.getDefense() == 49));
-						CHECK((pokemon.getSpAttack() == 51));
-						CHECK((pokemon.getSpDefense() == 57));
-						CHECK((pokemon.getSpeed() == 52));
+						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
 				}
 			}
@@ -847,13 +774,7 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getPokemonIV(4) == 2));
 					CHECK((pokemon.getPokemonIV(5) == 5));
 
-					CHECK((pokemon.getMaximumHealth() == 40));
-					CHECK((pokemon.getHealth() == 40));
-					CHECK((pokemon.getAttack() == 26));
-					CHECK((pokemon.getDefense() == 28));
-					CHECK((pokemon.getSpAttack() == 27));
-					CHECK((pokemon.getSpDefense() == 25));
-					CHECK((pokemon.getSpeed() == 25));
+					CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 				}
 			}
 
@@ -976,13 +897,7 @@ SCENARIO("Pokemon")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 42));
 
-						CHECK((pokemon.getMaximumHealth() == 41));
-						CHECK((pokemon.getHealth() == 41));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 27));
-						CHECK((pokemon.getSpAttack() == 26));
-						CHECK((pokemon.getSpDefense() == 25));
-						CHECK((pokemon.getSpeed() == 26));
+						CHECK(checkStats(pokemon, 41, 41, 26, 27, 26, 25, 26));
 					}
 				}
 
@@ -995,13 +910,7 @@ SCENARIO("Pokemon")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
 
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 27));
-						CHECK((pokemon.getSpAttack() == 26));
-						CHECK((pokemon.getSpDefense() == 25));
-						CHECK((pokemon.getSpeed() == 26));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 25, 26));
 					}
 				}
 
@@ -1013,13 +922,7 @@ SCENARIO("Pokemon")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
 
-						CHECK((pokemon.getMaximumHealth() == 40));
-						CHECK((pokemon.getHealth() == 40));
-						CHECK((pokemon.getAttack() == 26));
-						CHECK((pokemon.getDefense() == 27));
-						CHECK((pokemon.getSpAttack() == 26));
-						CHECK((pokemon.getSpDefense() == 31));
-						CHECK((pokemon.getSpeed() == 26));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 			}
@@ -1237,13 +1140,7 @@ SCENARIO("Pokemon")
 				CHECK((20 == pokemon.getLevel()));
 				CHECK((10 == pokemon.getLevelDamageFactor()));
 
-				CHECK((pokemon.getMaximumHealth() == 71));
-				CHECK((pokemon.getHealth() == 71));
-				CHECK((pokemon.getAttack() == 50));
-				CHECK((pokemon.getDefense() == 55));
-				CHECK((pokemon.getSpAttack() == 51));
-				CHECK((pokemon.getSpDefense() == 57));
-				CHECK((pokemon.getSpeed() == 48));
+				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
@@ -1256,13 +1153,7 @@ SCENARIO("Pokemon")
 				CHECK((30 == pokemon.getLevel()));
 				CHECK((14 == pokemon.getLevelDamageFactor()));
 
-				CHECK((pokemon.getMaximumHealth() == 102));
-				CHECK((pokemon.getHealth() == 102));
-				CHECK((pokemon.getAttack() == 73));
-				CHECK((pokemon.getDefense() == 80));
-				CHECK((pokemon.getSpAttack() == 74));
-				CHECK((pokemon.getSpDefense() == 83));
-				CHECK((pokemon.getSpeed() == 70));
+				CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
 			}
 		}
 	}
@@ -1286,13 +1177,7 @@ SCENARIO("Pokemon")
 			{
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Charizard)));
 
-				CHECK((pokemon.getMaximumHealth() == 71));
-				CHECK((pokemon.getHealth() == 71));
-				CHECK((pokemon.getAttack() == 50));
-				CHECK((pokemon.getDefense() == 55));
-				CHECK((pokemon.getSpAttack() == 51));
-				CHECK((pokemon.getSpDefense() == 57));
-				CHECK((pokemon.getSpeed() == 48));
+				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
@@ -1305,13 +1190,7 @@ SCENARIO("Pokemon")
 			{
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Blastoise)));
 
-				CHECK((pokemon.getMaximumHealth() == 111));
-				CHECK((pokemon.getHealth() == 111));
-				CHECK((pokemon.getAttack() == 90));
-				CHECK((pokemon.getDefense() == 95));
-				CHECK((pokemon.getSpAttack() == 91));
-				CHECK((pokemon.getSpDefense() == 97));
-				CHECK((pokemon.getSpeed() == 88));
+				CHECK(checkStats(pokemon, 111, 111, 90, 95, 91, 97, 88));
 			}
 		}
 	}
@@ -2287,6 +2166,9 @@ SCENARIO("Pokemon")
 					.mLevel = 10,
 				}),
 			};
+
+			REQUIRE((damagedPokemon.getMaximumHealth() == 40));
+			REQUIRE((damagedPokemon.getHealth() == 25));
 
 			damagedPokemon.setPokemonIV(0, 13);
 

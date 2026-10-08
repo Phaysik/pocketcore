@@ -1169,8 +1169,16 @@ namespace PocketCore::Pokemon
 		private:
 			/*! @brief The nature multipliers affecting the Pokemon's stats. */
 			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{
-				{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
-				  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}};
+				[] {
+					std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> natureMultipliers{};
+
+					for (auto &natureMultiplierRow : natureMultipliers)
+					{
+						natureMultiplierRow.fill(NATURE_STAT_BASE_MULTIPLIER);
+					}
+					return natureMultipliers;
+				}(),
+			};
 
 			/*! @brief The non-owning display name. */
 			std::string_view mName{};

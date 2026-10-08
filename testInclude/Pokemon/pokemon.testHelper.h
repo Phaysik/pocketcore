@@ -104,6 +104,14 @@ namespace PocketCore::Testing
 		return pokemon;
 	}
 
+	constexpr bool checkStats(const Pokemon &pokemon, const us expectedMaxHP, const us expectedHP, const us expectedAttack,
+							  const us expectedDefense, const us expectedSpAttack, const us expectedSpDefense, const us expectedSpeed)
+	{
+		return pokemon.getMaximumHealth() == expectedMaxHP || pokemon.getHealth() == expectedHP || pokemon.getAttack() == expectedAttack
+			|| pokemon.getDefense() == expectedDefense || pokemon.getSpAttack() == expectedSpAttack
+			|| pokemon.getSpDefense() == expectedSpDefense || pokemon.getSpeed() == expectedSpeed;
+	}
+
 } // namespace PocketCore::Testing
 
 #endif
