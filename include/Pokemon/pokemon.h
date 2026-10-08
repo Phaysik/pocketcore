@@ -86,7 +86,8 @@ namespace PocketCore::Pokemon
 		@brief Stores a Pokemon's identity, battle statistics, moves, held items, abilities, types, natures, and statuses.
 		@details The class owns all identifier arrays and scalar battle state. The display name is a non-owning string view whose backing
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
-		 corresponding fixed-size array.
+		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
+		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 10/07/2026
 		@since 0.3.0
@@ -687,7 +688,8 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
 				@details Stores the supplied value when it is within the configured IV bounds. Otherwise, the slot is not updated.
-			   Immediately invokes @ref recomputeStats after either outcome.
+			   Immediately invokes @ref recomputeStats after either outcome. If the calculated maximum health changes, current health is
+			   adjusted by the same amount unless it is already zero.
 				@param[in] slotIndex Base stat slot index; must be less than POKEMON_STAT_COUNT.
 				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
@@ -840,19 +842,20 @@ namespace PocketCore::Pokemon
 				mHealth = std::min(health, mCalculatedStats.mMaxHealth);
 			}
 
-			/*! @brief Replaces base HP, immediately recomputes all calculated stats, and clamps current health.
-				@details Invokes @ref recomputeStats before clamping current health to the new calculated maximum. Does not heal the Pokemon
-			   or assign the calculated maximum directly.
+			/*! @brief Replaces base HP and immediately recomputes all calculated stats.
+				@details Invokes @ref recomputeStats, which adjusts current health by the change in calculated maximum health while
+			   preserving the amount of missing health. A Pokemon with zero current health remains fainted; a living Pokemon is never
+			   reduced below 1.
 				@param[in] maximumHealth The new base HP value used by the stat calculation.
-				@post Current health does not exceed @ref getMaximumHealth and does not increase.
+				@post Current health does not exceed @ref getMaximumHealth; zero current health remains zero and non-zero health stays at
+			   least 1.
 				@since 0.9.14
-				@version 0.12.23
+				@version 0.12.48
 			*/
 			constexpr void setMaximumHealth(const us maximumHealth)
 			{
 				mBaseStats.mMaxHealth = maximumHealth;
 				recomputeStats();
-				mHealth = std::min(mHealth, mCalculatedStats.mMaxHealth);
 			}
 
 			/*! @brief Replaces base Attack and immediately recomputes all calculated stats.
@@ -1013,10 +1016,11 @@ namespace PocketCore::Pokemon
 		private:
 			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, and nature multipliers.
 				@details Owns the stat calculation formula. Constructors and public stat-input setters invoke this function after updating
-			   inputs so calculated stats are immediately consistent on return. Does not change current health; @ref setMaximumHealth
-			   clamps it after recalculation.
+			   inputs so calculated stats are immediately consistent on return. Adjusts current health by the change in calculated maximum
+			   health, preserving the amount of missing health. A Pokemon with zero health stays fainted; a living Pokemon is never reduced
+			   below 1 health by a stat change.
 				@since 0.12.23
-				@version 0.12.47
+				@version 0.12.48
 			*/
 			constexpr void recomputeStats()
 			{
@@ -1037,6 +1041,7 @@ namespace PocketCore::Pokemon
 				constexpr std::size_t specialDefenseIndex{toIndex(PokemonStat::SpecialDefense)};
 				constexpr std::size_t speedIndex{toIndex(PokemonStat::Speed)};
 
+				const us previousMaxHealth{mCalculatedStats.mMaxHealth};
 				mCalculatedStats.mMaxHealth
 					= static_cast<us>(getBaseComponent(healthIndex, mBaseStats.mMaxHealth) + mLevel + CALCULATED_HEALTH_OFFSET);
 
@@ -1061,6 +1066,21 @@ namespace PocketCore::Pokemon
 					mCalculatedStats.mSpDefense
 						= static_cast<us>(mCalculatedStats.mSpDefense * natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
 					mCalculatedStats.mSpeed = static_cast<us>(mCalculatedStats.mSpeed * natureMultiplier.at(toIndex(PokemonStat::Speed)));
+				}
+
+				if (mHealth > 0)
+				{
+					if (mCalculatedStats.mMaxHealth > previousMaxHealth)
+					{
+						const ui healthIncrease{static_cast<ui>(mCalculatedStats.mMaxHealth - previousMaxHealth)};
+						const ui adjustedHealth{static_cast<ui>(mHealth) + healthIncrease};
+						mHealth = static_cast<us>(std::min(adjustedHealth, static_cast<ui>(mCalculatedStats.mMaxHealth)));
+					}
+					else
+					{
+						const us healthDecrease{static_cast<us>(previousMaxHealth - mCalculatedStats.mMaxHealth)};
+						mHealth = mHealth > healthDecrease ? static_cast<us>(mHealth - healthDecrease) : 1;
+					}
 				}
 			}
 

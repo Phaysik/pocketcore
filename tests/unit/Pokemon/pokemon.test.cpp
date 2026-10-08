@@ -442,6 +442,13 @@ SCENARIO("Pokemon")
 					THEN("the IV array is properly set")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 25));
+						CHECK((pokemon.getDefense() == 25));
+						CHECK((pokemon.getSpAttack() == 25));
+						CHECK((pokemon.getSpDefense() == 28));
+						CHECK((pokemon.getSpeed() == 27));
 					}
 				}
 
@@ -453,6 +460,13 @@ SCENARIO("Pokemon")
 					THEN("the IV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 			}
@@ -460,7 +474,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("EV array")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonEV")
 			{
@@ -469,6 +490,13 @@ SCENARIO("Pokemon")
 				THEN("the EV array matches")
 				{
 					CHECK((pokemon.getPokemonEVsArray() == expected));
+					CHECK((pokemon.getMaximumHealth() == 40));
+					CHECK((pokemon.getHealth() == 40));
+					CHECK((pokemon.getAttack() == 26));
+					CHECK((pokemon.getDefense() == 27));
+					CHECK((pokemon.getSpAttack() == 26));
+					CHECK((pokemon.getSpDefense() == 31));
+					CHECK((pokemon.getSpeed() == 26));
 				}
 			}
 
@@ -482,6 +510,13 @@ SCENARIO("Pokemon")
 					THEN("the EV array is properly set")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 25));
+						CHECK((pokemon.getDefense() == 25));
+						CHECK((pokemon.getSpAttack() == 25));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 
@@ -493,6 +528,13 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 31));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 
@@ -504,6 +546,13 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 31));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 			}
@@ -711,7 +760,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("IV index")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonIV")
 			{
@@ -723,6 +779,14 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getPokemonIV(3) == 20));
 					CHECK((pokemon.getPokemonIV(4) == 2));
 					CHECK((pokemon.getPokemonIV(5) == 5));
+
+					CHECK((pokemon.getMaximumHealth() == 40));
+					CHECK((pokemon.getHealth() == 40));
+					CHECK((pokemon.getAttack() == 26));
+					CHECK((pokemon.getDefense() == 28));
+					CHECK((pokemon.getSpAttack() == 27));
+					CHECK((pokemon.getSpDefense() == 25));
+					CHECK((pokemon.getSpeed() == 25));
 				}
 			}
 
@@ -735,6 +799,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is properly set")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 13));
+
+						CHECK((pokemon.getMaximumHealth() == 41));
+						CHECK((pokemon.getHealth() == 41));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 
@@ -745,6 +817,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is properly set")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 31));
+
+						CHECK((pokemon.getMaximumHealth() == 43));
+						CHECK((pokemon.getHealth() == 43));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 
@@ -755,6 +835,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is unchanged")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 0));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 			}
@@ -762,7 +850,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("EV index")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonEV")
 			{
@@ -774,6 +869,14 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getPokemonEV(3) == 47));
 					CHECK((pokemon.getPokemonEV(4) == 241));
 					CHECK((pokemon.getPokemonEV(5) == 50));
+
+					CHECK((pokemon.getMaximumHealth() == 40));
+					CHECK((pokemon.getHealth() == 40));
+					CHECK((pokemon.getAttack() == 26));
+					CHECK((pokemon.getDefense() == 27));
+					CHECK((pokemon.getSpAttack() == 26));
+					CHECK((pokemon.getSpDefense() == 31));
+					CHECK((pokemon.getSpeed() == 26));
 				}
 			}
 
@@ -786,16 +889,33 @@ SCENARIO("Pokemon")
 					THEN("the EV is properly set")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 13));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 31));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 
-				GIVEN("an EV of 31")
+				GIVEN("an EV of 42")
 				{
-					pokemon.setPokemonEV(0, 31);
+					pokemon.setPokemonEV(4, 0);
+					pokemon.setPokemonEV(0, 42);
 
 					THEN("the EV is properly set")
 					{
-						CHECK((pokemon.getPokemonEV(0) == 31));
+						CHECK((pokemon.getPokemonEV(0) == 42));
+
+						CHECK((pokemon.getMaximumHealth() == 41));
+						CHECK((pokemon.getHealth() == 41));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 
@@ -807,6 +927,14 @@ SCENARIO("Pokemon")
 					THEN("the EV is unchanged")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 
@@ -817,6 +945,14 @@ SCENARIO("Pokemon")
 					THEN("the EV is unchanged")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 31));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 			}
@@ -891,10 +1027,10 @@ SCENARIO("Pokemon")
 
 				pokemon.setMaximumHealth(20);
 
-				THEN("maximum health is recalculated and current health is clamped to it")
+				THEN("maximum health and current health both decrease by the same amount")
 				{
 					CHECK((pokemon.getMaximumHealth() == 80));
-					CHECK((pokemon.getHealth() == pokemon.getMaximumHealth()));
+					CHECK((pokemon.getHealth() == 70));
 				}
 			}
 		}
@@ -1450,7 +1586,7 @@ SCENARIO("Pokemon")
 		}
 	}
 
-	GIVEN("resolveNatureMetadata and recomputeStats")
+	GIVEN("resolveNatureMetadata")
 	{
 		Pokemon pokemon{
     		makePokemon({
@@ -2010,6 +2146,92 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getSpDefense() == expectedSpDefense));
 					CHECK((pokemon.getSpeed() == expectedSpeed));
 				}
+			}
+		}
+	}
+
+	GIVEN("recomputeStats")
+	{
+		Pokemon pokemon{
+			makePokemon({
+				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+				.mHealth = 100,
+				.mLevel = 10,
+			}),
+		};
+
+		GIVEN("a damaged Pokemon")
+		{
+			Pokemon damagedPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mHealth = 25,
+					.mLevel = 10,
+				}),
+			};
+
+			damagedPokemon.setPokemonIV(0, 13);
+
+			THEN("increasing maximum health preserves the amount of missing health")
+			{
+				CHECK((damagedPokemon.getMaximumHealth() == 41));
+				CHECK((damagedPokemon.getHealth() == 26));
+			}
+		}
+
+		GIVEN("a fainted Pokemon")
+		{
+			pokemon.setHealth(0);
+			pokemon.setPokemonIV(0, 31);
+
+			THEN("increasing maximum health does not revive it")
+			{
+				CHECK((pokemon.getMaximumHealth() == 43));
+				CHECK((pokemon.getHealth() == 0));
+				CHECK(pokemon.isFainted());
+			}
+		}
+
+		GIVEN("a Pokemon with more current health than a maximum health decrease")
+		{
+			Pokemon lowHealthPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
+					.mHealth = 5,
+					.mLevel = 10,
+				}),
+			};
+
+			lowHealthPokemon.setPokemonIV(0, 0);
+
+			THEN("decreasing maximum health leaves current health at a minimum of 1")
+			{
+				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
+				CHECK((lowHealthPokemon.getHealth() == 2));
+				CHECK_FALSE(lowHealthPokemon.isFainted());
+			}
+		}
+
+		GIVEN("a Pokemon with less current health than a maximum health decrease")
+		{
+			Pokemon lowHealthPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
+					.mHealth = 2,
+					.mLevel = 10,
+				}),
+			};
+
+			lowHealthPokemon.setPokemonIV(0, 0);
+
+			THEN("decreasing maximum health leaves current health at a minimum of 1")
+			{
+				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
+				CHECK((lowHealthPokemon.getHealth() == 1));
+				CHECK_FALSE(lowHealthPokemon.isFainted());
 			}
 		}
 	}
