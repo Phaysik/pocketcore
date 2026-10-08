@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 09/28/2026
+	@date 10/08/2026
 	@since 0.9.14
-	@version 0.12.45
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -704,8 +704,8 @@ namespace PocketCore::Battle
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
-				return registryProvider.statusRegistry != nullptr ? registryProvider.statusRegistry->getStatusName(identifier)
-																  : std::nullopt;
+				return registryProvider.mStatusRegistry != nullptr ? registryProvider.mStatusRegistry->getStatusName(identifier)
+																   : std::nullopt;
 			});
 
 			outStream << '\n';

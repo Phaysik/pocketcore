@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.12.28
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -15,6 +15,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
@@ -31,6 +32,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
+	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Pokemon::Pokemon;
@@ -40,7 +42,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Registry::RegistryErrorInfo;
 
 	ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> PokemonRegistry::instantiate(
-		const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries,
+		const PokemonID pokemonID, const LearnsetID learnsetID, const PokemonInstantiationDependencies *dependencyRegistries,
 		const std::array<us, POKEMON_STAT_COUNT> *ivs, const std::array<us, POKEMON_STAT_COUNT> &evs,
 		const std::array<NatureID, MAX_NATURES_PER_POKEMON> *natureIDs, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
 		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs, const std::array<MoveID, MAX_MOVES_PER_POKEMON> *moveIDs) const
@@ -83,6 +85,7 @@ namespace PocketCore::Registry::Pokemon
 
 		return Pokemon{
 			pokemonID,
+			learnsetID,
 			pokemonMeta->mName,
 			*moveIDs,
 			{},

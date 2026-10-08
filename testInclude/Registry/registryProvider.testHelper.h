@@ -1,8 +1,8 @@
 /*! @file registryProivder.testHelper.h
 	@brief Test helper for dealing with RegistryProvider concepts.
-	@date 09/17/2026
+	@date 10/08/2026
 	@since 0.12.17
-	@version 0.12.37
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
+#include "Configuration/learnsetRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Configuration/natureRegistryConfiguration.h"
@@ -25,6 +26,7 @@ namespace PocketCore::Testing
 {
 	using PocketCore::Configuration::AbilityRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
+	using PocketCore::Configuration::LearnsetRegistryConfiguration;
 	using PocketCore::Configuration::MoveRegistryConfiguration;
 	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Configuration::NatureRegistryConfiguration;
@@ -47,18 +49,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -73,18 +77,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = nullptr,
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = nullptr,
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -99,18 +105,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = nullptr,
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = nullptr,
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -125,18 +133,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = nullptr,
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = nullptr,
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -151,18 +161,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = nullptr,
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = nullptr,
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -177,18 +189,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = nullptr,
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = nullptr,
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -203,18 +217,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = nullptr,
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = nullptr,
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -229,18 +245,20 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = nullptr,
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = nullptr,
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -255,18 +273,20 @@ namespace PocketCore::Testing
 		static const WeatherRegistryConfiguration weatherRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = nullptr,
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = nullptr,
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -281,18 +301,20 @@ namespace PocketCore::Testing
 		static const WeatherRegistryConfiguration weatherRegistryConfig{};
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = nullptr,
-			.pokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = nullptr,
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -308,18 +330,49 @@ namespace PocketCore::Testing
 		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
 		static const NatureRegistryConfiguration natureRegistryConfig{};
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 
 		return {
-			.abilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
-			.moveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
-			.itemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
-			.typeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
-			.statusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
-			.weatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
-			.terrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
-			.multiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
-			.natureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
-			.pokemonRegistry = nullptr,
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = nullptr,
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
+		};
+	}
+
+	inline RegistryProvider getNullLearnsetRegistryProvider()
+	{
+		static const TypeRegistryConfiguration typeRegistryConfig{};
+		static const ItemRegistryConfiguration itemRegistryConfig{};
+		static const MoveRegistryConfiguration moveRegistryConfig{};
+		static const AbilityRegistryConfiguration abilityRegistryConfig{};
+		static const StatusRegistryConfiguration statusRegistryConfig{};
+		static const TerrainRegistryConfiguration terrainRegistryConfig{};
+		static const WeatherRegistryConfiguration weatherRegistryConfig{};
+		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
+		static const NatureRegistryConfiguration natureRegistryConfig{};
+		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
+
+		return {
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = nullptr,
 		};
 	}
 } // namespace PocketCore::Testing

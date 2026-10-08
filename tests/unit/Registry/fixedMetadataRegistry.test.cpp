@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 09/11/2026
+	@date 10/08/2026
 	@since 0.7.0
-	@version 0.12.22
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -242,6 +242,88 @@ SCENARIO("FixedMetadataRegistry")
 			{
 				CHECK((targetRegistry.getAmountRegistered() == finalWeatherUnderlyingValue - 1));
 				CHECK_FALSE(targetRegistry.hasEntry(NO_ID));
+			}
+		}
+	}
+
+	GIVEN("registry equality")
+	{
+		CheckpointRegistry actual{};
+		const CheckpointRegistry original{actual};
+
+		THEN("identical registered metadata and next IDs compare equal")
+		{
+			CHECK((actual == original));
+		}
+
+		WHEN("entries are appended and rolled back")
+		{
+			const auto checkpoint{actual.createCheckpoint()};
+			const FixedMetaDataID appendedID{actual.addEntry({.mName = "Appended"})};
+			actual.restoreCheckpoint(checkpoint);
+
+			THEN("the restored registry compares equal in both directions")
+			{
+				CHECK((actual == original));
+				CHECK((original == actual));
+				CHECK((actual.getNextID() == original.getNextID()));
+				CHECK_FALSE(actual.hasEntry(appendedID));
+				CHECK_FALSE(actual.hasEntry("Appended"));
+			}
+
+			WHEN("the old checkpoint is reused after another append")
+			{
+				const FixedMetaDataID retainedID{actual.addEntry({.mName = "Retained"})};
+				const CheckpointRegistry beforeRestore{actual};
+				actual.restoreCheckpoint(checkpoint);
+
+				THEN("the stale checkpoint is rejected and the new entry remains registered")
+				{
+					CHECK((actual == beforeRestore));
+					CHECK(actual.hasEntry(retainedID));
+					CHECK(actual.hasEntry("Retained"));
+				}
+			}
+		}
+
+		WHEN("the registered entry counts differ")
+		{
+			static_cast<void>(actual.addEntry({.mName = "Additional"}));
+
+			THEN("the registries compare unequal")
+			{
+				CHECK((actual != original));
+			}
+		}
+
+		WHEN("the registered metadata differs with matching counts and next IDs")
+		{
+			CheckpointRegistry other{};
+			static_cast<void>(actual.addEntry({.mName = "First"}));
+			static_cast<void>(other.addEntry({.mName = "Second"}));
+
+			THEN("the registries compare unequal")
+			{
+				CHECK((actual.getAmountRegistered() == other.getAmountRegistered()));
+				CHECK((actual.getNextID() == other.getNextID()));
+				CHECK((actual != other));
+			}
+		}
+
+		WHEN("an entry is appended and removed without rolling back its assigned ID")
+		{
+			static_cast<void>(actual.addEntry({.mName = "Removed"}));
+			actual.eraseEntry(original.getAmountRegistered());
+
+			THEN("matching registered metadata with different next IDs compares unequal")
+			{
+				REQUIRE((actual.getAmountRegistered() == original.getAmountRegistered()));
+				for (PocketCore::Core::us index{0}; index < actual.getAmountRegistered(); ++index)
+				{
+					CHECK((*actual.getEntry(index) == *original.getEntry(index)));
+				}
+				CHECK((actual.getNextID() != original.getNextID()));
+				CHECK((actual != original));
 			}
 		}
 	}

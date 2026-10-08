@@ -1,8 +1,8 @@
 /*! @file targetsHandler.test.cpp
 	@brief C++ file for running tests for the TargetsHandler.
-	@date 09/03/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.18
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -44,7 +44,7 @@ SCENARIO("TargetsHandler")
 	BattleState battleState{};
 	MoveRegistryConfiguration moveConfiguration{};
 	const MoveRegistry &moveRegistry{moveConfiguration.getRuntimeRegistry()};
-	RegistryProvider provider{.moveRegistry = &moveRegistry};
+	RegistryProvider provider{.mMoveRegistry = &moveRegistry};
 
 	GIVEN("a move that targets a single opponent")
 	{

@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 09/27/2026
+	@date 10/08/2026
 	@since 0.12.28
-	@version 0.12.45
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -67,7 +67,7 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", typeID, [&registryProvider](const TypeID identifier) {
-				return registryProvider.typeRegistry != nullptr ? registryProvider.typeRegistry->getTypeName(identifier) : std::nullopt;
+				return registryProvider.mTypeRegistry != nullptr ? registryProvider.mTypeRegistry->getTypeName(identifier) : std::nullopt;
 			});
 
 			outStream << '\n';
@@ -81,8 +81,8 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", natureID, [&registryProvider](const NatureID identifier) {
-				return registryProvider.natureRegistry != nullptr ? registryProvider.natureRegistry->getNatureName(identifier)
-																  : std::nullopt;
+				return registryProvider.mNatureRegistry != nullptr ? registryProvider.mNatureRegistry->getNatureName(identifier)
+																   : std::nullopt;
 			});
 
 			outStream << '\n';
@@ -96,8 +96,8 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", abilityID, [&registryProvider](const AbilityID identifier) {
-				return registryProvider.abilityRegistry != nullptr ? registryProvider.abilityRegistry->getAbilityName(identifier)
-																   : std::nullopt;
+				return registryProvider.mAbilityRegistry != nullptr ? registryProvider.mAbilityRegistry->getAbilityName(identifier)
+																	: std::nullopt;
 			});
 
 			outStream << '\n';
@@ -111,7 +111,7 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", itemID, [&registryProvider](const ItemID identifier) {
-				return registryProvider.itemRegistry != nullptr ? registryProvider.itemRegistry->getItemName(identifier) : std::nullopt;
+				return registryProvider.mItemRegistry != nullptr ? registryProvider.mItemRegistry->getItemName(identifier) : std::nullopt;
 			});
 
 			outStream << '\n';
@@ -125,8 +125,8 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
-				return registryProvider.statusRegistry != nullptr ? registryProvider.statusRegistry->getStatusName(identifier)
-																  : std::nullopt;
+				return registryProvider.mStatusRegistry != nullptr ? registryProvider.mStatusRegistry->getStatusName(identifier)
+																   : std::nullopt;
 			});
 
 			outStream << '\n';
@@ -141,7 +141,7 @@ namespace PocketCore::Pokemon
 			outStream << "    [" << index << "]:\n";
 
 			printIDAndName("      ", moveID, [&registryProvider](const MoveID identifier) {
-				return registryProvider.moveRegistry != nullptr ? registryProvider.moveRegistry->getMoveName(identifier) : std::nullopt;
+				return registryProvider.mMoveRegistry != nullptr ? registryProvider.mMoveRegistry->getMoveName(identifier) : std::nullopt;
 			});
 
 			outStream << "\n      PP: " << static_cast<unsigned int>(pokemon.getCurrentPP(moveSlotIndex)) << '/'

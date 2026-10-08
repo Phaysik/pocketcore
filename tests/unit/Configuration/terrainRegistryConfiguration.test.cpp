@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TerrainRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -261,6 +261,7 @@ SCENARIO("TerrainRegistryConfiguration")
 			}
 
 			terrainMetas.push_back({.mName = std::string(TERRAIN_NAME_ELECTRIC)});
+			const TerrainRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addTerrains(terrainMetas)};
 
 			THEN("registration reports a duplicate terrain and the registry is rollback to the checkpoint before the erroneous addition")
@@ -268,6 +269,9 @@ SCENARIO("TerrainRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextTerrainID() == beforeBatch.getNextTerrainID()));
+				CHECK_FALSE(config.hasTerrain("String_0000"));
 			}
 		}
 

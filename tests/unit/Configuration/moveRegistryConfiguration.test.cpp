@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -282,6 +282,7 @@ SCENARIO("MoveRegistryConfiguration")
 			}
 
 			moveMetas.push_back({.mName = std::string(MOVE_NAME_FACADE), .mTriggers = {}});
+			const MoveRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addMoves(moveMetas)};
 
 			THEN("registration reports a duplicate move and the registry is rollback to the checkpoint before the erroneous addition")
@@ -289,6 +290,9 @@ SCENARIO("MoveRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateMove));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextMoveID() == beforeBatch.getNextMoveID()));
+				CHECK_FALSE(config.hasMove("String_0000"));
 			}
 		}
 

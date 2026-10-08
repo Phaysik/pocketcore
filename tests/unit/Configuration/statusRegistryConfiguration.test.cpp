@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the StatusRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -261,6 +261,7 @@ SCENARIO("StatusRegistryConfiguration")
 			}
 
 			statusMetas.push_back({.mName = std::string(STATUS_NAME_BURN)});
+			const StatusRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addStatuses(statusMetas)};
 
 			THEN("registration reports a duplicate status and the registry is rollback to the checkpoint before the erroneous addition")
@@ -268,6 +269,9 @@ SCENARIO("StatusRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateStatus));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextStatusID() == beforeBatch.getNextStatusID()));
+				CHECK_FALSE(config.hasStatus("String_0000"));
 			}
 		}
 

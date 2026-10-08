@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.12.13
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -15,6 +15,7 @@
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/constants.h"
@@ -40,6 +41,8 @@ namespace PocketCore::Testing
 	using PocketCore::Core::us;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
+	using PocketCore::Learnset::LearnsetID;
+	using PocketCore::Learnset::NO_LEARNSET_ID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
@@ -89,13 +92,15 @@ namespace PocketCore::Testing
 			us mLevel{1};
 
 			PokemonID mPokemonID{NO_POKEMON_ID};
+			LearnsetID mLearnsetID{NO_LEARNSET_ID};
 	};
 
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
 		Pokemon pokemon{
-			data.mPokemonID,  data.mName,	 data.mMoveIDs,	 data.mMaxPP,	  data.mCurrentPP,		data.mStats,	  data.mLevel,
-			data.mAbilityIDs, data.mItemIDs, data.mTypesIDs, data.mNatureIDs, data.mNatureRegistry, data.mPokemonIVs, data.mPokemonEVs,
+			data.mPokemonID, data.mLearnsetID, data.mName,			 data.mMoveIDs,	   data.mMaxPP,
+			data.mCurrentPP, data.mStats,	   data.mLevel,			 data.mAbilityIDs, data.mItemIDs,
+			data.mTypesIDs,	 data.mNatureIDs,  data.mNatureRegistry, data.mPokemonIVs, data.mPokemonEVs,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

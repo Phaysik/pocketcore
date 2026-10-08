@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.2.19
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -779,6 +779,7 @@ SCENARIO("TypeRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_TYPES + 1)};
 
 			typeMetas.push_back({.mName = name});
+			const TypeRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
@@ -786,6 +787,9 @@ SCENARIO("TypeRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextTypeID() == beforeBatch.getNextTypeID()));
+				CHECK_FALSE(config.hasType("String_0000"));
 			}
 		}
 

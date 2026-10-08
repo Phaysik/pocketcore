@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 09/28/2026
+	@date 10/08/2026
 	@since 0.9.16
-	@version 0.12.45
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -92,10 +92,11 @@ namespace PocketCore::Battle
 		}
 
 		// Every metadata registry used during setup and trigger execution must be available.
-		if (mProvider == nullptr || mEffectRegistry == nullptr || mProvider->abilityRegistry == nullptr
-			|| mProvider->moveRegistry == nullptr || mProvider->itemRegistry == nullptr || mProvider->typeRegistry == nullptr
-			|| mProvider->statusRegistry == nullptr || mProvider->weatherRegistry == nullptr || mProvider->terrainRegistry == nullptr
-			|| mProvider->multiplierRegistry == nullptr || mProvider->natureRegistry == nullptr || mProvider->pokemonRegistry == nullptr)
+		if (mProvider == nullptr || mEffectRegistry == nullptr || mProvider->mAbilityRegistry == nullptr
+			|| mProvider->mMoveRegistry == nullptr || mProvider->mItemRegistry == nullptr || mProvider->mTypeRegistry == nullptr
+			|| mProvider->mStatusRegistry == nullptr || mProvider->mWeatherRegistry == nullptr || mProvider->mTerrainRegistry == nullptr
+			|| mProvider->mMultiplierRegistry == nullptr || mProvider->mNatureRegistry == nullptr || mProvider->mPokemonRegistry == nullptr
+			|| mProvider->mLearnsetRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}
@@ -193,7 +194,7 @@ namespace PocketCore::Battle
 		for (const BattleAction &action : actions)
 		{
 			const std::expected<void, BattleEngineError> validationResult{
-				getValidationResult(mState, action, mPhase, mProvider->moveRegistry),
+				getValidationResult(mState, action, mPhase, mProvider->mMoveRegistry),
 			};
 
 			if (!validationResult.has_value())
@@ -264,7 +265,7 @@ namespace PocketCore::Battle
 		}
 
 		// Randomize exact move-order ties before applying the priority and speed ordering below.
-		handleMovePrioritization(mState, moves, mProvider->moveRegistry);
+		handleMovePrioritization(mState, moves, mProvider->mMoveRegistry);
 
 		// Re-check volatile battle conditions because earlier actions may have fainted or disabled a later actor.
 		std::ranges::for_each(moves, [this](const MoveAction &moveAction) {
@@ -550,7 +551,7 @@ namespace PocketCore::Battle
 		Pokemon *userPokemon{userSlot.mPokemon};
 
 		const MoveID moveID{userPokemon->getMoveID(action.mMoveSlotIndex)};
-		const MoveMeta *moveMeta{mProvider->moveRegistry->getMoveMetadata(moveID)};
+		const MoveMeta *moveMeta{mProvider->mMoveRegistry->getMoveMetadata(moveID)};
 
 		if (moveMeta == nullptr)
 		{
@@ -560,7 +561,7 @@ namespace PocketCore::Battle
 
 		// Resolve targets again after switches and earlier moves may have changed the battlefield.
 		const std::expected<std::vector<BattleTarget>, BattleEngineError> targetsResult{
-			getMoveTargets(mState, action, mProvider->moveRegistry),
+			getMoveTargets(mState, action, mProvider->mMoveRegistry),
 		};
 
 		if (!targetsResult.has_value())
@@ -699,7 +700,7 @@ namespace PocketCore::Battle
 		if (context.mDamage.mShouldApplyDamage && context.mDamage.mDamage > 0U)
 		{
 			Pokemon *targetPokemon{activeSlots(mState, target.mSide).at(target.mSlotIndex).mPokemon};
-			const us damage{context.applyMultiplier(context.mDamage.mDamage, *mProvider->multiplierRegistry)};
+			const us damage{context.applyMultiplier(context.mDamage.mDamage, *mProvider->mMultiplierRegistry)};
 			const us remainingHealth{
 				damage >= targetPokemon->getHealth() ? static_cast<us>(0) : static_cast<us>(targetPokemon->getHealth() - damage),
 			};
@@ -884,19 +885,19 @@ namespace PocketCore::Battle
 		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilityIDsArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
-			return abilityID != NO_ABILITY_ID ? mProvider->abilityRegistry->getAbilityMetadata(abilityID) : nullptr;
+			return abilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityID) : nullptr;
 		});
 
 		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsIDsArray()};
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
-			return itemID != NO_ITEM_ID ? mProvider->itemRegistry->getItemMetadata(itemID) : nullptr;
+			return itemID != NO_ITEM_ID ? mProvider->mItemRegistry->getItemMetadata(itemID) : nullptr;
 		});
 
 		const std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{pokemon->getNatureIDsArray()};
 		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
 		std::ranges::transform(natureIDs, natureMetas.begin(), [this](const NatureID natureID) {
-			return natureID != NO_NATURE_ID ? mProvider->natureRegistry->getNatureMetadata(natureID) : nullptr;
+			return natureID != NO_NATURE_ID ? mProvider->mNatureRegistry->getNatureMetadata(natureID) : nullptr;
 		});
 
 		// Activate all relevant suppression rules before executing either source's effects.

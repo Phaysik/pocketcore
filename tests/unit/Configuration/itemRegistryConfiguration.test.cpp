@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.5.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -282,6 +282,7 @@ SCENARIO("ItemRegistryConfiguration")
 			}
 
 			itemMetas.push_back({.mName = std::string(ITEM_NAME_CHERI_BERRY), .mTriggers = {}});
+			const ItemRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addItems(itemMetas)};
 
 			THEN("registration reports a duplicate item and the registry is rollback to the checkpoint before the erroneous addition")
@@ -289,6 +290,9 @@ SCENARIO("ItemRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateItem));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextItemID() == beforeBatch.getNextItemID()));
+				CHECK_FALSE(config.hasItem("String_0000"));
 			}
 		}
 

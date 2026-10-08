@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.11.6
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -25,6 +25,7 @@
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Learnset/builtInLearnsetID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Nature/natureID.h"
@@ -61,6 +62,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::toItemID;
 	using PocketCore::Learnset::BuiltinLearnsetID;
+	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::toLearnsetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
@@ -139,9 +141,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 09/29/2026
+		@date 10/08/2026
 		@since 0.11.6
-		@version 0.12.47
+		@version 0.12.50
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -344,6 +346,7 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier.
+				@param[in] learnsetID The built-in or custom stable identifier.
 				@param[in] natureRegistry The nature registry to use for resolving nature IDs. Defaults to nullptr.
 				@param[in] ivs The IVs of the Pokemon. Defaults to nullptr.
 				@param[in] evs The EVs of the Pokemon. Defaults to @ref MIN_EV_STAT_VALUE.
@@ -353,10 +356,11 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] movesIDs The move IDs of the Pokemon. Defaults to nullptr.
 				@return The instantiated Pokemon on success, or @ref RegistryErrorInfo if no matching pokemon exists.
 				@since 0.12.24
-				@version 0.12.47
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> instantiate(
-				const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
+				const PokemonID pokemonID, const LearnsetID learnsetID,
+				const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
 				const std::array<us, POKEMON_STAT_COUNT> *ivs = nullptr,
 				const std::array<us, POKEMON_STAT_COUNT> &evs
 				= {MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE, MIN_EV_STAT_VALUE},

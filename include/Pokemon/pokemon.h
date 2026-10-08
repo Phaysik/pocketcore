@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 10/08/2026
 	@since 0.3.0
-	@version 0.12.49
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -25,6 +25,7 @@
 #include "Interaction/interactionApplicationError.h"
 #include "Interaction/interactionHelpers.h"
 #include "Item/itemID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
@@ -64,6 +65,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Item::ItemID;
+	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
@@ -91,7 +93,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 10/08/2026
 		@since 0.3.0
-		@version 0.12.49
+		@version 0.12.50
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -112,16 +114,18 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.48
+				@version 0.12.50
 			*/
-			explicit constexpr Pokemon(const PokemonID pokemonID, const std::string_view &name, const PokemonStats &stats, const us level,
+			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view &name,
+									   const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{name}, mBaseStats{stats}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
+				: mName{name}, mBaseStats{stats}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID),
+				  mLearnsetID(learnsetID)
 			{
 				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -154,17 +158,20 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.48
+				@version 0.12.50
 			*/
-			explicit constexpr Pokemon(
-				const PokemonID pokemonID, const std::string_view &name, const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
-				const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP, const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP,
-				const PokemonStats &stats, const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
-				const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs, const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
-				const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
-				const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs, const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view &name,
+									   const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP,
+									   const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP, const PokemonStats &stats, const us level,
+									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
+									   const std::array<TypeID, MAX_TYPES_PER_POKEMON> &typeIDs,
+									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 				: mName{name}, mBaseStats{stats}, mMoveIDs{moveIDs}, mMaxPP{maxPP}, mCurrentPP{currentPP}, mTypeIDs{typeIDs},
-				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID)
+				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID), mLearnsetID(learnsetID)
 			{
 				resolveNatureMultipliers(natureIDs, natureRegistry);
 
@@ -527,6 +534,16 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr PokemonID getPokemonID() const
 			{
 				return mPokemonID;
+			}
+
+			/*! @brief Returns the stable identifier for the Learnset species.
+				@return The LearnsetID value.
+				@since 0.12.50
+				@version 0.12.50
+			*/
+			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const
+			{
+				return mLearnsetID;
 			}
 
 			// Setters
@@ -933,15 +950,15 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Replaces species identity and base stats, then immediately recomputes all calculated stats.
 				@details Copies the supplied base-stat record and invokes @ref recomputeStats; does not resolve species metadata.
-				@param[in] pokemonID The new PokemonID value.
-				@param[in] baseStats The new base stats to copy; no reference is retained.
+				@param[in] meta The registry-resolved metadata for the new Pokemon.
 				@since 0.12.23
-				@version 0.12.49
+				@version 0.12.50
 			*/
-			constexpr void setPokemonID(const PokemonID pokemonID, const PokemonStats &baseStats)
+			constexpr void setSpecies(const PokemonMeta &meta)
 			{
-				mPokemonID = pokemonID;
-				mBaseStats = baseStats;
+				mPokemonID = meta.mPokemonID;
+				mLearnsetID = meta.mLearnsetID;
+				mBaseStats = meta.mBaseStats;
 				recomputeStats();
 			}
 
@@ -1225,6 +1242,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The stable identifier for the Pokemon species. */
 			PokemonID mPokemonID{};
+
+			/*! @brief The stable identifier for the Learnset species. */
+			LearnsetID mLearnsetID{};
 	};
 } // namespace PocketCore::Pokemon
 

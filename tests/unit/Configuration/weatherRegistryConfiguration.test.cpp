@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 09/11/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.22
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -267,6 +267,7 @@ SCENARIO("WeatherRegistryConfiguration")
 			}
 
 			weatherMetas.push_back({.mName = std::string(WEATHER_NAME_FOG)});
+			const WeatherRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addWeathers(weatherMetas)};
 
 			THEN("registration reports a duplicate weather and the registry is rollback to the checkpoint before the erroneous addition")
@@ -274,6 +275,10 @@ SCENARIO("WeatherRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateWeather));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextWeatherID() == beforeBatch.getNextWeatherID()));
+				CHECK_FALSE(config.hasWeather("String_0000"));
 			}
 		}
 
