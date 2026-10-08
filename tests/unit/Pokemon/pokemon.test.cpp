@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/07/2026
+	@date 10/08/2026
 	@since 0.4.0
-	@version 0.12.48
+	@version 0.12.49
 	@author Matthew Moore
 */
 
@@ -74,6 +74,7 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonStats;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::Nature::NatureRegistry;
 using PocketCore::Registry::RegistryErrorInfo;
@@ -85,6 +86,7 @@ using PocketCore::Status::NO_STATUS_ID;
 using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::toStatusID;
+using PocketCore::Testing::checkStats;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
@@ -367,7 +369,16 @@ SCENARIO("Pokemon")
 
 		GIVEN("nature array")
 		{
-			Pokemon pokemon{makePokemon({.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)},
+					.mHealth = 100,
+					.mLevel = 20,
+				}),
+			};
 
 			WHEN("calling getNatureIDsArray")
 			{
@@ -375,6 +386,8 @@ SCENARIO("Pokemon")
 				{
 					CHECK(
 						(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)} == pokemon.getNatureIDsArray()));
+
+					CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 				}
 			}
 
@@ -388,6 +401,8 @@ SCENARIO("Pokemon")
 					{
 						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)}
 							   == pokemon.getNatureIDsArray()));
+
+						CHECK(checkStats(pokemon, 71, 71, 55, 49, 51, 57, 48));
 					}
 				}
 
@@ -395,10 +410,12 @@ SCENARIO("Pokemon")
 				{
 					pokemon.setNatureIDsArray({NatureID{200}}, natureRegistry);
 
-					THEN("the pokemon's natures are properly updated")
+					THEN("the pokemon's natures are not updated")
 					{
-						CHECK((pokemon.getNatureIDsArray()
-							   == std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)}));
+						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)}
+							   == pokemon.getNatureIDsArray()));
+
+						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
 				}
 			}
@@ -406,7 +423,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("IV array")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonIVsArray")
 			{
@@ -415,6 +439,8 @@ SCENARIO("Pokemon")
 				THEN("the IV array matches")
 				{
 					CHECK((pokemon.getPokemonIVsArray() == expected));
+
+					CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 				}
 			}
 
@@ -428,6 +454,8 @@ SCENARIO("Pokemon")
 					THEN("the IV array is properly set")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
+
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 28, 27));
 					}
 				}
 
@@ -439,6 +467,8 @@ SCENARIO("Pokemon")
 					THEN("the IV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonIVsArray() == expected));
+
+						CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 					}
 				}
 			}
@@ -446,7 +476,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("EV array")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonEV")
 			{
@@ -455,6 +492,8 @@ SCENARIO("Pokemon")
 				THEN("the EV array matches")
 				{
 					CHECK((pokemon.getPokemonEVsArray() == expected));
+
+					CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 				}
 			}
 
@@ -468,6 +507,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is properly set")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 25, 25));
 					}
 				}
 
@@ -479,6 +519,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 
@@ -490,6 +531,7 @@ SCENARIO("Pokemon")
 					THEN("the EV array is unchanged")
 					{
 						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 			}
@@ -661,13 +703,24 @@ SCENARIO("Pokemon")
 
 		GIVEN("nature array index")
 		{
-			Pokemon pokemon{makePokemon({.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)},
+					.mHealth = 100,
+					.mLevel = 20,
+				}),
+			};
 
 			WHEN("calling getNatureID")
 			{
 				THEN("the nature matches")
 				{
 					CHECK((toNatureID(BuiltinNatureID::Hasty) == pokemon.getNatureID(0)));
+
+					CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 				}
 			}
 
@@ -680,6 +733,8 @@ SCENARIO("Pokemon")
 					THEN("the pokemon's nature is properly updated")
 					{
 						CHECK((toNatureID(BuiltinNatureID::Lonely) == pokemon.getNatureID(0)));
+
+						CHECK(checkStats(pokemon, 71, 71, 55, 49, 51, 57, 48));
 					}
 				}
 
@@ -690,6 +745,8 @@ SCENARIO("Pokemon")
 					THEN("the pokemon's nature is not updated")
 					{
 						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Hasty)));
+
+						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
 				}
 			}
@@ -697,7 +754,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("IV index")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonIVs = {0, 15, 30, 20, 2, 5}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonIV")
 			{
@@ -709,6 +773,8 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getPokemonIV(3) == 20));
 					CHECK((pokemon.getPokemonIV(4) == 2));
 					CHECK((pokemon.getPokemonIV(5) == 5));
+
+					CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 				}
 			}
 
@@ -721,6 +787,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is properly set")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 13));
+
+						CHECK((pokemon.getMaximumHealth() == 41));
+						CHECK((pokemon.getHealth() == 41));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 
@@ -731,6 +805,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is properly set")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 31));
+
+						CHECK((pokemon.getMaximumHealth() == 43));
+						CHECK((pokemon.getHealth() == 43));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 
@@ -741,6 +823,14 @@ SCENARIO("Pokemon")
 					THEN("the IV is unchanged")
 					{
 						CHECK((pokemon.getPokemonIV(0) == 0));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 28));
+						CHECK((pokemon.getSpAttack() == 27));
+						CHECK((pokemon.getSpDefense() == 25));
+						CHECK((pokemon.getSpeed() == 25));
 					}
 				}
 			}
@@ -748,7 +838,14 @@ SCENARIO("Pokemon")
 
 		GIVEN("EV index")
 		{
-			Pokemon pokemon{makePokemon({.mPokemonEVs = {30, 52, 85, 47, 241, 50}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+					.mHealth = 100,
+					.mLevel = 10,
+				}),
+			};
 
 			WHEN("calling getPokemonEV")
 			{
@@ -760,6 +857,14 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getPokemonEV(3) == 47));
 					CHECK((pokemon.getPokemonEV(4) == 241));
 					CHECK((pokemon.getPokemonEV(5) == 50));
+
+					CHECK((pokemon.getMaximumHealth() == 40));
+					CHECK((pokemon.getHealth() == 40));
+					CHECK((pokemon.getAttack() == 26));
+					CHECK((pokemon.getDefense() == 27));
+					CHECK((pokemon.getSpAttack() == 26));
+					CHECK((pokemon.getSpDefense() == 31));
+					CHECK((pokemon.getSpeed() == 26));
 				}
 			}
 
@@ -772,16 +877,27 @@ SCENARIO("Pokemon")
 					THEN("the EV is properly set")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 13));
+
+						CHECK((pokemon.getMaximumHealth() == 40));
+						CHECK((pokemon.getHealth() == 40));
+						CHECK((pokemon.getAttack() == 26));
+						CHECK((pokemon.getDefense() == 27));
+						CHECK((pokemon.getSpAttack() == 26));
+						CHECK((pokemon.getSpDefense() == 31));
+						CHECK((pokemon.getSpeed() == 26));
 					}
 				}
 
-				GIVEN("an EV of 31")
+				GIVEN("an EV of 42")
 				{
-					pokemon.setPokemonEV(0, 31);
+					pokemon.setPokemonEV(4, 0);
+					pokemon.setPokemonEV(0, 42);
 
 					THEN("the EV is properly set")
 					{
-						CHECK((pokemon.getPokemonEV(0) == 31));
+						CHECK((pokemon.getPokemonEV(0) == 42));
+
+						CHECK(checkStats(pokemon, 41, 41, 26, 27, 26, 25, 26));
 					}
 				}
 
@@ -793,6 +909,8 @@ SCENARIO("Pokemon")
 					THEN("the EV is unchanged")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
+
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 25, 26));
 					}
 				}
 
@@ -803,6 +921,8 @@ SCENARIO("Pokemon")
 					THEN("the EV is unchanged")
 					{
 						CHECK((pokemon.getPokemonEV(0) == 30));
+
+						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
 			}
@@ -863,6 +983,24 @@ SCENARIO("Pokemon")
 				THEN("the pokemon's maximum health is properly updated")
 				{
 					CHECK((13 == pokemon.getMaximumHealth()));
+				}
+			}
+
+			WHEN("lowering base HP so calculated maximum health falls below current health")
+			{
+				pokemon.setLevel(50);
+				pokemon.setMaximumHealth(100);
+				pokemon.setHealth(150);
+
+				REQUIRE((pokemon.getMaximumHealth() == 160));
+				REQUIRE((pokemon.getHealth() == 150));
+
+				pokemon.setMaximumHealth(20);
+
+				THEN("maximum health and current health both decrease by the same amount")
+				{
+					CHECK((pokemon.getMaximumHealth() == 80));
+					CHECK((pokemon.getHealth() == 70));
 				}
 			}
 		}
@@ -985,7 +1123,15 @@ SCENARIO("Pokemon")
 
 	GIVEN("get/set level and level damage factor")
 	{
-		Pokemon pokemon{makePokemon({.mLevel = 20})};
+		Pokemon pokemon{
+			makePokemon({
+				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+				.mHealth = 100,
+				.mLevel = 20,
+			}),
+		};
 
 		WHEN("calling getLevel and getLevelDamageFactor")
 		{
@@ -993,6 +1139,8 @@ SCENARIO("Pokemon")
 			{
 				CHECK((20 == pokemon.getLevel()));
 				CHECK((10 == pokemon.getLevelDamageFactor()));
+
+				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
@@ -1004,29 +1152,45 @@ SCENARIO("Pokemon")
 			{
 				CHECK((30 == pokemon.getLevel()));
 				CHECK((14 == pokemon.getLevelDamageFactor()));
+
+				CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
 			}
 		}
 	}
 
 	GIVEN("get/set Pokemon ID")
 	{
-		Pokemon pokemon{makePokemon({.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard)})};
+		Pokemon pokemon{
+			makePokemon({
+				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+				.mHealth = 100,
+				.mLevel = 20,
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+			}),
+		};
 
 		WHEN("calling getPokemonID")
 		{
 			THEN("the expected ID is returned")
 			{
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Charizard)));
+
+				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
 		WHEN("calling setPokemonID")
 		{
-			pokemon.setPokemonID(toPokemonID(BuiltinPokemonID::Blastoise), {});
+			PokemonStats stats{.mMaxHealth = 200, .mAttack = 200, .mDefense = 200, .mSpAttack = 200, .mSpDefense = 200, .mSpeed = 200};
+			pokemon.setPokemonID(toPokemonID(BuiltinPokemonID::Blastoise), stats);
 
 			THEN("the ID is properly updated")
 			{
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Blastoise)));
+
+				CHECK(checkStats(pokemon, 111, 111, 90, 95, 91, 97, 88));
 			}
 		}
 	}
@@ -1418,7 +1582,7 @@ SCENARIO("Pokemon")
 		}
 	}
 
-	GIVEN("resolveNatureMetadata and recomputeStats")
+	GIVEN("resolveNatureMetadata")
 	{
 		Pokemon pokemon{
     		makePokemon({
@@ -1978,6 +2142,95 @@ SCENARIO("Pokemon")
 					CHECK((pokemon.getSpDefense() == expectedSpDefense));
 					CHECK((pokemon.getSpeed() == expectedSpeed));
 				}
+			}
+		}
+	}
+
+	GIVEN("recomputeStats")
+	{
+		Pokemon pokemon{
+			makePokemon({
+				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+				.mHealth = 100,
+				.mLevel = 10,
+			}),
+		};
+
+		GIVEN("a damaged Pokemon")
+		{
+			Pokemon damagedPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mHealth = 25,
+					.mLevel = 10,
+				}),
+			};
+
+			REQUIRE((damagedPokemon.getMaximumHealth() == 40));
+			REQUIRE((damagedPokemon.getHealth() == 25));
+
+			damagedPokemon.setPokemonIV(0, 13);
+
+			THEN("increasing maximum health preserves the amount of missing health")
+			{
+				CHECK((damagedPokemon.getMaximumHealth() == 41));
+				CHECK((damagedPokemon.getHealth() == 26));
+			}
+		}
+
+		GIVEN("a fainted Pokemon")
+		{
+			pokemon.setHealth(0);
+			pokemon.setPokemonIV(0, 31);
+
+			THEN("increasing maximum health does not revive it")
+			{
+				CHECK((pokemon.getMaximumHealth() == 43));
+				CHECK((pokemon.getHealth() == 0));
+				CHECK(pokemon.isFainted());
+			}
+		}
+
+		GIVEN("a Pokemon with more current health than a maximum health decrease")
+		{
+			Pokemon lowHealthPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
+					.mHealth = 5,
+					.mLevel = 10,
+				}),
+			};
+
+			lowHealthPokemon.setPokemonIV(0, 0);
+
+			THEN("decreasing maximum health leaves current health at a minimum of 1")
+			{
+				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
+				CHECK((lowHealthPokemon.getHealth() == 2));
+				CHECK_FALSE(lowHealthPokemon.isFainted());
+			}
+		}
+
+		GIVEN("a Pokemon with less current health than a maximum health decrease")
+		{
+			Pokemon lowHealthPokemon{
+				makePokemon({
+					.mStats = {.mMaxHealth = 100},
+					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
+					.mHealth = 2,
+					.mLevel = 10,
+				}),
+			};
+
+			lowHealthPokemon.setPokemonIV(0, 0);
+
+			THEN("decreasing maximum health leaves current health at a minimum of 1")
+			{
+				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
+				CHECK((lowHealthPokemon.getHealth() == 1));
+				CHECK_FALSE(lowHealthPokemon.isFainted());
 			}
 		}
 	}
