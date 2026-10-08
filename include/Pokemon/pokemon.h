@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/07/2026
+	@date 10/08/2026
 	@since 0.3.0
-	@version 0.12.48
+	@version 0.12.49
 	@author Matthew Moore
 */
 
@@ -89,9 +89,9 @@ namespace PocketCore::Pokemon
 		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
 		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/07/2026
+		@date 10/08/2026
 		@since 0.3.0
-		@version 0.12.48
+		@version 0.12.49
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -442,7 +442,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated maximum health.
 				@return The maximum health value.
 				@since 0.9.14
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getMaximumHealth() const
 			{
@@ -452,7 +452,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Attack statistic.
 				@return The Attack value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getAttack() const
 			{
@@ -462,7 +462,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Defense statistic.
 				@return The Defense value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getDefense() const
 			{
@@ -472,7 +472,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Special Attack statistic.
 				@return The Special Attack value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getSpAttack() const
 			{
@@ -482,7 +482,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Special Defense statistic.
 				@return The Special Defense value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getSpDefense() const
 			{
@@ -492,7 +492,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Speed statistic.
 				@return The Speed value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			ATTR_NODISCARD constexpr us getSpeed() const
 			{
@@ -567,7 +567,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs The individual values to validate and copy; no reference to the input is retained.
 				@post The calculated stats reflect the stored IVs after either validation outcome.
 				@since 0.12.23
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void setPokemonIVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs)
 			{
@@ -583,7 +583,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonEVs The effort values to validate and copy; no reference to the input is retained.
 				@post The calculated stats reflect the stored EVs after either validation outcome.
 				@since 0.12.23
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void setPokemonEVsArray(const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
 			{
@@ -644,12 +644,12 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Resolves all nature slots and immediately recomputes the calculated stats.
 				@details Resolves nature multipliers from the registry, then invokes @ref recomputeStats. If any nature is unregistered,
-			   retains the existing identifiers, resets all multiplier rows to neutral values, and recomputes using those values.
+			   retains both the existing identifiers and multiplier rows, then recomputes using those unchanged inputs.
 				@param[in] natureIDs The nature identifiers to store.
 				@param[in] natureRegistry Non-owning registry reference used during this call; no reference is retained.
 				@post The calculated stats reflect the stored nature multipliers after either lookup outcome.
 				@since 0.11.6
-				@version 0.12.47
+				@version 0.12.49
 			*/
 			constexpr void setNatureIDsArray(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
 											 const NatureRegistry &natureRegistry)
@@ -694,7 +694,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIV The individual value to store; must be within the configured IV bounds to be stored as supplied.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
 				@since 0.12.23
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void setPokemonIV(const ub slotIndex, const us pokemonIV)
 			{
@@ -717,7 +717,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonEV The effort value to store, subject to the per-stat and aggregate EV limits.
 				@pre slotIndex < POKEMON_STAT_COUNT; violation triggers an assertion.
 				@since 0.12.23
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void setPokemonEV(const ub slotIndex, const us pokemonEV)
 			{
@@ -813,7 +813,7 @@ namespace PocketCore::Pokemon
 				@param[in] natureRegistry Non-owning registry reference used during this call; no reference is retained.
 				@pre slotIndex < MAX_NATURES_PER_POKEMON; violation triggers an assertion.
 				@since 0.11.6
-				@version 0.12.47
+				@version 0.12.49
 			*/
 			constexpr void setNatureID(const ub slotIndex, const NatureID natureID, const NatureRegistry &natureRegistry)
 			{
@@ -835,7 +835,7 @@ namespace PocketCore::Pokemon
 				@details Uses the existing calculated maximum; does not invoke @ref recomputeStats or change stat inputs.
 				@param[in] health The requested current health value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setHealth(const us health)
 			{
@@ -850,7 +850,7 @@ namespace PocketCore::Pokemon
 				@post Current health does not exceed @ref getMaximumHealth; zero current health remains zero and non-zero health stays at
 			   least 1.
 				@since 0.9.14
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void setMaximumHealth(const us maximumHealth)
 			{
@@ -862,7 +862,7 @@ namespace PocketCore::Pokemon
 				@details Invokes @ref recomputeStats after storing the base stat.
 				@param[in] attack The new base Attack value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setAttack(const us attack)
 			{
@@ -874,7 +874,7 @@ namespace PocketCore::Pokemon
 				@details Invokes @ref recomputeStats after storing the base stat.
 				@param[in] defense The new base Defense value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setDefense(const us defense)
 			{
@@ -886,7 +886,7 @@ namespace PocketCore::Pokemon
 				@details Invokes @ref recomputeStats after storing the base stat.
 				@param[in] spAttack The new base Special Attack value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setSpAttack(const us spAttack)
 			{
@@ -898,7 +898,7 @@ namespace PocketCore::Pokemon
 				@details Invokes @ref recomputeStats after storing the base stat.
 				@param[in] spDefense The new base Special Defense value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setSpDefense(const us spDefense)
 			{
@@ -910,7 +910,7 @@ namespace PocketCore::Pokemon
 				@details Invokes @ref recomputeStats after storing the base stat.
 				@param[in] speed The new base Speed value.
 				@since 0.3.0
-				@version 0.12.23
+				@version 0.12.49
 			*/
 			constexpr void setSpeed(const us speed)
 			{
@@ -936,7 +936,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonID The new PokemonID value.
 				@param[in] baseStats The new base stats to copy; no reference is retained.
 				@since 0.12.23
-				@version 0.12.24
+				@version 0.12.49
 			*/
 			constexpr void setPokemonID(const PokemonID pokemonID, const PokemonStats &baseStats)
 			{
@@ -1020,7 +1020,7 @@ namespace PocketCore::Pokemon
 			   health, preserving the amount of missing health. A Pokemon with zero health stays fainted; a living Pokemon is never reduced
 			   below 1 health by a stat change.
 				@since 0.12.23
-				@version 0.12.48
+				@version 0.12.49
 			*/
 			constexpr void recomputeStats()
 			{
@@ -1087,15 +1087,16 @@ namespace PocketCore::Pokemon
 			/*! @brief Resolves and stores the nature multipliers for the supplied nature identifiers.
 				@details Looks up each nature's metadata in @p natureRegistry and stages its stat multipliers before committing. The
 			   identifiers and resolved multipliers are replaced once every lookup succeeds. An unregistered nature retains the existing
-			   identifiers but resets all multiplier rows to neutral values. Does not recalculate stats; callers invoke @ref recomputeStats
-			   after either lookup outcome.
+			   identifiers and multiplier rows without installing fallback values. Does not recalculate stats; callers invoke @ref
+			   recomputeStats after either lookup outcome.
 				@pre @p natureRegistry must outlive this call; @ref Pokemon does not own the registry.
 				@post On success, @ref mNatureIDs equals @p natureIDs and @ref mNatureMultipliers holds the resolved multipliers; on
-			   lookup failure, identifiers are unchanged and multipliers are neutral.
+			   lookup failure, both identifiers and multipliers remain unchanged.
 				@param[in] natureIDs The nature identifier slots to resolve.
 				@param[in] natureRegistry The registry used to resolve each nature's stat multipliers.
+				@note During construction, a lookup failure preserves the neutral defaults of @ref mNatureMultipliers.
 				@since 0.12.47
-				@version 0.12.47
+				@version 0.12.49
 			*/
 			constexpr void resolveNatureMultipliers(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
 													const NatureRegistry &natureRegistry)
@@ -1108,9 +1109,6 @@ namespace PocketCore::Pokemon
 
 					if (metadata == nullptr)
 					{
-						std::array<double, POKEMON_STAT_COUNT> defaultMultipliers{};
-						defaultMultipliers.fill(NATURE_STAT_BASE_MULTIPLIER);
-						mNatureMultipliers.fill(defaultMultipliers);
 						return;
 					}
 
@@ -1170,7 +1168,9 @@ namespace PocketCore::Pokemon
 
 		private:
 			/*! @brief The nature multipliers affecting the Pokemon's stats. */
-			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{};
+			std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> mNatureMultipliers{
+				{{NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER,
+				  NATURE_STAT_BASE_MULTIPLIER, NATURE_STAT_BASE_MULTIPLIER}}};
 
 			/*! @brief The non-owning display name. */
 			std::string_view mName{};

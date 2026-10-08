@@ -89,12 +89,25 @@ Authoritative source for a **single Pokemon instance**. It splits into three gro
 | `setAttack()`, `setDefense()`, `setSpAttack()`, `setSpDefense()`, `setSpeed()` | Replaces the corresponding base stat and recomputes all calculated stats.                                                                                                               |
 | `setPokemonID()`                                                               | Replaces species identity and the supplied base-stat record, then recomputes.                                                                                                           |
 | `setNatureID()`                                                                | Resolves and stores the nature's multipliers, then recomputes. An unregistered ID leaves state unchanged and does not recompute.                                                        |
-| `setNatureIDsArray()`                                                          | Resolves multipliers and recomputes. If any ID is unregistered, existing IDs are retained, all multiplier rows become neutral, and stats are recomputed from those neutral multipliers. |
-| `setMaximumHealth()`                                                           | Replaces base HP, recomputes all calculated stats, and clamps current HP to the new calculated maximum without healing.                                                                 |
+| `setNatureIDsArray()`                                                          | Resolves multipliers and recomputes. If any ID is unregistered, existing identifiers and multiplier rows remain unchanged; stats are recomputed from those retained inputs.             |
+| `setMaximumHealth()`                                                           | Replaces base HP and recomputes all calculated stats, preserving missing health through the shared HP adjustment rules.                                                                 |
 
 Invalid IV/EV values and arrays leave the corresponding stored inputs unchanged. Calculated stats still reflect those retained inputs on return.
 
-`setMaximumHealth()` accepts **base HP**, not the desired calculated maximum: `getMaximumHealth()` returns the value derived from base HP, IVs, EVs, level, and nature multipliers. Other stat-input setters do not adjust current HP, even when recalculation lowers the maximum. `setHealth()` clamps its argument to the existing calculated maximum without recalculating stats.
+`setMaximumHealth()` accepts **base HP**, not the desired calculated maximum: `getMaximumHealth()` returns the value derived from base HP, IVs, EVs, level, and nature multipliers. `setHealth()` clamps its argument to the existing calculated maximum without recalculating stats.
+
+#### Current HP during recalculation
+
+`recomputeStats()` also adjusts current HP when the calculated maximum changes. This policy applies to every stat-input setter that invokes it, including IV, EV, level, base-stat, species, and nature mutations; it is not specific to `setMaximumHealth()`.
+
+- **Fainted Pokemon:** Current HP remains zero, even if maximum HP increases. Stat changes do not revive a Pokemon.
+- **Maximum HP increases:** A living Pokemon gains the same amount of current HP, capped at the new maximum. The amount of missing HP is preserved.
+- **Maximum HP decreases:** A living Pokemon loses the same amount of current HP, with a floor of 1. Missing HP is preserved unless that floor is reached; a stat change does not faint a living Pokemon.
+- **Maximum HP is unchanged:** Current HP is unchanged.
+
+For example, decreasing maximum HP from 160 to 80 while current HP is 150 leaves 70 current HP, preserving the 10 missing HP. Increasing maximum HP from 40 to 41 while current HP is 25 leaves 26 current HP. A decrease of 3 maximum HP while current HP is 2 leaves 1 current HP.
+
+This replaces the earlier clamp-only HP policy: shrinking maximum HP does not simply set current HP to the new maximum, and increasing maximum HP can increase current HP. Calculated-stat consistency remains immediate in either case.
 
 ### `BattleSlot` (`include/Battle/battleState.h`)
 
