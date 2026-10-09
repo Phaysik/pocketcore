@@ -33,7 +33,6 @@ using PocketCore::Location::LOCATION_NAME_ROUTE1;
 using PocketCore::Location::LocationID;
 using PocketCore::Location::LocationMeta;
 using PocketCore::Location::NO_LOCATION_ID;
-using PocketCore::Location::PokemonOrigin;
 using PocketCore::Location::toLocationID;
 using PocketCore::Registry::Location::LocationRegistry;
 using PocketCore::Registry::RegistryErrorInfo;
@@ -57,7 +56,6 @@ SCENARIO("LocationRegistry")
 			LocationMeta expected{
 				.mName = std::string(LOCATION_NAME_ROUTE1),
 				.mLocationID = toLocationID(BuiltinLocationID::Route1),
-				.mOrigin = PokemonOrigin::Wild,
 			};
 
 			const LocationMeta *actual{registry.getLocationMetadata(toLocationID(BuiltinLocationID::Route1))};

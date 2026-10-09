@@ -1,7 +1,7 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the location registry.
 	@date 10/09/2026
-	@since 0.8.0
+	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
 */
@@ -11,14 +11,8 @@
 
 #include <string_view>
 
-#include "Core/typedefs.h"
-
 namespace PocketCore::Location
 {
-	using PocketCore::Core::us;
-
-	inline constexpr us MIN_ENCOUNTER_LEVEL{1};
-
 	inline constexpr std::string_view LOCATION_NAME_NONE{"None"};
 	inline constexpr std::string_view LOCATION_NAME_ROUTE1{"Route 1"};
 } // namespace PocketCore::Location

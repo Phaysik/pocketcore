@@ -39,7 +39,6 @@ using PocketCore::Location::LOCATION_NAME_ROUTE1;
 using PocketCore::Location::LocationID;
 using PocketCore::Location::LocationMeta;
 using PocketCore::Location::NO_LOCATION_ID;
-using PocketCore::Location::PokemonOrigin;
 using PocketCore::Location::toLocationID;
 using PocketCore::Registry::Location::LocationRegistry;
 using PocketCore::Registry::RegistryErrorInfo;
@@ -208,10 +207,7 @@ SCENARIO("LocationRegistryConfiguration")
 
 		WHEN("a unique location definition is added")
 		{
-			LocationMeta definition{
-				.mName = "TestLocationName",
-				.mOrigin = PokemonOrigin::Egg,
-			};
+			LocationMeta definition{.mName = "TestLocationName"};
 
 			std::expected<LocationID, RegistryErrorInfo> result{config.addLocation(definition)};
 

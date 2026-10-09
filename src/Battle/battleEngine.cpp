@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.9.16
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -96,7 +96,7 @@ namespace PocketCore::Battle
 			|| mProvider->mMoveRegistry == nullptr || mProvider->mItemRegistry == nullptr || mProvider->mTypeRegistry == nullptr
 			|| mProvider->mStatusRegistry == nullptr || mProvider->mWeatherRegistry == nullptr || mProvider->mTerrainRegistry == nullptr
 			|| mProvider->mMultiplierRegistry == nullptr || mProvider->mNatureRegistry == nullptr || mProvider->mPokemonRegistry == nullptr
-			|| mProvider->mLearnsetRegistry == nullptr)
+			|| mProvider->mLearnsetRegistry == nullptr || mProvider->mLocationRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}

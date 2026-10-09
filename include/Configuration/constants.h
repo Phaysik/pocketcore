@@ -99,7 +99,7 @@ namespace PocketCore::Configuration
 	/*! @brief The maximum number of locations assigned to one Pokemon.
 		@see docs/config-boundary.md
 	*/
-	inline constexpr ub MAX_LOCATIONS_PER_POKEMON{20};
+	inline constexpr ub MAX_ENCOUNTERS_PER_POKEMON{20};
 
 	/*! @brief The maximum number of registered Pokemon species.
 		@see docs/config-boundary.md

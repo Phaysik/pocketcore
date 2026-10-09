@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.12.23
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,10 +11,14 @@
 
 #include <string_view>
 
-#include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Core::us;
+
+	inline constexpr us MIN_ENCOUNTER_LEVEL{1};
+
 	inline constexpr std::string_view POKEMON_NAME_NONE{"None"};
 	inline constexpr std::string_view POKEMON_NAME_BULBASAUR{"Bulbasaur"};
 	inline constexpr PokemonStats BULBASAUR_BASE_STATS{

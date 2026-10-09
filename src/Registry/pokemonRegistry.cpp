@@ -9,6 +9,7 @@
 #include "Registry/pokemonRegistry.h"
 
 #include <array>
+#include <cstddef>
 #include <expected>
 #include <span>
 
@@ -19,7 +20,6 @@
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Location/locationID.h"
-#include "Location/locationMeta.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
@@ -44,7 +44,6 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Location::LocationID;
-	using PocketCore::Location::LocationMeta;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Pokemon::getValidPokemonAbilities;
@@ -65,7 +64,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Validation::Pokemon::PokemonError;
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
-		const PokemonID pokemonID, const LocationID locationID, const PokemonInstantiationDependencies *dependencyRegistries,
+		const PokemonID pokemonID, const std::size_t encounterIndex, const PokemonInstantiationDependencies *dependencyRegistries,
 		const std::span<const us, POKEMON_STAT_COUNT> *ivs, const std::span<const us, POKEMON_STAT_COUNT> *evs,
 		const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs,
 		const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
@@ -96,12 +95,10 @@ namespace PocketCore::Registry::Pokemon
 				RegistryErrorInfo{RegistryError::LearnsetNotFound, {}, "PokemonRegistry::instantiate: missing learnset metadata"}};
 		}
 
-		const LocationMeta *locationMeta{dependencyRegistries->mLocationRegistry->getLocationMetadata(locationID)};
-
-		if (locationMeta == nullptr)
+		if (encounterIndex > pokemonMeta->mEncounters.size())
 		{
 			return std::unexpected{
-				RegistryErrorInfo{RegistryError::LocationNotFound, {}, "PokemonRegistry::instantiate: missing location metadata"}};
+				RegistryErrorInfo{RegistryError::LocationNotFound, {}, "PokemonRegistry::instantiate: missing encounter metadata"}};
 		}
 
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};

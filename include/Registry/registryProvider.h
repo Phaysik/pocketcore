@@ -1,8 +1,8 @@
 /*! @file registryProvider.h
 	@brief Provides a registry provider that holds references to all registry objects.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.8.2
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 #define INCLUDE_REGISTRY_REGISTRY_PROVIDER_H
 
 #include "Registry/learnsetRegistry.h"
+#include "Registry/locationRegistry.h"
 #include "Registry/pokemonRegistry.h"
 
 #include "abilityRegistry.h"
@@ -28,6 +29,7 @@ namespace PocketCore::Registry
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
 	using PocketCore::Registry::Learnset::LearnsetRegistry;
+	using PocketCore::Registry::Location::LocationRegistry;
 	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Registry::Multiplier::MultiplierRegistry;
 	using PocketCore::Registry::Nature::NatureRegistry;
@@ -42,9 +44,9 @@ namespace PocketCore::Registry
 		@details Provides a lightweight dependency bundle passed into systems that require cross-registry lookup access.
 		All pointers are non-owning and must refer to registry instances whose lifetime exceeds the provider usage.
 		@warning Dereferencing any null member pointer is undefined behavior.
-		@date 10/08/2026
+		@date 10/09/2026
 		@since 0.8.2
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct RegistryProvider
@@ -104,6 +106,11 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref LearnsetRegistry instance for learnset metadata queries.
 			*/
 			const LearnsetRegistry *mLearnsetRegistry{nullptr};
+
+			/*! @brief Non-owning pointer to the location metadata registry.
+				@details Must point to a valid @ref LocationRegistry instance for location metadata queries.
+			*/
+			const LocationRegistry *mLocationRegistry{nullptr};
 	};
 } // namespace PocketCore::Registry
 

@@ -31,7 +31,6 @@ namespace PocketCore::Registry::Location
 	using PocketCore::Location::LOCATION_NAME_ROUTE1;
 	using PocketCore::Location::LocationID;
 	using PocketCore::Location::LocationMeta;
-	using PocketCore::Location::PokemonOrigin;
 	using PocketCore::Location::toLocationID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 
@@ -71,7 +70,6 @@ namespace PocketCore::Registry::Location
 				addBuiltin({
 					.mName = std::string(LOCATION_NAME_ROUTE1),
 					.mLocationID = toLocationID(BuiltinLocationID::Route1),
-					.mOrigin = PokemonOrigin::Wild,
 				});
 			}
 

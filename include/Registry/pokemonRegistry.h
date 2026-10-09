@@ -9,6 +9,7 @@
 #ifndef INCLUDE_REGISTRY_POKEMON_REGISTRY_H
 #define INCLUDE_REGISTRY_POKEMON_REGISTRY_H
 
+#include <cstddef>
 #include <expected>
 #include <optional>
 #include <span>
@@ -385,7 +386,7 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier for the Pokemon to create.
-				@param[in] locationID The built-in or custom stable identifier for where the Pokemon was found.
+				@param[in] encounterIndex The index of the encounter metadata to use from the pokemon.
 				@param[in] natureRegistry The nature registry to use for resolving nature IDs. Defaults to nullptr.
 				@param[in] ivs The IVs of the Pokemon. Defaults to nullptr.
 				@param[in] evs The EVs of the Pokemon. Defaults to @ref MIN_EV_STAT_VALUE.
@@ -398,7 +399,7 @@ namespace PocketCore::Registry::Pokemon
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
-				const PokemonID pokemonID, const LocationID locationID,
+				const PokemonID pokemonID, const std::size_t encounterIndex,
 				const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
 				const std::span<const us, POKEMON_STAT_COUNT> *ivs = nullptr, const std::span<const us, POKEMON_STAT_COUNT> *evs = nullptr,
 				const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs = nullptr,

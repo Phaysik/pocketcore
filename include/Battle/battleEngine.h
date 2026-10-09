@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.10.3
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -57,9 +57,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 09/17/2026
+		@date 10/09/2026
 		@since 0.10.3
-		@version 0.12.37
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -115,7 +115,7 @@ namespace PocketCore::Battle
 				@param[in] activePokemonPerSide Number of simultaneously active Pokemon required from each party. Must be greater than zero.
 				@return Void on success, or a validation error without starting the battle.
 				@since 0.10.3
-				@version 0.12.50
+				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> startBattle(const std::span<Pokemon *const> &partyA,
 																			  const std::span<Pokemon *const> &partyB,
