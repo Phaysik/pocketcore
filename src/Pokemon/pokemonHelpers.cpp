@@ -1,32 +1,70 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.12.28
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Pokemon/pokemonHelpers.h"
 
+#include <array>
 #include <cstddef>
+#include <expected>
 #include <optional>
 #include <ostream>
+#include <span>
 #include <string_view>
 
+#include "Configuration/constants.h"
+#include "Core/typedefs.h"
+#include "Learnset/learnsetMeta.h"
+#include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/natureRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Validation/Ability/abilityError.h"
+#include "Validation/Ability/abilityValidation.h"
+#include "Validation/Item/itemError.h"
+#include "Validation/Item/itemValidation.h"
+#include "Validation/Move/moveError.h"
+#include "Validation/Move/moveValidation.h"
+#include "Validation/Nature/natureError.h"
+#include "Validation/Nature/natureValidation.h"
+#include "Validation/Pokemon/pokemonError.h"
+#include "Validation/Pokemon/pokemonValidation.h"
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
+	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+	using PocketCore::Core::us;
+	using PocketCore::Learnset::LearnsetMeta;
+	using PocketCore::Nature::NatureID;
+	using PocketCore::Registry::Nature::NatureRegistry;
+	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Validation::Ability::AbilityError;
+	using PocketCore::Validation::Ability::validateAbilityMetadata;
+	using PocketCore::Validation::Item::ItemError;
+	using PocketCore::Validation::Item::validateItemMetadata;
+	using PocketCore::Validation::Move::MoveError;
+	using PocketCore::Validation::Move::validateMoveMetadata;
+	using PocketCore::Validation::Nature::NatureError;
+	using PocketCore::Validation::Nature::validateNatureMetadata;
+	using PocketCore::Validation::Pokemon::PokemonError;
+	using Validation::Pokemon::isValidPokemonEVArray;
+	using Validation::Pokemon::isValidPokemonIVArray;
+
 #if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
 #endif
 
-	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon,
-										const PocketCore::Registry::RegistryProvider &registryProvider)
+	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider)
 	{
 		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
 										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
@@ -155,4 +193,125 @@ namespace PocketCore::Pokemon
 #if ATTR_ONLY_GCC
 	#pragma GCC diagnostic pop
 #endif
+
+	std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs,
+															std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
+															const NatureRegistry &natureRegistry)
+	{
+		if (natureIDs != nullptr)
+		{
+			if (const std::expected<void, NatureError> error{validateNatureMetadata(natureIDs, natureRegistry)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*natureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
+		}
+		else
+		{
+		}
+
+		return {};
+	}
+
+	std::expected<void, AbilityError> getValidPokemonAbilities(const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
+															   std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
+															   const AbilityRegistry &abilityRegistry)
+	{
+		if (abilityIDs != nullptr)
+		{
+			if (const std::expected<void, AbilityError> error{validateAbilityMetadata(abilityIDs, abilityRegistry)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*abilityIDs, validAbilityIDs.begin(), [](const AbilityID abilityID) { return abilityID; });
+		}
+		else
+		{
+		}
+
+		return {};
+	}
+
+	std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs,
+														std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
+														const ItemRegistry &itemRegistry)
+	{
+		if (itemIDs != nullptr)
+		{
+			if (const std::expected<void, ItemError> error{validateItemMetadata(itemIDs, itemRegistry)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*itemIDs, validItemIDs.begin(), [](const ItemID itemID) { return itemID; });
+		}
+		else
+		{
+		}
+
+		return {};
+	}
+
+	std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs,
+														std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
+														const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
+														const PokemonMeta &pokemonMeta)
+	{
+		if (moveIDs != nullptr)
+		{
+			if (const std::expected<void, MoveError> error{validateMoveMetadata(moveIDs, moveRegistry)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*moveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
+		}
+		else
+		{
+			if (learnsetMeta.mName == "test" && pokemonMeta.mName == "test")
+			{
+			}
+		}
+
+		return {};
+	}
+
+	std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us, POKEMON_STAT_COUNT> *ivs,
+														 std::array<us, POKEMON_STAT_COUNT> &validIVs)
+	{
+		if (ivs != nullptr)
+		{
+			if (const std::expected<void, PokemonError> error{isValidPokemonIVArray(*ivs)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*ivs, validIVs.begin(), [](const us pokemonIV) { return pokemonIV; });
+		}
+		else
+		{
+		}
+		return {};
+	}
+
+	std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us, POKEMON_STAT_COUNT> *evs,
+														 std::array<us, POKEMON_STAT_COUNT> &validEVs)
+	{
+		if (evs != nullptr)
+		{
+			if (const std::expected<void, PokemonError> error{isValidPokemonEVArray(*evs)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+
+			std::ranges::transform(*evs, validEVs.begin(), [](const us pokemonEV) { return pokemonEV; });
+		}
+		else
+		{
+		}
+
+		return {};
+	}
 } // namespace PocketCore::Pokemon

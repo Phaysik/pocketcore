@@ -1,13 +1,15 @@
 /*! @file builtInTypeID.h
 	@brief Declares the canonical enumeration of Pokemon elemental types.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.9.2
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_TYPES_TYPES_H
 #define INCLUDE_TYPES_TYPES_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -57,11 +59,11 @@ namespace PocketCore::Type
 		@param[in] builtinType The built-in type to convert.
 		@return The corresponding open type identifier.
 		@since 0.4.0
-		@version 0.9.8
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr TypeID toTypeID(const BuiltinTypeID builtinType) noexcept
 	{
-		return TypeID{static_cast<ub>(builtinType)};
+		return TypeID{std::to_underlying(builtinType)};
 	}
 } // namespace PocketCore::Type
 

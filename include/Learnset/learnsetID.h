@@ -1,13 +1,13 @@
 /*! @file learnsetID.h
-	@brief Contains the learnset status
-	@date 09/11/2026
+	@brief Defines the open identifier used for built-in and user-defined learnsets.
+	@date 10/09/2026
 	@since 0.12.24
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_LEARNSET_LEARNSETID_H
-#define INCLUDE_LEARNSET_LEARNSETID_H
+#ifndef INCLUDE_LEARNSET_LEARNSET_ID_H
+#define INCLUDE_LEARNSET_LEARNSET_ID_H
 
 #include "ID/idInterface.h"
 

@@ -1,8 +1,8 @@
 /*! @file effectRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring effect metadata.
-	@date 08/28/2026
+	@date 10/09/2026
 	@since 0.10.0
-	@version 0.12.9
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -36,9 +36,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the effect-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/28/2026
+			@date 10/09/2026
 			@since 0.10.0
-			@version 0.12.9
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct EffectRegistryConfigurationPolicy
@@ -50,10 +50,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"effect"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate effect name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateEffect};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when an effect lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::EffectNotFound};
 		};
 	} // namespace Detail

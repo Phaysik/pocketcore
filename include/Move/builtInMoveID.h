@@ -1,13 +1,15 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.5.2
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_MOVE_BUILTIN_MOVE_ID_H
 #define INCLUDE_MOVE_BUILTIN_MOVE_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -44,11 +46,11 @@ namespace PocketCore::Move
 		@param[in] builtinMoveID The built-in move to convert.
 		@return The corresponding open move identifier.
 		@since 0.5.2
-		@version 0.12.13
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr MoveID toMoveID(const BuiltinMoveID builtinMoveID) noexcept
 	{
-		return MoveID{static_cast<ub>(builtinMoveID)};
+		return MoveID{std::to_underlying(builtinMoveID)};
 	}
 } // namespace PocketCore::Move
 

@@ -2,7 +2,7 @@
 	@brief Contains the function declarations for the user-configurable type registry facade.
 	@date 10/09/2026
 	@since 0.2.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Configuration
 		@details Encapsulates the type-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/27/2026
+			@date 10/09/2026
 			@since 0.9.0
-			@version 0.12.8
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct TypeRegistryConfigurationPolicy
@@ -53,10 +53,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"type"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate type name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateType};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when a type lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::TypeNotFound};
 		};
 	} // namespace Detail

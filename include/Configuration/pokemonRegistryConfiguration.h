@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring pokemon metadata.
-	@date 09/12/2026
+	@date 10/09/2026
 	@since 0.12.0
-	@version 0.12.28
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -37,9 +37,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the pokemon-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/30/2026
+			@date 10/09/2026
 			@since 0.12.0
-			@version 0.12.11
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct PokemonRegistryConfigurationPolicy
@@ -51,10 +51,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"pokemon"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate pokemon name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicatePokemon};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when a pokemon lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::PokemonNotFound};
 		};
 	} // namespace Detail

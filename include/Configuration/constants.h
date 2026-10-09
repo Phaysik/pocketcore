@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 10/06/2026
+	@date 10/09/2026
 	@since 0.1.0
-	@version 0.12.48
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -90,6 +90,16 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr ub MAX_NATURES_PER_POKEMON{1};
+
+	/*! @brief The maximum number of registered locations.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr us MAX_LOCATIONS{1'000};
+
+	/*! @brief The maximum number of locations assigned to one Pokemon.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub MAX_LOCATIONS_PER_POKEMON{20};
 
 	/*! @brief The maximum number of registered Pokemon species.
 		@see docs/config-boundary.md

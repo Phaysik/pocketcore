@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring multiplier metadata.
-	@date 08/30/2026
+	@date 10/09/2026
 	@since 0.8.1
-	@version 0.12.11
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the multiplier-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/26/2026
+			@date 10/09/2026
 			@since 0.8.1
-			@version 0.12.7
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct MultiplierRegistryConfigurationPolicy
@@ -53,10 +53,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"multiplier"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate multiplier name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateMultiplier};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when a multiplier lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::MultiplierNotFound};
 		};
 	} // namespace Detail

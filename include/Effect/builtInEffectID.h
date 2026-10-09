@@ -1,13 +1,15 @@
 /*! @file builtInEffectID.h
 	@brief Contains the effect types
-	@date 09/23/2026
+	@date 10/09/2026
 	@since 0.10.0
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_BUILT_IN_EFFECT_ID_H
 #define INCLUDE_EFFECT_BUILT_IN_EFFECT_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -91,11 +93,11 @@ namespace PocketCore::Effect
 		@param[in] builtinEffectID The built-in effect to convert.
 		@return The corresponding open effect identifier.
 		@since 0.10.0
-		@version 0.10.0
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr EffectID toEffectID(const BuiltinEffectID builtinEffectID) noexcept
 	{
-		return EffectID{static_cast<ub>(builtinEffectID)};
+		return EffectID{std::to_underlying(builtinEffectID)};
 	}
 } // namespace PocketCore::Effect
 

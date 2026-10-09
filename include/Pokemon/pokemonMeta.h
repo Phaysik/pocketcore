@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,12 +11,14 @@
 
 #include <array>
 #include <string>
+#include <utility>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
+#include "Location/locationID.h"
 #include "Move/moveID.h"
 #include "Types/typeID.h"
 
@@ -26,6 +28,7 @@ namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
+	using PocketCore::Configuration::MAX_LOCATIONS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
@@ -33,6 +36,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::LearnsetID;
+	using PocketCore::Location::LocationID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
 
@@ -60,11 +64,11 @@ namespace PocketCore::Pokemon
 		@return The zero-based index represented by @p stat.
 		@note This constexpr conversion supports both compile-time and runtime stat indexing and is no-throw.
 		@since 0.12.23
-		@version 0.12.23
+		@version 0.12.51
 	*/
 	constexpr std::size_t toIndex(const PokemonStat stat) noexcept
 	{
-		return static_cast<std::size_t>(stat);
+		return std::to_underlying(stat);
 	}
 
 	/*! @brief Provides the number of elements required by arrays indexed with @ref PokemonStat. */
@@ -74,9 +78,9 @@ namespace PocketCore::Pokemon
 		@brief Stores one pokemon's base stats.
 		@details This struct contains the base stats for a pokemon, including health, attack, defense, special attack, special defense, and
 	   speed.
-		@date 09/11/2026
+		@date 10/09/2026
 		@since 0.12.22
-		@version 0.12.23
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct PokemonStats
@@ -87,28 +91,28 @@ namespace PocketCore::Pokemon
 				@param[in] other The PokemonStats instance to compare.
 				@return True when both instances contain equivalent metadata; otherwise false.
 				@since 0.12.22
-				@version 0.12.23
+				@version 0.12.51
 			*/
 			ATTR_NODISCARD constexpr bool operator==(const PokemonStats &other) const noexcept = default;
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
-			/*! @brief The Pokemon's  max health stat. */
+			/*! @brief The Pokemon's max health stat. */
 			us mMaxHealth{};
 
-			/*! @brief The Pokemon's  attack stat. */
+			/*! @brief The Pokemon's attack stat. */
 			us mAttack{};
 
-			/*! @brief The Pokemon's  defense stat. */
+			/*! @brief The Pokemon's defense stat. */
 			us mDefense{};
 
-			/*! @brief The Pokemon's  special attack stat. */
+			/*! @brief The Pokemon's special attack stat. */
 			us mSpAttack{};
 
-			/*! @brief The Pokemon's  special defense stat. */
+			/*! @brief The Pokemon's special defense stat. */
 			us mSpDefense{};
 
-			/*! @brief The Pokemon's  speed stat. */
+			/*! @brief The Pokemon's speed stat. */
 			us mSpeed{};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
@@ -118,9 +122,9 @@ namespace PocketCore::Pokemon
 		@brief Stores one pokemon's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/11/2026
+		@date 10/09/2026
 		@since 0.11.6
-		@version 0.12.24
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -143,14 +147,14 @@ namespace PocketCore::Pokemon
 			/*! @brief The Pokemon's pool of available abilities. */
 			std::array<AbilityID, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
 
+			/*! @brief The Pokemon's available locations. */
+			std::array<LocationID, MAX_LOCATIONS_PER_POKEMON> mLocationID{};
+
 			/*! @brief The Pokemon's base stats. */
 			PokemonStats mBaseStats{};
 
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
-
-			/*! @brief The Pokemon's level. */
-			us mLevel{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			PokemonID mPokemonID{};

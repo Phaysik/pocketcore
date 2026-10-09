@@ -12,6 +12,7 @@ This document defines the boundary between compile-time storage capacities in `i
 | `MAX_MOVES`                             | Registry capacity            | Move registry                             | None                                     |
 | `MAX_STATUSES`                          | Registry capacity            | Status registry                           | None                                     |
 | `MAX_NATURES`                           | Registry capacity            | Nature registry                           | None                                     |
+| `MAX_LOCATIONS`                         | Registry capacity            | Location registry                         | None                                     |
 | `MAX_POKEMON`                           | Registry capacity            | Pokemon registry                          | None                                     |
 | `MAX_LEARNSETS`                         | Registry capacity            | Learnset registry                         | None                                     |
 | `MAX_WEATHERS`                          | Registry capacity            | Weather registry                          | None                                     |
@@ -24,6 +25,7 @@ This document defines the boundary between compile-time storage capacities in `i
 | `MAX_ITEMS_PER_POKEMON`                 | Physical storage capacity    | Pokemon item array                        | None                                     |
 | `MAX_MOVES_PER_POKEMON`                 | Physical storage capacity    | Pokemon move and PP arrays                | None                                     |
 | `MAX_NATURES_PER_POKEMON`               | Physical storage capacity    | Pokemon nature arrays                     | None                                     |
+| `MAX_LOCATIONS_PER_POKEMON`             | Physical storage capacity    | Pokemon location arrays                   | None                                     |
 | `MAX_NON_VOLATILE_STATUSES_PER_POKEMON` | Physical storage capacity    | Pokemon non-volatile status array         | `RulesetPolicy::mMaxNonVolatileStatuses` |
 | `MAX_VOLATILE_STATUSES_PER_POKEMON`     | Physical storage capacity    | Volatile-status storage                   | `RulesetPolicy::mMaxVolatileStatuses`    |
 | `MAX_ACTIVE_WEATHERS_ON_FIELD`          | Physical storage capacity    | Battle-state weather array                | `RulesetPolicy::mMaxWeathers`            |

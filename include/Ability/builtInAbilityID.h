@@ -1,13 +1,15 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.4.0
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_ABILITY_BUILTIN_ABILITY_ID_H
 #define INCLUDE_ABILITY_BUILTIN_ABILITY_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -47,11 +49,11 @@ namespace PocketCore::Ability
 		@param[in] builtinAbilityID The built-in ability to convert.
 		@return The corresponding open ability identifier.
 		@since 0.4.0
-		@version 0.5.1
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr AbilityID toAbilityID(const BuiltinAbilityID builtinAbilityID) noexcept
 	{
-		return AbilityID{static_cast<ub>(builtinAbilityID)};
+		return AbilityID{std::to_underlying(builtinAbilityID)};
 	}
 } // namespace PocketCore::Ability
 

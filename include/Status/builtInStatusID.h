@@ -1,13 +1,15 @@
 /*! @file builtinStatusID.h
 	@brief Defines identifiers for statuses compiled into PocketCore.
-	@date 09/28/2026
+	@date 10/09/2026
 	@since 0.7.0
-	@version 0.12.45
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_STATUS_BUILTIN_STATUS_ID_H
 #define INCLUDE_STATUS_BUILTIN_STATUS_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -47,11 +49,11 @@ namespace PocketCore::Status
 		@param[in] builtinStatusID The built-in status to convert.
 		@return The corresponding open status identifier.
 		@since 0.7.0
-		@version 0.7.0
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr StatusID toStatusID(const BuiltinStatusID builtinStatusID) noexcept
 	{
-		return StatusID{static_cast<ub>(builtinStatusID)};
+		return StatusID{std::to_underlying(builtinStatusID)};
 	}
 } // namespace PocketCore::Status
 

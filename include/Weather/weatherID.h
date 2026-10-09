@@ -1,13 +1,13 @@
 /*! @file weatherID.h
-	@brief Contains the weather status
-	@date 07/30/2026
+	@brief Defines the open identifier used for built-in and user-defined weathers.
+	@date 10/09/2026
 	@since 0.8.0
-	@version 0.8.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_WEATHER_WEATHERID_H
-#define INCLUDE_WEATHER_WEATHERID_H
+#ifndef INCLUDE_WEATHER_WEATHER_ID_H
+#define INCLUDE_WEATHER_WEATHER_ID_H
 
 #include "ID/idInterface.h"
 

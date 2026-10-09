@@ -1,13 +1,13 @@
 /*! @file pokemonID.h
-	@brief Contains the pokemon status
-	@date 08/22/2026
+	@brief Defines the open identifier used for built-in and user-defined pokemons.
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.11.6
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_POKEMON_POKEMONID_H
-#define INCLUDE_POKEMON_POKEMONID_H
+#ifndef INCLUDE_POKEMON_POKEMON_ID_H
+#define INCLUDE_POKEMON_POKEMON_ID_H
 
 #include "ID/idInterface.h"
 

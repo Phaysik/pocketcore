@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring move metadata.
-	@date 08/27/2026
+	@date 10/09/2026
 	@since 0.6.0
-	@version 0.12.8
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -40,9 +40,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the move-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/26/2026
+			@date 10/09/2026
 			@since 0.6.0
-			@version 0.12.7
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct MoveRegistryConfigurationPolicy
@@ -54,10 +54,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"move"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate move name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateMove};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when a move lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::MoveNotFound};
 		};
 	} // namespace Detail

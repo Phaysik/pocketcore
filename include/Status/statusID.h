@@ -1,13 +1,14 @@
 /*! @file statusID.h
+	@brief Defines the open identifier used for built-in and user-defined statuses.
 	@brief Contains the status effects
-	@date 07/29/2026
+	@date 10/09/2026
 	@since 0.3.0
-	@version 0.7.7
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_STATUS_STATUSID_H
-#define INCLUDE_STATUS_STATUSID_H
+#ifndef INCLUDE_STATUS_STATUS_ID_H
+#define INCLUDE_STATUS_STATUS_ID_H
 
 #include "ID/idInterface.h"
 

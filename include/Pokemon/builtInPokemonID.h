@@ -1,13 +1,15 @@
 /*! @file builtinPokemonID.h
 	@brief Defines identifiers for pokemons compiled into PocketCore.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_POKEMON_BUILTIN_POKEMON_ID_H
 #define INCLUDE_POKEMON_BUILTIN_POKEMON_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -48,11 +50,11 @@ namespace PocketCore::Pokemon
 		@param[in] builtinPokemonID The built-in pokemon to convert.
 		@return The corresponding open pokemon identifier.
 		@since 0.11.6
-		@version 0.12.13
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr PokemonID toPokemonID(const BuiltinPokemonID builtinPokemonID) noexcept
 	{
-		return PokemonID{static_cast<ub>(builtinPokemonID)};
+		return PokemonID{std::to_underlying(builtinPokemonID)};
 	}
 } // namespace PocketCore::Pokemon
 

@@ -1,13 +1,15 @@
 /*! @file builtinNatureID.h
 	@brief Defines identifiers for natures compiled into PocketCore.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_NATURE_BUILTIN_NATURE_ID_H
 #define INCLUDE_NATURE_BUILTIN_NATURE_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -64,11 +66,11 @@ namespace PocketCore::Nature
 		@param[in] builtinNatureID The built-in nature to convert.
 		@return The corresponding open nature identifier.
 		@since 0.11.6
-		@version 0.12.13
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr NatureID toNatureID(const BuiltinNatureID builtinNatureID) noexcept
 	{
-		return NatureID{static_cast<ub>(builtinNatureID)};
+		return NatureID{std::to_underlying(builtinNatureID)};
 	}
 } // namespace PocketCore::Nature
 
