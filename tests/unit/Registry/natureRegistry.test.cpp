@@ -1,13 +1,14 @@
 /*! @file natureRegistry.test.cpp
 	@brief C++ file for running tests for the NatureRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/natureRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,17 +16,20 @@
 #include <utility>
 
 #include "Configuration/constants.h"
+#include "Configuration/natureRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Nature/builtInNatureID.h"
 #include "Nature/constants.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 using PocketCore::Configuration::NATURE_STAT_BOOST_MULTIPLIER;
 using PocketCore::Configuration::NATURE_STAT_WEAKNESS_MULTIPLIER;
+using PocketCore::Configuration::NatureRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Nature::BuiltinNatureID;
 using PocketCore::Nature::NATURE_NAME_ADAMANT;
@@ -59,6 +63,7 @@ using PocketCore::Nature::NatureMeta;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Registry::Nature::NatureRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -562,6 +567,57 @@ SCENARIO("NatureRegistry")
 			THEN("a known nature ID has an entry")
 			{
 				CHECK(registry.hasNature(NO_NATURE_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			NatureRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			NatureRegistryConfiguration other{};
+			std::expected<NatureID, RegistryErrorInfo> result{other.addNature({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			NatureRegistryConfiguration other{};
+			std::expected<NatureID, RegistryErrorInfo> result{other.removeNature(toNatureID(BuiltinNatureID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			NatureRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateNature(toNatureID(BuiltinNatureID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

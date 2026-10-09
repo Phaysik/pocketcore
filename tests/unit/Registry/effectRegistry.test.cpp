@@ -1,19 +1,21 @@
 /*! @file effectRegistry.test.cpp
 	@brief C++ file for running tests for the EffectRegistry.
-	@date 09/23/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.43
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/effectRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "Configuration/effectRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
 #include "Effect/constants.h"
@@ -42,9 +44,11 @@
 #include "EffectHandler/terrainHandler.h"
 #include "EffectHandler/typeEffectivenessHandler.h"
 #include "EffectHandler/weatherHandler.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::EffectRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Effect::applyAccuracyCheck;
 using PocketCore::Effect::applyBaseDamage;
@@ -103,6 +107,7 @@ using PocketCore::Effect::EffectMeta;
 using PocketCore::Effect::NO_EFFECT_ID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Effect::EffectRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -595,6 +600,57 @@ SCENARIO("EffectRegistry")
 			THEN("a known effect ID has an entry")
 			{
 				CHECK(registry.hasEffect(NO_EFFECT_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			EffectRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			EffectRegistryConfiguration other{};
+			std::expected<EffectID, RegistryErrorInfo> result{other.addEffect({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			EffectRegistryConfiguration other{};
+			std::expected<EffectID, RegistryErrorInfo> result{other.removeEffect(toEffectID(BuiltinEffectID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			EffectRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateEffect(toEffectID(BuiltinEffectID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

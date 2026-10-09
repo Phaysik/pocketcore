@@ -1,27 +1,31 @@
 /*! @file multiplierRegistry.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/multiplierRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "Configuration/multiplierRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::MultiplierRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Multiplier::BuiltinMultiplierID;
 using PocketCore::Multiplier::MULTIPLIER_NAME_ABILITY;
@@ -41,6 +45,7 @@ using PocketCore::Multiplier::MultiplierMeta;
 using PocketCore::Multiplier::NO_MULTIPLIER_ID;
 using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Registry::Multiplier::MultiplierRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -324,6 +329,57 @@ SCENARIO("MultiplierRegistry")
 			THEN("a known multiplier ID has an entry")
 			{
 				CHECK(registry.hasMultiplier(NO_MULTIPLIER_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			MultiplierRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			MultiplierRegistryConfiguration other{};
+			std::expected<MultiplierID, RegistryErrorInfo> result{other.addMultiplier({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			MultiplierRegistryConfiguration other{};
+			std::expected<MultiplierID, RegistryErrorInfo> result{other.removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			MultiplierRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

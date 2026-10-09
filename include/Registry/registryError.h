@@ -1,6 +1,6 @@
 /*! @file registryError.h
 	@brief Defines registry error types and metadata.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.12.1
 	@version 0.12.50
 	@author Matthew Moore
@@ -30,6 +30,8 @@ namespace PocketCore::Registry
 	enum class RegistryError : ub
 	{
 		MaxCapacity,		 /*!< The registry has reached its maximum number of entries. */
+		DuplicateMetadata,	 /*!< A metadata with the given name already exists. */
+		MetadataNotFound,	 /*!< No metadata matching the input was found. */
 		DuplicateType,		 /*!< A type with the given name already exists. */
 		TypeNotFound,		 /*!< No type matching the input was found. */
 		MatchupMismatch,	 /*!< The number of provided matchup entries does not match the registered count. */
@@ -130,6 +132,12 @@ namespace PocketCore::Registry
 				{
 					case RegistryError::MaxCapacity:
 						mErrorName = "MaxCapacity";
+						break;
+					case RegistryError::DuplicateMetadata:
+						mErrorName = "DuplicateMetadata";
+						break;
+					case RegistryError::MetadataNotFound:
+						mErrorName = "MetadataNotFound";
 						break;
 					case RegistryError::DuplicateType:
 						mErrorName = "DuplicateType";

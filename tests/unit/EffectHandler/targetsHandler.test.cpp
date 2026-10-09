@@ -1,6 +1,6 @@
 /*! @file targetsHandler.test.cpp
 	@brief C++ file for running tests for the TargetsHandler.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.8.7
 	@version 0.12.50
 	@author Matthew Moore
@@ -19,6 +19,7 @@
 #include "Registry/moveRegistry.h"
 #include "Registry/moveRegistry.testHelper.h"
 #include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -32,6 +33,7 @@ using PocketCore::Move::MoveID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
 using PocketCore::Registry::RegistryProvider;
+using PocketCore::Testing::getNullMoveRegistryProvider;
 using PocketCore::Testing::hasTargetsMultiplier;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::registerMove;
@@ -45,6 +47,37 @@ SCENARIO("TargetsHandler")
 	MoveRegistryConfiguration moveConfiguration{};
 	const MoveRegistry &moveRegistry{moveConfiguration.getRuntimeRegistry()};
 	RegistryProvider provider{.mMoveRegistry = &moveRegistry};
+
+	GIVEN("a null move provider")
+	{
+		EffectContext context{makeEffectContext({.mMoveID = toMoveID(BuiltinMoveID::Pound)})};
+		RegistryProvider nullProvider{getNullMoveRegistryProvider()};
+
+		WHEN("applying target handling")
+		{
+			targetsHandler.apply(battleState, context, nullProvider);
+
+			THEN("no targets spread multiplier is added")
+			{
+				CHECK_FALSE(hasTargetsMultiplier(context));
+			}
+		}
+	}
+
+	GIVEN("an invalid moveID")
+	{
+		EffectContext context{makeEffectContext({.mMoveID = MoveID{200}})};
+
+		WHEN("applying target handling")
+		{
+			targetsHandler.apply(battleState, context, provider);
+
+			THEN("no targets spread multiplier is added")
+			{
+				CHECK_FALSE(hasTargetsMultiplier(context));
+			}
+		}
+	}
 
 	GIVEN("a move that targets a single opponent")
 	{

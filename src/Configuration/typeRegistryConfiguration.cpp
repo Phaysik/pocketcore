@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.2.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -452,6 +452,18 @@ namespace PocketCore::Configuration
 		}
 
 		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::updateType(const std::string_view &typeName,
+																								const TypeMeta &typeMeta)
+	{
+		return mutateMetadata(typeName, "updateType", [&typeMeta](TypeMeta &metadata) { metadata = typeMeta; });
+	}
+
+	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> TypeRegistryConfiguration::updateType(const TypeID typeID,
+																								const TypeMeta &typeMeta)
+	{
+		return mutateMetadata(typeID, "updateType", [&typeMeta](TypeMeta &metadata) { metadata = typeMeta; });
 	}
 
 	ATTR_NODISCARD std::expected<TypeID, RegistryErrorInfo> TypeRegistryConfiguration::removeType(const std::string_view &typeName)

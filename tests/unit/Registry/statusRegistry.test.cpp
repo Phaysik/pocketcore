@@ -1,21 +1,24 @@
 /*! @file statusRegistry.test.cpp
 	@brief C++ file for running tests for the StatusRegistry.
-	@date 09/28/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.45
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/statusRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Interaction/interaction.h"
+#include "Registry/registryError.h"
 #include "Status/builtInStatusID.h"
 #include "Status/constants.h"
 #include "Status/statusID.h"
@@ -23,8 +26,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Interaction::InteractionAction;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
@@ -315,6 +320,57 @@ SCENARIO("StatusRegistry")
 			THEN("a known status ID has an entry")
 			{
 				CHECK(registry.hasStatus(NO_STATUS_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			StatusRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			StatusRegistryConfiguration other{};
+			std::expected<StatusID, RegistryErrorInfo> result{other.addStatus({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			StatusRegistryConfiguration other{};
+			std::expected<StatusID, RegistryErrorInfo> result{other.removeStatus(toStatusID(BuiltinStatusID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			StatusRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

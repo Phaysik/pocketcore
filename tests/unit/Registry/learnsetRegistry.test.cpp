@@ -1,6 +1,6 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 08/08/2026
+	@date 10/09/2026
 	@since 0.12.50
 	@version 0.12.50
 	@author Matthew Moore
@@ -14,14 +14,17 @@
 #include <string_view>
 #include <utility>
 
+#include "Configuration/learnsetRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Learnset/builtInLearnsetID.h"
 #include "Learnset/constants.h"
 #include "Learnset/learnsetID.h"
 #include "Learnset/learnsetMeta.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::LearnsetRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::LEARNSET_NAME_BLASTOISE;
@@ -39,6 +42,7 @@ using PocketCore::Learnset::LearnsetMeta;
 using PocketCore::Learnset::NO_LEARNSET_ID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Registry::Learnset::LearnsetRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -305,6 +309,57 @@ SCENARIO("LearnsetRegistry")
 			THEN("a known learnset ID has an entry")
 			{
 				CHECK(registry.hasLearnset(NO_LEARNSET_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			LearnsetRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			LearnsetRegistryConfiguration other{};
+			std::expected<LearnsetID, RegistryErrorInfo> result{other.addLearnset({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			LearnsetRegistryConfiguration other{};
+			std::expected<LearnsetID, RegistryErrorInfo> result{other.removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			LearnsetRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateLearnset(toLearnsetID(BuiltinLearnsetID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

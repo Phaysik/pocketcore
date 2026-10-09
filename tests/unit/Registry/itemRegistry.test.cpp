@@ -1,13 +1,14 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.5.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/itemRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,18 +16,21 @@
 #include <utility>
 
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/itemRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
 #include "Item/builtInItemID.h"
 #include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
 using PocketCore::Battle::BattleTargetID;
+using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
@@ -39,6 +43,7 @@ using PocketCore::Item::ItemMeta;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Item::toItemID;
 using PocketCore::Registry::Item::ItemRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -237,6 +242,57 @@ SCENARIO("ItemRegistry")
 			THEN("a known item ID has an entry")
 			{
 				CHECK(registry.hasItem(NO_ITEM_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			ItemRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			ItemRegistryConfiguration other{};
+			std::expected<ItemID, RegistryErrorInfo> result{other.addItem({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			ItemRegistryConfiguration other{};
+			std::expected<ItemID, RegistryErrorInfo> result{other.removeItem(toItemID(BuiltinItemID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			ItemRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateItem(toItemID(BuiltinItemID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

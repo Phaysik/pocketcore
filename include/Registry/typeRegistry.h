@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.1.0
-	@version 0.12.22
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -85,9 +85,9 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 09/11/2026
+		@date 10/09/2026
 		@since 0.1.0
-		@version 0.12.22
+		@version 0.12.50
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -366,12 +366,12 @@ namespace PocketCore::Registry::Type
 				@param[in] defender The defending-type index.
 				@return The @ref TypeEffectiveness value at that cell.
 				@since 0.1.0
-				@version 0.12.19
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD constexpr TypeEffectiveness getTypeChartCell(const us attacker, const us defender) const
 			{
 				const TypeMeta *metadata{getEntry(attacker)};
-				const std::optional<us> defenderIndex{findIndexByID(TypeID{defender})};
+				const std::optional<us> defenderIndex{findIndexByID(TypeID{defender})}; // LCOV_EXCL_BR
 
 				if (metadata == nullptr || !defenderIndex.has_value())
 				{
@@ -387,12 +387,12 @@ namespace PocketCore::Registry::Type
 				@return A non-owning pointer to the effectiveness value, or nullptr when the attacker is not registered or the defender ID
 			   is out of range. The pointer remains valid until the corresponding metadata is replaced or the registry is destroyed.
 				@since 0.12.19
-				@version 0.12.19
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD constexpr const TypeEffectiveness *getTypeChartCell(const TypeID attacker, const TypeID defender) const
 			{
 				const TypeMeta *metadata{getMetadata(attacker)};
-				const std::optional<us> defenderIndex{findIndexByID(defender)};
+				const std::optional<us> defenderIndex{findIndexByID(defender)}; // LCOV_EXCL_BR
 
 				if (metadata == nullptr || !defenderIndex.has_value())
 				{

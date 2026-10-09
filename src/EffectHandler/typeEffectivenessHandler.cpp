@@ -33,6 +33,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Type::getEffectivenessValue;
 	using PocketCore::Type::NO_TYPE_ID;
+	using PocketCore::Type::TypeEffectiveness;
 	using PocketCore::Type::TypeID;
 
 	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const
@@ -77,11 +78,11 @@ namespace PocketCore::Effect
 				continue;
 			}
 
-			const Type::TypeEffectiveness effectiveness{
+			const TypeEffectiveness effectiveness{
 				provider.mTypeRegistry->getTypeChartCell(attackerIndex.value(), defenderIndex.value()),
 			};
 
-			if (effectiveness == Type::TypeEffectiveness::NOT_DEFINED)
+			if (effectiveness == TypeEffectiveness::NOT_DEFINED)
 			{
 				continue;
 			}

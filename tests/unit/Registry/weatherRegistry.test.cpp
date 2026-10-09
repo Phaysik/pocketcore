@@ -1,20 +1,23 @@
 /*! @file weatherRegistry.test.cpp
 	@brief C++ file for running tests for the WeatherRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/weatherRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "Configuration/weatherRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "Registry/registryError.h"
 #include "Weather/builtInWeatherID.h"
 #include "Weather/constants.h"
 #include "Weather/weatherID.h"
@@ -22,7 +25,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Configuration::WeatherRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Weather::WeatherRegistry;
 using PocketCore::Weather::BuiltinWeatherID;
 using PocketCore::Weather::NO_WEATHER_ID;
@@ -318,6 +323,57 @@ SCENARIO("WeatherRegistry")
 			THEN("a known weather ID has an entry")
 			{
 				CHECK(registry.hasWeather(NO_WEATHER_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			WeatherRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			WeatherRegistryConfiguration other{};
+			std::expected<WeatherID, RegistryErrorInfo> result{other.addWeather({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			WeatherRegistryConfiguration other{};
+			std::expected<WeatherID, RegistryErrorInfo> result{other.removeWeather(toWeatherID(BuiltinWeatherID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			WeatherRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateWeather(toWeatherID(BuiltinWeatherID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

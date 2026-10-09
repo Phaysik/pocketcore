@@ -1,25 +1,30 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.7.0
 	@version 0.12.50
 	@author Matthew Moore
 */
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
+#include "Configuration/fixedMetadataConfiguration.testHelper.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.testHelper.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Core::ub;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::CheckpointRegistry;
+using PocketCore::Testing::FixedConfiguration;
 using PocketCore::Testing::FixedMetaDataID;
 using PocketCore::Testing::FixedRegistry;
 using PocketCore::Testing::Metadata;
@@ -324,6 +329,58 @@ SCENARIO("FixedMetadataRegistry")
 				}
 				CHECK((actual.getNextID() != original.getNextID()));
 				CHECK((actual != original));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			FixedRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			FixedConfiguration other{};
+			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.addMetadata({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			FixedConfiguration other{};
+			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			FixedConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
+									 [](Metadata &metadata) { metadata = {.mName = "test"}; }),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRegistry()));
 			}
 		}
 	}
