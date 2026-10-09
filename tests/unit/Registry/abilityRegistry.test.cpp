@@ -1,13 +1,14 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.4.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/abilityRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -18,8 +19,10 @@
 #include "Ability/builtInAbilityID.h"
 #include "Ability/constants.h"
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/abilityRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
+#include "Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -34,10 +37,12 @@ using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
 using PocketCore::Battle::BattleTargetID;
+using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -233,6 +238,57 @@ SCENARIO("AbilityRegistry")
 			THEN("a known ability ID has an entry")
 			{
 				CHECK(registry.hasAbility(NO_ABILITY_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			AbilityRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			AbilityRegistryConfiguration other{};
+			std::expected<AbilityID, RegistryErrorInfo> result{other.addAbility({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			AbilityRegistryConfiguration other{};
+			std::expected<AbilityID, RegistryErrorInfo> result{other.removeAbility(toAbilityID(BuiltinAbilityID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			AbilityRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateAbility(toAbilityID(BuiltinAbilityID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

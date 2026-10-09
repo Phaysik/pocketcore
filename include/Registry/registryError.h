@@ -1,8 +1,8 @@
 /*! @file registryError.h
 	@brief Defines registry error types and metadata.
-	@date 08/26/2026
+	@date 10/09/2026
 	@since 0.12.1
-	@version 0.12.5
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -25,11 +25,13 @@ namespace PocketCore::Registry
 		@details Each value represents a distinct failure mode used by @ref RegistryErrorInfo for programmatic error handling.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 		@since 0.1.0
-		@version 0.12.0
+		@version 0.12.50
 	*/
 	enum class RegistryError : ub
 	{
 		MaxCapacity,		 /*!< The registry has reached its maximum number of entries. */
+		DuplicateMetadata,	 /*!< A metadata with the given name already exists. */
+		MetadataNotFound,	 /*!< No metadata matching the input was found. */
 		DuplicateType,		 /*!< A type with the given name already exists. */
 		TypeNotFound,		 /*!< No type matching the input was found. */
 		MatchupMismatch,	 /*!< The number of provided matchup entries does not match the registered count. */
@@ -53,6 +55,8 @@ namespace PocketCore::Registry
 		NatureNotFound,		 /*!< No nature matching the input was found. */
 		DuplicatePokemon,	 /*!< A Pokemon with the given name already exists. */
 		PokemonNotFound,	 /*!< No Pokemon matching the input was found. */
+		DuplicateLearnset,	 /*!< A Learnset with the given name already exists. */
+		LearnsetNotFound,	 /*!< No Learnset matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup Configuration/constants.h
@@ -73,7 +77,7 @@ namespace PocketCore::Registry
 		without requiring the caller to enable logging.
 		@note This type is a lightweight data carrier and stores non-owning string views.
 		@since 0.1.0
-		@version 0.12.0
+		@version 0.12.50
 	*/
 	struct RegistryErrorInfo
 	{
@@ -120,7 +124,7 @@ namespace PocketCore::Registry
 			/*! @brief Converts @ref mKind to a human-readable name.
 				@return A string view containing the enum name suitable for diagnostics and error messages.
 				@since 0.1.0
-				@version 0.12.0
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD constexpr std::string_view errorKindToString(const RegistryError errorKind) noexcept
 			{
@@ -128,6 +132,12 @@ namespace PocketCore::Registry
 				{
 					case RegistryError::MaxCapacity:
 						mErrorName = "MaxCapacity";
+						break;
+					case RegistryError::DuplicateMetadata:
+						mErrorName = "DuplicateMetadata";
+						break;
+					case RegistryError::MetadataNotFound:
+						mErrorName = "MetadataNotFound";
 						break;
 					case RegistryError::DuplicateType:
 						mErrorName = "DuplicateType";
@@ -197,6 +207,12 @@ namespace PocketCore::Registry
 						break;
 					case RegistryError::PokemonNotFound:
 						mErrorName = "PokemonNotFound";
+						break;
+					case RegistryError::DuplicateLearnset:
+						mErrorName = "DuplicateLearnset";
+						break;
+					case RegistryError::LearnsetNotFound:
+						mErrorName = "LearnsetNotFound";
 						break;
 					// LCOV_EXCL_START — Defensive: All enum values are handled, and the default case is unreachable, but this
 					// silences compiler warnings about unhandled enum values.

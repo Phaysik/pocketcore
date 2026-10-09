@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.4.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -282,6 +282,7 @@ SCENARIO("AbilityRegistryConfiguration")
 			}
 
 			abilityMetas.push_back({.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = {}});
+			const AbilityRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
 
 			THEN("registration reports a duplicate ability and the registry is rollback to the checkpoint before the erroneous addition")
@@ -289,6 +290,9 @@ SCENARIO("AbilityRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextAbilityID() == beforeBatch.getNextAbilityID()));
+				CHECK_FALSE(config.hasAbility("String_0000"));
 			}
 		}
 

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.testHelper.h
 	@brief Test helper for dealing with FixedMetadataRegistry concepts.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.12.22
-	@version 0.12.22
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -20,6 +21,7 @@
 namespace PocketCore::Testing
 {
 	using PocketCore::Core::ub;
+	using PocketCore::Registry::FixedMetadataRegistry;
 
 	struct FixedMetadataIDTag;
 	using FixedMetaDataID = PocketCore::ID::IDInterface<FixedMetadataIDTag, 0>;
@@ -42,7 +44,7 @@ namespace PocketCore::Testing
 
 	ATTR_NODISCARD constexpr FixedMetaDataID toFixedMetaDataID(const BuiltinFixedMetaDataID builtinFixedMetaDataID) noexcept
 	{
-		return FixedMetaDataID{static_cast<ub>(builtinFixedMetaDataID)};
+		return FixedMetaDataID{std::to_underlying(builtinFixedMetaDataID)};
 	}
 
 	struct Metadata
@@ -58,12 +60,14 @@ namespace PocketCore::Testing
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
-	class FixedRegistry : private PocketCore::Registry::FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>
+	class FixedRegistry : private FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>
 	{
 		private:
-			using Base = PocketCore::Registry::FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>;
+			using Base = FixedMetadataRegistry<Metadata, FixedMetaDataID, CAPACITY, &Metadata::mID>;
 
 		public:
+			ATTR_NODISCARD constexpr bool operator==(const FixedRegistry &other) const = default;
+
 			ATTR_NOINLINE explicit constexpr FixedRegistry()
 				: Base{static_cast<PocketCore::Core::us>(toFixedMetaDataID(BuiltinFixedMetaDataID::Test3).getValue() + 1U)}
 			{
@@ -100,6 +104,7 @@ namespace PocketCore::Testing
 		public:
 			constexpr CheckpointRegistry() : FixedRegistry{} {}
 
+			using FixedRegistry::addEntry;
 			using FixedRegistry::createCheckpoint;
 			using FixedRegistry::eraseEntry;
 			using FixedRegistry::restoreCheckpoint;

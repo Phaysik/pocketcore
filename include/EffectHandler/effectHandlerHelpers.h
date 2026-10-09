@@ -1,8 +1,8 @@
 /*! @file effectHandlerHelpers.h
 	@brief Contains the effect handler helpers
-	@date 09/02/2026
+	@date 10/08/2026
 	@since 0.7.2
-	@version 0.12.17
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -74,18 +74,18 @@ namespace PocketCore::Effect
 		@return `true` when a resolved type name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the type registry is unavailable, or no type matches.
 		@since 0.12.17
-		@version 0.12.17
+		@version 0.12.50
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasTypeByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 															  const std::string_view &expectedName)
 	{
-		if (battleSlot.mPokemon == nullptr || provider.typeRegistry == nullptr)
+		if (battleSlot.mPokemon == nullptr || provider.mTypeRegistry == nullptr)
 		{
 			return false;
 		}
 
 		return std::ranges::any_of(battleSlot.mPokemon->getTypeIDsArray(), [expectedName, &provider](const TypeID pokemonAbility) {
-			const std::optional<std::string_view> typeName{provider.typeRegistry->getTypeName(pokemonAbility)};
+			const std::optional<std::string_view> typeName{provider.mTypeRegistry->getTypeName(pokemonAbility)};
 			return typeName.has_value() && typeName.value() == expectedName;
 		});
 	}
@@ -116,18 +116,18 @@ namespace PocketCore::Effect
 		@return `true` when a resolved ability name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the ability registry is unavailable, or no ability matches.
 		@since 0.9.10
-		@version 0.12.17
+		@version 0.12.50
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																 const std::string_view &expectedName)
 	{
-		if (battleSlot.mPokemon == nullptr || provider.abilityRegistry == nullptr)
+		if (battleSlot.mPokemon == nullptr || provider.mAbilityRegistry == nullptr)
 		{
 			return false;
 		}
 
 		return std::ranges::any_of(battleSlot.mPokemon->getAbilityIDsArray(), [expectedName, &provider](const AbilityID pokemonAbility) {
-			const std::optional<std::string_view> abilityName{provider.abilityRegistry->getAbilityName(pokemonAbility)};
+			const std::optional<std::string_view> abilityName{provider.mAbilityRegistry->getAbilityName(pokemonAbility)};
 			return abilityName.has_value() && abilityName.value() == expectedName;
 		});
 	}
@@ -156,18 +156,18 @@ namespace PocketCore::Effect
 		@return `true` when a resolved item name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the item registry is unavailable, or no item matches.
 		@since 0.9.10
-		@version 0.12.17
+		@version 0.12.50
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 															  const std::string_view &expectedName)
 	{
-		if (battleSlot.mPokemon == nullptr || provider.itemRegistry == nullptr)
+		if (battleSlot.mPokemon == nullptr || provider.mItemRegistry == nullptr)
 		{
 			return false;
 		}
 
 		return std::ranges::any_of(battleSlot.mPokemon->getItemsIDsArray(), [expectedName, &provider](const ItemID pokemonItem) {
-			const std::optional<std::string_view> itemName{provider.itemRegistry->getItemName(pokemonItem)};
+			const std::optional<std::string_view> itemName{provider.mItemRegistry->getItemName(pokemonItem)};
 			return itemName.has_value() && itemName.value() == expectedName;
 		});
 	}
@@ -197,18 +197,18 @@ namespace PocketCore::Effect
 		@return `true` when a resolved nature name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the nature registry is unavailable, or no nature matches.
 		@since 0.11.6
-		@version 0.12.17
+		@version 0.12.50
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																const std::string_view &expectedName)
 	{
-		if (battleSlot.mPokemon == nullptr || provider.natureRegistry == nullptr)
+		if (battleSlot.mPokemon == nullptr || provider.mNatureRegistry == nullptr)
 		{
 			return false;
 		}
 
 		return std::ranges::any_of(battleSlot.mPokemon->getNatureIDsArray(), [expectedName, &provider](const NatureID natureID) {
-			const std::optional<std::string_view> natureName{provider.natureRegistry->getNatureName(natureID)};
+			const std::optional<std::string_view> natureName{provider.mNatureRegistry->getNatureName(natureID)};
 			return natureName.has_value() && natureName.value() == expectedName;
 		});
 	}

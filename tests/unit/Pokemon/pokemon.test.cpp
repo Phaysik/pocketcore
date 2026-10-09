@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 10/08/2026
 	@since 0.4.0
-	@version 0.12.49
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -23,6 +23,7 @@
 #include "Interaction/interactionApplicationError.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
+#include "Learnset/builtInLearnsetID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
 #include "Nature/builtInNatureID.h"
@@ -63,6 +64,8 @@ using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Item::toItemID;
+using PocketCore::Learnset::BuiltinLearnsetID;
+using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::NO_MOVE_ID;
@@ -74,6 +77,7 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonStats;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::Nature::NatureRegistry;
@@ -99,7 +103,7 @@ using PocketCore::Type::TypeID;
 SCENARIO("Pokemon")
 {
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
-	const NatureRegistry natureRegistry{*provider.natureRegistry};
+	const NatureRegistry natureRegistry{*provider.mNatureRegistry};
 
 	GIVEN("constructors")
 	{
@@ -107,6 +111,7 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				toPokemonID(BuiltinPokemonID::None),
+				toLearnsetID(BuiltinLearnsetID::None),
 				"TestMon",
 				{
 					.mMaxHealth = 100,
@@ -139,6 +144,7 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				toPokemonID(BuiltinPokemonID::None),
+				toLearnsetID(BuiltinLearnsetID::None),
 				"TestMon",
 				{
 					toMoveID(BuiltinMoveID::Facade),
@@ -1181,16 +1187,47 @@ SCENARIO("Pokemon")
 			}
 		}
 
-		WHEN("calling setPokemonID")
+		WHEN("calling setSpecies")
 		{
 			PokemonStats stats{.mMaxHealth = 200, .mAttack = 200, .mDefense = 200, .mSpAttack = 200, .mSpDefense = 200, .mSpeed = 200};
-			pokemon.setPokemonID(toPokemonID(BuiltinPokemonID::Blastoise), stats);
+			PokemonMeta meta{
+				.mBaseStats = stats,
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+			};
+
+			pokemon.setSpecies(meta);
 
 			THEN("the ID is properly updated")
 			{
-				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Blastoise)));
+				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Bulbasaur)));
 
 				CHECK(checkStats(pokemon, 111, 111, 90, 95, 91, 97, 88));
+			}
+		}
+	}
+
+	GIVEN("get Learnset ID")
+	{
+		Pokemon pokemon{
+			makePokemon({
+				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
+				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
+				.mHealth = 100,
+				.mLevel = 20,
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+			}),
+		};
+
+		WHEN("calling getLearnsetID")
+		{
+			THEN("the expected ID is returned")
+			{
+				CHECK((pokemon.getLearnsetID() == toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset)));
+
+				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 	}

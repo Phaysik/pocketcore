@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the NatureRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -261,6 +261,7 @@ SCENARIO("NatureRegistryConfiguration")
 			}
 
 			natureMetas.push_back({.mName = std::string(NATURE_NAME_HASTY)});
+			const NatureRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addNatures(natureMetas)};
 
 			THEN("registration reports a duplicate nature and the registry is rollback to the checkpoint before the erroneous addition")
@@ -268,6 +269,9 @@ SCENARIO("NatureRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateNature));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextNatureID() == beforeBatch.getNextNatureID()));
+				CHECK_FALSE(config.hasNature("String_0000"));
 			}
 		}
 

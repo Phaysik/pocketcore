@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 09/11/2026
+	@date 10/08/2026
 	@since 0.11.6
-	@version 0.12.24
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Pokemon
 	/*! @enum PokemonStat
 		@brief Identifies each Pokemon stat and its position in stat-indexed arrays.
 		@note All enum values except @ref PokemonStat::Count must be handled exhaustively when processing Pokemon stats.
-		@date 09/11/2026
+		@date 10/08/2026
 		@since 0.12.23
-		@version 0.12.23
+		@version 0.12.50
 		@author Matthew Moore
 	*/
 	enum class PokemonStat : ub
@@ -52,7 +52,7 @@ namespace PocketCore::Pokemon
 		SpecialAttack,	/*! @brief Identifies the Special Attack stat. */
 		SpecialDefense, /*! @brief Identifies the Special Defense stat. */
 		Speed,			/*! @brief Identifies the Speed stat. */
-		Count			/*! @brief Provides the number of usable stat values and is not itself a stat. */
+		Count,			/*! @brief Provides the number of usable stat values and is not itself a stat. */
 	};
 
 	/*! @brief Converts a Pokemon stat identifier to its zero-based array index.

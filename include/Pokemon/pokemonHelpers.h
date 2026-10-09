@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 09/28/2026
+	@date 10/08/2026
 	@since 0.12.28
-	@version 0.12.45
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -25,7 +25,7 @@ namespace PocketCore::Pokemon
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.11.2
-		@version 0.12.45
+		@version 0.12.50
 	*/
 	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Pokemon

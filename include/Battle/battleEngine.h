@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 09/23/2026
+	@date 10/08/2026
 	@since 0.10.3
-	@version 0.12.43
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -115,7 +115,7 @@ namespace PocketCore::Battle
 				@param[in] activePokemonPerSide Number of simultaneously active Pokemon required from each party. Must be greater than zero.
 				@return Void on success, or a validation error without starting the battle.
 				@since 0.10.3
-				@version 0.12.37
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> startBattle(const std::span<Pokemon *const> &partyA,
 																			  const std::span<Pokemon *const> &partyB,
@@ -128,7 +128,7 @@ namespace PocketCore::Battle
 				@param[in] actions The move and switch choices submitted by both trainers.
 				@return Void on success, or the first validation error before the state is mutated.
 				@since 0.10.7
-				@version 0.10.7
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> executeTurn(const std::span<const BattleAction> &actions);
 
@@ -285,7 +285,7 @@ namespace PocketCore::Battle
 			   Missing metadata or invalidated targets cancel execution without reporting an error.
 				@param[in] action The validated move action to execute.
 				@since 0.10.7
-				@version 0.11.0
+				@version 0.12.50
 			*/
 			void executeMove(const MoveAction &action);
 
@@ -385,7 +385,7 @@ namespace PocketCore::Battle
 				@post Nothing changes when damage application is disabled or the calculated damage is zero.
 				@note Fainting is detected separately by @ref processFaints.
 				@since 0.11.0
-				@version 0.12.10
+				@version 0.12.50
 			*/
 			void executeDamageApplication(const EffectContext &context, const BattleTarget &target);
 
@@ -434,7 +434,7 @@ namespace PocketCore::Battle
 				@param[in,out] context The event or move context shared by the dispatched sources.
 				@param[in] targeting Selects metadata target resolution or preservation of the context's existing target.
 				@since 0.10.3
-				@version 0.12.17
+				@version 0.12.50
 			*/
 			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
 									 const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting);

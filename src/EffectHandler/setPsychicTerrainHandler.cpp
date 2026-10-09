@@ -1,8 +1,8 @@
 /*! @file setPsychicTerrain.cpp
 	@brief Contains the set psychic terrain effect handler implementation
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.12.43
-	@version 0.12.46
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -39,7 +39,7 @@ namespace PocketCore::Effect
 										 const RegistryProvider &provider) const
 	{
 		const std::expected<void, InteractionApplicationError> result{
-			applyInteractions(toTerrainID(BuiltinTerrainID::Psychic), NO_TERRAIN_ID, *provider.terrainRegistry, state.mTerrainIDs,
+			applyInteractions(toTerrainID(BuiltinTerrainID::Psychic), NO_TERRAIN_ID, *provider.mTerrainRegistry, state.mTerrainIDs,
 							  &TerrainMeta::mTerrainInteractions, state.mRuleset.mMaxTerrains, state.mRuleset.mReplaceTerrainWhenFull),
 		};
 

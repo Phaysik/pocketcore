@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.8.7
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -261,6 +261,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 			}
 
 			multiplierMetas.push_back({.mName = std::string(MULTIPLIER_NAME_CRITICAL)});
+			const MultiplierRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
 
 			THEN("registration reports a duplicate multiplier and the registry is rollback to the checkpoint before the erroneous addition")
@@ -268,6 +269,9 @@ SCENARIO("MultiplierRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextMultiplierID() == beforeBatch.getNextMultiplierID()));
+				CHECK_FALSE(config.hasMultiplier("String_0000"));
 			}
 		}
 

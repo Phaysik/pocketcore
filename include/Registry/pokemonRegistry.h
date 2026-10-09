@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.11.6
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -25,6 +25,7 @@
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Learnset/builtInLearnsetID.h"
+#include "Learnset/learnsetID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Nature/natureID.h"
@@ -61,6 +62,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::toItemID;
 	using PocketCore::Learnset::BuiltinLearnsetID;
+	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::toLearnsetID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
@@ -139,9 +141,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 09/29/2026
+		@date 10/08/2026
 		@since 0.11.6
-		@version 0.12.47
+		@version 0.12.50
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -162,7 +164,7 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID.
 				@since 0.11.6
-				@version 0.12.24
+				@version 0.12.50
 			 */
 			ATTR_NOINLINE explicit constexpr PokemonRegistry() : Base{toPokemonID(BuiltinPokemonID::FinalPokemon).getValue()}
 			{
@@ -173,6 +175,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = BULBASAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
@@ -180,6 +183,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = IVYSAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
@@ -187,6 +191,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = VENUSAUR_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
@@ -194,6 +199,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARMANDER_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
@@ -201,6 +207,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARMELEON_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
@@ -208,6 +215,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = CHARIZARD_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
@@ -215,6 +223,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = SQUIRTLE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
@@ -222,6 +231,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = WARTORTLE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
@@ -229,6 +239,7 @@ namespace PocketCore::Registry::Pokemon
 					.mBaseStats = BLASTOISE_BASE_STATS,
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 				});
 			}
 
@@ -353,7 +364,7 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] movesIDs The move IDs of the Pokemon. Defaults to nullptr.
 				@return The instantiated Pokemon on success, or @ref RegistryErrorInfo if no matching pokemon exists.
 				@since 0.12.24
-				@version 0.12.47
+				@version 0.12.50
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, RegistryErrorInfo> instantiate(
 				const PokemonID pokemonID, const PokemonInstantiationDependencies *dependencyRegistries = nullptr,

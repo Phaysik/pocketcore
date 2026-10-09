@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.12.28
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -82,7 +82,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		return Pokemon{
-			pokemonID,
+			pokemonMeta->mPokemonID,
+			pokemonMeta->mLearnsetID,
 			pokemonMeta->mName,
 			*moveIDs,
 			{},

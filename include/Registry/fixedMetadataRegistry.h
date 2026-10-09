@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 09/11/2026
+	@date 10/08/2026
 	@since 0.5.0
-	@version 0.12.22
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -34,9 +34,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 09/11/2026
+		@date 10/08/2026
 		@since 0.5.0
-		@version 0.12.22
+		@version 0.12.50
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -45,12 +45,17 @@ namespace PocketCore::Registry
 	{
 		public:
 			/*! @brief Compares two FixedMetadataRegistry instances for equality.
+				@details Compares registered metadata in storage order and the next stable ID. Derived lookup indexes, unused storage, and
+			   checkpoint mutation versions do not affect equality.
 				@param[in] other The other registry to compare with.
-				@return true if the registries are equal, false otherwise.
+				@return True if the registered metadata and next stable ID are equal, false otherwise.
 				@since 0.12.20
-				@version 0.12.20
+				@version 0.12.50
 			*/
-			ATTR_NODISCARD constexpr bool operator==(const FixedMetadataRegistry &other) const = default;
+			ATTR_NODISCARD constexpr bool operator==(const FixedMetadataRegistry &other) const
+			{
+				return mNextID == other.mNextID && std::ranges::equal(getRegisteredEntries(), other.getRegisteredEntries());
+			}
 
 			/*! @class Checkpoint Registry/fixedMetadataRegistry.h
 				@brief Stores an opaque registry state that can be restored by @ref restoreCheckpoint.

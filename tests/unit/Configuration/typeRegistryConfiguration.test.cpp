@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.2.19
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -779,6 +779,7 @@ SCENARIO("TypeRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_TYPES + 1)};
 
 			typeMetas.push_back({.mName = name});
+			const TypeRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addTypes(typeMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
@@ -786,6 +787,9 @@ SCENARIO("TypeRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextTypeID() == beforeBatch.getNextTypeID()));
+				CHECK_FALSE(config.hasType("String_0000"));
 			}
 		}
 
@@ -881,6 +885,93 @@ SCENARIO("TypeRegistryConfiguration")
 				REQUIRE(result.has_value());
 				CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
 				CHECK((config.getTypeMetadata(toTypeID(BuiltinTypeID::None))->mName == "NewName"));
+			}
+		}
+	}
+
+	GIVEN("updateType")
+	{
+		TypeMeta definition{.mName = "TestTypeName"};
+
+		WHEN("calling the string_view overload")
+		{
+			WHEN("calling with an invalid type name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateType("ThisIsInvalid", definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateType(TYPE_NAME_NONE, {.mName = std::string(TYPE_NAME_FIRE)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateType));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing type definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateType(TYPE_NAME_NONE, definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+					CHECK((config.getTypeMetadata(toTypeID(BuiltinTypeID::None))->mName == "TestTypeName"));
+				}
+			}
+		}
+
+		WHEN("calling the TypeID overload")
+		{
+			WHEN("calling with an invalid type name")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateType(TypeID{200}, definition)};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::TypeNotFound));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("trying to rename to a name already in the registry")
+			{
+				std::expected<void, RegistryErrorInfo> result{
+					config.updateType(toTypeID(BuiltinTypeID::None), {.mName = std::string(TYPE_NAME_FIRE)}),
+				};
+
+				THEN("the registry reports an error and there is no update to the registry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error().mKind == RegistryError::DuplicateType));
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+				}
+			}
+
+			WHEN("updating an existing type definition")
+			{
+				std::expected<void, RegistryErrorInfo> result{config.updateType(toTypeID(BuiltinTypeID::None), definition)};
+
+				THEN("the registry reports no error and the target is appropriately updated")
+				{
+					REQUIRE(result.has_value());
+					CHECK((config.getAmountRegistered() == finalTypeUnderlyingValue));
+					CHECK((config.getTypeMetadata(toTypeID(BuiltinTypeID::None))->mName == "TestTypeName"));
+				}
 			}
 		}
 	}

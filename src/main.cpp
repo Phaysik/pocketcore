@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 09/29/2026
+	@date 10/08/2026
 	@since 0.1.0
-	@version 0.12.47
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/effectRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
+#include "Configuration/learnsetRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Configuration/natureRegistryConfiguration.h"
@@ -30,6 +31,7 @@
 #include "Effect/effectContext.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
+#include "Learnset/builtInLearnsetID.h"
 #include "Move/builtInMoveID.h"
 #include "Nature/builtInNatureID.h"
 #include "Pokemon/builtInPokemonID.h"
@@ -44,7 +46,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.37
+	@version 0.12.50
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -60,6 +62,7 @@ int main()
 	using PocketCore::Configuration::AbilityRegistryConfiguration;
 	using PocketCore::Configuration::EffectRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
+	using PocketCore::Configuration::LearnsetRegistryConfiguration;
 	using PocketCore::Configuration::MoveRegistryConfiguration;
 	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
@@ -73,6 +76,8 @@ int main()
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Item::toItemID;
+	using PocketCore::Learnset::BuiltinLearnsetID;
+	using PocketCore::Learnset::toLearnsetID;
 	using PocketCore::Move::BuiltinMoveID;
 	using PocketCore::Move::toMoveID;
 	using PocketCore::Nature::BuiltinNatureID;
@@ -106,23 +111,26 @@ int main()
 	std::unique_ptr<EffectRegistryConfiguration> effectRegistryConfig{std::make_unique<EffectRegistryConfiguration>()};
 	std::unique_ptr<NatureRegistryConfiguration> natureRegistryConfig{std::make_unique<NatureRegistryConfiguration>()};
 	std::unique_ptr<PokemonRegistryConfiguration> pokemonRegistryConfig{std::make_unique<PokemonRegistryConfiguration>()};
+	std::unique_ptr<LearnsetRegistryConfiguration> learnsetRegistryConfig{std::make_unique<LearnsetRegistryConfiguration>()};
 
 	const RegistryProvider registryProvider{
-		.abilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
-		.moveRegistry = &moveRegistryConfig->getRuntimeRegistry(),
-		.itemRegistry = &itemRegistryConfig->getRuntimeRegistry(),
-		.typeRegistry = &typeRegistryConfig->getRuntimeRegistry(),
-		.statusRegistry = &statusRegistryConfig->getRuntimeRegistry(),
-		.weatherRegistry = &weatherRegistryConfig->getRuntimeRegistry(),
-		.terrainRegistry = &terrainRegistryConfig->getRuntimeRegistry(),
-		.multiplierRegistry = &multiplierRegistryConfig->getRuntimeRegistry(),
-		.natureRegistry = &natureRegistryConfig->getRuntimeRegistry(),
-		.pokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
+		.mAbilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
+		.mMoveRegistry = &moveRegistryConfig->getRuntimeRegistry(),
+		.mItemRegistry = &itemRegistryConfig->getRuntimeRegistry(),
+		.mTypeRegistry = &typeRegistryConfig->getRuntimeRegistry(),
+		.mStatusRegistry = &statusRegistryConfig->getRuntimeRegistry(),
+		.mWeatherRegistry = &weatherRegistryConfig->getRuntimeRegistry(),
+		.mTerrainRegistry = &terrainRegistryConfig->getRuntimeRegistry(),
+		.mMultiplierRegistry = &multiplierRegistryConfig->getRuntimeRegistry(),
+		.mNatureRegistry = &natureRegistryConfig->getRuntimeRegistry(),
+		.mPokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
+		.mLearnsetRegistry = &learnsetRegistryConfig->getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 
 	Pokemon pokemonA{
 		toPokemonID(BuiltinPokemonID::Blastoise),
+		toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 		"Blastoise",
 		{
 			.mMaxHealth = 100U,
@@ -137,7 +145,7 @@ int main()
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toTypeID(BuiltinTypeID::Water)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		*registryProvider.natureRegistry,
+		*registryProvider.mNatureRegistry,
 		{},
 		{},
 	};
@@ -148,6 +156,7 @@ int main()
 
 	Pokemon pokemonB{
 		toPokemonID(BuiltinPokemonID::Charizard),
+		toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 		"Charizard",
 		{
 			.mMaxHealth = 100U,
@@ -162,7 +171,7 @@ int main()
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 		{toNatureID(BuiltinNatureID::Hardy)},
-		*registryProvider.natureRegistry,
+		*registryProvider.mNatureRegistry,
 		{},
 		{},
 	};

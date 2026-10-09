@@ -1,13 +1,14 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.6.0
-	@version 0.12.24
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/moveRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,12 +16,14 @@
 #include <utility>
 
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Configuration/moveRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
+#include "Registry/registryError.h"
 #include "Types/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -29,6 +32,7 @@ using PocketCore::Battle::BattleEventID;
 using PocketCore::Battle::BattleEventRole;
 using PocketCore::Battle::BattleRangeID;
 using PocketCore::Battle::BattleTargetID;
+using PocketCore::Configuration::MoveRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
@@ -42,6 +46,7 @@ using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 
@@ -266,6 +271,57 @@ SCENARIO("MoveRegistry")
 			THEN("a known move ID has an entry")
 			{
 				CHECK(registry.hasMove(NO_MOVE_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			MoveRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			MoveRegistryConfiguration other{};
+			std::expected<MoveID, RegistryErrorInfo> result{other.addMove({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			MoveRegistryConfiguration other{};
+			std::expected<MoveID, RegistryErrorInfo> result{other.removeMove(toMoveID(BuiltinMoveID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			MoveRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateMove(toMoveID(BuiltinMoveID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

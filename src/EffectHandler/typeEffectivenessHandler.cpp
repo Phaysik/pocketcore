@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.cpp
 	@brief Contains the type effectiveness effect handler implementation
-	@date 09/02/2026
+	@date 10/08/2026
 	@since 0.9.2
-	@version 0.12.17
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -33,6 +33,7 @@ namespace PocketCore::Effect
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Type::getEffectivenessValue;
 	using PocketCore::Type::NO_TYPE_ID;
+	using PocketCore::Type::TypeEffectiveness;
 	using PocketCore::Type::TypeID;
 
 	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const
@@ -48,13 +49,13 @@ namespace PocketCore::Effect
 			return;
 		}
 
-		if (provider.typeRegistry == nullptr)
+		if (provider.mTypeRegistry == nullptr)
 		{
 			return;
 		}
 
 		const TypeID moveTypeID{context.mMoveTypeID};
-		const std::optional<us> attackerIndex{provider.typeRegistry->findIndexByTypeID(moveTypeID)};
+		const std::optional<us> attackerIndex{provider.mTypeRegistry->findIndexByTypeID(moveTypeID)};
 
 		if (!attackerIndex.has_value())
 		{
@@ -70,18 +71,18 @@ namespace PocketCore::Effect
 				continue;
 			}
 
-			const std::optional<us> defenderIndex{provider.typeRegistry->findIndexByTypeID(type)};
+			const std::optional<us> defenderIndex{provider.mTypeRegistry->findIndexByTypeID(type)};
 
 			if (!defenderIndex.has_value())
 			{
 				continue;
 			}
 
-			const Type::TypeEffectiveness effectiveness{
-				provider.typeRegistry->getTypeChartCell(attackerIndex.value(), defenderIndex.value()),
+			const TypeEffectiveness effectiveness{
+				provider.mTypeRegistry->getTypeChartCell(attackerIndex.value(), defenderIndex.value()),
 			};
 
-			if (effectiveness == Type::TypeEffectiveness::NOT_DEFINED)
+			if (effectiveness == TypeEffectiveness::NOT_DEFINED)
 			{
 				continue;
 			}

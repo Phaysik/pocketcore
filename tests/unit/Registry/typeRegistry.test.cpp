@@ -1,8 +1,8 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 09/10/2026
+	@date 10/09/2026
 	@since 0.1.0
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cstddef>
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -17,7 +18,9 @@
 #include <utility>
 
 #include "Configuration/constants.h"
+#include "Configuration/typeRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "Registry/registryError.h"
 #include "Types/builtInTypeID.h"
 #include "Types/constants.h"
 #include "Types/typeEffectiveness.h"
@@ -27,8 +30,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::MAX_TYPES;
+using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Type::TypeMeta;
 using PocketCore::Registry::Type::TypeRegistry;
 using PocketCore::Type::BUG_TYPE_MATCHUP;
@@ -628,6 +633,57 @@ SCENARIO("TypeRegistry")
 				CHECK((typeChartRow.at(13) == NVE)); // Rock
 				CHECK((typeChartRow.at(14) == NE));	 // Ghost
 				CHECK((typeChartRow.at(17) == NVE)); // Steel
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			TypeRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			TypeRegistryConfiguration other{};
+			std::expected<TypeID, RegistryErrorInfo> result{other.addType({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			TypeRegistryConfiguration other{};
+			std::expected<TypeID, RegistryErrorInfo> result{other.removeType(toTypeID(BuiltinTypeID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			TypeRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updateType(toTypeID(BuiltinTypeID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file effectRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the EffectRegistryConfiguration.
-	@date 09/10/2026
+	@date 10/08/2026
 	@since 0.12.20
-	@version 0.12.20
+	@version 0.12.50
 	@author Matthew Moore
 */
 
@@ -261,6 +261,7 @@ SCENARIO("EffectRegistryConfiguration")
 			}
 
 			effectMetas.push_back({.mName = std::string(EFFECT_NAME_ACCURACY_CHECK)});
+			const EffectRegistry beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryErrorInfo> result{config.addEffects(effectMetas)};
 
 			THEN("registration reports a duplicate effect and the registry is rollback to the checkpoint before the erroneous addition")
@@ -268,6 +269,9 @@ SCENARIO("EffectRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error().mKind == RegistryError::DuplicateEffect));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
+				CHECK((config.getRuntimeRegistry() == beforeBatch));
+				CHECK((config.getRuntimeRegistry().getNextEffectID() == beforeBatch.getNextEffectID()));
+				CHECK_FALSE(config.hasEffect("String_0000"));
 			}
 		}
 

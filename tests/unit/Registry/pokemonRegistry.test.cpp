@@ -1,13 +1,14 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 09/11/2026
+	@date 10/09/2026
 	@since 0.12.20
-	@version 0.12.24
+	@version 0.12.50
 	@author Matthew Moore
 */
 
 #include "Registry/pokemonRegistry.h"
 
+#include <expected>
 #include <optional>
 #include <span>
 #include <string>
@@ -15,18 +16,24 @@
 #include <utility>
 
 #include "Ability/builtInAbilityID.h"
+#include "Configuration/pokemonRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "Learnset/builtInLearnsetID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/registryError.h"
 #include "Types/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::Configuration::PokemonRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::Learnset::BuiltinLearnsetID;
+using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
@@ -52,6 +59,7 @@ using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
 using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
+using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 
@@ -77,6 +85,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = BULBASAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Bulbasaur))};
@@ -92,6 +101,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = IVYSAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Ivysaur))};
@@ -107,6 +117,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = VENUSAUR_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Venusaur))};
@@ -122,6 +133,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARMANDER_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charmander))};
@@ -137,6 +149,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARMELEON_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charmeleon))};
@@ -152,6 +165,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = CHARIZARD_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Charizard))};
@@ -167,6 +181,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = SQUIRTLE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Squirtle))};
@@ -182,6 +197,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = WARTORTLE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Wartortle))};
@@ -197,6 +213,7 @@ SCENARIO("PokemonRegistry")
 				.mBaseStats = BLASTOISE_BASE_STATS,
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Blastoise))};
@@ -347,6 +364,57 @@ SCENARIO("PokemonRegistry")
 			THEN("a known pokemon ID has an entry")
 			{
 				CHECK(registry.hasPokemon(NO_POKEMON_ID));
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed registries")
+		{
+			PokemonRegistry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((registry == other));
+			}
+		}
+
+		GIVEN("for an entry added in one registry")
+		{
+			PokemonRegistryConfiguration other{};
+			std::expected<PokemonID, RegistryErrorInfo> result{other.addPokemon({.mName = "test"})};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry removed in one registry")
+		{
+			PokemonRegistryConfiguration other{};
+			std::expected<PokemonID, RegistryErrorInfo> result{other.removePokemon(toPokemonID(BuiltinPokemonID::None))};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			PokemonRegistryConfiguration other{};
+			std::expected<void, RegistryErrorInfo> result{
+				other.updatePokemon(toPokemonID(BuiltinPokemonID::None), {.mName = "test"}),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other.getRuntimeRegistry()));
 			}
 		}
 	}
