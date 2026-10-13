@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.9.14
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -364,7 +364,7 @@ namespace PocketCore::Battle
 		@param[in] moveRegistry The move registry to grab the move metadata from.
 		@return Void when the action is valid, or the first applicable @ref BattleEngineError.
 		@since 0.10.4
-		@version 0.12.17
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
 																			 const BattlePhase phase, const MoveRegistry *moveRegistry);

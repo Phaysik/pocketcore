@@ -76,7 +76,8 @@ namespace PocketCore::Pokemon
 		@param[in] learnsetMeta The learnset used when @p moveIDs is nullptr.
 		@param[in] encounterData The encounter origin, which determines whether egg moves are eligible.
 		@param[in] pokemonEncounterLevel The Pokemon's encounter level; level-up and egg moves above this level are excluded.
-		@return Success when all resulting move IDs have registered metadata; otherwise, @ref PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA.
+		@return Success when all resulting move IDs have registered metadata; otherwise, @ref
+	   PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA.
 		@since 0.12.51
 		@version 0.12.51
 	*/
@@ -134,7 +135,8 @@ namespace PocketCore::Pokemon
 		@param[in] learnsetMeta The learnset entries from which eligible moves are selected.
 		@param[in] encounterData The encounter origin, which determines whether egg moves are eligible.
 		@param[in] pokemonEncounterLevel The Pokemon's encounter level; moves requiring a higher level are excluded.
-		@return Success when all generated move IDs have registered metadata; otherwise, @ref PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA.
+		@return Success when all generated move IDs have registered metadata; otherwise, @ref
+	   PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA.
 		@note For @p n learnset entries, selection takes O(n log n) time and O(n) auxiliary space.
 		@since 0.12.51
 		@version 0.12.51
