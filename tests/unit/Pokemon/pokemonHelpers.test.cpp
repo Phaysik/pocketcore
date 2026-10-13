@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.28
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Status/builtInStatusID.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -1,9 +1,9 @@
 
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.5.2
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,7 +17,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/typedefs.h"
 #include "Effect/effectTrigger.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 #include "moveHitPolicy.h"
 #include "moveID.h"

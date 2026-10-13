@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 09/29/2026
+	@date 10/13/2026
 	@since 0.3.0
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -31,7 +31,7 @@
 #include "Pokemon/pokemon.h"
 #include "Registry/multiplierRegistry.h"
 #include "Status/statusID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 #include "Utility/Math/floatUtility.h"
 
 namespace PocketCore::Effect

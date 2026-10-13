@@ -1,8 +1,8 @@
 /*! @file effectContext.testHelper.h
 	@brief Test helper for dealing with EffectContext concepts.
-	@date 09/29/2026
+	@date 10/13/2026
 	@since 0.12.13
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
 #include "Terrain/terrainID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Testing

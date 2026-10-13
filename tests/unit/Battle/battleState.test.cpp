@@ -1,8 +1,8 @@
 /*! @file battleState.test.cpp
 	@brief C++ file for running tests for the BattleState.
-	@date 09/29/2026
+	@date 10/13/2026
 	@since 0.12.45
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -30,7 +30,7 @@
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Status/volatileStatus.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

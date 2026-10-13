@@ -1,8 +1,8 @@
 /*! @file typeMeta.h
 	@brief Defines the metadata stored for built-in and user-defined types.
-	@date 09/10/2026
+	@date 10/13/2026
 	@since 0.12.5
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 

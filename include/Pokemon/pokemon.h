@@ -34,7 +34,7 @@
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 #include "Utility/random.h"
 #include "Validation/Pokemon/pokemonError.h"
 #include "Validation/Pokemon/pokemonValidation.h"

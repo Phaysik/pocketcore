@@ -1,6 +1,6 @@
 /*! @file pokemonMeta.h
 	@brief Defines the objects that pertain to the pokemon's base stats.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.11.6
 	@version 0.12.51
 	@author Matthew Moore
@@ -45,7 +45,7 @@ namespace PocketCore::Pokemon
 		@since 0.12.23
 		@version 0.12.51
 	*/
-	constexpr std::size_t toIndex(const PokemonStat stat) noexcept
+	ATTR_NODISCARD constexpr std::size_t toIndex(const PokemonStat stat) noexcept
 	{
 		return std::to_underlying(stat);
 	}

@@ -41,8 +41,8 @@
 #include "Status/builtInStatusID.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
-#include "Types/builtInTypeID.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

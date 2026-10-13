@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.2.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -24,9 +24,9 @@
 #include "Core/typedefs.h"
 #include "Registry/registryError.h"
 #include "Registry/typeRegistry.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
-#include "Types/typeMeta.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
+#include "Type/typeMeta.h"
 #include "Utility/Debug/Logging/logger.h"
 
 namespace PocketCore::Configuration

@@ -47,7 +47,7 @@
 #include "Registry/moveRegistry.h"
 #include "Registry/natureRegistry.h"
 #include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"

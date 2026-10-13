@@ -1,8 +1,8 @@
 /*! @file moveMeta.test.cpp
 	@brief C++ file for running tests for the MoveMeta.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -18,7 +18,7 @@
 #include "Effect/effectTrigger.h"
 #include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

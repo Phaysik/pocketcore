@@ -42,7 +42,7 @@
 #include "Registry/registryProvider.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Ruleset/rulesetPresets.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 #include "Utility/Debug/Logging/constants.h"
 #include "Utility/Debug/Logging/logger.h"
 
@@ -89,8 +89,8 @@ int main()
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
-	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Registry::Pokemon::PokemonInstantiationError;
+	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Ruleset::GEN9_BASE_GAME;
 	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Type::BuiltinTypeID;

@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.5.3
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 namespace PocketCore::Registry::Move
 {

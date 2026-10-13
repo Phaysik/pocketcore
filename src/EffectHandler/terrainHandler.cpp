@@ -1,8 +1,8 @@
 /*! @file terrainHandler.cpp
 	@brief Contains the terrain effect handler implementation
-	@date 09/23/2026
+	@date 10/13/2026
 	@since 0.9.10
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@
 #include "EffectHandler/effectHandlerInterface.h"
 #include "Registry/registryProvider.h"
 #include "Terrain/builtInTerrainID.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 namespace PocketCore::Effect
 {

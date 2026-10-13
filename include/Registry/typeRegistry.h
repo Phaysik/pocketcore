@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.1.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,11 +19,11 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
-#include "Types/typeMeta.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
+#include "Type/typeMeta.h"
 
 #include "constants.h" // IWYU pragma: keep
 

@@ -1,6 +1,6 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.2.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -20,8 +20,8 @@
 #include "Core/attributeMacros.h"
 #include "Registry/registryError.h"
 #include "Registry/typeRegistry.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Configuration
 {

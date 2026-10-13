@@ -22,11 +22,11 @@
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
-#include "Types/typeMeta.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
+#include "Type/typeMeta.h"
 
 #include <catch2/catch_test_macros.hpp>
 

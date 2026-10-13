@@ -25,7 +25,7 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

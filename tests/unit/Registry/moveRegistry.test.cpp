@@ -25,7 +25,7 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

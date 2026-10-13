@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.cpp
 	@brief Contains the type effectiveness effect handler implementation
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.9.2
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,8 +19,8 @@
 #include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Effect
 {

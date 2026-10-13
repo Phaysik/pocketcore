@@ -24,7 +24,7 @@
 #include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
 #include "Status/statusID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Testing
 {

@@ -1,6 +1,6 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.11.6
 	@version 0.12.51
 	@author Matthew Moore
@@ -19,7 +19,7 @@
 #include "Learnset/learnsetID.h"
 #include "Location/locationID.h"
 #include "Move/moveID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 #include "pokemonEncounter.h"
 #include "pokemonID.h"
