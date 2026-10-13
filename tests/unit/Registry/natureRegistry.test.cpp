@@ -1,14 +1,15 @@
 /*! @file natureRegistry.test.cpp
 	@brief C++ file for running tests for the NatureRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/natureRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -74,7 +75,8 @@ static_assert(!PubliclyStructurallyMutable<NatureRegistry>);
 
 SCENARIO("NatureRegistry")
 {
-	NatureRegistry registry{};
+	std::unique_ptr<NatureRegistry> registryStorage{std::make_unique<NatureRegistry>()};
+	NatureRegistry &registry{*registryStorage};
 	ub finalNatureUnderlyingValue{std::to_underlying(BuiltinNatureID::FinalNature)};
 
 	GIVEN("a default constructed nature registry")
@@ -575,49 +577,49 @@ SCENARIO("NatureRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			NatureRegistry other{};
+			std::unique_ptr<NatureRegistry> other{std::make_unique<NatureRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			NatureRegistryConfiguration other{};
-			std::expected<NatureID, RegistryErrorInfo> result{other.addNature({.mName = "test"})};
+			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
+			std::expected<NatureID, RegistryErrorInfo> result{other->addNature({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			NatureRegistryConfiguration other{};
-			std::expected<NatureID, RegistryErrorInfo> result{other.removeNature(toNatureID(BuiltinNatureID::None))};
+			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
+			std::expected<NatureID, RegistryErrorInfo> result{other->removeNature(toNatureID(BuiltinNatureID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			NatureRegistryConfiguration other{};
+			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateNature(toNatureID(BuiltinNatureID::None), {.mName = "test"}),
+				other->updateNature(toNatureID(BuiltinNatureID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

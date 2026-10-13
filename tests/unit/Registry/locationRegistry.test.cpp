@@ -1,6 +1,6 @@
 /*! @file locationRegistry.test.cpp
 	@brief C++ file for running tests for the LocationRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -9,6 +9,7 @@
 #include "Registry/locationRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -46,7 +47,8 @@ static_assert(!PubliclyStructurallyMutable<LocationRegistry>);
 
 SCENARIO("LocationRegistry")
 {
-	LocationRegistry registry{};
+	std::unique_ptr<LocationRegistry> registryStorage{std::make_unique<LocationRegistry>()};
+	LocationRegistry &registry{*registryStorage};
 	ub finalLocationUnderlyingValue{std::to_underlying(BuiltinLocationID::FinalLocation)};
 
 	GIVEN("a default constructed location registry")
@@ -214,49 +216,49 @@ SCENARIO("LocationRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			LocationRegistry other{};
+			std::unique_ptr<LocationRegistry> other{std::make_unique<LocationRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			LocationRegistryConfiguration other{};
-			std::expected<LocationID, RegistryErrorInfo> result{other.addLocation({.mName = "test"})};
+			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
+			std::expected<LocationID, RegistryErrorInfo> result{other->addLocation({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			LocationRegistryConfiguration other{};
-			std::expected<LocationID, RegistryErrorInfo> result{other.removeLocation(toLocationID(BuiltinLocationID::None))};
+			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
+			std::expected<LocationID, RegistryErrorInfo> result{other->removeLocation(toLocationID(BuiltinLocationID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			LocationRegistryConfiguration other{};
+			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateLocation(toLocationID(BuiltinLocationID::None), {.mName = "test"}),
+				other->updateLocation(toLocationID(BuiltinLocationID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

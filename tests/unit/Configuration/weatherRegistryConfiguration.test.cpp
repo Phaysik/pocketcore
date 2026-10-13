@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -52,8 +53,10 @@ SCENARIO("WeatherRegistryConfiguration")
 {
 	ensureLoggerInitialized("weather registry configuration test", "weatherRegistryConfiguration_test.log");
 
-	WeatherRegistryConfiguration config{};
-	WeatherRegistry registry{};
+	std::unique_ptr<WeatherRegistryConfiguration> configRegistryStorage{std::make_unique<WeatherRegistryConfiguration>()};
+	WeatherRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<WeatherRegistry> registryStorage{std::make_unique<WeatherRegistry>()};
+	WeatherRegistry &registry{*registryStorage};
 	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinWeatherID::FinalWeather)};
 
 	GIVEN("getAmountRegistered")

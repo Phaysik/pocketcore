@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.2.19
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -62,8 +63,10 @@ SCENARIO("TypeRegistryConfiguration")
 {
 	ensureLoggerInitialized("type registry configuration test", "typeRegistryConfiguration_test.log");
 
-	TypeRegistryConfiguration config{};
-	TypeRegistry registry{};
+	std::unique_ptr<TypeRegistryConfiguration> configRegistryStorage{std::make_unique<TypeRegistryConfiguration>()};
+	TypeRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<TypeRegistry> registryStorage{std::make_unique<TypeRegistry>()};
+	TypeRegistry &registry{*registryStorage};
 	ub finalTypeUnderlyingValue{std::to_underlying(BuiltinTypeID::FinalType)};
 
 	GIVEN("getAmountRegistered")

@@ -1,14 +1,15 @@
 /*! @file effectRegistry.test.cpp
 	@brief C++ file for running tests for the EffectRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/effectRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -118,7 +119,8 @@ static_assert(!PubliclyStructurallyMutable<EffectRegistry>);
 
 SCENARIO("EffectRegistry")
 {
-	EffectRegistry registry{};
+	std::unique_ptr<EffectRegistry> registryStorage{std::make_unique<EffectRegistry>()};
+	EffectRegistry &registry{*registryStorage};
 	ub finalEffectUnderlyingValue{std::to_underlying(BuiltinEffectID::FinalEffect)};
 
 	GIVEN("a default constructed effect registry")
@@ -608,49 +610,49 @@ SCENARIO("EffectRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			EffectRegistry other{};
+			std::unique_ptr<EffectRegistry> other{std::make_unique<EffectRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			EffectRegistryConfiguration other{};
-			std::expected<EffectID, RegistryErrorInfo> result{other.addEffect({.mName = "test"})};
+			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
+			std::expected<EffectID, RegistryErrorInfo> result{other->addEffect({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			EffectRegistryConfiguration other{};
-			std::expected<EffectID, RegistryErrorInfo> result{other.removeEffect(toEffectID(BuiltinEffectID::None))};
+			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
+			std::expected<EffectID, RegistryErrorInfo> result{other->removeEffect(toEffectID(BuiltinEffectID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			EffectRegistryConfiguration other{};
+			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateEffect(toEffectID(BuiltinEffectID::None), {.mName = "test"}),
+				other->updateEffect(toEffectID(BuiltinEffectID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

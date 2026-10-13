@@ -1,13 +1,14 @@
 /*! @file fixedMetadataRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistryConfiguration.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -45,8 +46,10 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 {
 	ensureLoggerInitialized("weather registry configuration test", "FixedConfiguration_test.log");
 
-	FixedConfiguration config{};
-	FixedRegistry registry{};
+	std::unique_ptr<FixedConfiguration> configRegistryStorage{std::make_unique<FixedConfiguration>()};
+	FixedConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<FixedRegistry> registryStorage{std::make_unique<FixedRegistry>()};
+	FixedRegistry &registry{*registryStorage};
 	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinFixedMetaDataID::Final)};
 
 	GIVEN("getAmountRegistered")

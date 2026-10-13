@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the NatureRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("NatureRegistryConfiguration")
 {
 	ensureLoggerInitialized("nature registry configuration test", "natureRegistryConfiguration_test.log");
 
-	NatureRegistryConfiguration config{};
-	NatureRegistry registry{};
+	std::unique_ptr<NatureRegistryConfiguration> configRegistryStorage{std::make_unique<NatureRegistryConfiguration>()};
+	NatureRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<NatureRegistry> registryStorage{std::make_unique<NatureRegistry>()};
+	NatureRegistry &registry{*registryStorage};
 	ub finalNatureUnderlyingValue{std::to_underlying(BuiltinNatureID::FinalNature)};
 
 	GIVEN("getAmountRegistered")

@@ -1,6 +1,6 @@
 /*! @file locationRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LocationRegistryConfiguration.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("LocationRegistryConfiguration")
 {
 	ensureLoggerInitialized("location registry configuration test", "locationRegistryConfiguration_test.log");
 
-	LocationRegistryConfiguration config{};
-	LocationRegistry registry{};
+	std::unique_ptr<LocationRegistryConfiguration> configRegistryStorage{std::make_unique<LocationRegistryConfiguration>()};
+	LocationRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<LocationRegistry> registryStorage{std::make_unique<LocationRegistry>()};
+	LocationRegistry &registry{*registryStorage};
 	ub finalLocationUnderlyingValue{std::to_underlying(BuiltinLocationID::FinalLocation)};
 
 	GIVEN("getAmountRegistered")

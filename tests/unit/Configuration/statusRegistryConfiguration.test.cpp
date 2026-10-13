@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the StatusRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("StatusRegistryConfiguration")
 {
 	ensureLoggerInitialized("status registry configuration test", "statusRegistryConfiguration_test.log");
 
-	StatusRegistryConfiguration config{};
-	StatusRegistry registry{};
+	std::unique_ptr<StatusRegistryConfiguration> configRegistryStorage{std::make_unique<StatusRegistryConfiguration>()};
+	StatusRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<StatusRegistry> registryStorage{std::make_unique<StatusRegistry>()};
+	StatusRegistry &registry{*registryStorage};
 	ub finalStatusUnderlyingValue{std::to_underlying(BuiltinStatusID::FinalStatus)};
 
 	GIVEN("getAmountRegistered")

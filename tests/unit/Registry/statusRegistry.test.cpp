@@ -1,14 +1,15 @@
 /*! @file statusRegistry.test.cpp
 	@brief C++ file for running tests for the StatusRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/statusRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -56,7 +57,8 @@ static_assert(!PubliclyStructurallyMutable<StatusRegistry>);
 
 SCENARIO("StatusRegistry")
 {
-	StatusRegistry registry{};
+	std::unique_ptr<StatusRegistry> registryStorage{std::make_unique<StatusRegistry>()};
+	StatusRegistry &registry{*registryStorage};
 	ub finalStatusUnderlyingValue{std::to_underlying(BuiltinStatusID::FinalStatus)};
 
 	GIVEN("a default constructed status registry")
@@ -328,49 +330,49 @@ SCENARIO("StatusRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			StatusRegistry other{};
+			std::unique_ptr<StatusRegistry> other{std::make_unique<StatusRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			StatusRegistryConfiguration other{};
-			std::expected<StatusID, RegistryErrorInfo> result{other.addStatus({.mName = "test"})};
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
+			std::expected<StatusID, RegistryErrorInfo> result{other->addStatus({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			StatusRegistryConfiguration other{};
-			std::expected<StatusID, RegistryErrorInfo> result{other.removeStatus(toStatusID(BuiltinStatusID::None))};
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
+			std::expected<StatusID, RegistryErrorInfo> result{other->removeStatus(toStatusID(BuiltinStatusID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			StatusRegistryConfiguration other{};
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
+				other->updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

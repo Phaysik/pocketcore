@@ -1,12 +1,13 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.7.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -44,7 +45,8 @@ static_assert(!PubliclyStructurallyMutable<FixedRegistry>);
 
 SCENARIO("FixedMetadataRegistry")
 {
-	FixedRegistry registry{};
+	std::unique_ptr<FixedRegistry> registryStorage{std::make_unique<FixedRegistry>()};
+	FixedRegistry &registry{*registryStorage};
 	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinFixedMetaDataID::Final)};
 
 	GIVEN("a default constructed FixedRegistry")
@@ -337,50 +339,52 @@ SCENARIO("FixedMetadataRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			FixedRegistry other{};
+			std::unique_ptr<FixedRegistry> other{std::make_unique<FixedRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			FixedConfiguration other{};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.addMetadata({.mName = "test"})};
+			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other->addMetadata({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
+				CHECK((registry != other->getRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			FixedConfiguration other{};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None))};
-
-			THEN("they are not equal")
-			{
-				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
-			}
-		}
-
-		GIVEN("for an entry modified in one registry")
-		{
-			FixedConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
-									 [](Metadata &metadata) { metadata = {.mName = "test"}; }),
+			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::expected<FixedMetaDataID, RegistryErrorInfo> result{
+				other->removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None)),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
+				CHECK((registry != other->getRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::expected<void, RegistryErrorInfo> result{
+				other->mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
+									  [](Metadata &metadata) { metadata = {.mName = "test"}; }),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other->getRegistry()));
 			}
 		}
 	}

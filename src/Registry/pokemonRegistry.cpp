@@ -13,6 +13,7 @@
 #include <expected>
 #include <span>
 #include <type_traits>
+#include <variant>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
@@ -110,18 +111,20 @@ namespace PocketCore::Registry::Pokemon
 		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(encounterIndex)};
 
 		const us pokemonEncounterLevel{
-			encounterData.mLevel.visit([](const auto &policy) {
-				using Policy = std::decay_t<decltype(policy)>;
+			std::visit(
+				[](const auto &policy) {
+					using Policy = std::decay_t<decltype(policy)>;
 
-				if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
-				{
-					return policy.mLevel;
-				}
-				else
-				{
-					return Random::get(policy.mMinLevel, policy.mMaxLevel);
-				}
-			}),
+					if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
+					{
+						return policy.mLevel;
+					}
+					else
+					{
+						return Random::get(policy.mMinLevel, policy.mMaxLevel);
+					}
+				},
+				encounterData.mLevel),
 		};
 
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};

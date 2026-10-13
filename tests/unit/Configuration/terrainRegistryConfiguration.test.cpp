@@ -1,8 +1,8 @@
 /*! @file terrainRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TerrainRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("TerrainRegistryConfiguration")
 {
 	ensureLoggerInitialized("terrain registry configuration test", "terrainRegistryConfiguration_test.log");
 
-	TerrainRegistryConfiguration config{};
-	TerrainRegistry registry{};
+	std::unique_ptr<TerrainRegistryConfiguration> configRegistryStorage{std::make_unique<TerrainRegistryConfiguration>()};
+	TerrainRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<TerrainRegistry> registryStorage{std::make_unique<TerrainRegistry>()};
+	TerrainRegistry &registry{*registryStorage};
 	ub finalTerrainUnderlyingValue{std::to_underlying(BuiltinTerrainID::FinalTerrain)};
 
 	GIVEN("getAmountRegistered")

@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -59,8 +60,10 @@ SCENARIO("MoveRegistryConfiguration")
 {
 	ensureLoggerInitialized("move registry configuration test", "moveRegistryConfiguration_test.log");
 
-	MoveRegistryConfiguration config{};
-	MoveRegistry registry{};
+	std::unique_ptr<MoveRegistryConfiguration> configRegistryStorage{std::make_unique<MoveRegistryConfiguration>()};
+	MoveRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<MoveRegistry> registryStorage{std::make_unique<MoveRegistry>()};
+	MoveRegistry &registry{*registryStorage};
 	ub finalMoveUnderlyingValue{std::to_underlying(BuiltinMoveID::FinalMove)};
 
 	GIVEN("getAmountRegistered")

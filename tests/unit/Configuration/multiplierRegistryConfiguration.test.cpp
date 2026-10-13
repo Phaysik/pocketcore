@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("MultiplierRegistryConfiguration")
 {
 	ensureLoggerInitialized("multiplier registry configuration test", "multiplierRegistryConfiguration_test.log");
 
-	MultiplierRegistryConfiguration config{};
-	MultiplierRegistry registry{};
+	std::unique_ptr<MultiplierRegistryConfiguration> configRegistryStorage{std::make_unique<MultiplierRegistryConfiguration>()};
+	MultiplierRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<MultiplierRegistry> registryStorage{std::make_unique<MultiplierRegistry>()};
+	MultiplierRegistry &registry{*registryStorage};
 	ub finalMultiplierUnderlyingValue{std::to_underlying(BuiltinMultiplierID::FinalMultiplier)};
 
 	GIVEN("getAmountRegistered")

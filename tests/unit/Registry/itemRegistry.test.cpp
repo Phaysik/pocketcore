@@ -1,14 +1,15 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/itemRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -54,7 +55,8 @@ static_assert(!PubliclyStructurallyMutable<ItemRegistry>);
 
 SCENARIO("ItemRegistry")
 {
-	ItemRegistry registry{};
+	std::unique_ptr<ItemRegistry> registryStorage{std::make_unique<ItemRegistry>()};
+	ItemRegistry &registry{*registryStorage};
 	ub finalItemUnderlyingValue{std::to_underlying(BuiltinItemID::FinalItem)};
 
 	GIVEN("a default constructed item registry")
@@ -250,49 +252,49 @@ SCENARIO("ItemRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			ItemRegistry other{};
+			std::unique_ptr<ItemRegistry> other{std::make_unique<ItemRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			ItemRegistryConfiguration other{};
-			std::expected<ItemID, RegistryErrorInfo> result{other.addItem({.mName = "test"})};
+			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
+			std::expected<ItemID, RegistryErrorInfo> result{other->addItem({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			ItemRegistryConfiguration other{};
-			std::expected<ItemID, RegistryErrorInfo> result{other.removeItem(toItemID(BuiltinItemID::None))};
+			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
+			std::expected<ItemID, RegistryErrorInfo> result{other->removeItem(toItemID(BuiltinItemID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			ItemRegistryConfiguration other{};
+			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateItem(toItemID(BuiltinItemID::None), {.mName = "test"}),
+				other->updateItem(toItemID(BuiltinItemID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

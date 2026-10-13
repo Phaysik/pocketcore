@@ -1,14 +1,15 @@
 /*! @file weatherRegistry.test.cpp
 	@brief C++ file for running tests for the WeatherRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/weatherRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -55,7 +56,8 @@ static_assert(!PubliclyStructurallyMutable<WeatherRegistry>);
 
 SCENARIO("WeatherRegistry")
 {
-	WeatherRegistry registry{};
+	std::unique_ptr<WeatherRegistry> registryStorage{std::make_unique<WeatherRegistry>()};
+	WeatherRegistry &registry{*registryStorage};
 	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinWeatherID::FinalWeather)};
 
 	GIVEN("a default constructed weather registry")
@@ -331,49 +333,49 @@ SCENARIO("WeatherRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			WeatherRegistry other{};
+			std::unique_ptr<WeatherRegistry> other{std::make_unique<WeatherRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			WeatherRegistryConfiguration other{};
-			std::expected<WeatherID, RegistryErrorInfo> result{other.addWeather({.mName = "test"})};
+			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
+			std::expected<WeatherID, RegistryErrorInfo> result{other->addWeather({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			WeatherRegistryConfiguration other{};
-			std::expected<WeatherID, RegistryErrorInfo> result{other.removeWeather(toWeatherID(BuiltinWeatherID::None))};
+			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
+			std::expected<WeatherID, RegistryErrorInfo> result{other->removeWeather(toWeatherID(BuiltinWeatherID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			WeatherRegistryConfiguration other{};
+			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateWeather(toWeatherID(BuiltinWeatherID::None), {.mName = "test"}),
+				other->updateWeather(toWeatherID(BuiltinWeatherID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

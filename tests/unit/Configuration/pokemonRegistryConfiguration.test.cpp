@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the PokemonRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -50,8 +51,10 @@ SCENARIO("PokemonRegistryConfiguration")
 {
 	ensureLoggerInitialized("pokemon registry configuration test", "pokemonRegistryConfiguration_test.log");
 
-	PokemonRegistryConfiguration config{};
-	PokemonRegistry registry{};
+	std::unique_ptr<PokemonRegistryConfiguration> configRegistryStorage{std::make_unique<PokemonRegistryConfiguration>()};
+	PokemonRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<PokemonRegistry> registryStorage{std::make_unique<PokemonRegistry>()};
+	PokemonRegistry &registry{*registryStorage};
 	ub finalPokemonUnderlyingValue{std::to_underlying(BuiltinPokemonID::FinalPokemon)};
 
 	GIVEN("getAmountRegistered")

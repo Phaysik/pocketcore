@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -59,8 +60,10 @@ SCENARIO("ItemRegistryConfiguration")
 {
 	ensureLoggerInitialized("item registry configuration test", "itemRegistryConfiguration_test.log");
 
-	ItemRegistryConfiguration config{};
-	ItemRegistry registry{};
+	std::unique_ptr<ItemRegistryConfiguration> configRegistryStorage{std::make_unique<ItemRegistryConfiguration>()};
+	ItemRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<ItemRegistry> registryStorage{std::make_unique<ItemRegistry>()};
+	ItemRegistry &registry{*registryStorage};
 	ub finalItemUnderlyingValue{std::to_underlying(BuiltinItemID::FinalItem)};
 
 	GIVEN("getAmountRegistered")

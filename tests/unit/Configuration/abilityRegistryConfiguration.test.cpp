@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.4.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -59,8 +60,10 @@ SCENARIO("AbilityRegistryConfiguration")
 {
 	ensureLoggerInitialized("ability registry configuration test", "abilityRegistryConfiguration_test.log");
 
-	AbilityRegistryConfiguration config{};
-	AbilityRegistry registry{};
+	std::unique_ptr<AbilityRegistryConfiguration> configRegistryStorage{std::make_unique<AbilityRegistryConfiguration>()};
+	AbilityRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<AbilityRegistry> registryStorage{std::make_unique<AbilityRegistry>()};
+	AbilityRegistry &registry{*registryStorage};
 	ub finalAbilityUnderlyingValue{std::to_underlying(BuiltinAbilityID::FinalAbility)};
 
 	GIVEN("getAmountRegistered")

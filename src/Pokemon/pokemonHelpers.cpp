@@ -343,9 +343,10 @@ namespace PocketCore::Pokemon
 		const auto getEntriesThatMeetLevelCapByAcquisition
 			= [pokemonEncounterLevel, &learnsetMeta](const AcquisitionMethod method) -> std::vector<MoveLearnEntry> {
 			std::vector<MoveLearnEntry> entriesThatMeetLevelCapFilteredByMethod{
-				learnsetMeta.mEntries | std::views::filter([pokemonEncounterLevel, method](const MoveLearnEntry &entry) {
-					return entry.mLevelRequirement <= pokemonEncounterLevel && entry.mAcquisitionMethod == method;
-				}) | std::ranges::to<std::vector<MoveLearnEntry>>(),
+				std::ranges::to<std::vector<MoveLearnEntry>>(
+					learnsetMeta.mEntries | std::views::filter([pokemonEncounterLevel, method](const MoveLearnEntry &entry) {
+						return entry.mLevelRequirement <= pokemonEncounterLevel && entry.mAcquisitionMethod == method;
+					})),
 			};
 
 			// Sort to have highest level moves at the front
@@ -375,13 +376,13 @@ namespace PocketCore::Pokemon
 			std::vector<MoveLearnEntry> eggMoveEntriesThatMeetLevelCap{getEntriesThatMeetLevelCapByAcquisition(AcquisitionMethod::Egg)};
 
 			const std::vector<MoveLearnEntry> selectedEggEntries{
-				eggMoveEntriesThatMeetLevelCap | std::views::take(MAX_MOVES_PER_POKEMON) | std::views::reverse
-					| std::ranges::to<std::vector<MoveLearnEntry>>(),
+				std::ranges::to<std::vector<MoveLearnEntry>>(eggMoveEntriesThatMeetLevelCap | std::views::take(MAX_MOVES_PER_POKEMON)
+															 | std::views::reverse),
 			};
 
 			std::ranges::replace_if(
 				moveIDs,
-				[&selectedEggEntries](const MoveID moveID) {
+				[&selectedEggEntries](const MoveID &moveID) {
 					return std::ranges::contains(selectedEggEntries, moveID, &MoveLearnEntry::mMoveID);
 				},
 				NO_MOVE_ID);

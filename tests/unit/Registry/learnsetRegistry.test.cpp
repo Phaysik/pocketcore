@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -53,7 +53,8 @@ static_assert(!PubliclyStructurallyMutable<LearnsetRegistry>);
 
 SCENARIO("LearnsetRegistry")
 {
-	LearnsetRegistry registry{};
+	std::unique_ptr<LearnsetRegistry> registryStorage{std::make_unique<LearnsetRegistry>()};
+	LearnsetRegistry &registry{*registryStorage};
 	ub finalLearnsetUnderlyingValue{std::to_underlying(BuiltinLearnsetID::FinalLearnset)};
 
 	GIVEN("a default constructed learnset registry")
@@ -317,49 +318,49 @@ SCENARIO("LearnsetRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			LearnsetRegistry other{};
+			std::unique_ptr<LearnsetRegistry> other{std::make_unique<LearnsetRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			LearnsetRegistryConfiguration other{};
-			std::expected<LearnsetID, RegistryErrorInfo> result{other.addLearnset({.mName = "test"})};
+			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
+			std::expected<LearnsetID, RegistryErrorInfo> result{other->addLearnset({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			LearnsetRegistryConfiguration other{};
-			std::expected<LearnsetID, RegistryErrorInfo> result{other.removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
+			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
+			std::expected<LearnsetID, RegistryErrorInfo> result{other->removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			LearnsetRegistryConfiguration other{};
+			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
 			std::expected<void, RegistryErrorInfo> result{
-				other.updateLearnset(toLearnsetID(BuiltinLearnsetID::None), {.mName = "test"}),
+				other->updateLearnset(toLearnsetID(BuiltinLearnsetID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

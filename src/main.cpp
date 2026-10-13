@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.1.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -20,6 +20,7 @@
 #include "Configuration/effectRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/learnsetRegistryConfiguration.h"
+#include "Configuration/locationRegistryConfiguration.h"
 #include "Configuration/moveRegistryConfiguration.h"
 #include "Configuration/multiplierRegistryConfiguration.h"
 #include "Configuration/natureRegistryConfiguration.h"
@@ -46,7 +47,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -63,6 +64,7 @@ int main()
 	using PocketCore::Configuration::EffectRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
 	using PocketCore::Configuration::LearnsetRegistryConfiguration;
+	using PocketCore::Configuration::LocationRegistryConfiguration;
 	using PocketCore::Configuration::MoveRegistryConfiguration;
 	using PocketCore::Configuration::MultiplierRegistryConfiguration;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
@@ -112,6 +114,7 @@ int main()
 	std::unique_ptr<NatureRegistryConfiguration> natureRegistryConfig{std::make_unique<NatureRegistryConfiguration>()};
 	std::unique_ptr<PokemonRegistryConfiguration> pokemonRegistryConfig{std::make_unique<PokemonRegistryConfiguration>()};
 	std::unique_ptr<LearnsetRegistryConfiguration> learnsetRegistryConfig{std::make_unique<LearnsetRegistryConfiguration>()};
+	std::unique_ptr<LocationRegistryConfiguration> locationRegistryConfig{std::make_unique<LocationRegistryConfiguration>()};
 
 	const RegistryProvider registryProvider{
 		.mAbilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
@@ -125,6 +128,7 @@ int main()
 		.mNatureRegistry = &natureRegistryConfig->getRuntimeRegistry(),
 		.mPokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
 		.mLearnsetRegistry = &learnsetRegistryConfig->getRuntimeRegistry(),
+		.mLocationRegistry = &locationRegistryConfig->getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 

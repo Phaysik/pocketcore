@@ -1,8 +1,8 @@
 /*! @file learnsetRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -54,8 +55,10 @@ SCENARIO("LearnsetRegistryConfiguration")
 {
 	ensureLoggerInitialized("learnset registry configuration test", "learnsetRegistryConfiguration_test.log");
 
-	LearnsetRegistryConfiguration config{};
-	LearnsetRegistry registry{};
+	std::unique_ptr<LearnsetRegistryConfiguration> configRegistryStorage{std::make_unique<LearnsetRegistryConfiguration>()};
+	LearnsetRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<LearnsetRegistry> registryStorage{std::make_unique<LearnsetRegistry>()};
+	LearnsetRegistry &registry{*registryStorage};
 	ub finalLearnsetUnderlyingValue{std::to_underlying(BuiltinLearnsetID::FinalLearnset)};
 
 	GIVEN("getAmountRegistered")
