@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -8,20 +8,29 @@
 
 #include "Pokemon/pokemonHelpers.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <expected>
+#include <functional>
 #include <optional>
 #include <ostream>
+#include <ranges>
 #include <span>
 #include <string_view>
+#include <unordered_set>
+#include <vector>
 
 #include "Configuration/constants.h"
+#include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Learnset/learnsetMeta.h"
+#include "Move/builtInMoveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/moveRegistry.h"
 #include "Registry/natureRegistry.h"
 #include "Registry/registryProvider.h"
 #include "Validation/Ability/abilityError.h"
@@ -42,7 +51,10 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::us;
+	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::LearnsetMeta;
+	using PocketCore::Learnset::MoveLearnEntry;
+	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::RegistryProvider;
@@ -194,9 +206,9 @@ namespace PocketCore::Pokemon
 	#pragma GCC diagnostic pop
 #endif
 
-	std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs,
-															std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
-															const NatureRegistry &natureRegistry)
+	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(
+		const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs, std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
+		const NatureRegistry &natureRegistry)
 	{
 		if (natureIDs != nullptr)
 		{
@@ -214,9 +226,9 @@ namespace PocketCore::Pokemon
 		return {};
 	}
 
-	std::expected<void, AbilityError> getValidPokemonAbilities(const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
-															   std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-															   const AbilityRegistry &abilityRegistry)
+	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
+		const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
+		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs, const AbilityRegistry &abilityRegistry)
 	{
 		if (abilityIDs != nullptr)
 		{
@@ -234,9 +246,9 @@ namespace PocketCore::Pokemon
 		return {};
 	}
 
-	std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs,
-														std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
-														const ItemRegistry &itemRegistry)
+	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs,
+																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
+																	   const ItemRegistry &itemRegistry)
 	{
 		if (itemIDs != nullptr)
 		{
@@ -254,10 +266,11 @@ namespace PocketCore::Pokemon
 		return {};
 	}
 
-	std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs,
-														std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
-														const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
-														const PokemonMeta &pokemonMeta)
+	ATTR_NODISCARD std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs,
+																	   std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
+																	   const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
+																	   const PokemonEncounter &encounterData,
+																	   const us pokemonEncounterLevel)
 	{
 		if (moveIDs != nullptr)
 		{
@@ -266,20 +279,28 @@ namespace PocketCore::Pokemon
 				return std::unexpected{error.error()};
 			}
 
+			// Remove duplicate entries
+			std::unordered_set<MoveID> seenMoveIDs;
+
 			std::ranges::transform(*moveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
+
+			std::ranges::replace_if(
+				validMoveIDs, [&seenMoveIDs](const MoveID moveID) { return moveID != NO_MOVE_ID && !seenMoveIDs.insert(moveID).second; },
+				NO_MOVE_ID);
 		}
-		else
+		else if (const std::expected<void, MoveError> error{
+					 fillWithValidMoves(validMoveIDs, moveRegistry, learnsetMeta, encounterData, pokemonEncounterLevel),
+				 };
+				 !error.has_value())
 		{
-			if (learnsetMeta.mName == "test" && pokemonMeta.mName == "test")
-			{
-			}
+			return std::unexpected{error.error()};
 		}
 
 		return {};
 	}
 
-	std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us, POKEMON_STAT_COUNT> *ivs,
-														 std::array<us, POKEMON_STAT_COUNT> &validIVs)
+	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us, POKEMON_STAT_COUNT> *ivs,
+																		std::array<us, POKEMON_STAT_COUNT> &validIVs)
 	{
 		if (ivs != nullptr)
 		{
@@ -296,8 +317,8 @@ namespace PocketCore::Pokemon
 		return {};
 	}
 
-	std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us, POKEMON_STAT_COUNT> *evs,
-														 std::array<us, POKEMON_STAT_COUNT> &validEVs)
+	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us, POKEMON_STAT_COUNT> *evs,
+																		std::array<us, POKEMON_STAT_COUNT> &validEVs)
 	{
 		if (evs != nullptr)
 		{
@@ -310,6 +331,72 @@ namespace PocketCore::Pokemon
 		}
 		else
 		{
+		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, MoveError> fillWithValidMoves(std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
+																	 const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
+																	 const PokemonEncounter &encounterData, const us pokemonEncounterLevel)
+	{
+		const auto getEntriesThatMeetLevelCapByAcquisition
+			= [pokemonEncounterLevel, &learnsetMeta](const AcquisitionMethod method) -> std::vector<MoveLearnEntry> {
+			std::vector<MoveLearnEntry> entriesThatMeetLevelCapFilteredByMethod{
+				learnsetMeta.mEntries | std::views::filter([pokemonEncounterLevel, method](const MoveLearnEntry &entry) {
+					return entry.mLevelRequirement <= pokemonEncounterLevel && entry.mAcquisitionMethod == method;
+				}) | std::ranges::to<std::vector<MoveLearnEntry>>(),
+			};
+
+			// Sort to have highest level moves at the front
+			std::ranges::sort(entriesThatMeetLevelCapFilteredByMethod, std::ranges::greater{}, &MoveLearnEntry::mLevelRequirement);
+
+			// Remove duplicate entries
+			std::unordered_set<MoveID> seenMoveIDs;
+
+			std::erase_if(entriesThatMeetLevelCapFilteredByMethod,
+						  [&seenMoveIDs](const MoveLearnEntry &entry) { return !seenMoveIDs.insert(entry.mMoveID).second; });
+
+			return entriesThatMeetLevelCapFilteredByMethod;
+		};
+
+		const std::vector<MoveLearnEntry> levelUpEntriesThatMeetLevelCap{
+			getEntriesThatMeetLevelCapByAcquisition(AcquisitionMethod::LevelUp),
+		};
+
+		moveIDs.fill(NO_MOVE_ID);
+
+		// Last entry goes into index 0, and so on
+		std::ranges::transform(levelUpEntriesThatMeetLevelCap | std::views::take(MAX_MOVES_PER_POKEMON) | std::views::reverse,
+							   moveIDs.begin(), [](const MoveLearnEntry &moveLearnEntry) { return moveLearnEntry.mMoveID; });
+
+		if (encounterData.mOrigin == PokemonOrigin::Egg)
+		{
+			std::vector<MoveLearnEntry> eggMoveEntriesThatMeetLevelCap{getEntriesThatMeetLevelCapByAcquisition(AcquisitionMethod::Egg)};
+
+			const std::vector<MoveLearnEntry> selectedEggEntries{
+				eggMoveEntriesThatMeetLevelCap | std::views::take(MAX_MOVES_PER_POKEMON) | std::views::reverse
+					| std::ranges::to<std::vector<MoveLearnEntry>>(),
+			};
+
+			std::ranges::replace_if(
+				moveIDs,
+				[&selectedEggEntries](const MoveID moveID) {
+					return std::ranges::contains(selectedEggEntries, moveID, &MoveLearnEntry::mMoveID);
+				},
+				NO_MOVE_ID);
+
+			std::ranges::stable_partition(moveIDs, [](const MoveID moveID) { return moveID == NO_MOVE_ID; });
+			std::ranges::transform(selectedEggEntries, moveIDs.begin(),
+								   [](const MoveLearnEntry &moveLearnEntry) { return moveLearnEntry.mMoveID; });
+
+			std::ranges::stable_partition(moveIDs, [](const MoveID moveID) { return moveID != NO_MOVE_ID; });
+		}
+
+		const std::span<const MoveID, MAX_MOVES_PER_POKEMON> moveIDsSpan{moveIDs};
+		if (const std::expected<void, MoveError> error{validateMoveMetadata(&moveIDsSpan, moveRegistry)}; !error.has_value())
+		{
+			return std::unexpected{error.error()};
 		}
 
 		return {};

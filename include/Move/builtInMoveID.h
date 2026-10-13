@@ -1,6 +1,6 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.5.2
 	@version 0.12.51
 	@author Matthew Moore
@@ -52,6 +52,9 @@ namespace PocketCore::Move
 	{
 		return MoveID{std::to_underlying(builtinMoveID)};
 	}
+
+	/*! @brief The stable identifier representing no move. */
+	inline constexpr MoveID NO_MOVE_ID{toMoveID(BuiltinMoveID::None)};
 } // namespace PocketCore::Move
 
 #endif

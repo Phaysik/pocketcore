@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.9.14
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -557,7 +557,7 @@ namespace PocketCore::Battle
 		// A move is usable only when its ID is assigned and resolves to registered metadata.
 		const MoveID moveID{userPokemon->getMoveID(action.mMoveSlotIndex)};
 
-		if (moveID == Move::NO_MOVE_ID && moveRegistry->getMoveMetadata(moveID) == nullptr)
+		if (moveRegistry->getMoveMetadata(moveID) == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MoveNotFound};
 		}

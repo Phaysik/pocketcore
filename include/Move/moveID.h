@@ -1,6 +1,6 @@
 /*! @file moveID.h
 	@brief Defines the open identifier used for built-in and user-defined moves.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -25,9 +25,6 @@ namespace PocketCore::Move
 	   abilities without extending an enum. Its tag prevents comparison or conversion with identifiers from other registry domains.
 	*/
 	using MoveID = PocketCore::ID::IDInterface<Detail::MoveIDTag, 0>;
-
-	/*! @brief The stable identifier representing no move. */
-	inline constexpr MoveID NO_MOVE_ID{};
 } // namespace PocketCore::Move
 
 #endif

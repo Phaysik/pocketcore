@@ -1,6 +1,6 @@
 /*! @file pokemonEncounter.h
 	@brief Defines species-specific acquisition categories and encounter-level specifications.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -28,7 +28,7 @@ namespace PocketCore::Pokemon
 		@brief Identifies the acquisition category of a species-specific encounter.
 		@details Describes a possible acquisition, not an individual's recorded history or later transfers.
 		@note All enum values must be handled exhaustively when processing acquisition categories.
-		@date 10/09/2026
+		@date 10/13/2026
 		@since 0.12.51
 		@version 0.12.51
 		@author Matthew Moore
@@ -38,6 +38,7 @@ namespace PocketCore::Pokemon
 		Wild,  /*! @brief Describes acquisition through a wild encounter. */
 		Egg,   /*! @brief Describes acquisition through egg hatching. */
 		Trade, /*! @brief Describes acquisition through a defined in-game trade, not a later player transfer. */
+		Gift,  /*! @brief Describes acquisition through a gift event. */
 	};
 
 	/*! @struct SetLevelEncounter Pokemon/pokemonEncounter.h

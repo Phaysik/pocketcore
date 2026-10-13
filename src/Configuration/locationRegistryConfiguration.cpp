@@ -1,8 +1,8 @@
 /*! @file locationRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the location registry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
-	@version 0.12.12
+	@version 0.12.51
 	@author Matthew Moore
 */
 

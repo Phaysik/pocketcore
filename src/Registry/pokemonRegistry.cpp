@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <expected>
 #include <span>
+#include <type_traits>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
@@ -23,10 +24,12 @@
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonHelpers.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Registry/registryError.h"
+#include "Utility/random.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
@@ -54,9 +57,12 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::getValidPokemonNatures;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonEncounter;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
+	using PocketCore::Pokemon::SetLevelEncounter;
 	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Utility::Random;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Move::MoveError;
@@ -101,6 +107,23 @@ namespace PocketCore::Registry::Pokemon
 				RegistryErrorInfo{RegistryError::LocationNotFound, {}, "PokemonRegistry::instantiate: missing encounter metadata"}};
 		}
 
+		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(encounterIndex)};
+
+		const us pokemonEncounterLevel{
+			encounterData.mLevel.visit([](const auto &policy) {
+				using Policy = std::decay_t<decltype(policy)>;
+
+				if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
+				{
+					return policy.mLevel;
+				}
+				else
+				{
+					return Random::get(policy.mMinLevel, policy.mMaxLevel);
+				}
+			}),
+		};
+
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
 		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> validAbilityIDs{};
 		std::array<ItemID, MAX_ITEMS_PER_POKEMON> validItemIDs{};
@@ -131,7 +154,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, MoveError> error{
-				getValidPokemonMoves(moveIDs, validMoveIDs, *dependencyRegistries->mMoveRegistry, *learnsetMeta, *pokemonMeta),
+				getValidPokemonMoves(moveIDs, validMoveIDs, *dependencyRegistries->mMoveRegistry, *learnsetMeta, encounterData,
+									 pokemonEncounterLevel),
 			};
 			!error.has_value())
 		{
@@ -156,7 +180,7 @@ namespace PocketCore::Registry::Pokemon
 			{},
 			{},
 			pokemonMeta->mBaseStats,
-			20,
+			pokemonEncounterLevel,
 			validAbilityIDs,
 			validItemIDs,
 			pokemonMeta->mTypeIDs,

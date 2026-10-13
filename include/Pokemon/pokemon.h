@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.3.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -26,7 +26,7 @@
 #include "Interaction/interactionHelpers.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
-#include "Move/moveID.h"
+#include "Move/builtInMoveID.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Pokemon/pokemonID.h"
@@ -67,6 +67,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Registry::Nature::NatureRegistry;
@@ -91,9 +92,9 @@ namespace PocketCore::Pokemon
 		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
 		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/08/2026
+		@date 10/13/2026
 		@since 0.3.0
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -114,7 +115,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.50
+				@version 0.12.51
 			*/
 			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view &name,
 									   const PokemonStats &stats, const us level,
@@ -127,7 +128,7 @@ namespace PocketCore::Pokemon
 				: mName{name}, mBaseStats{stats}, mTypeIDs{typeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonID),
 				  mLearnsetID(learnsetID)
 			{
-				mMoveIDs.fill(PocketCore::Move::NO_MOVE_ID);
+				mMoveIDs.fill(NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
 
