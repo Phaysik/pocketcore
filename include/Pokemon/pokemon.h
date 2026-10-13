@@ -29,8 +29,6 @@
 #include "Move/builtInMoveID.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
-#include "Pokemon/pokemonID.h"
-#include "Pokemon/pokemonMeta.h"
 #include "Registry/natureRegistry.h"
 #include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
@@ -40,6 +38,10 @@
 #include "Utility/random.h"
 #include "Validation/Pokemon/pokemonError.h"
 #include "Validation/Pokemon/pokemonValidation.h"
+
+#include "pokemonID.h"
+#include "pokemonMeta.h"
+#include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {

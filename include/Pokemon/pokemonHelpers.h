@@ -31,6 +31,7 @@
 #include "Validation/Pokemon/pokemonError.h"
 
 #include "pokemon.h"
+#include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {
@@ -81,23 +82,23 @@ namespace PocketCore::Pokemon
 		@since 0.12.51
 		@version 0.12.51
 	*/
-	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(
-		const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs, std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
-		const NatureRegistry &natureRegistry);
+	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
+																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
+																		   const NatureRegistry &natureRegistry);
 
 	/*!
 		@since 0.12.51
 		@version 0.12.51
 	*/
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
-		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs, const AbilityRegistry &abilityRegistry);
+		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
+		const AbilityRegistry &abilityRegistry);
 
 	/*!
 		@since 0.12.51
 		@version 0.12.51
 	*/
-	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs,
+	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID> itemIDs,
 																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
 																	   const ItemRegistry &itemRegistry);
 
@@ -105,7 +106,7 @@ namespace PocketCore::Pokemon
 		@since 0.12.51
 		@version 0.12.51
 	*/
-	ATTR_NODISCARD std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs,
+	ATTR_NODISCARD std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID> moveIDs,
 																	   std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
 																	   const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
 																	   const PokemonEncounter &encounterData,
@@ -115,14 +116,14 @@ namespace PocketCore::Pokemon
 		@since 0.12.51
 		@version 0.12.51
 	*/
-	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us, POKEMON_STAT_COUNT> *ivs,
+	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us> ivs,
 																		std::array<us, POKEMON_STAT_COUNT> &validIVs);
 
 	/*!
 		@since 0.12.51
 		@version 0.12.51
 	*/
-	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us, POKEMON_STAT_COUNT> *evs,
+	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
 
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.

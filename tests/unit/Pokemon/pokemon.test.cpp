@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.4.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -31,6 +31,7 @@
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
 #include "Registry/registryError.h"
 #include "Registry/registryProvider.h"

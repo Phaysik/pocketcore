@@ -32,7 +32,6 @@
 #include "Effect/effectContext.h"
 #include "Effect/effectSourceAndSuppression.h"
 #include "Move/moveHitPolicy.h"
-#include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonHelpers.h"
@@ -246,7 +245,7 @@ namespace PocketCore::Battle
 			moveMeta.mHitCountPolicy);
 	}
 
-	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB)
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> partyA, const std::span<Pokemon *const> partyB)
 	{
 		std::vector<Pokemon *> combinedParties{};
 		combinedParties.reserve(partyA.size() + partyB.size());

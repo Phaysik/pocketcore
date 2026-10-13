@@ -1,6 +1,6 @@
 /*! @file abilityValidation.h
 	@brief Defines validation functions that help with Ability.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -37,11 +37,11 @@ namespace PocketCore::Validation::Ability
 		@since 0.12.26
 		@version 0.12.51
 	 */
-	ATTR_NODISCARD constexpr std::expected<void, AbilityError> validateAbilityMetadata(
-		const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs, const AbilityRegistry &abilityRegistry)
+	ATTR_NODISCARD constexpr std::expected<void, AbilityError> validateAbilityMetadata(const std::span<const AbilityID> abilityIDs,
+																					   const AbilityRegistry &abilityRegistry)
 	{
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
-		std::ranges::transform(*abilityIDs, abilityMetas.begin(),
+		std::ranges::transform(abilityIDs, abilityMetas.begin(),
 							   [&abilityRegistry](const AbilityID abilityID) { return abilityRegistry.getAbilityMetadata(abilityID); });
 
 		if (std::ranges::any_of(abilityMetas, [](const AbilityMeta *meta) { return meta == nullptr; }))

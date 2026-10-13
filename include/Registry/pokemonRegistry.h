@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.11.6
 	@version 0.12.51
 	@author Matthew Moore
@@ -38,6 +38,7 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
 #include "Registry/fixedMetadataRegistry.h"
 #include "Registry/itemRegistry.h"
@@ -387,25 +388,23 @@ namespace PocketCore::Registry::Pokemon
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier for the Pokemon to create.
 				@param[in] encounterIndex The index of the encounter metadata to use from the pokemon.
-				@param[in] natureRegistry The nature registry to use for resolving nature IDs. Defaults to nullptr.
-				@param[in] ivs The IVs of the Pokemon. Defaults to nullptr.
-				@param[in] evs The EVs of the Pokemon. Defaults to @ref MIN_EV_STAT_VALUE.
-				@param[in] natureIDs The nature IDs of the Pokemon. Defaults to nullptr.
-				@param[in] abilityIDs The ability IDs of the Pokemon. Defaults to nullptr.
-				@param[in] itemIDs The item IDs of the Pokemon. Defaults to nullptr.
-				@param[in] movesIDs The move IDs of the Pokemon. Defaults to nullptr.
+				@param[in] dependencyRegistries The dependency registries to use for resolving various IDs. Defaults to nullptr.
+				@param[in] ivs The non-owning span of IVs for the Pokemon.
+				@param[in] evs The non-owning span of EVs for the Pokemon.
+				@param[in] natureIDs The non-owning span of nature IDs for the Pokemon.
+				@param[in] abilityIDs The non-owning span of ability IDs for the Pokemon.
+				@param[in] itemIDs The non-owning span of item IDs for the Pokemon.
+				@param[in] movesIDs The non-owning span of move IDs for the Pokemon.
 				@return The instantiated Pokemon on success, or @ref PokemonInstantiationError if no matching pokemon exists.
 				@since 0.12.24
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
 				const PokemonID pokemonID, const std::size_t encounterIndex,
-				const PokemonInstantiationDependencies *dependencyRegistries = nullptr,
-				const std::span<const us, POKEMON_STAT_COUNT> *ivs = nullptr, const std::span<const us, POKEMON_STAT_COUNT> *evs = nullptr,
-				const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs = nullptr,
-				const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs = nullptr,
-				const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs = nullptr,
-				const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs = nullptr) const;
+				PokemonInstantiationDependencies *dependencyRegistries = nullptr, const std::span<const us> ivs = {},
+				const std::span<const us> evs = {}, const std::span<const NatureID> natureIDs = {},
+				const std::span<const AbilityID> abilityIDs = {}, const std::span<const ItemID> itemIDs = {},
+				const std::span<const MoveID> moveIDs = {}) const;
 	};
 } // namespace PocketCore::Registry::Pokemon
 

@@ -234,9 +234,9 @@ namespace PocketCore::Battle
 		@return True when any pointer value occurs more than once in the combined parties; otherwise false.
 		@note Time complexity is O(n log n) and auxiliary space is O(n), where n is the combined party size.
 		@since 0.10.3
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB);
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> partyA, const std::span<Pokemon *const> partyB);
 
 	/*! @brief Counts healthy Pokemon in a party.
 		@param[in] party The non-owning party pointer span to inspect.

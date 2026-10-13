@@ -29,6 +29,7 @@
 #include "Pokemon/pokemonHelpers.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 #include "Registry/registryError.h"
 #include "Utility/random.h"
 #include "Validation/Ability/abilityError.h"
@@ -71,11 +72,9 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Validation::Pokemon::PokemonError;
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
-		const PokemonID pokemonID, const std::size_t encounterIndex, const PokemonInstantiationDependencies *dependencyRegistries,
-		const std::span<const us, POKEMON_STAT_COUNT> *ivs, const std::span<const us, POKEMON_STAT_COUNT> *evs,
-		const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs,
-		const std::span<const AbilityID, MAX_ABILITIES_PER_POKEMON> *abilityIDs,
-		const std::span<const ItemID, MAX_ITEMS_PER_POKEMON> *itemIDs, const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs) const
+		const PokemonID pokemonID, const std::size_t encounterIndex, PokemonInstantiationDependencies *dependencyRegistries,
+		const std::span<const us> ivs, const std::span<const us> evs, const std::span<const NatureID> natureIDs,
+		const std::span<const AbilityID> abilityIDs, const std::span<const ItemID> itemIDs, const std::span<const MoveID> moveIDs) const
 	{
 		if (dependencyRegistries == nullptr || dependencyRegistries->mAbilityRegistry == nullptr
 			|| dependencyRegistries->mItemRegistry == nullptr || dependencyRegistries->mMoveRegistry == nullptr

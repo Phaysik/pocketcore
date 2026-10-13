@@ -37,11 +37,11 @@ namespace PocketCore::Validation::Nature
 		@since 0.12.26
 		@version 0.12.51
 	 */
-	ATTR_NODISCARD constexpr std::expected<void, NatureError> validateNatureMetadata(
-		const std::span<const NatureID, MAX_NATURES_PER_POKEMON> *natureIDs, const NatureRegistry &natureRegistry)
+	ATTR_NODISCARD constexpr std::expected<void, NatureError> validateNatureMetadata(const std::span<const NatureID> natureIDs,
+																					 const NatureRegistry &natureRegistry)
 	{
 		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
-		std::ranges::transform(*natureIDs, natureMetas.begin(),
+		std::ranges::transform(natureIDs, natureMetas.begin(),
 							   [&natureRegistry](const NatureID natureID) { return natureRegistry.getNatureMetadata(natureID); });
 
 		if (std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))

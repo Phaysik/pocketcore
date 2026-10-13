@@ -38,6 +38,7 @@
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/effectRegistry.h"
+#include "Registry/pokemonRegistry.h"
 #include "Registry/registryProvider.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Ruleset/rulesetPresets.h"
@@ -89,6 +90,7 @@ int main()
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Registry::Pokemon::PokemonInstantiationError;
 	using PocketCore::Ruleset::GEN9_BASE_GAME;
 	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Type::BuiltinTypeID;

@@ -1,6 +1,6 @@
 /*! @file moveValidation.h
 	@brief Defines validation functions that help with Move.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -37,11 +37,11 @@ namespace PocketCore::Validation::Move
 		@since 0.12.26
 		@version 0.12.51
 	 */
-	ATTR_NODISCARD constexpr std::expected<void, MoveError> validateMoveMetadata(
-		const std::span<const MoveID, MAX_MOVES_PER_POKEMON> *moveIDs, const MoveRegistry &moveRegistry)
+	ATTR_NODISCARD constexpr std::expected<void, MoveError> validateMoveMetadata(const std::span<const MoveID> moveIDs,
+																				 const MoveRegistry &moveRegistry)
 	{
 		std::array<const MoveMeta *, MAX_MOVES_PER_POKEMON> moveMetas{};
-		std::ranges::transform(*moveIDs, moveMetas.begin(),
+		std::ranges::transform(moveIDs, moveMetas.begin(),
 							   [&moveRegistry](const MoveID moveID) { return moveRegistry.getMoveMetadata(moveID); });
 
 		if (std::ranges::any_of(moveMetas, [](const MoveMeta *meta) { return meta == nullptr; }))

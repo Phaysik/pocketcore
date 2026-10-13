@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.13
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
 #include "Status/statusID.h"
 #include "Types/typeID.h"
