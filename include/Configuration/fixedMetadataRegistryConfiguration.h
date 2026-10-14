@@ -1,6 +1,6 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 10/13/2026
+	@date 10/14/2026
 	@since 0.5.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -20,7 +20,7 @@
 
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
-#include "Core/cconcepts.h"
+#include "Core/concepts.h"
 #include "Core/typedefs.h"
 #include "Utility/Debug/Logging/logger.h"
 #include "Validation/Registry/registryError.h"
@@ -224,7 +224,7 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			template <typename Definition, typename Factory>
-				requires InvocableWithArgs<Factory, const Definition &>
+				requires InvocableWithArgs<Factory &, const Definition &>
 			ATTR_NODISCARD const std::expected<void, RegistryError> addMetadataBatch(const std::span<const Definition> definitions,
 																					 Factory &&factory)
 			{
@@ -268,7 +268,7 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			template <typename Mutator>
-				requires InvocableWithArgs<Mutator, Metadata &>
+				requires InvocableWithArgs<Mutator &, Metadata &>
 			ATTR_NODISCARD const std::expected<void, RegistryError> mutateMetadata(const std::string_view name,
 																				   const std::string_view callerContext, Mutator &&mutator)
 			{
@@ -281,12 +281,7 @@ namespace PocketCore::Configuration
 
 				const Metadata *currentMetadata{getEntry(index.value())};
 
-				// LCOV_EXCL_START - Cannot hit this branch since resolveIndex was successful. This is just defensive programming.
-				if (currentMetadata == nullptr)
-				{
-					return std::unexpected{Policy::notFoundError};
-				}
-				// LCOV_EXCL_STOP
+				assert(currentMetadata != nullptr);
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
@@ -313,7 +308,7 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			template <typename Mutator>
-				requires InvocableWithArgs<Mutator, Metadata &>
+				requires InvocableWithArgs<Mutator &, Metadata &>
 			ATTR_NODISCARD const std::expected<void, RegistryError> mutateMetadata(const StableID stableID,
 																				   const std::string_view callerContext, Mutator &&mutator)
 			{
@@ -326,10 +321,7 @@ namespace PocketCore::Configuration
 
 				const Metadata *currentMetadata{getEntry(index.value())};
 
-				if (currentMetadata == nullptr)
-				{
-					return std::unexpected{Policy::notFoundError};
-				}
+				assert(currentMetadata != nullptr);
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
@@ -379,10 +371,7 @@ namespace PocketCore::Configuration
 
 				const Metadata *currentMetadata{getEntry(index.value())};
 
-				if (currentMetadata == nullptr)
-				{
-					return std::unexpected{Policy::notFoundError};
-				}
+				assert(currentMetadata != nullptr);
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				metadata.mName = newName;

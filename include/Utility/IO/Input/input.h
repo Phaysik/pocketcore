@@ -1,13 +1,13 @@
 /*! @file input.h
 	@brief Contains the function declarations for getting user input.
-	@date 08/03/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.8.7
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_INPUT_H
-#define INCLUDE_INPUT_H
+#ifndef INCLUDE_UTILITY_IO_INPUT_H
+#define INCLUDE_UTILITY_IO_INPUT_H
 
 #include <algorithm>
 #include <cstdlib> // for std::exit
@@ -17,19 +17,19 @@
 #include <span>
 #include <string>
 
-#include "Core/cconcepts.h" // for Integral, String
+#include "Core/concepts.h" // for Integral, String
 
-/*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
+/*! @namespace PocketCore::Utility::IO::Input Holds input stream manipulation
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.12.51
 	@author Matthew Moore
 */
-namespace PocketCore::Utility
+namespace PocketCore::Utility::IO::Input
 {
-	/*! @class Input input.h "include/input.h"
+	/*! @class Input input.h "Utility/IO/Input/input.h"
 		@brief Will try and extract valid user input and clean up the input buffer as needed
 		@since 0.1.0
-		@version 0.8.7
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class Input
@@ -309,6 +309,6 @@ namespace PocketCore::Utility
 				}
 			}
 	};
-} // namespace PocketCore::Utility
+} // namespace PocketCore::Utility::IO::Input
 
 #endif

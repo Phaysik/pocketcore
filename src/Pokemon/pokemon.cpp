@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 09/27/2026
+	@date 10/14/2026
 	@since 0.3.0
-	@version 0.12.45
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -12,10 +12,17 @@
 #include <ostream>
 #include <string_view>
 
+#include "Core/concepts.h"
+#include "Core/typedefs.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Utility/IO/Pokemon/pokemonIO.h"
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Core::InvocableWithArgs;
+	using PocketCore::Core::ub;
+	using PocketCore::Utility::IO::Pokemon::outputPokemonDataID;
+
 #if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
@@ -50,42 +57,45 @@ namespace PocketCore::Pokemon
 
 		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
 		{
-			outStream << (index == 0U ? "" : ", ") << pokemon.getTypeID(static_cast<ub>(index)).getValue();
+			outputPokemonDataID(outStream, [&pokemon](const ub typeIndex) { return pokemon.getTypeID(typeIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Nature IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
 		{
-			outStream << (index == 0U ? "" : ", ") << pokemon.getNatureID(static_cast<ub>(index)).getValue();
+			outputPokemonDataID(
+				outStream, [&pokemon](const ub natureIndex) { return pokemon.getNatureID(natureIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Ability IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
 		{
-			outStream << (index == 0U ? "" : ", ") << pokemon.getAbilityID(static_cast<ub>(index)).getValue();
+			outputPokemonDataID(
+				outStream, [&pokemon](const ub abilityIndex) { return pokemon.getAbilityID(abilityIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Item IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
 		{
-			outStream << (index == 0U ? "" : ", ") << pokemon.getItemID(static_cast<ub>(index)).getValue();
+			outputPokemonDataID(outStream, [&pokemon](const ub itemIndex) { return pokemon.getItemID(itemIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Non-Volatile Status IDs: [";
 
 		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
 		{
-			outStream << (index == 0U ? "" : ", ") << pokemon.getStatusID(static_cast<us>(index)).getValue();
+			outputPokemonDataID(
+				outStream, [&pokemon](const ub statusIndex) { return pokemon.getStatusID(statusIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Moves:\n";
 
 		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
 		{
-			const auto moveSlotIndex{static_cast<ub>(index)};
+			const ub moveSlotIndex{static_cast<ub>(index)};
 			outStream << "    [" << index << "] ID: " << pokemon.getMoveID(moveSlotIndex).getValue()
 					  << ", PP: " << static_cast<unsigned int>(pokemon.getCurrentPP(moveSlotIndex)) << '/'
 					  << static_cast<unsigned int>(pokemon.getMaxPP(moveSlotIndex)) << '\n';

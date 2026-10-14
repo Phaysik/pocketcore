@@ -1,19 +1,19 @@
 /*! @file floatUtility.h
 	@brief Contains the function declarations for utility functions related to floating-point numbers.
-	@date 07/26/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_FLOATUTILITY_H
-#define INCLUDE_FLOATUTILITY_H
+#ifndef INCLUDE_UTILITY_MATH_FLOATUTILITY_H
+#define INCLUDE_UTILITY_MATH_FLOATUTILITY_H
 
 #include <algorithm>
 #include <cmath>
 
 #include "Core/attributeMacros.h"
-#include "Core/cconcepts.h"
+#include "Core/concepts.h"
 
 /*! @namespace PocketCore::Utility::Math
 	@brief Helper utilities and constants for robust floating-point comparisons.
@@ -26,7 +26,7 @@
 	@note Constants represent conservative defaults; callers may override them by passing
 	explicit epsilon values to the functions.
 	@since 0.1.0
-	@version 0.1.0
+	@version 0.12.51
 */
 namespace PocketCore::Utility::Math
 {
@@ -36,20 +36,16 @@ namespace PocketCore::Utility::Math
 		tiny to avoid masking meaningful differences for typical double-precision calculations.
 		@note This is a reasonable default but may be tightened or relaxed depending on the
 		numerical domain. Callers may provide an explicit `absEpsilon` to `approximatelyEqualAbsRel`.
-		@since 0.1.0
-		@version 0.1.0
 	*/
-	constexpr double ABS_EPSILON{1e-12};
+	inline constexpr double ABS_EPSILON{1e-12};
 
 	/*! @brief Relative tolerance used for scale-aware comparisons of non-zero values.
 		@details When two values are sufficiently far from zero, this relative epsilon is
 		multiplied by the larger magnitude to produce a scale-appropriate tolerance. This
 		prevents false negatives when comparing large-magnitude values where absolute
 		tolerances would be ineffective.
-		@since 0.1.0
-		@version 0.1.0
 	*/
-	constexpr double REL_EPSILON{1e-8};
+	inline constexpr double REL_EPSILON{1e-8};
 
 	/*! @brief Compare two double-precision values using combined absolute and relative tolerances.
 		@details The comparison first checks whether the absolute difference between `lhs` and `rhs`

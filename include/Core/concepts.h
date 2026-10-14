@@ -1,14 +1,15 @@
-/*! @file cconcepts.h
+/*! @file concepts.h
 	@brief Contains the declarations of common concepts that might be used in multiple files.
-	@date 07/26/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef BASE_INCLUDE_CCONCEPTS_H
 #define BASE_INCLUDE_CCONCEPTS_H
 
+#include <ratio>
 #include <string>
 #include <type_traits>
 
@@ -115,6 +116,22 @@ namespace PocketCore::Core
 	*/
 	template <typename T>
 	concept IsEnum = std::is_enum_v<T>;
+
+	/*! @concept Ratio
+		@brief Tests whether a type is a normalized std::ratio specialization.
+		@details Requires T to be identical to std::ratio<T::num, T::den>, reconstructed from its normalized numerator and denominator.
+		@tparam T The type to test; its num and den constants, when present, must form a valid std::ratio specialization.
+		@note Does not remove cv/ref qualifiers. std::ratio<1, 2> satisfies the concept, but std::ratio<2, 4> and const std::ratio<1, 2> do
+	   not.
+		@since 0.12.51
+		@version 0.12.51
+		@author Matthew Moore
+	*/
+	template <typename T>
+	concept Ratio = requires {
+		T::num;
+		T::den;
+	} && std::is_same_v<T, std::ratio<T::num, T::den>>;
 } // namespace PocketCore::Core
 
 #endif

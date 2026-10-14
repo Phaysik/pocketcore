@@ -1,6 +1,6 @@
 /*! @file fixedMetadataRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/14/2026
 	@since 0.12.50
 	@version 0.12.51
 	@author Matthew Moore
@@ -8,6 +8,7 @@
 
 #include <expected>
 #include <format>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -185,6 +186,37 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == CAPACITY));
+			}
+		}
+
+		WHEN("stable IDs are exhausted while storage capacity remains available")
+		{
+			us maximumNextID{std::numeric_limits<us>::max()};
+			Metadata definition{.mName = "ReusedCustomMetadata"};
+
+			for (us nextID{config.getRegistry().getNextID()}; nextID < maximumNextID; ++nextID)
+			{
+				std::expected<FixedMetaDataID, RegistryError> added{config.addMetadata(definition)};
+				REQUIRE(added.has_value());
+				REQUIRE((added.value().getValue() == nextID));
+
+				std::expected<FixedMetaDataID, RegistryError> removed{config.removeMetadata(added.value())};
+				REQUIRE(removed.has_value());
+			}
+
+			REQUIRE((config.getAmountRegistered() < CAPACITY));
+			REQUIRE((config.getRegistry().getNextID() == maximumNextID));
+			FixedRegistry beforeAddition{config.getRegistry()};
+			std::expected<FixedMetaDataID, RegistryError> result{config.addMetadata(definition)};
+
+			THEN("registration reports max capacity without changing registry state or wrapping stable IDs")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == finalFixedUnderlyingValue));
+				CHECK((config.getRegistry().getNextID() == maximumNextID));
+				CHECK((config.getRegistry() == beforeAddition));
+				CHECK_FALSE(config.hasEntry(definition.mName));
 			}
 		}
 

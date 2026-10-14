@@ -1,18 +1,18 @@
 /*! @file overflowProtection.h
 	@brief Declares constexpr helpers for overflow-safe unsigned multiplication.
-	@date 08/30/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.9.1
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_OVERFLOWPROTECTION_H
-#define INCLUDE_OVERFLOWPROTECTION_H
+#ifndef INCLUDE_UTILITY_OVERFLOWPROTECTION_OVERFLOWPROTECTION_H
+#define INCLUDE_UTILITY_OVERFLOWPROTECTION_OVERFLOWPROTECTION_H
 
 #include <limits>
 
 #include "Core/attributeMacros.h"
-#include "Core/cconcepts.h"
+#include "Core/concepts.h"
 
 /*! @namespace PocketCore::Utility::OverflowProtection
 	@brief Utilities for detecting and guarding against unsigned integer overflow.
