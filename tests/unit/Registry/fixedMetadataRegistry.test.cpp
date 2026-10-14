@@ -14,7 +14,7 @@
 #include <string_view>
 #include <utility>
 
-#include "Configuration/fixedMetadataConfiguration.testHelper.h"
+#include "Configuration/fixedMetadataRegistryConfiguration.testHelper.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.testHelper.h"
 #include "Validation/Registry/registryError.h"
@@ -24,9 +24,9 @@
 using PocketCore::Core::ub;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::CheckpointRegistry;
-using PocketCore::Testing::FixedConfiguration;
 using PocketCore::Testing::FixedMetaDataID;
 using PocketCore::Testing::FixedRegistry;
+using PocketCore::Testing::FixedRegistryConfiguration;
 using PocketCore::Testing::Metadata;
 using PocketCore::Testing::NO_ID;
 using PocketCore::Testing::NONE_NAME;
@@ -349,7 +349,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		GIVEN("for an entry added in one registry")
 		{
-			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
 			std::expected<FixedMetaDataID, RegistryError> result{other->addMetadata({.mName = "test"})};
 
 			THEN("they are not equal")
@@ -361,7 +361,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		GIVEN("for an entry removed in one registry")
 		{
-			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
 			std::expected<FixedMetaDataID, RegistryError> result{
 				other->removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None)),
 			};
@@ -375,7 +375,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		GIVEN("for an entry modified in one registry")
 		{
-			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
 			std::expected<void, RegistryError> result{
 				other->mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
 									  [](Metadata &metadata) { metadata = {.mName = "test"}; }),

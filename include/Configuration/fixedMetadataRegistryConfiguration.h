@@ -75,6 +75,17 @@ namespace PocketCore::Configuration
 			 */
 			constexpr FixedMetadataRegistryConfiguration() = default;
 
+		protected:
+			using Registry::addEntry;
+			using Registry::createCheckpoint;
+			using Registry::eraseEntry;
+			using Registry::findIndexByID;
+			using Registry::getAmountRegistered;
+			using Registry::getEntry;
+			using Registry::getNextID;
+			using Registry::restoreCheckpoint;
+			using Registry::setEntry;
+
 			/*! @brief Returns mutable access to the inherited concrete registry.
 				@return A mutable reference to the underlying registry instance.
 				@since 0.9.0
@@ -181,7 +192,7 @@ namespace PocketCore::Configuration
 			{
 				const std::string_view name{metadata.mName};
 
-				if (getAmountRegistered() >= Capacity || this->getNextID() == std::numeric_limits<us>::max())
+				if (getAmountRegistered() >= Capacity || getNextID() == std::numeric_limits<us>::max())
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::add registry capacity or ID space exhausted. Cannot add {} '{}'.", Policy::configurationName,
@@ -200,7 +211,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::duplicateError};
 				}
 
-				return this->addEntry(std::move(metadata));
+				return addEntry(std::move(metadata));
 			}
 
 			/*! @brief Registers multiple definitions atomically after converting each to metadata.
@@ -217,7 +228,7 @@ namespace PocketCore::Configuration
 			ATTR_NODISCARD const std::expected<void, RegistryError> addMetadataBatch(const std::span<const Definition> definitions,
 																					 Factory &&factory)
 			{
-				if (definitions.size() > static_cast<std::size_t>(Capacity - this->getAmountRegistered()))
+				if (definitions.size() > static_cast<std::size_t>(Capacity - getAmountRegistered()))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::addBatch cannot add {} {} entries: capacity is {}.", Policy::configurationName,
@@ -227,7 +238,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{RegistryError::MaxCapacity};
 				}
 
-				const auto checkpoint{this->createCheckpoint()};
+				const auto checkpoint{createCheckpoint()};
 
 				Factory &&forwardedFactory{std::forward<Factory>(factory)};
 
@@ -239,7 +250,7 @@ namespace PocketCore::Configuration
 
 					if (!result.has_value())
 					{
-						this->restoreCheckpoint(checkpoint);
+						restoreCheckpoint(checkpoint);
 						return std::unexpected{result.error()};
 					}
 				}
@@ -268,12 +279,14 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata *currentMetadata{this->getEntry(index.value())};
+				const Metadata *currentMetadata{getEntry(index.value())};
 
+				// LCOV_EXCL_START - Cannot hit this branch since resolveIndex was successful. This is just defensive programming.
 				if (currentMetadata == nullptr)
 				{
 					return std::unexpected{Policy::notFoundError};
 				}
+				// LCOV_EXCL_STOP
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
@@ -289,7 +302,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::duplicateError};
 				}
 
-				this->setEntry(index.value(), metadata);
+				setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -311,7 +324,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata *currentMetadata{this->getEntry(index.value())};
+				const Metadata *currentMetadata{getEntry(index.value())};
 
 				if (currentMetadata == nullptr)
 				{
@@ -332,7 +345,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::duplicateError};
 				}
 
-				this->setEntry(index.value(), metadata);
+				setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -364,7 +377,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::duplicateError};
 				}
 
-				const Metadata *currentMetadata{this->getEntry(index.value())};
+				const Metadata *currentMetadata{getEntry(index.value())};
 
 				if (currentMetadata == nullptr)
 				{
@@ -373,7 +386,7 @@ namespace PocketCore::Configuration
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
 				metadata.mName = newName;
-				this->setEntry(index.value(), metadata);
+				setEntry(index.value(), metadata);
 
 				return {};
 			}
@@ -393,7 +406,7 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::notFoundError};
 				}
 
-				const std::optional<us> index{this->findIndexByID(stableID.value())};
+				const std::optional<us> index{findIndexByID(stableID.value())}; // LCOV_EXCL_BR - Can't fail when getID succeeded
 				assert(index.has_value());
 				removeEntry(index.value());
 
@@ -438,9 +451,10 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::notFoundError};
 				}
 
+				assert(stableID.has_value());
+
 				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-				return this->findIndexByID(stableID.value())
-					.value(); // LCOV_EXCL_BR - Cannot fail when getID just succeeded on the same registry
+				return findIndexByID(*stableID).value(); // LCOV_EXCL_BR - Can't fail when getID succeeded
 			}
 
 			/*! @brief Resolves a stable ID to its registry index after validation.
@@ -453,14 +467,16 @@ namespace PocketCore::Configuration
 			*/
 			ATTR_NODISCARD const std::expected<us, RegistryError> resolveIndex(const StableID stableID)
 			{
-				const std::optional<us> index{this->findIndexByID(stableID)};
+				const std::optional<us> index{findIndexByID(stableID)}; // LCOV_EXCL_BR (from possible .at() throw which can't happen)
 
 				if (!index.has_value())
 				{
 					return std::unexpected{Policy::notFoundError};
 				}
 
-				return index.value();
+				assert(index.has_value());
+
+				return *index;
 			}
 
 			/*! @brief Removes the metadata entry at the specified registry index.
@@ -469,11 +485,11 @@ namespace PocketCore::Configuration
 				@post The registry removes the entry and compacts any remaining entries as defined by @ref Registry::eraseEntry.
 				@note The underlying registry remains responsible for maintaining its entry count and index consistency.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
 			void removeEntry(const us index)
 			{
-				this->eraseEntry(index);
+				eraseEntry(index);
 			}
 	};
 } // namespace PocketCore::Configuration

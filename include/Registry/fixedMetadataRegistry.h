@@ -283,9 +283,9 @@ namespace PocketCore::Registry
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			constexpr void setAmountRegistered(const us amount) noexcept
+			constexpr void setAmountRegistered(const us amount)
 			{
 				assert(amount <= mEntries.size());
 				mAmountRegistered = amount;
@@ -334,7 +334,7 @@ namespace PocketCore::Registry
 				@since 0.5.0
 				@version 0.12.51
 			 */
-			constexpr void incrementAmountRegistered() noexcept
+			constexpr void incrementAmountRegistered()
 			{
 				assert(mAmountRegistered < mEntries.size());
 				insertIDIndex(mEntries.at(mAmountRegistered).*IDMember, mAmountRegistered);
@@ -345,9 +345,9 @@ namespace PocketCore::Registry
 
 			/*! @brief Decrements the registered count.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			 */
-			constexpr void decrementAmountRegistered() noexcept
+			constexpr void decrementAmountRegistered()
 			{
 				assert(mAmountRegistered > 0U);
 				removeIDIndex(mEntries.at(static_cast<us>(mAmountRegistered - 1U)).*IDMember, static_cast<us>(mAmountRegistered - 1U));
@@ -546,9 +546,9 @@ namespace PocketCore::Registry
 				@details Regenerates @ref mIDIndex from @ref mEntries for all indices in [0, @ref mAmountRegistered),
 				then sorts the generated entries with @ref idIndexEntryLess.
 				@since 0.8.7
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NOINLINE constexpr void rebuildIDIndex() noexcept
+			ATTR_NOINLINE constexpr void rebuildIDIndex()
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
 				{

@@ -37,10 +37,10 @@ namespace PocketCore::Testing
 		Final,
 	};
 
-	constexpr std::string_view NONE_NAME{"None"};
-	constexpr std::string_view TEST1_NAME{"Test1"};
-	constexpr std::string_view TEST2_NAME{"Test2"};
-	constexpr std::string_view TEST3_NAME{"Test3"};
+	inline constexpr std::string_view NONE_NAME{"None"};
+	inline constexpr std::string_view TEST1_NAME{"Test1"};
+	inline constexpr std::string_view TEST2_NAME{"Test2"};
+	inline constexpr std::string_view TEST3_NAME{"Test3"};
 
 	ATTR_NODISCARD constexpr FixedMetaDataID toFixedMetaDataID(const BuiltinFixedMetaDataID builtinFixedMetaDataID) noexcept
 	{
