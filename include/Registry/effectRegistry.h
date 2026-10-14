@@ -139,9 +139,9 @@ namespace PocketCore::Registry::Effect
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinEffectID.
 				@since 0.10.0
-				@version 0.12.43
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr EffectRegistry() : Base{toEffectID(BuiltinEffectID::FinalEffect).getValue()}
+			ATTR_NOINLINE explicit constexpr EffectRegistry()
 			{
 				addBuiltin({.mName = std::string(EFFECT_NAME_NONE), .mEffectID = toEffectID(BuiltinEffectID::None)});
 				addBuiltin({

@@ -72,9 +72,9 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID.
 				@since 0.6.4
-				@version 0.12.45
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
+			ATTR_NOINLINE explicit constexpr StatusRegistry()
 			{
 				// Non-Volatile Statuses
 

@@ -44,13 +44,6 @@ namespace PocketCore::Registry
 	class FixedMetadataRegistry
 	{
 		public:
-			/*! @brief Constructs empty storage with a specified next-ID counter.
-				@param[in] nextID The first numeric ID available after built-in registration.
-				@since 0.5.0
-				@version 0.5.0
-			*/
-			explicit constexpr FixedMetadataRegistry(const us nextID) noexcept : mNextID{nextID} {}
-
 			/*! @brief Compares two FixedMetadataRegistry instances for equality.
 				@details Compares registered metadata in storage order and the next stable ID. Derived lookup indexes, unused storage, and
 			   checkpoint mutation versions do not affect equality.
@@ -339,7 +332,7 @@ namespace PocketCore::Registry
 
 			/*! @brief Increments the registered count.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			 */
 			constexpr void incrementAmountRegistered() noexcept
 			{
@@ -347,6 +340,7 @@ namespace PocketCore::Registry
 				insertIDIndex(mEntries.at(mAmountRegistered).*IDMember, mAmountRegistered);
 				++mAmountRegistered;
 				++mMutationVersion;
+				++mNextID;
 			}
 
 			/*! @brief Decrements the registered count.

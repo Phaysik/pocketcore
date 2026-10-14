@@ -70,9 +70,9 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Constructs a registry populated with all built-in learnsets, including None but excluding the FinalLearnset sentinel.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr LearnsetRegistry() : Base{toLearnsetID(BuiltinLearnsetID::FinalLearnset).getValue()}
+			ATTR_NOINLINE explicit constexpr LearnsetRegistry()
 			{
 				addBuiltin({.mName = std::string(LEARNSET_NAME_NONE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::None)});
 				addBuiltin(

@@ -116,9 +116,9 @@ namespace PocketCore::Registry::Nature
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinNatureID.
 				@since 0.11.6
-				@version 0.12.23
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr NatureRegistry() : Base{toNatureID(BuiltinNatureID::FinalNature).getValue()}
+			ATTR_NOINLINE explicit constexpr NatureRegistry()
 			{
 				addBuiltin({.mName = std::string(NATURE_NAME_NONE), .mNatureID = toNatureID(BuiltinNatureID::None)});
 

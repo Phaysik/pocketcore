@@ -64,7 +64,7 @@ namespace PocketCore::Registry::Location
 				@since 0.12.51
 				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr LocationRegistry() : Base{toLocationID(BuiltinLocationID::FinalLocation).getValue()}
+			ATTR_NOINLINE explicit constexpr LocationRegistry()
 			{
 				addBuiltin({.mName = std::string(LOCATION_NAME_NONE), .mLocationID = toLocationID(BuiltinLocationID::None)});
 				addBuiltin({

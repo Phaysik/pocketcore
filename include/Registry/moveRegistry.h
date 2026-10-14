@@ -78,9 +78,9 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.12.24
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
+			ATTR_NOINLINE explicit constexpr MoveRegistry()
 			{
 				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 

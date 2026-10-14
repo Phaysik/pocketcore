@@ -70,9 +70,9 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID.
 				@since 0.4.1
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr ItemRegistry() : Base{toItemID(BuiltinItemID::FinalItem).getValue()}
+			ATTR_NOINLINE explicit constexpr ItemRegistry()
 			{
 				addBuiltin({.mName = std::string(ITEM_NAME_NONE), .mTriggers = {}, .mItemID = toItemID(BuiltinItemID::None)});
 				addBuiltin({

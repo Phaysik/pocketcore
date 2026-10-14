@@ -71,9 +71,9 @@ namespace PocketCore::Registry::Weather
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID.
 				@since 0.8.0
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr WeatherRegistry() : Base{toWeatherID(BuiltinWeatherID::FinalWeather).getValue()}
+			ATTR_NOINLINE explicit constexpr WeatherRegistry()
 			{
 				addBuiltin({.mName = std::string(WEATHER_NAME_NONE), .mWeatherID = toWeatherID(BuiltinWeatherID::None)});
 				addBuiltin({

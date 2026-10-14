@@ -295,7 +295,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		WHEN("the registered entry counts differ")
 		{
-			static_cast<void>(actual.addEntry({.mName = "Additional"}));
+			actual.addEntry({.mName = "Additional"});
 
 			THEN("the registries compare unequal")
 			{
@@ -306,8 +306,8 @@ SCENARIO("FixedMetadataRegistry")
 		WHEN("the registered metadata differs with matching counts and next IDs")
 		{
 			CheckpointRegistry other{};
-			static_cast<void>(actual.addEntry({.mName = "First"}));
-			static_cast<void>(other.addEntry({.mName = "Second"}));
+			actual.addEntry({.mName = "First"});
+			other.addEntry({.mName = "Second"});
 
 			THEN("the registries compare unequal")
 			{
@@ -319,7 +319,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		WHEN("an entry is appended and removed without rolling back its assigned ID")
 		{
-			static_cast<void>(actual.addEntry({.mName = "Removed"}));
+			actual.addEntry({.mName = "Removed"});
 			actual.eraseEntry(original.getAmountRegistered());
 
 			THEN("matching registered metadata with different next IDs compares unequal")

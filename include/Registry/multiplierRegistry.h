@@ -73,9 +73,9 @@ namespace PocketCore::Registry::Multiplier
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID.
 				@since 0.8.1
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr MultiplierRegistry() : Base{toMultiplierID(BuiltinMultiplierID::FinalMultiplier).getValue()}
+			ATTR_NOINLINE explicit constexpr MultiplierRegistry()
 			{
 				addBuiltin({
 					.mName = std::string(MULTIPLIER_NAME_NONE),

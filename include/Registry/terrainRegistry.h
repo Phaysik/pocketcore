@@ -65,9 +65,9 @@ namespace PocketCore::Registry::Terrain
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinTerrainID.
 				@since 0.8.0
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr TerrainRegistry() : Base{toTerrainID(BuiltinTerrainID::FinalTerrain).getValue()}
+			ATTR_NOINLINE explicit constexpr TerrainRegistry()
 			{
 				addBuiltin({.mName = std::string(TERRAIN_NAME_NONE), .mTerrainID = toTerrainID(BuiltinTerrainID::None)});
 				addBuiltin({

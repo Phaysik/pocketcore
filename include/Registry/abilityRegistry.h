@@ -75,9 +75,9 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID.
 				@since 0.4.0
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr AbilityRegistry() : Base{toAbilityID(BuiltinAbilityID::FinalAbility).getValue()}
+			ATTR_NOINLINE explicit constexpr AbilityRegistry()
 			{
 				addBuiltin({
 					.mName = std::string(ABILITY_NAME_NONE),
