@@ -195,7 +195,7 @@ namespace PocketCore::Configuration
 	}
 
 	ATTR_NODISCARD std::expected<void, RegistryError> TypeRegistryConfiguration::setDefensiveColumn(
-	const std::string_view defenderName, const std::span<const TypeEffectiveness> newCol)
+		const std::string_view defenderName, const std::span<const TypeEffectiveness> newCol)
 	{
 		if (newCol.size() > MAX_TYPES)
 		{
