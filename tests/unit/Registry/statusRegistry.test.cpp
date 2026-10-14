@@ -19,18 +19,17 @@
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Interaction/interaction.h"
-#include "Registry/registryError.h"
 #include "Status/builtInStatusID.h"
 #include "Status/constants.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Interaction::InteractionAction;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
@@ -47,6 +46,7 @@ using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Status::toStatusID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -341,7 +341,7 @@ SCENARIO("StatusRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
-			std::expected<StatusID, RegistryErrorInfo> result{other->addStatus({.mName = "test"})};
+			std::expected<StatusID, RegistryError> result{other->addStatus({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -353,7 +353,7 @@ SCENARIO("StatusRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
-			std::expected<StatusID, RegistryErrorInfo> result{other->removeStatus(toStatusID(BuiltinStatusID::None))};
+			std::expected<StatusID, RegistryError> result{other->removeStatus(toStatusID(BuiltinStatusID::None))};
 
 			THEN("they are not equal")
 			{
@@ -365,7 +365,7 @@ SCENARIO("StatusRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
 			};
 

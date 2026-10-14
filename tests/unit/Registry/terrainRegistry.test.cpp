@@ -18,17 +18,16 @@
 
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::TerrainRegistryConfiguration;
 using PocketCore::Core::ub;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Terrain::TerrainRegistry;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::NO_TERRAIN_ID;
@@ -40,6 +39,7 @@ using PocketCore::Terrain::TERRAIN_NAME_PSYCHIC;
 using PocketCore::Terrain::TerrainID;
 using PocketCore::Terrain::TerrainMeta;
 using PocketCore::Terrain::toTerrainID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -266,7 +266,7 @@ SCENARIO("TerrainRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
-			std::expected<TerrainID, RegistryErrorInfo> result{other->addTerrain({.mName = "test"})};
+			std::expected<TerrainID, RegistryError> result{other->addTerrain({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -278,7 +278,7 @@ SCENARIO("TerrainRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
-			std::expected<TerrainID, RegistryErrorInfo> result{other->removeTerrain(toTerrainID(BuiltinTerrainID::None))};
+			std::expected<TerrainID, RegistryError> result{other->removeTerrain(toTerrainID(BuiltinTerrainID::None))};
 
 			THEN("they are not equal")
 			{
@@ -290,7 +290,7 @@ SCENARIO("TerrainRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateTerrain(toTerrainID(BuiltinTerrainID::None), {.mName = "test"}),
 			};
 

@@ -22,7 +22,7 @@
 #include "Location/constants.h"
 #include "Location/locationID.h"
 #include "Location/locationMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -36,7 +36,7 @@ using PocketCore::Location::LocationMeta;
 using PocketCore::Location::NO_LOCATION_ID;
 using PocketCore::Location::toLocationID;
 using PocketCore::Registry::Location::LocationRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -227,7 +227,7 @@ SCENARIO("LocationRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
-			std::expected<LocationID, RegistryErrorInfo> result{other->addLocation({.mName = "test"})};
+			std::expected<LocationID, RegistryError> result{other->addLocation({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -239,7 +239,7 @@ SCENARIO("LocationRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
-			std::expected<LocationID, RegistryErrorInfo> result{other->removeLocation(toLocationID(BuiltinLocationID::None))};
+			std::expected<LocationID, RegistryError> result{other->removeLocation(toLocationID(BuiltinLocationID::None))};
 
 			THEN("they are not equal")
 			{
@@ -251,7 +251,7 @@ SCENARIO("LocationRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<LocationRegistryConfiguration> other{std::make_unique<LocationRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateLocation(toLocationID(BuiltinLocationID::None), {.mName = "test"}),
 			};
 

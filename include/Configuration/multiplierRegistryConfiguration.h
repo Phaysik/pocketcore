@@ -1,6 +1,6 @@
 /*! @file multiplierRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring multiplier metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.8.1
 	@version 0.12.51
 	@author Matthew Moore
@@ -21,15 +21,14 @@
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Registry/multiplierRegistry.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::us;
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
-	using PocketCore::Registry::RegistryError;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 	using Registry::Multiplier::MultiplierRegistry;
 
 	namespace Detail
@@ -65,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal multiplier registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/30/2026
+		@date 10/13/2026
 		@since 0.8.1
-		@version 0.12.11
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class MultiplierRegistryConfiguration
@@ -113,9 +112,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<MultiplierID> getMultiplierID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<MultiplierID> getMultiplierID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -145,9 +144,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasMultiplier(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasMultiplier(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -165,69 +164,69 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined multiplier and assigns a stable ID.
 				@param[in] multiplierMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> addMultiplier(const MultiplierMeta &multiplierMeta);
+			ATTR_NODISCARD std::expected<MultiplierID, RegistryError> addMultiplier(const MultiplierMeta &multiplierMeta);
 
 			/*! @brief Registers multiple multipliers atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] multiplierMetas The multiplier definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addMultipliers(const std::span<const MultiplierMeta> &multiplierMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addMultipliers(const std::span<const MultiplierMeta> multiplierMetas);
 
 			/*! @brief Renames an multiplier without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameMultiplier(const std::string_view &oldName,
-																				   const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameMultiplier(const std::string_view oldName,
+																			   const std::string_view newName);
 
 			/*! @brief Replaces all multiplier metadata for an multiplier selected by stable ID.
 				@param[in] multiplierName The registered display name.
 				@param[in] multiplierMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the multiplier is not registered.
+				@return Void on success, or @ref RegistryError if the multiplier is not registered.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMultiplier(const std::string_view &multiplierName,
-																				   const MultiplierMeta &multiplierMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateMultiplier(const std::string_view multiplierName,
+																			   const MultiplierMeta &multiplierMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateMultiplier(MultiplierID, const MultiplierMeta &multiplierMeta)
+			/*! @overload std::expected<void, RegistryError> updateMultiplier(MultiplierID, const MultiplierMeta &multiplierMeta)
 				@brief Replaces all multiplier metadata for an multiplier selected by stable ID.
 				@param[in] multiplierID The built-in or custom stable identifier.
 				@param[in] multiplierMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the multiplier is not registered.
+				@return Void on success, or @ref RegistryError if the multiplier is not registered.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMultiplier(const MultiplierID multiplierID,
-																				   const MultiplierMeta &multiplierMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateMultiplier(const MultiplierID multiplierID,
+																			   const MultiplierMeta &multiplierMeta);
 
 			/*! @brief Removes an multiplier by display name.
 				@param[in] multiplierName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching multiplier exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching multiplier exists.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> removeMultiplier(const std::string_view &multiplierName);
+			ATTR_NODISCARD std::expected<MultiplierID, RegistryError> removeMultiplier(const std::string_view multiplierName);
 
-			/*! @overload std::expected<MultiplierID, RegistryErrorInfo> removeMultiplier(MultiplierID)
+			/*! @overload std::expected<MultiplierID, RegistryError> removeMultiplier(MultiplierID)
 				@brief Removes an multiplier by stable ID.
 				@param[in] multiplierID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching multiplier exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching multiplier exists.
 				@since 0.8.1
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MultiplierID, RegistryErrorInfo> removeMultiplier(const MultiplierID multiplierID);
+			ATTR_NODISCARD std::expected<MultiplierID, RegistryError> removeMultiplier(const MultiplierID multiplierID);
 	};
 } // namespace PocketCore::Configuration
 

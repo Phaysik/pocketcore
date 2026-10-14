@@ -678,7 +678,7 @@ namespace PocketCore::Battle
 		}
 
 		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
-										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
+										const std::string_view indentation, const StableID stableID, const NameLookup &nameLookup) {
 			constexpr std::string_view unregisteredName{"<unregistered>"};
 			const std::optional<std::string_view> name{nameLookup(stableID)};
 

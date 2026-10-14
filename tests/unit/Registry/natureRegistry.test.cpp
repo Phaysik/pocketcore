@@ -23,7 +23,7 @@
 #include "Nature/constants.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -64,7 +64,7 @@ using PocketCore::Nature::NatureMeta;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Registry::Nature::NatureRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -588,7 +588,7 @@ SCENARIO("NatureRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
-			std::expected<NatureID, RegistryErrorInfo> result{other->addNature({.mName = "test"})};
+			std::expected<NatureID, RegistryError> result{other->addNature({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -600,7 +600,7 @@ SCENARIO("NatureRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
-			std::expected<NatureID, RegistryErrorInfo> result{other->removeNature(toNatureID(BuiltinNatureID::None))};
+			std::expected<NatureID, RegistryError> result{other->removeNature(toNatureID(BuiltinNatureID::None))};
 
 			THEN("they are not equal")
 			{
@@ -612,7 +612,7 @@ SCENARIO("NatureRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<NatureRegistryConfiguration> other{std::make_unique<NatureRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateNature(toNatureID(BuiltinNatureID::None), {.mName = "test"}),
 			};
 

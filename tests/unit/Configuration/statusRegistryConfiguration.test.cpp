@@ -19,13 +19,13 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Registry/statusRegistry.h"
 #include "Status/builtInStatusID.h"
 #include "Status/constants.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -34,7 +34,6 @@ using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
@@ -44,6 +43,7 @@ using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Status::toStatusID;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("StatusRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				StatusMeta definition{.mName = name};
-				std::expected<StatusID, RegistryErrorInfo> result{config.addStatus(definition)};
+				std::expected<StatusID, RegistryError> result{config.addStatus(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("StatusRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_STATUSES + 1)};
 
 			StatusMeta definition{.mName = name};
-			std::expected<StatusID, RegistryErrorInfo> result{config.addStatus(definition)};
+			std::expected<StatusID, RegistryError> result{config.addStatus(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_STATUSES));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("StatusRegistryConfiguration")
 		WHEN("an status whose name is already in use is added")
 		{
 			StatusMeta definition{.mName = std::string(STATUS_NAME_BURN)};
-			std::expected<StatusID, RegistryErrorInfo> result{config.addStatus(definition)};
+			std::expected<StatusID, RegistryError> result{config.addStatus(definition)};
 
 			THEN("registration reports a duplicate status and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateStatus));
+				CHECK((result.error() == RegistryError::DuplicateStatus));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("StatusRegistryConfiguration")
 		{
 			StatusMeta definition{.mName = "TestStatusName"};
 
-			std::expected<StatusID, RegistryErrorInfo> result{config.addStatus(definition)};
+			std::expected<StatusID, RegistryError> result{config.addStatus(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -243,12 +243,12 @@ SCENARIO("StatusRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_STATUSES + 1)};
 
 			statusMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addStatuses(statusMetas)};
+			std::expected<void, RegistryError> result{config.addStatuses(statusMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 			}
 		}
@@ -265,12 +265,12 @@ SCENARIO("StatusRegistryConfiguration")
 
 			statusMetas.push_back({.mName = std::string(STATUS_NAME_BURN)});
 			const StatusRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addStatuses(statusMetas)};
+			std::expected<void, RegistryError> result{config.addStatuses(statusMetas)};
 
 			THEN("registration reports a duplicate status and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateStatus));
+				CHECK((result.error() == RegistryError::DuplicateStatus));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextStatusID() == beforeBatch.getNextStatusID()));
@@ -284,7 +284,7 @@ SCENARIO("StatusRegistryConfiguration")
 
 			statusMetas.push_back({.mName = "TestStatusName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addStatuses(statusMetas)};
+			std::expected<void, RegistryError> result{config.addStatuses(statusMetas)};
 
 			THEN("the registry reports no error and all the status definitions are added")
 			{
@@ -298,31 +298,31 @@ SCENARIO("StatusRegistryConfiguration")
 	{
 		WHEN("calling with an invalid status name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameStatus("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameStatus("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::StatusNotFound));
+				CHECK((result.error() == RegistryError::StatusNotFound));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameStatus(STATUS_NAME_NONE, STATUS_NAME_BURN)};
+			std::expected<void, RegistryError> result{config.renameStatus(STATUS_NAME_NONE, STATUS_NAME_BURN)};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateStatus));
+				CHECK((result.error() == RegistryError::DuplicateStatus));
 				CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing status definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameStatus(STATUS_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameStatus(STATUS_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -341,33 +341,33 @@ SCENARIO("StatusRegistryConfiguration")
 		{
 			WHEN("calling with an invalid status name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateStatus("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateStatus("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::StatusNotFound));
+					CHECK((result.error() == RegistryError::StatusNotFound));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateStatus(STATUS_NAME_NONE, {.mName = std::string(STATUS_NAME_BURN)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateStatus));
+					CHECK((result.error() == RegistryError::DuplicateStatus));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing status definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateStatus(STATUS_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateStatus(STATUS_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -382,33 +382,33 @@ SCENARIO("StatusRegistryConfiguration")
 		{
 			WHEN("calling with an invalid status name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateStatus(StatusID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateStatus(StatusID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::StatusNotFound));
+					CHECK((result.error() == RegistryError::StatusNotFound));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateStatus(toStatusID(BuiltinStatusID::None), {.mName = std::string(STATUS_NAME_BURN)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateStatus));
+					CHECK((result.error() == RegistryError::DuplicateStatus));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing status definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateStatus(toStatusID(BuiltinStatusID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateStatus(toStatusID(BuiltinStatusID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -426,19 +426,19 @@ SCENARIO("StatusRegistryConfiguration")
 		{
 			WHEN("calling with an unknown status name")
 			{
-				std::expected<StatusID, RegistryErrorInfo> result{config.removeStatus("Unknown")};
+				std::expected<StatusID, RegistryError> result{config.removeStatus("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::StatusNotFound));
+					CHECK((result.error() == RegistryError::StatusNotFound));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known status name")
 			{
-				std::expected<StatusID, RegistryErrorInfo> result{config.removeStatus(STATUS_NAME_NONE)};
+				std::expected<StatusID, RegistryError> result{config.removeStatus(STATUS_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -453,19 +453,19 @@ SCENARIO("StatusRegistryConfiguration")
 		{
 			WHEN("calling with an unknown status ID")
 			{
-				std::expected<StatusID, RegistryErrorInfo> result{config.removeStatus(StatusID{200})};
+				std::expected<StatusID, RegistryError> result{config.removeStatus(StatusID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::StatusNotFound));
+					CHECK((result.error() == RegistryError::StatusNotFound));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known status ID")
 			{
-				std::expected<StatusID, RegistryErrorInfo> result{config.removeStatus(toStatusID(BuiltinStatusID::None))};
+				std::expected<StatusID, RegistryError> result{config.removeStatus(toStatusID(BuiltinStatusID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

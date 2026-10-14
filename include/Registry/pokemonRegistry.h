@@ -46,13 +46,13 @@
 #include "Registry/locationRegistry.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/natureRegistry.h"
-#include "Registry/registryError.h"
 #include "Type/builtInTypeID.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
 #include "Validation/Nature/natureError.h"
 #include "Validation/Pokemon/pokemonError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Registry::Pokemon
 {
@@ -113,7 +113,6 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Registry::Location::LocationRegistry;
 	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Registry::Nature::NatureRegistry;
-	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 	using PocketCore::Validation::Ability::AbilityError;
@@ -121,8 +120,9 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Validation::Move::MoveError;
 	using PocketCore::Validation::Nature::NatureError;
 	using PocketCore::Validation::Pokemon::PokemonError;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	using PokemonInstantiationError = std::variant<RegistryErrorInfo, PokemonError, NatureError, AbilityError, ItemError, MoveError>;
+	using PokemonInstantiationError = std::variant<RegistryError, PokemonError, NatureError, AbilityError, ItemError, MoveError>;
 
 	/*! @struct PokemonInstantiationDependencies Registry/pokemonRegistry.h
 		@brief Aggregates non-owning pointers to runtime metadata registries needed for Pokemon instantiation.
@@ -173,7 +173,7 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 10/09/2026
+		@date 10/13/2026
 		@since 0.11.6
 		@version 0.12.51
 		@author Matthew Moore
@@ -314,9 +314,9 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<PokemonID> getPokemonID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<PokemonID> getPokemonID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -367,9 +367,9 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasPokemon(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasPokemon(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

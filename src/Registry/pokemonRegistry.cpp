@@ -30,13 +30,13 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
-#include "Registry/registryError.h"
 #include "Utility/random.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
 #include "Validation/Nature/natureError.h"
 #include "Validation/Pokemon/pokemonError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Registry::Pokemon
 {
@@ -63,13 +63,13 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::SetLevelEncounter;
-	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Utility::Random;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Move::MoveError;
 	using PocketCore::Validation::Nature::NatureError;
 	using PocketCore::Validation::Pokemon::PokemonError;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
 		const PokemonID pokemonID, const std::size_t encounterIndex, PokemonInstantiationDependencies *dependencyRegistries,
@@ -81,30 +81,26 @@ namespace PocketCore::Registry::Pokemon
 			|| dependencyRegistries->mNatureRegistry == nullptr || dependencyRegistries->mLearnsetRegistry == nullptr
 			|| dependencyRegistries->mLocationRegistry == nullptr)
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::MissingRegistry, {}, "PokemonRegistry::instantiate: missing registry dependency"}};
+			return std::unexpected{RegistryError::MissingRegistry};
 		}
 
 		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonID)};
 
 		if (pokemonMeta == nullptr)
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::PokemonNotFound, {}, "PokemonRegistry::instantiate: missing pokemon metadata"}};
+			return std::unexpected{RegistryError::PokemonNotFound};
 		}
 
 		const LearnsetMeta *learnsetMeta{dependencyRegistries->mLearnsetRegistry->getLearnsetMetadata(pokemonMeta->mLearnsetID)};
 
 		if (learnsetMeta == nullptr)
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::LearnsetNotFound, {}, "PokemonRegistry::instantiate: missing learnset metadata"}};
+			return std::unexpected{RegistryError::LearnsetNotFound};
 		}
 
 		if (encounterIndex > pokemonMeta->mEncounters.size())
 		{
-			return std::unexpected{
-				RegistryErrorInfo{RegistryError::LocationNotFound, {}, "PokemonRegistry::instantiate: missing encounter metadata"}};
+			return std::unexpected{RegistryError::LocationNotFound};
 		}
 
 		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(encounterIndex)};

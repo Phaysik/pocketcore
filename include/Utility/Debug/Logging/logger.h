@@ -1,8 +1,8 @@
 /*! @file logger.h
 	@brief Contains the function declarations for a static logging wrapper around spdlog.
-	@date 07/26/2026
+	@date 10/13/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -31,7 +31,7 @@ namespace PocketCore::Utility::Debug::Logging
 		@details All constructors, copy/move operators, and the destructor are deleted to prevent instantiation. Call @ref initialize before
 	   any logging methods. Internal state is stored via function-local statics to avoid static-initialization-order issues.
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.12.51
 	*/
 	class Logger
 	{
@@ -150,10 +150,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] args The arguments to format into the message.
 				@param[in] level The spdlog level to log at (defaults to spdlog::level::info).
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> log(spdlog::level::level_enum level, const std::string_view &format,
+			ATTR_NODISCARD static std::optional<std::string_view> log(spdlog::level::level_enum level, const std::string_view format,
 																	  Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
@@ -176,10 +176,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> trace(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> trace(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
@@ -201,10 +201,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> debug(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> debug(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
@@ -226,10 +226,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> info(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> info(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
@@ -251,10 +251,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> warn(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> warn(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
@@ -276,10 +276,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> error(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> error(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
@@ -301,10 +301,10 @@ namespace PocketCore::Utility::Debug::Logging
 				@param[in] format The fmt-style format string.
 				@param[in] args The arguments to format into the message.
 				@since 0.1.0
-				@version 0.1.0
+				@version 0.12.51
 			*/
 			template <typename... Args>
-			ATTR_NODISCARD static std::optional<std::string_view> critical(const std::string_view &format, Args &&...args)
+			ATTR_NODISCARD static std::optional<std::string_view> critical(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 

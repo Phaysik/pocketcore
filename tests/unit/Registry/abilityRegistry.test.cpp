@@ -23,7 +23,7 @@
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -43,7 +43,7 @@ using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -259,7 +259,7 @@ SCENARIO("AbilityRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
-			std::expected<AbilityID, RegistryErrorInfo> result{other->addAbility({.mName = "test"})};
+			std::expected<AbilityID, RegistryError> result{other->addAbility({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -271,7 +271,7 @@ SCENARIO("AbilityRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
-			std::expected<AbilityID, RegistryErrorInfo> result{other->removeAbility(toAbilityID(BuiltinAbilityID::None))};
+			std::expected<AbilityID, RegistryError> result{other->removeAbility(toAbilityID(BuiltinAbilityID::None))};
 
 			THEN("they are not equal")
 			{
@@ -283,7 +283,7 @@ SCENARIO("AbilityRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateAbility(toAbilityID(BuiltinAbilityID::None), {.mName = "test"}),
 			};
 

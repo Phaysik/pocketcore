@@ -19,8 +19,8 @@
 #include "Configuration/fixedMetadataConfiguration.testHelper.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.testHelper.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -28,7 +28,6 @@ using PocketCore::Configuration::MAX_WEATHERS;
 using PocketCore::Configuration::RegistryError;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::ensureLoggerInitialized;
 using PocketCore::Testing::FixedConfiguration;
@@ -39,6 +38,7 @@ using PocketCore::Testing::NO_ID;
 using PocketCore::Testing::NONE_NAME;
 using PocketCore::Testing::TEST1_NAME;
 using PocketCore::Testing::toFixedMetaDataID;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -169,7 +169,7 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				Metadata definition{.mName = name};
-				std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.addMetadata(definition)};
+				std::expected<FixedMetaDataID, RegistryError> result{config.addMetadata(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -180,12 +180,12 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_WEATHERS + 1)};
 
 			Metadata definition{.mName = name};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.addMetadata(definition)};
+			std::expected<FixedMetaDataID, RegistryError> result{config.addMetadata(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_WEATHERS));
 			}
 		}
@@ -193,12 +193,12 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		WHEN("an weather whose name is already in use is added")
 		{
 			Metadata definition{.mName = std::string(TEST1_NAME)};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.addMetadata(definition)};
+			std::expected<FixedMetaDataID, RegistryError> result{config.addMetadata(definition)};
 
 			THEN("registration reports a duplicate weather and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMetadata));
+				CHECK((result.error() == RegistryError::DuplicateMetadata));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 			}
 		}
@@ -207,7 +207,7 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		{
 			Metadata definition{.mName = "TestWeatherName"};
 
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.addMetadata(definition)};
+			std::expected<FixedMetaDataID, RegistryError> result{config.addMetadata(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -239,14 +239,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_WEATHERS + 1)};
 
 			Metadatas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.addMetadataBatch<Metadata>(Metadatas, [](const Metadata &definition) { return Metadata{definition}; }),
 			};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 			}
 		}
@@ -263,14 +263,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 
 			Metadatas.push_back({.mName = std::string(TEST1_NAME)});
 			const FixedRegistry beforeBatch{config.getRegistry()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.addMetadataBatch<Metadata>(Metadatas, [](const Metadata &definition) { return Metadata{definition}; }),
 			};
 
 			THEN("registration reports a duplicate weather and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMetadata));
+				CHECK((result.error() == RegistryError::DuplicateMetadata));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				CHECK((config.getRegistry() == beforeBatch));
@@ -285,7 +285,7 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 
 			Metadatas.push_back({.mName = "TestWeatherName"});
 
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.addMetadataBatch<Metadata>(Metadatas, [](const Metadata &definition) { return Metadata{definition}; }),
 			};
 
@@ -301,33 +301,33 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 	{
 		WHEN("calling with an invalid weather name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMetadata("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameMetadata("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MetadataNotFound));
+				CHECK((result.error() == RegistryError::MetadataNotFound));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameMetadata(NONE_NAME, TEST1_NAME),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMetadata));
+				CHECK((result.error() == RegistryError::DuplicateMetadata));
 				CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing weather definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMetadata(NONE_NAME, "NewName")};
+			std::expected<void, RegistryError> result{config.renameMetadata(NONE_NAME, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -346,7 +346,7 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		{
 			WHEN("calling with an invalid weather name")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata("ThisIsInvalid", "FixedMetadataConfiguration",
 										  [&definition](Metadata &metadata) { metadata = definition; }),
 				};
@@ -354,14 +354,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MetadataNotFound));
+					CHECK((result.error() == RegistryError::MetadataNotFound));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata(NONE_NAME, "FixedMetadataConfiguration",
 										  [](Metadata &metadata) { metadata = {.mName = std::string(TEST1_NAME)}; }),
 				};
@@ -369,14 +369,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMetadata));
+					CHECK((result.error() == RegistryError::DuplicateMetadata));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing weather definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata(NONE_NAME, "FixedMetadataConfiguration",
 										  [&definition](Metadata &metadata) { metadata = definition; }),
 				};
@@ -394,7 +394,7 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		{
 			WHEN("calling with an invalid weather name")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata(FixedMetaDataID{200}, "FixedMetadataConfiguration",
 										  [&definition](Metadata &metadata) { metadata = definition; }),
 				};
@@ -402,14 +402,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MetadataNotFound));
+					CHECK((result.error() == RegistryError::MetadataNotFound));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadataConfiguration",
 										  [](Metadata &metadata) { metadata = {.mName = std::string(TEST1_NAME)}; }),
 				};
@@ -417,14 +417,14 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMetadata));
+					CHECK((result.error() == RegistryError::DuplicateMetadata));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing weather definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadataConfiguration",
 										  [&definition](Metadata &metadata) { metadata = definition; }),
 				};
@@ -445,19 +445,19 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		{
 			WHEN("calling with an unknown weather name")
 			{
-				std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.removeMetadata("Unknown")};
+				std::expected<FixedMetaDataID, RegistryError> result{config.removeMetadata("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MetadataNotFound));
+					CHECK((result.error() == RegistryError::MetadataNotFound));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known weather name")
 			{
-				std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.removeMetadata(NONE_NAME)};
+				std::expected<FixedMetaDataID, RegistryError> result{config.removeMetadata(NONE_NAME)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -472,19 +472,19 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 		{
 			WHEN("calling with an unknown weather ID")
 			{
-				std::expected<FixedMetaDataID, RegistryErrorInfo> result{config.removeMetadata(FixedMetaDataID{200})};
+				std::expected<FixedMetaDataID, RegistryError> result{config.removeMetadata(FixedMetaDataID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MetadataNotFound));
+					CHECK((result.error() == RegistryError::MetadataNotFound));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known weather ID")
 			{
-				std::expected<FixedMetaDataID, RegistryErrorInfo> result{
+				std::expected<FixedMetaDataID, RegistryError> result{
 					config.removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None)),
 				};
 

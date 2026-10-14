@@ -19,13 +19,13 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Registry/terrainRegistry.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -34,7 +34,6 @@ using PocketCore::Configuration::RegistryError;
 using PocketCore::Configuration::TerrainRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Terrain::TerrainRegistry;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::NO_TERRAIN_ID;
@@ -44,6 +43,7 @@ using PocketCore::Terrain::TerrainID;
 using PocketCore::Terrain::TerrainMeta;
 using PocketCore::Terrain::toTerrainID;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("TerrainRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				TerrainMeta definition{.mName = name};
-				std::expected<TerrainID, RegistryErrorInfo> result{config.addTerrain(definition)};
+				std::expected<TerrainID, RegistryError> result{config.addTerrain(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("TerrainRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_TERRAINS + 1)};
 
 			TerrainMeta definition{.mName = name};
-			std::expected<TerrainID, RegistryErrorInfo> result{config.addTerrain(definition)};
+			std::expected<TerrainID, RegistryError> result{config.addTerrain(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_TERRAINS));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("TerrainRegistryConfiguration")
 		WHEN("an terrain whose name is already in use is added")
 		{
 			TerrainMeta definition{.mName = std::string(TERRAIN_NAME_ELECTRIC)};
-			std::expected<TerrainID, RegistryErrorInfo> result{config.addTerrain(definition)};
+			std::expected<TerrainID, RegistryError> result{config.addTerrain(definition)};
 
 			THEN("registration reports a duplicate terrain and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
+				CHECK((result.error() == RegistryError::DuplicateTerrain));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("TerrainRegistryConfiguration")
 		{
 			TerrainMeta definition{.mName = "TestTerrainName"};
 
-			std::expected<TerrainID, RegistryErrorInfo> result{config.addTerrain(definition)};
+			std::expected<TerrainID, RegistryError> result{config.addTerrain(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -243,12 +243,12 @@ SCENARIO("TerrainRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_TERRAINS + 1)};
 
 			terrainMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addTerrains(terrainMetas)};
+			std::expected<void, RegistryError> result{config.addTerrains(terrainMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 			}
 		}
@@ -265,12 +265,12 @@ SCENARIO("TerrainRegistryConfiguration")
 
 			terrainMetas.push_back({.mName = std::string(TERRAIN_NAME_ELECTRIC)});
 			const TerrainRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addTerrains(terrainMetas)};
+			std::expected<void, RegistryError> result{config.addTerrains(terrainMetas)};
 
 			THEN("registration reports a duplicate terrain and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
+				CHECK((result.error() == RegistryError::DuplicateTerrain));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextTerrainID() == beforeBatch.getNextTerrainID()));
@@ -284,7 +284,7 @@ SCENARIO("TerrainRegistryConfiguration")
 
 			terrainMetas.push_back({.mName = "TestTerrainName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addTerrains(terrainMetas)};
+			std::expected<void, RegistryError> result{config.addTerrains(terrainMetas)};
 
 			THEN("the registry reports no error and all the terrain definitions are added")
 			{
@@ -298,33 +298,33 @@ SCENARIO("TerrainRegistryConfiguration")
 	{
 		WHEN("calling with an invalid terrain name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameTerrain("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameTerrain("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::TerrainNotFound));
+				CHECK((result.error() == RegistryError::TerrainNotFound));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameTerrain(TERRAIN_NAME_NONE, TERRAIN_NAME_ELECTRIC),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
+				CHECK((result.error() == RegistryError::DuplicateTerrain));
 				CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing terrain definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameTerrain(TERRAIN_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameTerrain(TERRAIN_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -343,33 +343,33 @@ SCENARIO("TerrainRegistryConfiguration")
 		{
 			WHEN("calling with an invalid terrain name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateTerrain("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateTerrain("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::TerrainNotFound));
+					CHECK((result.error() == RegistryError::TerrainNotFound));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateTerrain(TERRAIN_NAME_NONE, {.mName = std::string(TERRAIN_NAME_ELECTRIC)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
+					CHECK((result.error() == RegistryError::DuplicateTerrain));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing terrain definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateTerrain(TERRAIN_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateTerrain(TERRAIN_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -384,33 +384,33 @@ SCENARIO("TerrainRegistryConfiguration")
 		{
 			WHEN("calling with an invalid terrain name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateTerrain(TerrainID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateTerrain(TerrainID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::TerrainNotFound));
+					CHECK((result.error() == RegistryError::TerrainNotFound));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateTerrain(toTerrainID(BuiltinTerrainID::None), {.mName = std::string(TERRAIN_NAME_ELECTRIC)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateTerrain));
+					CHECK((result.error() == RegistryError::DuplicateTerrain));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing terrain definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateTerrain(toTerrainID(BuiltinTerrainID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateTerrain(toTerrainID(BuiltinTerrainID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -428,19 +428,19 @@ SCENARIO("TerrainRegistryConfiguration")
 		{
 			WHEN("calling with an unknown terrain name")
 			{
-				std::expected<TerrainID, RegistryErrorInfo> result{config.removeTerrain("Unknown")};
+				std::expected<TerrainID, RegistryError> result{config.removeTerrain("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::TerrainNotFound));
+					CHECK((result.error() == RegistryError::TerrainNotFound));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known terrain name")
 			{
-				std::expected<TerrainID, RegistryErrorInfo> result{config.removeTerrain(TERRAIN_NAME_NONE)};
+				std::expected<TerrainID, RegistryError> result{config.removeTerrain(TERRAIN_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -455,19 +455,19 @@ SCENARIO("TerrainRegistryConfiguration")
 		{
 			WHEN("calling with an unknown terrain ID")
 			{
-				std::expected<TerrainID, RegistryErrorInfo> result{config.removeTerrain(TerrainID{200})};
+				std::expected<TerrainID, RegistryError> result{config.removeTerrain(TerrainID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::TerrainNotFound));
+					CHECK((result.error() == RegistryError::TerrainNotFound));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known terrain ID")
 			{
-				std::expected<TerrainID, RegistryErrorInfo> result{config.removeTerrain(toTerrainID(BuiltinTerrainID::None))};
+				std::expected<TerrainID, RegistryError> result{config.removeTerrain(toTerrainID(BuiltinTerrainID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

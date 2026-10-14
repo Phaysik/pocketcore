@@ -24,8 +24,8 @@
 #include "Location/locationID.h"
 #include "Location/locationMeta.h"
 #include "Registry/locationRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,8 +42,8 @@ using PocketCore::Location::LocationMeta;
 using PocketCore::Location::NO_LOCATION_ID;
 using PocketCore::Location::toLocationID;
 using PocketCore::Registry::Location::LocationRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("LocationRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				LocationMeta definition{.mName = name};
-				std::expected<LocationID, RegistryErrorInfo> result{config.addLocation(definition)};
+				std::expected<LocationID, RegistryError> result{config.addLocation(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("LocationRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_LOCATIONS + 1)};
 
 			LocationMeta definition{.mName = name};
-			std::expected<LocationID, RegistryErrorInfo> result{config.addLocation(definition)};
+			std::expected<LocationID, RegistryError> result{config.addLocation(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_LOCATIONS));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("LocationRegistryConfiguration")
 		WHEN("an location whose name is already in use is added")
 		{
 			LocationMeta definition{.mName = std::string(LOCATION_NAME_ROUTE1)};
-			std::expected<LocationID, RegistryErrorInfo> result{config.addLocation(definition)};
+			std::expected<LocationID, RegistryError> result{config.addLocation(definition)};
 
 			THEN("registration reports a duplicate location and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLocation));
+				CHECK((result.error() == RegistryError::DuplicateLocation));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("LocationRegistryConfiguration")
 		{
 			LocationMeta definition{.mName = "TestLocationName"};
 
-			std::expected<LocationID, RegistryErrorInfo> result{config.addLocation(definition)};
+			std::expected<LocationID, RegistryError> result{config.addLocation(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -244,12 +244,12 @@ SCENARIO("LocationRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_LOCATIONS + 1)};
 
 			locationMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addLocations(locationMetas)};
+			std::expected<void, RegistryError> result{config.addLocations(locationMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 			}
 		}
@@ -266,12 +266,12 @@ SCENARIO("LocationRegistryConfiguration")
 
 			locationMetas.push_back({.mName = std::string(LOCATION_NAME_ROUTE1)});
 			const LocationRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addLocations(locationMetas)};
+			std::expected<void, RegistryError> result{config.addLocations(locationMetas)};
 
 			THEN("registration reports a duplicate location and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLocation));
+				CHECK((result.error() == RegistryError::DuplicateLocation));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
@@ -286,7 +286,7 @@ SCENARIO("LocationRegistryConfiguration")
 
 			locationMetas.push_back({.mName = "TestLocationName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addLocations(locationMetas)};
+			std::expected<void, RegistryError> result{config.addLocations(locationMetas)};
 
 			THEN("the registry reports no error and all the location definitions are added")
 			{
@@ -300,33 +300,33 @@ SCENARIO("LocationRegistryConfiguration")
 	{
 		WHEN("calling with an invalid location name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameLocation("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameLocation("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::LocationNotFound));
+				CHECK((result.error() == RegistryError::LocationNotFound));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameLocation(LOCATION_NAME_NONE, LOCATION_NAME_ROUTE1),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLocation));
+				CHECK((result.error() == RegistryError::DuplicateLocation));
 				CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing location definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameLocation(LOCATION_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameLocation(LOCATION_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -345,33 +345,33 @@ SCENARIO("LocationRegistryConfiguration")
 		{
 			WHEN("calling with an invalid location name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLocation("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateLocation("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LocationNotFound));
+					CHECK((result.error() == RegistryError::LocationNotFound));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateLocation(LOCATION_NAME_NONE, {.mName = std::string(LOCATION_NAME_ROUTE1)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateLocation));
+					CHECK((result.error() == RegistryError::DuplicateLocation));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing location definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLocation(LOCATION_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateLocation(LOCATION_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -386,33 +386,33 @@ SCENARIO("LocationRegistryConfiguration")
 		{
 			WHEN("calling with an invalid location name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLocation(LocationID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateLocation(LocationID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LocationNotFound));
+					CHECK((result.error() == RegistryError::LocationNotFound));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateLocation(toLocationID(BuiltinLocationID::None), {.mName = std::string(LOCATION_NAME_ROUTE1)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateLocation));
+					CHECK((result.error() == RegistryError::DuplicateLocation));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing location definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLocation(toLocationID(BuiltinLocationID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateLocation(toLocationID(BuiltinLocationID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -430,19 +430,19 @@ SCENARIO("LocationRegistryConfiguration")
 		{
 			WHEN("calling with an unknown location name")
 			{
-				std::expected<LocationID, RegistryErrorInfo> result{config.removeLocation("Unknown")};
+				std::expected<LocationID, RegistryError> result{config.removeLocation("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LocationNotFound));
+					CHECK((result.error() == RegistryError::LocationNotFound));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known location name")
 			{
-				std::expected<LocationID, RegistryErrorInfo> result{config.removeLocation(LOCATION_NAME_NONE)};
+				std::expected<LocationID, RegistryError> result{config.removeLocation(LOCATION_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -457,19 +457,19 @@ SCENARIO("LocationRegistryConfiguration")
 		{
 			WHEN("calling with an unknown location ID")
 			{
-				std::expected<LocationID, RegistryErrorInfo> result{config.removeLocation(LocationID{200})};
+				std::expected<LocationID, RegistryError> result{config.removeLocation(LocationID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LocationNotFound));
+					CHECK((result.error() == RegistryError::LocationNotFound));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known location ID")
 			{
-				std::expected<LocationID, RegistryErrorInfo> result{config.removeLocation(toLocationID(BuiltinLocationID::None))};
+				std::expected<LocationID, RegistryError> result{config.removeLocation(toLocationID(BuiltinLocationID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

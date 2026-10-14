@@ -1,6 +1,6 @@
 /*! @file locationRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring location metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -21,6 +21,7 @@
 #include "Location/locationID.h"
 #include "Location/locationMeta.h"
 #include "Registry/locationRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,6 +29,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Location::LocationID;
 	using PocketCore::Location::LocationMeta;
 	using PocketCore::Registry::Location::LocationRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -62,7 +64,7 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal location registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 10/09/2026
+		@date 10/13/2026
 		@since 0.12.51
 		@version 0.12.51
 		@author Matthew Moore
@@ -112,7 +114,7 @@ namespace PocketCore::Configuration
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<LocationID> getLocationID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<LocationID> getLocationID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -144,7 +146,7 @@ namespace PocketCore::Configuration
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasLocation(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasLocation(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -162,69 +164,68 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined location and assigns a stable ID.
 				@param[in] locationMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> addLocation(const LocationMeta &locationMeta);
+			ATTR_NODISCARD std::expected<LocationID, RegistryError> addLocation(const LocationMeta &locationMeta);
 
 			/*! @brief Registers multiple locations atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] locationMetas The location definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addLocations(const std::span<const LocationMeta> &locationMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addLocations(const std::span<const LocationMeta> locationMetas);
 
 			/*! @brief Renames an location without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameLocation(const std::string_view &oldName,
-																				 const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameLocation(const std::string_view oldName,
+																			 const std::string_view newName);
 
 			/*! @brief Replaces all location metadata for an location selected by stable ID.
 				@param[in] locationName The registered display name.
 				@param[in] locationMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the location is not registered.
+				@return Void on success, or @ref RegistryError if the location is not registered.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateLocation(const std::string_view &locationName,
-																				 const LocationMeta &locationMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateLocation(const std::string_view locationName,
+																			 const LocationMeta &locationMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateLocation(LocationID, const LocationMeta &locationMeta)
+			/*! @overload std::expected<void, RegistryError> updateLocation(LocationID, const LocationMeta &locationMeta)
 				@brief Replaces all location metadata for an location selected by stable ID.
 				@param[in] locationID The built-in or custom stable identifier.
 				@param[in] locationMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the location is not registered.
+				@return Void on success, or @ref RegistryError if the location is not registered.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateLocation(const LocationID locationID,
-																				 const LocationMeta &locationMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateLocation(const LocationID locationID, const LocationMeta &locationMeta);
 
 			/*! @brief Removes an location by display name.
 				@param[in] locationName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching location exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching location exists.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> removeLocation(const std::string_view &locationName);
+			ATTR_NODISCARD std::expected<LocationID, RegistryError> removeLocation(const std::string_view locationName);
 
-			/*! @overload std::expected<LocationID, RegistryErrorInfo> removeLocation(LocationID)
+			/*! @overload std::expected<LocationID, RegistryError> removeLocation(LocationID)
 				@brief Removes an location by stable ID.
 				@param[in] locationID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching location exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching location exists.
 				@since 0.12.51
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> removeLocation(const LocationID locationID);
+			ATTR_NODISCARD std::expected<LocationID, RegistryError> removeLocation(const LocationID locationID);
 	};
 } // namespace PocketCore::Configuration
 

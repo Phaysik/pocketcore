@@ -1,6 +1,6 @@
 /*! @file statusRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring status metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.6.4
 	@version 0.12.51
 	@author Matthew Moore
@@ -21,6 +21,7 @@
 #include "Registry/statusRegistry.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,6 +29,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Registry::Status::StatusRegistry;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -62,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal status registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/30/2026
+		@date 10/13/2026
 		@since 0.6.4
-		@version 0.12.11
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class StatusRegistryConfiguration
@@ -110,9 +112,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<StatusID> getStatusID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<StatusID> getStatusID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -142,9 +144,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasStatus(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasStatus(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -162,68 +164,66 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined status and assigns a stable ID.
 				@param[in] statusMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<StatusID, RegistryErrorInfo> addStatus(const StatusMeta &statusMeta);
+			ATTR_NODISCARD std::expected<StatusID, RegistryError> addStatus(const StatusMeta &statusMeta);
 
 			/*! @brief Registers multiple statuses atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] statusMetas The status definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addStatuses(const std::span<const StatusMeta> &statusMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addStatuses(const std::span<const StatusMeta> statusMetas);
 
 			/*! @brief Renames an status without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameStatus(const std::string_view &oldName,
-																			   const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameStatus(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all status metadata for an status selected by stable ID.
 				@param[in] statusName The registered display name.
 				@param[in] statusMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the status is not registered.
+				@return Void on success, or @ref RegistryError if the status is not registered.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateStatus(const std::string_view &statusName,
-																			   const StatusMeta &statusMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateStatus(const std::string_view statusName, const StatusMeta &statusMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateStatus(StatusID, const StatusMeta &statusMeta)
+			/*! @overload std::expected<void, RegistryError> updateStatus(StatusID, const StatusMeta &statusMeta)
 				@brief Replaces all status metadata for an status selected by stable ID.
 				@param[in] statusID The built-in or custom stable identifier.
 				@param[in] statusMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the status is not registered.
+				@return Void on success, or @ref RegistryError if the status is not registered.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateStatus(const StatusID statusID, const StatusMeta &statusMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateStatus(const StatusID statusID, const StatusMeta &statusMeta);
 
 			/*! @brief Removes an status by display name.
 				@param[in] statusName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching status exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching status exists.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<StatusID, RegistryErrorInfo> removeStatus(const std::string_view &statusName);
+			ATTR_NODISCARD std::expected<StatusID, RegistryError> removeStatus(const std::string_view statusName);
 
-			/*! @overload std::expected<StatusID, RegistryErrorInfo> removeStatus(StatusID)
+			/*! @overload std::expected<StatusID, RegistryError> removeStatus(StatusID)
 				@brief Removes an status by stable ID.
 				@param[in] statusID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching status exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching status exists.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<StatusID, RegistryErrorInfo> removeStatus(const StatusID statusID);
+			ATTR_NODISCARD std::expected<StatusID, RegistryError> removeStatus(const StatusID statusID);
 	};
 } // namespace PocketCore::Configuration
 

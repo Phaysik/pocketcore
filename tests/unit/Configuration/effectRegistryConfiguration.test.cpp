@@ -24,8 +24,8 @@
 #include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
 #include "Registry/effectRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,8 +42,8 @@ using PocketCore::Effect::EffectMeta;
 using PocketCore::Effect::NO_EFFECT_ID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Effect::EffectRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("EffectRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				EffectMeta definition{.mName = name};
-				std::expected<EffectID, RegistryErrorInfo> result{config.addEffect(definition)};
+				std::expected<EffectID, RegistryError> result{config.addEffect(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("EffectRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_EFFECTS + 1)};
 
 			EffectMeta definition{.mName = name};
-			std::expected<EffectID, RegistryErrorInfo> result{config.addEffect(definition)};
+			std::expected<EffectID, RegistryError> result{config.addEffect(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_EFFECTS));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("EffectRegistryConfiguration")
 		WHEN("an effect whose name is already in use is added")
 		{
 			EffectMeta definition{.mName = std::string(EFFECT_NAME_ACCURACY_CHECK)};
-			std::expected<EffectID, RegistryErrorInfo> result{config.addEffect(definition)};
+			std::expected<EffectID, RegistryError> result{config.addEffect(definition)};
 
 			THEN("registration reports a duplicate effect and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateEffect));
+				CHECK((result.error() == RegistryError::DuplicateEffect));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("EffectRegistryConfiguration")
 		{
 			EffectMeta definition{.mName = "TestEffectName"};
 
-			std::expected<EffectID, RegistryErrorInfo> result{config.addEffect(definition)};
+			std::expected<EffectID, RegistryError> result{config.addEffect(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -243,12 +243,12 @@ SCENARIO("EffectRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_EFFECTS + 1)};
 
 			effectMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addEffects(effectMetas)};
+			std::expected<void, RegistryError> result{config.addEffects(effectMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 			}
 		}
@@ -265,12 +265,12 @@ SCENARIO("EffectRegistryConfiguration")
 
 			effectMetas.push_back({.mName = std::string(EFFECT_NAME_ACCURACY_CHECK)});
 			const EffectRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addEffects(effectMetas)};
+			std::expected<void, RegistryError> result{config.addEffects(effectMetas)};
 
 			THEN("registration reports a duplicate effect and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateEffect));
+				CHECK((result.error() == RegistryError::DuplicateEffect));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextEffectID() == beforeBatch.getNextEffectID()));
@@ -284,7 +284,7 @@ SCENARIO("EffectRegistryConfiguration")
 
 			effectMetas.push_back({.mName = "TestEffectName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addEffects(effectMetas)};
+			std::expected<void, RegistryError> result{config.addEffects(effectMetas)};
 
 			THEN("the registry reports no error and all the effect definitions are added")
 			{
@@ -298,33 +298,33 @@ SCENARIO("EffectRegistryConfiguration")
 	{
 		WHEN("calling with an invalid effect name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameEffect("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameEffect("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::EffectNotFound));
+				CHECK((result.error() == RegistryError::EffectNotFound));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameEffect(EFFECT_NAME_NONE, EFFECT_NAME_ACCURACY_CHECK),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateEffect));
+				CHECK((result.error() == RegistryError::DuplicateEffect));
 				CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing effect definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameEffect(EFFECT_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameEffect(EFFECT_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -343,33 +343,33 @@ SCENARIO("EffectRegistryConfiguration")
 		{
 			WHEN("calling with an invalid effect name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateEffect("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateEffect("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::EffectNotFound));
+					CHECK((result.error() == RegistryError::EffectNotFound));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateEffect(EFFECT_NAME_NONE, {.mName = std::string(EFFECT_NAME_ACCURACY_CHECK)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateEffect));
+					CHECK((result.error() == RegistryError::DuplicateEffect));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing effect definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateEffect(EFFECT_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateEffect(EFFECT_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -384,33 +384,33 @@ SCENARIO("EffectRegistryConfiguration")
 		{
 			WHEN("calling with an invalid effect name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateEffect(EffectID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateEffect(EffectID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::EffectNotFound));
+					CHECK((result.error() == RegistryError::EffectNotFound));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateEffect(toEffectID(BuiltinEffectID::None), {.mName = std::string(EFFECT_NAME_ACCURACY_CHECK)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateEffect));
+					CHECK((result.error() == RegistryError::DuplicateEffect));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing effect definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateEffect(toEffectID(BuiltinEffectID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateEffect(toEffectID(BuiltinEffectID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -428,19 +428,19 @@ SCENARIO("EffectRegistryConfiguration")
 		{
 			WHEN("calling with an unknown effect name")
 			{
-				std::expected<EffectID, RegistryErrorInfo> result{config.removeEffect("Unknown")};
+				std::expected<EffectID, RegistryError> result{config.removeEffect("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::EffectNotFound));
+					CHECK((result.error() == RegistryError::EffectNotFound));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known effect name")
 			{
-				std::expected<EffectID, RegistryErrorInfo> result{config.removeEffect(EFFECT_NAME_NONE)};
+				std::expected<EffectID, RegistryError> result{config.removeEffect(EFFECT_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -455,19 +455,19 @@ SCENARIO("EffectRegistryConfiguration")
 		{
 			WHEN("calling with an unknown effect ID")
 			{
-				std::expected<EffectID, RegistryErrorInfo> result{config.removeEffect(EffectID{200})};
+				std::expected<EffectID, RegistryError> result{config.removeEffect(EffectID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::EffectNotFound));
+					CHECK((result.error() == RegistryError::EffectNotFound));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known effect ID")
 			{
-				std::expected<EffectID, RegistryErrorInfo> result{config.removeEffect(toEffectID(BuiltinEffectID::None))};
+				std::expected<EffectID, RegistryError> result{config.removeEffect(toEffectID(BuiltinEffectID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the ability registry.
-	@date 08/30/2026
+	@date 10/13/2026
 	@since 0.4.0
-	@version 0.12.12
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -18,7 +18,7 @@
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectTrigger.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -26,70 +26,69 @@ namespace PocketCore::Configuration
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Effect::EffectTrigger;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
+	ATTR_NODISCARD std::expected<AbilityID, RegistryError> AbilityRegistryConfiguration::addAbility(const AbilityMeta &abilityMeta)
 	{
 		return addMetadata(abilityMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::addAbilities(
-		const std::span<const AbilityMeta> &abilityMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::addAbilities(
+		const std::span<const AbilityMeta> abilityMetas)
 	{
 		return addMetadataBatch(abilityMetas, [](const AbilityMeta &definition) { return AbilityMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTriggers(
-		const std::string_view &abilityName, const std::span<const EffectTrigger> &triggers)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::setAbilityTriggers(
+		const std::string_view abilityName, const std::span<const EffectTrigger> triggers)
 	{
 		return mutateMetadata(abilityName, "setAbilityTriggers",
 							  [&triggers](AbilityMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTriggers(
-		const AbilityID abilityID, const std::span<const EffectTrigger> &triggers)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::setAbilityTriggers(
+		const AbilityID abilityID, const std::span<const EffectTrigger> triggers)
 	{
 		return mutateMetadata(abilityID, "setAbilityTriggers",
 							  [&triggers](AbilityMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(
-		const std::string_view &abilityName, const BattleTargetID target)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::setAbilityTarget(const std::string_view abilityName,
+																									 const BattleTargetID target)
 	{
 		return mutateMetadata(abilityName, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::setAbilityTarget(const AbilityID abilityID,
-																										 const BattleTargetID target)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::setAbilityTarget(const AbilityID abilityID,
+																									 const BattleTargetID target)
 	{
 		return mutateMetadata(abilityID, "setAbilityTarget", [&target](AbilityMeta &metadata) { metadata.mTargetID = target; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::renameAbility(const std::string_view &oldName,
-																									  const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::renameAbility(const std::string_view oldName,
+																								  const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::updateAbility(const std::string_view &abilityName,
-																									  const AbilityMeta &abilityMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::updateAbility(const std::string_view abilityName,
+																								  const AbilityMeta &abilityMeta)
 	{
 		return mutateMetadata(abilityName, "updateAbility", [&abilityMeta](AbilityMeta &metadata) { metadata = abilityMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> AbilityRegistryConfiguration::updateAbility(const AbilityID abilityID,
-																									  const AbilityMeta &abilityMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> AbilityRegistryConfiguration::updateAbility(const AbilityID abilityID,
+																								  const AbilityMeta &abilityMeta)
 	{
 		return mutateMetadata(abilityID, "updateAbility", [&abilityMeta](AbilityMeta &metadata) { metadata = abilityMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::removeAbility(
-		const std::string_view &abilityName)
+	ATTR_NODISCARD std::expected<AbilityID, RegistryError> AbilityRegistryConfiguration::removeAbility(const std::string_view abilityName)
 	{
 		return removeMetadata(abilityName);
 	}
 
-	ATTR_NODISCARD std::expected<AbilityID, RegistryErrorInfo> AbilityRegistryConfiguration::removeAbility(const AbilityID abilityID)
+	ATTR_NODISCARD std::expected<AbilityID, RegistryError> AbilityRegistryConfiguration::removeAbility(const AbilityID abilityID)
 	{
 		return removeMetadata(abilityID);
 	}

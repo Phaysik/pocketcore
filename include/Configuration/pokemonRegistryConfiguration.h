@@ -1,6 +1,6 @@
 /*! @file pokemonRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring pokemon metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -20,7 +20,7 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Registry/pokemonRegistry.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,7 +28,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Registry::Pokemon::PokemonRegistry;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -63,9 +63,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal pokemon registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 09/12/2026
+		@date 10/13/2026
 		@since 0.12.0
-		@version 0.12.28
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class PokemonRegistryConfiguration
@@ -111,9 +111,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<PokemonID> getPokemonID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<PokemonID> getPokemonID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -143,9 +143,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasPokemon(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasPokemon(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -163,68 +163,67 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined pokemon and assigns a stable ID.
 				@param[in] pokemonMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> addPokemon(const PokemonMeta &pokemonMeta);
+			ATTR_NODISCARD std::expected<PokemonID, RegistryError> addPokemon(const PokemonMeta &pokemonMeta);
 
 			/*! @brief Registers multiple pokemons atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] pokemonMetas The pokemon definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addPokemons(const std::span<const PokemonMeta> &pokemonMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addPokemons(const std::span<const PokemonMeta> pokemonMetas);
 
 			/*! @brief Renames an pokemon without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renamePokemon(const std::string_view &oldName,
-																				const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renamePokemon(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all pokemon metadata for an pokemon selected by stable ID.
 				@param[in] pokemonName The registered display name.
 				@param[in] pokemonMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the pokemon is not registered.
+				@return Void on success, or @ref RegistryError if the pokemon is not registered.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updatePokemon(const std::string_view &pokemonName,
-																				const PokemonMeta &pokemonMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updatePokemon(const std::string_view pokemonName,
+																			const PokemonMeta &pokemonMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updatePokemon(PokemonID, const PokemonMeta &pokemonMeta)
+			/*! @overload std::expected<void, RegistryError> updatePokemon(PokemonID, const PokemonMeta &pokemonMeta)
 				@brief Replaces all pokemon metadata for an pokemon selected by stable ID.
 				@param[in] pokemonID The built-in or custom stable identifier.
 				@param[in] pokemonMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the pokemon is not registered.
+				@return Void on success, or @ref RegistryError if the pokemon is not registered.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updatePokemon(const PokemonID pokemonID, const PokemonMeta &pokemonMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updatePokemon(const PokemonID pokemonID, const PokemonMeta &pokemonMeta);
 
 			/*! @brief Removes an pokemon by display name.
 				@param[in] pokemonName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching pokemon exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching pokemon exists.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> removePokemon(const std::string_view &pokemonName);
+			ATTR_NODISCARD std::expected<PokemonID, RegistryError> removePokemon(const std::string_view pokemonName);
 
-			/*! @overload std::expected<PokemonID, RegistryErrorInfo> removePokemon(PokemonID)
+			/*! @overload std::expected<PokemonID, RegistryError> removePokemon(PokemonID)
 				@brief Removes an pokemon by stable ID.
 				@param[in] pokemonID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching pokemon exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching pokemon exists.
 				@since 0.12.0
-				@version 0.12.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> removePokemon(const PokemonID pokemonID);
+			ATTR_NODISCARD std::expected<PokemonID, RegistryError> removePokemon(const PokemonID pokemonID);
 	};
 } // namespace PocketCore::Configuration
 

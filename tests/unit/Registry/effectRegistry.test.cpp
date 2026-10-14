@@ -45,7 +45,7 @@
 #include "EffectHandler/terrainHandler.h"
 #include "EffectHandler/typeEffectivenessHandler.h"
 #include "EffectHandler/weatherHandler.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -108,7 +108,7 @@ using PocketCore::Effect::EffectMeta;
 using PocketCore::Effect::NO_EFFECT_ID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Effect::EffectRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -621,7 +621,7 @@ SCENARIO("EffectRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
-			std::expected<EffectID, RegistryErrorInfo> result{other->addEffect({.mName = "test"})};
+			std::expected<EffectID, RegistryError> result{other->addEffect({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -633,7 +633,7 @@ SCENARIO("EffectRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
-			std::expected<EffectID, RegistryErrorInfo> result{other->removeEffect(toEffectID(BuiltinEffectID::None))};
+			std::expected<EffectID, RegistryError> result{other->removeEffect(toEffectID(BuiltinEffectID::None))};
 
 			THEN("they are not equal")
 			{
@@ -645,7 +645,7 @@ SCENARIO("EffectRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<EffectRegistryConfiguration> other{std::make_unique<EffectRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateEffect(toEffectID(BuiltinEffectID::None), {.mName = "test"}),
 			};
 

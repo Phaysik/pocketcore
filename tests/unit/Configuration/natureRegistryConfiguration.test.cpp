@@ -24,8 +24,8 @@
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Registry/natureRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,8 +42,8 @@ using PocketCore::Nature::NatureMeta;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Registry::Nature::NatureRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("NatureRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				NatureMeta definition{.mName = name};
-				std::expected<NatureID, RegistryErrorInfo> result{config.addNature(definition)};
+				std::expected<NatureID, RegistryError> result{config.addNature(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("NatureRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_NATURES + 1)};
 
 			NatureMeta definition{.mName = name};
-			std::expected<NatureID, RegistryErrorInfo> result{config.addNature(definition)};
+			std::expected<NatureID, RegistryError> result{config.addNature(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_NATURES));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("NatureRegistryConfiguration")
 		WHEN("an nature whose name is already in use is added")
 		{
 			NatureMeta definition{.mName = std::string(NATURE_NAME_HASTY)};
-			std::expected<NatureID, RegistryErrorInfo> result{config.addNature(definition)};
+			std::expected<NatureID, RegistryError> result{config.addNature(definition)};
 
 			THEN("registration reports a duplicate nature and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateNature));
+				CHECK((result.error() == RegistryError::DuplicateNature));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("NatureRegistryConfiguration")
 		{
 			NatureMeta definition{.mName = "TestNatureName"};
 
-			std::expected<NatureID, RegistryErrorInfo> result{config.addNature(definition)};
+			std::expected<NatureID, RegistryError> result{config.addNature(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -243,12 +243,12 @@ SCENARIO("NatureRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_NATURES + 1)};
 
 			natureMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addNatures(natureMetas)};
+			std::expected<void, RegistryError> result{config.addNatures(natureMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 			}
 		}
@@ -265,12 +265,12 @@ SCENARIO("NatureRegistryConfiguration")
 
 			natureMetas.push_back({.mName = std::string(NATURE_NAME_HASTY)});
 			const NatureRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addNatures(natureMetas)};
+			std::expected<void, RegistryError> result{config.addNatures(natureMetas)};
 
 			THEN("registration reports a duplicate nature and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateNature));
+				CHECK((result.error() == RegistryError::DuplicateNature));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextNatureID() == beforeBatch.getNextNatureID()));
@@ -284,7 +284,7 @@ SCENARIO("NatureRegistryConfiguration")
 
 			natureMetas.push_back({.mName = "TestNatureName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addNatures(natureMetas)};
+			std::expected<void, RegistryError> result{config.addNatures(natureMetas)};
 
 			THEN("the registry reports no error and all the nature definitions are added")
 			{
@@ -298,33 +298,33 @@ SCENARIO("NatureRegistryConfiguration")
 	{
 		WHEN("calling with an invalid nature name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameNature("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameNature("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::NatureNotFound));
+				CHECK((result.error() == RegistryError::NatureNotFound));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameNature(NATURE_NAME_NONE, NATURE_NAME_HASTY),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateNature));
+				CHECK((result.error() == RegistryError::DuplicateNature));
 				CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing nature definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameNature(NATURE_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameNature(NATURE_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -343,33 +343,33 @@ SCENARIO("NatureRegistryConfiguration")
 		{
 			WHEN("calling with an invalid nature name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateNature("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateNature("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::NatureNotFound));
+					CHECK((result.error() == RegistryError::NatureNotFound));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateNature(NATURE_NAME_NONE, {.mName = std::string(NATURE_NAME_HASTY)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateNature));
+					CHECK((result.error() == RegistryError::DuplicateNature));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing nature definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateNature(NATURE_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateNature(NATURE_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -384,33 +384,33 @@ SCENARIO("NatureRegistryConfiguration")
 		{
 			WHEN("calling with an invalid nature name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateNature(NatureID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateNature(NatureID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::NatureNotFound));
+					CHECK((result.error() == RegistryError::NatureNotFound));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateNature(toNatureID(BuiltinNatureID::None), {.mName = std::string(NATURE_NAME_HASTY)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateNature));
+					CHECK((result.error() == RegistryError::DuplicateNature));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing nature definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateNature(toNatureID(BuiltinNatureID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateNature(toNatureID(BuiltinNatureID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -428,19 +428,19 @@ SCENARIO("NatureRegistryConfiguration")
 		{
 			WHEN("calling with an unknown nature name")
 			{
-				std::expected<NatureID, RegistryErrorInfo> result{config.removeNature("Unknown")};
+				std::expected<NatureID, RegistryError> result{config.removeNature("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::NatureNotFound));
+					CHECK((result.error() == RegistryError::NatureNotFound));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known nature name")
 			{
-				std::expected<NatureID, RegistryErrorInfo> result{config.removeNature(NATURE_NAME_NONE)};
+				std::expected<NatureID, RegistryError> result{config.removeNature(NATURE_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -455,19 +455,19 @@ SCENARIO("NatureRegistryConfiguration")
 		{
 			WHEN("calling with an unknown nature ID")
 			{
-				std::expected<NatureID, RegistryErrorInfo> result{config.removeNature(NatureID{200})};
+				std::expected<NatureID, RegistryError> result{config.removeNature(NatureID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::NatureNotFound));
+					CHECK((result.error() == RegistryError::NatureNotFound));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known nature ID")
 			{
-				std::expected<NatureID, RegistryErrorInfo> result{config.removeNature(toNatureID(BuiltinNatureID::None))};
+				std::expected<NatureID, RegistryError> result{config.removeNature(toNatureID(BuiltinNatureID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

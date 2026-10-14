@@ -425,7 +425,7 @@ namespace PocketCore::Battle
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.12.45
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Battle

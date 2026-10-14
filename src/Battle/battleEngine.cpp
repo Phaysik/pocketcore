@@ -453,8 +453,9 @@ namespace PocketCore::Battle
 			statusTarget = targetSlot != nullptr ? targetSlot->mPokemon : nullptr;
 		}
 
-		const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> previousStatuses{
-			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){}};
+		const std::span<const StatusID> previousStatuses{
+			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){},
+		};
 
 		effectMeta->mApply(mState, context, *mProvider);
 
@@ -468,7 +469,7 @@ namespace PocketCore::Battle
 			triggerWhenStateChanged(BattleEventID::TerrainChanged, context);
 		}
 
-		if (statusTarget != nullptr && statusTarget->getStatusIDsArray() != previousStatuses)
+		if (statusTarget != nullptr && !std::ranges::equal(statusTarget->getStatusIDsArray(), previousStatuses))
 		{
 			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
 			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
@@ -882,19 +883,19 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilityIDsArray()};
+		const std::span<const AbilityID> abilityIDs{pokemon->getAbilityIDsArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
 			return abilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityID) : nullptr;
 		});
 
-		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsIDsArray()};
+		const std::span<const ItemID> itemIDs{pokemon->getItemsIDsArray()};
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
 			return itemID != NO_ITEM_ID ? mProvider->mItemRegistry->getItemMetadata(itemID) : nullptr;
 		});
 
-		const std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{pokemon->getNatureIDsArray()};
+		const std::span<const NatureID> natureIDs{pokemon->getNatureIDsArray()};
 		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
 		std::ranges::transform(natureIDs, natureMetas.begin(), [this](const NatureID natureID) {
 			return natureID != NO_NATURE_ID ? mProvider->mNatureRegistry->getNatureMetadata(natureID) : nullptr;

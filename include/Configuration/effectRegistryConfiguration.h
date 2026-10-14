@@ -1,6 +1,6 @@
 /*! @file effectRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring effect metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.10.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -21,6 +21,7 @@
 #include "Effect/effectID.h"
 #include "Effect/effectMeta.h"
 #include "Registry/effectRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,6 +29,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
 	using PocketCore::Registry::Effect::EffectRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -62,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal effect registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/27/2026
+		@date 10/13/2026
 		@since 0.10.0
-		@version 0.12.8
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class EffectRegistryConfiguration
@@ -110,9 +112,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<EffectID> getEffectID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<EffectID> getEffectID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -142,9 +144,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasEffect(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasEffect(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -162,68 +164,66 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined effect and assigns a stable ID.
 				@param[in] effectMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<EffectID, RegistryErrorInfo> addEffect(const EffectMeta &effectMeta);
+			ATTR_NODISCARD std::expected<EffectID, RegistryError> addEffect(const EffectMeta &effectMeta);
 
 			/*! @brief Registers multiple effects atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] effectMetas The effect definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addEffects(const std::span<const EffectMeta> &effectMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addEffects(const std::span<const EffectMeta> effectMetas);
 
 			/*! @brief Renames an effect without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameEffect(const std::string_view &oldName,
-																			   const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameEffect(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all effect metadata for an effect selected by stable ID.
 				@param[in] effectName The registered display name.
 				@param[in] effectMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the effect is not registered.
+				@return Void on success, or @ref RegistryError if the effect is not registered.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateEffect(const std::string_view &effectName,
-																			   const EffectMeta &effectMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateEffect(const std::string_view effectName, const EffectMeta &effectMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateEffect(EffectID, const EffectMeta &effectMeta)
+			/*! @overload std::expected<void, RegistryError> updateEffect(EffectID, const EffectMeta &effectMeta)
 				@brief Replaces all effect metadata for an effect selected by stable ID.
 				@param[in] effectID The built-in or custom stable identifier.
 				@param[in] effectMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the effect is not registered.
+				@return Void on success, or @ref RegistryError if the effect is not registered.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateEffect(const EffectID effectID, const EffectMeta &effectMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateEffect(const EffectID effectID, const EffectMeta &effectMeta);
 
 			/*! @brief Removes an effect by display name.
 				@param[in] effectName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching effect exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching effect exists.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<EffectID, RegistryErrorInfo> removeEffect(const std::string_view &effectName);
+			ATTR_NODISCARD std::expected<EffectID, RegistryError> removeEffect(const std::string_view effectName);
 
-			/*! @overload std::expected<EffectID, RegistryErrorInfo> removeEffect(EffectID)
+			/*! @overload std::expected<EffectID, RegistryError> removeEffect(EffectID)
 				@brief Removes an effect by stable ID.
 				@param[in] effectID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching effect exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching effect exists.
 				@since 0.10.0
-				@version 0.10.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<EffectID, RegistryErrorInfo> removeEffect(const EffectID effectID);
+			ATTR_NODISCARD std::expected<EffectID, RegistryError> removeEffect(const EffectID effectID);
 	};
 } // namespace PocketCore::Configuration
 

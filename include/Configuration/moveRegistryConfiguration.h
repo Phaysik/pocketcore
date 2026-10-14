@@ -1,6 +1,6 @@
 /*! @file moveRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring move metadata.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.6.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -23,6 +23,7 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -32,6 +33,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Registry::Move::MoveRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -66,9 +68,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal move registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/27/2026
+		@date 10/13/2026
 		@since 0.6.0
-		@version 0.12.8
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class MoveRegistryConfiguration
@@ -114,9 +116,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<MoveID> getMoveID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<MoveID> getMoveID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -146,9 +148,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasMove(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasMove(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -166,108 +168,106 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined move and assigns a stable ID.
 				@param[in] moveMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> addMove(const MoveMeta &moveMeta);
+			ATTR_NODISCARD std::expected<MoveID, RegistryError> addMove(const MoveMeta &moveMeta);
 
 			/*! @brief Registers multiple moves atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] moveMetas The move definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addMoves(const std::span<const MoveMeta> &moveMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addMoves(const std::span<const MoveMeta> moveMetas);
 
 			/*! @brief Replaces all trigger metadata for an move selected by name.
 				@param[in] moveName The registered display name.
 				@param[in] triggers The trigger definitions to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.12.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const std::string_view &moveName,
-																				  const std::span<const EffectTrigger> &triggers);
+			ATTR_NODISCARD std::expected<void, RegistryError> setMoveTriggers(const std::string_view moveName,
+																			  const std::span<const EffectTrigger> triggers);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTriggers(MoveID, std::span<const EffectTrigger>)
+			/*! @overload std::expected<void, RegistryError> setMoveTriggers(MoveID, std::span<const EffectTrigger>)
 				@brief Replaces all trigger metadata for an move selected by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.12.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTriggers(const MoveID moveID,
-																				  const std::span<const EffectTrigger> &triggers);
+			ATTR_NODISCARD std::expected<void, RegistryError> setMoveTriggers(const MoveID moveID,
+																			  const std::span<const EffectTrigger> triggers);
 
 			/*! @brief Replaces all trigger metadata for an move selected by name.
 				@param[in] moveName The registered display name.
 				@param[in] target The target to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.9.16
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const std::string_view &moveName,
-																				const BattleTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryError> setMoveTarget(const std::string_view moveName, const BattleTargetID target);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setMoveTarget(MoveID, const BattleTargetID target)
+			/*! @overload std::expected<void, RegistryError> setMoveTarget(MoveID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an move selected by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.9.14
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setMoveTarget(const MoveID moveID, const BattleTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryError> setMoveTarget(const MoveID moveID, const BattleTargetID target);
 
 			/*! @brief Renames an move without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameMove(const std::string_view &oldName,
-																			 const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameMove(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all move metadata for an move selected by stable ID.
 				@param[in] moveName The registered display name.
 				@param[in] moveMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.9.8
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMove(const std::string_view &moveName, const MoveMeta &moveMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateMove(const std::string_view moveName, const MoveMeta &moveMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateMove(MoveID, const MoveMeta &moveMeta)
+			/*! @overload std::expected<void, RegistryError> updateMove(MoveID, const MoveMeta &moveMeta)
 				@brief Replaces all move metadata for an move selected by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
 				@param[in] moveMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the move is not registered.
+				@return Void on success, or @ref RegistryError if the move is not registered.
 				@since 0.6.0
-				@version 0.9.8
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateMove(const MoveID moveID, const MoveMeta &moveMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateMove(const MoveID moveID, const MoveMeta &moveMeta);
 
 			/*! @brief Removes an move by display name.
 				@param[in] moveName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching move exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching move exists.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> removeMove(const std::string_view &moveName);
+			ATTR_NODISCARD std::expected<MoveID, RegistryError> removeMove(const std::string_view moveName);
 
-			/*! @overload std::expected<MoveID, RegistryErrorInfo> removeMove(MoveID)
+			/*! @overload std::expected<MoveID, RegistryError> removeMove(MoveID)
 				@brief Removes an move by stable ID.
 				@param[in] moveID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching move exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching move exists.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> removeMove(const MoveID moveID);
+			ATTR_NODISCARD std::expected<MoveID, RegistryError> removeMove(const MoveID moveID);
 	};
 } // namespace PocketCore::Configuration
 

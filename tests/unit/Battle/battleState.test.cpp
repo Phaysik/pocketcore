@@ -23,7 +23,6 @@
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
-#include "Registry/registryError.h"
 #include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/builtInStatusID.h"
@@ -31,6 +30,7 @@
 #include "Status/statusMeta.h"
 #include "Status/volatileStatus.h"
 #include "Type/typeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -49,7 +49,6 @@ using PocketCore::Move::MoveID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Nature::NatureID;
 using PocketCore::Pokemon::Pokemon;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Status::BuiltinStatusID;
@@ -60,6 +59,7 @@ using PocketCore::Status::toStatusID;
 using PocketCore::Status::VolatileStatus;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::TypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -183,7 +183,7 @@ SCENARIO("BattleSlot")
 		{
 			RulesetPolicy newPolicy{.mMaxVolatileStatuses = 0, .mReplaceVolatileStatusWhenFull = false};
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -209,7 +209,7 @@ SCENARIO("BattleSlot")
 		GIVEN("an incoming status classified as non-volatile")
 		{
 			StatusID nonVolatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(nonVolatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -250,7 +250,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{NO_STATUS_ID};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -287,7 +287,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Burn)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -352,7 +352,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -392,7 +392,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -422,7 +422,7 @@ SCENARIO("BattleSlot")
 		GIVEN("several current statuses that the incoming status replaces")
 		{
 			StatusID incomingStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
+			std::expected<void, RegistryError> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
 				.mName = "Toxic",
 			    .mStatusInteractions = {
 					{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::ReplaceCurrent},
@@ -474,7 +474,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Freeze)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -517,7 +517,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",

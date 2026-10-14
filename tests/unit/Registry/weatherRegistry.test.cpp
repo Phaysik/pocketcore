@@ -18,7 +18,7 @@
 
 #include "Configuration/weatherRegistryConfiguration.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 #include "Weather/builtInWeatherID.h"
 #include "Weather/constants.h"
 #include "Weather/weatherID.h"
@@ -28,8 +28,8 @@
 
 using PocketCore::Configuration::WeatherRegistryConfiguration;
 using PocketCore::Core::ub;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Weather::WeatherRegistry;
+using PocketCore::Validation::Registry::RegistryError;
 using PocketCore::Weather::BuiltinWeatherID;
 using PocketCore::Weather::NO_WEATHER_ID;
 using PocketCore::Weather::toWeatherID;
@@ -344,7 +344,7 @@ SCENARIO("WeatherRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
-			std::expected<WeatherID, RegistryErrorInfo> result{other->addWeather({.mName = "test"})};
+			std::expected<WeatherID, RegistryError> result{other->addWeather({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -356,7 +356,7 @@ SCENARIO("WeatherRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
-			std::expected<WeatherID, RegistryErrorInfo> result{other->removeWeather(toWeatherID(BuiltinWeatherID::None))};
+			std::expected<WeatherID, RegistryError> result{other->removeWeather(toWeatherID(BuiltinWeatherID::None))};
 
 			THEN("they are not equal")
 			{
@@ -368,7 +368,7 @@ SCENARIO("WeatherRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<WeatherRegistryConfiguration> other{std::make_unique<WeatherRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateWeather(toWeatherID(BuiltinWeatherID::None), {.mName = "test"}),
 			};
 

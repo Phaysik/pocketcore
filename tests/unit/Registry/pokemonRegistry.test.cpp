@@ -24,8 +24,8 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
-#include "Registry/registryError.h"
 #include "Type/builtInTypeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -60,9 +60,9 @@ using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
 using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -385,7 +385,7 @@ SCENARIO("PokemonRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
-			std::expected<PokemonID, RegistryErrorInfo> result{other->addPokemon({.mName = "test"})};
+			std::expected<PokemonID, RegistryError> result{other->addPokemon({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -397,7 +397,7 @@ SCENARIO("PokemonRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
-			std::expected<PokemonID, RegistryErrorInfo> result{other->removePokemon(toPokemonID(BuiltinPokemonID::None))};
+			std::expected<PokemonID, RegistryError> result{other->removePokemon(toPokemonID(BuiltinPokemonID::None))};
 
 			THEN("they are not equal")
 			{
@@ -409,7 +409,7 @@ SCENARIO("PokemonRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updatePokemon(toPokemonID(BuiltinPokemonID::None), {.mName = "test"}),
 			};
 

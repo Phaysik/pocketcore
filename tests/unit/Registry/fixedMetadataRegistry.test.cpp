@@ -17,12 +17,11 @@
 #include "Configuration/fixedMetadataConfiguration.testHelper.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.testHelper.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Core::ub;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::CheckpointRegistry;
 using PocketCore::Testing::FixedConfiguration;
@@ -35,6 +34,7 @@ using PocketCore::Testing::TEST1_NAME;
 using PocketCore::Testing::TEST2_NAME;
 using PocketCore::Testing::TEST3_NAME;
 using PocketCore::Testing::toFixedMetaDataID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -350,7 +350,7 @@ SCENARIO("FixedMetadataRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other->addMetadata({.mName = "test"})};
+			std::expected<FixedMetaDataID, RegistryError> result{other->addMetadata({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -362,7 +362,7 @@ SCENARIO("FixedMetadataRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{
+			std::expected<FixedMetaDataID, RegistryError> result{
 				other->removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None)),
 			};
 
@@ -376,7 +376,7 @@ SCENARIO("FixedMetadataRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<FixedConfiguration> other{std::make_unique<FixedConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
 									  [](Metadata &metadata) { metadata = {.mName = "test"}; }),
 			};

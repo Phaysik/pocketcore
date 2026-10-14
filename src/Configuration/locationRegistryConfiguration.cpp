@@ -15,50 +15,50 @@
 #include "Core/attributeMacros.h"
 #include "Location/locationID.h"
 #include "Location/locationMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Location::LocationID;
 	using PocketCore::Location::LocationMeta;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> LocationRegistryConfiguration::addLocation(const LocationMeta &locationMeta)
+	ATTR_NODISCARD std::expected<LocationID, RegistryError> LocationRegistryConfiguration::addLocation(const LocationMeta &locationMeta)
 	{
 		return addMetadata(locationMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> LocationRegistryConfiguration::addLocations(
-		const std::span<const LocationMeta> &locationMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> LocationRegistryConfiguration::addLocations(
+		const std::span<const LocationMeta> locationMetas)
 	{
 		return addMetadataBatch(locationMetas, [](const LocationMeta &definition) { return LocationMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> LocationRegistryConfiguration::renameLocation(const std::string_view &oldName,
-																										const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> LocationRegistryConfiguration::renameLocation(const std::string_view oldName,
+																									const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> LocationRegistryConfiguration::updateLocation(
-		const std::string_view &locationName, const LocationMeta &locationMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> LocationRegistryConfiguration::updateLocation(const std::string_view locationName,
+																									const LocationMeta &locationMeta)
 	{
 		return mutateMetadata(locationName, "updateLocation", [&locationMeta](LocationMeta &metadata) { metadata = locationMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> LocationRegistryConfiguration::updateLocation(const LocationID locationID,
-																										const LocationMeta &locationMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> LocationRegistryConfiguration::updateLocation(const LocationID locationID,
+																									const LocationMeta &locationMeta)
 	{
 		return mutateMetadata(locationID, "updateLocation", [&locationMeta](LocationMeta &metadata) { metadata = locationMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> LocationRegistryConfiguration::removeLocation(
-		const std::string_view &locationName)
+	ATTR_NODISCARD std::expected<LocationID, RegistryError> LocationRegistryConfiguration::removeLocation(
+		const std::string_view locationName)
 	{
 		return removeMetadata(locationName);
 	}
 
-	ATTR_NODISCARD std::expected<LocationID, RegistryErrorInfo> LocationRegistryConfiguration::removeLocation(const LocationID locationID)
+	ATTR_NODISCARD std::expected<LocationID, RegistryError> LocationRegistryConfiguration::removeLocation(const LocationID locationID)
 	{
 		return removeMetadata(locationID);
 	}

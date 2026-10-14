@@ -24,8 +24,8 @@
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Registry/registryError.h"
 #include "Type/builtInTypeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -47,9 +47,9 @@ using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -292,7 +292,7 @@ SCENARIO("MoveRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
-			std::expected<MoveID, RegistryErrorInfo> result{other->addMove({.mName = "test"})};
+			std::expected<MoveID, RegistryError> result{other->addMove({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -304,7 +304,7 @@ SCENARIO("MoveRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
-			std::expected<MoveID, RegistryErrorInfo> result{other->removeMove(toMoveID(BuiltinMoveID::None))};
+			std::expected<MoveID, RegistryError> result{other->removeMove(toMoveID(BuiltinMoveID::None))};
 
 			THEN("they are not equal")
 			{
@@ -316,7 +316,7 @@ SCENARIO("MoveRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateMove(toMoveID(BuiltinMoveID::None), {.mName = "test"}),
 			};
 

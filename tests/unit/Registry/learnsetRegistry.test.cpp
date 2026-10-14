@@ -20,7 +20,7 @@
 #include "Learnset/constants.h"
 #include "Learnset/learnsetID.h"
 #include "Learnset/learnsetMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,7 +42,7 @@ using PocketCore::Learnset::LearnsetMeta;
 using PocketCore::Learnset::NO_LEARNSET_ID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Registry::Learnset::LearnsetRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -329,7 +329,7 @@ SCENARIO("LearnsetRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
-			std::expected<LearnsetID, RegistryErrorInfo> result{other->addLearnset({.mName = "test"})};
+			std::expected<LearnsetID, RegistryError> result{other->addLearnset({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -341,7 +341,7 @@ SCENARIO("LearnsetRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
-			std::expected<LearnsetID, RegistryErrorInfo> result{other->removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
+			std::expected<LearnsetID, RegistryError> result{other->removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
 
 			THEN("they are not equal")
 			{
@@ -353,7 +353,7 @@ SCENARIO("LearnsetRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<LearnsetRegistryConfiguration> other{std::make_unique<LearnsetRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateLearnset(toLearnsetID(BuiltinLearnsetID::None), {.mName = "test"}),
 			};
 

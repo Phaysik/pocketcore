@@ -16,6 +16,7 @@
 #include <expected>
 #include <functional>
 #include <ostream>
+#include <span>
 #include <string_view>
 
 #include "Ability/abilityID.h"
@@ -119,7 +120,7 @@ namespace PocketCore::Pokemon
 				@since 0.3.0
 				@version 0.12.51
 			*/
-			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view &name,
+			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view name,
 									   const PokemonStats &stats, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
@@ -161,9 +162,9 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view &name,
+			explicit constexpr Pokemon(const PokemonID pokemonID, const LearnsetID learnsetID, const std::string_view name,
 									   const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> &maxPP,
 									   const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP, const PokemonStats &stats, const us level,
@@ -190,11 +191,11 @@ namespace PocketCore::Pokemon
 			// Getters
 
 			/*! @brief Returns the non-owning display name.
-				@return A reference to the stored name view.
+				@return A the stored name.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::string_view &getName() const
+			ATTR_NODISCARD constexpr const std::string_view getName() const
 			{
 				return mName;
 			}
@@ -202,9 +203,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all status identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.9.11
-				@version 0.12.46
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> &getStatusIDsArray() const
+			ATTR_NODISCARD constexpr const std::span<const StatusID> getStatusIDsArray() const
 			{
 				return mNonVolatileStatusIDs;
 			}
@@ -212,9 +213,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all move identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<MoveID, MAX_MOVES_PER_POKEMON> &getMoveIDsArray() const
+			ATTR_NODISCARD constexpr const std::span<const MoveID> getMoveIDsArray() const
 			{
 				return mMoveIDs;
 			}
@@ -222,9 +223,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all individual value (IV) slots for the Pokemon's base stats.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<us, POKEMON_STAT_COUNT> &getPokemonIVsArray() const
+			ATTR_NODISCARD constexpr const std::span<const us> getPokemonIVsArray() const
 			{
 				return mPokemonIVs;
 			}
@@ -232,9 +233,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all effort value (EV) slots for the Pokemon's base stats.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<us, POKEMON_STAT_COUNT> &getPokemonEVsArray() const
+			ATTR_NODISCARD constexpr const std::span<const us> getPokemonEVsArray() const
 			{
 				return mPokemonEVs;
 			}
@@ -242,9 +243,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns maximum PP for every move slot.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getMaxPPArray() const
+			ATTR_NODISCARD constexpr const std::span<const ub> getMaxPPArray() const
 			{
 				return mMaxPP;
 			}
@@ -252,9 +253,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns current PP for every move slot.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<ub, MAX_MOVES_PER_POKEMON> &getCurrentPPArray() const
+			ATTR_NODISCARD constexpr const std::span<const ub> getCurrentPPArray() const
 			{
 				return mCurrentPP;
 			}
@@ -262,9 +263,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all type identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.4.0
-				@version 0.12.17
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<TypeID, MAX_TYPES_PER_POKEMON> &getTypeIDsArray() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const TypeID> getTypeIDsArray() const noexcept
 			{
 				return mTypeIDs;
 			}
@@ -272,9 +273,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all ability identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.11.6
-				@version 0.12.17
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &getAbilityIDsArray() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const AbilityID> getAbilityIDsArray() const noexcept
 			{
 				return mAbilityIDs;
 			}
@@ -282,9 +283,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all held-item identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.11.6
-				@version 0.12.17
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &getItemsIDsArray() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const ItemID> getItemsIDsArray() const noexcept
 			{
 				return mItemIDs;
 			}
@@ -292,9 +293,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns all nature identifier slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.11.6
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<NatureID, MAX_NATURES_PER_POKEMON> &getNatureIDsArray() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const NatureID> getNatureIDsArray() const noexcept
 			{
 				return mNatureIDs;
 			}
@@ -554,9 +555,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces the non-owning display-name view.
 				@param[in] name Display-name view whose backing storage must outlive the object.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			constexpr void setName(const std::string_view &name)
+			constexpr void setName(const std::string_view name)
 			{
 				mName = name;
 			}

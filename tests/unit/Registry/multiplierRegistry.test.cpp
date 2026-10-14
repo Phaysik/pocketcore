@@ -22,7 +22,7 @@
 #include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -46,7 +46,7 @@ using PocketCore::Multiplier::MultiplierMeta;
 using PocketCore::Multiplier::NO_MULTIPLIER_ID;
 using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Registry::Multiplier::MultiplierRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -350,7 +350,7 @@ SCENARIO("MultiplierRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
-			std::expected<MultiplierID, RegistryErrorInfo> result{other->addMultiplier({.mName = "test"})};
+			std::expected<MultiplierID, RegistryError> result{other->addMultiplier({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -362,7 +362,7 @@ SCENARIO("MultiplierRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
-			std::expected<MultiplierID, RegistryErrorInfo> result{other->removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
+			std::expected<MultiplierID, RegistryError> result{other->removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
 
 			THEN("they are not equal")
 			{
@@ -374,7 +374,7 @@ SCENARIO("MultiplierRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = "test"}),
 			};
 

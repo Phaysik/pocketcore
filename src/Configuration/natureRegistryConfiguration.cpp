@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the nature registry.
-	@date 08/30/2026
+	@date 10/13/2026
 	@since 0.12.0
-	@version 0.12.12
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -15,49 +15,48 @@
 #include "Core/attributeMacros.h"
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> NatureRegistryConfiguration::addNature(const NatureMeta &natureMeta)
+	ATTR_NODISCARD std::expected<NatureID, RegistryError> NatureRegistryConfiguration::addNature(const NatureMeta &natureMeta)
 	{
 		return addMetadata(natureMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> NatureRegistryConfiguration::addNatures(
-		const std::span<const NatureMeta> &natureMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> NatureRegistryConfiguration::addNatures(const std::span<const NatureMeta> natureMetas)
 	{
 		return addMetadataBatch(natureMetas, [](const NatureMeta &definition) { return NatureMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> NatureRegistryConfiguration::renameNature(const std::string_view &oldName,
-																									const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> NatureRegistryConfiguration::renameNature(const std::string_view oldName,
+																								const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> NatureRegistryConfiguration::updateNature(const std::string_view &natureName,
-																									const NatureMeta &natureMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> NatureRegistryConfiguration::updateNature(const std::string_view natureName,
+																								const NatureMeta &natureMeta)
 	{
 		return mutateMetadata(natureName, "updateNature", [&natureMeta](NatureMeta &metadata) { metadata = natureMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> NatureRegistryConfiguration::updateNature(const NatureID natureID,
-																									const NatureMeta &natureMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> NatureRegistryConfiguration::updateNature(const NatureID natureID,
+																								const NatureMeta &natureMeta)
 	{
 		return mutateMetadata(natureID, "updateNature", [&natureMeta](NatureMeta &metadata) { metadata = natureMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> NatureRegistryConfiguration::removeNature(const std::string_view &natureName)
+	ATTR_NODISCARD std::expected<NatureID, RegistryError> NatureRegistryConfiguration::removeNature(const std::string_view natureName)
 	{
 		return removeMetadata(natureName);
 	}
 
-	ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> NatureRegistryConfiguration::removeNature(const NatureID natureID)
+	ATTR_NODISCARD std::expected<NatureID, RegistryError> NatureRegistryConfiguration::removeNature(const NatureID natureID)
 	{
 		return removeMetadata(natureID);
 	}

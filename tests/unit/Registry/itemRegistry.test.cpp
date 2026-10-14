@@ -24,7 +24,7 @@
 #include "Item/constants.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -44,7 +44,7 @@ using PocketCore::Item::ItemMeta;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Item::toItemID;
 using PocketCore::Registry::Item::ItemRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -263,7 +263,7 @@ SCENARIO("ItemRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
-			std::expected<ItemID, RegistryErrorInfo> result{other->addItem({.mName = "test"})};
+			std::expected<ItemID, RegistryError> result{other->addItem({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -275,7 +275,7 @@ SCENARIO("ItemRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
-			std::expected<ItemID, RegistryErrorInfo> result{other->removeItem(toItemID(BuiltinItemID::None))};
+			std::expected<ItemID, RegistryError> result{other->removeItem(toItemID(BuiltinItemID::None))};
 
 			THEN("they are not equal")
 			{
@@ -287,7 +287,7 @@ SCENARIO("ItemRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<ItemRegistryConfiguration> other{std::make_unique<ItemRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateItem(toItemID(BuiltinItemID::None), {.mName = "test"}),
 			};
 

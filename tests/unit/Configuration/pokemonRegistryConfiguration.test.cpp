@@ -24,8 +24,8 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Registry/pokemonRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,8 +42,8 @@ using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -174,7 +174,7 @@ SCENARIO("PokemonRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				PokemonMeta definition{.mName = name};
-				std::expected<PokemonID, RegistryErrorInfo> result{config.addPokemon(definition)};
+				std::expected<PokemonID, RegistryError> result{config.addPokemon(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -185,12 +185,12 @@ SCENARIO("PokemonRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_POKEMON + 1)};
 
 			PokemonMeta definition{.mName = name};
-			std::expected<PokemonID, RegistryErrorInfo> result{config.addPokemon(definition)};
+			std::expected<PokemonID, RegistryError> result{config.addPokemon(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_POKEMON));
 			}
 		}
@@ -198,12 +198,12 @@ SCENARIO("PokemonRegistryConfiguration")
 		WHEN("an pokemon whose name is already in use is added")
 		{
 			PokemonMeta definition{.mName = std::string(POKEMON_NAME_SQUIRTLE)};
-			std::expected<PokemonID, RegistryErrorInfo> result{config.addPokemon(definition)};
+			std::expected<PokemonID, RegistryError> result{config.addPokemon(definition)};
 
 			THEN("registration reports a duplicate pokemon and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicatePokemon));
+				CHECK((result.error() == RegistryError::DuplicatePokemon));
 				CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 			}
 		}
@@ -212,7 +212,7 @@ SCENARIO("PokemonRegistryConfiguration")
 		{
 			PokemonMeta definition{.mName = "TestPokemonName"};
 
-			std::expected<PokemonID, RegistryErrorInfo> result{config.addPokemon(definition)};
+			std::expected<PokemonID, RegistryError> result{config.addPokemon(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -243,12 +243,12 @@ SCENARIO("PokemonRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_POKEMON + 1)};
 
 			pokemonMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addPokemons(pokemonMetas)};
+			std::expected<void, RegistryError> result{config.addPokemons(pokemonMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 			}
 		}
@@ -265,12 +265,12 @@ SCENARIO("PokemonRegistryConfiguration")
 
 			pokemonMetas.push_back({.mName = std::string(POKEMON_NAME_SQUIRTLE)});
 			const PokemonRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addPokemons(pokemonMetas)};
+			std::expected<void, RegistryError> result{config.addPokemons(pokemonMetas)};
 
 			THEN("registration reports a duplicate pokemon and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicatePokemon));
+				CHECK((result.error() == RegistryError::DuplicatePokemon));
 				CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextPokemonID() == beforeBatch.getNextPokemonID()));
@@ -284,7 +284,7 @@ SCENARIO("PokemonRegistryConfiguration")
 
 			pokemonMetas.push_back({.mName = "TestPokemonName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addPokemons(pokemonMetas)};
+			std::expected<void, RegistryError> result{config.addPokemons(pokemonMetas)};
 
 			THEN("the registry reports no error and all the pokemon definitions are added")
 			{
@@ -298,33 +298,33 @@ SCENARIO("PokemonRegistryConfiguration")
 	{
 		WHEN("calling with an invalid pokemon name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renamePokemon("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renamePokemon("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::PokemonNotFound));
+				CHECK((result.error() == RegistryError::PokemonNotFound));
 				CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renamePokemon(POKEMON_NAME_NONE, POKEMON_NAME_SQUIRTLE),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicatePokemon));
+				CHECK((result.error() == RegistryError::DuplicatePokemon));
 				CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing pokemon definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renamePokemon(POKEMON_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renamePokemon(POKEMON_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -343,33 +343,33 @@ SCENARIO("PokemonRegistryConfiguration")
 		{
 			WHEN("calling with an invalid pokemon name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updatePokemon("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updatePokemon("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::PokemonNotFound));
+					CHECK((result.error() == RegistryError::PokemonNotFound));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updatePokemon(POKEMON_NAME_NONE, {.mName = std::string(POKEMON_NAME_SQUIRTLE)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicatePokemon));
+					CHECK((result.error() == RegistryError::DuplicatePokemon));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing pokemon definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updatePokemon(POKEMON_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updatePokemon(POKEMON_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -384,33 +384,33 @@ SCENARIO("PokemonRegistryConfiguration")
 		{
 			WHEN("calling with an invalid pokemon name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updatePokemon(PokemonID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updatePokemon(PokemonID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::PokemonNotFound));
+					CHECK((result.error() == RegistryError::PokemonNotFound));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updatePokemon(toPokemonID(BuiltinPokemonID::None), {.mName = std::string(POKEMON_NAME_SQUIRTLE)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicatePokemon));
+					CHECK((result.error() == RegistryError::DuplicatePokemon));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing pokemon definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updatePokemon(toPokemonID(BuiltinPokemonID::None), definition)};
+				std::expected<void, RegistryError> result{config.updatePokemon(toPokemonID(BuiltinPokemonID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -428,19 +428,19 @@ SCENARIO("PokemonRegistryConfiguration")
 		{
 			WHEN("calling with an unknown pokemon name")
 			{
-				std::expected<PokemonID, RegistryErrorInfo> result{config.removePokemon("Unknown")};
+				std::expected<PokemonID, RegistryError> result{config.removePokemon("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::PokemonNotFound));
+					CHECK((result.error() == RegistryError::PokemonNotFound));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known pokemon name")
 			{
-				std::expected<PokemonID, RegistryErrorInfo> result{config.removePokemon(POKEMON_NAME_NONE)};
+				std::expected<PokemonID, RegistryError> result{config.removePokemon(POKEMON_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -455,19 +455,19 @@ SCENARIO("PokemonRegistryConfiguration")
 		{
 			WHEN("calling with an unknown pokemon ID")
 			{
-				std::expected<PokemonID, RegistryErrorInfo> result{config.removePokemon(PokemonID{200})};
+				std::expected<PokemonID, RegistryError> result{config.removePokemon(PokemonID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::PokemonNotFound));
+					CHECK((result.error() == RegistryError::PokemonNotFound));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known pokemon ID")
 			{
-				std::expected<PokemonID, RegistryErrorInfo> result{config.removePokemon(toPokemonID(BuiltinPokemonID::None))};
+				std::expected<PokemonID, RegistryError> result{config.removePokemon(toPokemonID(BuiltinPokemonID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

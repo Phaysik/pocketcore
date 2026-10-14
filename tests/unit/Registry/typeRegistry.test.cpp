@@ -8,7 +8,6 @@
 
 #include "Registry/typeRegistry.h"
 
-#include <array>
 #include <cstddef>
 #include <expected>
 #include <memory>
@@ -21,12 +20,12 @@
 #include "Configuration/constants.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Type/builtInTypeID.h"
 #include "Type/constants.h"
 #include "Type/typeEffectiveness.h"
 #include "Type/typeID.h"
 #include "Type/typeMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -34,7 +33,6 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Type::TypeMeta;
 using PocketCore::Registry::Type::TypeRegistry;
 using PocketCore::Type::BUG_TYPE_MATCHUP;
@@ -81,6 +79,7 @@ using PocketCore::Type::TYPE_NAME_WATER;
 using PocketCore::Type::TypeEffectiveness;
 using PocketCore::Type::TypeID;
 using PocketCore::Type::WATER_TYPE_MATCHUP;
+using PocketCore::Validation::Registry::RegistryError;
 
 using enum TypeEffectiveness;
 
@@ -584,12 +583,12 @@ SCENARIO("TypeRegistry")
 		{
 			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((registry.getTypeChartRow(2'000) == INVALID_TYPE_CHART_ROW));
+				CHECK((std::ranges::equal(registry.getTypeChartRow(2'000), INVALID_TYPE_CHART_ROW)));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(19)};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(19)};
 
 				for (std::size_t indexValue{0}; indexValue < MAX_TYPES; ++indexValue)
 				{
@@ -599,7 +598,7 @@ SCENARIO("TypeRegistry")
 
 			THEN("the Normal row matches known matchups")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(1)};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(1)};
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
@@ -611,14 +610,14 @@ SCENARIO("TypeRegistry")
 
 		WHEN("calling the TypeID overload")
 		{
-			THEN("passing in an invalid typeID returns nullptr")
+			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((registry.getTypeChartRow(TypeID{200}) == nullptr));
+				CHECK((std::ranges::equal(registry.getTypeChartRow(TypeID{200}), INVALID_TYPE_CHART_ROW)));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{*registry.getTypeChartRow(toTypeID(BuiltinTypeID::None))};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(toTypeID(BuiltinTypeID::None))};
 
 				for (std::size_t indexValue{0}; indexValue < MAX_TYPES; ++indexValue)
 				{
@@ -628,7 +627,7 @@ SCENARIO("TypeRegistry")
 
 			THEN("the Normal row matches known matchups")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{*registry.getTypeChartRow(toTypeID(BuiltinTypeID::Normal))};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(toTypeID(BuiltinTypeID::Normal))};
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
@@ -654,7 +653,7 @@ SCENARIO("TypeRegistry")
 		GIVEN("for an entry added in one registry")
 		{
 			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
-			std::expected<TypeID, RegistryErrorInfo> result{other->addType({.mName = "test"})};
+			std::expected<TypeID, RegistryError> result{other->addType({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
@@ -666,7 +665,7 @@ SCENARIO("TypeRegistry")
 		GIVEN("for an entry removed in one registry")
 		{
 			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
-			std::expected<TypeID, RegistryErrorInfo> result{other->removeType(toTypeID(BuiltinTypeID::None))};
+			std::expected<TypeID, RegistryError> result{other->removeType(toTypeID(BuiltinTypeID::None))};
 
 			THEN("they are not equal")
 			{
@@ -678,7 +677,7 @@ SCENARIO("TypeRegistry")
 		GIVEN("for an entry modified in one registry")
 		{
 			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				other->updateType(toTypeID(BuiltinTypeID::None), {.mName = "test"}),
 			};
 

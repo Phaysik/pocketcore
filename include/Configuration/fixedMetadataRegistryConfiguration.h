@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 09/03/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.19
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -22,16 +22,15 @@
 #include "Core/attributeMacros.h"
 #include "Core/cconcepts.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logger.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Core::InvocableWithArgs;
 	using PocketCore::Core::us;
-	using PocketCore::Registry::RegistryError;
-	using PocketCore::Registry::RegistryErrorInfo;
 	using PocketCore::Utility::Debug::Logging::Logger;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -61,9 +60,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 09/03/2026
+		@date 10/13/2026
 		@since 0.5.0
-		@version 0.12.19
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -112,9 +111,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view name) const
 			{
 				return getRegistry().getID(name);
 			}
@@ -154,9 +153,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view name) const
 			{
 				return getRegistry().hasEntry(name);
 			}
@@ -176,9 +175,9 @@ namespace PocketCore::Configuration
 				@param[in] metadata The metadata record with name and domain-specific data populated.
 				@return The assigned stable ID on success, or contextual registry error information.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> addMetadata(Metadata metadata)
+			ATTR_NODISCARD const std::expected<StableID, RegistryError> addMetadata(Metadata metadata)
 			{
 				const std::string_view name{metadata.mName};
 
@@ -189,7 +188,7 @@ namespace PocketCore::Configuration
 									 Policy::entityName, name),
 					};
 
-					return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, name, logResult.value_or(std::string_view{})}};
+					return std::unexpected{RegistryError::MaxCapacity};
 				}
 
 				if (hasEntry(name))
@@ -198,7 +197,7 @@ namespace PocketCore::Configuration
 						Logger::warn("{}::add duplicate {} '{}'.", Policy::configurationName, Policy::entityName, name),
 					};
 
-					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, name, logResult.value_or(std::string_view{})}};
+					return std::unexpected{Policy::duplicateError};
 				}
 
 				return this->addEntry(std::move(metadata));
@@ -211,12 +210,12 @@ namespace PocketCore::Configuration
 				@param[in] factory The eager conversion callable used for each definition.
 				@return Void on success, or the first registry error after restoring the prior state.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
 			template <typename Definition, typename Factory>
 				requires InvocableWithArgs<Factory, const Definition &>
-			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> addMetadataBatch(const std::span<const Definition> &definitions,
-																						 Factory &&factory)
+			ATTR_NODISCARD const std::expected<void, RegistryError> addMetadataBatch(const std::span<const Definition> definitions,
+																					 Factory &&factory)
 			{
 				if (definitions.size() > static_cast<std::size_t>(Capacity - this->getAmountRegistered()))
 				{
@@ -225,7 +224,7 @@ namespace PocketCore::Configuration
 									 definitions.size(), Policy::entityName, Capacity),
 					};
 
-					return std::unexpected{RegistryErrorInfo{RegistryError::MaxCapacity, {}, logResult.value_or(std::string_view{})}};
+					return std::unexpected{RegistryError::MaxCapacity};
 				}
 
 				const auto checkpoint{this->createCheckpoint()};
@@ -234,7 +233,7 @@ namespace PocketCore::Configuration
 
 				for (const Definition &definition : definitions)
 				{
-					const std::expected<StableID, RegistryErrorInfo> result{
+					const std::expected<StableID, RegistryError> result{
 						addMetadata(std::invoke(forwardedFactory, definition)),
 					};
 
@@ -255,15 +254,14 @@ namespace PocketCore::Configuration
 				@param[in] mutator The eager mutation callable.
 				@return Void on success, or not-found error information.
 				@since 0.5.0
-				@version 0.12.20
+				@version 0.12.51
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
-			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> mutateMetadata(const std::string_view &name,
-																					   const std::string_view &callerContext,
-																					   Mutator &&mutator)
+			ATTR_NODISCARD const std::expected<void, RegistryError> mutateMetadata(const std::string_view name,
+																				   const std::string_view callerContext, Mutator &&mutator)
 			{
-				const std::expected<us, RegistryErrorInfo> index{resolveIndex(name, callerContext)};
+				const std::expected<us, RegistryError> index{resolveIndex(name)};
 
 				if (!index.has_value())
 				{
@@ -274,10 +272,7 @@ namespace PocketCore::Configuration
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{
-						makeNotFoundError(name, callerContext),
-					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the
-					   // same registry. This is purely defensive programming
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
@@ -291,9 +286,7 @@ namespace PocketCore::Configuration
 									 Policy::entityName, metadata.mName),
 					};
 
-					return std::unexpected{
-						RegistryErrorInfo{Policy::duplicateError, metadata.mName, logResult.value_or(std::string_view{})},
-					};
+					return std::unexpected{Policy::duplicateError};
 				}
 
 				this->setEntry(index.value(), metadata);
@@ -304,15 +297,14 @@ namespace PocketCore::Configuration
 			/*! @overload mutateMetadata(StableID, std::string_view, Mutator&&)
 				@brief Mutates a copy of registered metadata selected by stable ID and writes it back.
 				@since 0.5.0
-				@version 0.12.20
+				@version 0.12.51
 			*/
 			template <typename Mutator>
 				requires InvocableWithArgs<Mutator, Metadata &>
-			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> mutateMetadata(const StableID stableID,
-																					   const std::string_view &callerContext,
-																					   Mutator &&mutator)
+			ATTR_NODISCARD const std::expected<void, RegistryError> mutateMetadata(const StableID stableID,
+																				   const std::string_view callerContext, Mutator &&mutator)
 			{
-				const std::expected<us, RegistryErrorInfo> index{resolveIndex(stableID, callerContext)};
+				const std::expected<us, RegistryError> index{resolveIndex(stableID)};
 
 				if (!index.has_value())
 				{
@@ -323,10 +315,7 @@ namespace PocketCore::Configuration
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{
-						makeNotFoundError({}, callerContext),
-					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the same
-					   // registry. This is purely defensive programming
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
@@ -340,9 +329,7 @@ namespace PocketCore::Configuration
 									 Policy::entityName, metadata.mName),
 					};
 
-					return std::unexpected{
-						RegistryErrorInfo{Policy::duplicateError, metadata.mName, logResult.value_or(std::string_view{})},
-					};
+					return std::unexpected{Policy::duplicateError};
 				}
 
 				this->setEntry(index.value(), metadata);
@@ -355,12 +342,12 @@ namespace PocketCore::Configuration
 				@param[in] newName The unique replacement display name.
 				@return Void on success, or not-found/duplicate error information.
 				@since 0.5.0
-				@version 0.12.20
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<void, RegistryErrorInfo> renameMetadata(const std::string_view &oldName,
-																					   const std::string_view &newName)
+			ATTR_NODISCARD const std::expected<void, RegistryError> renameMetadata(const std::string_view oldName,
+																				   const std::string_view newName)
 			{
-				const std::expected<us, RegistryErrorInfo> index{resolveIndex(oldName, "rename")};
+				const std::expected<us, RegistryError> index{resolveIndex(oldName)};
 
 				if (!index.has_value())
 				{
@@ -374,17 +361,14 @@ namespace PocketCore::Configuration
 									 newName),
 					};
 
-					return std::unexpected{RegistryErrorInfo{Policy::duplicateError, newName, logResult.value_or(std::string_view{})}};
+					return std::unexpected{Policy::duplicateError};
 				}
 
 				const Metadata *currentMetadata{this->getEntry(index.value())};
 
 				if (currentMetadata == nullptr)
 				{
-					return std::unexpected{
-						makeNotFoundError(oldName, "rename"),
-					}; // LCOV_EXCL_LINE - Cannot fail when resolveIndex just succeeded on the same
-					   // registry. This is purely defensive programming
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
@@ -398,15 +382,15 @@ namespace PocketCore::Configuration
 				@param[in] name The registered display name.
 				@return The removed stable ID on success, or not-found error information.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const std::string_view &name)
+			ATTR_NODISCARD const std::expected<StableID, RegistryError> removeMetadata(const std::string_view name)
 			{
 				const std::optional<StableID> stableID{getID(name)};
 
 				if (!stableID.has_value())
 				{
-					return std::unexpected{makeNotFoundError(name, "remove")};
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				const std::optional<us> index{this->findIndexByID(stableID.value())};
@@ -420,11 +404,11 @@ namespace PocketCore::Configuration
 				@param[in] stableID The built-in or custom stable identifier.
 				@return The removed stable ID on success, or not-found error information.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<StableID, RegistryErrorInfo> removeMetadata(const StableID stableID)
+			ATTR_NODISCARD const std::expected<StableID, RegistryError> removeMetadata(const StableID stableID)
 			{
-				const std::expected<us, RegistryErrorInfo> index{resolveIndex(stableID, "remove")};
+				const std::expected<us, RegistryError> index{resolveIndex(stableID)};
 
 				if (!index.has_value())
 				{
@@ -440,20 +424,18 @@ namespace PocketCore::Configuration
 				@details Queries the registry for the stable ID associated with the given name, then resolves that ID to its array index.
 				Logs and reports not-found errors with domain-specific messages.
 				@param[in] name The case-sensitive display name to resolve.
-				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
 				@return The 0-based registry index on success, or a contextual registry error if name is not registered.
 				@note This function is exception-safe (noexcept); errors are communicated via std::expected.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const std::string_view &name,
-																				   const std::string_view &callerContext)
+			ATTR_NODISCARD const std::expected<us, RegistryError> resolveIndex(const std::string_view name)
 			{
 				const std::optional<StableID> stableID{getID(name)};
 
 				if (!stableID.has_value())
 				{
-					return std::unexpected{makeNotFoundError(name, callerContext)};
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
@@ -465,41 +447,20 @@ namespace PocketCore::Configuration
 				@details Queries the registry for the array index of the entry with the given stable ID. Logs and reports not-found errors
 				with domain-specific messages when the ID is not registered.
 				@param[in] stableID The built-in or custom stable identifier to resolve.
-				@param[in] callerContext The operation name (e.g., "remove", "update") used in diagnostic messages to provide context.
 				@return The 0-based registry index on success, or a contextual registry error if the stable ID is not registered.
 				@since 0.5.0
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD const std::expected<us, RegistryErrorInfo> resolveIndex(const StableID stableID,
-																				   const std::string_view &callerContext)
+			ATTR_NODISCARD const std::expected<us, RegistryError> resolveIndex(const StableID stableID)
 			{
 				const std::optional<us> index{this->findIndexByID(stableID)};
 
 				if (!index.has_value())
 				{
-					return std::unexpected{makeNotFoundError({}, callerContext)};
+					return std::unexpected{Policy::notFoundError};
 				}
 
 				return index.value();
-			}
-
-			/*! @brief Constructs a not-found error with domain-specific context and logging.
-				@details Logs an informational message using the policy's domain name and entity name, then constructs a RegistryErrorInfo
-				with the policy's not-found error code, the context (usually a name being searched), and the log result.
-				@param[in] context The display name or search term that was not found (empty for ID-only lookups).
-				@param[in] callerContext The operation name (e.g., "remove", "update") included in the log message.
-				@return A RegistryErrorInfo with the policy's not-found error, the context, and the log output reference.
-				@since 0.5.0
-				@version 0.12.3
-			*/
-			ATTR_NODISCARD const RegistryErrorInfo makeNotFoundError(const std::string_view &context,
-																	 const std::string_view &callerContext) const
-			{
-				const std::optional<std::string_view> logResult{
-					Logger::info("{}::{} {} '{}' not found.", Policy::configurationName, callerContext, Policy::entityName, context),
-				};
-
-				return RegistryErrorInfo{Policy::notFoundError, context, logResult.value_or(std::string_view{})};
 			}
 
 			/*! @brief Removes the metadata entry at the specified registry index.

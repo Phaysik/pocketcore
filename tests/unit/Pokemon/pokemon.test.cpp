@@ -33,7 +33,6 @@
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
-#include "Registry/registryError.h"
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Registry/statusRegistry.h"
@@ -43,6 +42,7 @@
 #include "Status/statusMeta.h"
 #include "Type/builtInTypeID.h"
 #include "Type/typeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -82,7 +82,6 @@ using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonStats;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Registry::Nature::NatureRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Ruleset::RulesetPolicy;
@@ -98,6 +97,7 @@ using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::NO_TYPE_ID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -217,8 +217,9 @@ SCENARIO("Pokemon")
 			{
 				THEN("the statuses match")
 				{
-					CHECK((std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Freeze)}
-						   == pokemon.getStatusIDsArray()));
+					CHECK(
+						std::ranges::equal(std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Freeze)},
+										   pokemon.getStatusIDsArray()));
 				}
 			}
 
@@ -228,8 +229,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's statuses are properly updated")
 				{
-					CHECK((std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Burn)}
-						   == pokemon.getStatusIDsArray()));
+					CHECK(std::ranges::equal(std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON>{toStatusID(BuiltinStatusID::Burn)},
+											 pokemon.getStatusIDsArray()));
 				}
 			}
 		}
@@ -242,7 +243,8 @@ SCENARIO("Pokemon")
 			{
 				THEN("the moves match")
 				{
-					CHECK((std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::HydroSteam)} == pokemon.getMoveIDsArray()));
+					CHECK(std::ranges::equal(std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::HydroSteam)},
+											 pokemon.getMoveIDsArray()));
 				}
 			}
 
@@ -252,7 +254,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's moves are properly updated")
 				{
-					CHECK((std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::Facade)} == pokemon.getMoveIDsArray()));
+					CHECK(std::ranges::equal(std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::Facade)},
+											 pokemon.getMoveIDsArray()));
 				}
 			}
 		}
@@ -265,7 +268,7 @@ SCENARIO("Pokemon")
 			{
 				THEN("the max pps match")
 				{
-					CHECK((std::array<ub, MAX_MOVES_PER_POKEMON>{0} == pokemon.getMaxPPArray()));
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{0}, pokemon.getMaxPPArray()));
 				}
 			}
 
@@ -275,7 +278,7 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's max pps are properly updated")
 				{
-					CHECK((std::array<ub, MAX_MOVES_PER_POKEMON>{1} == pokemon.getMaxPPArray()));
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{1}, pokemon.getMaxPPArray()));
 				}
 			}
 		}
@@ -288,7 +291,7 @@ SCENARIO("Pokemon")
 			{
 				THEN("the current pps match")
 				{
-					CHECK((std::array<ub, MAX_MOVES_PER_POKEMON>{0} == pokemon.getCurrentPPArray()));
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{0}, pokemon.getCurrentPPArray()));
 				}
 			}
 
@@ -298,7 +301,7 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's current pps are properly updated")
 				{
-					CHECK((std::array<ub, MAX_MOVES_PER_POKEMON>{1} == pokemon.getCurrentPPArray()));
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{1}, pokemon.getCurrentPPArray()));
 				}
 			}
 		}
@@ -311,7 +314,8 @@ SCENARIO("Pokemon")
 			{
 				THEN("the types match")
 				{
-					CHECK((std::array<TypeID, MAX_TYPES_PER_POKEMON>{toTypeID(BuiltinTypeID::Bug)} == pokemon.getTypeIDsArray()));
+					CHECK(std::ranges::equal(std::array<TypeID, MAX_TYPES_PER_POKEMON>{toTypeID(BuiltinTypeID::Bug)},
+											 pokemon.getTypeIDsArray()));
 				}
 			}
 
@@ -321,7 +325,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's types are properly updated")
 				{
-					CHECK((std::array<TypeID, MAX_TYPES_PER_POKEMON>{toTypeID(BuiltinTypeID::Fire)} == pokemon.getTypeIDsArray()));
+					CHECK(std::ranges::equal(std::array<TypeID, MAX_TYPES_PER_POKEMON>{toTypeID(BuiltinTypeID::Fire)},
+											 pokemon.getTypeIDsArray()));
 				}
 			}
 		}
@@ -334,8 +339,8 @@ SCENARIO("Pokemon")
 			{
 				THEN("the abilities match")
 				{
-					CHECK((std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::AirLock)}
-						   == pokemon.getAbilityIDsArray()));
+					CHECK(std::ranges::equal(std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::AirLock)},
+											 pokemon.getAbilityIDsArray()));
 				}
 			}
 
@@ -345,8 +350,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's abilities are properly updated")
 				{
-					CHECK((std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::CloudNine)}
-						   == pokemon.getAbilityIDsArray()));
+					CHECK(std::ranges::equal(std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::CloudNine)},
+											 pokemon.getAbilityIDsArray()));
 				}
 			}
 		}
@@ -359,7 +364,8 @@ SCENARIO("Pokemon")
 			{
 				THEN("the items match")
 				{
-					CHECK((std::array<ItemID, MAX_ITEMS_PER_POKEMON>{toItemID(BuiltinItemID::CheriBerry)} == pokemon.getItemsIDsArray()));
+					CHECK(std::ranges::equal(std::array<ItemID, MAX_ITEMS_PER_POKEMON>{toItemID(BuiltinItemID::CheriBerry)},
+											 pokemon.getItemsIDsArray()));
 				}
 			}
 
@@ -369,7 +375,8 @@ SCENARIO("Pokemon")
 
 				THEN("the pokemon's items are properly updated")
 				{
-					CHECK((std::array<ItemID, MAX_ITEMS_PER_POKEMON>{toItemID(BuiltinItemID::ChestoBerry)} == pokemon.getItemsIDsArray()));
+					CHECK(std::ranges::equal(std::array<ItemID, MAX_ITEMS_PER_POKEMON>{toItemID(BuiltinItemID::ChestoBerry)},
+											 pokemon.getItemsIDsArray()));
 				}
 			}
 		}
@@ -391,8 +398,8 @@ SCENARIO("Pokemon")
 			{
 				THEN("the natures match")
 				{
-					CHECK(
-						(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)} == pokemon.getNatureIDsArray()));
+					CHECK(std::ranges::equal(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)},
+											 pokemon.getNatureIDsArray()));
 
 					CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 				}
@@ -406,8 +413,8 @@ SCENARIO("Pokemon")
 
 					THEN("the pokemon's natures are properly updated")
 					{
-						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)}
-							   == pokemon.getNatureIDsArray()));
+						CHECK(std::ranges::equal(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Lonely)},
+												 pokemon.getNatureIDsArray()));
 
 						CHECK(checkStats(pokemon, 71, 71, 55, 49, 51, 57, 48));
 					}
@@ -419,8 +426,8 @@ SCENARIO("Pokemon")
 
 					THEN("the pokemon's natures are not updated")
 					{
-						CHECK((std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)}
-							   == pokemon.getNatureIDsArray()));
+						CHECK(std::ranges::equal(std::array<NatureID, MAX_NATURES_PER_POKEMON>{toNatureID(BuiltinNatureID::Hasty)},
+												 pokemon.getNatureIDsArray()));
 
 						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
@@ -445,7 +452,7 @@ SCENARIO("Pokemon")
 
 				THEN("the IV array matches")
 				{
-					CHECK((pokemon.getPokemonIVsArray() == expected));
+					CHECK(std::ranges::equal(pokemon.getPokemonIVsArray(), expected));
 
 					CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 				}
@@ -460,7 +467,7 @@ SCENARIO("Pokemon")
 
 					THEN("the IV array is properly set")
 					{
-						CHECK((pokemon.getPokemonIVsArray() == expected));
+						CHECK(std::ranges::equal(pokemon.getPokemonIVsArray(), expected));
 
 						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 28, 27));
 					}
@@ -473,7 +480,7 @@ SCENARIO("Pokemon")
 
 					THEN("the IV array is unchanged")
 					{
-						CHECK((pokemon.getPokemonIVsArray() == expected));
+						CHECK(std::ranges::equal(pokemon.getPokemonIVsArray(), expected));
 
 						CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 					}
@@ -498,7 +505,7 @@ SCENARIO("Pokemon")
 
 				THEN("the EV array matches")
 				{
-					CHECK((pokemon.getPokemonEVsArray() == expected));
+					CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
 
 					CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 				}
@@ -513,7 +520,7 @@ SCENARIO("Pokemon")
 
 					THEN("the EV array is properly set")
 					{
-						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
 						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 25, 25));
 					}
 				}
@@ -525,7 +532,7 @@ SCENARIO("Pokemon")
 
 					THEN("the EV array is unchanged")
 					{
-						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
 						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
@@ -537,7 +544,7 @@ SCENARIO("Pokemon")
 
 					THEN("the EV array is unchanged")
 					{
-						CHECK((pokemon.getPokemonEVsArray() == expected));
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
 						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
@@ -1318,14 +1325,14 @@ SCENARIO("Pokemon")
 			{
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error() == InteractionApplicationError::CapReached));
-				CHECK((pokemon.getStatusIDsArray() == statusIDs));
+				CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 			}
 		}
 
 		GIVEN("an incoming status classified as volatile")
 		{
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -1349,7 +1356,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::WrongClassification));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}
@@ -1369,7 +1376,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::SameAsEmptyID));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}
@@ -1389,7 +1396,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::Duplicate));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}
@@ -1411,7 +1418,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::MissingMetadata));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}
@@ -1432,7 +1439,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::Blocked));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}
@@ -1460,7 +1467,7 @@ SCENARIO("Pokemon")
 		GIVEN("several current statuses that the incoming status replaces")
 		{
 			StatusID incomingStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
+			std::expected<void, RegistryError> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
 				.mName = "Toxic",
 			    .mStatusInteractions = {
 					{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::ReplaceCurrent},
@@ -1491,7 +1498,7 @@ SCENARIO("Pokemon")
 						toStatusID(BuiltinStatusID::Paralysis),
 					};
 
-					CHECK((pokemon.getStatusIDsArray() == expectedStatusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), expectedStatusIDs));
 				}
 			}
 		}
@@ -1540,7 +1547,7 @@ SCENARIO("Pokemon")
 				{
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == InteractionApplicationError::CapReached));
-					CHECK((pokemon.getStatusIDsArray() == statusIDs));
+					CHECK(std::ranges::equal(pokemon.getStatusIDsArray(), statusIDs));
 				}
 			}
 		}

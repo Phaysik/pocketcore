@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -34,9 +34,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 10/08/2026
+		@date 10/13/2026
 		@since 0.5.0
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -44,6 +44,13 @@ namespace PocketCore::Registry
 	class FixedMetadataRegistry
 	{
 		public:
+			/*! @brief Constructs empty storage with a specified next-ID counter.
+				@param[in] nextID The first numeric ID available after built-in registration.
+				@since 0.5.0
+				@version 0.5.0
+			*/
+			explicit constexpr FixedMetadataRegistry(const us nextID) noexcept : mNextID{nextID} {}
+
 			/*! @brief Compares two FixedMetadataRegistry instances for equality.
 				@details Compares registered metadata in storage order and the next stable ID. Derived lookup indexes, unused storage, and
 			   checkpoint mutation versions do not affect equality.
@@ -136,9 +143,9 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<StableID> getID(const std::string_view name) const
 			{
 				const us index{findEntryIndexByName(name)};
 
@@ -221,9 +228,9 @@ namespace PocketCore::Registry
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasEntry(const std::string_view name) const
 			{
 				return findEntryIndexByName(name) != mAmountRegistered;
 			}
@@ -309,9 +316,9 @@ namespace PocketCore::Registry
 				@pre Since creating @p checkpoint, the registry has only been mutated by @ref addEntry.
 				@param[in] checkpoint The opaque state returned by @ref createCheckpoint.
 				@since 0.12.18
-				@version 0.12.22
+				@version 0.12.51
 			*/
-			constexpr void restoreCheckpoint(const Checkpoint checkpoint)
+			constexpr void restoreCheckpoint(const Checkpoint &checkpoint)
 			{
 				if (checkpoint.mOwner != this || checkpoint.mAmountRegistered > mAmountRegistered
 					|| checkpoint.mMutationVersion != mMutationVersion)
@@ -361,9 +368,9 @@ namespace PocketCore::Registry
 				@param[in] metadata The metadata record with name and domain-specific data populated.
 				@return The stable ID assigned to the appended record.
 				@since 0.12.18
-				@version 0.12.18
+				@version 0.12.51
 			*/
-			ATTR_NOINLINE constexpr StableID addEntry(Metadata metadata)
+			ATTR_NOINLINE constexpr StableID addEntry(Metadata &&metadata)
 			{
 				assert(mAmountRegistered < mEntries.size());
 
@@ -392,13 +399,6 @@ namespace PocketCore::Registry
 				assert(index < mEntries.size());
 				return mEntries.at(index);
 			}
-
-			/*! @brief Constructs empty storage with a specified next-ID counter.
-				@param[in] nextID The first numeric ID available after built-in registration.
-				@since 0.5.0
-				@version 0.5.0
-			*/
-			explicit constexpr FixedMetadataRegistry(const us nextID) noexcept : mNextID{nextID} {}
 
 			/*! @brief Appends one built-in metadata record.
 				@pre @ref getAmountRegistered() < Capacity.
@@ -450,9 +450,9 @@ namespace PocketCore::Registry
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(n), where n is @ref mAmountRegistered.
 				@since 0.5.0
-				@version 0.9.1
+				@version 0.12.51
 			*/
-			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view &name) const
+			ATTR_NOINLINE ATTR_NODISCARD constexpr us findEntryIndexByName(const std::string_view name) const
 			{
 				for (us index{0}; index < mAmountRegistered; ++index)
 				{

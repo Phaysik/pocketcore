@@ -1,8 +1,8 @@
 /*! @file fixedMetadataConfiguration.testHelper.h
 	@brief Provides a concrete test facade for fixed metadata registry configuration.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,14 +11,14 @@
 
 #include <string_view>
 
-#include "../Registry/fixedMetadataRegistry.testHelper.h"
 #include "Configuration/fixedMetadataRegistryConfiguration.h"
-#include "Registry/registryError.h"
+#include "Registry/fixedMetadataRegistry.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Testing
 {
 	using PocketCore::Configuration::FixedMetadataRegistryConfiguration;
-	using PocketCore::Registry::RegistryError;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	/*! @struct FixedConfigurationPolicy Configuration/fixedMetadataConfiguration.testHelper.h
 		@brief Supplies diagnostic names and error categories for the dummy configuration.

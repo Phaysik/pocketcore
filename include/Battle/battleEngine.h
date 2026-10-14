@@ -1,6 +1,6 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.10.3
 	@version 0.12.51
 	@author Matthew Moore
@@ -252,7 +252,7 @@ namespace PocketCore::Battle
 				@param[in] effect The built-in effect identifier to resolve.
 				@param[in,out] context The shared effect context read and modified by the registered effect function.
 				@since 0.10.3
-				@version 0.12.43
+				@version 0.12.51
 			*/
 			void executeEffect(const EffectID effect, EffectContext &context);
 
@@ -434,7 +434,7 @@ namespace PocketCore::Battle
 				@param[in,out] context The event or move context shared by the dispatched sources.
 				@param[in] targeting Selects metadata target resolution or preservation of the context's existing target.
 				@since 0.10.3
-				@version 0.12.50
+				@version 0.12.51
 			*/
 			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
 									 const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting);
