@@ -302,8 +302,8 @@ SCENARIO("Concepts")
 		{
 			THEN("they satisfy the Ratio concept")
 			{
-				CHECK((Ratio<std::ratio<1, 2>>));
-				CHECK((Ratio<std::ratio<-1, 2>>));
+				CHECK((Ratio<std::ratio<1, 2>>) );
+				CHECK((Ratio<std::ratio<-1, 2>>) );
 				CHECK(Ratio<std::ratio<0>>);
 				CHECK(Ratio<std::ratio<1>>);
 				CHECK(Ratio<std::milli>);
@@ -314,13 +314,13 @@ SCENARIO("Concepts")
 		{
 			THEN("they do not satisfy the Ratio concept")
 			{
-				CHECK_FALSE((Ratio<std::ratio<2, 4>>));
-				CHECK_FALSE((Ratio<std::ratio<0, 5>>));
-				CHECK_FALSE((Ratio<std::ratio<1, -2>>));
-				CHECK_FALSE((Ratio<const std::ratio<1, 2>>));
-				CHECK_FALSE((Ratio<volatile std::ratio<1, 2>>));
-				CHECK_FALSE((Ratio<std::ratio<1, 2> &>));
-				CHECK_FALSE((Ratio<std::ratio<1, 2> &&>));
+				CHECK_FALSE((Ratio<std::ratio<2, 4>>) );
+				CHECK_FALSE((Ratio<std::ratio<0, 5>>) );
+				CHECK_FALSE((Ratio<std::ratio<1, -2>>) );
+				CHECK_FALSE((Ratio<const std::ratio<1, 2>>) );
+				CHECK_FALSE((Ratio<volatile std::ratio<1, 2>>) );
+				CHECK_FALSE((Ratio<std::ratio<1, 2> &>) );
+				CHECK_FALSE((Ratio<std::ratio<1, 2> &&>) );
 				CHECK_FALSE(Ratio<si>);
 				CHECK_FALSE(Ratio<void>);
 				CHECK_FALSE(Ratio<std::string>);

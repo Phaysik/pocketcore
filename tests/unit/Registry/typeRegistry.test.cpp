@@ -1,6 +1,6 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 10/13/2026
+	@date 10/14/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -583,7 +583,7 @@ SCENARIO("TypeRegistry")
 		{
 			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((std::ranges::equal(registry.getTypeChartRow(2'000), INVALID_TYPE_CHART_ROW)));
+				CHECK(std::ranges::equal(registry.getTypeChartRow(2'000), INVALID_TYPE_CHART_ROW));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")
@@ -612,7 +612,7 @@ SCENARIO("TypeRegistry")
 		{
 			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((std::ranges::equal(registry.getTypeChartRow(TypeID{200}), INVALID_TYPE_CHART_ROW)));
+				CHECK(std::ranges::equal(registry.getTypeChartRow(TypeID{200}), INVALID_TYPE_CHART_ROW));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")

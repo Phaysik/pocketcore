@@ -32,23 +32,6 @@ namespace PocketCore::Configuration
 	using PocketCore::Utility::Debug::Logging::Logger;
 	using PocketCore::Validation::Registry::RegistryError;
 
-	namespace Detail
-	{
-		/*! @brief Returns an independent copy of a metadata record.
-			@tparam Metadata The metadata record type to copy.
-			@param[in] metadata The registered metadata record to copy.
-			@return A copy that can be mutated without affecting the stored entry.
-			@note Inlining is suppressed so the copy remains observable to sanitizers and coverage instrumentation.
-			@since 0.9.8
-			@version 0.12.9
-		*/
-		template <typename Metadata>
-		ATTR_NOINLINE constexpr Metadata cloneMetadata(const Metadata &metadata)
-		{
-			return metadata;
-		}
-	} // namespace Detail
-
 	/*! @class FixedMetadataRegistryConfiguration Configuration/fixedMetadataRegistryConfiguration.h
 		@brief Implements validated lifecycle operations shared by named metadata registry facades.
 		@details Inherits one registry and centralizes lookup, monotonic ID assignment, duplicate and capacity validation, atomic batch
@@ -60,7 +43,7 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 10/13/2026
+		@date 10/14/2026
 		@since 0.5.0
 		@version 0.12.51
 		@author Matthew Moore
@@ -279,15 +262,13 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata *currentMetadata{getEntry(index.value())};
+				const Metadata &currentMetadata{getRegisteredEntries().at(index.value())};
 
-				assert(currentMetadata != nullptr);
-
-				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
+				Metadata metadata{currentMetadata};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
-				metadata.*IDMember = currentMetadata->*IDMember;
+				metadata.*IDMember = currentMetadata.*IDMember;
 
-				if (metadata.mName != currentMetadata->mName && hasEntry(metadata.mName))
+				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -319,15 +300,13 @@ namespace PocketCore::Configuration
 					return std::unexpected{index.error()};
 				}
 
-				const Metadata *currentMetadata{getEntry(index.value())};
+				const Metadata &currentMetadata{getRegisteredEntries().at(index.value())};
 
-				assert(currentMetadata != nullptr);
-
-				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
+				Metadata metadata{currentMetadata};
 				std::invoke(std::forward<Mutator>(mutator), metadata);
-				metadata.*IDMember = currentMetadata->*IDMember;
+				metadata.*IDMember = currentMetadata.*IDMember;
 
-				if (metadata.mName != currentMetadata->mName && hasEntry(metadata.mName))
+				if (metadata.mName != currentMetadata.mName && hasEntry(metadata.mName))
 				{
 					const std::optional<std::string_view> logResult{
 						Logger::warn("{}::{} target {} name '{}' already exists.", Policy::configurationName, callerContext,
@@ -369,11 +348,9 @@ namespace PocketCore::Configuration
 					return std::unexpected{Policy::duplicateError};
 				}
 
-				const Metadata *currentMetadata{getEntry(index.value())};
+				const Metadata &currentMetadata{getRegisteredEntries().at(index.value())};
 
-				assert(currentMetadata != nullptr);
-
-				Metadata metadata{Detail::cloneMetadata(*currentMetadata)};
+				Metadata metadata{currentMetadata};
 				metadata.mName = newName;
 				setEntry(index.value(), metadata);
 

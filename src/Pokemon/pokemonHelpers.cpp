@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/13/2026
+	@date 10/14/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -21,9 +21,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
 #include "Nature/natureID.h"
@@ -47,16 +49,19 @@
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::NO_ABILITY_ID;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::us;
+	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Learnset::MoveLearnEntry;
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Validation::Ability::AbilityError;
@@ -219,6 +224,9 @@ namespace PocketCore::Pokemon
 			}
 
 			std::ranges::transform(natureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
+
+			// Remove duplicate entries
+			replaceDuplicatesWithNoID(NO_NATURE_ID, validNatureIDs);
 		}
 		else
 		{
@@ -239,6 +247,9 @@ namespace PocketCore::Pokemon
 			}
 
 			std::ranges::transform(abilityIDs, validAbilityIDs.begin(), [](const AbilityID abilityID) { return abilityID; });
+
+			// Remove duplicate entries
+			replaceDuplicatesWithNoID(NO_ABILITY_ID, validAbilityIDs);
 		}
 		else
 		{
@@ -259,6 +270,9 @@ namespace PocketCore::Pokemon
 			}
 
 			std::ranges::transform(itemIDs, validItemIDs.begin(), [](const ItemID itemID) { return itemID; });
+
+			// Remove duplicate entries
+			replaceDuplicatesWithNoID(NO_ITEM_ID, validItemIDs);
 		}
 		else
 		{
@@ -280,14 +294,10 @@ namespace PocketCore::Pokemon
 				return std::unexpected{error.error()};
 			}
 
-			// Remove duplicate entries
-			std::unordered_set<MoveID> seenMoveIDs;
-
 			std::ranges::transform(moveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
 
-			std::ranges::replace_if(
-				validMoveIDs, [&seenMoveIDs](const MoveID moveID) { return moveID != NO_MOVE_ID && !seenMoveIDs.insert(moveID).second; },
-				NO_MOVE_ID);
+			// Remove duplicate entries
+			replaceDuplicatesWithNoID(NO_MOVE_ID, validMoveIDs);
 		}
 		else if (const std::expected<void, MoveError> error{
 					 fillWithValidMoves(validMoveIDs, moveRegistry, learnsetMeta, encounterData, pokemonEncounterLevel),
@@ -391,12 +401,13 @@ namespace PocketCore::Pokemon
 			std::ranges::stable_partition(moveIDs, [](const MoveID moveID) { return moveID == NO_MOVE_ID; });
 			std::ranges::transform(selectedEggEntries, moveIDs.begin(),
 								   [](const MoveLearnEntry &moveLearnEntry) { return moveLearnEntry.mMoveID; });
-
-			std::ranges::stable_partition(moveIDs, [](const MoveID moveID) { return moveID != NO_MOVE_ID; });
 		}
+
+		std::ranges::stable_partition(moveIDs, [](const MoveID moveID) { return moveID != NO_MOVE_ID; });
 
 		if (const std::expected<void, MoveError> error{validateMoveMetadata(moveIDs, moveRegistry)}; !error.has_value())
 		{
+			moveIDs.fill(NO_MOVE_ID);
 			return std::unexpected{error.error()};
 		}
 
