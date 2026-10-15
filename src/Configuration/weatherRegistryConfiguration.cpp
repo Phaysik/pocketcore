@@ -1,8 +1,8 @@
 /*! @file weatherRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the weather registry.
-	@date 08/30/2026
+	@date 10/13/2026
 	@since 0.8.1
-	@version 0.12.12
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -13,52 +13,51 @@
 #include <string_view>
 
 #include "Core/attributeMacros.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 #include "Weather/weatherID.h"
 #include "Weather/weatherMeta.h"
 
 namespace PocketCore::Configuration
 {
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 	using PocketCore::Weather::WeatherID;
 	using PocketCore::Weather::WeatherMeta;
 
-	ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> WeatherRegistryConfiguration::addWeather(const WeatherMeta &weatherMeta)
+	ATTR_NODISCARD std::expected<WeatherID, RegistryError> WeatherRegistryConfiguration::addWeather(const WeatherMeta &weatherMeta)
 	{
 		return addMetadata(weatherMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> WeatherRegistryConfiguration::addWeathers(
-		const std::span<const WeatherMeta> &weatherMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> WeatherRegistryConfiguration::addWeathers(
+		const std::span<const WeatherMeta> weatherMetas)
 	{
 		return addMetadataBatch(weatherMetas, [](const WeatherMeta &definition) { return WeatherMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> WeatherRegistryConfiguration::renameWeather(const std::string_view &oldName,
-																									  const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> WeatherRegistryConfiguration::renameWeather(const std::string_view oldName,
+																								  const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> WeatherRegistryConfiguration::updateWeather(const std::string_view &weatherName,
-																									  const WeatherMeta &weatherMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> WeatherRegistryConfiguration::updateWeather(const std::string_view weatherName,
+																								  const WeatherMeta &weatherMeta)
 	{
 		return mutateMetadata(weatherName, "updateWeather", [&weatherMeta](WeatherMeta &metadata) { metadata = weatherMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> WeatherRegistryConfiguration::updateWeather(const WeatherID weatherID,
-																									  const WeatherMeta &weatherMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> WeatherRegistryConfiguration::updateWeather(const WeatherID weatherID,
+																								  const WeatherMeta &weatherMeta)
 	{
 		return mutateMetadata(weatherID, "updateWeather", [&weatherMeta](WeatherMeta &metadata) { metadata = weatherMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> WeatherRegistryConfiguration::removeWeather(
-		const std::string_view &weatherName)
+	ATTR_NODISCARD std::expected<WeatherID, RegistryError> WeatherRegistryConfiguration::removeWeather(const std::string_view weatherName)
 	{
 		return removeMetadata(weatherName);
 	}
 
-	ATTR_NODISCARD std::expected<WeatherID, RegistryErrorInfo> WeatherRegistryConfiguration::removeWeather(const WeatherID weatherID)
+	ATTR_NODISCARD std::expected<WeatherID, RegistryError> WeatherRegistryConfiguration::removeWeather(const WeatherID weatherID)
 	{
 		return removeMetadata(weatherID);
 	}

@@ -1,12 +1,12 @@
 /*! @file input.test.cpp
 	@brief Catch2 unit tests for `Utility::Input` utilities.
-	@date 08/03/2026
+	@date 10/14/2026
 	@version 0.8.7
-	@since 0.8.7
+	@since 0.12.51
 	@author Matthew Moore
 */
 
-#include "Utility/input.h"
+#include "Utility/IO/Input/input.h"
 
 #include <array>
 #include <span>
@@ -14,7 +14,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-using PocketCore::Utility::Input;
+using PocketCore::Utility::IO::Input::Input;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 

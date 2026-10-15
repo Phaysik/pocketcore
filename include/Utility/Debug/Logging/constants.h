@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains the constant definitions for use with logging.
-	@date 07/26/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.3.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -14,37 +14,37 @@
 namespace PocketCore::Utility::Debug::Logging
 {
 	/*! @brief The default logger name used for the static Logger wrapper. */
-	constexpr std::string_view LOGGING_LOGGER_NAME{"pokemon_logger"};
+	inline constexpr std::string_view LOGGING_LOGGER_NAME{"pokemon_logger"};
 
 	/*! @brief The default log file name used for the static Logger wrapper. */
-	constexpr std::string_view LOGGING_FILE_NAME{"pokemon.log"};
+	inline constexpr std::string_view LOGGING_FILE_NAME{"pokemon.log"};
 
 	/*! @brief Error message returned when a call to @ref Logger::log fails. */
-	constexpr std::string_view LOG_LOG_FAILURE{
+	inline constexpr std::string_view LOG_LOG_FAILURE{
 		"Failed to log the log message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::trace fails. */
-	constexpr std::string_view TRACE_LOG_FAILURE{
+	inline constexpr std::string_view TRACE_LOG_FAILURE{
 		"Failed to log the trace message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::debug fails. */
-	constexpr std::string_view DEBUG_LOG_FAILURE{
+	inline constexpr std::string_view DEBUG_LOG_FAILURE{
 		"Failed to log the debug message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::info fails. */
-	constexpr std::string_view INFO_LOG_FAILURE{
+	inline constexpr std::string_view INFO_LOG_FAILURE{
 		"Failed to log the info message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::warn fails. */
-	constexpr std::string_view WARN_LOG_FAILURE{
+	inline constexpr std::string_view WARN_LOG_FAILURE{
 		"Failed to log the warning message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::error fails. */
-	constexpr std::string_view ERROR_LOG_FAILURE{
+	inline constexpr std::string_view ERROR_LOG_FAILURE{
 		"Failed to log the error message. This likely indicates a severe issue with the logging system itself."};
 
 	/*! @brief Error message returned when a call to @ref Logger::critical fails. */
-	constexpr std::string_view CRITICAL_LOG_FAILURE{
+	inline constexpr std::string_view CRITICAL_LOG_FAILURE{
 		"Failed to log the critical message. This likely indicates a severe issue with the logging system itself."};
 } // namespace PocketCore::Utility::Debug::Logging
 

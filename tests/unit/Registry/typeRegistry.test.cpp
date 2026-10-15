@@ -1,16 +1,16 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 10/09/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/typeRegistry.h"
 
-#include <array>
 #include <cstddef>
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -20,12 +20,12 @@
 #include "Configuration/constants.h"
 #include "Configuration/typeRegistryConfiguration.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
-#include "Types/typeMeta.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
+#include "Type/typeMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -33,7 +33,6 @@ using PocketCore::Configuration::MAX_TYPES;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Type::TypeMeta;
 using PocketCore::Registry::Type::TypeRegistry;
 using PocketCore::Type::BUG_TYPE_MATCHUP;
@@ -80,6 +79,7 @@ using PocketCore::Type::TYPE_NAME_WATER;
 using PocketCore::Type::TypeEffectiveness;
 using PocketCore::Type::TypeID;
 using PocketCore::Type::WATER_TYPE_MATCHUP;
+using PocketCore::Validation::Registry::RegistryError;
 
 using enum TypeEffectiveness;
 
@@ -95,7 +95,8 @@ static_assert(!PubliclyStructurallyMutable<TypeRegistry>);
 
 SCENARIO("TypeRegistry")
 {
-	TypeRegistry registry{};
+	std::unique_ptr<TypeRegistry> registryStorage{std::make_unique<TypeRegistry>()};
+	TypeRegistry &registry{*registryStorage};
 	ub finalTypeUnderlyingValue{std::to_underlying(BuiltinTypeID::FinalType)};
 
 	GIVEN("a default constructed type registry")
@@ -582,12 +583,12 @@ SCENARIO("TypeRegistry")
 		{
 			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((registry.getTypeChartRow(2'000) == INVALID_TYPE_CHART_ROW));
+				CHECK(std::ranges::equal(registry.getTypeChartRow(2'000), INVALID_TYPE_CHART_ROW));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(19)};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(19)};
 
 				for (std::size_t indexValue{0}; indexValue < MAX_TYPES; ++indexValue)
 				{
@@ -597,7 +598,7 @@ SCENARIO("TypeRegistry")
 
 			THEN("the Normal row matches known matchups")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{registry.getTypeChartRow(1)};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(1)};
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
@@ -609,14 +610,14 @@ SCENARIO("TypeRegistry")
 
 		WHEN("calling the TypeID overload")
 		{
-			THEN("passing in an invalid typeID returns nullptr")
+			THEN("an invalid type chart row is returned when the row is out of bounds")
 			{
-				CHECK((registry.getTypeChartRow(TypeID{200}) == nullptr));
+				CHECK(std::ranges::equal(registry.getTypeChartRow(TypeID{200}), INVALID_TYPE_CHART_ROW));
 			}
 
 			THEN("the Stellar row is all NOT_DEFINED")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{*registry.getTypeChartRow(toTypeID(BuiltinTypeID::None))};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(toTypeID(BuiltinTypeID::None))};
 
 				for (std::size_t indexValue{0}; indexValue < MAX_TYPES; ++indexValue)
 				{
@@ -626,7 +627,7 @@ SCENARIO("TypeRegistry")
 
 			THEN("the Normal row matches known matchups")
 			{
-				std::array<TypeEffectiveness, MAX_TYPES> typeChartRow{*registry.getTypeChartRow(toTypeID(BuiltinTypeID::Normal))};
+				std::span<const TypeEffectiveness> typeChartRow{registry.getTypeChartRow(toTypeID(BuiltinTypeID::Normal))};
 
 				CHECK((typeChartRow.at(0) == NOT_DEFINED));
 				CHECK((typeChartRow.at(1) == E));
@@ -641,49 +642,49 @@ SCENARIO("TypeRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			TypeRegistry other{};
+			std::unique_ptr<TypeRegistry> other{std::make_unique<TypeRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			TypeRegistryConfiguration other{};
-			std::expected<TypeID, RegistryErrorInfo> result{other.addType({.mName = "test"})};
+			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
+			std::expected<TypeID, RegistryError> result{other->addType({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			TypeRegistryConfiguration other{};
-			std::expected<TypeID, RegistryErrorInfo> result{other.removeType(toTypeID(BuiltinTypeID::None))};
+			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
+			std::expected<TypeID, RegistryError> result{other->removeType(toTypeID(BuiltinTypeID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			TypeRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateType(toTypeID(BuiltinTypeID::None), {.mName = "test"}),
+			std::unique_ptr<TypeRegistryConfiguration> other{std::make_unique<TypeRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateType(toTypeID(BuiltinTypeID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

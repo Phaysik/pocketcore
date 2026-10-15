@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -26,8 +27,8 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -50,8 +51,8 @@ using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -59,8 +60,10 @@ SCENARIO("MoveRegistryConfiguration")
 {
 	ensureLoggerInitialized("move registry configuration test", "moveRegistryConfiguration_test.log");
 
-	MoveRegistryConfiguration config{};
-	MoveRegistry registry{};
+	std::unique_ptr<MoveRegistryConfiguration> configRegistryStorage{std::make_unique<MoveRegistryConfiguration>()};
+	MoveRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<MoveRegistry> registryStorage{std::make_unique<MoveRegistry>()};
+	MoveRegistry &registry{*registryStorage};
 	ub finalMoveUnderlyingValue{std::to_underlying(BuiltinMoveID::FinalMove)};
 
 	GIVEN("getAmountRegistered")
@@ -181,7 +184,7 @@ SCENARIO("MoveRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				MoveMeta definition{.mName = name, .mTriggers = {}};
-				std::expected<MoveID, RegistryErrorInfo> result{config.addMove(definition)};
+				std::expected<MoveID, RegistryError> result{config.addMove(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -192,12 +195,12 @@ SCENARIO("MoveRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_MOVES + 1)};
 
 			MoveMeta definition{.mName = name, .mTriggers = {}};
-			std::expected<MoveID, RegistryErrorInfo> result{config.addMove(definition)};
+			std::expected<MoveID, RegistryError> result{config.addMove(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_MOVES));
 			}
 		}
@@ -205,12 +208,12 @@ SCENARIO("MoveRegistryConfiguration")
 		WHEN("an move whose name is already in use is added")
 		{
 			MoveMeta definition{.mName = std::string(MOVE_NAME_FACADE), .mTriggers = {}};
-			std::expected<MoveID, RegistryErrorInfo> result{config.addMove(definition)};
+			std::expected<MoveID, RegistryError> result{config.addMove(definition)};
 
 			THEN("registration reports a duplicate move and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMove));
+				CHECK((result.error() == RegistryError::DuplicateMove));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 			}
 		}
@@ -226,7 +229,7 @@ SCENARIO("MoveRegistryConfiguration")
 
 			MoveMeta definition{.mName = "TestMoveName", .mTriggers = triggers};
 
-			std::expected<MoveID, RegistryErrorInfo> result{config.addMove(definition)};
+			std::expected<MoveID, RegistryError> result{config.addMove(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -261,12 +264,12 @@ SCENARIO("MoveRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_MOVES + 1)};
 
 			moveMetas.push_back({.mName = name, .mTriggers = {}});
-			std::expected<void, RegistryErrorInfo> result{config.addMoves(moveMetas)};
+			std::expected<void, RegistryError> result{config.addMoves(moveMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 			}
 		}
@@ -283,12 +286,12 @@ SCENARIO("MoveRegistryConfiguration")
 
 			moveMetas.push_back({.mName = std::string(MOVE_NAME_FACADE), .mTriggers = {}});
 			const MoveRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addMoves(moveMetas)};
+			std::expected<void, RegistryError> result{config.addMoves(moveMetas)};
 
 			THEN("registration reports a duplicate move and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMove));
+				CHECK((result.error() == RegistryError::DuplicateMove));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextMoveID() == beforeBatch.getNextMoveID()));
@@ -308,7 +311,7 @@ SCENARIO("MoveRegistryConfiguration")
 
 			moveMetas.push_back({.mName = "TestMoveName", .mTriggers = triggers});
 
-			std::expected<void, RegistryErrorInfo> result{config.addMoves(moveMetas)};
+			std::expected<void, RegistryError> result{config.addMoves(moveMetas)};
 
 			THEN("the registry reports no error and all the move definitions are added")
 			{
@@ -331,12 +334,12 @@ SCENARIO("MoveRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTriggers("ThisIsInvalid", triggers)};
+				std::expected<void, RegistryError> result{config.setMoveTriggers("ThisIsInvalid", triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
@@ -350,7 +353,7 @@ SCENARIO("MoveRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTriggers(MOVE_NAME_NONE, triggers)};
+				std::expected<void, RegistryError> result{config.setMoveTriggers(MOVE_NAME_NONE, triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -372,12 +375,12 @@ SCENARIO("MoveRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTriggers(MoveID{200}, triggers)};
+				std::expected<void, RegistryError> result{config.setMoveTriggers(MoveID{200}, triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
@@ -391,7 +394,7 @@ SCENARIO("MoveRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTriggers(toMoveID(BuiltinMoveID::None), triggers)};
+				std::expected<void, RegistryError> result{config.setMoveTriggers(toMoveID(BuiltinMoveID::None), triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -409,19 +412,19 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing move definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTarget(MOVE_NAME_NONE, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget(MOVE_NAME_NONE, BattleTargetID::AllAllies)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -436,19 +439,19 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setMoveTarget(MoveID{200}, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget(MoveID{200}, BattleTargetID::AllAllies)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing move definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.setMoveTarget(toMoveID(BuiltinMoveID::None), BattleTargetID::AllAllies),
 				};
 
@@ -466,31 +469,31 @@ SCENARIO("MoveRegistryConfiguration")
 	{
 		WHEN("calling with an invalid move name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMove("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameMove("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MoveNotFound));
+				CHECK((result.error() == RegistryError::MoveNotFound));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMove(MOVE_NAME_NONE, MOVE_NAME_FACADE)};
+			std::expected<void, RegistryError> result{config.renameMove(MOVE_NAME_NONE, MOVE_NAME_FACADE)};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMove));
+				CHECK((result.error() == RegistryError::DuplicateMove));
 				CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing move definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMove(MOVE_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameMove(MOVE_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -516,33 +519,33 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMove("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateMove("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateMove(MOVE_NAME_NONE, {.mName = std::string(MOVE_NAME_FACADE), .mTriggers = triggers}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMove));
+					CHECK((result.error() == RegistryError::DuplicateMove));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing move definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMove(MOVE_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateMove(MOVE_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -558,33 +561,33 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMove(MoveID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateMove(MoveID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateMove(toMoveID(BuiltinMoveID::None), {.mName = std::string(MOVE_NAME_FACADE), .mTriggers = triggers}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMove));
+					CHECK((result.error() == RegistryError::DuplicateMove));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing move definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMove(toMoveID(BuiltinMoveID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateMove(toMoveID(BuiltinMoveID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -603,19 +606,19 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an unknown move name")
 			{
-				std::expected<MoveID, RegistryErrorInfo> result{config.removeMove("Unknown")};
+				std::expected<MoveID, RegistryError> result{config.removeMove("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known move name")
 			{
-				std::expected<MoveID, RegistryErrorInfo> result{config.removeMove(MOVE_NAME_NONE)};
+				std::expected<MoveID, RegistryError> result{config.removeMove(MOVE_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -630,19 +633,19 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an unknown move ID")
 			{
-				std::expected<MoveID, RegistryErrorInfo> result{config.removeMove(MoveID{200})};
+				std::expected<MoveID, RegistryError> result{config.removeMove(MoveID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MoveNotFound));
+					CHECK((result.error() == RegistryError::MoveNotFound));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known move ID")
 			{
-				std::expected<MoveID, RegistryErrorInfo> result{config.removeMove(toMoveID(BuiltinMoveID::None))};
+				std::expected<MoveID, RegistryError> result{config.removeMove(toMoveID(BuiltinMoveID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

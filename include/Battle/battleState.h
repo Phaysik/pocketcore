@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 09/29/2026
+	@date 10/15/2026
 	@since 0.3.0
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Status/statusMeta.h"
 #include "Status/volatileStatus.h"
 #include "Terrain/terrainID.h"
+#include "Utility/Math/floatUtility.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
@@ -48,19 +49,30 @@ namespace PocketCore::Battle
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Status::VolatileStatus;
 	using PocketCore::Terrain::TerrainID;
+	using PocketCore::Utility::Math::approximatelyEqualAbsRel;
 	using PocketCore::Weather::WeatherID;
 
 	/*! @struct StatStages Battle/battleState.h
 		@brief Stores a battler's temporary stat stage changes.
 		@details Each signed stage applies to the corresponding stat during battle calculations.
-		@date 09/28/2026
+		@date 10/15/2026
 		@since 0.3.0
-		@version 0.12.45
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct StatStages
 	{
 		public:
+			/*! @brief Compares all stat stages for exact equality.
+				@param[in] other The stages to compare; borrowed only for the duration of the call.
+				@return True when every corresponding stage is equal; otherwise false.
+				@note Provides the no-throw guarantee because all stages are integral values.
+				@date 10/15/2026
+				@since 0.12.51
+				@version 0.12.51
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const StatStages &other) const noexcept = default;
+
 			/*! @brief Writes the StatStages' raw identifier and statistic representation to a stream.
 				@param[in,out] outStream The stream receiving the representation.
 				@param[in] statStages The StatStages to write.
@@ -71,6 +83,10 @@ namespace PocketCore::Battle
 			friend std::ostream &operator<<(std::ostream &outStream, const StatStages &statStages);
 
 		public:
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The temporary Max Health stage. */
+			sb mMaxHealth{0};
 			/*! @brief The temporary Attack stage. */
 			sb mAttack{0};
 			/*! @brief The temporary Defense stage. */
@@ -85,19 +101,41 @@ namespace PocketCore::Battle
 			sb mAccuracy{0};
 			/*! @brief The temporary evasion stage. */
 			sb mEvasion{0};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	/*! @struct DamageFormulaModifiers Battle/battleState.h
 		@brief Stores multiplicative modifiers applied to damage-formula statistics.
 		@details A default-constructed instance leaves every supported statistic unchanged by initializing each modifier to 1.0.
-		@date 09/28/2026
+		@date 10/15/2026
 		@since 0.8.5
-		@version 0.12.45
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct DamageFormulaModifiers
 	{
 		public:
+			/*! @brief Compares all six damage-formula modifiers for approximate equality.
+				@details Uses @ref approximatelyEqualAbsRel for each corresponding pair with its default absolute tolerance of 1e-12
+				and relative tolerance of 1e-8. A pair matches when either tolerance is satisfied.
+				@param[in] other The modifiers to compare; borrowed only for the duration of the call.
+				@return True when every corresponding modifier pair is approximately equal; otherwise false.
+				@warning Approximate equality is not transitive.
+				@date 10/15/2026
+				@since 0.12.51
+				@version 0.12.51
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const DamageFormulaModifiers &other) const
+			{
+				return approximatelyEqualAbsRel(mHealthModifier, other.mHealthModifier)
+					&& approximatelyEqualAbsRel(mAttackModifier, other.mAttackModifier)
+					&& approximatelyEqualAbsRel(mDefenseModifier, other.mDefenseModifier)
+					&& approximatelyEqualAbsRel(mSpecialAttackModifier, other.mSpecialAttackModifier)
+					&& approximatelyEqualAbsRel(mSpecialDefenseModifier, other.mSpecialDefenseModifier)
+					&& approximatelyEqualAbsRel(mSpeedModifier, other.mSpeedModifier);
+			}
+
 			/*! @brief Writes the DamageFormulaModifiers' raw identifier and statistic representation to a stream.
 				@param[in,out] outStream The stream receiving the representation.
 				@param[in] damageFormulaModifiers The DamageFormulaModifiers to write.
@@ -108,6 +146,8 @@ namespace PocketCore::Battle
 			friend std::ostream &operator<<(std::ostream &outStream, const DamageFormulaModifiers &damageFormulaModifiers);
 
 		public:
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The multiplicative modifier applied to health. */
 			double mHealthModifier{1.0};
 			/*! @brief The multiplicative modifier applied to Attack. */
@@ -120,21 +160,36 @@ namespace PocketCore::Battle
 			double mSpecialDefenseModifier{1.0};
 			/*! @brief The multiplicative modifier applied to Speed. */
 			double mSpeedModifier{1.0};
-	};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+	}; // namespace PocketCore::Battle
 
 	/*! @struct BattleSlot Battle/battleState.h
 		@brief Stores the active battle state associated with one position on a side.
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 09/29/2026
+		@date 10/15/2026
 		@since 0.3.0
-		@version 0.12.46
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct BattleSlot
 	{
 		public:
+			/*! @brief Compares all stored battle-slot members using their equality operators.
+				@details Compares @ref mPokemon by pointer identity, without dereferencing it; two nullptr values compare equal.
+				Compares @ref mVolatileStatuses element by element in array order and @ref mDamageFormulaModifiers using
+				the approximate equality provided by @ref DamageFormulaModifiers. All remaining members compare exactly.
+				@param[in] other The slot to compare; borrowed only for the duration of the call.
+				@return True when every corresponding member compares equal; otherwise false.
+				@warning Approximate modifier comparisons make this equality relation non-transitive.
+				@date 10/15/2026
+				@since 0.12.51
+				@version 0.12.51
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const BattleSlot &other) const = default;
+
 			/*! @brief Applies a registered volatile status according to its interactions with the current statuses.
 				@details Blocking interactions leave the array unchanged. Replacement interactions store the incoming status in place, while
 			   removal interactions clear matching statuses and compact the remaining active statuses before insertion. A status whose

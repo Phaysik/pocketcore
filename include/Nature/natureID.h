@@ -1,13 +1,13 @@
 /*! @file natureID.h
-	@brief Contains the nature status
-	@date 08/22/2026
+	@brief Defines the open identifier used for built-in and user-defined natures.
+	@date 10/09/2026
 	@since 0.11.6
-	@version 0.11.6
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_NATURE_NATUREID_H
-#define INCLUDE_NATURE_NATUREID_H
+#ifndef INCLUDE_NATURE_NATURE_ID_H
+#define INCLUDE_NATURE_NATURE_ID_H
 
 #include "ID/idInterface.h"
 

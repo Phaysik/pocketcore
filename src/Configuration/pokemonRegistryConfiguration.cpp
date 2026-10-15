@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the pokemon registry.
-	@date 09/12/2026
+	@date 10/13/2026
 	@since 0.12.0
-	@version 0.12.28
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -15,50 +15,49 @@
 #include "Core/attributeMacros.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> PokemonRegistryConfiguration::addPokemon(const PokemonMeta &pokemonMeta)
+	ATTR_NODISCARD std::expected<PokemonID, RegistryError> PokemonRegistryConfiguration::addPokemon(const PokemonMeta &pokemonMeta)
 	{
 		return addMetadata(pokemonMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> PokemonRegistryConfiguration::addPokemons(
-		const std::span<const PokemonMeta> &pokemonMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> PokemonRegistryConfiguration::addPokemons(
+		const std::span<const PokemonMeta> pokemonMetas)
 	{
 		return addMetadataBatch(pokemonMetas, [](const PokemonMeta &definition) { return PokemonMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> PokemonRegistryConfiguration::renamePokemon(const std::string_view &oldName,
-																									  const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> PokemonRegistryConfiguration::renamePokemon(const std::string_view oldName,
+																								  const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> PokemonRegistryConfiguration::updatePokemon(const std::string_view &pokemonName,
-																									  const PokemonMeta &pokemonMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> PokemonRegistryConfiguration::updatePokemon(const std::string_view pokemonName,
+																								  const PokemonMeta &pokemonMeta)
 	{
 		return mutateMetadata(pokemonName, "updatePokemon", [&pokemonMeta](PokemonMeta &metadata) { metadata = pokemonMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> PokemonRegistryConfiguration::updatePokemon(const PokemonID pokemonID,
-																									  const PokemonMeta &pokemonMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> PokemonRegistryConfiguration::updatePokemon(const PokemonID pokemonID,
+																								  const PokemonMeta &pokemonMeta)
 	{
 		return mutateMetadata(pokemonID, "updatePokemon", [&pokemonMeta](PokemonMeta &metadata) { metadata = pokemonMeta; });
 	}
 
-	ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> PokemonRegistryConfiguration::removePokemon(
-		const std::string_view &pokemonName)
+	ATTR_NODISCARD std::expected<PokemonID, RegistryError> PokemonRegistryConfiguration::removePokemon(const std::string_view pokemonName)
 	{
 		return removeMetadata(pokemonName);
 	}
 
-	ATTR_NODISCARD std::expected<PokemonID, RegistryErrorInfo> PokemonRegistryConfiguration::removePokemon(const PokemonID pokemonID)
+	ATTR_NODISCARD std::expected<PokemonID, RegistryError> PokemonRegistryConfiguration::removePokemon(const PokemonID pokemonID)
 	{
 		return removeMetadata(pokemonID);
 	}

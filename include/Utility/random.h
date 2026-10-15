@@ -1,13 +1,13 @@
 /*! @file random.h
 	@brief Contains the function declarations for creating a random number generator
-	@date 08/31/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.12.13
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_RANDOM_H
-#define INCLUDE_RANDOM_H
+#ifndef INCLUDE_UTILITY_RANDOM_H
+#define INCLUDE_UTILITY_RANDOM_H
 
 #include <chrono>
 #include <concepts>
@@ -15,7 +15,7 @@
 #include <utility>
 
 #include "Core/attributeMacros.h"
-#include "Core/cconcepts.h" // for Integral
+#include "Core/concepts.h" // for Integral
 #include "Core/typedefs.h"
 
 /*! @namespace PocketCore::Utility Holds any useful functionality that doesn't fit anywhere else
@@ -27,10 +27,10 @@ namespace PocketCore::Utility
 {
 	using PocketCore::Core::ul;
 
-	/*! @class Random random.h "include/random.h"
+	/*! @class Random random.h "Utility/random.h"
 		@brief Class for creating a random number generator
 		@since 0.1.0
-		@version 0.12.13
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class Random

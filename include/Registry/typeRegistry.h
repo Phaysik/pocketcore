@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.1.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,20 +19,23 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
-#include "Types/typeMeta.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
+#include "Type/typeMeta.h"
 
-#include "constants.h" // IWYU pragma: keep
+#include "constants.h"
 
 namespace PocketCore::Registry::Type
 {
 	using PocketCore::Core::us;
 
 	using PocketCore::Configuration::MAX_TYPES;
+	using PocketCore::Registry::COL_OOB_SET_TYPE_CHART_CELL;
 	using PocketCore::Registry::FixedMetadataRegistry;
+	using PocketCore::Registry::ROW_OOB_SET_TYPE_CHART_CELL;
+	using PocketCore::Registry::ROW_OOB_SET_TYPE_CHART_ROW;
 	using PocketCore::Type::BUG_TYPE_MATCHUP;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::DARK_TYPE_MATCHUP;
@@ -109,9 +112,9 @@ namespace PocketCore::Registry::Type
 				@details Registers the 18 standard Pokemon types (Normal through Fairy) and Stellar with IDs matching their @ref Types enum
 			   values and populates the corresponding rows of the effectiveness chart.
 				@since 0.1.0
-				@version 0.12.20
+				@version 0.12.51
 			*/
-			ATTR_NOINLINE explicit constexpr TypeRegistry() : Base{toTypeID(BuiltinTypeID::FinalType).getValue()}
+			ATTR_NOINLINE explicit constexpr TypeRegistry()
 			{
 				addBuiltin({
 					.mName = std::string(TYPE_NAME_NONE),
@@ -284,9 +287,9 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to search for.
 				@return The type ID wrapped in std::optional if found, or std::nullopt if no type with that name is registered.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view &name) const
+			ATTR_NODISCARD ATTR_NOINLINE constexpr std::optional<TypeID> getTypeID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -341,9 +344,9 @@ namespace PocketCore::Registry::Type
 				@param[in] name The display name to check.
 				@return True if a type with that name exists in the registry, false otherwise.
 				@since 0.1.0
-				@version 0.12.5
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasType(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasType(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -408,9 +411,9 @@ namespace PocketCore::Registry::Type
 				@return A read-only reference to the full effectiveness row for the given type, or to an all-@ref NOT_DEFINED fallback row
 			   when the index is invalid.
 				@since 0.1.0
-				@version 0.12.19
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::array<TypeEffectiveness, MAX_TYPES> &getTypeChartRow(const us row) const
+			ATTR_NODISCARD constexpr const std::span<const TypeEffectiveness> getTypeChartRow(const us row) const
 			{
 				const TypeMeta *metadata{getEntry(row)};
 
@@ -424,21 +427,21 @@ namespace PocketCore::Registry::Type
 
 			/*! @brief Looks up an entire type-chart row by stable type ID.
 				@param[in] typeID The stable type identifier for the attacking type.
-				@return A non-owning pointer to the effectiveness row, or nullptr when the type ID is not registered. The pointer remains
-			   valid until the corresponding metadata is replaced or the registry is destroyed.
+				@return A read-only reference to the full effectiveness row for the given type, or to an all-@ref NOT_DEFINED fallback row
+			   when the index is invalid.
 				@since 0.12.19
 				@version 0.12.19
 			*/
-			ATTR_NODISCARD constexpr const std::array<TypeEffectiveness, MAX_TYPES> *getTypeChartRow(const TypeID typeID) const
+			ATTR_NODISCARD constexpr const std::span<const TypeEffectiveness> getTypeChartRow(const TypeID typeID) const
 			{
 				const TypeMeta *metadata{getMetadata(typeID)};
 
 				if (metadata == nullptr)
 				{
-					return nullptr;
+					return INVALID_TYPE_CHART_ROW;
 				}
 
-				return &metadata->mOffensiveMatchups;
+				return metadata->mOffensiveMatchups;
 			}
 	};
 } // namespace PocketCore::Registry::Type

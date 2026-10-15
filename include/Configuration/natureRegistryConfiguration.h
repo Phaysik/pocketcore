@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring nature metadata.
-	@date 08/30/2026
+	@date 10/13/2026
 	@since 0.11.6
-	@version 0.12.11
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Registry/natureRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,6 +29,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Registry::Nature::NatureRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -36,9 +38,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the nature-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 08/30/2026
+			@date 10/09/2026
 			@since 0.11.6
-			@version 0.12.11
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct NatureRegistryConfigurationPolicy
@@ -50,10 +52,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"nature"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate nature name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateNature};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when a nature lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::NatureNotFound};
 		};
 	} // namespace Detail
@@ -62,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal nature registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/30/2026
+		@date 10/13/2026
 		@since 0.11.6
-		@version 0.12.11
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class NatureRegistryConfiguration
@@ -110,9 +112,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<NatureID> getNatureID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<NatureID> getNatureID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -142,9 +144,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasNature(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasNature(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -162,68 +164,66 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined nature and assigns a stable ID.
 				@param[in] natureMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> addNature(const NatureMeta &natureMeta);
+			ATTR_NODISCARD std::expected<NatureID, RegistryError> addNature(const NatureMeta &natureMeta);
 
 			/*! @brief Registers multiple natures atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] natureMetas The nature definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addNatures(const std::span<const NatureMeta> &natureMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addNatures(const std::span<const NatureMeta> natureMetas);
 
 			/*! @brief Renames an nature without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameNature(const std::string_view &oldName,
-																			   const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameNature(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all nature metadata for an nature selected by stable ID.
 				@param[in] natureName The registered display name.
 				@param[in] natureMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the nature is not registered.
+				@return Void on success, or @ref RegistryError if the nature is not registered.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateNature(const std::string_view &natureName,
-																			   const NatureMeta &natureMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateNature(const std::string_view natureName, const NatureMeta &natureMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateNature(NatureID, const NatureMeta &natureMeta)
+			/*! @overload std::expected<void, RegistryError> updateNature(NatureID, const NatureMeta &natureMeta)
 				@brief Replaces all nature metadata for an nature selected by stable ID.
 				@param[in] natureID The built-in or custom stable identifier.
 				@param[in] natureMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the nature is not registered.
+				@return Void on success, or @ref RegistryError if the nature is not registered.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateNature(const NatureID natureID, const NatureMeta &natureMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateNature(const NatureID natureID, const NatureMeta &natureMeta);
 
 			/*! @brief Removes an nature by display name.
 				@param[in] natureName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching nature exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching nature exists.
 				@since 0.11.6
-				@version 0.11.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> removeNature(const std::string_view &natureName);
+			ATTR_NODISCARD std::expected<NatureID, RegistryError> removeNature(const std::string_view natureName);
 
-			/*! @overload std::expected<NatureID, RegistryErrorInfo> removeNature(NatureID)
+			/*! @overload std::expected<NatureID, RegistryError> removeNature(NatureID)
 				@brief Removes an nature by stable ID.
 				@param[in] natureID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching nature exists.
-				@since 0.11.6
-				@version 0.11.6
+				@return The removed stable ID on success, or @ref RegistryError if no matching nature exists.
+				@since 0.12.51
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<NatureID, RegistryErrorInfo> removeNature(const NatureID natureID);
+			ATTR_NODISCARD std::expected<NatureID, RegistryError> removeNature(const NatureID natureID);
 	};
 } // namespace PocketCore::Configuration
 

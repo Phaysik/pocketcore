@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/08/2026
+	@date 10/15/2026
 	@since 0.9.16
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -96,7 +96,7 @@ namespace PocketCore::Battle
 			|| mProvider->mMoveRegistry == nullptr || mProvider->mItemRegistry == nullptr || mProvider->mTypeRegistry == nullptr
 			|| mProvider->mStatusRegistry == nullptr || mProvider->mWeatherRegistry == nullptr || mProvider->mTerrainRegistry == nullptr
 			|| mProvider->mMultiplierRegistry == nullptr || mProvider->mNatureRegistry == nullptr || mProvider->mPokemonRegistry == nullptr
-			|| mProvider->mLearnsetRegistry == nullptr)
+			|| mProvider->mLearnsetRegistry == nullptr || mProvider->mLocationRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}
@@ -115,7 +115,7 @@ namespace PocketCore::Battle
 		}
 
 		// Count usable party members independently from party size because fainted Pokemon cannot start active.
-		if (healthyPokemonInParty(partyA) < activePokemonPerSide || healthyPokemonInParty(partyB) < activePokemonPerSide)
+		if (amountOfHealthyPokemonInParty(partyA) < activePokemonPerSide || amountOfHealthyPokemonInParty(partyB) < activePokemonPerSide)
 		{
 			return std::unexpected{BattleEngineError::InvalidParty};
 		}
@@ -453,8 +453,9 @@ namespace PocketCore::Battle
 			statusTarget = targetSlot != nullptr ? targetSlot->mPokemon : nullptr;
 		}
 
-		const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> previousStatuses{
-			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){}};
+		const std::span<const StatusID> previousStatuses{
+			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){},
+		};
 
 		effectMeta->mApply(mState, context, *mProvider);
 
@@ -468,7 +469,7 @@ namespace PocketCore::Battle
 			triggerWhenStateChanged(BattleEventID::TerrainChanged, context);
 		}
 
-		if (statusTarget != nullptr && statusTarget->getStatusIDsArray() != previousStatuses)
+		if (statusTarget != nullptr && !std::ranges::equal(statusTarget->getStatusIDsArray(), previousStatuses))
 		{
 			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
 			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
@@ -882,19 +883,19 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilityIDsArray()};
+		const std::span<const AbilityID> abilityIDs{pokemon->getAbilityIDsArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
 			return abilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityID) : nullptr;
 		});
 
-		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsIDsArray()};
+		const std::span<const ItemID> itemIDs{pokemon->getItemsIDsArray()};
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
 			return itemID != NO_ITEM_ID ? mProvider->mItemRegistry->getItemMetadata(itemID) : nullptr;
 		});
 
-		const std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{pokemon->getNatureIDsArray()};
+		const std::span<const NatureID> natureIDs{pokemon->getNatureIDsArray()};
 		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
 		std::ranges::transform(natureIDs, natureMetas.begin(), [this](const NatureID natureID) {
 			return natureID != NO_NATURE_ID ? mProvider->mNatureRegistry->getNatureMetadata(natureID) : nullptr;

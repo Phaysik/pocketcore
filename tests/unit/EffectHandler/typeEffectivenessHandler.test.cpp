@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.test.cpp
 	@brief C++ file for running tests for the TypeEffectivenessHandler.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -19,10 +19,10 @@
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Registry/typeRegistry.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

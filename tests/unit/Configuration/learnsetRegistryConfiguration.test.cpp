@@ -1,8 +1,8 @@
 /*! @file learnsetRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -24,8 +25,8 @@
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
 #include "Registry/learnsetRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -45,8 +46,8 @@ using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Learnset::LearnsetRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -54,8 +55,10 @@ SCENARIO("LearnsetRegistryConfiguration")
 {
 	ensureLoggerInitialized("learnset registry configuration test", "learnsetRegistryConfiguration_test.log");
 
-	LearnsetRegistryConfiguration config{};
-	LearnsetRegistry registry{};
+	std::unique_ptr<LearnsetRegistryConfiguration> configRegistryStorage{std::make_unique<LearnsetRegistryConfiguration>()};
+	LearnsetRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<LearnsetRegistry> registryStorage{std::make_unique<LearnsetRegistry>()};
+	LearnsetRegistry &registry{*registryStorage};
 	ub finalLearnsetUnderlyingValue{std::to_underlying(BuiltinLearnsetID::FinalLearnset)};
 
 	GIVEN("getAmountRegistered")
@@ -175,7 +178,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				LearnsetMeta definition{.mName = name};
-				std::expected<LearnsetID, RegistryErrorInfo> result{config.addLearnset(definition)};
+				std::expected<LearnsetID, RegistryError> result{config.addLearnset(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -186,12 +189,12 @@ SCENARIO("LearnsetRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_LEARNSETS + 1)};
 
 			LearnsetMeta definition{.mName = name};
-			std::expected<LearnsetID, RegistryErrorInfo> result{config.addLearnset(definition)};
+			std::expected<LearnsetID, RegistryError> result{config.addLearnset(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_LEARNSETS));
 			}
 		}
@@ -199,12 +202,12 @@ SCENARIO("LearnsetRegistryConfiguration")
 		WHEN("an learnset whose name is already in use is added")
 		{
 			LearnsetMeta definition{.mName = std::string(LEARNSET_NAME_BULBASAUR)};
-			std::expected<LearnsetID, RegistryErrorInfo> result{config.addLearnset(definition)};
+			std::expected<LearnsetID, RegistryError> result{config.addLearnset(definition)};
 
 			THEN("registration reports a duplicate learnset and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLearnset));
+				CHECK((result.error() == RegistryError::DuplicateLearnset));
 				CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 			}
 		}
@@ -217,7 +220,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 				= {{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mLevelRequirement = 20, .mAcquisitionMethod = AcquisitionMethod::TM}},
 			};
 
-			std::expected<LearnsetID, RegistryErrorInfo> result{config.addLearnset(definition)};
+			std::expected<LearnsetID, RegistryError> result{config.addLearnset(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -249,12 +252,12 @@ SCENARIO("LearnsetRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_LEARNSETS + 1)};
 
 			learnsetMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addLearnsets(learnsetMetas)};
+			std::expected<void, RegistryError> result{config.addLearnsets(learnsetMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 			}
 		}
@@ -271,12 +274,12 @@ SCENARIO("LearnsetRegistryConfiguration")
 
 			learnsetMetas.push_back({.mName = std::string(LEARNSET_NAME_BULBASAUR)});
 			const LearnsetRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addLearnsets(learnsetMetas)};
+			std::expected<void, RegistryError> result{config.addLearnsets(learnsetMetas)};
 
 			THEN("registration reports a duplicate learnset and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLearnset));
+				CHECK((result.error() == RegistryError::DuplicateLearnset));
 				CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextLearnsetID() == beforeBatch.getNextLearnsetID()));
@@ -290,7 +293,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 
 			learnsetMetas.push_back({.mName = "TestLearnsetName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addLearnsets(learnsetMetas)};
+			std::expected<void, RegistryError> result{config.addLearnsets(learnsetMetas)};
 
 			THEN("the registry reports no error and all the learnset definitions are added")
 			{
@@ -304,33 +307,33 @@ SCENARIO("LearnsetRegistryConfiguration")
 	{
 		WHEN("calling with an invalid learnset name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameLearnset("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameLearnset("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::LearnsetNotFound));
+				CHECK((result.error() == RegistryError::LearnsetNotFound));
 				CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameLearnset(LEARNSET_NAME_NONE, LEARNSET_NAME_BULBASAUR),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateLearnset));
+				CHECK((result.error() == RegistryError::DuplicateLearnset));
 				CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing learnset definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameLearnset(LEARNSET_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameLearnset(LEARNSET_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -349,33 +352,33 @@ SCENARIO("LearnsetRegistryConfiguration")
 		{
 			WHEN("calling with an invalid learnset name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLearnset("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateLearnset("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LearnsetNotFound));
+					CHECK((result.error() == RegistryError::LearnsetNotFound));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateLearnset(LEARNSET_NAME_NONE, {.mName = std::string(LEARNSET_NAME_BULBASAUR)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateLearnset));
+					CHECK((result.error() == RegistryError::DuplicateLearnset));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing learnset definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLearnset(LEARNSET_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateLearnset(LEARNSET_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -390,33 +393,33 @@ SCENARIO("LearnsetRegistryConfiguration")
 		{
 			WHEN("calling with an invalid learnset name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLearnset(LearnsetID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateLearnset(LearnsetID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LearnsetNotFound));
+					CHECK((result.error() == RegistryError::LearnsetNotFound));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateLearnset(toLearnsetID(BuiltinLearnsetID::None), {.mName = std::string(LEARNSET_NAME_BULBASAUR)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateLearnset));
+					CHECK((result.error() == RegistryError::DuplicateLearnset));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing learnset definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateLearnset(toLearnsetID(BuiltinLearnsetID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateLearnset(toLearnsetID(BuiltinLearnsetID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -434,19 +437,19 @@ SCENARIO("LearnsetRegistryConfiguration")
 		{
 			WHEN("calling with an unknown learnset name")
 			{
-				std::expected<LearnsetID, RegistryErrorInfo> result{config.removeLearnset("Unknown")};
+				std::expected<LearnsetID, RegistryError> result{config.removeLearnset("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LearnsetNotFound));
+					CHECK((result.error() == RegistryError::LearnsetNotFound));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known learnset name")
 			{
-				std::expected<LearnsetID, RegistryErrorInfo> result{config.removeLearnset(LEARNSET_NAME_NONE)};
+				std::expected<LearnsetID, RegistryError> result{config.removeLearnset(LEARNSET_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -461,19 +464,19 @@ SCENARIO("LearnsetRegistryConfiguration")
 		{
 			WHEN("calling with an unknown learnset ID")
 			{
-				std::expected<LearnsetID, RegistryErrorInfo> result{config.removeLearnset(LearnsetID{200})};
+				std::expected<LearnsetID, RegistryError> result{config.removeLearnset(LearnsetID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::LearnsetNotFound));
+					CHECK((result.error() == RegistryError::LearnsetNotFound));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known learnset ID")
 			{
-				std::expected<LearnsetID, RegistryErrorInfo> result{config.removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
+				std::expected<LearnsetID, RegistryError> result{config.removeLearnset(toLearnsetID(BuiltinLearnsetID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

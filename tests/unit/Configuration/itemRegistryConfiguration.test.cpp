@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -26,8 +27,8 @@
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Registry/itemRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -50,8 +51,8 @@ using PocketCore::Item::ItemMeta;
 using PocketCore::Item::NO_ITEM_ID;
 using PocketCore::Item::toItemID;
 using PocketCore::Registry::Item::ItemRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -59,8 +60,10 @@ SCENARIO("ItemRegistryConfiguration")
 {
 	ensureLoggerInitialized("item registry configuration test", "itemRegistryConfiguration_test.log");
 
-	ItemRegistryConfiguration config{};
-	ItemRegistry registry{};
+	std::unique_ptr<ItemRegistryConfiguration> configRegistryStorage{std::make_unique<ItemRegistryConfiguration>()};
+	ItemRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<ItemRegistry> registryStorage{std::make_unique<ItemRegistry>()};
+	ItemRegistry &registry{*registryStorage};
 	ub finalItemUnderlyingValue{std::to_underlying(BuiltinItemID::FinalItem)};
 
 	GIVEN("getAmountRegistered")
@@ -181,7 +184,7 @@ SCENARIO("ItemRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				ItemMeta definition{.mName = name, .mTriggers = {}};
-				std::expected<ItemID, RegistryErrorInfo> result{config.addItem(definition)};
+				std::expected<ItemID, RegistryError> result{config.addItem(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -192,12 +195,12 @@ SCENARIO("ItemRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_ITEMS + 1)};
 
 			ItemMeta definition{.mName = name, .mTriggers = {}};
-			std::expected<ItemID, RegistryErrorInfo> result{config.addItem(definition)};
+			std::expected<ItemID, RegistryError> result{config.addItem(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_ITEMS));
 			}
 		}
@@ -205,12 +208,12 @@ SCENARIO("ItemRegistryConfiguration")
 		WHEN("an item whose name is already in use is added")
 		{
 			ItemMeta definition{.mName = std::string(ITEM_NAME_CHERI_BERRY), .mTriggers = {}};
-			std::expected<ItemID, RegistryErrorInfo> result{config.addItem(definition)};
+			std::expected<ItemID, RegistryError> result{config.addItem(definition)};
 
 			THEN("registration reports a duplicate item and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateItem));
+				CHECK((result.error() == RegistryError::DuplicateItem));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 			}
 		}
@@ -226,7 +229,7 @@ SCENARIO("ItemRegistryConfiguration")
 
 			ItemMeta definition{.mName = "TestItemName", .mTriggers = triggers};
 
-			std::expected<ItemID, RegistryErrorInfo> result{config.addItem(definition)};
+			std::expected<ItemID, RegistryError> result{config.addItem(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -261,12 +264,12 @@ SCENARIO("ItemRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_ITEMS + 1)};
 
 			itemMetas.push_back({.mName = name, .mTriggers = {}});
-			std::expected<void, RegistryErrorInfo> result{config.addItems(itemMetas)};
+			std::expected<void, RegistryError> result{config.addItems(itemMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 			}
 		}
@@ -283,12 +286,12 @@ SCENARIO("ItemRegistryConfiguration")
 
 			itemMetas.push_back({.mName = std::string(ITEM_NAME_CHERI_BERRY), .mTriggers = {}});
 			const ItemRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addItems(itemMetas)};
+			std::expected<void, RegistryError> result{config.addItems(itemMetas)};
 
 			THEN("registration reports a duplicate item and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateItem));
+				CHECK((result.error() == RegistryError::DuplicateItem));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextItemID() == beforeBatch.getNextItemID()));
@@ -308,7 +311,7 @@ SCENARIO("ItemRegistryConfiguration")
 
 			itemMetas.push_back({.mName = "TestItemName", .mTriggers = triggers});
 
-			std::expected<void, RegistryErrorInfo> result{config.addItems(itemMetas)};
+			std::expected<void, RegistryError> result{config.addItems(itemMetas)};
 
 			THEN("the registry reports no error and all the item definitions are added")
 			{
@@ -331,12 +334,12 @@ SCENARIO("ItemRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setItemTriggers("ThisIsInvalid", triggers)};
+				std::expected<void, RegistryError> result{config.setItemTriggers("ThisIsInvalid", triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
@@ -350,7 +353,7 @@ SCENARIO("ItemRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setItemTriggers(ITEM_NAME_NONE, triggers)};
+				std::expected<void, RegistryError> result{config.setItemTriggers(ITEM_NAME_NONE, triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -372,12 +375,12 @@ SCENARIO("ItemRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setItemTriggers(ItemID{200}, triggers)};
+				std::expected<void, RegistryError> result{config.setItemTriggers(ItemID{200}, triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
@@ -391,7 +394,7 @@ SCENARIO("ItemRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setItemTriggers(toItemID(BuiltinItemID::None), triggers)};
+				std::expected<void, RegistryError> result{config.setItemTriggers(toItemID(BuiltinItemID::None), triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -409,19 +412,19 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setItemTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing item definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setItemTarget(ITEM_NAME_NONE, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget(ITEM_NAME_NONE, BattleTargetID::AllAllies)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -436,19 +439,19 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setItemTarget(ItemID{200}, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget(ItemID{200}, BattleTargetID::AllAllies)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing item definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.setItemTarget(toItemID(BuiltinItemID::None), BattleTargetID::AllAllies),
 				};
 
@@ -466,33 +469,33 @@ SCENARIO("ItemRegistryConfiguration")
 	{
 		WHEN("calling with an invalid item name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameItem("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameItem("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::ItemNotFound));
+				CHECK((result.error() == RegistryError::ItemNotFound));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameItem(ITEM_NAME_NONE, ITEM_NAME_CHERI_BERRY),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateItem));
+				CHECK((result.error() == RegistryError::DuplicateItem));
 				CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing item definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameItem(ITEM_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameItem(ITEM_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -518,33 +521,33 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateItem("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateItem("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateItem(ITEM_NAME_NONE, {.mName = std::string(ITEM_NAME_CHERI_BERRY), .mTriggers = triggers}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateItem));
+					CHECK((result.error() == RegistryError::DuplicateItem));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing item definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateItem(ITEM_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateItem(ITEM_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -560,33 +563,33 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateItem(ItemID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateItem(ItemID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateItem(toItemID(BuiltinItemID::None), {.mName = std::string(ITEM_NAME_CHERI_BERRY), .mTriggers = triggers}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateItem));
+					CHECK((result.error() == RegistryError::DuplicateItem));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing item definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateItem(toItemID(BuiltinItemID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateItem(toItemID(BuiltinItemID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -605,19 +608,19 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an unknown item name")
 			{
-				std::expected<ItemID, RegistryErrorInfo> result{config.removeItem("Unknown")};
+				std::expected<ItemID, RegistryError> result{config.removeItem("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known item name")
 			{
-				std::expected<ItemID, RegistryErrorInfo> result{config.removeItem(ITEM_NAME_NONE)};
+				std::expected<ItemID, RegistryError> result{config.removeItem(ITEM_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -632,19 +635,19 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an unknown item ID")
 			{
-				std::expected<ItemID, RegistryErrorInfo> result{config.removeItem(ItemID{200})};
+				std::expected<ItemID, RegistryError> result{config.removeItem(ItemID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::ItemNotFound));
+					CHECK((result.error() == RegistryError::ItemNotFound));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known item ID")
 			{
-				std::expected<ItemID, RegistryErrorInfo> result{config.removeItem(toItemID(BuiltinItemID::None))};
+				std::expected<ItemID, RegistryError> result{config.removeItem(toItemID(BuiltinItemID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

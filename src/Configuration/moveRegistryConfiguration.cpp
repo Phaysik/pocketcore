@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.cpp
 	@brief Defines validated user customization operations for the move registry.
-	@date 08/30/2026
+	@date 10/13/2026
 	@since 0.6.0
-	@version 0.12.12
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -18,7 +18,7 @@
 #include "Effect/effectTrigger.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -26,52 +26,52 @@ namespace PocketCore::Configuration
 	using PocketCore::Effect::EffectTrigger;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Registry::RegistryErrorInfo;
+	using PocketCore::Validation::Registry::RegistryError;
 
-	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::addMove(const MoveMeta &moveMeta)
+	ATTR_NODISCARD std::expected<MoveID, RegistryError> MoveRegistryConfiguration::addMove(const MoveMeta &moveMeta)
 	{
 		return addMetadata(moveMeta);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::addMoves(const std::span<const MoveMeta> &moveMetas)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::addMoves(const std::span<const MoveMeta> moveMetas)
 	{
 		return addMetadataBatch(moveMetas, [](const MoveMeta &definition) { return MoveMeta{definition}; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTriggers(
-		const std::string_view &moveName, const std::span<const EffectTrigger> &triggers)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::setMoveTriggers(
+		const std::string_view moveName, const std::span<const EffectTrigger> triggers)
 	{
 		return mutateMetadata(moveName, "setMoveTriggers",
 							  [&triggers](MoveMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTriggers(
-		const MoveID moveID, const std::span<const EffectTrigger> &triggers)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::setMoveTriggers(
+		const MoveID moveID, const std::span<const EffectTrigger> triggers)
 	{
 		return mutateMetadata(moveID, "setMoveTriggers",
 							  [&triggers](MoveMeta &metadata) { metadata.mTriggers.assign(triggers.begin(), triggers.end()); });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTarget(const std::string_view &moveName,
-																								   const BattleTargetID target)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::setMoveTarget(const std::string_view moveName,
+																							   const BattleTargetID target)
 	{
 		return mutateMetadata(moveName, "setMoveTarget", [&target](MoveMeta &metadata) { metadata.mTargetID = target; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::setMoveTarget(const MoveID moveID,
-																								   const BattleTargetID target)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::setMoveTarget(const MoveID moveID,
+																							   const BattleTargetID target)
 	{
 		return mutateMetadata(moveID, "setMoveTarget", [&target](MoveMeta &metadata) { metadata.mTargetID = target; });
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::renameMove(const std::string_view &oldName,
-																								const std::string_view &newName)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::renameMove(const std::string_view oldName,
+																							const std::string_view newName)
 	{
 		return renameMetadata(oldName, newName);
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::updateMove(const std::string_view &moveName,
-																								const MoveMeta &moveMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::updateMove(const std::string_view moveName,
+																							const MoveMeta &moveMeta)
 	{
 		return mutateMetadata(moveName, "updateMove", [&moveMeta](MoveMeta &metadata) {
 			metadata.mHitCountPolicy = moveMeta.mHitCountPolicy;
@@ -88,8 +88,7 @@ namespace PocketCore::Configuration
 		});
 	}
 
-	ATTR_NODISCARD std::expected<void, RegistryErrorInfo> MoveRegistryConfiguration::updateMove(const MoveID moveID,
-																								const MoveMeta &moveMeta)
+	ATTR_NODISCARD std::expected<void, RegistryError> MoveRegistryConfiguration::updateMove(const MoveID moveID, const MoveMeta &moveMeta)
 	{
 		return mutateMetadata(moveID, "updateMove", [&moveMeta](MoveMeta &metadata) {
 			metadata.mHitCountPolicy = moveMeta.mHitCountPolicy;
@@ -106,12 +105,12 @@ namespace PocketCore::Configuration
 		});
 	}
 
-	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::removeMove(const std::string_view &moveName)
+	ATTR_NODISCARD std::expected<MoveID, RegistryError> MoveRegistryConfiguration::removeMove(const std::string_view moveName)
 	{
 		return removeMetadata(moveName);
 	}
 
-	ATTR_NODISCARD std::expected<MoveID, RegistryErrorInfo> MoveRegistryConfiguration::removeMove(const MoveID moveID)
+	ATTR_NODISCARD std::expected<MoveID, RegistryError> MoveRegistryConfiguration::removeMove(const MoveID moveID)
 	{
 		return removeMetadata(moveID);
 	}

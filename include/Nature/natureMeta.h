@@ -1,8 +1,8 @@
 /*! @file natureMeta.h
 	@brief Defines the metadata stored for built-in and user-defined natures.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.11.6
-	@version 0.12.23
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -14,7 +14,7 @@
 
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Effect/effectTrigger.h"
-#include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 
 #include "natureID.h"
 

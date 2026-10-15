@@ -1,13 +1,13 @@
 /*! @file itemID.h
-	@brief Contains the item status
-	@date 07/27/2026
+	@brief Defines the open identifier used for built-in and user-defined items.
+	@date 10/09/2026
 	@since 0.3.0
-	@version 0.4.1
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_ITEM_ITEMID_H
-#define INCLUDE_ITEM_ITEMID_H
+#ifndef INCLUDE_ITEM_ITEM_ID_H
+#define INCLUDE_ITEM_ITEM_ID_H
 
 #include "ID/idInterface.h"
 

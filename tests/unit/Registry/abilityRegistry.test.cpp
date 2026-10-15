@@ -1,14 +1,15 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.4.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/abilityRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -22,7 +23,7 @@
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -42,7 +43,7 @@ using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -53,7 +54,8 @@ static_assert(!PubliclyStructurallyMutable<AbilityRegistry>);
 
 SCENARIO("AbilityRegistry")
 {
-	AbilityRegistry registry{};
+	std::unique_ptr<AbilityRegistry> registryStorage{std::make_unique<AbilityRegistry>()};
+	AbilityRegistry &registry{*registryStorage};
 	ub finalAbilityUnderlyingValue{std::to_underlying(BuiltinAbilityID::FinalAbility)};
 
 	GIVEN("a default constructed ability registry")
@@ -246,49 +248,49 @@ SCENARIO("AbilityRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			AbilityRegistry other{};
+			std::unique_ptr<AbilityRegistry> other{std::make_unique<AbilityRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			AbilityRegistryConfiguration other{};
-			std::expected<AbilityID, RegistryErrorInfo> result{other.addAbility({.mName = "test"})};
+			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
+			std::expected<AbilityID, RegistryError> result{other->addAbility({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			AbilityRegistryConfiguration other{};
-			std::expected<AbilityID, RegistryErrorInfo> result{other.removeAbility(toAbilityID(BuiltinAbilityID::None))};
+			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
+			std::expected<AbilityID, RegistryError> result{other->removeAbility(toAbilityID(BuiltinAbilityID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			AbilityRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateAbility(toAbilityID(BuiltinAbilityID::None), {.mName = "test"}),
+			std::unique_ptr<AbilityRegistryConfiguration> other{std::make_unique<AbilityRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateAbility(toAbilityID(BuiltinAbilityID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

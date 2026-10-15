@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.5.3
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Registry/fixedMetadataRegistry.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 namespace PocketCore::Registry::Move
 {
@@ -55,9 +55,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 09/11/2026
+		@date 10/13/2026
 		@since 0.5.3
-		@version 0.12.24
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -78,9 +78,9 @@ namespace PocketCore::Registry::Move
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinMoveID.
 				@since 0.5.3
-				@version 0.12.24
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr MoveRegistry() : Base{toMoveID(BuiltinMoveID::FinalMove).getValue()}
+			ATTR_NOINLINE explicit constexpr MoveRegistry()
 			{
 				// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
@@ -184,9 +184,9 @@ namespace PocketCore::Registry::Move
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.3
-				@version 0.5.3
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<MoveID> getMoveID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<MoveID> getMoveID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -237,9 +237,9 @@ namespace PocketCore::Registry::Move
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.3
-				@version 0.5.3
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasMove(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasMove(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

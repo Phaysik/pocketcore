@@ -1,8 +1,8 @@
 /*! @file stabHandler.test.cpp
 	@brief C++ file for running tests for the StabHandler.
-	@date 09/02/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,7 +17,7 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

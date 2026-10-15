@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 09/23/2026
+	@date 10/13/2026
 	@since 0.9.10
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,8 +17,8 @@
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
 #include "Terrain/builtInTerrainID.h"
-#include "Types/builtInTypeID.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 

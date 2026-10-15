@@ -1,8 +1,8 @@
 /*! @file statusRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined statuses.
-	@date 09/28/2026
+	@date 10/13/2026
 	@since 0.6.4
-	@version 0.12.45
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -49,9 +49,9 @@ namespace PocketCore::Registry::Status
 		@details Built-in statuses are registered during construction with IDs derived from @ref BuiltinStatusID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_STATUSES.
-		@date 09/28/2026
+		@date 10/13/2026
 		@since 0.6.4
-		@version 0.12.45
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class StatusRegistry : private FixedMetadataRegistry<StatusMeta, StatusID, MAX_STATUSES, &StatusMeta::mStatusID>
@@ -72,9 +72,9 @@ namespace PocketCore::Registry::Status
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinStatusID.
 				@since 0.6.4
-				@version 0.12.45
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr StatusRegistry() : Base{toStatusID(BuiltinStatusID::FinalStatus).getValue()}
+			ATTR_NOINLINE explicit constexpr StatusRegistry()
 			{
 				// Non-Volatile Statuses
 
@@ -176,9 +176,9 @@ namespace PocketCore::Registry::Status
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<StatusID> getStatusID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<StatusID> getStatusID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -229,9 +229,9 @@ namespace PocketCore::Registry::Status
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.6.4
-				@version 0.6.4
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasStatus(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasStatus(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

@@ -1,8 +1,8 @@
 /*! @file contiguousSequence.h
 	@brief Declares helper algorithms for contiguous sequence containers.
-	@date 08/03/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.9.1
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -12,7 +12,7 @@
 #include <span>
 
 #include "Core/attributeMacros.h"
-#include "Core/cconcepts.h"
+#include "Core/concepts.h"
 
 /*! @namespace PocketCore::Utility::Containers::ContiguousSequence
 	@brief Utilities for working with contiguous sequence containers

@@ -1,8 +1,8 @@
 /*! @file learnsetRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring learnset metadata.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Learnset/learnsetID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Registry/learnsetRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -28,6 +29,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Registry::Learnset::LearnsetRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -63,9 +65,9 @@ namespace PocketCore::Configuration
 		@details Supports lookup, addition, batch addition, move learn entry replacement, renaming, and removal. The registry owns copies
 	   of registered names and entries. Custom IDs are assigned monotonically and are preserved during updates and renaming, and are not
 	   reused after removal. Batch additions provide all-or-nothing semantics for reported validation errors.
-		@date 10/08/2026
+		@date 10/13/2026
 		@since 0.12.50
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class LearnsetRegistryConfiguration
@@ -111,9 +113,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<LearnsetID> getLearnsetID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<LearnsetID> getLearnsetID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -144,9 +146,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasLearnset(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasLearnset(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -165,76 +167,75 @@ namespace PocketCore::Configuration
 			/*! @brief Registers one user-defined learnset and assigns a stable ID.
 				@param[in] learnsetMeta The name and move learn entries to copy into owned registry storage. The supplied ID is ignored,
 			   and the source metadata does not need to outlive this call.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LearnsetID, RegistryErrorInfo> addLearnset(const LearnsetMeta &learnsetMeta);
+			ATTR_NODISCARD std::expected<LearnsetID, RegistryError> addLearnset(const LearnsetMeta &learnsetMeta);
 
 			/*! @brief Registers multiple learnsets atomically.
 				@details Restores the registered metadata and next stable ID if any definition fails validation.
 				@param[in] learnsetMetas The learnset definitions to copy eagerly into owned registry storage in order. Supplied IDs are
 			   ignored, and the source span and definitions do not need to outlive this call.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@note Rollback applies to reported validation errors; allocation exceptions are not caught and may leave earlier additions
 			   registered.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addLearnsets(const std::span<const LearnsetMeta> &learnsetMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addLearnsets(const std::span<const LearnsetMeta> learnsetMetas);
 
 			/*! @brief Renames a learnset without changing its stable ID or move learn entries.
 				@details Copies @p newName into the registry-owned string; its backing storage does not need to outlive this call.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameLearnset(const std::string_view &oldName,
-																				 const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameLearnset(const std::string_view oldName,
+																			 const std::string_view newName);
 
 			/*! @brief Replaces a learnset's name and move learn entries selected by display name, preserving its stable ID.
 				@param[in] learnsetName The registered display name.
 				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source
 			   metadata does not need to outlive this call.
-				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in
+				@return Void on success, or @ref RegistryError if the learnset is not registered or the replacement name is already in
 			   use by another learnset.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateLearnset(const std::string_view &learnsetName,
-																				 const LearnsetMeta &learnsetMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateLearnset(const std::string_view learnsetName,
+																			 const LearnsetMeta &learnsetMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateLearnset(LearnsetID, const LearnsetMeta &learnsetMeta)
+			/*! @overload std::expected<void, RegistryError> updateLearnset(LearnsetID, const LearnsetMeta &learnsetMeta)
 				@brief Replaces a learnset's name and move learn entries selected by stable ID, preserving that ID.
 				@param[in] learnsetID The built-in or custom stable identifier.
 				@param[in] learnsetMeta The metadata to copy into owned registry storage. The supplied ID is ignored, and the source
 			   metadata does not need to outlive this call.
-				@return Void on success, or @ref RegistryErrorInfo if the learnset is not registered or the replacement name is already in
+				@return Void on success, or @ref RegistryError if the learnset is not registered or the replacement name is already in
 			   use by another learnset.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateLearnset(const LearnsetID learnsetID,
-																				 const LearnsetMeta &learnsetMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateLearnset(const LearnsetID learnsetID, const LearnsetMeta &learnsetMeta);
 
 			/*! @brief Removes a learnset by display name.
 				@param[in] learnsetName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching learnset exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching learnset exists.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LearnsetID, RegistryErrorInfo> removeLearnset(const std::string_view &learnsetName);
+			ATTR_NODISCARD std::expected<LearnsetID, RegistryError> removeLearnset(const std::string_view learnsetName);
 
-			/*! @overload std::expected<LearnsetID, RegistryErrorInfo> removeLearnset(LearnsetID)
+			/*! @overload std::expected<LearnsetID, RegistryError> removeLearnset(LearnsetID)
 				@brief Removes a learnset by stable ID.
 				@param[in] learnsetID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching learnset exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching learnset exists.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<LearnsetID, RegistryErrorInfo> removeLearnset(const LearnsetID learnsetID);
+			ATTR_NODISCARD std::expected<LearnsetID, RegistryError> removeLearnset(const LearnsetID learnsetID);
 	};
 } // namespace PocketCore::Configuration
 

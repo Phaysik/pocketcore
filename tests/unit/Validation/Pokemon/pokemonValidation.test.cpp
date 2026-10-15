@@ -1,8 +1,8 @@
 /*! @file pokemonValidation.test.cpp
 	@brief C++ file for running tests for the Pokemon validation functions.
-	@date 10/07/2026
+	@date 10/13/2026
 	@since 0.12.48
-	@version 0.12.48
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -12,7 +12,7 @@
 #include <expected>
 
 #include "Core/typedefs.h"
-#include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 #include "Validation/Pokemon/pokemonError.h"
 
 #include <catch2/catch_test_macros.hpp>

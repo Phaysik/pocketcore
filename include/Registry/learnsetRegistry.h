@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined learnsets.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -47,9 +47,9 @@ namespace PocketCore::Registry::Learnset
 		@details Built-in learnsets are registered during construction with IDs derived from @ref BuiltinLearnsetID. Configuration code may
 	   append, replace, or remove owned metadata through protected mutators while battle-time callers use allocation-free lookup operations.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n), where n is bounded by @ref MAX_LEARNSETS.
-		@date 10/08/2026
+		@date 10/13/2026
 		@since 0.12.50
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class LearnsetRegistry : private FixedMetadataRegistry<LearnsetMeta, LearnsetID, MAX_LEARNSETS, &LearnsetMeta::mLearnsetID>
@@ -70,9 +70,9 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Constructs a registry populated with all built-in learnsets, including None but excluding the FinalLearnset sentinel.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr LearnsetRegistry() : Base{toLearnsetID(BuiltinLearnsetID::FinalLearnset).getValue()}
+			ATTR_NOINLINE explicit constexpr LearnsetRegistry()
 			{
 				addBuiltin({.mName = std::string(LEARNSET_NAME_NONE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::None)});
 				addBuiltin(
@@ -133,9 +133,9 @@ namespace PocketCore::Registry::Learnset
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<LearnsetID> getLearnsetID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<LearnsetID> getLearnsetID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -187,9 +187,9 @@ namespace PocketCore::Registry::Learnset
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasLearnset(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasLearnset(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

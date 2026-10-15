@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 10/08/2026
+	@date 10/15/2026
 	@since 0.9.14
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -32,7 +32,6 @@
 #include "Effect/effectContext.h"
 #include "Effect/effectSourceAndSuppression.h"
 #include "Move/moveHitPolicy.h"
-#include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonHelpers.h"
@@ -73,7 +72,7 @@ namespace PocketCore::Battle
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
 
-	ATTR_NODISCARD ATTR_CONST const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST const std::span<const BattleSlot> activeSlots(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mSideA : state.mSideB;
 	}
@@ -89,7 +88,7 @@ namespace PocketCore::Battle
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
 
-	ATTR_NODISCARD ATTR_CONST const std::vector<Pokemon *> &party(const BattleState &state, const Side side)
+	ATTR_NODISCARD ATTR_CONST const std::span<const Pokemon *const> party(const BattleState &state, const Side side)
 	{
 		return side == Side::A ? state.mPartyA : state.mPartyB;
 	}
@@ -103,15 +102,15 @@ namespace PocketCore::Battle
 		return slot.mPokemon != nullptr && !slot.mPokemon->isFainted();
 	}
 
-	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *pokemon) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *const pokemon) noexcept
 	{
 		return pokemon != nullptr && !pokemon->isFainted();
 	}
 
-	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept
+	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *const pokemon) noexcept
 	{
-		const std::vector<BattleSlot> &slots{activeSlots(state, side)};
-		return std::ranges::any_of(slots, [pokemon](const BattleSlot &slot) { return slot.mPokemon == pokemon; });
+		const std::span<const BattleSlot> slots{activeSlots(state, side)};
+		return std::ranges::any_of(slots, [&pokemon](const BattleSlot &slot) { return slot.mPokemon == pokemon; });
 	}
 
 	ATTR_NODISCARD ATTR_PURE bool isAdjacent(const BattleSlot &source, const BattleSlot &target) noexcept
@@ -120,16 +119,16 @@ namespace PocketCore::Battle
 		return positionDifference <= 1;
 	}
 
-	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget target) noexcept
+	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget &target) noexcept
 	{
-		const std::vector<BattleSlot> &slots{activeSlots(state, target.mSide)};
+		const std::span<const BattleSlot> slots{activeSlots(state, target.mSide)};
 		return target.mSlotIndex < slots.size() && isHealthy(slots.at(target.mSlotIndex));
 	}
 
 	ATTR_NODISCARD ATTR_PURE bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept
 	{
-		const std::vector<Pokemon *> &sideParty{party(state, side)};
-		return std::ranges::any_of(sideParty, [](const Pokemon *pokemon) { return isHealthy(pokemon); });
+		const std::span<const Pokemon *const> sideParty{party(state, side)};
+		return std::ranges::any_of(sideParty, [](const Pokemon *const pokemon) { return isHealthy(pokemon); });
 	}
 
 	ATTR_NODISCARD ATTR_PURE double getEffectiveSpeed(const BattleSlot &slot) noexcept
@@ -143,10 +142,10 @@ namespace PocketCore::Battle
 
 		const double stageMultiplier{CACHE_STAT_STAGE_MULTIPLIERS.at(statStageCacheIndex(slot.mStatStages.mSpeed))};
 
-		return slotPokemon->getSpeed() * stageMultiplier * slot.mDamageFormulaModifiers.mSpeedModifier;
+		return std::max(0.0, std::floor(slotPokemon->getSpeed() * stageMultiplier * slot.mDamageFormulaModifiers.mSpeedModifier));
 	}
 
-	ATTR_NODISCARD EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget target,
+	ATTR_NODISCARD EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget &target,
 												 const ub hitAttemptIndex)
 	{
 		EffectContext context{};
@@ -235,18 +234,13 @@ namespace PocketCore::Battle
 											 }),
 					};
 
-					if (selectedOutcome != policy.mOutcomes.end())
-					{
-						return selectedOutcome->mHitCount;
-					}
-
-					return policy.mOutcomes.back().mHitCount;
+					return selectedOutcome->mHitCount;
 				}
 			},
 			moveMeta.mHitCountPolicy);
 	}
 
-	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB)
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> partyA, const std::span<Pokemon *const> partyB)
 	{
 		std::vector<Pokemon *> combinedParties{};
 		combinedParties.reserve(partyA.size() + partyB.size());
@@ -257,7 +251,7 @@ namespace PocketCore::Battle
 		return std::ranges::adjacent_find(combinedParties) != combinedParties.end();
 	}
 
-	ATTR_NODISCARD ATTR_PURE sl healthyPokemonInParty(const std::span<Pokemon *const> &party)
+	ATTR_NODISCARD ATTR_PURE sl amountOfHealthyPokemonInParty(const std::span<const Pokemon *const> party)
 	{
 		return std::ranges::count_if(party, [](const Pokemon *pokemon) { return isHealthy(pokemon); });
 	}
@@ -310,7 +304,7 @@ namespace PocketCore::Battle
 					const Side side)
 	{
 		// Append eligible slots in active-slot order to keep multi-target execution deterministic.
-		const std::vector<BattleSlot> &slots{activeSlots(state, side)};
+		const std::span<const BattleSlot> slots{activeSlots(state, side)};
 
 		for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
 		{
@@ -354,7 +348,7 @@ namespace PocketCore::Battle
 		return BattleResult::Draw;
 	}
 
-	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *const> &trainerParty)
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<const Pokemon *const> trainerParty)
 	{
 		// A fainted slot requires replacement only when this side has a healthy reserve available.
 		return std::ranges::any_of(
@@ -366,7 +360,7 @@ namespace PocketCore::Battle
 																							  const MoveRegistry *moveRegistry)
 	{
 		// Validate only the action fields required to locate the move and its targeting metadata.
-		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+		const std::span<const BattleSlot> slots{activeSlots(state, action.mSide)};
 		const BattleSlot &userSlot{slots.at(action.mUserSlotIndex)};
 
 		if (!state.mBattleStarted || action.mUserSlotIndex >= slots.size() || !isHealthy(userSlot))
@@ -477,7 +471,7 @@ namespace PocketCore::Battle
 		}
 
 		// Verify the outgoing battlefield slot befor indexing the active side.
-		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+		const std::span<const BattleSlot> slots{activeSlots(state, action.mSide)};
 
 		if (action.mActiveSlotIndex >= slots.size())
 		{
@@ -485,14 +479,14 @@ namespace PocketCore::Battle
 		}
 
 		// Verify the incoming party index independently because party and active-slot indexes are unrelated.
-		const std::vector<Pokemon *> &trainerParty{party(state, action.mSide)};
+		const std::span<const Pokemon *const> trainerParty{party(state, action.mSide)};
 
 		if (action.mPartyIndex >= trainerParty.size())
 		{
 			return std::unexpected{BattleEngineError::InvalidPartyIndex};
 		}
 
-		Pokemon *incomingPokemon{trainerParty.at(action.mPartyIndex)};
+		const Pokemon *incomingPokemon{trainerParty.at(action.mPartyIndex)};
 
 		// Fainted reserves cannot be switched into battle.
 		if (!isHealthy(incomingPokemon))
@@ -531,7 +525,7 @@ namespace PocketCore::Battle
 		}
 
 		// Resolve the acting slot on the action's side and reject out-of-range indexes before access.
-		const std::vector<BattleSlot> &slots{activeSlots(state, action.mSide)};
+		const std::span<const BattleSlot> slots{activeSlots(state, action.mSide)};
 
 		if (action.mUserSlotIndex >= slots.size())
 		{
@@ -557,7 +551,7 @@ namespace PocketCore::Battle
 		// A move is usable only when its ID is assigned and resolves to registered metadata.
 		const MoveID moveID{userPokemon->getMoveID(action.mMoveSlotIndex)};
 
-		if (moveID == Move::NO_MOVE_ID && moveRegistry->getMoveMetadata(moveID) == nullptr)
+		if (moveRegistry->getMoveMetadata(moveID) == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MoveNotFound};
 		}
@@ -679,7 +673,7 @@ namespace PocketCore::Battle
 		}
 
 		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
-										const std::string_view &indentation, const StableID stableID, const NameLookup &nameLookup) {
+										const std::string_view indentation, const StableID stableID, const NameLookup &nameLookup) {
 			constexpr std::string_view unregisteredName{"<unregistered>"};
 			const std::optional<std::string_view> name{nameLookup(stableID)};
 

@@ -1,8 +1,8 @@
 /*! @file weatherHandler.cpp
 	@brief Contains the weather effect handler implementation
-	@date 09/02/2026
+	@date 10/13/2026
 	@since 0.9.8
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@
 #include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 #include "Weather/builtInWeatherID.h"
 
 namespace PocketCore::Effect

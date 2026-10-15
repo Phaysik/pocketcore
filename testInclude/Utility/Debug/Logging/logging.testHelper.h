@@ -1,8 +1,8 @@
 /*! @file logging.testHelper.h
 	@brief Header file for running tests for the logging.
-	@date 09/10/2026
+	@date 10/13/2026
 	@since 0.4.0
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,8 +17,7 @@ namespace PocketCore::Testing
 {
 	using PocketCore::Utility::Debug::Logging::Logger;
 
-	static void ensureLoggerInitialized(const std::string_view &loggerName, const std::string_view &fileName,
-										const bool truncateFile = true)
+	static void ensureLoggerInitialized(const std::string_view loggerName, const std::string_view fileName, const bool truncateFile = true)
 	{
 		static bool initialized{false};
 

@@ -1,8 +1,8 @@
 /*! @file typeEffectiveness.h
 	@brief Contains the function declarations for creating a Detailed file description
-	@date 08/26/2026
+	@date 10/13/2026
 	@since 0.1.0
-	@version 0.12.5
+	@version 0.12.51
 	@author Matthew Moore
 */
 

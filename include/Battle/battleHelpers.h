@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/08/2026
+	@date 10/15/2026
 	@since 0.9.14
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -68,9 +68,9 @@ namespace PocketCore::Battle
 		@return True when at least one element is nullptr; otherwise false.
 		@note Time complexity is O(n), where n is @p party.size(). Supports compile-time and runtime evaluation.
 		@since 0.10.3
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD constexpr bool anyPartyPokemonNull(const std::span<Pokemon *const> &party)
+	ATTR_NODISCARD constexpr bool anyPartyPokemonNull(const std::span<Pokemon *const> party)
 	{
 		return std::ranges::any_of(party, [](const Pokemon *pokemon) { return pokemon == nullptr; });
 	}
@@ -85,16 +85,15 @@ namespace PocketCore::Battle
 	*/
 	ATTR_NODISCARD ATTR_CONST std::vector<BattleSlot> &activeSlots(BattleState &state, const Side side);
 
-	/*! @overload const std::vector<BattleSlot> &activeSlots(const BattleState &state, Side side)
-		@brief Selects the read-only active-slot collection for a side.
+	/*! @brief Selects the read-only active-slot collection for a side.
 		@param[in] state The battle state containing both active-slot collections.
 		@param[in] side The side to select.
 		@return The read-only side-A collection for @ref Side::A; otherwise the read-only side-B collection. The reference remains valid
 	   while @p state exists.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_CONST const std::vector<BattleSlot> &activeSlots(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_CONST const std::span<const BattleSlot> activeSlots(const BattleState &state, const Side side);
 
 	/*! @brief Finds a mutable active slot from effect-context coordinates.
 		@param[in,out] state The battle state containing the requested slot.
@@ -117,16 +116,15 @@ namespace PocketCore::Battle
 	*/
 	ATTR_NODISCARD ATTR_CONST std::vector<Pokemon *> &party(BattleState &state, const Side side);
 
-	/*! @overload const std::vector<Pokemon *> &party(const BattleState &state, Side side)
-		@brief Selects the read-only party collection for a side.
+	/*! @brief Selects the read-only party collection for a side.
 		@param[in] state The battle state containing both parties.
 		@param[in] side The side to select.
 		@return The read-only side-A party for @ref Side::A; otherwise the read-only side-B party. The reference remains valid while @p
 	   state exists.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_CONST const std::vector<Pokemon *> &party(const BattleState &state, const Side side);
+	ATTR_NODISCARD ATTR_CONST const std::span<const Pokemon *const> party(const BattleState &state, const Side side);
 
 	/*! @brief Checks whether an active slot contains a non-fainted Pokemon.
 		@param[in] slot The active slot to inspect.
@@ -141,9 +139,9 @@ namespace PocketCore::Battle
 		@param[in] pokemon The non-owning pointer to inspect; may be nullptr.
 		@return True when @p pokemon is non-null and has not fainted; otherwise false.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *pokemon) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isHealthy(const Pokemon *const pokemon) noexcept;
 
 	/*! @brief Checks whether a Pokemon occupies an active slot on a side.
 		@param[in] state The battle state to inspect.
@@ -152,9 +150,9 @@ namespace PocketCore::Battle
 		@return True when any selected active slot stores @p pokemon; otherwise false.
 		@note Time complexity is O(a), where a is the number of active slots on @p side.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *pokemon) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool isActive(const BattleState &state, const Side side, const Pokemon *const pokemon) noexcept;
 
 	/*! @brief Checks whether two battlefield positions are within one position of each other.
 		@param[in] source The source slot supplying the first position.
@@ -170,9 +168,9 @@ namespace PocketCore::Battle
 		@param[in] target The side and zero-based active-slot index to resolve.
 		@return True when the slot index exists and contains a non-fainted Pokemon; otherwise false.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget target) noexcept;
+	ATTR_NODISCARD ATTR_PURE bool targetExists(const BattleState &state, const BattleTarget &target) noexcept;
 
 	/*! @brief Checks whether a party has at least one healthy Pokemon.
 		@param[in] state The battle state containing the party.
@@ -180,7 +178,7 @@ namespace PocketCore::Battle
 		@return True when at least one party pointer is non-null and identifies a non-fainted Pokemon; otherwise false.
 		@note Time complexity is O(n), where n is the selected party size.
 		@since 0.9.14
-		@version 0.10.9
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD ATTR_PURE bool sideHasHealthyPokemon(const BattleState &state, const Side side) noexcept;
 
@@ -202,9 +200,9 @@ namespace PocketCore::Battle
 		@param[in] hitAttemptIndex The hit-attempt index stored in the context.
 		@return A new move-sourced effect context initialized from the supplied values.
 		@since 0.9.16
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget target,
+	ATTR_NODISCARD ATTR_PURE EffectContext makeMoveContext(const MoveAction &action, const MoveMeta &moveMeta, const BattleTarget &target,
 														   const ub hitAttemptIndex);
 
 	/*! @brief Applies recoil from a completed damage context to the move user.
@@ -234,18 +232,18 @@ namespace PocketCore::Battle
 		@return True when any pointer value occurs more than once in the combined parties; otherwise false.
 		@note Time complexity is O(n log n) and auxiliary space is O(n), where n is the combined party size.
 		@since 0.10.3
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> &partyA, const std::span<Pokemon *const> &partyB);
+	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> partyA, const std::span<Pokemon *const> partyB);
 
 	/*! @brief Counts healthy Pokemon in a party.
 		@param[in] party The non-owning party pointer span to inspect.
 		@return The number of non-null, non-fainted Pokemon pointers.
 		@note Time complexity is O(n), where n is @p party.size().
 		@since 0.10.3
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE sl healthyPokemonInParty(const std::span<Pokemon *const> &party);
+	ATTR_NODISCARD ATTR_PURE sl amountOfHealthyPokemonInParty(const std::span<const Pokemon *const> party);
 
 	/*! @brief Appends the first healthy party members to active slots in party order.
 		@details Assigns contiguous positions from the current slot count and stops when @p activePokemonPerSide slots are populated.
@@ -303,9 +301,9 @@ namespace PocketCore::Battle
 		@return True when @p trainerParty contains a healthy Pokemon not active on @p side; otherwise false.
 		@note Time complexity is O(p * a), where p is the party size and a is the active-slot count.
 		@since 0.10.3
-		@version 0.10.10
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<Pokemon *const> &trainerParty);
+	ATTR_NODISCARD ATTR_PURE bool hasReserve(const BattleState &state, const Side side, const std::span<const Pokemon *const> trainerParty);
 
 	/*! @brief Resolves the active targets selected by a move action.
 		@details Resolves the acting slot and its registered move metadata, then delegates selector and range behavior to @ref
@@ -317,7 +315,7 @@ namespace PocketCore::Battle
 		@return The selected active slots in deterministic side and slot order, or @ref BattleEngineError::InvalidActiveSlot, @ref
 	   BattleEngineError::MoveNotFound, or a target-resolution error.
 		@since 0.10.4
-		@version 0.12.17
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> getMoveTargets(const BattleState &state,
 																							  const MoveAction &action,
@@ -349,7 +347,7 @@ namespace PocketCore::Battle
 		@param[in] action The switch action to validate.
 		@return Void when the switch is valid, or the first applicable @ref BattleEngineError.
 		@since 0.10.4
-		@version 0.10.9
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD ATTR_PURE std::expected<void, BattleEngineError> validateSwitchAction(const BattleState &state,
 																						 const SwitchAction &action);
@@ -364,7 +362,7 @@ namespace PocketCore::Battle
 		@param[in] moveRegistry The move registry to grab the move metadata from.
 		@return Void when the action is valid, or the first applicable @ref BattleEngineError.
 		@since 0.10.4
-		@version 0.12.17
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD std::expected<void, BattleEngineError> validateMoveAction(const BattleState &state, const MoveAction &action,
 																			 const BattlePhase phase, const MoveRegistry *moveRegistry);
@@ -425,7 +423,7 @@ namespace PocketCore::Battle
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.12.45
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	std::ostream &printBattleSlotWithNames(std::ostream &outStream, const BattleSlot &battleSlot, const RegistryProvider &registryProvider);
 } // namespace PocketCore::Battle

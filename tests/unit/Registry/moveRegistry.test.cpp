@@ -1,14 +1,15 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.6.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/moveRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -23,8 +24,8 @@
 #include "Move/constants.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -46,9 +47,9 @@ using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Move::MoveRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -59,7 +60,8 @@ static_assert(!PubliclyStructurallyMutable<MoveRegistry>);
 
 SCENARIO("MoveRegistry")
 {
-	MoveRegistry registry{};
+	std::unique_ptr<MoveRegistry> registryStorage{std::make_unique<MoveRegistry>()};
+	MoveRegistry &registry{*registryStorage};
 	ub finalMoveUnderlyingValue{std::to_underlying(BuiltinMoveID::FinalMove)};
 
 	GIVEN("a default constructed move registry")
@@ -279,49 +281,49 @@ SCENARIO("MoveRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			MoveRegistry other{};
+			std::unique_ptr<MoveRegistry> other{std::make_unique<MoveRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			MoveRegistryConfiguration other{};
-			std::expected<MoveID, RegistryErrorInfo> result{other.addMove({.mName = "test"})};
+			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
+			std::expected<MoveID, RegistryError> result{other->addMove({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			MoveRegistryConfiguration other{};
-			std::expected<MoveID, RegistryErrorInfo> result{other.removeMove(toMoveID(BuiltinMoveID::None))};
+			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
+			std::expected<MoveID, RegistryError> result{other->removeMove(toMoveID(BuiltinMoveID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			MoveRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateMove(toMoveID(BuiltinMoveID::None), {.mName = "test"}),
+			std::unique_ptr<MoveRegistryConfiguration> other{std::make_unique<MoveRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateMove(toMoveID(BuiltinMoveID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}
