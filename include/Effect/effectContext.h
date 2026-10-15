@@ -1,6 +1,6 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 10/13/2026
+	@date 10/15/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -165,9 +165,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 09/29/2026
+		@date 10/15/2026
 		@since 0.3.0
-		@version 0.12.46
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -282,7 +282,7 @@ namespace PocketCore::Effect
 
 		private:
 			/*! @brief The number of built-in multiplier identifiers represented by the position table. */
-			static constexpr std::size_t BUILTIN_MULTIPLIER_COUNT{static_cast<std::size_t>(BuiltinMultiplierID::FinalMultiplier)};
+			static constexpr std::size_t BUILTIN_MULTIPLIER_COUNT{std::to_underlying(BuiltinMultiplierID::FinalMultiplier)};
 
 			/*! @brief The owned active multipliers in their application order. */
 			std::vector<std::pair<MultiplierID, double>> mActiveMultipliers{};

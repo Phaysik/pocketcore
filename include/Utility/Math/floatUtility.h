@@ -1,6 +1,6 @@
 /*! @file floatUtility.h
 	@brief Contains the function declarations for utility functions related to floating-point numbers.
-	@date 10/14/2026
+	@date 10/15/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -59,14 +59,14 @@ namespace PocketCore::Utility::Math
 		@param[in] absEpsilon Absolute tolerance to use for near-zero comparisons. Defaults to `ABS_EPSILON`.
 		@param[in] relEpsilon Relative tolerance factor applied to the larger magnitude of the operands. Defaults to `REL_EPSILON`.
 		@return `true` if the values are considered equal within the provided tolerances; otherwise `false`.
-		@note The function is `constexpr` and `noexcept`, suitable for compile-time evaluation when used with constexpr values.
+		@note The function is `constexpr`, suitable for compile-time evaluation when used with constexpr values.
 		@since 0.1.0
-		@version 0.3.0
+		@version 0.12.51
 	*/
 	template <PocketCore::Core::FloatingPoint FloatingPoint>
 	ATTR_NODISCARD constexpr bool approximatelyEqualAbsRel(const FloatingPoint lhs, const FloatingPoint rhs,
 														   const FloatingPoint absEpsilon = ABS_EPSILON,
-														   const FloatingPoint relEpsilon = REL_EPSILON) noexcept
+														   const FloatingPoint relEpsilon = REL_EPSILON)
 	{
 		// Check if the numbers are really close -- needed when comparing numbers near zero
 		if (std::abs(lhs - rhs) <= absEpsilon)

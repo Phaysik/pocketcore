@@ -1,6 +1,6 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/09/2026
+	@date 10/15/2026
 	@since 0.9.16
 	@version 0.12.51
 	@author Matthew Moore
@@ -115,7 +115,7 @@ namespace PocketCore::Battle
 		}
 
 		// Count usable party members independently from party size because fainted Pokemon cannot start active.
-		if (healthyPokemonInParty(partyA) < activePokemonPerSide || healthyPokemonInParty(partyB) < activePokemonPerSide)
+		if (amountOfHealthyPokemonInParty(partyA) < activePokemonPerSide || amountOfHealthyPokemonInParty(partyB) < activePokemonPerSide)
 		{
 			return std::unexpected{BattleEngineError::InvalidParty};
 		}
