@@ -1,8 +1,8 @@
 /*! @file logger.cpp
 	@brief Contains the function definitions for creating a logger
-	@date 09/22/2026
+	@date 10/15/2026
 	@since 0.1.0
-	@version 0.12.42
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -112,20 +112,20 @@ namespace PocketCore::Utility::Debug::Logging
 	std::shared_ptr<spdlog::logger> &Logger::getLoggerInstance()
 	{
 		static std::shared_ptr<spdlog::logger>
-			logger; // LCOV_EXCL_BR_LINE — fourth branch is the __cxa_atexit destructor-registration failure path, only reachable on OOM
+			logger; // LCOV_EXCL_BR — fourth branch is the __cxa_atexit destructor-registration failure path, only reachable on OOM
 		return logger;
 	}
 
 	std::string &Logger::getLoggerName()
 	{
-		static std::string loggerName; // LCOV_EXCL_BR_LINE — fourth branch is the __cxa_atexit destructor-registration failure path,
+		static std::string loggerName; // LCOV_EXCL_BR — fourth branch is the __cxa_atexit destructor-registration failure path,
 									   // only reachable on OOM
 		return loggerName;
 	}
 
 	std::string &Logger::getFileNameStore()
 	{
-		static std::string fileName; // LCOV_EXCL_BR_LINE — fourth branch is the __cxa_atexit destructor-registration failure path, only
+		static std::string fileName; // LCOV_EXCL_BR — fourth branch is the __cxa_atexit destructor-registration failure path, only
 									 // reachable on OOM
 		return fileName;
 	}
