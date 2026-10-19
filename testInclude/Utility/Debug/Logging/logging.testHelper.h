@@ -23,7 +23,8 @@ namespace PocketCore::Testing
 {
 	using PocketCore::Utility::Debug::Logging::Logger;
 
-	static inline void ensureLoggerInitialized(const std::string_view loggerName, const std::string_view fileName, const bool truncateFile = true)
+	static inline void ensureLoggerInitialized(const std::string_view loggerName, const std::string_view fileName,
+											   const bool truncateFile = true)
 	{
 		static bool initialized{false};
 
