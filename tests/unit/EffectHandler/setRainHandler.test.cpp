@@ -1,8 +1,8 @@
 /*! @file setRainHandler.test.cpp
 	@brief C++ file for running tests for the SetRainHandler.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
@@ -19,6 +20,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::applySetRain;
 using PocketCore::Effect::EffectContext;
@@ -37,6 +39,7 @@ SCENARIO("SetRainHandler")
 	BattleState battleState{};
 	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources randomSources{};
 
 	WeatherID rainID{toWeatherID(BuiltinWeatherID::Rain)};
 	WeatherID hailID{toWeatherID(BuiltinWeatherID::Hail)};
@@ -46,7 +49,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("rain weather becomes active")
 			{
@@ -66,7 +69,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied again")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("rain weather remains active exactly once")
 			{
@@ -83,7 +86,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("rain weather replaces the existing weather")
 			{
@@ -101,7 +104,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the existing weather is retained and rain weather is not added")
 			{
@@ -119,7 +122,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("rain weather is added alongside the existing weather")
 			{
@@ -135,7 +138,7 @@ SCENARIO("SetRainHandler")
 
 		WHEN("rain weather is applied")
 		{
-			setRainHandler.apply(battleState, context, provider);
+			setRainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no weather becomes active")
 			{
@@ -153,8 +156,8 @@ SCENARIO("SetRainHandler")
 
 		WHEN("applied to empty active weathers")
 		{
-			setRainHandler.apply(handlerState, handlerContext, provider);
-			applySetRain(freeFunctionState, freeFunctionContext, provider);
+			setRainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetRain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("the free function yields the same active weathers as the handler")
 			{
@@ -168,8 +171,8 @@ SCENARIO("SetRainHandler")
 			handlerState.mWeatherIDs = {rainID};
 			freeFunctionState.mWeatherIDs = {rainID};
 
-			setRainHandler.apply(handlerState, handlerContext, provider);
-			applySetRain(freeFunctionState, freeFunctionContext, provider);
+			setRainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetRain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both leave sun weather active exactly once")
 			{
@@ -187,8 +190,8 @@ SCENARIO("SetRainHandler")
 			freeFunctionState.mRuleset.mMaxWeathers = 1;
 			freeFunctionState.mRuleset.mReplaceWeatherWhenFull = true;
 
-			setRainHandler.apply(handlerState, handlerContext, provider);
-			applySetRain(freeFunctionState, freeFunctionContext, provider);
+			setRainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetRain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both replace the existing weather identically")
 			{
@@ -203,8 +206,8 @@ SCENARIO("SetRainHandler")
 			handlerState.mRuleset.mMaxWeathers = 0;
 			freeFunctionState.mRuleset.mMaxWeathers = 0;
 
-			setRainHandler.apply(handlerState, handlerContext, provider);
-			applySetRain(freeFunctionState, freeFunctionContext, provider);
+			setRainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetRain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("neither activates a weather")
 			{

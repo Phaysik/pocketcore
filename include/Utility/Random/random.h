@@ -1,13 +1,13 @@
 /*! @file random.h
 	@brief Contains the function declarations for creating a random number generator
-	@date 10/14/2026
+	@date 10/19/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_UTILITY_RANDOM_H
-#define INCLUDE_UTILITY_RANDOM_H
+#ifndef INCLUDE_UTILITY_RANDOM_RANDOM_H
+#define INCLUDE_UTILITY_RANDOM_RANDOM_H
 
 #include <chrono>
 #include <concepts>
@@ -23,7 +23,7 @@
 	@version 0.1.0
 	@author Matthew Moore
 */
-namespace PocketCore::Utility
+namespace PocketCore::Utility::Random
 {
 	using PocketCore::Core::ul;
 
@@ -143,6 +143,6 @@ namespace PocketCore::Utility
 
 			static inline std::mt19937 mTwister{generate()}; /*!< The global random number generator */
 	};
-} // namespace PocketCore::Utility
+} // namespace PocketCore::Utility::Random
 
 #endif

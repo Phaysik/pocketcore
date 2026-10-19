@@ -1,8 +1,8 @@
 /*! @file battleValidation.h
 	@brief Defines validation methods for battling Pokemon and their actions.
-	@date 09/17/2026
+	@date 10/19/2026
 	@since 0.10.2
-	@version 0.12.37
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,9 +23,9 @@ namespace PocketCore::Battle
 		@details The engine reports these values through `std::expected` when validating battle startup, submitted actions, targets, and
 			replacements. A rejected request leaves the battle state unchanged.
 		@note All enum values must be handled exhaustively when reporting engine failures.
-		@date 09/17/2026
+		@date 10/19/2026
 		@since 0.10.2
-		@version 0.12.37
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	enum class BattleEngineError : ub
@@ -66,6 +66,8 @@ namespace PocketCore::Battle
 		MissingRegistry,
 		/*! @brief Indicates the selected ruleset is invalid or unsupported. */
 		InvalidRuleset,
+		/*! @brief Indicates the engine is busy processing. */
+		EngineBusy,
 	};
 
 	/*! @enum BattleResult

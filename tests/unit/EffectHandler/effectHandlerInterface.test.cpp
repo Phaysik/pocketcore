@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.test.cpp
-	@brief C++ file for running tests for the EffectHandlerInterface.
-	@date 09/16/2026
+	@brief C++ file for running tests for the IEffectHandler.
+	@date 10/19/2026
 	@since 0.8.7
-	@version 0.12.34
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Effect/effectContext.h"
@@ -18,6 +19,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::EffectContext;
@@ -36,7 +38,9 @@ SCENARIO("IEffectHandler")
 		class NoopEffectHandler final : public IEffectHandler
 		{
 			public:
-				void apply(BattleState & /*state*/, EffectContext & /*context*/, const RegistryProvider & /*provider*/) const override {}
+				void apply(BattleState & /* state */, EffectContext & /* context */, const RegistryProvider & /* provider */,
+						   const BattleRandomSources & /* randomSources */) const override
+				{}
 		};
 
 		std::unique_ptr<IEffectHandler> handler{std::make_unique<NoopEffectHandler>()};

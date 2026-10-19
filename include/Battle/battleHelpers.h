@@ -1,6 +1,6 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/18/2026
+	@date 10/19/2026
 	@since 0.9.14
 	@version 0.12.51
 	@author Matthew Moore
@@ -28,7 +28,7 @@
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
-#include "Utility/random.h"
+#include "Utility/Random/random.h"
 
 #include "battleAction.h"
 #include "battleValidation.h"
@@ -46,7 +46,7 @@ namespace PocketCore::Battle
 	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Utility::Random;
+	using PocketCore::Utility::Random::Random;
 
 	/*! @brief Returns the side opposing the supplied battle side.
 		@param[in] side The battle side to invert.
@@ -259,13 +259,13 @@ namespace PocketCore::Battle
 					double totalWeight{0.0};
 
 					std::ranges::for_each(policy.mOutcomes, [&totalWeight, isValidWeight](const WeightedHitCountOutcome &outcome) {
-						if (isValidWeight(outcome))
+						if (isValidWeight(outcome)) // LCOV_EXCL_BR (From template specification - Tested)
 						{
 							totalWeight += outcome.mWeight;
 						}
 					});
 
-					if (!std::isfinite(totalWeight) || totalWeight <= 0.0)
+					if (!std::isfinite(totalWeight) || totalWeight <= 0.0) // LCOV_EXCL_BR (From template specification - Tested)
 					{
 						return static_cast<ub>(0);
 					}
@@ -275,9 +275,9 @@ namespace PocketCore::Battle
 
 					ub result{0}; // 0 is unreachable when a valid outcome exists, kept as a fallback
 
-					for (const WeightedHitCountOutcome &outcome : policy.mOutcomes)
+					for (const WeightedHitCountOutcome &outcome : policy.mOutcomes) // LCOV_EXCL_BR (From template specification - Tested)
 					{
-						if (!isValidWeight(outcome))
+						if (!isValidWeight(outcome)) // LCOV_EXCL_BR (From template specification - Tested)
 						{
 							continue;
 						}
@@ -285,7 +285,7 @@ namespace PocketCore::Battle
 						cumulativeWeight += outcome.mWeight;
 						result = outcome.mHitCount; // tentatively the last valid seen
 
-						if (selectedWeight < cumulativeWeight)
+						if (selectedWeight < cumulativeWeight) // LCOV_EXCL_BR (From template specification - Tested)
 						{
 							break; // exact match, result already correct
 						}
@@ -471,9 +471,51 @@ namespace PocketCore::Battle
 		@param[in] moveRegistry The non-owning registry used to resolve move priorities; must not be nullptr.
 		@note Advances the shared random-number generator state. Sorting performs O(m log m) comparisons for m actions.
 		@since 0.10.7
-		@version 0.10.9
+		@version 0.10.51
 	*/
-	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry);
+	template <RandomFn<std::size_t> RandomFunc = decltype(&Random::get<std::size_t>)>
+	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry,
+								  RandomFunc &&func = &Random::get<std::size_t>)
+	{
+		RandomFunc &&randomFunc{std::forward<RandomFunc>(func)};
+		// Apply Fisher-Yates shuffling
+		for (std::size_t remaining{moves.size()}; remaining > 1; --remaining)
+		{
+			const std::size_t selected{std::invoke(randomFunc, std::size_t{0}, remaining - 1)};
+
+			std::swap(moves.at(remaining - 1), moves.at(selected));
+		}
+
+		std::ranges::stable_sort(moves, [&state, &moveRegistry](const MoveAction &left, const MoveAction &right) {
+			const BattleSlot &leftSlot{activeSlots(state, left.mSide).at(left.mUserSlotIndex)};
+			const BattleSlot &rightSlot{activeSlots(state, right.mSide).at(right.mUserSlotIndex)};
+
+			const MoveMeta *leftMove{moveRegistry->getMoveMetadata(leftSlot.mPokemon->getMoveID(left.mMoveSlotIndex))};
+			const MoveMeta *rightMove{moveRegistry->getMoveMetadata(rightSlot.mPokemon->getMoveID(right.mMoveSlotIndex))};
+
+			// Validated engine actions always have metadata; keep direct helper calls null-safe and ordered consistently.
+			if (leftMove == nullptr || rightMove == nullptr)
+			{
+				return leftMove != nullptr;
+			}
+
+			if (leftMove->mPriority != rightMove->mPriority)
+			{
+				return leftMove->mPriority > rightMove->mPriority;
+			}
+
+			// Compare as doubles without narrowing the effective speed calculation.
+			const double leftSpeed{getEffectiveSpeed(leftSlot)};
+			const double rightSpeed{getEffectiveSpeed(rightSlot)};
+
+			if (leftSpeed < rightSpeed || leftSpeed > rightSpeed)
+			{
+				return leftSpeed > rightSpeed;
+			}
+
+			return false;
+		});
+	}
 
 	/*! @brief Indents every line of a text block by two spaces.
 		@details Prepends two spaces to the start of the block and inserts two spaces after each newline, shifting every line two columns to

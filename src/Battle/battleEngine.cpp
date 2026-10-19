@@ -1,6 +1,6 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/15/2026
+	@date 10/19/2026
 	@since 0.9.16
 	@version 0.12.51
 	@author Matthew Moore
@@ -22,6 +22,7 @@
 #include "Ability/abilityMeta.h"
 #include "Battle/battleAction.h"
 #include "Battle/battleHelpers.h"
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Battle/battleValidation.h"
@@ -57,7 +58,6 @@ namespace PocketCore::Battle
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
@@ -85,6 +85,13 @@ namespace PocketCore::Battle
 																					const RulesetPolicy &ruleset,
 																					const ub activePokemonPerSide)
 	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		const ExecutionGuard executionGuard{mIsExecuting};
+
 		// Starting twice would discard live battle state, so reject the request before validating new input
 		if (mState.mBattleStarted)
 		{
@@ -169,6 +176,13 @@ namespace PocketCore::Battle
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::executeTurn(const std::span<const BattleAction> &actions)
 	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		const ExecutionGuard executionGuard{mIsExecuting};
+
 		// Reject invalid engine phases before allocating work buffers or inspecting actions
 		if (!mState.mBattleStarted)
 		{
@@ -265,7 +279,7 @@ namespace PocketCore::Battle
 		}
 
 		// Randomize exact move-order ties before applying the priority and speed ordering below.
-		handleMovePrioritization(mState, moves, mProvider->mMoveRegistry);
+		handleMovePrioritization(mState, moves, mProvider->mMoveRegistry, mRandomSources.mIndex);
 
 		// Re-check volatile battle conditions because earlier actions may have fainted or disabled a later actor.
 		std::ranges::for_each(moves, [this](const MoveAction &moveAction) {
@@ -286,11 +300,27 @@ namespace PocketCore::Battle
 		return {};
 	}
 
+	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::setRandomSources(const BattleRandomSources &randomSources) noexcept
+	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		mRandomSources = randomSources;
+		return {};
+	}
+
 #if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
 #endif
+
+	ATTR_NODISCARD ATTR_CONST const BattleRandomSources &BattleEngine::getRandomSources() const noexcept
+	{
+		return mRandomSources;
+	}
 
 	ATTR_NODISCARD ATTR_CONST const BattleState &BattleEngine::getState() const noexcept
 	{
@@ -457,7 +487,7 @@ namespace PocketCore::Battle
 			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){},
 		};
 
-		effectMeta->mApply(mState, context, *mProvider);
+		effectMeta->mApply(mState, context, *mProvider, mRandomSources);
 
 		if (mayChangeWeather && mState.mWeatherIDs != previousWeatherIDs)
 		{
@@ -574,7 +604,7 @@ namespace PocketCore::Battle
 		mActiveSuppressions.clear();
 
 		userPokemon->usePP(action.mMoveSlotIndex);
-		const ub hitCount{resolveHitCount(*moveMeta)};
+		const ub hitCount{resolveHitCount(*moveMeta, mRandomSources.mReal)};
 		const BattleTarget user{.mSide = action.mSide, .mSlotIndex = action.mUserSlotIndex};
 		EffectContext moveContext{makeMoveContext(action, *moveMeta, targetsResult->front(), 0U)};
 

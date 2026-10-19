@@ -1,8 +1,8 @@
 /*! @file targetsHandler.cpp
 	@brief Contains the targets effect handler implementation
-	@date 10/09/2026
+	@date 10/19/2026
 	@since 0.8.1
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <cassert>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/constants.h"
@@ -22,6 +23,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Battle::BattleTargetID;
 	using PocketCore::Configuration::TARGETS_HIT_MULTIPLIER_VALUE;
@@ -31,7 +33,8 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 
-	void TargetsHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const
+	void TargetsHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider,
+							   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		if (provider.mMoveRegistry == nullptr)
 		{

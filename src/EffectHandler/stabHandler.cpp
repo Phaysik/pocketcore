@@ -1,8 +1,8 @@
 /*! @file stabHandler.cpp
 	@brief Contains the stab effect handler implementation
-	@date 09/02/2026
+	@date 10/19/2026
 	@since 0.8.1
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -22,6 +23,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::STAB_HIT_MULTIPLIER_VALUE;
@@ -29,7 +31,8 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 
-	void StabHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void StabHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+							ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 

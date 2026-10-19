@@ -1,14 +1,15 @@
 /*! @file setGrassyTerrainHandler.h
 	@brief Contains the setGrassyTerrain effect handler
-	@date 10/08/2026
+	@date 10/19/2026
 	@since 0.12.43
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_SET_GRASSY_TERRAIN_HANDLER_H
 #define INCLUDE_EFFECT_SET_GRASSY_TERRAIN_HANDLER_H
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
@@ -30,9 +32,9 @@ namespace PocketCore::Effect
 	   RulesetPolicy::mReplaceTerrainWhenFull is true. Blocking interactions leave the active terrains unchanged, and grassy terrain is
 	   never inserted twice.
 		@note The handler does not inspect the effect context, but it does use the provider's terrain registry.
-		@date 10/08/2026
+		@date 10/19/2026
 		@since 0.12.43
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class SetGrassyTerrainHandler : public IEffectHandler
@@ -42,26 +44,30 @@ namespace PocketCore::Effect
 				@param[in,out] state The battle state whose active terrains and ruleset drive insertion and replacement.
 				@param[in,out] context The effect context, which is not inspected or modified.
 				@param[in] provider The registry provider whose terrain registry resolves grassy terrain's interaction metadata.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@post @p state reports grassy terrain among its active terrains unless a blocking interaction prevented insertion or the
 			   terrain list was full and @ref RulesetPolicy::mReplaceTerrainWhenFull is false.
 				@since 0.12.43
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			void apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const override;
+			void apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider,
+					   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const override;
 	};
 
 	/*! @brief Applies grassy terrain to the active terrains according to its registered interactions.
 		@param[in,out] state The battle state whose active terrains and ruleset drive insertion and replacement.
 		@param[in,out] context The effect context, which is not inspected or modified.
 		@param[in] provider The registry provider whose terrain registry resolves grassy terrain's interaction metadata.
+		@param[in] randomSources The random sources used for battle-related numeric types.
 		@post @p state reports grassy terrain among its active terrains unless a blocking interaction prevented insertion or the terrain
 	   list was full and @ref RulesetPolicy::mReplaceTerrainWhenFull is false.
 		@since 0.12.43
-		@version 0.12.43
+		@version 0.12.51
 	*/
-	inline void applySetGrassy(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applySetGrassy(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+							   const BattleRandomSources &randomSources = {})
 	{
-		SetGrassyTerrainHandler{}.apply(state, context, provider);
+		SetGrassyTerrainHandler{}.apply(state, context, provider, randomSources);
 	}
 } // namespace PocketCore::Effect
 

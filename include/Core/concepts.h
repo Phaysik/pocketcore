@@ -1,6 +1,6 @@
 /*! @file concepts.h
 	@brief Contains the declarations of common concepts that might be used in multiple files.
-	@date 10/18/2026
+	@date 10/19/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -24,32 +24,41 @@
 */
 namespace PocketCore::Core
 {
+	/*! @concept IsBoolean
+		@brief Tests whether a type is a boolean type.
+		@tparam T The type to test.
+		@since 0.12.51
+		@version 0.12.51
+	*/
+	template <typename T>
+	concept IsBoolean = std::is_same_v<bool, std::remove_cv_t<T>>;
+
 	/*! @concept Integral
 		@brief Tests whether a type is an integral type.
 		@tparam T The type to test. Typical examples: `int`, `long`, `char`.
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.12.51
 	*/
 	template <typename T>
-	concept Integral = std::is_integral_v<T>;
+	concept Integral = std::is_integral_v<T> && !IsBoolean<T>;
 
 	/*! @concept UnsignedIntegral
 		@brief Tests whether a type is an unsigned integral type.
 		@tparam T The type to test. Typical examples: `unsigned int`, `std::uint32_t`.
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.12.51
 	*/
 	template <typename T>
-	concept UnsignedIntegral = std::is_unsigned_v<T>;
+	concept UnsignedIntegral = std::is_unsigned_v<T> && !IsBoolean<T>;
 
 	/*! @concept SignedIntegral
 		@brief Tests whether a type is a signed integral type.
 		@tparam T The type to test. Typical examples: `int`, `long`.
 		@since 0.1.0
-		@version 0.1.0
+		@version 0.12.51
 	*/
 	template <typename T>
-	concept SignedIntegral = std::is_signed_v<T>;
+	concept SignedIntegral = std::is_signed_v<T> && !IsBoolean<T>;
 
 	/*! @concept FloatingPoint
 		@brief Tests whether a type is a floating-point type.
@@ -134,17 +143,18 @@ namespace PocketCore::Core
 	} && std::is_same_v<T, std::ratio<T::num, T::den>>;
 
 	/*! @concept RandomFn
-		@brief Tests whether a callable accepts two values of a specified type and returns that exact type.
-		@details Requires an lvalue of the callable type to be invocable with two arguments of @p ValueType, with an invocation result
-	   exactly matching @p ValueType.
+		@brief Tests whether a callable accepts two integral or floating-point values and returns that exact type.
+		@details Requires @p ValueType to satisfy @ref Integral or @ref FloatingPoint and an lvalue of the callable type to be invocable
+	   with two arguments of @p ValueType, with an invocation result exactly matching @p ValueType.
 		@tparam Func The callable type to test.
-		@tparam ValueType The type of each argument passed to the callable.
+		@tparam ValueType The argument and return type, which must satisfy @ref Integral or @ref FloatingPoint.
 		@since 0.12.51
 		@version 0.12.51
 	*/
 	template <typename Func, typename ValueType>
 	concept RandomFn
-		= InvocableWithArgs<Func &, ValueType, ValueType> && std::same_as<std::invoke_result_t<Func &, ValueType, ValueType>, ValueType>;
+		= InvocableWithArgs<Func &, ValueType, ValueType> && std::same_as<std::invoke_result_t<Func &, ValueType, ValueType>, ValueType>
+	   && (Integral<ValueType> || FloatingPoint<ValueType>);
 } // namespace PocketCore::Core
 
 #endif

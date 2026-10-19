@@ -1,8 +1,8 @@
 /*! @file setMistyTerrainHandler.test.cpp
 	@brief C++ file for running tests for the SetMistyTerrainHandler.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
@@ -19,6 +20,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::applySetMisty;
 using PocketCore::Effect::EffectContext;
@@ -37,6 +39,7 @@ SCENARIO("SetMistyTerrainHandler")
 	BattleState battleState{};
 	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources randomSources{};
 
 	TerrainID mistyID{toTerrainID(BuiltinTerrainID::Misty)};
 	TerrainID electricID{toTerrainID(BuiltinTerrainID::Electric)};
@@ -46,7 +49,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("misty terrain becomes active")
 			{
@@ -66,7 +69,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied again")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("misty terrain remains active exactly once")
 			{
@@ -83,7 +86,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("misty terrain replaces the existing terrain")
 			{
@@ -101,7 +104,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the existing terrain is retained and misty terrain is not added")
 			{
@@ -119,7 +122,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("misty terrain is added alongside the existing terrain")
 			{
@@ -135,7 +138,7 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider);
+			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no terrain becomes active")
 			{
@@ -153,8 +156,8 @@ SCENARIO("SetMistyTerrainHandler")
 
 		WHEN("applied to empty active terrains")
 		{
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider);
+			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("the free function yields the same active terrains as the handler")
 			{
@@ -168,8 +171,8 @@ SCENARIO("SetMistyTerrainHandler")
 			handlerState.mTerrainIDs = {mistyID};
 			freeFunctionState.mTerrainIDs = {mistyID};
 
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider);
+			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both leave psychic terrain active exactly once")
 			{
@@ -187,8 +190,8 @@ SCENARIO("SetMistyTerrainHandler")
 			freeFunctionState.mRuleset.mMaxTerrains = 1;
 			freeFunctionState.mRuleset.mReplaceTerrainWhenFull = true;
 
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider);
+			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both replace the existing terrain identically")
 			{
@@ -203,8 +206,8 @@ SCENARIO("SetMistyTerrainHandler")
 			handlerState.mRuleset.mMaxTerrains = 0;
 			freeFunctionState.mRuleset.mMaxTerrains = 0;
 
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider);
+			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("neither activates a terrain")
 			{

@@ -1,12 +1,12 @@
 /*! @file random.test.cpp
 	@brief Catch2 unit tests for `Utility::Random` utilities.
-	@date 10/18/2026
+	@date 10/19/2026
 	@version 0.8.7
 	@since 0.12.51
 	@author Matthew Moore
 */
 
-#include "Utility/random.h"
+#include "Utility/Random/random.h"
 
 #include <cstddef>
 
@@ -19,7 +19,7 @@
 using PocketCore::Core::sb;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
-using PocketCore::Utility::Random;
+using PocketCore::Utility::Random::Random;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,bugprone-random-generator-seed,cert-msc51-cpp,cert-msc32-c,readability-function-cognitive-complexity)
 

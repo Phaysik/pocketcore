@@ -1,8 +1,8 @@
 /*! @file abilityHelpers.h
 	@brief Houses free functions that aide in handling abilities.
-	@date 09/12/2026
+	@date 10/19/2026
 	@since 0.12.26
-	@version 0.12.27
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -14,7 +14,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/abilityRegistry.h"
-#include "Utility/random.h"
+#include "Utility/Random/random.h"
 
 #include "abilityID.h"
 #include "builtInAbilityID.h"
@@ -23,7 +23,7 @@ namespace PocketCore::Ability
 {
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Ability::AbilityRegistry;
-	using PocketCore::Utility::Random;
+	using PocketCore::Utility::Random::Random;
 
 	/*! @brief Gets a random ability ID from the built-in abilitys.
 		@return The random ability ID.

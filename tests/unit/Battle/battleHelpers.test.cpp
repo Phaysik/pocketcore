@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/18/2026
+	@date 10/19/2026
 	@since 0.12.45
 	@version 0.12.51
 	@author Matthew Moore
@@ -39,8 +39,7 @@
 #include "Status/volatileStatus.h"
 #include "Type/builtInTypeID.h"
 #include "Utility/Math/floatUtility.h"
-#include "Utility/random.h"
-#include "Utility/random.testHelper.h"
+#include "Utility/Random/random.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -104,7 +103,6 @@ using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Utility::Math::approximatelyEqualAbsRel;
-using PocketCore::Utility::Random;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

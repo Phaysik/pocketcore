@@ -1,6 +1,6 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 10/18/2026
+	@date 10/19/2026
 	@since 0.9.14
 	@version 0.12.51
 	@author Matthew Moore
@@ -31,14 +31,12 @@
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "Effect/effectSourceAndSuppression.h"
-#include "Move/moveHitPolicy.h"
 #include "Move/moveMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonHelpers.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
 #include "Status/statusID.h"
-#include "Utility/random.h"
 
 namespace PocketCore::Battle
 {
@@ -51,15 +49,12 @@ namespace PocketCore::Battle
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectSource;
 	using PocketCore::Effect::Side;
-	using PocketCore::Move::FixedHitCount;
 	using PocketCore::Move::MoveMeta;
-	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::printPokemonWithNames;
 	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Status::StatusID;
-	using PocketCore::Utility::Random;
 
 #if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
@@ -554,40 +549,6 @@ namespace PocketCore::Battle
 				}
 			},
 			action);
-	}
-
-	void handleMovePrioritization(const BattleState &state, std::vector<MoveAction> &moves, const MoveRegistry *moveRegistry)
-	{
-		std::shuffle(moves.begin(), moves.end(), Random::getTwister());
-		std::ranges::stable_sort(moves, [&state, &moveRegistry](const MoveAction &left, const MoveAction &right) {
-			const BattleSlot &leftSlot{activeSlots(state, left.mSide).at(left.mUserSlotIndex)};
-			const BattleSlot &rightSlot{activeSlots(state, right.mSide).at(right.mUserSlotIndex)};
-
-			const MoveMeta *leftMove{moveRegistry->getMoveMetadata(leftSlot.mPokemon->getMoveID(left.mMoveSlotIndex))};
-			const MoveMeta *rightMove{moveRegistry->getMoveMetadata(rightSlot.mPokemon->getMoveID(right.mMoveSlotIndex))};
-
-			// Validated engine actions always have metadata; keep direct helper calls null-safe and ordered consistently.
-			if (leftMove == nullptr || rightMove == nullptr)
-			{
-				return leftMove != nullptr;
-			}
-
-			if (leftMove->mPriority != rightMove->mPriority)
-			{
-				return leftMove->mPriority > rightMove->mPriority;
-			}
-
-			// Compare as doubles without narrowing the effective speed calculation.
-			const double leftSpeed{getEffectiveSpeed(leftSlot)};
-			const double rightSpeed{getEffectiveSpeed(rightSlot)};
-
-			if (leftSpeed < rightSpeed || leftSpeed > rightSpeed)
-			{
-				return leftSpeed > rightSpeed;
-			}
-
-			return false;
-		});
 	}
 
 	std::string indentBlock(const std::string &block)

@@ -1,8 +1,8 @@
 /*! @file effectMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.10.0
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <string>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/builtInEffectID.h"
 #include "Effect/effectContext.h"
@@ -20,12 +21,13 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Registry::RegistryProvider;
 
-	using EffectFunction = void (*)(BattleState &, EffectContext &, const RegistryProvider &);
+	using EffectFunction = void (*)(BattleState &, EffectContext &, const RegistryProvider &, const BattleRandomSources &);
 
 	/*! @struct EffectMeta Effect/effectMeta.h
 		@brief Stores one effect's stable ID, display name, and owned trigger definitions.

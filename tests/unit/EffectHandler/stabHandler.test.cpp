@@ -1,6 +1,6 @@
 /*! @file stabHandler.test.cpp
 	@brief C++ file for running tests for the StabHandler.
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.8.7
 	@version 0.12.51
 	@author Matthew Moore
@@ -8,6 +8,7 @@
 
 #include "EffectHandler/stabHandler.h"
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Core/typedefs.h"
@@ -21,6 +22,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Core::ub;
 using PocketCore::Effect::EffectContext;
@@ -42,6 +44,7 @@ SCENARIO("StabHandler")
 	StabHandler stabHandler{};
 	RegistryProvider provider{};
 	EffectContext context{makeEffectContext({.mMoveTypeID = toTypeID(BuiltinTypeID::Fire), .mUserIndex = 0, .mUserSide = Side::A})};
+	BattleRandomSources randomSources{};
 
 	GIVEN("a user Pokemon with a matching move type")
 	{
@@ -51,7 +54,7 @@ SCENARIO("StabHandler")
 
 		WHEN("applying STAB handling")
 		{
-			stabHandler.apply(battleState, context, provider);
+			stabHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the STAB multiplier is recorded")
 			{
@@ -68,7 +71,7 @@ SCENARIO("StabHandler")
 
 		WHEN("applying STAB handling")
 		{
-			stabHandler.apply(battleState, context, provider);
+			stabHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the STAB multiplier is not recorded")
 			{

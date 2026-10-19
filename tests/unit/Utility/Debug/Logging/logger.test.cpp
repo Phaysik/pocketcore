@@ -2,19 +2,17 @@
 	@brief Catch2 BDD unit tests for the static Logger wrapper.
 	@details Exercises initialization, level get/set, name/file replacement, and all seven logging-level template methods using Catch2's BDD
    syntax. Each test scenario manages temporary files that are cleaned up after the scenario completes.
-	@date 08/03/2026
+	@date 10/19/2026
 	@since 0.1.0
-	@version 0.9.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Utility/Debug/Logging/logger.h"
 
 #include <filesystem>
-#include <fstream>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -22,6 +20,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Utility/Debug/Logging/constants.h"
+#include "Utility/Debug/Logging/logging.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 #include <spdlog/common.h>
@@ -34,29 +33,9 @@ namespace Logging = PocketCore::Utility::Debug::Logging;
 using Logging::Logger;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::Testing::readLogFile;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity,llvm-prefer-static-over-anonymous-namespace)
-
-namespace
-{
-	/*! @brief Flushes spdlog and reads the full contents of a log file.
-		@param fileName Optional path to a specific log file. If nullptr, uses the default test log file.
-		@return The file contents as a string.
-		@since 0.1.0
-		@version 0.1.5
-	*/
-	ATTR_NODISCARD std::string readLogFile(const std::string *fileName = nullptr)
-	{
-		std::string defaultFileName{"logger_test_output.log"};
-		// Flush spdlog to ensure all output is written before reading
-		spdlog::apply_all([](const std::shared_ptr<spdlog::logger> &logger) { logger->flush(); });
-
-		std::ifstream file(fileName != nullptr ? *fileName : defaultFileName);
-		std::ostringstream contents;
-		contents << file.rdbuf();
-		return contents.str();
-	}
-} // namespace
 
 SCENARIO("Logger")
 {
@@ -536,7 +515,7 @@ SCENARIO("Logger")
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 			const std::string_view arg{"x"};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::info("{} {}", arg)), std::runtime_error);
+			CHECK(Logger::info("{} {}", arg).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -547,7 +526,7 @@ SCENARIO("Logger")
 			const std::string_view arg1{"a"};
 			const std::string_view arg2{"b"};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::info("{} {} {}", arg1, arg2)), std::runtime_error);
+			CHECK(Logger::info("{} {} {}", arg1, arg2).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -557,7 +536,7 @@ SCENARIO("Logger")
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 			const ub arg{1};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::info("{} {}", arg)), std::runtime_error);
+			CHECK(Logger::info("{} {}", arg).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -567,7 +546,7 @@ SCENARIO("Logger")
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 			const std::string_view arg{"x"};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {}", arg)), std::runtime_error);
+			CHECK(Logger::warn("{} {}", arg).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -578,7 +557,7 @@ SCENARIO("Logger")
 			const std::string_view arg1{"a"};
 			const std::string_view arg2{"b"};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {} {}", arg1, arg2)), std::runtime_error);
+			CHECK(Logger::warn("{} {} {}", arg1, arg2).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -589,7 +568,7 @@ SCENARIO("Logger")
 			const ub userID{1};
 			const std::string_view name{"x"};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {} {}", userID, name)), std::runtime_error);
+			CHECK(Logger::warn("{} {} {}", userID, name).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -600,7 +579,7 @@ SCENARIO("Logger")
 			const ub id1{1};
 			const ub id2{2};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {} {}", id1, id2)), std::runtime_error);
+			CHECK(Logger::warn("{} {} {}", id1, id2).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -610,7 +589,7 @@ SCENARIO("Logger")
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 			const ub userID{1};
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {} {}", 20UL, userID)), std::runtime_error);
+			CHECK(Logger::warn("{} {} {}", 20UL, userID).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -791,7 +770,7 @@ SCENARIO("Logger")
 		{
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::log(spdlog::level::info, "{} {}", 77)), std::runtime_error);
+			CHECK(Logger::log(spdlog::level::info, "{} {}", 77).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -801,7 +780,7 @@ SCENARIO("Logger")
 			Logger::setLevel(spdlog::level::trace);
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::trace("{} {}", 42)), std::runtime_error);
+			CHECK(Logger::trace("{} {}", 42).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 			Logger::setLevel(spdlog::level::info);
@@ -812,7 +791,7 @@ SCENARIO("Logger")
 			Logger::setLevel(spdlog::level::debug);
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::debug("{} {}", "hello")), std::runtime_error);
+			CHECK(Logger::debug("{} {}", "hello").has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 			Logger::setLevel(spdlog::level::info);
@@ -822,7 +801,7 @@ SCENARIO("Logger")
 		{
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::info("{} {}", 100)), std::runtime_error);
+			CHECK(Logger::info("{} {}", 100).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -831,7 +810,7 @@ SCENARIO("Logger")
 		{
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::warn("{} {}", 3.14)), std::runtime_error);
+			CHECK(Logger::warn("{} {}", 3.14).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -840,7 +819,7 @@ SCENARIO("Logger")
 		{
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::error("{} {}", "failure")), std::runtime_error);
+			CHECK(Logger::error("{} {}", "failure").has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -849,7 +828,7 @@ SCENARIO("Logger")
 		{
 			spdlog::set_error_handler([] ATTR_NORETURN(const std::string &msg) { throw std::runtime_error(msg); });
 
-			CHECK_THROWS_AS(static_cast<void>(Logger::critical("{} {}", 999)), std::runtime_error);
+			CHECK(Logger::critical("{} {}", 999).has_value());
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}

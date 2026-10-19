@@ -1,6 +1,6 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.8.7
 	@version 0.12.51
 	@author Matthew Moore
@@ -11,6 +11,7 @@
 #include <limits>
 
 #include "Ability/abilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Core/typedefs.h"
@@ -25,6 +26,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Ability::NO_ABILITY_ID;
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Core::us;
 using PocketCore::Effect::BaseDamageHandler;
@@ -44,6 +46,7 @@ SCENARIO("BaseDamageHandler")
 {
 	BaseDamageHandler baseDamageHandler{};
 	RegistryProvider provider{};
+	BattleRandomSources randomSources{};
 
 	GIVEN("invalid pokemon pointers")
 	{
@@ -57,7 +60,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since no valid user")
 				{
@@ -76,7 +79,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since no valid target")
 				{
@@ -97,7 +100,7 @@ SCENARIO("BaseDamageHandler")
 
 		WHEN("base damage is applied before external modifiers")
 		{
-			baseDamageHandler.apply(battleState, context, provider);
+			baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the initial damage returns 0 since no move base power")
 			{
@@ -127,7 +130,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since non-finite attack")
 				{
@@ -150,7 +153,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since non-finite defense")
 				{
@@ -178,7 +181,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since the attack was below 0")
 				{
@@ -198,7 +201,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage returns 0 since the attack was 0")
 				{
@@ -221,7 +224,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -238,7 +241,7 @@ SCENARIO("BaseDamageHandler")
 
 			WHEN("base damage is applied before external modifiers")
 			{
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -266,7 +269,7 @@ SCENARIO("BaseDamageHandler")
 			{
 				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -281,7 +284,7 @@ SCENARIO("BaseDamageHandler")
 						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the increased defense stat stages are ignored")
 				{
@@ -303,7 +306,7 @@ SCENARIO("BaseDamageHandler")
 			{
 				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -318,7 +321,7 @@ SCENARIO("BaseDamageHandler")
 						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
 				{
@@ -340,7 +343,7 @@ SCENARIO("BaseDamageHandler")
 			{
 				EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -355,7 +358,7 @@ SCENARIO("BaseDamageHandler")
 						{.mDamage = {.mIsCritical = true}, .mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the base damage does not change")
 				{
@@ -379,7 +382,7 @@ SCENARIO("BaseDamageHandler")
 					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -399,7 +402,7 @@ SCENARIO("BaseDamageHandler")
 					}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the increased defense stat stages are ignored")
 				{
@@ -423,7 +426,7 @@ SCENARIO("BaseDamageHandler")
 					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -443,7 +446,7 @@ SCENARIO("BaseDamageHandler")
 					}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the increased defense stat stages and lowered attack stat stages are ignored")
 				{
@@ -467,7 +470,7 @@ SCENARIO("BaseDamageHandler")
 					makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B, .mIsSpecial = true}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the initial damage calculation follows each floor boundary")
 				{
@@ -487,7 +490,7 @@ SCENARIO("BaseDamageHandler")
 					}),
 				};
 
-				baseDamageHandler.apply(battleState, context, provider);
+				baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the base damage does not change")
 				{
@@ -508,7 +511,7 @@ SCENARIO("BaseDamageHandler")
 
 		WHEN("base damage is applied before external modifiers")
 		{
-			baseDamageHandler.apply(battleState, context, provider);
+			baseDamageHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the initial damage calculation saturates at the largest representable value")
 			{

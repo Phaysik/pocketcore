@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -30,7 +30,7 @@
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
-#include "Utility/random.h"
+#include "Utility/Random/random.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
@@ -63,7 +63,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::SetLevelEncounter;
-	using PocketCore::Utility::Random;
+	using PocketCore::Utility::Random::Random;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Move::MoveError;

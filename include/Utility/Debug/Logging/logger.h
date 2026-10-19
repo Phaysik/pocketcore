@@ -1,6 +1,6 @@
 /*! @file logger.h
 	@brief Contains the function declarations for a static logging wrapper around spdlog.
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -9,12 +9,14 @@
 #ifndef INCLUDE_UTILITY_DEBUG_LOGGING_LOGGER_H
 #define INCLUDE_UTILITY_DEBUG_LOGGING_LOGGER_H
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <utility>
 
 #include "Core/attributeMacros.h"
+#include "Core/concepts.h"
 #include "Utility/Debug/Logging/constants.h"
 
 #include <spdlog/logger.h>
@@ -26,6 +28,8 @@
 */
 namespace PocketCore::Utility::Debug::Logging
 {
+	using PocketCore::Core::InvocableNoArgs;
+
 	/*! @class Logger logger.h "include/Utility/Debug/Logging/logger.h"
 		@brief A static-only wrapper around spdlog that provides global logging through deferred initialization.
 		@details All constructors, copy/move operators, and the destructor are deleted to prevent instantiation. Call @ref initialize before
@@ -158,11 +162,9 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->log(level, fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData([&logger, &format, &args..., level] {
+						logger->log(level, fmt::runtime(format), std::forward<Args>(args)...);
+					})) // LCOV_EXCL_BR
 				{
 					return LOG_LOG_FAILURE;
 				}
@@ -183,11 +185,8 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->trace(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData(
+						[&logger, &format, &args...] { logger->trace(fmt::runtime(format), std::forward<Args>(args)...); })) // LCOV_EXCL_BR
 				{
 					return TRACE_LOG_FAILURE;
 				}
@@ -208,11 +207,8 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->debug(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData(
+						[&logger, &format, &args...] { logger->debug(fmt::runtime(format), std::forward<Args>(args)...); })) // LCOV_EXCL_BR
 				{
 					return DEBUG_LOG_FAILURE;
 				}
@@ -233,11 +229,8 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->info(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData(
+						[&logger, &format, &args...] { logger->info(fmt::runtime(format), std::forward<Args>(args)...); })) // LCOV_EXCL_BR
 				{
 					return INFO_LOG_FAILURE;
 				}
@@ -258,11 +251,8 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->warn(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData(
+						[&logger, &format, &args...] { logger->warn(fmt::runtime(format), std::forward<Args>(args)...); })) // LCOV_EXCL_BR
 				{
 					return WARN_LOG_FAILURE;
 				}
@@ -283,11 +273,8 @@ namespace PocketCore::Utility::Debug::Logging
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
 
-				try
-				{
-					logger->error(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData(
+						[&logger, &format, &args...] { logger->error(fmt::runtime(format), std::forward<Args>(args)...); })) // LCOV_EXCL_BR
 				{
 					return ERROR_LOG_FAILURE;
 				}
@@ -307,12 +294,9 @@ namespace PocketCore::Utility::Debug::Logging
 			ATTR_NODISCARD static std::optional<std::string_view> critical(const std::string_view format, Args &&...args)
 			{
 				const std::shared_ptr<spdlog::logger> &logger = getLoggerInstance();
-
-				try
-				{
-					logger->critical(fmt::runtime(format), std::forward<Args>(args)...);
-				}
-				catch (const spdlog::spdlog_ex &ex)
+				if (!logData([&logger, &format, &args...] {
+						logger->critical(fmt::runtime(format), std::forward<Args>(args)...);
+					})) // LCOV_EXCL_BR
 				{
 					return CRITICAL_LOG_FAILURE;
 				}
@@ -322,6 +306,30 @@ namespace PocketCore::Utility::Debug::Logging
 
 		private:
 			// MARK: Private Static Member Functions
+
+			/*! @brief Invokes a logging operation synchronously and translates spdlog exceptions into failure.
+				@tparam Func The callable type accepting no arguments.
+				@param[in] func The operation to invoke; references captured by it must remain valid for this call.
+				@return True on success, or false when the operation throws an exception.
+				@note Exceptions of other types propagate to the caller.
+				@since 0.12.51
+				@version 0.12.51
+			*/
+			template <typename Func>
+				requires InvocableNoArgs<Func &>
+			ATTR_NODISCARD static bool logData(Func &&func)
+			{
+				try
+				{
+					std::invoke(std::forward<Func>(func));
+				}
+				catch (...)
+				{
+					return false;
+				}
+
+				return true;
+			}
 
 			/*! @brief Provides access to the function-local static spdlog logger instance.
 				@return A reference to the shared pointer holding the spdlog logger. The reference remains valid for the lifetime of the

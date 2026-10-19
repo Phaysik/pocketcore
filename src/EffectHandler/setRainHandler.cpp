@@ -1,8 +1,8 @@
 /*! @file setRainHandler.cpp
 	@brief Contains the set rain effect handler implementation
-	@date 10/08/2026
+	@date 10/19/2026
 	@since 0.10.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -12,6 +12,7 @@
 #include <expected>
 #include <optional>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
@@ -26,6 +27,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Interaction::InteractionApplicationError;
@@ -35,7 +37,8 @@ namespace PocketCore::Effect
 	using PocketCore::Weather::toWeatherID;
 	using PocketCore::Weather::WeatherMeta;
 
-	void SetRainHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider) const
+	void SetRainHandler::apply(BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context, const RegistryProvider &provider,
+							   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		const std::expected<void, InteractionApplicationError> result{
 			applyInteractions(toWeatherID(BuiltinWeatherID::Rain), NO_WEATHER_ID, *provider.mWeatherRegistry, state.mWeatherIDs,

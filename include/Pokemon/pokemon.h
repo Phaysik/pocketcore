@@ -1,6 +1,6 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -36,7 +36,6 @@
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Type/typeID.h"
-#include "Utility/random.h"
 #include "Validation/Pokemon/pokemonError.h"
 #include "Validation/Pokemon/pokemonValidation.h"
 
@@ -81,7 +80,6 @@ namespace PocketCore::Pokemon
 	using PocketCore::Status::StatusID;
 	using PocketCore::Status::StatusMeta;
 	using PocketCore::Type::TypeID;
-	using PocketCore::Utility::Random;
 	using PocketCore::Validation::Pokemon::isValidPokemonEV;
 	using PocketCore::Validation::Pokemon::isValidPokemonEVArray;
 	using PocketCore::Validation::Pokemon::isValidPokemonIV;

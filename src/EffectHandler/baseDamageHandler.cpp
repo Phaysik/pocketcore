@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.cpp
 	@brief Contains the base damage effect handler implementation
-	@date 09/11/2026
+	@date 10/19/2026
 	@since 0.7.2
-	@version 0.12.23
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <cmath>
 #include <limits>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/cache.h"
 #include "Core/attributeMacros.h"
@@ -25,6 +26,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::BASE_DAMAGE_DIVISOR;
@@ -36,7 +38,8 @@ namespace PocketCore::Effect
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Registry::RegistryProvider;
 
-	void BaseDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void BaseDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+								  ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};

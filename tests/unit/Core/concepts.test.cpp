@@ -1,6 +1,6 @@
 /*! @file concepts.test.cpp
 	@brief C++ file for creating tests for validating custom concepts.
-	@date 10/18/2026
+	@date 10/19/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -22,6 +22,7 @@ using PocketCore::Core::FloatingPoint;
 using PocketCore::Core::Integral;
 using PocketCore::Core::InvocableNoArgs;
 using PocketCore::Core::InvocableWithArgs;
+using PocketCore::Core::IsBoolean;
 using PocketCore::Core::IsEnum;
 using PocketCore::Core::RandomFn;
 using PocketCore::Core::Ratio;
@@ -38,7 +39,7 @@ using PocketCore::Core::UnsignedIntegral;
 
 // Compile-time sanity checks (will fail to compile if concepts change unexpectedly)
 static_assert(Integral<si>);
-static_assert(Integral<bool>);
+static_assert(!Integral<bool>);
 static_assert(FloatingPoint<double>);
 static_assert(!FloatingPoint<si>);
 static_assert(RationalNumber<si>);
@@ -51,6 +52,27 @@ static_assert(!String<const char *>);
 
 SCENARIO("Concepts")
 {
+	GIVEN("IsBoolean")
+	{
+		GIVEN("Basic boolean value")
+		{
+			THEN("It should satisfy the IsBoolean concept")
+			{
+				REQUIRE(IsBoolean<bool>);
+			}
+		}
+
+		GIVEN("Non-boolean types")
+		{
+			THEN("They should not satisfy the IsBoolean concept")
+			{
+				REQUIRE_FALSE(IsBoolean<double>);
+				REQUIRE_FALSE(IsBoolean<int>);
+				REQUIRE_FALSE(IsBoolean<std::string>);
+			}
+		}
+	}
+
 	GIVEN("Integral")
 	{
 		GIVEN("Basic integral types")
@@ -59,7 +81,6 @@ SCENARIO("Concepts")
 			{
 				REQUIRE(Integral<si>);
 				REQUIRE(Integral<ul>);
-				REQUIRE(Integral<bool>);
 			}
 		}
 
@@ -67,6 +88,7 @@ SCENARIO("Concepts")
 		{
 			THEN("They should not satisfy the Integral concept")
 			{
+				REQUIRE_FALSE(Integral<bool>);
 				REQUIRE_FALSE(Integral<double>);
 				REQUIRE_FALSE(Integral<std::string>);
 			}
@@ -99,6 +121,7 @@ SCENARIO("Concepts")
 		{
 			THEN("They should not satisfy the UnsignedIntegral concept")
 			{
+				REQUIRE_FALSE(Integral<bool>);
 				REQUIRE_FALSE(UnsignedIntegral<double>);
 				REQUIRE_FALSE(UnsignedIntegral<std::string>);
 			}
@@ -131,6 +154,7 @@ SCENARIO("Concepts")
 		{
 			THEN("They should not satisfy the UnsignedIntegral concept")
 			{
+				REQUIRE_FALSE(Integral<bool>);
 				REQUIRE_FALSE(UnsignedIntegral<double>);
 				REQUIRE_FALSE(UnsignedIntegral<std::string>);
 			}
@@ -166,7 +190,6 @@ SCENARIO("Concepts")
 			{
 				REQUIRE(RationalNumber<si>);
 				REQUIRE(RationalNumber<double>);
-				REQUIRE(RationalNumber<bool>);
 			}
 		}
 
@@ -337,7 +360,9 @@ SCENARIO("Concepts")
 			THEN("they should satisfy the RandomFn concept")
 			{
 				REQUIRE(RandomFn<std::function<double(double, double)>, double>);
+				REQUIRE(RandomFn<std::function<int(int, int)>, int>);
 				REQUIRE(RandomFn<decltype([](double, double) { return 1.0; }), double>);
+				REQUIRE(RandomFn<decltype([](int, int) { return 1; }), int>);
 			}
 		}
 
@@ -345,6 +370,7 @@ SCENARIO("Concepts")
 		{
 			THEN("they should not satisfy the RandomFn concept")
 			{
+				REQUIRE_FALSE(RandomFn<std::function<std::string(std::string, std::string)>, std::string>);
 				REQUIRE_FALSE(RandomFn<std::function<float(double, double)>, double>);
 				REQUIRE_FALSE(RandomFn<std::function<void(double, double)>, double>);
 				REQUIRE_FALSE(RandomFn<std::function<double(std::string, std::string)>, double>);

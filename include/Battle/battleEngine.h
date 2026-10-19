@@ -1,6 +1,6 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/13/2026
+	@date 10/19/2026
 	@since 0.10.3
 	@version 0.12.51
 	@author Matthew Moore
@@ -30,6 +30,7 @@
 
 #include "battleAction.h"
 #include "battleHelpers.h"
+#include "battleRandomSources.h"
 #include "battleState.h"
 #include "battleTargetsAndTriggers.h"
 #include "battleValidation.h"
@@ -50,6 +51,60 @@ namespace PocketCore::Battle
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Ruleset::RulesetPolicy;
 
+	/*! @class ExecutionGuard Battle/battleEngine.h
+		@brief Marks an execution scope as active and clears its flag when the scope exits.
+		@details Sets a borrowed flag on construction and clears it on destruction, including during exception unwinding.
+		@warning Not thread-safe. The caller must synchronize access to the flag and reject overlapping execution before constructing a
+	   guard.
+		@note The guard is neither copyable nor movable and does not restore the flag's previous value.
+		@date 10/19/2026
+		@since 0.12.51
+		@version 0.12.51
+		@author Matthew Moore
+	*/
+	class ExecutionGuard
+	{
+		public:
+			/*! @brief Marks the borrowed execution flag as active without throwing.
+				@param[in,out] executing The non-owning flag reference, which must outlive this guard.
+				@pre @p executing is false, and no other guard controls the same flag.
+				@post @p executing is true.
+				@date 10/19/2026
+				@since 0.12.51
+				@version 0.12.51
+				@author Matthew Moore
+			*/
+			explicit ExecutionGuard(bool &executing) noexcept : mExecuting(executing)
+			{
+				mExecuting = true;
+			}
+
+			/*! @brief Clears the borrowed execution flag without throwing.
+				@post The flag referenced by @ref mExecuting is false.
+				@date 10/19/2026
+				@since 0.12.51
+				@version 0.12.51
+				@author Matthew Moore
+			*/
+			~ExecutionGuard() noexcept
+			{
+				mExecuting = false;
+			}
+
+			/*! @brief Prevents copying responsibility for clearing the execution flag. */
+			ExecutionGuard(const ExecutionGuard &) = delete;
+			/*! @brief Prevents copy assignment of execution-flag responsibility. */
+			ExecutionGuard &operator=(const ExecutionGuard &) = delete;
+			/*! @brief Prevents moving responsibility for clearing the execution flag. */
+			ExecutionGuard(ExecutionGuard &&) = delete;
+			/*! @brief Prevents move assignment of execution-flag responsibility. */
+			ExecutionGuard &operator=(ExecutionGuard &&) = delete;
+
+		private:
+			/*! @brief Borrows the execution flag, which must remain valid until this guard is destroyed. */
+			bool &mExecuting;
+	};
+
 	/*! @class BattleEngine Battle/battleEngine_copy.h
 		@brief Orchestrates turns, switching, targeting, and metadata triggers for two sides of Pokemon trainers.
 		@details The engine owns only its @ref BattleState and uses registered effect metadata to apply effects. Party Pokemon, the
@@ -57,7 +112,7 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 10/09/2026
+		@date 10/19/2026
 		@since 0.10.3
 		@version 0.12.51
 		@author Matthew Moore
@@ -68,13 +123,15 @@ namespace PocketCore::Battle
 			/*! @brief Constructs an engine bound to the registries used for metadata lookup and effect execution.
 				@param[in] provider The registry bundle used to resolve move, ability, item, and nature metadata.
 				@param[in] effectRegistry The registry mapping built-in effect identifiers to their apply functions.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@pre Both registries must outlive the engine because they are stored as non-owning references.
 				@note The engine starts with no battle in progress; call @ref startBattle before executing turns.
 				@since 0.10.3
 				@version 0.12.10
 			*/
-			explicit BattleEngine(const RegistryProvider &provider, const EffectRegistry &effectRegistry) noexcept
-				: mProvider(&provider), mEffectRegistry(&effectRegistry)
+			explicit BattleEngine(const RegistryProvider &provider, const EffectRegistry &effectRegistry,
+								  const BattleRandomSources &randomSources = {}) noexcept
+				: mRandomSources(randomSources), mProvider(&provider), mEffectRegistry(&effectRegistry)
 			{}
 
 			/*! @brief Prevents copying an engine because its battle state and suppression scopes are not shareable.
@@ -128,9 +185,28 @@ namespace PocketCore::Battle
 				@param[in] actions The move and switch choices submitted by both trainers.
 				@return Void on success, or the first validation error before the state is mutated.
 				@since 0.10.7
-				@version 0.12.50
+				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<void, BattleEngineError> executeTurn(const std::span<const BattleAction> &actions);
+
+			/*! @brief Replaces the random sources used by the engine.
+				@param[in] randomSources Configuration to copy. Its random sources are non-owning references and must outlive their use by
+			   this engine.
+				@date 10/19/2026
+				@since 0.12.51
+				@version 0.12.51
+				@author Matthew Moore
+			*/
+			ATTR_NODISCARD std::expected<void, BattleEngineError> setRandomSources(const BattleRandomSources &randomSources) noexcept;
+
+			/*! @brief Returns the random-source configuration used by the engine.
+				@return A read-only reference to the configuration, valid for the lifetime of the engine.
+				@date 10/19/2026
+				@since 0.12.51
+				@version 0.12.51
+				@author Matthew Moore
+			*/
+			ATTR_NODISCARD ATTR_CONST const BattleRandomSources &getRandomSources() const noexcept;
 
 			/*! @brief Returns the engine-owned battle state.
 				@return A read-only reference valid for the lifetime of the engine.
@@ -285,7 +361,7 @@ namespace PocketCore::Battle
 			   Missing metadata or invalidated targets cancel execution without reporting an error.
 				@param[in] action The validated move action to execute.
 				@since 0.10.7
-				@version 0.12.50
+				@version 0.12.51
 			*/
 			void executeMove(const MoveAction &action);
 
@@ -468,6 +544,9 @@ namespace PocketCore::Battle
 			/*! @brief Owns the parties, active slots, and mutable conditions for the current battle. */
 			BattleState mState{};
 
+			/*! @brief Holds the random sources used for battle-related numeric types. */
+			BattleRandomSources mRandomSources;
+
 			/*! @brief Stores suppression rules active in the current standalone trigger, move, target, or hit scope. */
 			std::vector<ActiveSuppression> mActiveSuppressions{};
 
@@ -486,6 +565,9 @@ namespace PocketCore::Battle
 
 			/*! @brief Records which category of external input the engine currently accepts. */
 			BattlePhase mPhase{BattlePhase::NotStarted};
+
+			/*! @brief States whether or not the engine is actively running. */
+			bool mIsExecuting{false};
 	};
 } // namespace PocketCore::Battle
 

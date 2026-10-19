@@ -1,8 +1,8 @@
 /*! @file statusRemoveHandler.cpp
 	@brief Contains the status remove effect handler implementation
-	@date 08/28/2026
+	@date 10/19/2026
 	@since 0.10.0
-	@version 0.12.9
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <cassert>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -20,12 +21,14 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::RegistryProvider;
 
 	void StatusRemoveHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context,
-									ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+									ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+									ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{}
 } // namespace PocketCore::Effect
