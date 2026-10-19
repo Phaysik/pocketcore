@@ -135,7 +135,8 @@ namespace PocketCore::Core
 
 	/*! @concept RandomFn
 		@brief Tests whether a callable accepts two values of a specified type and returns that exact type.
-		@details Requires an lvalue of the callable type to be invocable with two arguments of @p ValueType, with an invocation result exactly matching @p ValueType.
+		@details Requires an lvalue of the callable type to be invocable with two arguments of @p ValueType, with an invocation result
+	   exactly matching @p ValueType.
 		@tparam Func The callable type to test.
 		@tparam ValueType The type of each argument passed to the callable.
 		@since 0.12.51
