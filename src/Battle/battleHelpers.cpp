@@ -1,6 +1,6 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 10/15/2026
+	@date 10/18/2026
 	@since 0.9.14
 	@version 0.12.51
 	@author Matthew Moore
@@ -186,58 +186,6 @@ namespace PocketCore::Battle
 		const us currentHealth{userPokemon->getHealth()};
 
 		userPokemon->setHealth(recoilDamage >= currentHealth ? static_cast<us>(0) : static_cast<us>(currentHealth - recoilDamage));
-	}
-
-	ATTR_NODISCARD ub resolveHitCount(const MoveMeta &moveMeta)
-	{
-		return std::visit(
-			[](const auto &policy) {
-				using Policy = std::decay_t<decltype(policy)>;
-
-				if constexpr (std::is_same_v<Policy, FixedHitCount>)
-				{
-					return policy.mHitCount;
-				}
-				else
-				{
-					double totalWeight{0.0};
-
-					std::ranges::for_each(policy.mOutcomes, [&totalWeight](const WeightedHitCountOutcome &outcome) {
-						if (std::isfinite(outcome.mWeight) && outcome.mWeight > 0.0)
-						{
-							totalWeight += outcome.mWeight;
-						}
-					});
-
-					if (!std::isfinite(totalWeight) || totalWeight <= 0.0)
-					{
-						return static_cast<ub>(0);
-					}
-
-					const double selectedWeight{Random::get(0.0, totalWeight)};
-					double cumulativeWeight{0.0};
-
-					const auto selectedOutcome{
-						std::ranges::find_if(policy.mOutcomes,
-											 [&cumulativeWeight, selectedWeight](const WeightedHitCountOutcome &outcome) {
-												 if (std::isfinite(outcome.mWeight) && outcome.mWeight > 0.0)
-												 {
-													 cumulativeWeight += outcome.mWeight;
-
-													 if (selectedWeight < cumulativeWeight)
-													 {
-														 return true;
-													 }
-												 }
-
-												 return false;
-											 }),
-					};
-
-					return selectedOutcome->mHitCount;
-				}
-			},
-			moveMeta.mHitCountPolicy);
 	}
 
 	ATTR_NODISCARD bool hasDuplicatePokemonPointers(const std::span<Pokemon *const> partyA, const std::span<Pokemon *const> partyB)

@@ -1,6 +1,6 @@
 /*! @file concepts.h
 	@brief Contains the declarations of common concepts that might be used in multiple files.
-	@date 10/14/2026
+	@date 10/18/2026
 	@since 0.1.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -132,6 +132,18 @@ namespace PocketCore::Core
 		T::num;
 		T::den;
 	} && std::is_same_v<T, std::ratio<T::num, T::den>>;
+
+	/*! @concept RandomFn
+		@brief Tests whether a callable accepts two values of a specified type and returns that exact type.
+		@details Requires an lvalue of the callable type to be invocable with two arguments of @p ValueType, with an invocation result exactly matching @p ValueType.
+		@tparam Func The callable type to test.
+		@tparam ValueType The type of each argument passed to the callable.
+		@since 0.12.51
+		@version 0.12.51
+	*/
+	template <typename Func, typename ValueType>
+	concept RandomFn
+		= InvocableWithArgs<Func &, ValueType, ValueType> && std::same_as<std::invoke_result_t<Func &, ValueType, ValueType>, ValueType>;
 } // namespace PocketCore::Core
 
 #endif

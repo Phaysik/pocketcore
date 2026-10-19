@@ -1,6 +1,6 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/15/2026
+	@date 10/18/2026
 	@since 0.9.14
 	@version 0.12.51
 	@author Matthew Moore
@@ -12,18 +12,23 @@
 #include <algorithm>
 #include <cstddef>
 #include <expected>
+#include <functional>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Battle/battleState.h"
 #include "Battle/battleValidation.h"
 #include "Core/attributeMacros.h"
+#include "Core/concepts.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
+#include "Move/moveHitPolicy.h"
 #include "Move/moveMeta.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
+#include "Utility/random.h"
 
 #include "battleAction.h"
 #include "battleValidation.h"
@@ -31,13 +36,17 @@
 namespace PocketCore::Battle
 {
 	using PocketCore::Battle::BattleSlot;
+	using PocketCore::Core::RandomFn;
 	using PocketCore::Core::sl;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectContext;
 	using PocketCore::Effect::Side;
+	using PocketCore::Move::FixedHitCount;
 	using PocketCore::Move::MoveMeta;
+	using PocketCore::Move::WeightedHitCountOutcome;
 	using PocketCore::Registry::Move::MoveRegistry;
 	using PocketCore::Registry::RegistryProvider;
+	using PocketCore::Utility::Random;
 
 	/*! @brief Returns the side opposing the supplied battle side.
 		@param[in] side The battle side to invert.
@@ -217,14 +226,76 @@ namespace PocketCore::Battle
 
 	/*! @brief Resolves the number of hit attempts selected by a move's hit-count policy.
 		@details Returns a fixed policy's count directly. For weighted policies, ignores non-finite and non-positive weights and samples one
-	   positive outcome using @ref Random.
+	   positive outcome using the supplied random-number generator. Defaults to @ref Random::get.
+		@tparam RandomFunc A callable that accepts two double bounds and supplies the sampled weight.
 		@param[in] moveMeta The move metadata containing the hit-count policy.
-		@return The fixed or randomly selected hit count, or zero when a weighted policy has no valid positive total weight.
-		@note Weighted resolution advances the shared random-number generator state.
+		@param[in] func The random-number generator used to sample a weight in the range from zero to the total valid weight. Requires
+	   passing by std::ref for stateful fakes.
+		@return The fixed hit count, or for a weighted policy the hit count whose cumulative weight exceeds the sampled weight. If no
+	   outcome exceeds the sampled weight, returns the last valid outcome's hit count; returns zero when the total valid weight is not
+	   finite and positive.
+		@note The random-number generator is not invoked for a fixed policy or when the weighted policy has no valid positive total weight.
+	   When the default generator is used for weighted resolution, the shared random-number generator state advances.
 		@since 0.9.16
-		@version 0.10.9
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD ub resolveHitCount(const MoveMeta &moveMeta);
+	template <RandomFn<double> RandomFunc = decltype(&Random::get<double>)>
+	ATTR_NODISCARD ub resolveHitCount(const MoveMeta &moveMeta, RandomFunc &&func = &Random::get<double>)
+	{
+		return std::visit(
+			[randomFn = std::forward<RandomFunc>(func)](const auto &policy) {
+				using Policy = std::decay_t<decltype(policy)>;
+
+				if constexpr (std::is_same_v<Policy, FixedHitCount>)
+				{
+					return policy.mHitCount;
+				}
+				else
+				{
+					const auto isValidWeight{
+						[](const WeightedHitCountOutcome &outcome) { return std::isfinite(outcome.mWeight) && outcome.mWeight > 0.0; },
+					};
+
+					double totalWeight{0.0};
+
+					std::ranges::for_each(policy.mOutcomes, [&totalWeight, isValidWeight](const WeightedHitCountOutcome &outcome) {
+						if (isValidWeight(outcome))
+						{
+							totalWeight += outcome.mWeight;
+						}
+					});
+
+					if (!std::isfinite(totalWeight) || totalWeight <= 0.0)
+					{
+						return static_cast<ub>(0);
+					}
+
+					const double selectedWeight{std::invoke(randomFn, 0.0, totalWeight)};
+					double cumulativeWeight{0.0};
+
+					ub result{0}; // 0 is unreachable when a valid outcome exists, kept as a fallback
+
+					for (const WeightedHitCountOutcome &outcome : policy.mOutcomes)
+					{
+						if (!isValidWeight(outcome))
+						{
+							continue;
+						}
+
+						cumulativeWeight += outcome.mWeight;
+						result = outcome.mHitCount; // tentatively the last valid seen
+
+						if (selectedWeight < cumulativeWeight)
+						{
+							break; // exact match, result already correct
+						}
+					}
+
+					return result;
+				}
+			},
+			moveMeta.mHitCountPolicy);
+	}
 
 	/*! @brief Checks for duplicate Pokemon identities within or across two parties.
 		@param[in] partyA The first non-owning party pointer span.

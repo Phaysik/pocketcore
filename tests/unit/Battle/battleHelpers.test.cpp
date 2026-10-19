@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/15/2026
+	@date 10/18/2026
 	@since 0.12.45
 	@version 0.12.51
 	@author Matthew Moore
@@ -9,6 +9,7 @@
 #include "Battle/battleHelpers.h"
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 #include <sstream>
 #include <vector>
@@ -39,6 +40,7 @@
 #include "Type/builtInTypeID.h"
 #include "Utility/Math/floatUtility.h"
 #include "Utility/random.h"
+#include "Utility/random.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -92,11 +94,13 @@ using PocketCore::Registry::RegistryProvider;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::toStatusID;
 using PocketCore::Status::VolatileStatus;
+using PocketCore::Testing::FixedRandom;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::getNullStatusRegistryProvider;
 using PocketCore::Testing::makeBattleState;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::makePokemon;
+using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Utility::Math::approximatelyEqualAbsRel;
@@ -1095,7 +1099,7 @@ SCENARIO("Battle free function")
 
 		WHEN("calling with an infinite recoil ratio context a nullpt")
 		{
-			context.mDamage.mRecoilRatio = 1.0 / 0.0;
+			context.mDamage.mRecoilRatio = std::numeric_limits<double>::infinity();
 
 			applyRecoil(state, context);
 
@@ -1158,10 +1162,12 @@ SCENARIO("Battle free function")
 		WHEN("calling with a FixedHitCount")
 		{
 			MoveMeta meta{.mHitCountPolicy = FixedHitCount{2}};
+			SequenceRandom<double> unused{};
 
-			THEN("it returns appropriately")
+			THEN("it returns appropriately and does not trigger a random function call")
 			{
-				CHECK((resolveHitCount(meta) == 2));
+				REQUIRE((resolveHitCount(meta, std::ref(unused)) == 2));
+				CHECK((unused.calls() == 0));
 			}
 		}
 
@@ -1172,10 +1178,12 @@ SCENARIO("Battle free function")
 			GIVEN("no outcome weights")
 			{
 				MoveMeta meta{.mHitCountPolicy = weighted};
+				SequenceRandom<double> unused{};
 
-				THEN("it returns 0")
+				THEN("it returns 0 and does not trigger a random function call")
 				{
-					CHECK((resolveHitCount(meta) == 0));
+					REQUIRE((resolveHitCount(meta, std::ref(unused)) == 0));
+					CHECK((unused.calls() == 0));
 				}
 			}
 
@@ -1187,10 +1195,12 @@ SCENARIO("Battle free function")
 				};
 
 				MoveMeta meta{.mHitCountPolicy = weighted};
+				SequenceRandom<double> unused{};
 
-				THEN("it returns 0")
+				THEN("it returns 0 and does not trigger a random function call")
 				{
-					CHECK((resolveHitCount(meta) == 0));
+					REQUIRE((resolveHitCount(meta, std::ref(unused)) == 0));
+					CHECK((unused.calls() == 0));
 				}
 			}
 
@@ -1199,40 +1209,62 @@ SCENARIO("Battle free function")
 				weighted.mOutcomes = {{.mHitCount = 1, .mWeight = -1.0}, {.mHitCount = 1, .mWeight = -2.0}};
 
 				MoveMeta meta{.mHitCountPolicy = weighted};
+				SequenceRandom<double> unused{};
 
-				THEN("it returns 0")
+				THEN("it returns 0 and does not trigger a random function call")
 				{
-					CHECK((resolveHitCount(meta) == 0));
+					CHECK((resolveHitCount(meta, std::ref(unused)) == 0));
+					CHECK((unused.calls() == 0));
 				}
 			}
 
 			GIVEN("one impossible weight, one negative weight, one small weight, and one large weight")
 			{
 				weighted.mOutcomes = {
-					{.mHitCount = 1, .mWeight = 1.0 / 0.0},
+					{.mHitCount = 1, .mWeight = std::numeric_limits<double>::infinity()},
 					{.mHitCount = 5, .mWeight = 9.0},
-					{.mWeight = -1.0},
+					{.mHitCount = 1, .mWeight = -1.0},
 					{.mHitCount = 2, .mWeight = 1.0},
 				};
 
 				MoveMeta meta{.mHitCountPolicy = weighted};
 
-				Random::setSeed(7);
-
-				ub lowerWeight{0};
-
-				for (ub i{0}; i < 10; ++i)
+				WHEN("the random value is within the bounds [0.0, 9)")
 				{
-					if (resolveHitCount(meta) == 2)
+					SequenceRandom<double> seq{0.0, 8.999};
+					THEN("it returns 5")
 					{
-						++lowerWeight;
+						REQUIRE((resolveHitCount(meta, FixedRandom<double>{0.0}) == 5));
+						CHECK((resolveHitCount(meta, std::ref(seq)) == 5));
+						REQUIRE((resolveHitCount(meta, FixedRandom<double>{8.999}) == 5));
+						CHECK((resolveHitCount(meta, std::ref(seq)) == 5));
+						REQUIRE((seq.calls() == 2));
 					}
 				}
 
-				THEN("the selected weight only hits the lower weight 10% of the time")
+				WHEN("the random value is within the bounds [9.0, 10.0) - the exact boundary between the two valid buckets up to the "
+					 "highest value in the summed buckets")
 				{
-					CHECK((lowerWeight == 1));
-					CHECK(((10 - lowerWeight) == 9));
+					SequenceRandom<double> seq{9.0, 9.999};
+					THEN("it returns 2")
+					{
+						REQUIRE((resolveHitCount(meta, FixedRandom<double>{9.0}) == 2));
+						CHECK((resolveHitCount(meta, std::ref(seq)) == 2));
+						REQUIRE((resolveHitCount(meta, FixedRandom<double>{9.999}) == 2));
+						CHECK((resolveHitCount(meta, std::ref(seq)) == 2));
+						REQUIRE((seq.calls() == 2));
+					}
+				}
+
+				WHEN("the random value is exactly 10.0 - the theoretically unachievable max that real-distributions cannot generate")
+				{
+					SequenceRandom<double> seq{10.0};
+					THEN("it returns 2 - the last valid outcome")
+					{
+						REQUIRE((resolveHitCount(meta, FixedRandom<double>{10.0}) == 2));
+						CHECK((resolveHitCount(meta, std::ref(seq)) == 2));
+						REQUIRE((seq.calls() == 1));
+					}
 				}
 			}
 		}
