@@ -1,6 +1,6 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/19/2026
+	@date 10/20/2026
 	@since 0.9.16
 	@version 0.12.51
 	@author Matthew Moore
@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <expected>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <utility>
 #include <variant>
@@ -46,6 +47,8 @@
 #include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
 #include "Terrain/terrainID.h"
+#include "Validation/Battle/battleError.h"
+#include "Validation/Battle/battleValidation.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
@@ -78,7 +81,10 @@ namespace PocketCore::Battle
 	using PocketCore::Ruleset::validateRulesetPolicy;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Terrain::TerrainID;
+	using PocketCore::Validation::Battle::BattleEngineError;
 	using PocketCore::Weather::WeatherID;
+	using Validation::Battle::getValidationResult;
+	using Validation::Battle::validateSwitchAction;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
 																					const std::span<Pokemon *const> &partyB,
@@ -159,7 +165,7 @@ namespace PocketCore::Battle
 		{
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				const BattleTarget owner{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)};
 
@@ -511,7 +517,7 @@ namespace PocketCore::Battle
 		std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context, &triggerID](const Side side) {
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (isHealthy(slots.at(slotIndex)))
 				{
@@ -554,7 +560,7 @@ namespace PocketCore::Battle
 		};
 
 		// Ability and item effects are not constrained by move formation range.
-		const auto targets{resolveTargets(mState, owner.mSide, owner.mSlotIndex, targetID, BattleRangeID::Unrestricted, selectedTarget)};
+		const auto targets{resolveTargets(mState, owner, targetID, BattleRangeID::Unrestricted, selectedTarget)};
 
 		if (targets.has_value())
 		{
@@ -859,7 +865,7 @@ namespace PocketCore::Battle
 		{
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (isHealthy(slots.at(slotIndex)))
 				{
@@ -988,7 +994,7 @@ namespace PocketCore::Battle
 		{
 			std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				BattleSlot &slot{slots.at(slotIndex)};
 
@@ -1039,7 +1045,7 @@ namespace PocketCore::Battle
 			}
 
 			// Record every unhealthy active slot that can be filled from the reserve party.
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (!isHealthy(slots.at(slotIndex)))
 				{

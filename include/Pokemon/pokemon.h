@@ -1,6 +1,6 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/19/2026
+	@date 10/20/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -13,9 +13,11 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <expected>
 #include <functional>
 #include <ostream>
+#include <ranges>
 #include <span>
 #include <string_view>
 
@@ -93,7 +95,7 @@ namespace PocketCore::Pokemon
 		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
 		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/13/2026
+		@date 10/20/2026
 		@since 0.3.0
 		@version 0.12.51
 		@author Matthew Moore
@@ -193,7 +195,7 @@ namespace PocketCore::Pokemon
 				@since 0.3.0
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::string_view getName() const
+			ATTR_NODISCARD constexpr const std::string_view getName() const noexcept
 			{
 				return mName;
 			}
@@ -203,7 +205,7 @@ namespace PocketCore::Pokemon
 				@since 0.9.11
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const StatusID> getStatusIDsArray() const
+			ATTR_NODISCARD constexpr const std::span<const StatusID> getStatusIDsArray() const noexcept
 			{
 				return mNonVolatileStatusIDs;
 			}
@@ -213,7 +215,7 @@ namespace PocketCore::Pokemon
 				@since 0.3.0
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const MoveID> getMoveIDsArray() const
+			ATTR_NODISCARD constexpr const std::span<const MoveID> getMoveIDsArray() const noexcept
 			{
 				return mMoveIDs;
 			}
@@ -223,7 +225,7 @@ namespace PocketCore::Pokemon
 				@since 0.12.23
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const us> getPokemonIVsArray() const
+			ATTR_NODISCARD constexpr const std::span<const us> getPokemonIVsArray() const noexcept
 			{
 				return mPokemonIVs;
 			}
@@ -233,7 +235,7 @@ namespace PocketCore::Pokemon
 				@since 0.12.23
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const us> getPokemonEVsArray() const
+			ATTR_NODISCARD constexpr const std::span<const us> getPokemonEVsArray() const noexcept
 			{
 				return mPokemonEVs;
 			}
@@ -243,7 +245,7 @@ namespace PocketCore::Pokemon
 				@since 0.3.0
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const ub> getMaxPPArray() const
+			ATTR_NODISCARD constexpr const std::span<const ub> getMaxPPArray() const noexcept
 			{
 				return mMaxPP;
 			}
@@ -253,7 +255,7 @@ namespace PocketCore::Pokemon
 				@since 0.3.0
 				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::span<const ub> getCurrentPPArray() const
+			ATTR_NODISCARD constexpr const std::span<const ub> getCurrentPPArray() const noexcept
 			{
 				return mCurrentPP;
 			}
@@ -441,9 +443,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns current health.
 				@return The current health value.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getHealth() const
+			ATTR_NODISCARD constexpr us getHealth() const noexcept
 			{
 				return mHealth;
 			}
@@ -451,9 +453,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated maximum health.
 				@return The maximum health value.
 				@since 0.9.14
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getMaximumHealth() const
+			ATTR_NODISCARD constexpr us getMaximumHealth() const noexcept
 			{
 				return mCalculatedStats.mMaxHealth;
 			}
@@ -461,9 +463,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Attack statistic.
 				@return The Attack value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getAttack() const
+			ATTR_NODISCARD constexpr us getAttack() const noexcept
 			{
 				return mCalculatedStats.mAttack;
 			}
@@ -471,9 +473,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Defense statistic.
 				@return The Defense value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getDefense() const
+			ATTR_NODISCARD constexpr us getDefense() const noexcept
 			{
 				return mCalculatedStats.mDefense;
 			}
@@ -481,9 +483,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Special Attack statistic.
 				@return The Special Attack value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getSpAttack() const
+			ATTR_NODISCARD constexpr us getSpAttack() const noexcept
 			{
 				return mCalculatedStats.mSpAttack;
 			}
@@ -491,9 +493,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Special Defense statistic.
 				@return The Special Defense value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getSpDefense() const
+			ATTR_NODISCARD constexpr us getSpDefense() const noexcept
 			{
 				return mCalculatedStats.mSpDefense;
 			}
@@ -501,9 +503,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the calculated Speed statistic.
 				@return The Speed value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getSpeed() const
+			ATTR_NODISCARD constexpr us getSpeed() const noexcept
 			{
 				return mCalculatedStats.mSpeed;
 			}
@@ -511,9 +513,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the Pokemon's level.
 				@return The level value.
 				@since 0.7.2
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getLevel() const
+			ATTR_NODISCARD constexpr us getLevel() const noexcept
 			{
 				return mLevel;
 			}
@@ -521,9 +523,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the precomputed level damage factor.
 				@return The level damage factor used by damage calculations.
 				@since 0.8.2
-				@version 0.12.2
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr us getLevelDamageFactor() const
+			ATTR_NODISCARD constexpr us getLevelDamageFactor() const noexcept
 			{
 				return mLevelDamageFactor;
 			}
@@ -531,9 +533,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the stable identifier for the Pokemon species.
 				@return The PokemonID value.
 				@since 0.12.23
-				@version 0.12.23
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr PokemonID getPokemonID() const
+			ATTR_NODISCARD constexpr PokemonID getPokemonID() const noexcept
 			{
 				return mPokemonID;
 			}
@@ -541,9 +543,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Returns the stable identifier for the Learnset species.
 				@return The LearnsetID value.
 				@since 0.12.50
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const
+			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const noexcept
 			{
 				return mLearnsetID;
 			}
@@ -1028,7 +1030,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemon The Pokemon to write.
 				@return The supplied stream after writing the representation.
 				@since 0.11.2
-				@version 0.12.45
+				@version 0.12.51
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 
@@ -1115,23 +1117,23 @@ namespace PocketCore::Pokemon
 				@param[in] natureRegistry The registry used to resolve each nature's stat multipliers.
 				@note During construction, a lookup failure preserves the neutral defaults of @ref mNatureMultipliers.
 				@since 0.12.47
-				@version 0.12.49
+				@version 0.12.51
 			*/
 			constexpr void resolveNatureMultipliers(const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs,
 													const NatureRegistry &natureRegistry)
 			{
 				std::array<std::array<double, POKEMON_STAT_COUNT>, MAX_NATURES_PER_POKEMON> tempValues{};
 
-				for (std::size_t i{0}; i < natureIDs.size(); ++i)
+				for (const auto &[index, natureID] : natureIDs | std::views::enumerate)
 				{
-					const NatureMeta *metadata{natureRegistry.getNatureMetadata(natureIDs.at(i))};
+					const NatureMeta *metadata{natureRegistry.getNatureMetadata(natureID)};
 
 					if (metadata == nullptr)
 					{
 						return;
 					}
 
-					tempValues.at(i) = metadata->mStatMultipliers;
+					tempValues.at(static_cast<std::size_t>(index)) = metadata->mStatMultipliers;
 				}
 
 				mNatureIDs = natureIDs;

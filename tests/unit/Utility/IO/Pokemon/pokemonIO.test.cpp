@@ -1,6 +1,6 @@
 /*! @file pokemonIO.test.cpp
 	@brief C++ file for running tests pertaining to the input/output operations on Pokemon.
-	@date 10/14/2026
+	@date 10/20/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -9,6 +9,7 @@
 #include "Utility/IO/Pokemon/pokemonIO.h"
 
 #include <cstddef>
+#include <ranges>
 #include <sstream>
 
 #include "Core/typedefs.h"
@@ -43,10 +44,10 @@ SCENARIO("Pokemon IO functions")
 			WHEN("the data is properly written to the stream")
 			{
 				std::ostringstream output;
-				for (std::size_t i{0}; i < pokemon.getTypeIDsArray().size(); ++i)
+				for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getTypeIDsArray().size()))
 				{
 					outputPokemonDataID(
-						output, [&pokemon](const ub typeIndex) { return pokemon.getTypeID(typeIndex); }, static_cast<ub>(i));
+						output, [&pokemon](const ub typeIndex) { return pokemon.getTypeID(typeIndex); }, static_cast<ub>(index));
 				}
 
 				THEN("all public state is written with numeric identifiers and PP")
@@ -67,10 +68,10 @@ SCENARIO("Pokemon IO functions")
 			WHEN("the data is properly written to the stream")
 			{
 				std::ostringstream output;
-				for (std::size_t i{0}; i < pokemon.getNatureIDsArray().size(); ++i)
+				for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getNatureIDsArray().size()))
 				{
 					outputPokemonDataID(
-						output, [&pokemon](const ub natureID) { return pokemon.getNatureID(natureID); }, static_cast<ub>(i));
+						output, [&pokemon](const ub natureID) { return pokemon.getNatureID(natureID); }, static_cast<ub>(index));
 				}
 
 				THEN("all public state is written with numeric identifiers and PP")

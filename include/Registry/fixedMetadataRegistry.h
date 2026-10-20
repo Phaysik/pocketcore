@@ -1,6 +1,6 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 10/13/2026
+	@date 10/20/2026
 	@since 0.5.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -34,7 +34,7 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 10/13/2026
+		@date 10/20/2026
 		@since 0.5.0
 		@version 0.12.51
 		@author Matthew Moore
@@ -203,9 +203,9 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return The internal index if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.9.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const
+			ATTR_NODISCARD ATTR_PURE constexpr const std::optional<us> findIndexByID(const StableID stableID) const noexcept
 			{
 				const us index{findEntryIndexByID(stableID)}; // LCOV_EXCL_BR (from possible .at() throw which can't happen by invariants)
 
@@ -232,9 +232,9 @@ namespace PocketCore::Registry
 				@param[in] stableID The stable identifier to find.
 				@return True if the ID is registered, otherwise false.
 				@since 0.5.0
-				@version 0.5.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasEntry(const StableID stableID) const
+			ATTR_NODISCARD constexpr bool hasEntry(const StableID stableID) const noexcept
 			{
 				return findEntryIndexByID(stableID) != mAmountRegistered;
 			}
@@ -464,14 +464,14 @@ namespace PocketCore::Registry
 				@return The matching internal index, or @ref mAmountRegistered when not found.
 				@note Time complexity is O(log n), where n is @ref mIndexedAmount.
 				@since 0.5.0
-				@version 0.9.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const
+			ATTR_NODISCARD ATTR_PURE constexpr us findEntryIndexByID(const StableID stableID) const noexcept
 			{
 				const auto indexedEntries{std::span<const IDIndexEntry>{mIDIndex}.first(mIndexedAmount)};
 				const auto found{
 					std::lower_bound(indexedEntries.begin(), indexedEntries.end(), stableID,
-									 [](const IDIndexEntry &entry, const StableID value) { return entry.stableID < value; }),
+									 [](const IDIndexEntry &entry, const StableID value) noexcept { return entry.stableID < value; }),
 				};
 
 				if (found != indexedEntries.end() && found->stableID == stableID)

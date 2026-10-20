@@ -1,6 +1,6 @@
 /*! @file battleEngine.test.cpp
 	@brief C++ file for running tests for the BattleEngine.
-	@date 10/19/2026
+	@date 10/20/2026
 	@since 0.12.37
 	@version 0.12.51
 	@author Matthew Moore
@@ -29,12 +29,12 @@
 #include "Ruleset/rulesetPresets.h"
 #include "Utility/Random/callableRandomSource.h"
 #include "Utility/Random/defaultRandomSource.h"
+#include "Validation/Battle/battleError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Battle::BattleAction;
 using PocketCore::Battle::BattleEngine;
-using PocketCore::Battle::BattleEngineError;
 using PocketCore::Battle::BattlePhase;
 using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleTarget;
@@ -67,6 +67,7 @@ using PocketCore::Testing::getNullWeatherRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Utility::Random::CallableRandomSource;
 using PocketCore::Utility::Random::getDefaultRandomSource;
+using PocketCore::Validation::Battle::BattleEngineError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 

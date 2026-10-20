@@ -1,6 +1,6 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/19/2026
+	@date 10/20/2026
 	@since 0.10.3
 	@version 0.12.51
 	@author Matthew Moore
@@ -27,6 +27,7 @@
 #include "Registry/effectRegistry.h"
 #include "Registry/registryProvider.h"
 #include "Ruleset/rulesetPolicy.h"
+#include "Validation/Battle/battleError.h"
 
 #include "battleAction.h"
 #include "battleHelpers.h"
@@ -50,6 +51,7 @@ namespace PocketCore::Battle
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Ruleset::RulesetPolicy;
+	using PocketCore::Validation::Battle::BattleEngineError;
 
 	/*! @class ExecutionGuard Battle/battleEngine.h
 		@brief Marks an execution scope as active and clears its flag when the scope exits.
@@ -112,7 +114,7 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 10/19/2026
+		@date 10/20/2026
 		@since 0.10.3
 		@version 0.12.51
 		@author Matthew Moore
@@ -350,7 +352,7 @@ namespace PocketCore::Battle
 				@param[in] effects The ordered effects to execute for every resolved recipient.
 				@param[in,out] context The shared context whose event coordinates are preserved across target iteration.
 				@since 0.10.3
-				@version 0.11.1
+				@version 0.12.51
 			*/
 			void executeTargetedEffects(const BattleTarget &owner, const BattleTargetID targetID, const std::span<const EffectID> &effects,
 										EffectContext &context);
@@ -422,7 +424,7 @@ namespace PocketCore::Battle
 				@details Side A's slots are processed before side B's, and each side's slots are processed in ascending index order to keep
 			   turn-end effects deterministic. Fainted slots are skipped.
 				@since 0.10.7
-				@version 0.12.10
+				@version 0.12.51
 			*/
 			void executeEndTurnTrigger();
 
@@ -496,7 +498,7 @@ namespace PocketCore::Battle
 			   BattleEventID::TerrainChanged.
 				@param[in,out] context The shared effect context supplied to each notified slot's ability, item, and nature sources.
 				@since 0.12.43
-				@version 0.12.43
+				@version 0.12.51
 			*/
 			void triggerWhenStateChanged(const BattleEventID triggerID, EffectContext &context);
 
@@ -519,7 +521,7 @@ namespace PocketCore::Battle
 				@details Marks each faint before dispatch to prevent recursive duplicate processing, then recomputes the battle phase and
 			   required replacements.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.51
 			*/
 			void processFaints();
 
@@ -527,7 +529,7 @@ namespace PocketCore::Battle
 				@details Finished battles take precedence over replacement requests, and a fainted slot is requested only when its side has
 			   a healthy inactive reserve.
 				@since 0.10.3
-				@version 0.10.3
+				@version 0.12.51
 			*/
 			void refreshBattlePhase();
 

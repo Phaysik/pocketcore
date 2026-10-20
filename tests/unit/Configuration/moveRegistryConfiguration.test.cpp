@@ -1,6 +1,6 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/20/2026
 	@since 0.8.7
 	@version 0.12.51
 	@author Matthew Moore
@@ -412,7 +412,7 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryError> result{config.setMoveTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget("ThisIsInvalid", BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
@@ -424,13 +424,13 @@ SCENARIO("MoveRegistryConfiguration")
 
 			WHEN("updating an existing move definition")
 			{
-				std::expected<void, RegistryError> result{config.setMoveTarget(MOVE_NAME_NONE, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget(MOVE_NAME_NONE, BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
-					CHECK((config.getMoveMetadata(toMoveID(BuiltinMoveID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getMoveMetadata(toMoveID(BuiltinMoveID::None))->mTargetID == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}
@@ -439,7 +439,7 @@ SCENARIO("MoveRegistryConfiguration")
 		{
 			WHEN("calling with an invalid move name")
 			{
-				std::expected<void, RegistryError> result{config.setMoveTarget(MoveID{200}, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setMoveTarget(MoveID{200}, BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
@@ -452,14 +452,14 @@ SCENARIO("MoveRegistryConfiguration")
 			WHEN("updating an existing move definition")
 			{
 				std::expected<void, RegistryError> result{
-					config.setMoveTarget(toMoveID(BuiltinMoveID::None), BattleTargetID::AllAllies),
+					config.setMoveTarget(toMoveID(BuiltinMoveID::None), BattleTargetID::AllAlliesIncludingSelf),
 				};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue));
-					CHECK((config.getMoveMetadata(toMoveID(BuiltinMoveID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getMoveMetadata(toMoveID(BuiltinMoveID::None))->mTargetID == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 10/15/2026
+	@date 10/20/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -169,7 +169,7 @@ namespace PocketCore::Battle
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
 	   is empty.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 10/15/2026
+		@date 10/20/2026
 		@since 0.3.0
 		@version 0.12.51
 		@author Matthew Moore
@@ -236,7 +236,7 @@ namespace PocketCore::Battle
 				@param[in] battleSlot The BattleSlot to write.
 				@return The supplied stream after writing the representation.
 				@since 0.12.45
-				@version 0.12.45
+				@version 0.12.51
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const BattleSlot &battleSlot);
 

@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/14/2026
+	@date 10/20/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -117,7 +117,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Types:\n";
 
-		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getTypeIDsArray().size()))
 		{
 			const TypeID typeID{pokemon.getTypeID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
@@ -131,7 +131,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Natures:\n";
 
-		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getNatureIDsArray().size()))
 		{
 			const NatureID natureID{pokemon.getNatureID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
@@ -146,7 +146,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Abilities:\n";
 
-		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityIDsArray().size()))
 		{
 			const AbilityID abilityID{pokemon.getAbilityID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
@@ -161,7 +161,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Items:\n";
 
-		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getItemsIDsArray().size()))
 		{
 			const ItemID itemID{pokemon.getItemID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
@@ -175,7 +175,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Non-Volatile Statuses:\n";
 
-		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getStatusIDsArray().size()))
 		{
 			const StatusID statusID{pokemon.getStatusID(static_cast<us>(index))};
 			outStream << "    [" << index << "]:\n";
@@ -190,7 +190,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Moves:\n";
 
-		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getMoveIDsArray().size()))
 		{
 			const auto moveSlotIndex{static_cast<ub>(index)};
 			const MoveID moveID{pokemon.getMoveID(moveSlotIndex)};

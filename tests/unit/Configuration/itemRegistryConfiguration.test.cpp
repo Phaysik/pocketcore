@@ -1,6 +1,6 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/20/2026
 	@since 0.5.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -412,7 +412,7 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryError> result{config.setItemTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget("ThisIsInvalid", BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
@@ -424,13 +424,13 @@ SCENARIO("ItemRegistryConfiguration")
 
 			WHEN("updating an existing item definition")
 			{
-				std::expected<void, RegistryError> result{config.setItemTarget(ITEM_NAME_NONE, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget(ITEM_NAME_NONE, BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
-					CHECK((config.getItemMetadata(toItemID(BuiltinItemID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getItemMetadata(toItemID(BuiltinItemID::None))->mTargetID == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}
@@ -439,7 +439,7 @@ SCENARIO("ItemRegistryConfiguration")
 		{
 			WHEN("calling with an invalid item name")
 			{
-				std::expected<void, RegistryError> result{config.setItemTarget(ItemID{200}, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setItemTarget(ItemID{200}, BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
@@ -452,14 +452,14 @@ SCENARIO("ItemRegistryConfiguration")
 			WHEN("updating an existing item definition")
 			{
 				std::expected<void, RegistryError> result{
-					config.setItemTarget(toItemID(BuiltinItemID::None), BattleTargetID::AllAllies),
+					config.setItemTarget(toItemID(BuiltinItemID::None), BattleTargetID::AllAlliesIncludingSelf),
 				};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue));
-					CHECK((config.getItemMetadata(toItemID(BuiltinItemID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getItemMetadata(toItemID(BuiltinItemID::None))->mTargetID == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}

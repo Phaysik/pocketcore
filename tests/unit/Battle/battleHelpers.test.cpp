@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/19/2026
+	@date 10/20/2026
 	@since 0.12.45
 	@version 0.12.51
 	@author Matthew Moore
@@ -19,6 +19,7 @@
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Battle/battleValidation.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
@@ -27,12 +28,14 @@
 #include "Item/builtInItemID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/moveHitPolicy.h"
+#include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Nature/builtInNatureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Pokemon/pokemonStats.h"
+#include "Registry/moveRegistry.h"
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Status/builtInStatusID.h"
@@ -40,6 +43,7 @@
 #include "Type/builtInTypeID.h"
 #include "Utility/Math/floatUtility.h"
 #include "Utility/Random/random.testHelper.h"
+#include "Validation/Battle/battleError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -48,17 +52,26 @@ using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::activeSlots;
 using PocketCore::Battle::amountOfHealthyPokemonInParty;
 using PocketCore::Battle::anyPartyPokemonNull;
+using PocketCore::Battle::appendEligibleTargets;
 using PocketCore::Battle::applyRecoil;
+using PocketCore::Battle::assignActiveSlots;
 using PocketCore::Battle::BattleRangeID;
+using PocketCore::Battle::BattleResult;
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
 using PocketCore::Battle::BattleTarget;
+using PocketCore::Battle::BattleTargetID;
+using PocketCore::Battle::canTarget;
 using PocketCore::Battle::contextSlot;
 using PocketCore::Battle::DamageFormulaModifiers;
+using PocketCore::Battle::getBattleTarget;
 using PocketCore::Battle::getEffectiveSpeed;
+using PocketCore::Battle::getMoveTargets;
 using PocketCore::Battle::getOppositeSide;
+using PocketCore::Battle::getResult;
 using PocketCore::Battle::getSideOrder;
 using PocketCore::Battle::hasDuplicatePokemonPointers;
+using PocketCore::Battle::hasReserve;
 using PocketCore::Battle::isAdjacent;
 using PocketCore::Battle::isHealthy;
 using PocketCore::Battle::makeMoveContext;
@@ -66,8 +79,10 @@ using PocketCore::Battle::MoveAction;
 using PocketCore::Battle::party;
 using PocketCore::Battle::printBattleSlotWithNames;
 using PocketCore::Battle::resolveHitCount;
+using PocketCore::Battle::resolveTargets;
 using PocketCore::Battle::sideHasHealthyPokemon;
 using PocketCore::Battle::StatStages;
+using PocketCore::Battle::SwitchAction;
 using PocketCore::Battle::targetExists;
 using PocketCore::Configuration::MAX_VOLATILE_STATUSES_PER_POKEMON;
 using PocketCore::Core::sl;
@@ -80,6 +95,7 @@ using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::toItemID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::FixedHitCount;
+using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Move::toMoveID;
 using PocketCore::Move::WeightedHitCount;
@@ -89,6 +105,7 @@ using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 using PocketCore::Pokemon::toPokemonID;
+using PocketCore::Registry::Move::MoveRegistry;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::toStatusID;
@@ -103,6 +120,7 @@ using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Utility::Math::approximatelyEqualAbsRel;
+using PocketCore::Validation::Battle::BattleEngineError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -1369,6 +1387,784 @@ SCENARIO("Battle free function")
 			THEN("it returns the parties size")
 			{
 				CHECK((amountOfHealthyPokemonInParty(party) == static_cast<sl>(party.size())));
+			}
+		}
+	}
+
+	GIVEN("assignActiveSlots")
+	{
+		Pokemon member1{makePokemon({})};
+		Pokemon member2{makePokemon({})};
+		Pokemon member3{makePokemon({.mHealth = 30})};
+		Pokemon member4{makePokemon({.mHealth = 20})};
+		Pokemon member5{makePokemon({.mHealth = 10})};
+		std::vector<BattleSlot> slots{};
+
+		WHEN("calling with no party Pokemon")
+		{
+			std::vector<Pokemon *> party{};
+
+			assignActiveSlots(party, slots, 2);
+
+			THEN("no Pokemon is added to the slots")
+			{
+				CHECK(slots.empty());
+			}
+		}
+
+		WHEN("calling with no healthy Pokemon in party")
+		{
+			std::vector<Pokemon *> party{&member1, &member2};
+
+			assignActiveSlots(party, slots, 2);
+
+			THEN("no Pokemon is added to the slots")
+			{
+				CHECK(slots.empty());
+			}
+		}
+
+		WHEN("calling with one healthy Pokemon in party")
+		{
+			std::vector<Pokemon *> party{&member1, &member3};
+
+			assignActiveSlots(party, slots, 2);
+
+			THEN("only the healthy Pokemon is added to the slots")
+			{
+				CHECK((slots.size() == 1));
+				CHECK((slots.at(0).mPokemon == &member3));
+			}
+		}
+
+		WHEN("calling with all healthy Pokemon in party")
+		{
+			std::vector<Pokemon *> party{&member3, &member4};
+
+			assignActiveSlots(party, slots, 2);
+
+			THEN("all Pokemon are added to slots")
+			{
+				CHECK((slots.size() == 2));
+				CHECK((slots.at(0).mPokemon == &member3));
+				CHECK((slots.at(1).mPokemon == &member4));
+			}
+		}
+
+		WHEN("calling with more healthy Pokemon in party than allowed active Pokemon per side")
+		{
+			std::vector<Pokemon *> party{&member1, &member3, &member4, &member5};
+
+			assignActiveSlots(party, slots, 2);
+
+			THEN("only the first 2 healthy Pokemon are added")
+			{
+				CHECK((slots.size() == 2));
+				CHECK((slots.at(0).mPokemon == &member3));
+				CHECK((slots.at(1).mPokemon == &member4));
+			}
+		}
+	}
+
+	GIVEN("canTarget")
+	{
+		Pokemon member1{makePokemon({.mHealth = 50})};
+		Pokemon member2{makePokemon({})};
+		Pokemon member3{makePokemon({.mHealth = 30})};
+		Pokemon member4{makePokemon({.mHealth = 20})};
+		Pokemon member5{makePokemon({.mHealth = 10})};
+		Pokemon member6{makePokemon({.mHealth = 40})};
+		BattleState state{
+			makeBattleState({
+				.mSideA
+				= {{.mPokemon = &member1, .mPosition = 0}, {.mPokemon = &member2, .mPosition = 1}, {.mPokemon = &member3, .mPosition = 2}},
+				.mSideB
+				= {{.mPokemon = &member4, .mPosition = 0}, {.mPokemon = &member5, .mPosition = 1}, {.mPokemon = &member6, .mPosition = 2}},
+			}),
+		};
+		BattleTarget source{.mSide = Side::A};
+		BattleTarget target{.mSide = Side::B};
+
+		WHEN("calling with a target who doesn't exist")
+		{
+			target.mSlotIndex = 3;
+
+			THEN("it returns false")
+			{
+				CHECK_FALSE((canTarget(state, source, target, BattleRangeID::Adjacent)));
+			}
+		}
+
+		WHEN("calling with an unrestricted rangeID")
+		{
+			target.mSlotIndex = 0;
+
+			THEN("it returns true")
+			{
+				CHECK((canTarget(state, source, target, BattleRangeID::Unrestricted)));
+			}
+		}
+
+		WHEN("calling when the target is not adjacent")
+		{
+			source.mSlotIndex = 0;
+			target.mSlotIndex = 2;
+
+			THEN("it returns false")
+			{
+				CHECK_FALSE((canTarget(state, source, target, BattleRangeID::Adjacent)));
+			}
+		}
+
+		WHEN("calling when the target is adjacent")
+		{
+			source.mSlotIndex = 0;
+			target.mSlotIndex = 1;
+
+			THEN("it returns true")
+			{
+				CHECK((canTarget(state, source, target, BattleRangeID::Adjacent)));
+			}
+		}
+	}
+
+	GIVEN("appendEligibleTargets")
+	{
+		Pokemon member1{makePokemon({.mHealth = 50})};
+		Pokemon member2{makePokemon({.mHealth = 60})};
+		Pokemon member3{makePokemon({.mHealth = 30})};
+		Pokemon member4{makePokemon({.mHealth = 20})};
+		Pokemon member5{makePokemon({.mHealth = 10})};
+		Pokemon member6{makePokemon({.mHealth = 40})};
+		BattleState state{
+			makeBattleState({
+				.mSideA = {{.mPokemon = &member1, .mPosition = 0},
+						   {.mPokemon = &member2, .mPosition = 1},
+						   {.mPokemon = &member3, .mPosition = 2},
+						   {.mPokemon = &member6, .mPosition = 3},},
+				.mSideB = {{.mPokemon = &member4, .mPosition = 0}, {.mPokemon = &member5, .mPosition = 1}},
+			}),
+		};
+		BattleTarget source{.mSide = Side::A};
+		std::vector<BattleTarget> targets{};
+
+		WHEN("calling with a source not adjacent to any targets")
+		{
+			source.mSlotIndex = 3;
+
+			appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::B);
+
+			THEN("no targets are added to the vector")
+			{
+				CHECK(targets.empty());
+			}
+		}
+
+		WHEN("calling with a source not adjacent to any targets but is using an unrestricted range move")
+		{
+			source.mSlotIndex = 3;
+
+			appendEligibleTargets(targets, state, source, BattleRangeID::Unrestricted, Side::B);
+
+			THEN("all opposing targets are added to the vector")
+			{
+				CHECK((targets.size() == state.mSideB.size()));
+			}
+		}
+
+		WHEN("calling with a source adjacent to one target")
+		{
+			source.mSlotIndex = 2;
+
+			appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::B);
+
+			THEN("the adjacent target is added to the vector")
+			{
+				CHECK((targets.size() == 1));
+			}
+		}
+
+		WHEN("calling with a source adjacent to multiple targets")
+		{
+			source.mSide = Side::B;
+			source.mSlotIndex = 1;
+
+			appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::A);
+
+			THEN("the adjacent targets are added to the vector")
+			{
+				CHECK((targets.size() == 3));
+			}
+		}
+	}
+
+	GIVEN("getResult")
+	{
+		Pokemon member1{makePokemon({.mHealth = 50})};
+		Pokemon member2{makePokemon({.mHealth = 60})};
+		BattleState state{
+			makeBattleState({.mPartyA = {&member1}, .mPartyB = {&member2}, .mBattleStarted = true}),
+		};
+
+		WHEN("calling when the battle hasn't started")
+		{
+			state.mBattleStarted = false;
+
+			THEN("it returns NotStarted")
+			{
+				CHECK((getResult(state) == BattleResult::NotStarted));
+			}
+		}
+
+		WHEN("calling when both sides are healthy")
+		{
+			THEN("it returns InProgress")
+			{
+				CHECK((getResult(state) == BattleResult::InProgress));
+			}
+		}
+
+		WHEN("calling when side A only is healthy")
+		{
+			member2.setHealth(0);
+
+			THEN("it returns SideAWon")
+			{
+				CHECK((getResult(state) == BattleResult::SideAWon));
+			}
+		}
+
+		WHEN("calling when side B only is healthy")
+		{
+			member1.setHealth(0);
+
+			THEN("it returns SideBWon")
+			{
+				CHECK((getResult(state) == BattleResult::SideBWon));
+			}
+		}
+
+		WHEN("calling when both sides have no healthy Pokemon")
+		{
+			member1.setHealth(0);
+			member2.setHealth(0);
+
+			THEN("it returns Draw")
+			{
+				CHECK((getResult(state) == BattleResult::Draw));
+			}
+		}
+	}
+
+	GIVEN("hasReserve")
+	{
+		Pokemon member1{makePokemon({.mHealth = 50})};
+		Pokemon member2{makePokemon({.mHealth = 60})};
+		Pokemon member3{makePokemon({.mHealth = 60})};
+		BattleState state{
+			makeBattleState({.mSideA = {{{.mPokemon = &member1}, {.mPokemon = &member2}}}, .mBattleStarted = true}),
+		};
+
+		WHEN("calling when no Pokemon in the party are healthy")
+		{
+			member1.setHealth(0);
+			member2.setHealth(0);
+			member3.setHealth(0);
+
+			THEN("it returns false")
+			{
+				std::vector<Pokemon *> trainerParty{&member1, &member2, &member3};
+				CHECK_FALSE((hasReserve(state, Side::A, trainerParty)));
+			}
+		}
+
+		WHEN("calling when no Pokemon other than the active ones exist")
+		{
+			THEN("it returns false")
+			{
+				std::vector<Pokemon *> trainerParty{&member1, &member2};
+				CHECK_FALSE((hasReserve(state, Side::A, trainerParty)));
+			}
+		}
+
+		WHEN("calling when a Pokemon other than the active Pokemon exist")
+		{
+			THEN("it returns true")
+			{
+				std::vector<Pokemon *> trainerParty{&member1, &member2, &member3};
+				CHECK((hasReserve(state, Side::A, trainerParty)));
+			}
+		}
+	}
+
+	GIVEN("resolveTargets")
+	{
+		Pokemon member1{makePokemon({.mHealth = 50})};
+		Pokemon member2{makePokemon({.mHealth = 60})};
+		Pokemon member3{makePokemon({.mHealth = 30})};
+		Pokemon member4{makePokemon({.mHealth = 20})};
+		Pokemon member5{makePokemon({.mHealth = 10})};
+		Pokemon member6{makePokemon({.mHealth = 40})};
+		Pokemon member7{makePokemon({.mHealth = 70})};
+		BattleState state{
+    		makeBattleState({
+    			.mSideA = {{.mPokemon = &member1, .mPosition = 0},
+    					   {.mPokemon = &member2, .mPosition = 1},
+    					   {.mPokemon = &member3, .mPosition = 2},
+    					   {.mPokemon = &member6, .mPosition = 3},},
+    			.mSideB = {{.mPokemon = &member4, .mPosition = 0}, {.mPokemon = &member5, .mPosition = 1}},
+    		}),
+    	};
+		BattleTarget source{.mSide = Side::B, .mSlotIndex = 1};
+
+		WHEN("calling with an invalid source")
+		{
+			source.mSlotIndex = 5;
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::Self, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns InvalidActiveSlot")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidActiveSlot));
+			}
+		}
+
+		WHEN("calling when the targetID is Self")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::Self, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns an array with the source only")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				CHECK((targets.size() == 1));
+				CHECK((targets.at(0) == source));
+			}
+		}
+
+		WHEN("calling when the targetID is SingleAlly")
+		{
+			BattleTarget ally{.mSide = Side::B, .mSlotIndex = 0};
+
+			WHEN("calling with a supplied selected target")
+			{
+				WHEN("the selected target is targeting the same side as the source")
+				{
+					ally.mSide = Side::A;
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent, ally),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is not able to be hit by the BattleRangeID")
+				{
+					ally.mSlotIndex = 3;
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent, ally),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is able to be resolved")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent, ally),
+					};
+
+					THEN("it returns the singular target")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == ally));
+					}
+				}
+			}
+
+			WHEN("calling without a supplied selected target")
+			{
+				WHEN("there's more than one valid target")
+				{
+					state.mSideB = {
+						{.mPokemon = &member4, .mPosition = 0},
+						{.mPokemon = &member5, .mPosition = 1},
+						{.mPokemon = &member7, .mPosition = 2},
+					};
+
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("there's only one valid target")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns an array with the singular opponent")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == ally));
+					}
+				}
+			}
+		}
+
+		WHEN("calling when the targetID is SingleOpponent")
+		{
+			WHEN("calling with a supplied selected target")
+			{
+				BattleTarget target{.mSide = Side::A, .mSlotIndex = 1};
+
+				WHEN("the selected target is targeting the same side as the source")
+				{
+					target.mSide = Side::B;
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOpponent, BattleRangeID::Adjacent, target),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is not able to be hit by the BattleRangeID")
+				{
+					target.mSlotIndex = 3;
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOpponent, BattleRangeID::Adjacent, target),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is able to be resolved")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOpponent, BattleRangeID::Adjacent, target),
+					};
+
+					THEN("it returns the singular target")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == target));
+					}
+				}
+			}
+
+			WHEN("calling without a supplied selected target")
+			{
+				WHEN("there's more than one valid target")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOpponent, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("there's only one valid target")
+				{
+					state.mSideA = {{.mPokemon = &member1, .mPosition = 0}};
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOpponent, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns an array with the singular opponent")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						BattleTarget opp{.mSide = Side::A, .mSlotIndex = 0};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == opp));
+					}
+				}
+			}
+		}
+
+		WHEN("calling when the targetID is AllAlliesIncludingSelf")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::AllAlliesIncludingSelf, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns an array with the all Pokemon onsource only")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				BattleTarget ally1{.mSide = Side::B, .mSlotIndex = 0};
+
+				CHECK((targets.size() == 2));
+				CHECK((targets.at(0) == ally1));
+				CHECK((targets.at(1) == source));
+			}
+		}
+
+		WHEN("calling when the targetID is AllAlliesExceptSelf")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::AllAlliesExceptSelf, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns an array with the all Pokemon onsource only")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				BattleTarget ally1{.mSide = Side::B, .mSlotIndex = 0};
+
+				CHECK((targets.size() == 1));
+				CHECK((targets.at(0) == ally1));
+			}
+		}
+
+		WHEN("calling when the targetID is AllOpponents")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::AllOpponents, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns an array with the all Pokemon onsource only")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+				BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+				BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+
+				CHECK((targets.size() == 3));
+				CHECK((targets.at(0) == opp1));
+				CHECK((targets.at(1) == opp2));
+				CHECK((targets.at(2) == opp3));
+			}
+		}
+
+		WHEN("calling when the targetID is AllExceptSelf")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::AllExceptSelf, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns an array with the all Pokemon onsource only")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+				BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+				BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+				BattleTarget ally1{.mSide = Side::B, .mSlotIndex = 0};
+
+				CHECK((targets.size() == 4));
+				CHECK((targets.at(0) == opp1));
+				CHECK((targets.at(1) == opp2));
+				CHECK((targets.at(2) == opp3));
+				CHECK((targets.at(3) == ally1));
+			}
+		}
+
+		WHEN("calling with an unknown BattleTargetID")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, static_cast<BattleTargetID>(200), BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns InvalidTarget")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidTarget));
+			}
+		}
+
+		WHEN("calling when there are no valid targets")
+		{
+			source.mSide = Side::A;
+			source.mSlotIndex = 3;
+
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+				resolveTargets(state, source, BattleTargetID::AllOpponents, BattleRangeID::Adjacent),
+			};
+
+			THEN("it returns InvalidTarget")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidTarget));
+			}
+		}
+	}
+
+	GIVEN("getMoveTargets")
+	{
+		RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+		const MoveRegistry *moveRegistry{provider.mMoveRegistry};
+		BattleTarget target{.mSide = Side::B, .mSlotIndex = 1};
+		MoveAction action{.mSelectedTarget = target, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 0};
+
+		Pokemon member1{
+			makePokemon({.mMoveIDs = {{toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), MoveID{200}}}, .mHealth = 50}),
+		};
+		Pokemon member2{makePokemon({.mHealth = 60})};
+		Pokemon member3{makePokemon({.mHealth = 60})};
+		BattleState state{
+			makeBattleState({
+				.mSideA = {{{.mPokemon = &member1}}},
+				.mSideB = {{{.mPokemon = &member2}, {.mPokemon = &member3}}},
+				.mBattleStarted = true,
+			}),
+		};
+
+		WHEN("calling with a battle that's not already started")
+		{
+			state.mBattleStarted = false;
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns InvalidActiveSlot")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidActiveSlot));
+			}
+		}
+
+		WHEN("calling with an action user slot that is larger than the active slots")
+		{
+			action.mUserSlotIndex = 5;
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns InvalidActiveSlot")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidActiveSlot));
+			}
+		}
+
+		WHEN("calling with an action pointing to a fainted Pokemon")
+		{
+			member1.setHealth(0);
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns InvalidActiveSlot")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidActiveSlot));
+			}
+		}
+
+		WHEN("calling with an action move slot that is larger than the move slots")
+		{
+			action.mMoveSlotIndex = 5;
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns InvalidMoveSlot")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::InvalidMoveSlot));
+			}
+		}
+
+		WHEN("calling with a move action that points to invalid move metadata")
+		{
+			action.mMoveSlotIndex = 2;
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns MoveNotFound")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == BattleEngineError::MoveNotFound));
+			}
+		}
+
+		WHEN("calling with a valid move on a valid target")
+		{
+			std::expected<std::vector<BattleTarget>, BattleEngineError> result{getMoveTargets(state, action, moveRegistry)};
+
+			THEN("it returns the singular target")
+			{
+				REQUIRE(result.has_value());
+
+				std::vector<BattleTarget> &targets{result.value()};
+
+				CHECK((targets.size() == 1));
+				CHECK((targets.at(0) == target));
+			}
+		}
+	}
+
+	GIVEN("getBattleTarget")
+	{
+		WHEN("calling with a MoveAction")
+		{
+			MoveAction action{.mSide = Side::B, .mUserSlotIndex = 2};
+			BattleTarget result{getBattleTarget(action)};
+
+			THEN("it returns the expected BattleTarget")
+			{
+				BattleTarget expected{.mSide = Side::B, .mSlotIndex = 2};
+				CHECK((result == expected));
+			}
+		}
+
+		WHEN("calling with a SwitchAction")
+		{
+			SwitchAction action{.mSide = Side::A, .mActiveSlotIndex = 1};
+			BattleTarget result{getBattleTarget(action)};
+
+			THEN("it returns the expected BattleTarget")
+			{
+				BattleTarget expected{.mSide = Side::A, .mSlotIndex = 1};
+				CHECK((result == expected));
 			}
 		}
 	}

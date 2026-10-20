@@ -1,6 +1,6 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/14/2026
+	@date 10/20/2026
 	@since 0.3.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include <ostream>
+#include <ranges>
 #include <string_view>
 
 #include "Core/concepts.h"
@@ -55,14 +56,14 @@ namespace PocketCore::Pokemon
 				  << "    EV: " << pokemon.getPokemonEV(toIndex(PokemonStat::Speed)) << '\n'
 				  << "  Type IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getTypeIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getTypeIDsArray().size()))
 		{
 			outputPokemonDataID(outStream, [&pokemon](const ub typeIndex) { return pokemon.getTypeID(typeIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Nature IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getNatureIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getNatureIDsArray().size()))
 		{
 			outputPokemonDataID(
 				outStream, [&pokemon](const ub natureIndex) { return pokemon.getNatureID(natureIndex); }, static_cast<ub>(index));
@@ -70,7 +71,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "]\n  Ability IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getAbilityIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityIDsArray().size()))
 		{
 			outputPokemonDataID(
 				outStream, [&pokemon](const ub abilityIndex) { return pokemon.getAbilityID(abilityIndex); }, static_cast<ub>(index));
@@ -78,14 +79,14 @@ namespace PocketCore::Pokemon
 
 		outStream << "]\n  Item IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getItemsIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getItemsIDsArray().size()))
 		{
 			outputPokemonDataID(outStream, [&pokemon](const ub itemIndex) { return pokemon.getItemID(itemIndex); }, static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Non-Volatile Status IDs: [";
 
-		for (std::size_t index{0}; index < pokemon.getStatusIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getStatusIDsArray().size()))
 		{
 			outputPokemonDataID(
 				outStream, [&pokemon](const ub statusIndex) { return pokemon.getStatusID(statusIndex); }, static_cast<ub>(index));
@@ -93,7 +94,7 @@ namespace PocketCore::Pokemon
 
 		outStream << "]\n  Moves:\n";
 
-		for (std::size_t index{0}; index < pokemon.getMoveIDsArray().size(); ++index)
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getMoveIDsArray().size()))
 		{
 			const ub moveSlotIndex{static_cast<ub>(index)};
 			outStream << "    [" << index << "] ID: " << pokemon.getMoveID(moveSlotIndex).getValue()
