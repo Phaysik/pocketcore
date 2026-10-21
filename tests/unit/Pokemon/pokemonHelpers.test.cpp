@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/14/2026
+	@date 10/21/2026
 	@since 0.12.28
 	@version 0.12.51
 	@author Matthew Moore
@@ -1516,11 +1516,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1636,11 +1636,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1756,11 +1756,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1876,11 +1876,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1996,11 +1996,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2116,11 +2116,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2236,11 +2236,11 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 3\n"
+						"      ID: 4\n"
 						"      Name: <unregistered>\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: <unregistered>\n"
 						"      PP: 20/30\n"
 						"}",

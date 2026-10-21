@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the move registry.
-	@date 09/02/2026
+	@date 10/21/2026
 	@since 0.5.2
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,8 +17,10 @@ namespace PocketCore::Move
 	inline constexpr std::string_view MOVE_NAME_POUND{"Pound"};
 	inline constexpr std::string_view MOVE_NAME_KARATE_CHOP{"Karate Chop"};
 
+	inline constexpr std::string_view MOVE_NAME_QUICK_ATTACK{"Quick Attack"};
 	inline constexpr std::string_view MOVE_NAME_FACADE{"Facade"};
 	inline constexpr std::string_view MOVE_NAME_HYDRO_STEAM{"Hydro Steam"};
+	inline constexpr std::string_view MOVE_NAME_EXTREME_SPEED{"Extreme Speed"};
 } // namespace PocketCore::Move
 
 #endif

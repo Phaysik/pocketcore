@@ -1,8 +1,8 @@
 /*! @file battleAction.h
 	@brief Defines actions for battle states.
-	@date 09/03/2026
+	@date 10/21/2026
 	@since 0.10.2
-	@version 0.12.19
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -55,14 +55,25 @@ namespace PocketCore::Battle
 
 	/*! @struct MoveAction Battle/battleAction.h
 		@brief Describes one active Pokemon selecting a move during a turn.
-		@date 09/03/2026
+		@date 10/21/2026
 		@since 0.9.16
-		@version 0.12.19
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	struct MoveAction
 	{
 		public:
+			/*! @brief Compares two MoveAction instances for equality.
+				@details Compares all fields exactly.
+				@param[in] other The MoveAction instance to compare.
+				@return True when all fields are equal; otherwise false.
+				@since 0.12.51
+				@version 0.12.51
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const MoveAction &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
 			/*! @brief The explicitly selected target for single-target moves, or no value for automatically resolved targets. */
 			std::optional<BattleTarget> mSelectedTarget{};
 
@@ -74,6 +85,8 @@ namespace PocketCore::Battle
 
 			/*! @brief The zero-based move slot selected from the user's move set. */
 			ub mMoveSlotIndex{0};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	/*! @struct SwitchAction Battle/battleAction.h

@@ -1,7 +1,6 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 10/13/2026
-	@since 0.5.2
+	@date 10/21/2026
 	@version 0.12.51
 	@author Matthew Moore
 */
@@ -26,9 +25,9 @@ namespace PocketCore::Move
 		@details This closed enum is only a catalog of built-in moves. Runtime state and user-facing APIs use the open @ref MoveID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 10/21/2026
 		@version 0.5.2
-		@version 0.12.13
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	enum class BuiltinMoveID : ub
@@ -37,8 +36,10 @@ namespace PocketCore::Move
 		Pound,
 		KarateChop,
 
+		QuickAttack,
 		Facade,
 		HydroSteam,
+		ExtremeSpeed,
 		FinalMove,
 	};
 

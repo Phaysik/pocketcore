@@ -1,6 +1,6 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.6.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -39,9 +39,11 @@ using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::MOVE_NAME_EXTREME_SPEED;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 using PocketCore::Move::MOVE_NAME_NONE;
 using PocketCore::Move::MOVE_NAME_POUND;
+using PocketCore::Move::MOVE_NAME_QUICK_ATTACK;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
@@ -124,6 +126,68 @@ SCENARIO("MoveRegistry")
 			};
 
 			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::KarateChop))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Quick Attack has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_QUICK_ATTACK),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::QuickAttack),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mPower = 40,
+				.mTargetID = BattleTargetID::SingleOpponent,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 1,
+				.mPPMaxAmount = 48,
+				.mPPDefaultAmount = 30,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::QuickAttack))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Extreme Speed has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_EXTREME_SPEED),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::ExtremeSpeed),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mPower = 80,
+				.mTargetID = BattleTargetID::SingleOpponent,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 2,
+				.mPPMaxAmount = 8,
+				.mPPDefaultAmount = 5,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::ExtremeSpeed))};
 
 			CHECK((expected == *actual));
 		}

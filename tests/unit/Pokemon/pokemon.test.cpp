@@ -1,6 +1,6 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.4.0
 	@version 0.12.51
 	@author Matthew Moore
@@ -1631,7 +1631,7 @@ SCENARIO("Pokemon")
 	{
 		Pokemon pokemon{
     		makePokemon({
-        		.mNatureRegistry = natureRegistry,
+        		.mNatureRegistry = &natureRegistry,
     			.mName = "MissingNo",
     			.mStats = {
     				.mMaxHealth = 100,
