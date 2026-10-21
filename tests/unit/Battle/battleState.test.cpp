@@ -1,8 +1,8 @@
 /*! @file battleState.test.cpp
 	@brief C++ file for running tests for the BattleState.
-	@date 10/15/2026
+	@date 10/21/2026
 	@since 0.12.45
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -321,28 +321,51 @@ SCENARIO("BattleSlot")
 	StatStages stages{.mDefense = 2, .mSpAttack = 1, .mAccuracy = 4, .mEvasion = 3};
 	DamageFormulaModifiers modifiers{.mHealthModifier = 2.3, .mDefenseModifier = 1.2, .mSpeedModifier = 0.85};
 	Pokemon pokemon{
-			makePokemon({
-				.mName = "TestMon",
-				.mStats = {
-					.mMaxHealth = 150,
-					.mAttack = 101,
-					.mDefense = 102,
-					.mSpAttack = 103,
-					.mSpDefense = 104,
-					.mSpeed = 105,
-				},
-				.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
-				.mMoveIDs = {MoveID{10}, MoveID{11}, MoveID{12}, MoveID{13}},
-				.mMaxPP = {15, 20, 25, 30},
-				.mCurrentPP = {5, 10, 15, 20},
-				.mTypesIDs = {TypeID{2}, TypeID{3}},
-				.mAbilityIDs = {AbilityID{6}},
-				.mItemIDs = {ItemID{7}},
-				.mNatureIDs = {NatureID{1}},
-				.mHealth = 150,
-				.mLevel = 50,
-			}),
-		};
+		makePokemon({
+			.mMetadata = {
+            	.mName = "TestMon",
+            	.mBaseStats = {
+            		.mMaxHealth = 150,
+            		.mAttack = 101,
+            		.mDefense = 102,
+            		.mSpAttack = 103,
+            		.mSpDefense = 104,
+            		.mSpeed = 105,
+            	},
+            	.mTypeIDs = {TypeID{2}, TypeID{3}},
+			},
+			.mMoveMetas = {
+    			{
+                    {
+                        .mMoveID = MoveID{10},
+                        .mPPMaxAmount = 15,
+                        .mPPDefaultAmount = 5,
+                    },
+                    {
+                        .mMoveID = MoveID{11},
+                        .mPPMaxAmount = 20,
+                        .mPPDefaultAmount = 10,
+        			},
+                    {
+                        .mMoveID = MoveID{12},
+                        .mPPMaxAmount = 25,
+                        .mPPDefaultAmount = 15,
+        			},
+                    {
+                        .mMoveID = MoveID{13},
+                        .mPPMaxAmount = 30,
+                        .mPPDefaultAmount = 20,
+        			},
+                },
+			},
+			.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
+			.mAbilityIDs = {AbilityID{6}},
+			.mItemIDs = {ItemID{7}},
+			.mNatureIDs = {NatureID{1}},
+			.mHealth = 150,
+			.mLevel = 50,
+		}),
+	};
 	std::array<VolatileStatus, MAX_VOLATILE_STATUSES_PER_POKEMON> volatileStatuses{
 		{{.mStatusID{toStatusID(BuiltinStatusID::Autotomize)}}, {.mStatusID{toStatusID(BuiltinStatusID::AquaRing)}}},
 	};

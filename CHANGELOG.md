@@ -2246,7 +2246,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.51]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.52]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.51]: https://github.com/Phaysik/pocketcore/commit/0b746160cbe460be20e0a006f04409d7c7d08167
 [0.12.50]: https://github.com/Phaysik/pocketcore/commit/b87e380fc66c471f200ae1bf81abcd8d9d9909e1
 [0.12.49]: https://github.com/Phaysik/pocketcore/commit/acf73762f2a948421600281c252d4af5c1c500f5
 [0.12.48]: https://github.com/Phaysik/pocketcore/commit/8980057e4dbb9974a16863df96fe425e41a8ca5d

@@ -1,8 +1,8 @@
 /*! @file pokemonIO.test.cpp
 	@brief C++ file for running tests pertaining to the input/output operations on Pokemon.
-	@date 10/20/2026
+	@date 10/21/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -38,7 +38,7 @@ SCENARIO("Pokemon IO functions")
 		GIVEN("data with two values")
 		{
 			Pokemon pokemon{
-				makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)}}),
+				makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)}}}),
 			};
 
 			WHEN("the data is properly written to the stream")

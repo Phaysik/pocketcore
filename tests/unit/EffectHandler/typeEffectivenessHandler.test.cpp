@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.test.cpp
 	@brief C++ file for running tests for the TypeEffectivenessHandler.
-	@date 10/19/2026
+	@date 10/21/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -151,7 +151,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon with no type ID")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::None), toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::None), toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -169,7 +169,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon with an invalid type ID")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {TypeID{200}, toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {TypeID{200}, toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -190,7 +190,7 @@ SCENARIO("TypeEffectivenessHandler")
 		REQUIRE(typeConfiguration.setMatchup(TYPE_NAME_FIRE, TYPE_NAME_GRASS, TypeEffectiveness::NOT_DEFINED).has_value());
 		REQUIRE((typeConfiguration.getMatchup(TYPE_NAME_FIRE, TYPE_NAME_GRASS) == TypeEffectiveness::NOT_DEFINED));
 
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -208,7 +208,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon which will fully resist a move")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Ghost)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Ghost)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -227,7 +227,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon which will quad resist a move")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Grass)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Grass)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -247,7 +247,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon which will half resist a move")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Electric), toTypeID(BuiltinTypeID::Steel)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Electric), toTypeID(BuiltinTypeID::Steel)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -266,7 +266,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon which will have a half weakness to a move")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Dark)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Dark)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};
@@ -285,7 +285,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 	GIVEN("a target pokemon which will have a quad weakness to a move")
 	{
-		Pokemon newTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Rock), toTypeID(BuiltinTypeID::Ground)}})};
+		Pokemon newTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Rock), toTypeID(BuiltinTypeID::Ground)}}})};
 		BattleState newBattleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &newTarget}}}),
 		};

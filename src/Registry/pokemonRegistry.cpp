@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/19/2026
+	@date 10/21/2026
 	@since 0.12.28
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <array>
 #include <cstddef>
 #include <expected>
+#include <numeric>
 #include <span>
 #include <type_traits>
 #include <variant>
@@ -170,18 +171,22 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{error.error()};
 		}
 
+		std::array<MoveMeta, MAX_MOVES_PER_POKEMON> moveMetas;
+
+		for (const std::size_t index : std::views::iota(std::size_t{0}, MAX_MOVES_PER_POKEMON))
+		{
+			const MoveID currentMove{validMoveIDs.at(index)};
+			const MoveMeta *meta{dependencyRegistries->mMoveRegistry->getMoveMetadata(currentMove)};
+			moveMetas.at(index)
+				= {.mMoveID = validMoveIDs.at(index), .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
+		};
+
 		return Pokemon{
-			pokemonMeta->mPokemonID,
-			pokemonMeta->mLearnsetID,
-			pokemonMeta->mName,
-			validMoveIDs,
-			{},
-			{},
-			pokemonMeta->mBaseStats,
+			*pokemonMeta,
+			moveMetas,
 			pokemonEncounterLevel,
 			validAbilityIDs,
 			validItemIDs,
-			pokemonMeta->mTypeIDs,
 			validNatureIDs,
 			*dependencyRegistries->mNatureRegistry,
 			validIVs,
