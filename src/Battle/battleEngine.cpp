@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/08/2026
+	@date 10/20/2026
 	@since 0.9.16
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <expected>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <utility>
 #include <variant>
@@ -22,6 +23,7 @@
 #include "Ability/abilityMeta.h"
 #include "Battle/battleAction.h"
 #include "Battle/battleHelpers.h"
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Battle/battleValidation.h"
@@ -45,6 +47,8 @@
 #include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
 #include "Terrain/terrainID.h"
+#include "Validation/Battle/battleError.h"
+#include "Validation/Battle/battleValidation.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
@@ -57,7 +61,6 @@ namespace PocketCore::Battle
 	using PocketCore::Configuration::MAX_ACTIVE_WEATHERS_ON_FIELD;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
-	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectID;
 	using PocketCore::Effect::EffectMeta;
@@ -78,13 +81,23 @@ namespace PocketCore::Battle
 	using PocketCore::Ruleset::validateRulesetPolicy;
 	using PocketCore::Status::StatusID;
 	using PocketCore::Terrain::TerrainID;
+	using PocketCore::Validation::Battle::BattleEngineError;
 	using PocketCore::Weather::WeatherID;
+	using Validation::Battle::getValidationResult;
+	using Validation::Battle::validateSwitchAction;
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::startBattle(const std::span<Pokemon *const> &partyA,
 																					const std::span<Pokemon *const> &partyB,
 																					const RulesetPolicy &ruleset,
 																					const ub activePokemonPerSide)
 	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		const ExecutionGuard executionGuard{mIsExecuting};
+
 		// Starting twice would discard live battle state, so reject the request before validating new input
 		if (mState.mBattleStarted)
 		{
@@ -96,7 +109,7 @@ namespace PocketCore::Battle
 			|| mProvider->mMoveRegistry == nullptr || mProvider->mItemRegistry == nullptr || mProvider->mTypeRegistry == nullptr
 			|| mProvider->mStatusRegistry == nullptr || mProvider->mWeatherRegistry == nullptr || mProvider->mTerrainRegistry == nullptr
 			|| mProvider->mMultiplierRegistry == nullptr || mProvider->mNatureRegistry == nullptr || mProvider->mPokemonRegistry == nullptr
-			|| mProvider->mLearnsetRegistry == nullptr)
+			|| mProvider->mLearnsetRegistry == nullptr || mProvider->mLocationRegistry == nullptr)
 		{
 			return std::unexpected{BattleEngineError::MissingRegistry};
 		}
@@ -115,7 +128,7 @@ namespace PocketCore::Battle
 		}
 
 		// Count usable party members independently from party size because fainted Pokemon cannot start active.
-		if (healthyPokemonInParty(partyA) < activePokemonPerSide || healthyPokemonInParty(partyB) < activePokemonPerSide)
+		if (amountOfHealthyPokemonInParty(partyA) < activePokemonPerSide || amountOfHealthyPokemonInParty(partyB) < activePokemonPerSide)
 		{
 			return std::unexpected{BattleEngineError::InvalidParty};
 		}
@@ -152,7 +165,7 @@ namespace PocketCore::Battle
 		{
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				const BattleTarget owner{.mSide = side, .mSlotIndex = static_cast<ub>(slotIndex)};
 
@@ -169,6 +182,13 @@ namespace PocketCore::Battle
 
 	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::executeTurn(const std::span<const BattleAction> &actions)
 	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		const ExecutionGuard executionGuard{mIsExecuting};
+
 		// Reject invalid engine phases before allocating work buffers or inspecting actions
 		if (!mState.mBattleStarted)
 		{
@@ -265,7 +285,7 @@ namespace PocketCore::Battle
 		}
 
 		// Randomize exact move-order ties before applying the priority and speed ordering below.
-		handleMovePrioritization(mState, moves, mProvider->mMoveRegistry);
+		handleMovePrioritization(mState, moves, mProvider->mMoveRegistry, mRandomSources.mIndex);
 
 		// Re-check volatile battle conditions because earlier actions may have fainted or disabled a later actor.
 		std::ranges::for_each(moves, [this](const MoveAction &moveAction) {
@@ -286,11 +306,27 @@ namespace PocketCore::Battle
 		return {};
 	}
 
+	ATTR_NODISCARD std::expected<void, BattleEngineError> BattleEngine::setRandomSources(const BattleRandomSources &randomSources) noexcept
+	{
+		if (mIsExecuting)
+		{
+			return std::unexpected{BattleEngineError::EngineBusy};
+		}
+
+		mRandomSources = randomSources;
+		return {};
+	}
+
 #if ATTR_ONLY_GCC
 	// GCC suggests returns_nonnull for references even though the attribute accepts only pointer returns.
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wsuggest-attribute=returns_nonnull"
 #endif
+
+	ATTR_NODISCARD ATTR_CONST const BattleRandomSources &BattleEngine::getRandomSources() const noexcept
+	{
+		return mRandomSources;
+	}
 
 	ATTR_NODISCARD ATTR_CONST const BattleState &BattleEngine::getState() const noexcept
 	{
@@ -453,10 +489,11 @@ namespace PocketCore::Battle
 			statusTarget = targetSlot != nullptr ? targetSlot->mPokemon : nullptr;
 		}
 
-		const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> previousStatuses{
-			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){}};
+		const std::span<const StatusID> previousStatuses{
+			statusTarget != nullptr ? statusTarget->getStatusIDsArray() : decltype(statusTarget->getStatusIDsArray()){},
+		};
 
-		effectMeta->mApply(mState, context, *mProvider);
+		effectMeta->mApply(mState, context, *mProvider, mRandomSources);
 
 		if (mayChangeWeather && mState.mWeatherIDs != previousWeatherIDs)
 		{
@@ -468,7 +505,7 @@ namespace PocketCore::Battle
 			triggerWhenStateChanged(BattleEventID::TerrainChanged, context);
 		}
 
-		if (statusTarget != nullptr && statusTarget->getStatusIDsArray() != previousStatuses)
+		if (statusTarget != nullptr && !std::ranges::equal(statusTarget->getStatusIDsArray(), previousStatuses))
 		{
 			const BattleTarget target{.mSide = context.mTargetSide, .mSlotIndex = context.mTargetIndex};
 			triggerSlotInContext(target, BattleEventID::StatusChanged, context, BattleEventRole::Target);
@@ -480,7 +517,7 @@ namespace PocketCore::Battle
 		std::ranges::for_each(std::array{Side::A, Side::B}, [this, &context, &triggerID](const Side side) {
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (isHealthy(slots.at(slotIndex)))
 				{
@@ -523,7 +560,7 @@ namespace PocketCore::Battle
 		};
 
 		// Ability and item effects are not constrained by move formation range.
-		const auto targets{resolveTargets(mState, owner.mSide, owner.mSlotIndex, targetID, BattleRangeID::Unrestricted, selectedTarget)};
+		const auto targets{resolveTargets(mState, owner, targetID, BattleRangeID::Unrestricted, selectedTarget)};
 
 		if (targets.has_value())
 		{
@@ -573,7 +610,7 @@ namespace PocketCore::Battle
 		mActiveSuppressions.clear();
 
 		userPokemon->usePP(action.mMoveSlotIndex);
-		const ub hitCount{resolveHitCount(*moveMeta)};
+		const ub hitCount{resolveHitCount(*moveMeta, mRandomSources.mReal)};
 		const BattleTarget user{.mSide = action.mSide, .mSlotIndex = action.mUserSlotIndex};
 		EffectContext moveContext{makeMoveContext(action, *moveMeta, targetsResult->front(), 0U)};
 
@@ -828,7 +865,7 @@ namespace PocketCore::Battle
 		{
 			const std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (isHealthy(slots.at(slotIndex)))
 				{
@@ -882,19 +919,19 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs{pokemon->getAbilityIDsArray()};
+		const std::span<const AbilityID> abilityIDs{pokemon->getAbilityIDsArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
 			return abilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityID) : nullptr;
 		});
 
-		const std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{pokemon->getItemsIDsArray()};
+		const std::span<const ItemID> itemIDs{pokemon->getItemsIDsArray()};
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(), [this](const ItemID itemID) {
 			return itemID != NO_ITEM_ID ? mProvider->mItemRegistry->getItemMetadata(itemID) : nullptr;
 		});
 
-		const std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{pokemon->getNatureIDsArray()};
+		const std::span<const NatureID> natureIDs{pokemon->getNatureIDsArray()};
 		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
 		std::ranges::transform(natureIDs, natureMetas.begin(), [this](const NatureID natureID) {
 			return natureID != NO_NATURE_ID ? mProvider->mNatureRegistry->getNatureMetadata(natureID) : nullptr;
@@ -957,7 +994,7 @@ namespace PocketCore::Battle
 		{
 			std::vector<BattleSlot> &slots{activeSlots(mState, side)};
 
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				BattleSlot &slot{slots.at(slotIndex)};
 
@@ -1008,7 +1045,7 @@ namespace PocketCore::Battle
 			}
 
 			// Record every unhealthy active slot that can be filled from the reserve party.
-			for (std::size_t slotIndex{0}; slotIndex < slots.size(); ++slotIndex)
+			for (const std::size_t slotIndex : std::views::iota(std::size_t{0}, slots.size()))
 			{
 				if (!isHealthy(slots.at(slotIndex)))
 				{

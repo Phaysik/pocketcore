@@ -1,8 +1,8 @@
 /*! @file randomizationHandler.cpp
 	@brief Contains the randomization effect handler implementation
-	@date 08/28/2026
+	@date 10/19/2026
 	@since 0.9.6
-	@version 0.12.9
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <cassert>
 #include <string_view>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -20,10 +21,10 @@
 #include "Multiplier/builtInMultiplierID.h"
 #include "Registry/registryProvider.h"
 #include "Utility/Debug/Logging/logger.h"
-#include "Utility/random.h"
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::RANDOMIZATION_MULTIPLIER_MAX_VALUE;
 	using PocketCore::Configuration::RANDOMIZATION_MULTIPLIER_MIN_VALUE;
@@ -32,12 +33,12 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Utility::Debug::Logging::Logger;
-	using PocketCore::Utility::Random;
 
-	void RandomizationHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void RandomizationHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+									 const BattleRandomSources &randomSources) const
 	{
 		const double randomizationMultiplier{
-			static_cast<double>(Random::get<ub>(RANDOMIZATION_MULTIPLIER_MIN_VALUE, RANDOMIZATION_MULTIPLIER_MAX_VALUE)) / 100,
+			static_cast<double>(randomSources.mUnsigned(RANDOMIZATION_MULTIPLIER_MIN_VALUE, RANDOMIZATION_MULTIPLIER_MAX_VALUE)) / 100,
 		};
 
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};

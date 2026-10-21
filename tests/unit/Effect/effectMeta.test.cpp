@@ -1,8 +1,8 @@
 /*! @file effectMeta.test.cpp
 	@brief C++ file for running tests for the EffectMeta.
-	@date 09/23/2026
+	@date 10/13/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,7 +11,6 @@
 #include "Effect/builtInEffectID.h"
 #include "Effect/effectID.h"
 #include "EffectHandler/setRainHandler.h"
-#include "Interaction/interaction.h"
 
 #include <catch2/catch_test_macros.hpp>
 

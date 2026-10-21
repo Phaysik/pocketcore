@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.cpp
 	@brief Contains the accuracy check effect handler implementation
-	@date 08/31/2026
+	@date 10/19/2026
 	@since 0.7.5
-	@version 0.12.13
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/cache.h"
 #include "Configuration/constants.h"
@@ -20,10 +21,10 @@
 #include "EffectHandler/effectHandlerHelpers.h"
 #include "EffectHandler/effectHandlerInterface.h"
 #include "Registry/registryProvider.h"
-#include "Utility/random.h"
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::CACHE_ACCURACY_STAGE_MULTIPLIERS;
@@ -33,9 +34,9 @@ namespace PocketCore::Effect
 	using PocketCore::Core::sb;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::RegistryProvider;
-	using PocketCore::Utility::Random;
 
-	void AccuracyCheckHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void AccuracyCheckHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+									 const BattleRandomSources &randomSources) const
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};
@@ -48,7 +49,7 @@ namespace PocketCore::Effect
 
 		accuracy = std::max(std::min(accuracy, 100.0), 0.0);
 
-		const sb randomValue{Random::get<sb>(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE)};
+		const sb randomValue{randomSources.mSigned(MIN_ACCURACY_HIT_VALUE, MAX_ACCURACY_HIT_VALUE)};
 
 		if (randomValue > static_cast<sb>(accuracy))
 		{

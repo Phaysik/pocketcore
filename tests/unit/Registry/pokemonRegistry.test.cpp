@@ -1,14 +1,15 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/pokemonRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -23,8 +24,8 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonMeta.h"
-#include "Registry/registryError.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -59,9 +60,9 @@ using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
 using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -72,7 +73,8 @@ static_assert(!PubliclyStructurallyMutable<PokemonRegistry>);
 
 SCENARIO("PokemonRegistry")
 {
-	PokemonRegistry registry{};
+	std::unique_ptr<PokemonRegistry> registryStorage{std::make_unique<PokemonRegistry>()};
+	PokemonRegistry &registry{*registryStorage};
 	ub finalPokemonUnderlyingValue{std::to_underlying(BuiltinPokemonID::FinalPokemon)};
 
 	GIVEN("a default constructed pokemon registry")
@@ -372,49 +374,49 @@ SCENARIO("PokemonRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			PokemonRegistry other{};
+			std::unique_ptr<PokemonRegistry> other{std::make_unique<PokemonRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			PokemonRegistryConfiguration other{};
-			std::expected<PokemonID, RegistryErrorInfo> result{other.addPokemon({.mName = "test"})};
+			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
+			std::expected<PokemonID, RegistryError> result{other->addPokemon({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			PokemonRegistryConfiguration other{};
-			std::expected<PokemonID, RegistryErrorInfo> result{other.removePokemon(toPokemonID(BuiltinPokemonID::None))};
+			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
+			std::expected<PokemonID, RegistryError> result{other->removePokemon(toPokemonID(BuiltinPokemonID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			PokemonRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updatePokemon(toPokemonID(BuiltinPokemonID::None), {.mName = "test"}),
+			std::unique_ptr<PokemonRegistryConfiguration> other{std::make_unique<PokemonRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updatePokemon(toPokemonID(BuiltinPokemonID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

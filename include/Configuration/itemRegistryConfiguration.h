@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring item metadata.
-	@date 08/27/2026
+	@date 10/13/2026
 	@since 0.5.0
-	@version 0.12.8
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,6 +23,7 @@
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
 #include "Registry/itemRegistry.h"
+#include "Validation/Registry/registryError.h"
 
 namespace PocketCore::Configuration
 {
@@ -32,6 +33,7 @@ namespace PocketCore::Configuration
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
 	using PocketCore::Registry::Item::ItemRegistry;
+	using PocketCore::Validation::Registry::RegistryError;
 
 	namespace Detail
 	{
@@ -40,9 +42,9 @@ namespace PocketCore::Configuration
 			@details Encapsulates the item-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 07/27/2026
+			@date 10/09/2026
 			@since 0.5.0
-			@version 0.5.1
+			@version 0.12.51
 			@author Matthew Moore
 		*/
 		struct ItemRegistryConfigurationPolicy
@@ -54,10 +56,10 @@ namespace PocketCore::Configuration
 				/*! @brief The singular entity type managed by this configuration. */
 				static constexpr std::string_view entityName{"item"};
 
-				/*! @brief The error code returned when a duplicate ability name is registered. */
+				/*! @brief The error code returned when a duplicate item name is registered. */
 				static constexpr RegistryError duplicateError{RegistryError::DuplicateItem};
 
-				/*! @brief The error code returned when an ability lookup fails. */
+				/*! @brief The error code returned when an item lookup fails. */
 				static constexpr RegistryError notFoundError{RegistryError::ItemNotFound};
 		};
 	} // namespace Detail
@@ -66,9 +68,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal item registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 08/27/2026
+		@date 10/13/2026
 		@since 0.5.0
-		@version 0.12.8
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class ItemRegistryConfiguration
@@ -114,9 +116,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<ItemID> getItemID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -146,9 +148,9 @@ namespace PocketCore::Configuration
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasItem(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasItem(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}
@@ -166,108 +168,106 @@ namespace PocketCore::Configuration
 
 			/*! @brief Registers one user-defined item and assigns a stable ID.
 				@param[in] itemMeta The name and trigger metadata to copy into the registry.
-				@return The assigned ID on success, or @ref RegistryErrorInfo on duplicate name or exhausted capacity.
+				@return The assigned ID on success, or @ref RegistryError on duplicate name or exhausted capacity.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> addItem(const ItemMeta &itemMeta);
+			ATTR_NODISCARD std::expected<ItemID, RegistryError> addItem(const ItemMeta &itemMeta);
 
 			/*! @brief Registers multiple items atomically.
 				@details Restores the complete prior registry state if any definition fails validation.
 				@param[in] itemMetas The item definitions to register in order.
-				@return Void on success, or the first @ref RegistryErrorInfo on failure.
+				@return Void on success, or the first @ref RegistryError on failure.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> addItems(const std::span<const ItemMeta> &itemMetas);
+			ATTR_NODISCARD std::expected<void, RegistryError> addItems(const std::span<const ItemMeta> itemMetas);
 
 			/*! @brief Replaces all trigger metadata for an item selected by name.
 				@param[in] itemName The registered display name.
 				@param[in] triggers The trigger definitions to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.5.0
-				@version 0.12.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const std::string_view &itemName,
-																				  const std::span<const EffectTrigger> &triggers);
+			ATTR_NODISCARD std::expected<void, RegistryError> setItemTriggers(const std::string_view itemName,
+																			  const std::span<const EffectTrigger> triggers);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setItemTriggers(ItemID, std::span<const EffectTrigger>)
+			/*! @overload std::expected<void, RegistryError> setItemTriggers(ItemID, std::span<const EffectTrigger>)
 				@brief Replaces all trigger metadata for an item selected by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] triggers The trigger definitions to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.5.0
-				@version 0.12.6
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTriggers(const ItemID itemID,
-																				  const std::span<const EffectTrigger> &triggers);
+			ATTR_NODISCARD std::expected<void, RegistryError> setItemTriggers(const ItemID itemID,
+																			  const std::span<const EffectTrigger> triggers);
 
 			/*! @brief Replaces all trigger metadata for an item selected by name.
 				@param[in] itemName The registered display name.
 				@param[in] target The target to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.6.0
-				@version 0.9.16
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const std::string_view &itemName,
-																				const BattleTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryError> setItemTarget(const std::string_view itemName, const BattleTargetID target);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> setItemTarget(ItemID, const BattleTargetID target)
+			/*! @overload std::expected<void, RegistryError> setItemTarget(ItemID, const BattleTargetID target)
 				@brief Replaces all trigger metadata for an item selected by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] target The target to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.6.0
-				@version 0.9.14
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> setItemTarget(const ItemID itemID, const BattleTargetID target);
+			ATTR_NODISCARD std::expected<void, RegistryError> setItemTarget(const ItemID itemID, const BattleTargetID target);
 
 			/*! @brief Renames an item without changing its other metadata.
 				@details @p newName is stored as a non-owning view and its backing storage must remain valid while registered.
 				@param[in] oldName The currently registered display name.
 				@param[in] newName The unique replacement display name.
-				@return Void on success, or @ref RegistryErrorInfo if the source is absent or target name is already registered.
+				@return Void on success, or @ref RegistryError if the source is absent or target name is already registered.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> renameItem(const std::string_view &oldName,
-																			 const std::string_view &newName);
+			ATTR_NODISCARD std::expected<void, RegistryError> renameItem(const std::string_view oldName, const std::string_view newName);
 
 			/*! @brief Replaces all item metadata for an item selected by stable ID.
 				@param[in] itemName The registered display name.
 				@param[in] itemMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateItem(const std::string_view &itemName, const ItemMeta &itemMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateItem(const std::string_view itemName, const ItemMeta &itemMeta);
 
-			/*! @overload std::expected<void, RegistryErrorInfo> updateItem(ItemID, const ItemMeta &itemMeta)
+			/*! @overload std::expected<void, RegistryError> updateItem(ItemID, const ItemMeta &itemMeta)
 				@brief Replaces all item metadata for an item selected by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
 				@param[in] itemMeta The metadata to copy into the registry.
-				@return Void on success, or @ref RegistryErrorInfo if the item is not registered.
+				@return Void on success, or @ref RegistryError if the item is not registered.
 				@since 0.6.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<void, RegistryErrorInfo> updateItem(const ItemID itemID, const ItemMeta &itemMeta);
+			ATTR_NODISCARD std::expected<void, RegistryError> updateItem(const ItemID itemID, const ItemMeta &itemMeta);
 
 			/*! @brief Removes an item by display name.
 				@param[in] itemName The registered display name.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching item exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching item exists.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const std::string_view &itemName);
+			ATTR_NODISCARD std::expected<ItemID, RegistryError> removeItem(const std::string_view itemName);
 
-			/*! @overload std::expected<ItemID, RegistryErrorInfo> removeItem(ItemID)
+			/*! @overload std::expected<ItemID, RegistryError> removeItem(ItemID)
 				@brief Removes an item by stable ID.
 				@param[in] itemID The built-in or custom stable identifier.
-				@return The removed stable ID on success, or @ref RegistryErrorInfo if no matching item exists.
+				@return The removed stable ID on success, or @ref RegistryError if no matching item exists.
 				@since 0.5.0
-				@version 0.6.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD std::expected<ItemID, RegistryErrorInfo> removeItem(const ItemID itemID);
+			ATTR_NODISCARD std::expected<ItemID, RegistryError> removeItem(const ItemID itemID);
 	};
 } // namespace PocketCore::Configuration
 

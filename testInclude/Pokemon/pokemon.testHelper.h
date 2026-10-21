@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/08/2026
+	@date 10/21/2026
 	@since 0.12.13
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -21,9 +21,10 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
 #include "Status/statusID.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Testing
 {
@@ -62,7 +63,7 @@ namespace PocketCore::Testing
 	struct PokemonTestData
 	{
 		public:
-			NatureRegistry mNatureRegistry{};
+			const NatureRegistry *mNatureRegistry{nullptr};
 
 			std::string_view mName{POKEMON_NAME_BULBASAUR};
 
@@ -95,12 +96,20 @@ namespace PocketCore::Testing
 			LearnsetID mLearnsetID{NO_LEARNSET_ID};
 	};
 
+	inline const NatureRegistry &getDefaultTestNatureRegistry()
+	{
+		static const NatureRegistry registry{};
+		return registry;
+	}
+
 	constexpr Pokemon makePokemon(const PokemonTestData &data)
 	{
+		const NatureRegistry &natureRegistry{data.mNatureRegistry != nullptr ? *data.mNatureRegistry : getDefaultTestNatureRegistry()};
+
 		Pokemon pokemon{
-			data.mPokemonID, data.mLearnsetID, data.mName,			 data.mMoveIDs,	   data.mMaxPP,
-			data.mCurrentPP, data.mStats,	   data.mLevel,			 data.mAbilityIDs, data.mItemIDs,
-			data.mTypesIDs,	 data.mNatureIDs,  data.mNatureRegistry, data.mPokemonIVs, data.mPokemonEVs,
+			data.mPokemonID, data.mLearnsetID, data.mName,	   data.mMoveIDs,	 data.mMaxPP,
+			data.mCurrentPP, data.mStats,	   data.mLevel,	   data.mAbilityIDs, data.mItemIDs,
+			data.mTypesIDs,	 data.mNatureIDs,  natureRegistry, data.mPokemonIVs, data.mPokemonEVs,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

@@ -1,13 +1,13 @@
 /*! @file terrainID.h
-	@brief Contains the terrain status
-	@date 07/30/2026
+	@brief Defines the open identifier used for built-in and user-defined terrains.
+	@date 10/09/2026
 	@since 0.8.0
-	@version 0.8.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_TERRAIN_TERRAINID_H
-#define INCLUDE_TERRAIN_TERRAINID_H
+#ifndef INCLUDE_TERRAIN_TERRAIN_ID_H
+#define INCLUDE_TERRAIN_TERRAIN_ID_H
 
 #include "ID/idInterface.h"
 

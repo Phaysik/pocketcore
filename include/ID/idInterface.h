@@ -1,8 +1,8 @@
 /*! @file idInterface.h
 	@brief Defines a tagged value type for creating strongly typed stable identifiers.
-	@date 08/26/2026
+	@date 10/14/2026
 	@since 0.4.1
-	@version 0.12.7
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -25,9 +25,9 @@ namespace PocketCore::ID
 	   cannot be compared or implicitly converted even when their numeric values match.
 		@tparam Tag The unique type identifying the registry domain.
 		@tparam DefaultValue The numeric value used by the default constructor.
-		@date 07/27/2026
+		@date 10/14/2026
 		@since 0.4.1
-		@version 0.4.1
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	template <typename Tag, us DefaultValue>
@@ -65,7 +65,7 @@ namespace PocketCore::ID
 
 		private:
 			/*! @brief The stable numeric value assigned by the domain registry. */
-			us mValue{DefaultValue};
+			us mValue{DefaultValue}; // LCOV_EXCL_BR
 	};
 } // namespace PocketCore::ID
 

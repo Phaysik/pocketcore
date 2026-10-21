@@ -1,8 +1,8 @@
 /*! @file multiplierRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined multipliers.
-	@date 09/10/2026
+	@date 10/13/2026
 	@since 0.8.1
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -50,9 +50,9 @@ namespace PocketCore::Registry::Multiplier
 	   may append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MULTIPLIERS.
-		@date 09/10/2026
+		@date 10/13/2026
 		@since 0.8.1
-		@version 0.12.20
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class MultiplierRegistry : private FixedMetadataRegistry<MultiplierMeta, MultiplierID, MAX_MULTIPLIERS, &MultiplierMeta::mMultiplierID>
@@ -73,9 +73,9 @@ namespace PocketCore::Registry::Multiplier
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinMultiplierID.
 				@since 0.8.1
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr MultiplierRegistry() : Base{toMultiplierID(BuiltinMultiplierID::FinalMultiplier).getValue()}
+			ATTR_NOINLINE explicit constexpr MultiplierRegistry()
 			{
 				addBuiltin({
 					.mName = std::string(MULTIPLIER_NAME_NONE),
@@ -167,9 +167,9 @@ namespace PocketCore::Registry::Multiplier
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<MultiplierID> getMultiplierID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<MultiplierID> getMultiplierID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -220,9 +220,9 @@ namespace PocketCore::Registry::Multiplier
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.8.1
-				@version 0.8.1
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasMultiplier(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasMultiplier(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

@@ -1,8 +1,8 @@
 /*! @file moveRegistry.testHelper.h
 	@brief Test helper for dealing with MoveRegistry concepts.
-	@date 09/03/2026
+	@date 10/13/2026
 	@since 0.12.14
-	@version 0.12.18
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -16,7 +16,7 @@
 #include "Move/moveHitPolicy.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Testing
 {

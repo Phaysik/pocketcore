@@ -1,13 +1,14 @@
 /*! @file targetsHandler.test.cpp
 	@brief C++ file for running tests for the TargetsHandler.
-	@date 10/09/2026
+	@date 10/19/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "EffectHandler/targetsHandler.h"
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleTargetsAndTriggers.h"
 #include "Configuration/moveRegistryConfiguration.h"
@@ -23,6 +24,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
@@ -47,6 +49,7 @@ SCENARIO("TargetsHandler")
 	MoveRegistryConfiguration moveConfiguration{};
 	const MoveRegistry &moveRegistry{moveConfiguration.getRuntimeRegistry()};
 	RegistryProvider provider{.mMoveRegistry = &moveRegistry};
+	BattleRandomSources randomSources{};
 
 	GIVEN("a null move provider")
 	{
@@ -55,7 +58,7 @@ SCENARIO("TargetsHandler")
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, nullProvider);
+			targetsHandler.apply(battleState, context, nullProvider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
@@ -70,7 +73,7 @@ SCENARIO("TargetsHandler")
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider);
+			targetsHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
@@ -85,7 +88,7 @@ SCENARIO("TargetsHandler")
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider);
+			targetsHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
@@ -100,7 +103,7 @@ SCENARIO("TargetsHandler")
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider);
+			targetsHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
@@ -117,7 +120,7 @@ SCENARIO("TargetsHandler")
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider);
+			targetsHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the targets spread multiplier is added")
 			{

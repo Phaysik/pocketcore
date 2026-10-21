@@ -1,8 +1,8 @@
 /*! @file battleState.cpp
 	@brief Defines out-of-line operations for battle state storage.
-	@date 09/28/2026
+	@date 10/20/2026
 	@since 0.10.3
-	@version 0.12.45
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -76,9 +76,12 @@ namespace PocketCore::Battle
 		outStream << "Battle Slot {\n" << indentBlock(modifiersStream.str()) << '\n';
 		outStream << "  Volatile Status IDs: [";
 
-		for (std::size_t index{0}; index < battleSlot.mVolatileStatuses.size(); ++index)
+		for (const auto &[index, statusID] :
+			 battleSlot.mVolatileStatuses | std::views::transform([](const VolatileStatus &status) noexcept {
+				 return StatusID{status.mStatusID};
+			 }) | std::views::enumerate)
 		{
-			outStream << (index == 0U ? "" : ", ") << battleSlot.mVolatileStatuses.at(static_cast<us>(index)).mStatusID.getValue();
+			outStream << (index == 0 ? "" : ", ") << statusID.getValue();
 		}
 
 		outStream << std::boolalpha << "]\n"

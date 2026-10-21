@@ -1,13 +1,15 @@
 /*! @file builtinLearnsetID.h
 	@brief Defines identifiers for learnsets compiled into PocketCore.
-	@date 10/08/2026
+	@date 10/09/2026
 	@since 0.12.24
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_LEARNSET_BUILTIN_LEARNSET_ID_H
 #define INCLUDE_LEARNSET_BUILTIN_LEARNSET_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -47,11 +49,11 @@ namespace PocketCore::Learnset
 		@param[in] builtinLearnsetID The built-in learnset to convert.
 		@return The corresponding open learnset identifier.
 		@since 0.12.24
-		@version 0.12.24
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr LearnsetID toLearnsetID(const BuiltinLearnsetID builtinLearnsetID) noexcept
 	{
-		return LearnsetID{static_cast<ub>(builtinLearnsetID)};
+		return LearnsetID{std::to_underlying(builtinLearnsetID)};
 	}
 } // namespace PocketCore::Learnset
 

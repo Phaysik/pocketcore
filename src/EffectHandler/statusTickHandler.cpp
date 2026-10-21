@@ -1,8 +1,8 @@
 /*! @file statusTickHandler.cpp
 	@brief Contains the status tick effect handler implementation
-	@date 08/28/2026
+	@date 10/19/2026
 	@since 0.10.0
-	@version 0.12.9
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -20,12 +20,14 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Core::sb;
 	using PocketCore::Core::us;
 	using PocketCore::Registry::RegistryProvider;
 
 	void StatusTickHandler::apply(ATTR_MAYBE_UNUSED BattleState &state, ATTR_MAYBE_UNUSED EffectContext &context,
-								  ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+								  ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+								  ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{}
 } // namespace PocketCore::Effect

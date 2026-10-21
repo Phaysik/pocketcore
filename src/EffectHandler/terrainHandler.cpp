@@ -1,8 +1,8 @@
 /*! @file terrainHandler.cpp
 	@brief Contains the terrain effect handler implementation
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.9.10
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cassert>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -19,10 +20,11 @@
 #include "EffectHandler/effectHandlerInterface.h"
 #include "Registry/registryProvider.h"
 #include "Terrain/builtInTerrainID.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::DRAGON_DEBUFF_IN_TERRAIN_BASE_DAMAGE_VALUE;
@@ -35,7 +37,8 @@ namespace PocketCore::Effect
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
 
-	void TerrainHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void TerrainHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+							   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		BattleSlot &user{IEffectHandler::getUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};

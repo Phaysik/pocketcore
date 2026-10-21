@@ -1,14 +1,15 @@
 /*! @file statusRegistry.test.cpp
 	@brief C++ file for running tests for the StatusRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/statusRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -18,18 +19,17 @@
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Interaction/interaction.h"
-#include "Registry/registryError.h"
 #include "Status/builtInStatusID.h"
 #include "Status/constants.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Interaction::InteractionAction;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::NO_STATUS_ID;
@@ -46,6 +46,7 @@ using PocketCore::Status::StatusClassification;
 using PocketCore::Status::StatusID;
 using PocketCore::Status::StatusMeta;
 using PocketCore::Status::toStatusID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -56,7 +57,8 @@ static_assert(!PubliclyStructurallyMutable<StatusRegistry>);
 
 SCENARIO("StatusRegistry")
 {
-	StatusRegistry registry{};
+	std::unique_ptr<StatusRegistry> registryStorage{std::make_unique<StatusRegistry>()};
+	StatusRegistry &registry{*registryStorage};
 	ub finalStatusUnderlyingValue{std::to_underlying(BuiltinStatusID::FinalStatus)};
 
 	GIVEN("a default constructed status registry")
@@ -328,49 +330,49 @@ SCENARIO("StatusRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			StatusRegistry other{};
+			std::unique_ptr<StatusRegistry> other{std::make_unique<StatusRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			StatusRegistryConfiguration other{};
-			std::expected<StatusID, RegistryErrorInfo> result{other.addStatus({.mName = "test"})};
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
+			std::expected<StatusID, RegistryError> result{other->addStatus({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			StatusRegistryConfiguration other{};
-			std::expected<StatusID, RegistryErrorInfo> result{other.removeStatus(toStatusID(BuiltinStatusID::None))};
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
+			std::expected<StatusID, RegistryError> result{other->removeStatus(toStatusID(BuiltinStatusID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			StatusRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
+			std::unique_ptr<StatusRegistryConfiguration> other{std::make_unique<StatusRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateStatus(toStatusID(BuiltinStatusID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

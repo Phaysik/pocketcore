@@ -1,8 +1,8 @@
 /*! @file moveHelpers.h
 	@brief Houses free functions that aide in handling moves.
-	@date 09/11/2026
+	@date 10/19/2026
 	@since 0.12.26
-	@version 0.12.27
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -14,7 +14,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Registry/moveRegistry.h"
-#include "Utility/random.h"
+#include "Utility/Random/random.h"
 
 #include "builtInMoveID.h"
 #include "moveID.h"
@@ -23,7 +23,7 @@ namespace PocketCore::Move
 {
 	using PocketCore::Core::us;
 	using PocketCore::Registry::Move::MoveRegistry;
-	using PocketCore::Utility::Random;
+	using PocketCore::Utility::Random::Random;
 
 	/*! @brief Gets a random move ID from the built-in moves.
 		@return The random move ID.

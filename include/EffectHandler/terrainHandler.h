@@ -1,14 +1,15 @@
 /*! @file terrainHandler.h
 	@brief Contains the terrain effect handler
-	@date 09/02/2026
+	@date 10/19/2026
 	@since 0.9.10
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_TERRAINHANDLER_H
 #define INCLUDE_EFFECT_TERRAINHANDLER_H
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
@@ -29,9 +31,9 @@ namespace PocketCore::Effect
 		@warning The context must identify valid user and target slots, and the user's modifier is mutated in place rather than stored as
 			a context multiplier.
 		@note Terrain effects are skipped entirely when the target is not grounded.
-		@date 09/02/2026
+		@date 10/19/2026
 		@since 0.9.10
-		@version 0.12.17
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class TerrainHandler : public IEffectHandler
@@ -41,28 +43,32 @@ namespace PocketCore::Effect
 				@param[in,out] state The battle state containing the active terrain and both battle slots.
 				@param[in,out] context The effect context identifying the slots and the move's type.
 				@param[in] provider The registry provider, which is not used by this handler.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@pre The user and target indexes in @p context must refer to existing slots in their selected teams.
 				@post The user's attack damage-formula modifier is multiplied by the terrain value matching the move's type.
 				@note The state remains unchanged when the target is ungrounded or the move's type does not match the terrain.
 				@since 0.9.10
-				@version 0.12.17
+				@version 0.12.51
 			*/
-			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
+			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+					   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const override;
 	};
 
 	/*! @brief Applies the active terrain's damage adjustment for an effect context.
 		@param[in,out] state The battle state containing the active terrain and both battle slots.
 		@param[in,out] context The effect context identifying the slots and the move's type.
 		@param[in] provider The registry provider, which is not used by this handler.
+		@param[in] randomSources The random sources used for battle-related numeric types.
 		@pre The user and target indexes in @p context must refer to existing slots in their selected teams.
 		@post The user's attack damage-formula modifier is multiplied by the terrain value matching the move's type.
 		@note The state remains unchanged when the target is ungrounded or the move's type does not match the terrain.
 		@since 0.10.0
-		@version 0.12.9
+		@version 0.12.51
 	*/
-	inline void applyTerrain(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applyTerrain(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+							 const BattleRandomSources &randomSources = {})
 	{
-		TerrainHandler{}.apply(state, context, provider);
+		TerrainHandler{}.apply(state, context, provider, randomSources);
 	}
 } // namespace PocketCore::Effect
 

@@ -1,8 +1,8 @@
 /*! @file battleState.test.cpp
 	@brief C++ file for running tests for the BattleState.
-	@date 09/29/2026
+	@date 10/15/2026
 	@since 0.12.45
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,14 +23,14 @@
 #include "Nature/natureID.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
-#include "Registry/registryError.h"
 #include "Registry/statusRegistry.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Status/builtInStatusID.h"
 #include "Status/statusID.h"
 #include "Status/statusMeta.h"
 #include "Status/volatileStatus.h"
-#include "Types/typeID.h"
+#include "Type/typeID.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -49,7 +49,6 @@ using PocketCore::Move::MoveID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Nature::NatureID;
 using PocketCore::Pokemon::Pokemon;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Status::StatusRegistry;
 using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Status::BuiltinStatusID;
@@ -60,11 +59,118 @@ using PocketCore::Status::toStatusID;
 using PocketCore::Status::VolatileStatus;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::TypeID;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
 SCENARIO("StatStages")
 {
+	WHEN("operator==")
+	{
+		StatStages stages{};
+
+		GIVEN("two default constructed stages")
+		{
+			StatStages other{};
+
+			THEN("they are equal")
+			{
+				CHECK((stages == other));
+			}
+		}
+
+		GIVEN("for mMaxHealth modified in one stage")
+		{
+			StatStages other{.mMaxHealth = 2};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mAttack modified in one stage")
+		{
+			StatStages other{.mAttack = 10};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mDefense modified in one stage")
+		{
+			StatStages other{.mDefense = 20};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mSpAttack modified in one stage")
+		{
+			StatStages other{.mSpAttack = 40};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mSpDefense modified in one stage")
+		{
+			StatStages other{.mSpDefense = 50};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mSpeed modified in one stage")
+		{
+			StatStages other{.mSpeed = 60};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mAccuracy modified in one stage")
+		{
+			StatStages other{.mAccuracy = 70};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("for mEvasion modified in one stage")
+		{
+			StatStages other{.mEvasion = 80};
+
+			THEN("they are not equal")
+			{
+				CHECK((stages != other));
+			}
+		}
+
+		GIVEN("two stages modified the same way")
+		{
+			StatStages other{.mAttack = 5};
+			stages.mAttack = 5;
+
+			THEN("they are equal")
+			{
+				CHECK((stages == other));
+			}
+		}
+	}
+
 	GIVEN("operator<<")
 	{
 		StatStages stages{.mDefense = 2, .mSpAttack = 1, .mAccuracy = 4, .mEvasion = 3};
@@ -96,6 +202,92 @@ SCENARIO("StatStages")
 
 SCENARIO("DamageFormulaModifiers")
 {
+	WHEN("operator==")
+	{
+		DamageFormulaModifiers modifiers{};
+
+		GIVEN("two default constructed damage formula modifiers")
+		{
+			DamageFormulaModifiers other{};
+
+			THEN("they are equal")
+			{
+				CHECK((modifiers == other));
+			}
+		}
+
+		GIVEN("for mHealthModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mHealthModifier = 2.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("for mAttackModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mAttackModifier = 3.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("for mDefenseModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mDefenseModifier = 4.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("for mSpecialAttackModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mSpecialAttackModifier = 5.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("for mSpecialDefenseModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mSpecialDefenseModifier = 6.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("for mSpeedModifier modified in one damage formula modifier")
+		{
+			DamageFormulaModifiers other{.mSpeedModifier = 7.0};
+
+			THEN("they are not equal")
+			{
+				CHECK((modifiers != other));
+			}
+		}
+
+		GIVEN("two stages modified the same way")
+		{
+			DamageFormulaModifiers other{.mSpecialAttackModifier = 5.0};
+			modifiers.mSpecialAttackModifier = 5.0;
+
+			THEN("they are equal")
+			{
+				CHECK((modifiers == other));
+			}
+		}
+	}
+
 	GIVEN("operator<<")
 	{
 		DamageFormulaModifiers modifiers{.mHealthModifier = 2.3, .mDefenseModifier = 1.2, .mSpeedModifier = 0.85};
@@ -171,6 +363,163 @@ SCENARIO("BattleSlot")
 		.mFaintProcessed = false,
 	};
 
+	WHEN("operator==")
+	{
+		BattleSlot battleSlot{};
+
+		GIVEN("two default constructed battleSlot")
+		{
+			BattleSlot other{};
+
+			THEN("they are equal")
+			{
+				CHECK((battleSlot == other));
+			}
+		}
+
+		GIVEN("for mDamageFormulaModifiers modified in one battle slot")
+		{
+			BattleSlot other{.mDamageFormulaModifiers = {.mAttackModifier = 2.0}};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mVolatileStatuses modified in one battle slot")
+		{
+			BattleSlot other{.mVolatileStatuses = {{{.mStatusID = toStatusID(BuiltinStatusID::Burn)}}}};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mPokemon modified in one battle slot")
+		{
+			Pokemon tempPokemon{makePokemon({})};
+			BattleSlot other{.mPokemon = &tempPokemon};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mStatStages modified in one battle slot")
+		{
+			BattleSlot other{.mStatStages = {.mAccuracy = 2}};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mChoiceLockedMove modified in one battle slot")
+		{
+			BattleSlot other{.mChoiceLockedMove = toMoveID(BuiltinMoveID::HydroSteam)};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mPosition modified in one battle slot")
+		{
+			BattleSlot other{.mPosition = 2};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mSleepCounter modified in one battle slot")
+		{
+			BattleSlot other{.mSleepCounter = 3};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mToxicCounter modified in one battle slot")
+		{
+			BattleSlot other{.mToxicCounter = 4};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mProtectionCounter modified in one battle slot")
+		{
+			BattleSlot other{.mProtectionCounter = 5};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mIsProtected modified in one battle slot")
+		{
+			BattleSlot other{.mIsProtected = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mIsFlinched modified in one battle slot")
+		{
+			BattleSlot other{.mIsFlinched = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mIsGrounded modified in one battle slot")
+		{
+			BattleSlot other{.mIsGrounded = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("for mFaintProcessed modified in one battle slot")
+		{
+			BattleSlot other{.mFaintProcessed = true};
+
+			THEN("they are not equal")
+			{
+				CHECK((battleSlot != other));
+			}
+		}
+
+		GIVEN("two stages modified the same way")
+		{
+			BattleSlot other{.mPosition = 5};
+			battleSlot.mPosition = 5;
+
+			THEN("they are equal")
+			{
+				CHECK((battleSlot == other));
+			}
+		}
+	}
+
 	GIVEN("addVolatileStatus")
 	{
 		StatusRegistryConfiguration statusConfiguration{};
@@ -183,7 +532,7 @@ SCENARIO("BattleSlot")
 		{
 			RulesetPolicy newPolicy{.mMaxVolatileStatuses = 0, .mReplaceVolatileStatusWhenFull = false};
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -209,7 +558,7 @@ SCENARIO("BattleSlot")
 		GIVEN("an incoming status classified as non-volatile")
 		{
 			StatusID nonVolatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(nonVolatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -250,7 +599,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{NO_STATUS_ID};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -287,7 +636,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Burn)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -352,7 +701,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -392,7 +741,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -422,7 +771,7 @@ SCENARIO("BattleSlot")
 		GIVEN("several current statuses that the incoming status replaces")
 		{
 			StatusID incomingStatusID{toStatusID(BuiltinStatusID::Toxic)};
-			std::expected<void, RegistryErrorInfo> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
+			std::expected<void, RegistryError> updateResult{statusConfiguration.updateStatus(incomingStatusID, {
 				.mName = "Toxic",
 			    .mStatusInteractions = {
 					{.mExistingID = toStatusID(BuiltinStatusID::Burn), .mAction = InteractionAction::ReplaceCurrent},
@@ -474,7 +823,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Freeze)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",
@@ -517,7 +866,7 @@ SCENARIO("BattleSlot")
 								   [](const StatusID volatileStatusID) { return VolatileStatus{volatileStatusID}; });
 
 			StatusID volatileStatusID{toStatusID(BuiltinStatusID::Paralysis)};
-			std::expected<void, RegistryErrorInfo> updateResult{
+			std::expected<void, RegistryError> updateResult{
 				statusConfiguration.updateStatus(volatileStatusID,
 												 {
 													 .mName = "Confusion",

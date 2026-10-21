@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined weathers.
-	@date 09/10/2026
+	@date 10/13/2026
 	@since 0.8.0
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -48,9 +48,9 @@ namespace PocketCore::Registry::Weather
 		@details Built-in weathers are registered during construction with IDs derived from @ref BuiltinWeatherID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_WEATHERS.
-		@date 09/10/2026
+		@date 10/13/2026
 		@since 0.8.0
-		@version 0.12.20
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class WeatherRegistry : private FixedMetadataRegistry<WeatherMeta, WeatherID, MAX_WEATHERS, &WeatherMeta::mWeatherID>
@@ -71,9 +71,9 @@ namespace PocketCore::Registry::Weather
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinWeatherID.
 				@since 0.8.0
-				@version 0.12.20
+				@version 0.12.51
 			 */
-			ATTR_NOINLINE explicit constexpr WeatherRegistry() : Base{toWeatherID(BuiltinWeatherID::FinalWeather).getValue()}
+			ATTR_NOINLINE explicit constexpr WeatherRegistry()
 			{
 				addBuiltin({.mName = std::string(WEATHER_NAME_NONE), .mWeatherID = toWeatherID(BuiltinWeatherID::None)});
 				addBuiltin({
@@ -157,9 +157,9 @@ namespace PocketCore::Registry::Weather
 				@param[in] name The case-sensitive display name.
 				@return The stable ID if registered, or std::nullopt otherwise.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr const std::optional<WeatherID> getWeatherID(const std::string_view &name) const
+			ATTR_NODISCARD constexpr const std::optional<WeatherID> getWeatherID(const std::string_view name) const
 			{
 				return getID(name);
 			}
@@ -210,9 +210,9 @@ namespace PocketCore::Registry::Weather
 				@param[in] name The case-sensitive display name.
 				@return True if the name is registered, otherwise false.
 				@since 0.8.0
-				@version 0.8.0
+				@version 0.12.51
 			*/
-			ATTR_NODISCARD constexpr bool hasWeather(const std::string_view &name) const
+			ATTR_NODISCARD constexpr bool hasWeather(const std::string_view name) const
 			{
 				return hasEntry(name);
 			}

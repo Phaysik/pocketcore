@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -23,8 +24,8 @@
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Registry/multiplierRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -41,8 +42,8 @@ using PocketCore::Multiplier::MultiplierMeta;
 using PocketCore::Multiplier::NO_MULTIPLIER_ID;
 using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Registry::Multiplier::MultiplierRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -50,8 +51,10 @@ SCENARIO("MultiplierRegistryConfiguration")
 {
 	ensureLoggerInitialized("multiplier registry configuration test", "multiplierRegistryConfiguration_test.log");
 
-	MultiplierRegistryConfiguration config{};
-	MultiplierRegistry registry{};
+	std::unique_ptr<MultiplierRegistryConfiguration> configRegistryStorage{std::make_unique<MultiplierRegistryConfiguration>()};
+	MultiplierRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<MultiplierRegistry> registryStorage{std::make_unique<MultiplierRegistry>()};
+	MultiplierRegistry &registry{*registryStorage};
 	ub finalMultiplierUnderlyingValue{std::to_underlying(BuiltinMultiplierID::FinalMultiplier)};
 
 	GIVEN("getAmountRegistered")
@@ -171,7 +174,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				MultiplierMeta definition{.mName = name};
-				std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+				std::expected<MultiplierID, RegistryError> result{config.addMultiplier(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -182,12 +185,12 @@ SCENARIO("MultiplierRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_MULTIPLIERS + 1)};
 
 			MultiplierMeta definition{.mName = name};
-			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+			std::expected<MultiplierID, RegistryError> result{config.addMultiplier(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_MULTIPLIERS));
 			}
 		}
@@ -195,12 +198,12 @@ SCENARIO("MultiplierRegistryConfiguration")
 		WHEN("an multiplier whose name is already in use is added")
 		{
 			MultiplierMeta definition{.mName = std::string(MULTIPLIER_NAME_CRITICAL)};
-			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+			std::expected<MultiplierID, RegistryError> result{config.addMultiplier(definition)};
 
 			THEN("registration reports a duplicate multiplier and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((result.error() == RegistryError::DuplicateMultiplier));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 			}
 		}
@@ -209,7 +212,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 		{
 			MultiplierMeta definition{.mName = "TestMultiplierName"};
 
-			std::expected<MultiplierID, RegistryErrorInfo> result{config.addMultiplier(definition)};
+			std::expected<MultiplierID, RegistryError> result{config.addMultiplier(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -240,12 +243,12 @@ SCENARIO("MultiplierRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_MULTIPLIERS + 1)};
 
 			multiplierMetas.push_back({.mName = name});
-			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+			std::expected<void, RegistryError> result{config.addMultipliers(multiplierMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 			}
 		}
@@ -262,12 +265,12 @@ SCENARIO("MultiplierRegistryConfiguration")
 
 			multiplierMetas.push_back({.mName = std::string(MULTIPLIER_NAME_CRITICAL)});
 			const MultiplierRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+			std::expected<void, RegistryError> result{config.addMultipliers(multiplierMetas)};
 
 			THEN("registration reports a duplicate multiplier and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((result.error() == RegistryError::DuplicateMultiplier));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextMultiplierID() == beforeBatch.getNextMultiplierID()));
@@ -281,7 +284,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 
 			multiplierMetas.push_back({.mName = "TestMultiplierName"});
 
-			std::expected<void, RegistryErrorInfo> result{config.addMultipliers(multiplierMetas)};
+			std::expected<void, RegistryError> result{config.addMultipliers(multiplierMetas)};
 
 			THEN("the registry reports no error and all the multiplier definitions are added")
 			{
@@ -295,33 +298,33 @@ SCENARIO("MultiplierRegistryConfiguration")
 	{
 		WHEN("calling with an invalid multiplier name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMultiplier("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameMultiplier("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+				CHECK((result.error() == RegistryError::MultiplierNotFound));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameMultiplier(MULTIPLIER_NAME_NONE, MULTIPLIER_NAME_CRITICAL),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+				CHECK((result.error() == RegistryError::DuplicateMultiplier));
 				CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing multiplier definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameMultiplier(MULTIPLIER_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameMultiplier(MULTIPLIER_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -340,33 +343,33 @@ SCENARIO("MultiplierRegistryConfiguration")
 		{
 			WHEN("calling with an invalid multiplier name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateMultiplier("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((result.error() == RegistryError::MultiplierNotFound));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateMultiplier(MULTIPLIER_NAME_NONE, {.mName = std::string(MULTIPLIER_NAME_CRITICAL)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+					CHECK((result.error() == RegistryError::DuplicateMultiplier));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing multiplier definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier(MULTIPLIER_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateMultiplier(MULTIPLIER_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -381,33 +384,33 @@ SCENARIO("MultiplierRegistryConfiguration")
 		{
 			WHEN("calling with an invalid multiplier name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateMultiplier(MultiplierID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateMultiplier(MultiplierID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((result.error() == RegistryError::MultiplierNotFound));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = std::string(MULTIPLIER_NAME_CRITICAL)}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateMultiplier));
+					CHECK((result.error() == RegistryError::DuplicateMultiplier));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing multiplier definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), definition),
 				};
 
@@ -427,19 +430,19 @@ SCENARIO("MultiplierRegistryConfiguration")
 		{
 			WHEN("calling with an unknown multiplier name")
 			{
-				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier("Unknown")};
+				std::expected<MultiplierID, RegistryError> result{config.removeMultiplier("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((result.error() == RegistryError::MultiplierNotFound));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known multiplier name")
 			{
-				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(MULTIPLIER_NAME_NONE)};
+				std::expected<MultiplierID, RegistryError> result{config.removeMultiplier(MULTIPLIER_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -454,19 +457,19 @@ SCENARIO("MultiplierRegistryConfiguration")
 		{
 			WHEN("calling with an unknown multiplier ID")
 			{
-				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(MultiplierID{200})};
+				std::expected<MultiplierID, RegistryError> result{config.removeMultiplier(MultiplierID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::MultiplierNotFound));
+					CHECK((result.error() == RegistryError::MultiplierNotFound));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known multiplier ID")
 			{
-				std::expected<MultiplierID, RegistryErrorInfo> result{config.removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
+				std::expected<MultiplierID, RegistryError> result{config.removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

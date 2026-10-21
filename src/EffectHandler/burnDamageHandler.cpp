@@ -1,8 +1,8 @@
 /*! @file burnDamageHandler.cpp
 	@brief Contains the burn damage effect handler implementation
-	@date 09/02/2026
+	@date 10/19/2026
 	@since 0.9.5
-	@version 0.12.17
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -12,6 +12,7 @@
 #include <cassert>
 
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
@@ -28,6 +29,7 @@ namespace PocketCore::Effect
 {
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Configuration::BURN_MULTIPLIER_VALUE;
@@ -40,7 +42,8 @@ namespace PocketCore::Effect
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::toStatusID;
 
-	void BurnDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const
+	void BurnDamageHandler::apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+								  ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 

@@ -1,24 +1,30 @@
 /*! @file logging.testHelper.h
 	@brief Header file for running tests for the logging.
-	@date 09/10/2026
+	@date 10/19/2026
 	@since 0.4.0
-	@version 0.12.20
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef TEST_INCLUDE_UTILITY_DEBUG_LOGGING_LOGGING_TEST_HELPER_H
 #define TEST_INCLUDE_UTILITY_DEBUG_LOGGING_LOGGING_TEST_HELPER_H
 
+#include <fstream>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <string_view>
 
 #include "Utility/Debug/Logging/logger.h"
+
+#include <spdlog/spdlog.h>
 
 namespace PocketCore::Testing
 {
 	using PocketCore::Utility::Debug::Logging::Logger;
 
-	static void ensureLoggerInitialized(const std::string_view &loggerName, const std::string_view &fileName,
-										const bool truncateFile = true)
+	static inline void ensureLoggerInitialized(const std::string_view loggerName, const std::string_view fileName,
+											   const bool truncateFile = true)
 	{
 		static bool initialized{false};
 
@@ -26,6 +32,18 @@ namespace PocketCore::Testing
 		{
 			initialized = Logger::initialize(loggerName, fileName, truncateFile);
 		}
+	}
+
+	ATTR_NODISCARD static inline std::string readLogFile(const std::string *fileName = nullptr)
+	{
+		const std::string defaultFileName{"logger_test_output.log"};
+		// Flush spdlog to ensure all output is written before reading
+		spdlog::apply_all([](const std::shared_ptr<spdlog::logger> &logger) { logger->flush(); });
+
+		const std::ifstream file(fileName != nullptr ? *fileName : defaultFileName);
+		std::ostringstream contents;
+		contents << file.rdbuf();
+		return contents.str();
 	}
 } // namespace PocketCore::Testing
 

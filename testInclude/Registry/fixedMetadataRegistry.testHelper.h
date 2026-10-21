@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.testHelper.h
 	@brief Test helper for dealing with FixedMetadataRegistry concepts.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.22
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -37,10 +37,10 @@ namespace PocketCore::Testing
 		Final,
 	};
 
-	constexpr std::string_view NONE_NAME{"None"};
-	constexpr std::string_view TEST1_NAME{"Test1"};
-	constexpr std::string_view TEST2_NAME{"Test2"};
-	constexpr std::string_view TEST3_NAME{"Test3"};
+	inline constexpr std::string_view NONE_NAME{"None"};
+	inline constexpr std::string_view TEST1_NAME{"Test1"};
+	inline constexpr std::string_view TEST2_NAME{"Test2"};
+	inline constexpr std::string_view TEST3_NAME{"Test3"};
 
 	ATTR_NODISCARD constexpr FixedMetaDataID toFixedMetaDataID(const BuiltinFixedMetaDataID builtinFixedMetaDataID) noexcept
 	{
@@ -69,7 +69,6 @@ namespace PocketCore::Testing
 			ATTR_NODISCARD constexpr bool operator==(const FixedRegistry &other) const = default;
 
 			ATTR_NOINLINE explicit constexpr FixedRegistry()
-				: Base{static_cast<PocketCore::Core::us>(toFixedMetaDataID(BuiltinFixedMetaDataID::Test3).getValue() + 1U)}
 			{
 				addBuiltin({.mName = std::string(NONE_NAME), .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::None)});
 				addBuiltin({.mName = std::string(TEST1_NAME), .mID = toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)});

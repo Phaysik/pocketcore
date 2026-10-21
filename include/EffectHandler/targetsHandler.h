@@ -1,14 +1,15 @@
 /*! @file targetsHandler.h
 	@brief Contains the targets effect handler
-	@date 10/08/2026
+	@date 10/19/2026
 	@since 0.8.1
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_TARGETSHANDLER_H
 #define INCLUDE_EFFECT_TARGETSHANDLER_H
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
@@ -28,9 +30,9 @@ namespace PocketCore::Effect
 			than a single opponent or the user.
 		@warning The registry provider must contain an available move registry.
 		@note Missing move metadata leaves the effect context unchanged. The battle state is not inspected or modified.
-		@date 10/08/2026
+		@date 10/19/2026
 		@since 0.8.1
-		@version 0.12.50
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class TargetsHandler : public IEffectHandler
@@ -40,28 +42,32 @@ namespace PocketCore::Effect
 				@param[in] state The battle state, which is not inspected or modified by this handler.
 				@param[in,out] context The effect context containing the move identifier and receiving the targets multiplier.
 				@param[in] provider The registry provider used to resolve move metadata.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@pre @p provider must contain an available move registry.
 				@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move
 			   metadata leaves @p context unchanged.
 				@since 0.8.1
-				@version 0.12.50
+				@version 0.12.51
 			*/
-			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider) const override;
+			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider,
+					   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const override;
 	};
 
 	/*! @brief Applies the target-count multiplier for the move in an effect context.
 		@param[in,out] state The battle state, which is not inspected or modified by this handler.
 		@param[in,out] context The effect context containing the move identifier and receiving the targets multiplier.
 		@param[in] provider The registry provider used to resolve move metadata.
+		@param[in] randomSources The random sources used for battle-related numeric types.
 		@pre @p provider must contain an available move registry.
 		@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move metadata
 	   leaves @p context unchanged.
 		@since 0.10.0
-		@version 0.12.7
+		@version 0.12.51
 	*/
-	inline void applyTargets(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applyTargets(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+							 const BattleRandomSources &randomSources = {})
 	{
-		TargetsHandler{}.apply(state, context, provider);
+		TargetsHandler{}.apply(state, context, provider, randomSources);
 	}
 } // namespace PocketCore::Effect
 

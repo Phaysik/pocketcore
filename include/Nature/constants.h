@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the nature registry.
-	@date 09/11/2026
+	@date 10/13/2026
 	@since 0.11.6
-	@version 0.12.24
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -14,7 +14,7 @@
 
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
-#include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 
 namespace PocketCore::Nature
 {

@@ -1,13 +1,13 @@
 /*! @file effectID.h
-	@brief Defines the open identifier used for built-in and user-defined abilities.
-	@date 08/12/2026
+	@brief Defines the open identifier used for built-in and user-defined effects.
+	@date 10/09/2026
 	@since 0.10.0
-	@version 0.10.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_EFFECT_EFFECTID_H
-#define INCLUDE_EFFECT_EFFECTID_H
+#ifndef INCLUDE_EFFECT_EFFECT_ID_H
+#define INCLUDE_EFFECT_EFFECT_ID_H
 
 #include "ID/idInterface.h"
 

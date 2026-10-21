@@ -4,6 +4,287 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.51] - 2026-10-21
+
+### Added
+
+- Added a location domain with open `LocationID`, built-in location identifiers, owned location names, a fixed-capacity `LocationRegistry`, and `LocationRegistryConfiguration` operations for lookup, registration, atomic batch registration, rename, update, and removal. Added the non-owning location registry to `RegistryProvider`.
+- Added species-specific encounter data: `PokemonOrigin` (`Wild`, `Egg`, `Trade`, `Gift`), fixed and variable acquisition-level records, and `PokemonEncounter` entries that reference a location and own their level/origin values. `PokemonMeta` now stores a fixed encounter array; species level comes from the selected encounter.
+- Extracted the six-stat `PokemonStats` record, `PokemonStat` enum, and indexing helpers into `Pokemon/pokemonStats.h`.
+- Extended `PokemonRegistry::instantiate()` with an encounter index and learnset/location registry dependencies. It resolves fixed encounter levels directly and samples variable-level bounds, then requires registered learnset metadata.
+- When moves are generated, level-up entries at or below the encounter level are eligible. Egg moves are additionally eligible for egg-origin encounters and take precedence over matching level-up moves; duplicates are removed, the result is limited to the move-slot capacity, and generated IDs must resolve in the move registry.
+- The current implementation requires a non-null location registry but does not resolve the selected encounter's `LocationID` against it.
+- Added `IRandomSource` interfaces and callable/default source implementations for `ub`, `sb`, `double`, and `std::size_t`, grouped in `BattleRandomSources`. `BattleEngine` accepts, gets, and sets this bundle and returns `EngineBusy` if changed during execution.
+- Routed battle randomness through the configured sources and added fixed/sequential test sources; `resolveHitCount()` also accepts an injectable callable.
+- Added dedicated `Validation::Battle` errors and validation functions for switch and move actions, moving battle validation/error handling out of the battle helper surface. Added `SingleAlly`, `AllAlliesIncludingSelf`, and `AllAlliesExceptSelf` target selectors, and expanded target-resolution and battle-validation tests.
+- Added CMake options and interface targets for GCC C++26 contracts (quick-enforce in debug, observe in release) and static reflection, each detected through compiler-flag probes. Added `cmake/Contracts.cmake` and `cmake/Reflection.cmake`.
+- Added span-length rejection conditions for oversized ability, item, move, nature, IV, and EV inputs, plus regression cases for oversized ability/item/move/nature lists.
+
+### Changed
+
+- Changed requested-move handling in `PokemonRegistry::instantiate()`: caller-supplied IDs are checked for registered move metadata and duplicate slots, but are not checked for membership in the species learnset. Learnset eligibility is applied when moves are generated because no move IDs are supplied.
+- Moved nature, ability, item, move, and Pokemon validation errors/functions into dedicated `Validation` headers and namespaces. Moved `RegistryError` definitions to `Validation/Registry/registryError.h`, removed the `RegistryErrorInfo` wrapper in favor of typed registry errors, and changed non-owning `std::string_view` parameters from const references to by-value parameters.
+- Reworked `Pokemon` formatting and helper code, adding `Utility/IO/Pokemon/pokemonIO.h` for shared ID output. Renamed `Core/cconcepts.h` to `Core/concepts.h`, moved type headers from `Types/` to `Type/`, and reorganized utility input and random headers under `Utility/IO/` and `Utility/Random/`.
+- Removed the explicit `FixedMetadataRegistry` next-ID constructor parameter; built-in registration now advances the next stable ID through `addBuiltin()`. Registry equality now compares registered entries in order and the next ID, not derived indexes, unused storage, or checkpoint mutation versions.
+- Updated Codecov processing to upload a filtered LCOV report with excluded branch records removed, and expanded coverage exclusions and tests across Pokemon creation, learnset/location registries, battle helpers/validation, registry operations, equality, and deterministic randomization. The GCC setup now targets 16.2.0; removed obsolete custom Tracy and ConfigCat installation routines.
+
+## [0.12.50] - 2026-10-09
+
+### Added
+
+- Added the built-in `None` and starter-family learnset catalog entries and implemented the fixed-capacity `LearnsetRegistry` over the existing `LearnsetID` and `LearnsetMeta` model. Registered `None` plus one learnset identity for each of the nine built-in starter-family species.
+- Added `LearnsetRegistryConfiguration` with metadata/name/ID queries, containment, single and atomic batch registration, rename, metadata update, and removal operations. Added a non-owning learnset registry pointer to `RegistryProvider` and a `LearnsetNotFound` registry error.
+- Associated each built-in starter-family `PokemonMeta` with its matching registered learnset ID, making the learnset registry available through `RegistryProvider` alongside the existing species metadata.
+
+### Changed
+
+- Expanded fixed-registry, learnset metadata/registry/configuration, Pokemon registry, and Pokemon-helper test coverage for complete learnset metadata and species-to-learnset associations.
+
+## [0.12.49] - 2026-10-08
+
+### Changed
+
+- Changed whole-array IV and EV setters to validate and copy valid arrays, retain the previous array when validation fails, and recompute derived stats after either outcome. This replaces the preceding behavior in which an invalid whole EV array cleared stored EVs; added lower-level `update...Array()` operations still allow a caller to stage validated inputs before one explicit recomputation.
+- Changed `recomputeStats()` and stat setters to keep calculated values synchronized with their base stats, IVs, EVs, level, and registry-resolved natures. Nature-array updates now retain the prior nature IDs and multiplier rows when any lookup fails, then recalculate from the retained values.
+- Changed HP handling during stat recalculation to preserve absolute missing HP when maximum HP changes: living Pokemon retain at least one HP and cannot exceed the new maximum, while a Pokemon already at zero remains fainted. `setMaximumHealth()` now replaces base HP and recalculates all derived stats instead of directly assigning maximum HP.
+
+### Added
+
+- Expanded Pokemon regression coverage to verify calculated statistics after valid/invalid IV and EV updates, nature changes, level/base-stat changes, and maximum-HP changes.
+
+## [0.12.48] - 2026-10-07
+
+### Added
+
+- Added `PokemonError` and reusable constexpr `std::expected` validators for individual IVs/EVs and six-stat arrays. Validation covers configured per-stat bounds and the aggregate EV cap; failures distinguish below-minimum, above-stat-maximum, above-total-maximum, and invalid-array cases.
+- Added `updateLevel()`, `updatePokemonIVsArray()`, and `updatePokemonEVsArray()` as validated storage operations that defer calculated-stat recomputation. Public setters delegate to these operations and recompute after updating stat inputs.
+
+### Changed
+
+- Replaced the ad hoc IV/EV checks in `Pokemon` with the shared validation API. Added direct unit coverage for individual and array boundaries and invalid values.
+- Added a vcpkg manifest for Spdlog and optional Catch2, Google Benchmark, and Tracy features; updated CMake to consume package targets and CI workflows to configure vcpkg. Removed duplicated Google Test, ConfigCat, Curl, hash-library, and Spdlog caches/install steps from the workflows, and simplified dependency setup around the manifest.
+
+## [0.12.47] - 2026-09-29
+
+### Added
+
+- Added `docs/pokemon-ownership.md`, defining authoritative, derived, battle-live, and non-owning Pokemon data and documenting intentional snapshots between registry metadata, Pokemon instances, and battle slots.
+
+### Changed
+
+- Made `NatureMeta::mStatMultipliers` the source for Pokemon nature multipliers. Pokemon constructors and nature setters now take a `NatureRegistry` and resolve multipliers from metadata instead of accepting caller-supplied multiplier arrays; applying a registered nature recomputes the Pokemon's calculated stats.
+- Corrected nature stat application to multiply the calculated value by the floating-point multiplier before converting to `us`, rather than converting the multiplier to an integer first. Updated Pokemon registry instantiation, fixtures, the example, and tests to pass the nature registry and verify metadata-driven nature effects.
+
+## [0.12.46] - 2026-09-29
+
+### Added
+
+- Added `InteractionApplicationError : ub` with `WrongClassification`, `Blocked`, `CapReached`, `Duplicate`, `MissingMetadata`, and `SameAsEmptyID` rejection reasons. `applyInteractions()` now returns `std::expected<void, InteractionApplicationError>` instead of silently ignoring rejected applications; it rejects zero capacity, empty and duplicate IDs, missing metadata, blockers, and full lists when replacement is disabled.
+- Added `Pokemon::addNonVolatileStatus()` and `BattleSlot::addVolatileStatus()`, both returning the structured interaction result. Each rejects statuses classified for the other storage owner and applies the corresponding ruleset count and replace-when-full settings. Added `mReplaceVolatileStatusWhenFull`, defaulting to `false`, to `RulesetPolicy`; all six presets explicitly set status replacement off and weather/terrain replacement on.
+- Expanded interaction, Pokemon, BattleSlot, registry, and policy tests for every structured rejection path, classification mismatches, insertion/replacement behavior at capacity, and all preset replacement settings.
+
+### Changed
+
+- Renamed Pokemon-owned status storage from `mStatusIDs` to `mNonVolatileStatusIDs` and renamed the application API from `addStatus()` to `addNonVolatileStatus()` to make its ownership/classification explicit. Battle-slot volatile status application now converts its typed wrappers to IDs for shared interaction processing and writes the resulting IDs back to the slot.
+
+## [0.12.45] - 2026-09-28
+
+### Added
+
+- Added `VolatileStatus`, an equality-comparable wrapper around `StatusID` with no implicit conversion, and a fixed `MAX_VOLATILE_STATUSES_PER_POKEMON` array on each `BattleSlot`. Volatile IDs are therefore stored with the active occupant and cleared when the engine installs a fresh slot on switch, while non-volatile IDs remain Pokemon-owned.
+- Added built-in volatile status IDs and metadata for Autotomize and Aqua Ring; existing built-in statuses retain the default NonVolatile classification. Pokemon status application rejects metadata classified as Volatile so it cannot enter Pokemon-owned storage.
+- Added stream output for `StatStages`, `DamageFormulaModifiers`, and `BattleSlot`, including the slot's volatile status IDs and its existing battle modifiers and counters. Added dedicated battle helper/state and volatile-wrapper tests.
+- Updated VS Code launch/tasks to use the GCC CMake presets and executable paths, and added a Zed LLDB debug configuration.
+
+## [0.12.44] - 2026-09-23
+
+### Added
+
+- Added `StatusClassification : ub` with `NonVolatile` and `Volatile` values, and added `StatusMeta::mStatusClassification`, defaulting to `NonVolatile`, so registry metadata identifies which runtime storage owns a status.
+- Added `StatusMeta` tests covering equality and inequality for classification as well as the existing metadata members, and extended the status-registry suite for the classification field.
+
+### Changed
+
+- Removed `noexcept` from `StatusMeta::operator==` because comparing its dynamically owned interaction vector is not guaranteed not to throw.
+
+## [0.12.43] - 2026-09-23
+
+### Added
+
+- Added `SetElectricTerrain`, `SetMistyTerrain`, `SetGrassyTerrain`, and `SetPsychicTerrain` built-in effects and their registered handlers. Added `TerrainMeta::mTerrainInteractions` so terrain IDs can declare coexistence, replacement, removal, and blocking behavior through the shared interaction algorithm.
+- Added `EffectMeta::mMayChangeTerrain`, registered the four terrain-setting effects with this flag, and added `BattleEventID::TerrainChanged`. `BattleEngine::executeEffect()` snapshots the active terrain array and dispatches `TerrainChanged` to every healthy active slot when a flagged effect changes it.
+- Added coverage for terrain metadata and effect metadata plus dedicated handler suites for all four terrain setters, harsh sunlight, rain, and sandstorm.
+
+### Changed
+
+- Changed battle terrain storage from one `TerrainID` to the fixed-capacity `mTerrainIDs` array. Terrain handlers now apply registered interactions using `RulesetPolicy::mMaxTerrains` and `mReplaceTerrainWhenFull`; the terrain damage handler checks membership in the active array.
+- Renamed the Set Sun handler and its source/header to Set Harsh Sunlight and changed its display name accordingly. The registered effect continues to represent the existing harsh-sunlight action.
+- Removed `noexcept` from `EffectMeta`, `TerrainMeta`, and `WeatherMeta` equality operators after their dynamically owned vectors made non-throwing comparison an invalid promise.
+- Changed LCOV configuration to filter exception, region, and branch-region coverage and process files with eight workers. Excluded `testInclude` from captured coverage, made Codecov's ignored paths recursive, and configured its action to upload only the curated LCOV file without repository search or gcov reprocessing.
+
+## [0.12.42] - 2026-09-22
+
+### Fixed
+
+- Fixed CMake's MSVC release configuration by allowing `/std:c++latest` to satisfy the C++26 request without requiring the not-yet-named `cxx_std_26` feature level, and explicitly applying the latest-standard flag to build targets. MSVC builds now use the repository's bundled header-only Spdlog include directory.
+- Added portable compiler-attribute fallbacks for non-GCC/non-Clang compilers, MSVC-specific `ATTR_NOINLINE`, and `ATTR_ONLY_GCC`/`ATTR_ONLY_CLANG`/`ATTR_ONLY_MSVC` detection. Added `ATTR_DELETE_REASON` to use reasoned deleted functions where supported and plain `= delete` otherwise, and migrated Logger's deleted declarations and GCC-only diagnostic guards to these macros.
+
+### Changed
+
+- Corrected the documented `double` spelling and likely/unlikely macro names in attribute examples.
+
+## [0.12.41] - 2026-09-22
+
+### Added
+
+- Added `RulesetPolicy` controls for replacing a full non-volatile status list, weather list, or terrain list. Defaults disable non-volatile status replacement and enable weather and terrain replacement; policy equality and preset expectations now include these fields.
+- Added `replaceWhenFull` to `applyInteractions()`. When enabled and the active count has reached its semantic cap, the incoming ID replaces the oldest active ID; when disabled, a full list remains unchanged. Existing metadata-driven blocking, replacement, and removal continue to run before insertion-cap handling.
+
+### Changed
+
+- Passed the ruleset's replacement flags from Pokemon status application and the rain, sandstorm, and harsh-sunlight handlers to `applyInteractions()`, applying the policy consistently across these active lists.
+- Corrected the interaction-helper header guard from the unrelated `INCLUDE_CORE_INTERACTION_HELPERS_H` name to `INCLUDE_INTERACTION_INTERACTION_HELPERS_H` and added tests for replacement enabled/disabled at capacity and insertion below the cap.
+
+## [0.12.40] - 2026-09-22
+
+### Changed
+
+- Added a required `maxActive` parameter to `applyInteractions()`. Registered metadata still controls blocking, replacement, and removal first; insertion now occurs only when the post-interaction active index is below both the caller's semantic limit and the identifier range's physical extent. A zero limit prevents insertion, and a larger-than-storage limit cannot overrun the range.
+- Changed `Pokemon::addStatus()` to require the maximum active status count and forward it to `applyInteractions()`. Rain, sandstorm, and harsh-sunlight handlers now pass `BattleState::mRuleset.mMaxWeathers`, so weather insertion respects the active battle policy.
+- Expanded interaction tests for empty and duplicate IDs, unregistered IDs, blocking, replacement/removal and compaction, zero and reached limits, insertion below the cap, and a semantic cap larger than physical storage. Updated Pokemon status tests for the new API.
+
+## [0.12.39] - 2026-09-22
+
+### Added
+
+- Added `docs/config-boundary.md`, auditing registry capacities, fixed-storage capacities, and runtime semantic restrictions; mapping each runtime-policy-backed capacity to its `RulesetPolicy` field; and setting rules for keeping physical storage extents separate from format-specific limits. The document also identifies global mechanics and persistent Pokemon-data bounds that remain compile-time constants rather than per-battle policy.
+
+### Changed
+
+- Changed `MAX_NON_VOLATILE_STATUSES_PER_POKEMON`, `MAX_VOLATILE_STATUSES_PER_POKEMON`, `MAX_ACTIVE_WEATHERS_ON_FIELD`, and `MAX_ACTIVE_TERRAINS_ON_FIELD` from `us` to `ub`, matching the fixed-array capacities and the byte-sized policy fields without changing their values.
+- Added links to the capacity-boundary audit beside configuration constants and refreshed the README's CI badges to use labeled shieldcn badges for CodeQL, Clang Format, tests, coverage, and Valgrind.
+
+## [0.12.38] - 2026-09-22
+
+### Fixed
+
+- Corrected `IEffectHandler`'s deleted copy- and move-assignment declarations to return `IEffectHandler &` rather than `IEffectHandler` by value. The operators remain deleted, with signatures following the conventional assignment-operator return type.
+
+### Changed
+
+- Replaced the README's standard GitHub Actions badges with labeled shieldcn badges for CodeQL, Clang Format, tests, coverage, and Valgrind.
+
+## [0.12.37] - 2026-09-21
+
+### Added
+
+- Added a `RulesetPolicy` argument to `BattleEngine::startBattle()` and stored the accepted policy in `BattleState::mRuleset`. Startup now validates the policy with `validateRulesetPolicy()` and rejects an active-slot request larger than `mMaxSideSize`; invalid policy values return `BattleEngineError::InvalidRuleset`, while an excessive active-slot request returns `InvalidParty`.
+- Kept startup transactional: the policy and parties are copied into a locally prepared `BattleState`, and the engine commits it only after registry, party, duplicate-pointer, healthy-member, policy, and active-size validation succeeds. A failed initial start leaves the state unstarted and phase at `NotStarted`; a repeated start returns `BattleAlreadyStarted` without discarding live state.
+- Added `BattleEngine::getPhase()` as a `constexpr noexcept` read-only phase accessor and updated the example to start with the `GEN9_BASE_GAME` preset.
+- Added battle-engine startup tests for already-started battles, missing registries, zero/insufficient party sizes, null and duplicate Pokemon pointers, insufficient healthy members, invalid rulesets, and phase/state preservation after failure.
+
+### Changed
+
+- Added Sphinx RTD theme and Flawfinder to automated dependency setup, and added `setUpLCOV()` to install LCOV 2.5 and register its tools through `update-alternatives`. Coverage CI now installs the documentation dependencies and LCOV 2.5, while CMake's LCOV and genhtml commands read `.lcovrc`, enable branch coverage explicitly, and tolerate inconsistent-data diagnostics.
+- Renamed workflow dependency-installation steps to identify their CodeQL, testing, and Valgrind roles. Corrected the automated dependency setup's Clang version status message.
+
+## [0.12.36] - 2026-09-17
+
+### Added
+
+- Added `rulesetPolicyError.test.cpp` coverage for each policy field's accepted minimum and maximum, and for the corresponding field-specific error when its capacity is exceeded.
+
+### Changed
+
+- Corrected the `MAX_NON_VOLATILE_STATUSES_ERROR` enumerator and the non-volatile/volatile diagnostic constant spellings, and used C++23 `std::to_underlying()` to synchronize the bounds-table size with the `UNKNOWN_FIELD_ERROR` sentinel. Reformatted the field-bound table and added its direct `<utility>` dependency.
+- Renamed `.github/workflows/cpp-linter.yml` to `clang-format.yml`, renamed the workflow and job accordingly, and disabled clang-tidy review. The workflow now performs changed-line formatting review only and no longer installs Bear or generates a compilation database.
+
+## [0.12.35] - 2026-09-16
+
+### Added
+
+- Added explicit physical-capacity constants: `MAX_ACTIVE_SLOTS_PER_SIDE == 6`, `MAX_VOLATILE_STATUSES_PER_POKEMON == 8`, and `MAX_ACTIVE_TERRAINS_ON_FIELD == 5`. Policy bounds also use the existing five-slot non-volatile-status and active-weather capacities, separately from registry capacities and format-specific semantic limits.
+- Added `RulesetPolicyError : ub` with `MAX_SIDE_SIZE_ERROR`, `MAX_NON_VOLATIVE_STATUSES_ERROR`, `MAX_VOLATILE_STATUSES_ERROR`, `MAX_WEATHERS_ON_FIELD_ERROR`, `MAX_TERRAINS_ON_FIELD_ERROR`, and the `UNKNOWN_FIELD_ERROR` sentinel. The non-volatile enumerator retains the spelling introduced by this revision.
+- Added `RulesetPolicyFieldBound` and the constexpr `RULESET_POLICY_FIELD_BOUNDS` table, associating each bounded policy member with its inclusive capacity and error. A static assertion keeps the five table entries synchronized with the field-specific error count.
+- Added `constexpr noexcept validateRulesetPolicy()` returning `std::expected<void, RulesetPolicyError>`. It checks side size, non-volatile statuses, volatile statuses, weather, then terrain and returns the first exceeded-limit error; zero and the inclusive maximum are accepted, and mechanic-permission booleans are not validated.
+- Added shared diagnostic strings, compile-time checks that default policy limits fit physical capacities, and `static_assert` validation of all six built-in presets. Documented each numeric policy field's accepted range without changing its default or preset values.
+
+### Changed
+
+- Renamed `MAX_STATUSES_PER_POKEMON` to `MAX_NON_VOLATILE_STATUSES_PER_POKEMON`, retaining its value of five. Migrated Pokemon status storage and whole-array signatures, battle-engine status-change snapshots, shared Pokemon fixtures, and Pokemon tests to the new name. The volatile-status and terrain constants establish policy bounds but do not add new runtime status or terrain arrays in this revision.
+- Updated touched API documentation, direct includes, namespace imports, and formatting for the capacity and validation contracts.
+
+## [0.12.34] - 2026-09-16
+
+### Added
+
+- Added a CMake 4.4+ build alongside the retained Makefile, requiring standard C++26 without compiler extensions and exporting compilation commands. Ninja presets cover GCC and Clang release/debug builds, MSVC release/debug builds, clang-cl release, tests, coverage, benchmarks, Tracy, Clang analysis, and GCC Valgrind builds in separate `build/<preset>` directories.
+- Added `main_app`, `dev_app`, and `valgrind_app` targets producing `main`, `dev`, and `valgrind` executables, with optimized release flags, unoptimized debug symbols for development and Valgrind, and optional Linux gprof instrumentation. Added optional Google Benchmark and Tracy executables, thread linkage where required, resource copying, and Slang-to-SPIR-V shader compilation when the compiler and shader sources are available.
+- Added configurable test builds for Catch2 or Google Test, framework-specific CTest discovery, shared `testInclude` paths, and full, unit, integration, or mock source selection. Integration and mock selections also include unit tests; unsupported framework selections fail configuration, and shared production sources exclude the application entry point.
+- Added compiler-warning and release-hardening interface targets with compiler-specific flag probes, optional warnings-as-errors, MSVC settings, and GCC `-fhardened`/`-Whardened` support. Release hardening is linked after warning options to preserve the Makefile's effective null-pointer-check optimization behavior and avoid GCC 16.1 compiler failures.
+- Added a sanitizer interface for development builds, probing compilation and linkage support for address, leak, undefined-behavior, pointer, bounds, arithmetic, and related checks. Pointer comparison/subtraction probes include AddressSanitizer; object-size instrumentation is excluded for Clang, and MSVC uses AddressSanitizer without incremental linking.
+- Added coverage instrumentation and `coverage`/`genhtml` targets: reset counters, execute CTest, capture branch coverage from `test_app` objects, retain project source/header/test-helper paths, and generate dark-mode HTML. LCOV capture tolerates the configured gcov, mismatch, and unused-data diagnostics.
+- Added executable run targets, CTest execution, Valgrind execution with failing error exit codes, and optional benchmark execution. Added serial and parallel clang-tidy, compilation-database-driven cppcheck, Flawfinder, in-place clang-format, a CI formatting check, and an `analysis` aggregate for available analysis tools.
+- Added a Valgrind GitHub Actions workflow for pushes and pull requests targeting `master`, using the dedicated sanitizer-free, tests-disabled `gcc-valgrind` configuration and the `valgrind` build preset to build and run the memory checker.
+- Added a C++ lint workflow for `main`, `master`, and `develop` pushes and pull requests. It generates `.zed/compile_commands.json` with Bear and a forced Make `compile` build, then runs `cpp-linter-action@v2` with LLVM 23, repository clang-format/clang-tidy configuration, Catch2/include arguments, changed-line analysis, pull-request review/comment updates, and job summaries; reported failed checks fail the job.
+- Added a coverage workflow for `master` pushes and pull requests, with full-history checkout, explicit LLVM 24/CMake/testing/LCOV setup, CMake coverage execution, optional HTML generation, and Codecov v7 upload of `build/coverage/coverage.info` under the `unittests` flag. Upload errors fail CI, and LCOV/HTML artifacts are retained with an always-run artifact upload even when earlier steps fail.
+- Added `codecov.yml` with an 80% project target and 1% tolerance, a 70% patch target with no tolerance, two-decimal downward-rounded coverage display, a 70-to-100 display range, configured test/helper/benchmark/Tracy exclusions, updated pull-request comments, and GitHub check annotations. Project status reports an error when CI fails.
+- Added `.lcovrc` defaults enabling branch coverage and excluding assertion and `LCOV_EXCL_BR` lines from branch accounting. Added README badges for CodeQL, C++ lint, tests, and Valgrind.
+
+### Changed
+
+- Limited every CMake build preset to eight parallel jobs. Release, debug, benchmark, Tracy, and Valgrind presets disable test builds; dedicated test and coverage presets enable them, and the analysis preset disables coverage, sanitizers, and warnings-as-errors.
+- Migrated CodeQL from Make to building and running both GCC and Clang release presets. Renamed the test workflow and job for Catch2 and changed execution to build and run both GCC and Clang test presets, using the corrected `tests` executable name.
+- Added source/build-file path filters to CodeQL, tests, Valgrind, C++ lint, and coverage workflows, including C/C++ headers and sources, Makefile, CMake lists/modules/presets, and Meson build files. Documentation-only pushes no longer trigger these workflows; CodeQL retains its scheduled run.
+- Reused dependency caches for apt packages/lists, Google Test, ConfigCat, Curl, hash-library, Spdlog, and GCC in the new workflows, with dependency installation on cache misses, cache persistence, and apt-cache permission repair. Made cache-restore destination-directory creation idempotent and restored apt data from the nested `apt` and `lists` cache directories.
+- Updated workflow setup to download and invoke the LLVM 24 installer, explicitly select the versioned Clang compiler, and install current CMake through pip; CodeQL also upgrades `libstdc++6` through the Ubuntu toolchain test PPA. Coverage explicitly installs LCOV, and Valgrind installs its memory-checking tool separately from the shared dependency script.
+- Changed shared dependency setup to install CMake through pip instead of apt, avoid a system-wide package upgrade, and install/check Clang 24 during automated setup rather than limiting older Clang 22 tools to full interactive setup. Renamed `setUpClangTools()` to `setUpClang()`, added compiler installation, and registered compiler, clang-tidy, clang-format, and clangd alternatives with explicit priorities; GCC setup continues to target 16.1.0.
+
+### Fixed
+
+- Disabled CMake's automatic C++ module scanning because the project does not use modules and the injected module flags trigger GCC 16.1 internal compiler errors. Named the test executable `tests` instead of `test` to avoid colliding with Ninja's CTest target.
+- Fixed mutable `IEffectHandler::getTargetBattleSlot()` to index the selected target side with `mTargetIndex` instead of `mUserIndex`. Strengthened the shared handler-interface scenario with two distinguishable slots per side and different user/target indices, checking both mutable and const target access against the second target slot.
+
+## [0.12.33] - 2026-09-14
+
+### Added
+
+- Added six `inline constexpr RulesetPolicy` presets: `GEN9_BASE_GAME`, `GEN9_VGC_DOUBLES`, `GEN9_SMOGON_SINGLES`, `GEN8_BASE_GAME`, `GEN7_BASE_GAME`, and `GEN6_BASE_GAME`. Every preset permits one non-volatile status, eight volatile statuses, one weather, and one terrain; side-size limits are two except for Smogon Singles, which uses one.
+- Defined generation-specific mechanic permissions: the three Gen 9 presets enable only Terastallization; Gen 8 enables only Gigantamax; Gen 7 enables Z-Moves and Mega Evolution; and Gen 6 enables only Mega Evolution. These are policy declarations, not implementations of the enabled mechanics.
+- Added a dedicated Catch2 preset suite comparing all nine fields of every preset against explicit expected values.
+
+### Changed
+
+- Changed `RULESET_DEFAULT_MAX_SIDE_SIZE` from one to two. Reworked policy regression tests to assert literal defaults and explicit permission changes instead of deriving expectations from the production constants, and removed the now-unused constant imports.
+- Restricted CodeQL push and pull-request triggers to `master` while retaining its scheduled run, and added pull-request testing for `master` alongside the existing push trigger.
+- Added `--error-exitcode=1` to the Makefile's Valgrind flags so detected errors cause a failing process exit instead of a successful check.
+
+## [0.12.32] - 2026-09-14
+
+### Changed
+
+- Changed `RULESET_DEFAULT_MAX_SIDE_SIZE` from six Pokemon to one, so default-constructed `RulesetPolicy` values use a one-Pokemon side limit in this revision.
+- Reordered mechanic-permission members to `mAllowTera`, `mAllowGmax`, `mAllowZMoves`, then `mAllowMega`, changing positional aggregate initialization order without changing their defaults.
+
+## [0.12.31] - 2026-09-14
+
+### Added
+
+- Added `RulesetPolicy`, an equality-comparable, value-only description of symmetric battle-wide semantic limits and mechanic permissions. It owns no registries, Pokemon, battle state, or storage; its limits are independent of physical array capacities, and per-side permissions are explicitly outside its scope.
+- Added canonical defaults of six Pokemon per side, one simultaneous non-volatile status and eight volatile statuses per Pokemon, and one simultaneous weather and terrain on the field. Terastallization is enabled by default; Mega Evolution, Gigantamax, and Z-Moves are disabled.
+- Added a Catch2 policy suite covering default construction, equality of identical policies, inequality after independently changing each of the five limits or four mechanic permissions, and equality after matching mutations. This revision defines policy data but does not integrate policy enforcement into battle execution.
+
+## [0.12.30] - 2026-09-12
+
+### Added
+
+- Added `.github/skills/code-review/SKILL.md`, a repository-aware C++26 and Gen 9 engine review guide requiring inspection of project documentation, build and analysis settings, source organization, tests, core abstractions, and configuration before substantive review.
+- Defined review criteria for mechanical correctness and event ordering, determinism and randomness, numerical boundaries, ownership and lifetime safety, strong IDs and registry invariants, error handling, API and extension design, concurrency, and regression coverage. Performance findings distinguish measured or strongly inferred costs from potential or speculative concerns; findings and final assessments use explicit severity and evidence.
+
+### Changed
+
+- Backfilled release notes for 0.12.24 through 0.12.29, completed the 0.12.29 commit link, and removed redundant angle-bracket wrappers around changelog reference URLs. This release changes documentation and review guidance only; runtime behavior is unchanged.
+
 ## [0.12.29] - 2026-09-12
 
 ### Changed
@@ -697,29 +978,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 
 - Removed `effectType.h` after its enum moved to `builtInEffectID.h` and `effectID.h`.
 - Removed predefined move-effect helpers `baseAttackEffects()`, `baseAttackWithRecoil()`, `baseAttackWithStatus()`, `baseAttackWithFlinch()`, `statusChangeEffects()`, `protectEffects()`, and `fieldEffectEffects()`, together with their tests; built-in registries now define effect lists directly.
-
-## [0.9.19] - 2026-08-07
-
-### Changed
-
-- Changed only mutable `activeSlots(BattleState &, Side)` and `party(BattleState &, Side)` declarations and definitions from `ATTR_PURE` to GNU-style `ATTR_CONST` compiler attributes.
-- This is an optimization contract, not C++ `const` qualification and not a change to the mutability of returned references.
-
-## [0.9.18] - 2026-08-07
-
-### Changed
-
-- Changed only the const `activeSlots(const BattleState &, Side)` and `party(const BattleState &, Side)` overload declarations and definitions from the GNU-style `ATTR_PURE` compiler attribute to `ATTR_CONST`.
-- This changes the compiler optimization contract, not C++ `const` qualification or the mutability represented by the returned references.
-
-## [0.9.17] - 2026-08-07
-
-### Changed
-
-- Added the GNU-style `ATTR_PURE` compiler attribute to the declarations and definitions of 13 battle-helper overloads/functions: both `activeSlots()` overloads, `contextSlot()`, both `party()` overloads, both `isHealthy()` overloads, `isActive()`, `isAdjacent()`, `targetExists()`, `sideHasHealthyPokemon()`, `getEffectiveSpeed()`, and `makeMoveContext()`.
-- No function bodies changed. In particular, the mutable `activeSlots()` and `party()` overloads still return mutable references, and `contextSlot()` still returns a mutable pointer; this entry records the compiler attributes applied by the patch rather than asserting that mutation through those results is side-effect-free.
-
-## [0.9.16] - 2026-08-07
 
 ### Added
 
@@ -1988,6 +2246,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
+[0.12.51]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.50]: https://github.com/Phaysik/pocketcore/commit/b87e380fc66c471f200ae1bf81abcd8d9d9909e1
+[0.12.49]: https://github.com/Phaysik/pocketcore/commit/acf73762f2a948421600281c252d4af5c1c500f5
+[0.12.48]: https://github.com/Phaysik/pocketcore/commit/8980057e4dbb9974a16863df96fe425e41a8ca5d
+[0.12.47]: https://github.com/Phaysik/pocketcore/commit/0ebd8b0e6ec2e27c1cf3244744457fe5b1a8a61b
+[0.12.46]: https://github.com/Phaysik/pocketcore/commit/c8a758b1226bade8f13794d1e00461dbd53d4a80
+[0.12.45]: https://github.com/Phaysik/pocketcore/commit/440c6e17b39e7d597193d03cd7ff20af4a63605c
+[0.12.44]: https://github.com/Phaysik/pocketcore/commit/30764dddd49d9631836ba49eddafb996469abb86
+[0.12.43]: https://github.com/Phaysik/pocketcore/commit/6da2c4df9c4ce7f97210a357103a314d507edbcc
+[0.12.42]: https://github.com/Phaysik/pocketcore/commit/a888f49cd58ccfd76d301cc60da66a827f89b77a
+[0.12.41]: https://github.com/Phaysik/pocketcore/commit/a4e6a7cd7d336580b04646499a42fb431bcfa2fb
+[0.12.40]: https://github.com/Phaysik/pocketcore/commit/657773ad33b769cb24ae81d1a78c22737edea290
+[0.12.39]: https://github.com/Phaysik/pocketcore/commit/4ff809f2e88e8222359b332b6072b28908463711
+[0.12.38]: https://github.com/Phaysik/pocketcore/commit/1b0b3d610fb74b876624912620e479759359cc69
+[0.12.37]: https://github.com/Phaysik/pocketcore/commit/d71653628460f77d487d8cd616673bb339f04a13
+[0.12.36]: https://github.com/Phaysik/pocketcore/commit/377b6db612cea5b654053b699a2c85a57877fe52
+[0.12.35]: https://github.com/Phaysik/pocketcore/commit/759b63a703cd428ad2e77c16165d3d56f83338c2
+[0.12.34]: https://github.com/Phaysik/pocketcore/commit/19e3a2bf7b3c487c983a4da359e11fbcbd16ff1b
+[0.12.33]: https://github.com/Phaysik/pocketcore/commit/694c3bd79ef51f4d89fb48b430e1c7d15637c744
+[0.12.32]: https://github.com/Phaysik/pocketcore/commit/a8fb2eec131278f15a3a92e03f4d49509eef6938
+[0.12.31]: https://github.com/Phaysik/pocketcore/commit/151565979e88fa3a83698f37097591128e9ab37e
+[0.12.30]: https://github.com/Phaysik/pocketcore/commit/446b802fcda09aae09a3feecf541f8e8c0605593
 [0.12.29]: https://github.com/Phaysik/pocketcore/commit/99827bc09682ab31a0e015a411cca39d27f4021b
 [0.12.28]: https://github.com/Phaysik/pocketcore/commit/eaec1c1ac71a823dded7ef13f33373cd199fe142
 [0.12.27]: https://github.com/Phaysik/pocketcore/commit/dd8e736a5d9440ded6649c06242628f36d20e1eb

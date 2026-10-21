@@ -1,8 +1,8 @@
 /*! @file typeEffectivenessHandler.cpp
 	@brief Contains the type effectiveness effect handler implementation
-	@date 10/08/2026
+	@date 10/19/2026
 	@since 0.9.2
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <cassert>
 #include <optional>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/typedefs.h"
 #include "Effect/effectContext.h"
@@ -19,11 +20,12 @@
 #include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
 #include "Registry/registryProvider.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Core::us;
@@ -36,7 +38,8 @@ namespace PocketCore::Effect
 	using PocketCore::Type::TypeEffectiveness;
 	using PocketCore::Type::TypeID;
 
-	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const
+	void TypeEffectivenessHandler::apply(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+										 ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const
 	{
 		const BattleSlot &user{IEffectHandler::getConstUserBattleSlot(state, context)};
 		const BattleSlot &target{IEffectHandler::getConstTargetBattleSlot(state, context)};

@@ -1,13 +1,14 @@
 /*! @file typeEffectivenessHandler.test.cpp
 	@brief C++ file for running tests for the TypeEffectivenessHandler.
-	@date 10/09/2026
+	@date 10/19/2026
 	@since 0.12.50
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "EffectHandler/typeEffectivenessHandler.h"
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Configuration/typeRegistryConfiguration.h"
@@ -19,13 +20,14 @@
 #include "Registry/registryProvider.h"
 #include "Registry/registryProvider.testHelper.h"
 #include "Registry/typeRegistry.h"
-#include "Types/builtInTypeID.h"
-#include "Types/constants.h"
-#include "Types/typeEffectiveness.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/constants.h"
+#include "Type/typeEffectiveness.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Configuration::TypeRegistryConfiguration;
 using PocketCore::Effect::EffectContext;
@@ -64,6 +66,7 @@ SCENARIO("TypeEffectivenessHandler")
 		makeEffectContext(
 			{.mMoveTypeID = toTypeID(BuiltinTypeID::Fire), .mMoveBasePower = 20, .mUserSide = Side::A, .mTargetSide = Side::B}),
 	};
+	BattleRandomSources randomSources{};
 
 	GIVEN("a null user pokemon")
 	{
@@ -74,7 +77,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("no type effectiveness multiplier is added")
 			{
@@ -92,7 +95,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("no type effectiveness multiplier is added")
 			{
@@ -107,7 +110,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(battleState, context, provider);
+			typeEffectivenessHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no type effectiveness multiplier is added")
 			{
@@ -122,7 +125,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(battleState, context, nullProvider);
+			typeEffectivenessHandler.apply(battleState, context, nullProvider, randomSources);
 
 			THEN("no type effectiveness multiplier is added")
 			{
@@ -137,7 +140,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(battleState, context, provider);
+			typeEffectivenessHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no type effectiveness multiplier is added")
 			{
@@ -155,7 +158,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a base effectiveness is applied")
 			{
@@ -173,7 +176,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a base effectiveness is applied")
 			{
@@ -194,7 +197,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a base effectiveness is applied")
 			{
@@ -213,7 +216,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a complete resistance is applied")
 			{
@@ -232,7 +235,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a quad resistance is applied")
 			{
@@ -252,7 +255,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a half resistance is applied")
 			{
@@ -271,7 +274,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a half weakness is applied")
 			{
@@ -290,7 +293,7 @@ SCENARIO("TypeEffectivenessHandler")
 
 		WHEN("applying type effectiveness handler")
 		{
-			typeEffectivenessHandler.apply(newBattleState, context, provider);
+			typeEffectivenessHandler.apply(newBattleState, context, provider, randomSources);
 
 			THEN("a quad weakness is applied")
 			{

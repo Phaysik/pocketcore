@@ -1,24 +1,24 @@
 /*! @file timer.h
 	@brief Contains the function declarations for creating a class to time code execution.
-	@date 07/27/2026
+	@date 10/14/2026
 	@since 0.1.0
-	@version 0.4.0
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_CLOCK_H
-#define INCLUDE_CLOCK_H
+#ifndef INCLUDE_UTILITY_CLOCK_TIMER_H
+#define INCLUDE_UTILITY_CLOCK_TIMER_H
 
 #include <chrono>
 #include <format>
 #include <fstream>
 #include <iostream>
 #include <mutex>
-#include <ratio>
 #include <string_view>
 #include <utility>
 
 #include "Core/attributeMacros.h"
+#include "Core/concepts.h"
 #include "Core/typedefs.h"
 
 /*! @namespace PocketCore::Utility::Clock Holds any useful functionality that doesn't fit anywhere else
@@ -28,10 +28,8 @@
 */
 namespace PocketCore::Utility::Clock
 {
+	using PocketCore::Core::Ratio;
 	using PocketCore::Core::ub;
-
-	template <typename T>
-	concept Ratio = std::is_same_v<T, std::ratio<T::num, T::den>>; /*!< A concept to check if a type is a std::ratio */
 
 	/*! @enum TimeUnit A collection of named units of time
 		@since 0.1.0
@@ -257,7 +255,7 @@ namespace PocketCore::Utility::Clock
 			static std::ofstream &getLogFile(const std::string *filename = nullptr) noexcept
 			{
 
-				static std::ofstream mLogFile; // LCOV_EXCL_BR_LINE — fourth branch is the __cxa_atexit destructor-registration failure
+				static std::ofstream mLogFile; // LCOV_EXCL_BR — fourth branch is the __cxa_atexit destructor-registration failure
 											   // path, only reachable on OOM
 				static std::mutex logMutex;
 				if (filename != nullptr || getFileName() != "null")
@@ -288,7 +286,7 @@ namespace PocketCore::Utility::Clock
 			*/
 			static std::string &getFileName() noexcept
 			{
-				static std::string fileName{"null"}; // LCOV_EXCL_BR_LINE — fourth branch is the __cxa_atexit destructor-registration
+				static std::string fileName{"null"}; // LCOV_EXCL_BR — fourth branch is the __cxa_atexit destructor-registration
 													 // failure path, only reachable on OOM
 				return fileName;
 			}

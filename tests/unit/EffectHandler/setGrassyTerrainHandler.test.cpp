@@ -1,8 +1,8 @@
 /*! @file setGrassyTerrainHandler.test.cpp
 	@brief C++ file for running tests for the SetGrassyTerrainHandler.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
@@ -19,6 +20,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::applySetGrassy;
 using PocketCore::Effect::EffectContext;
@@ -37,6 +39,7 @@ SCENARIO("SetGrassyTerrainHandler")
 	BattleState battleState{};
 	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources randomSources{};
 
 	TerrainID grassyID{toTerrainID(BuiltinTerrainID::Grassy)};
 	TerrainID electricID{toTerrainID(BuiltinTerrainID::Electric)};
@@ -46,7 +49,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("grassy terrain becomes active")
 			{
@@ -66,7 +69,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied again")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("grassy terrain remains active exactly once")
 			{
@@ -83,7 +86,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("grassy terrain replaces the existing terrain")
 			{
@@ -101,7 +104,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the existing terrain is retained and grassy terrain is not added")
 			{
@@ -119,7 +122,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("grassy terrain is added alongside the existing terrain")
 			{
@@ -135,7 +138,7 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("grassy terrain is applied")
 		{
-			setGrassyTerrainHandler.apply(battleState, context, provider);
+			setGrassyTerrainHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no terrain becomes active")
 			{
@@ -153,8 +156,8 @@ SCENARIO("SetGrassyTerrainHandler")
 
 		WHEN("applied to empty active terrains")
 		{
-			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetGrassy(freeFunctionState, freeFunctionContext, provider);
+			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetGrassy(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("the free function yields the same active terrains as the handler")
 			{
@@ -168,8 +171,8 @@ SCENARIO("SetGrassyTerrainHandler")
 			handlerState.mTerrainIDs = {grassyID};
 			freeFunctionState.mTerrainIDs = {grassyID};
 
-			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetGrassy(freeFunctionState, freeFunctionContext, provider);
+			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetGrassy(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both leave psychic terrain active exactly once")
 			{
@@ -187,8 +190,8 @@ SCENARIO("SetGrassyTerrainHandler")
 			freeFunctionState.mRuleset.mMaxTerrains = 1;
 			freeFunctionState.mRuleset.mReplaceTerrainWhenFull = true;
 
-			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetGrassy(freeFunctionState, freeFunctionContext, provider);
+			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetGrassy(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both replace the existing terrain identically")
 			{
@@ -203,8 +206,8 @@ SCENARIO("SetGrassyTerrainHandler")
 			handlerState.mRuleset.mMaxTerrains = 0;
 			freeFunctionState.mRuleset.mMaxTerrains = 0;
 
-			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider);
-			applySetGrassy(freeFunctionState, freeFunctionContext, provider);
+			setGrassyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetGrassy(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("neither activates a terrain")
 			{

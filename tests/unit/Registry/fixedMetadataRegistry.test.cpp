@@ -1,32 +1,32 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.7.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <utility>
 
-#include "Configuration/fixedMetadataConfiguration.testHelper.h"
+#include "Configuration/fixedMetadataRegistryConfiguration.testHelper.h"
 #include "Core/typedefs.h"
 #include "Registry/fixedMetadataRegistry.testHelper.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Core::ub;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::CheckpointRegistry;
-using PocketCore::Testing::FixedConfiguration;
 using PocketCore::Testing::FixedMetaDataID;
 using PocketCore::Testing::FixedRegistry;
+using PocketCore::Testing::FixedRegistryConfiguration;
 using PocketCore::Testing::Metadata;
 using PocketCore::Testing::NO_ID;
 using PocketCore::Testing::NONE_NAME;
@@ -34,6 +34,7 @@ using PocketCore::Testing::TEST1_NAME;
 using PocketCore::Testing::TEST2_NAME;
 using PocketCore::Testing::TEST3_NAME;
 using PocketCore::Testing::toFixedMetaDataID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -44,7 +45,8 @@ static_assert(!PubliclyStructurallyMutable<FixedRegistry>);
 
 SCENARIO("FixedMetadataRegistry")
 {
-	FixedRegistry registry{};
+	std::unique_ptr<FixedRegistry> registryStorage{std::make_unique<FixedRegistry>()};
+	FixedRegistry &registry{*registryStorage};
 	ub finalWeatherUnderlyingValue{std::to_underlying(BuiltinFixedMetaDataID::Final)};
 
 	GIVEN("a default constructed FixedRegistry")
@@ -293,7 +295,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		WHEN("the registered entry counts differ")
 		{
-			static_cast<void>(actual.addEntry({.mName = "Additional"}));
+			actual.addEntry({.mName = "Additional"});
 
 			THEN("the registries compare unequal")
 			{
@@ -304,8 +306,8 @@ SCENARIO("FixedMetadataRegistry")
 		WHEN("the registered metadata differs with matching counts and next IDs")
 		{
 			CheckpointRegistry other{};
-			static_cast<void>(actual.addEntry({.mName = "First"}));
-			static_cast<void>(other.addEntry({.mName = "Second"}));
+			actual.addEntry({.mName = "First"});
+			other.addEntry({.mName = "Second"});
 
 			THEN("the registries compare unequal")
 			{
@@ -317,7 +319,7 @@ SCENARIO("FixedMetadataRegistry")
 
 		WHEN("an entry is appended and removed without rolling back its assigned ID")
 		{
-			static_cast<void>(actual.addEntry({.mName = "Removed"}));
+			actual.addEntry({.mName = "Removed"});
 			actual.eraseEntry(original.getAmountRegistered());
 
 			THEN("matching registered metadata with different next IDs compares unequal")
@@ -337,50 +339,52 @@ SCENARIO("FixedMetadataRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			FixedRegistry other{};
+			std::unique_ptr<FixedRegistry> other{std::make_unique<FixedRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			FixedConfiguration other{};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.addMetadata({.mName = "test"})};
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
+			std::expected<FixedMetaDataID, RegistryError> result{other->addMetadata({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
+				CHECK((registry != other->getRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			FixedConfiguration other{};
-			std::expected<FixedMetaDataID, RegistryErrorInfo> result{other.removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None))};
-
-			THEN("they are not equal")
-			{
-				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
-			}
-		}
-
-		GIVEN("for an entry modified in one registry")
-		{
-			FixedConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
-									 [](Metadata &metadata) { metadata = {.mName = "test"}; }),
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
+			std::expected<FixedMetaDataID, RegistryError> result{
+				other->removeMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None)),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRegistry()));
+				CHECK((registry != other->getRegistry()));
+			}
+		}
+
+		GIVEN("for an entry modified in one registry")
+		{
+			std::unique_ptr<FixedRegistryConfiguration> other{std::make_unique<FixedRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->mutateMetadata(toFixedMetaDataID(BuiltinFixedMetaDataID::None), "FixedMetadata",
+									  [](Metadata &metadata) { metadata = {.mName = "test"}; }),
+			};
+
+			THEN("they are not equal")
+			{
+				REQUIRE(result.has_value());
+				CHECK((registry != other->getRegistry()));
 			}
 		}
 	}

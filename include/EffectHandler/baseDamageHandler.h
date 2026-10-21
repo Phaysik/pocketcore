@@ -1,14 +1,15 @@
 /*! @file baseDamageHandler.h
 	@brief Contains the base damage effect handler
-	@date 09/11/2026
+	@date 10/19/2026
 	@since 0.7.2
-	@version 0.12.23
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_BASEDAMAGEHANDLER_H
 #define INCLUDE_EFFECT_BASEDAMAGEHANDLER_H
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Core/attributeMacros.h"
 #include "Effect/effectContext.h"
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
@@ -31,9 +33,9 @@ namespace PocketCore::Effect
 		@warning The context must identify valid user and target slots. A missing Pokemon, zero move base
 			power, invalid effective stat, or non-positive effective defense leaves the existing damage unchanged.
 		@note The calculated damage is clamped to the range representable by the damage field.
-		@date 09/11/2026
+		@date 10/19/2026
 		@since 0.7.2
-		@version 0.12.23
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class BaseDamageHandler : public IEffectHandler
@@ -43,28 +45,32 @@ namespace PocketCore::Effect
 				@param[in,out] state The battle state containing the user and target slots.
 				@param[in,out] context The effect context containing calculation inputs and receiving the damage result.
 				@param[in] provider The registry provider retained for the common effect-handler interface; this handler does not use it.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@pre The user and target indexes in @p context must refer to existing slots in their selected teams.
 				@post On successful calculation, @p context contains damage clamped to the representable damage range.
 				@note The existing damage value remains unchanged when required Pokemon data or valid effective statistics are unavailable.
 				@since 0.7.2
-				@version 0.12.23
+				@version 0.12.51
 			*/
-			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider) const override;
+			void apply(BattleState &state, EffectContext &context, ATTR_MAYBE_UNUSED const RegistryProvider &provider,
+					   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const override;
 	};
 
 	/*! @brief Applies the base damage calculation to an effect context.
 		@param[in,out] state The battle state containing the user and target slots.
 		@param[in,out] context The effect context containing calculation inputs and receiving the damage result.
 		@param[in] provider The registry provider passed to the common effect-handler interface; this calculation does not use it.
+		@param[in] randomSources The random sources used for battle-related numeric types.
 		@pre The user and target indexes in @p context must refer to existing slots in their selected teams.
 		@post On successful calculation, @p context contains the calculated base damage.
 		@note The existing damage value remains unchanged when the calculation cannot be performed.
 		@since 0.10.0
-		@version 0.12.7
+		@version 0.12.51
 	*/
-	inline void applyBaseDamage(BattleState &state, EffectContext &context, const RegistryProvider &provider)
+	inline void applyBaseDamage(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+								const BattleRandomSources &randomSources = {})
 	{
-		BaseDamageHandler{}.apply(state, context, provider);
+		BaseDamageHandler{}.apply(state, context, provider, randomSources);
 	}
 } // namespace PocketCore::Effect
 

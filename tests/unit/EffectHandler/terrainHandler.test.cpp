@@ -1,13 +1,14 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.9.10
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "EffectHandler/terrainHandler.h"
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
 #include "Effect/effectContext.h"
@@ -17,11 +18,12 @@
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
 #include "Terrain/builtInTerrainID.h"
-#include "Types/builtInTypeID.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/typeID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
@@ -47,6 +49,7 @@ SCENARIO("TerrainHandler")
 {
 	TerrainHandler terrainHandler{};
 	RegistryProvider provider{};
+	BattleRandomSources randomSources{};
 
 	GIVEN("electric terrain with an electric move")
 	{
@@ -73,7 +76,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -90,7 +93,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -107,7 +110,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -142,7 +145,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -159,7 +162,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -176,7 +179,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -211,7 +214,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -228,7 +231,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -245,7 +248,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -280,7 +283,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -297,7 +300,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -314,7 +317,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -349,7 +352,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -366,7 +369,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -383,7 +386,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -418,7 +421,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -435,7 +438,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -452,7 +455,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -487,7 +490,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -504,7 +507,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -521,7 +524,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
@@ -556,7 +559,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -573,7 +576,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
@@ -590,7 +593,7 @@ SCENARIO("TerrainHandler")
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider);
+				terrainHandler.apply(battleState, context, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{

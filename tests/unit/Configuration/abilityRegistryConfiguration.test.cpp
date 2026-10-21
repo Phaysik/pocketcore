@@ -1,8 +1,8 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 10/08/2026
+	@date 10/20/2026
 	@since 0.4.0
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <expected>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -26,8 +27,8 @@
 #include "Effect/builtInEffectID.h"
 #include "Effect/effectTrigger.h"
 #include "Registry/abilityRegistry.h"
-#include "Registry/registryError.h"
 #include "Utility/Debug/Logging/logging.testHelper.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -50,8 +51,8 @@ using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::EffectTrigger;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Registry::Ability::AbilityRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Testing::ensureLoggerInitialized;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -59,8 +60,10 @@ SCENARIO("AbilityRegistryConfiguration")
 {
 	ensureLoggerInitialized("ability registry configuration test", "abilityRegistryConfiguration_test.log");
 
-	AbilityRegistryConfiguration config{};
-	AbilityRegistry registry{};
+	std::unique_ptr<AbilityRegistryConfiguration> configRegistryStorage{std::make_unique<AbilityRegistryConfiguration>()};
+	AbilityRegistryConfiguration &config{*configRegistryStorage};
+	std::unique_ptr<AbilityRegistry> registryStorage{std::make_unique<AbilityRegistry>()};
+	AbilityRegistry &registry{*registryStorage};
 	ub finalAbilityUnderlyingValue{std::to_underlying(BuiltinAbilityID::FinalAbility)};
 
 	GIVEN("getAmountRegistered")
@@ -181,7 +184,7 @@ SCENARIO("AbilityRegistryConfiguration")
 			{
 				std::string name{std::format("String_{:04}", i)};
 				AbilityMeta definition{.mName = name, .mTriggers = {}};
-				std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+				std::expected<AbilityID, RegistryError> result{config.addAbility(definition)};
 
 				REQUIRE(result.has_value());
 
@@ -192,12 +195,12 @@ SCENARIO("AbilityRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_ABILITIES + 1)};
 
 			AbilityMeta definition{.mName = name, .mTriggers = {}};
-			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+			std::expected<AbilityID, RegistryError> result{config.addAbility(definition)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_ABILITIES));
 			}
 		}
@@ -205,12 +208,12 @@ SCENARIO("AbilityRegistryConfiguration")
 		WHEN("an ability whose name is already in use is added")
 		{
 			AbilityMeta definition{.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = {}};
-			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+			std::expected<AbilityID, RegistryError> result{config.addAbility(definition)};
 
 			THEN("registration reports a duplicate ability and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((result.error() == RegistryError::DuplicateAbility));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 			}
 		}
@@ -226,7 +229,7 @@ SCENARIO("AbilityRegistryConfiguration")
 
 			AbilityMeta definition{.mName = "TestAbilityName", .mTriggers = triggers};
 
-			std::expected<AbilityID, RegistryErrorInfo> result{config.addAbility(definition)};
+			std::expected<AbilityID, RegistryError> result{config.addAbility(definition)};
 
 			THEN("it receives the first custom stable ID and owns its trigger data")
 			{
@@ -261,12 +264,12 @@ SCENARIO("AbilityRegistryConfiguration")
 			std::string name{std::format("String_{:04}", MAX_ABILITIES + 1)};
 
 			abilityMetas.push_back({.mName = name, .mTriggers = {}});
-			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+			std::expected<void, RegistryError> result{config.addAbilities(abilityMetas)};
 
 			THEN("registration reports a max capacity and nothing is added")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::MaxCapacity));
+				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 			}
 		}
@@ -283,12 +286,12 @@ SCENARIO("AbilityRegistryConfiguration")
 
 			abilityMetas.push_back({.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = {}});
 			const AbilityRegistry beforeBatch{config.getRuntimeRegistry()};
-			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+			std::expected<void, RegistryError> result{config.addAbilities(abilityMetas)};
 
 			THEN("registration reports a duplicate ability and the registry is rollback to the checkpoint before the erroneous addition")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((result.error() == RegistryError::DuplicateAbility));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				CHECK((config.getRuntimeRegistry() == beforeBatch));
 				CHECK((config.getRuntimeRegistry().getNextAbilityID() == beforeBatch.getNextAbilityID()));
@@ -308,7 +311,7 @@ SCENARIO("AbilityRegistryConfiguration")
 
 			abilityMetas.push_back({.mName = "TestAbilityName", .mTriggers = triggers});
 
-			std::expected<void, RegistryErrorInfo> result{config.addAbilities(abilityMetas)};
+			std::expected<void, RegistryError> result{config.addAbilities(abilityMetas)};
 
 			THEN("the registry reports no error and all the ability definitions are added")
 			{
@@ -331,12 +334,12 @@ SCENARIO("AbilityRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers("ThisIsInvalid", triggers)};
+				std::expected<void, RegistryError> result{config.setAbilityTriggers("ThisIsInvalid", triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
@@ -350,7 +353,7 @@ SCENARIO("AbilityRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(ABILITY_NAME_NONE, triggers)};
+				std::expected<void, RegistryError> result{config.setAbilityTriggers(ABILITY_NAME_NONE, triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -372,12 +375,12 @@ SCENARIO("AbilityRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(AbilityID{200}, triggers)};
+				std::expected<void, RegistryError> result{config.setAbilityTriggers(AbilityID{200}, triggers)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
@@ -391,7 +394,7 @@ SCENARIO("AbilityRegistryConfiguration")
 					},
 				};
 
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTriggers(toAbilityID(BuiltinAbilityID::None), triggers)};
+				std::expected<void, RegistryError> result{config.setAbilityTriggers(toAbilityID(BuiltinAbilityID::None), triggers)};
 
 				THEN("the registry reports no error and the triggers are appropriately updated")
 				{
@@ -409,27 +412,28 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an invalid ability name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTarget("ThisIsInvalid", BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setAbilityTarget("ThisIsInvalid", BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing ability definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
-					config.setAbilityTarget(ABILITY_NAME_NONE, BattleTargetID::AllAllies),
+				std::expected<void, RegistryError> result{
+					config.setAbilityTarget(ABILITY_NAME_NONE, BattleTargetID::AllAlliesIncludingSelf),
 				};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
-					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID
+						   == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}
@@ -438,27 +442,28 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an invalid ability name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.setAbilityTarget(AbilityID{200}, BattleTargetID::AllAllies)};
+				std::expected<void, RegistryError> result{config.setAbilityTarget(AbilityID{200}, BattleTargetID::AllAlliesIncludingSelf)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing ability definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{
-					config.setAbilityTarget(toAbilityID(BuiltinAbilityID::None), BattleTargetID::AllAllies),
+				std::expected<void, RegistryError> result{
+					config.setAbilityTarget(toAbilityID(BuiltinAbilityID::None), BattleTargetID::AllAlliesIncludingSelf),
 				};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
 					REQUIRE(result.has_value());
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
-					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID == BattleTargetID::AllAllies));
+					CHECK((config.getAbilityMetadata(toAbilityID(BuiltinAbilityID::None))->mTargetID
+						   == BattleTargetID::AllAlliesIncludingSelf));
 				}
 			}
 		}
@@ -468,33 +473,33 @@ SCENARIO("AbilityRegistryConfiguration")
 	{
 		WHEN("calling with an invalid ability name")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameAbility("ThisIsInvalid", "NewName")};
+			std::expected<void, RegistryError> result{config.renameAbility("ThisIsInvalid", "NewName")};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+				CHECK((result.error() == RegistryError::AbilityNotFound));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 			}
 		}
 
 		WHEN("trying to rename to a name already in the registry")
 		{
-			std::expected<void, RegistryErrorInfo> result{
+			std::expected<void, RegistryError> result{
 				config.renameAbility(ABILITY_NAME_NONE, ABILITY_NAME_DRIZZLE),
 			};
 
 			THEN("the registry reports an error and there is no update to the registry")
 			{
 				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+				CHECK((result.error() == RegistryError::DuplicateAbility));
 				CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 			}
 		}
 
 		WHEN("updating an existing ability definition")
 		{
-			std::expected<void, RegistryErrorInfo> result{config.renameAbility(ABILITY_NAME_NONE, "NewName")};
+			std::expected<void, RegistryError> result{config.renameAbility(ABILITY_NAME_NONE, "NewName")};
 
 			THEN("the registry reports no error and the name is appropriately updated")
 			{
@@ -520,33 +525,33 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an invalid ability name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateAbility("ThisIsInvalid", definition)};
+				std::expected<void, RegistryError> result{config.updateAbility("ThisIsInvalid", definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateAbility(ABILITY_NAME_NONE, {.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = triggers}),
 				};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+					CHECK((result.error() == RegistryError::DuplicateAbility));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing ability definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateAbility(ABILITY_NAME_NONE, definition)};
+				std::expected<void, RegistryError> result{config.updateAbility(ABILITY_NAME_NONE, definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -562,19 +567,19 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an invalid ability name")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateAbility(AbilityID{200}, definition)};
+				std::expected<void, RegistryError> result{config.updateAbility(AbilityID{200}, definition)};
 
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("trying to rename to a name already in the registry")
 			{
-				std::expected<void, RegistryErrorInfo> result{
+				std::expected<void, RegistryError> result{
 					config.updateAbility(toAbilityID(BuiltinAbilityID::None),
 										 {.mName = std::string(ABILITY_NAME_DRIZZLE), .mTriggers = triggers}),
 				};
@@ -582,14 +587,14 @@ SCENARIO("AbilityRegistryConfiguration")
 				THEN("the registry reports an error and there is no update to the registry")
 				{
 					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::DuplicateAbility));
+					CHECK((result.error() == RegistryError::DuplicateAbility));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("updating an existing ability definition")
 			{
-				std::expected<void, RegistryErrorInfo> result{config.updateAbility(toAbilityID(BuiltinAbilityID::None), definition)};
+				std::expected<void, RegistryError> result{config.updateAbility(toAbilityID(BuiltinAbilityID::None), definition)};
 
 				THEN("the registry reports no error and the target is appropriately updated")
 				{
@@ -608,19 +613,19 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an unknown ability name")
 			{
-				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility("Unknown")};
+				std::expected<AbilityID, RegistryError> result{config.removeAbility("Unknown")};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known ability name")
 			{
-				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(ABILITY_NAME_NONE)};
+				std::expected<AbilityID, RegistryError> result{config.removeAbility(ABILITY_NAME_NONE)};
 
 				THEN("the result is a success and the registry is updated")
 				{
@@ -635,19 +640,19 @@ SCENARIO("AbilityRegistryConfiguration")
 		{
 			WHEN("calling with an unknown ability ID")
 			{
-				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(AbilityID{200})};
+				std::expected<AbilityID, RegistryError> result{config.removeAbility(AbilityID{200})};
 
 				THEN("the result is an error and the registry is not updated")
 				{
 					CHECK_FALSE(result.has_value());
-					CHECK((result.error().mKind == RegistryError::AbilityNotFound));
+					CHECK((result.error() == RegistryError::AbilityNotFound));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue));
 				}
 			}
 
 			WHEN("calling with a known ability ID")
 			{
-				std::expected<AbilityID, RegistryErrorInfo> result{config.removeAbility(toAbilityID(BuiltinAbilityID::None))};
+				std::expected<AbilityID, RegistryError> result{config.removeAbility(toAbilityID(BuiltinAbilityID::None))};
 
 				THEN("the result is a success and the registry is updated")
 				{

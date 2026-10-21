@@ -1,14 +1,15 @@
 /*! @file multiplierRegistry.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/multiplierRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -21,7 +22,7 @@
 #include "Multiplier/constants.h"
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
-#include "Registry/registryError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -45,7 +46,7 @@ using PocketCore::Multiplier::MultiplierMeta;
 using PocketCore::Multiplier::NO_MULTIPLIER_ID;
 using PocketCore::Multiplier::toMultiplierID;
 using PocketCore::Registry::Multiplier::MultiplierRegistry;
-using PocketCore::Registry::RegistryErrorInfo;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -56,7 +57,8 @@ static_assert(!PubliclyStructurallyMutable<MultiplierRegistry>);
 
 SCENARIO("MultiplierRegistry")
 {
-	MultiplierRegistry registry{};
+	std::unique_ptr<MultiplierRegistry> registryStorage{std::make_unique<MultiplierRegistry>()};
+	MultiplierRegistry &registry{*registryStorage};
 	ub finalMultiplierUnderlyingValue{std::to_underlying(BuiltinMultiplierID::FinalMultiplier)};
 
 	GIVEN("a default constructed multiplier registry")
@@ -337,49 +339,49 @@ SCENARIO("MultiplierRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			MultiplierRegistry other{};
+			std::unique_ptr<MultiplierRegistry> other{std::make_unique<MultiplierRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			MultiplierRegistryConfiguration other{};
-			std::expected<MultiplierID, RegistryErrorInfo> result{other.addMultiplier({.mName = "test"})};
+			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
+			std::expected<MultiplierID, RegistryError> result{other->addMultiplier({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			MultiplierRegistryConfiguration other{};
-			std::expected<MultiplierID, RegistryErrorInfo> result{other.removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
+			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
+			std::expected<MultiplierID, RegistryError> result{other->removeMultiplier(toMultiplierID(BuiltinMultiplierID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			MultiplierRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = "test"}),
+			std::unique_ptr<MultiplierRegistryConfiguration> other{std::make_unique<MultiplierRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateMultiplier(toMultiplierID(BuiltinMultiplierID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 09/29/2026
+	@date 10/13/2026
 	@since 0.8.7
-	@version 0.12.46
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@
 #include "Multiplier/multiplierID.h"
 #include "Nature/builtInNatureID.h"
 #include "Registry/multiplierRegistry.h"
-#include "Types/builtInTypeID.h"
+#include "Type/builtInTypeID.h"
 #include "Utility/Math/floatUtility.h"
 
 #include <catch2/catch_test_macros.hpp>

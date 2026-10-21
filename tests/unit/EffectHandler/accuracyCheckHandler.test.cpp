@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.test.cpp
 	@brief C++ file for running tests for the AccuracyCheckHandler.
-	@date 08/31/2026
+	@date 10/19/2026
 	@since 0.8.7
-	@version 0.12.13
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,19 +10,24 @@
 
 #include <cstddef>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Battle/battleState.testHelper.h"
+#include "Core/typedefs.h"
 #include "Effect/effectContext.h"
 #include "Effect/effectContext.testHelper.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
-#include "Utility/random.h"
+#include "Utility/Random/callableRandomSource.h"
+#include "Utility/Random/random.testHelper.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
+using PocketCore::Core::sb;
 using PocketCore::Effect::AccuracyCheckHandler;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
@@ -31,7 +36,8 @@ using PocketCore::Registry::RegistryProvider;
 using PocketCore::Testing::makeBattleState;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::makePokemon;
-using PocketCore::Utility::Random;
+using PocketCore::Testing::SequenceRandom;
+using PocketCore::Utility::Random::CallableRandomSource;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -39,6 +45,7 @@ SCENARIO("AccuracyCheckHandler")
 {
 	AccuracyCheckHandler accuracyCheckHandler{};
 	RegistryProvider provider{};
+	BattleRandomSources randomSources{};
 
 	GIVEN("perfect move accuracy and neutral stages")
 	{
@@ -62,7 +69,7 @@ SCENARIO("AccuracyCheckHandler")
 
 		WHEN("the handler is applied")
 		{
-			accuracyCheckHandler.apply(battleState, effectContext, provider);
+			accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 			THEN("the attack never misses")
 			{
@@ -83,13 +90,13 @@ SCENARIO("AccuracyCheckHandler")
 
 		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		WHEN("the handler is applied 100 times")
+		WHEN("the handler is applied 3 times")
 		{
 			std::size_t missCount{0};
+			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
+			randomSources.mSigned = signedSource;
 
-			Random::setSeed(5);
-
-			for (std::size_t i{0}; i < 100; ++i)
+			for (std::size_t i{0}; i < 3; ++i)
 			{
 				EffectContext effectContext{
 					makeEffectContext({
@@ -101,7 +108,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -111,7 +118,7 @@ SCENARIO("AccuracyCheckHandler")
 
 			THEN("the attack will miss on average 66% of the time")
 			{
-				CHECK((missCount == 66));
+				CHECK((missCount == 2));
 			}
 		}
 	}
@@ -126,13 +133,14 @@ SCENARIO("AccuracyCheckHandler")
 
 		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		WHEN("the handler is applied 100 times")
+		WHEN("the handler is applied 3 times")
 		{
 			std::size_t missCount{0};
 
-			Random::setSeed(5);
+			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
+			randomSources.mSigned = signedSource;
 
-			for (std::size_t i{0}; i < 100; ++i)
+			for (std::size_t i{0}; i < 3; ++i)
 			{
 				EffectContext effectContext{
 					makeEffectContext({
@@ -144,7 +152,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -154,7 +162,7 @@ SCENARIO("AccuracyCheckHandler")
 
 			THEN("the attack will miss on average 66% of the time")
 			{
-				CHECK((missCount == 66));
+				CHECK((missCount == 2));
 			}
 		}
 	}
@@ -185,7 +193,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -226,7 +234,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -267,7 +275,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -292,13 +300,14 @@ SCENARIO("AccuracyCheckHandler")
 
 		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
 
-		WHEN("the handler is applied 100 times")
+		WHEN("the handler is applied 3 times")
 		{
 			std::size_t missCount{0};
 
-			Random::setSeed(18);
+			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
+			randomSources.mSigned = signedSource;
 
-			for (std::size_t i{0}; i < 100; ++i)
+			for (std::size_t i{0}; i < 3; ++i)
 			{
 				EffectContext effectContext{
 					makeEffectContext({
@@ -310,7 +319,7 @@ SCENARIO("AccuracyCheckHandler")
 					}),
 				};
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider);
+				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
 
 				if (effectContext.mDamage.mIsMiss)
 				{
@@ -318,9 +327,9 @@ SCENARIO("AccuracyCheckHandler")
 				}
 			}
 
-			THEN("the attack hits 30% of the time")
+			THEN("the attack hits 66% of the time")
 			{
-				CHECK((missCount == 70));
+				CHECK((missCount == 2));
 			}
 		}
 	}

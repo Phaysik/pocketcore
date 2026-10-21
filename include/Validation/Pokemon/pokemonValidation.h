@@ -1,8 +1,8 @@
 /*! @file pokemonValidation.h
 	@brief Defines validation functions that help with Pokemon.
-	@date 10/07/2026
+	@date 10/21/2026
 	@since 0.12.48
-	@version 0.12.48
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -17,7 +17,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
-#include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonStats.h"
 
 #include "pokemonError.h"
 
@@ -58,15 +58,15 @@ namespace PocketCore::Validation::Pokemon
 	/*! @brief Checks whether every individual value in a Pokemon stat array is valid.
 		@details Validates each element against the configured IV bounds. This constexpr function can be evaluated at compile time or
 		runtime.
-		@param[in] pokemonIVArray The fixed-size array view to validate; its extent is @ref POKEMON_STAT_COUNT.
+		@param[in] pokemonIVArray The non-owning span of the pokemon's IVs.
 		@return An empty result when every IV is valid; otherwise, @ref PokemonError::INVALID_IV_ARRAY.
 		@since 0.12.48
-		@version 0.12.48
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonIVArray(
-		const std::span<const us, POKEMON_STAT_COUNT> pokemonIVArray)
+	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonIVArray(const std::span<const us> pokemonIVArray)
 	{
-		if (std::ranges::any_of(pokemonIVArray, [](const us pokemonIV) { return !isValidPokemonIV(pokemonIV).has_value(); }))
+		if (pokemonIVArray.size() > POKEMON_STAT_COUNT
+			|| std::ranges::any_of(pokemonIVArray, [](const us pokemonIV) { return !isValidPokemonIV(pokemonIV).has_value(); }))
 		{
 			return std::unexpected{PokemonError::INVALID_IV_ARRAY};
 		}
@@ -108,18 +108,18 @@ namespace PocketCore::Validation::Pokemon
 	/*! @brief Checks whether every effort value in a Pokemon stat array is valid.
 		@details Validates each element against the configured per-stat EV range and checks that the array's total does not exceed
 		@ref MAX_TOTAL_EV_STAT_VALUE. This constexpr function can be evaluated at compile time or runtime.
-		@param[in] pokemonEVArray The fixed-size array view to validate; its extent is @ref POKEMON_STAT_COUNT.
+		@param[in] pokemonEVArray The non-owning span of the pokemon's EVs.
 		@return An empty result when every EV and the aggregate total are valid; otherwise, @ref PokemonError::INVALID_EV_ARRAY.
 		@since 0.12.48
-		@version 0.12.48
+		@version 0.12.51
 	*/
-	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonEVArray(
-		const std::span<const us, POKEMON_STAT_COUNT> pokemonEVArray)
+	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonEVArray(const std::span<const us> pokemonEVArray)
 	{
 		const us sum{static_cast<us>(std::ranges::fold_left(pokemonEVArray, 0, std::plus<>()))};
 
-		if (std::ranges::any_of(pokemonEVArray,
-								[sum](const us pokemonEV) { return !isValidPokemonEV(pokemonEV, sum - pokemonEV).has_value(); }))
+		if (pokemonEVArray.size() > POKEMON_STAT_COUNT || std::ranges::any_of(pokemonEVArray, [sum](const us pokemonEV) {
+				return !isValidPokemonEV(pokemonEV, sum - pokemonEV).has_value();
+			}))
 		{
 			return std::unexpected{PokemonError::INVALID_EV_ARRAY};
 		}

@@ -1,8 +1,8 @@
 /*! @file effectHandlerHelpers.h
 	@brief Contains the effect handler helpers
-	@date 10/08/2026
+	@date 10/13/2026
 	@since 0.7.2
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -22,8 +22,8 @@
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Registry/registryProvider.h"
-#include "Types/builtInTypeID.h"
-#include "Types/typeID.h"
+#include "Type/builtInTypeID.h"
+#include "Type/typeID.h"
 
 namespace PocketCore::Effect
 {
@@ -74,10 +74,10 @@ namespace PocketCore::Effect
 		@return `true` when a resolved type name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the type registry is unavailable, or no type matches.
 		@since 0.12.17
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasTypeByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-															  const std::string_view &expectedName)
+															  const std::string_view expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.mTypeRegistry == nullptr)
 		{
@@ -116,10 +116,10 @@ namespace PocketCore::Effect
 		@return `true` when a resolved ability name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the ability registry is unavailable, or no ability matches.
 		@since 0.9.10
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																 const std::string_view &expectedName)
+																 const std::string_view expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.mAbilityRegistry == nullptr)
 		{
@@ -156,10 +156,10 @@ namespace PocketCore::Effect
 		@return `true` when a resolved item name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the item registry is unavailable, or no item matches.
 		@since 0.9.10
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-															  const std::string_view &expectedName)
+															  const std::string_view expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.mItemRegistry == nullptr)
 		{
@@ -197,10 +197,10 @@ namespace PocketCore::Effect
 		@return `true` when a resolved nature name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the nature registry is unavailable, or no nature matches.
 		@since 0.11.6
-		@version 0.12.50
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
-																const std::string_view &expectedName)
+																const std::string_view expectedName)
 	{
 		if (battleSlot.mPokemon == nullptr || provider.mNatureRegistry == nullptr)
 		{

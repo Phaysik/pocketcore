@@ -1,14 +1,15 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 09/22/2026
+	@date 10/19/2026
 	@since 0.7.2
-	@version 0.12.38
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_EFFECT_EFFECTHANDLERINTERFACE_H
 #define INCLUDE_EFFECT_EFFECTHANDLERINTERFACE_H
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "EffectHandler/effectHandlerHelpers.h"
@@ -16,6 +17,7 @@
 
 namespace PocketCore::Effect
 {
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Battle::BattleSlot;
 	using PocketCore::Battle::BattleState;
 	using PocketCore::Registry::RegistryProvider;
@@ -26,9 +28,9 @@ namespace PocketCore::Effect
 		 metadata. The static accessors resolve the user or target slot identified by the context.
 		@warning The context indexes must refer to existing slots in the selected side's team.
 		@note The class is not copyable or movable.
-		@date 09/22/2026
+		@date 10/19/2026
 		@since 0.7.2
-		@version 0.12.38
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	class IEffectHandler
@@ -75,11 +77,13 @@ namespace PocketCore::Effect
 				@param[in,out] state The battle state to inspect and mutate.
 				@param[in,out] context The mutable state shared by effects in the current dispatch.
 				@param[in] provider The registries used to resolve effect metadata.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@note Concrete handlers define the effect-specific behavior.
 				@since 0.7.2
-				@version 0.12.7
+				@version 0.12.51
 			*/
-			virtual void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider) const = 0;
+			virtual void apply(BattleState &state, EffectContext &context, const RegistryProvider &provider,
+							   const BattleRandomSources &randomSources) const = 0;
 
 			/*! @brief Returns the mutable battle slot occupied by the effect user.
 				@param[in,out] state The battle state containing the user's team.

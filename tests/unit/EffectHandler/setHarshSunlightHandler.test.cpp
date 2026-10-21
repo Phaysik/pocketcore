@@ -1,8 +1,8 @@
 /*! @file setHarshSunlightHandler.test.cpp
 	@brief C++ file for running tests for the SetHarshSunlightHandler.
-	@date 09/23/2026
+	@date 10/19/2026
 	@since 0.12.43
-	@version 0.12.43
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 
 #include <algorithm>
 
+#include "Battle/battleRandomSources.h"
 #include "Battle/battleState.h"
 #include "Effect/effectContext.h"
 #include "Registry/registryProvider.h"
@@ -19,6 +20,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Effect::applySetHarshSunlight;
 using PocketCore::Effect::EffectContext;
@@ -37,6 +39,7 @@ SCENARIO("SetHarshSunlightHandler")
 	BattleState battleState{};
 	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources randomSources{};
 
 	WeatherID sunID{toWeatherID(BuiltinWeatherID::HarshSunlight)};
 	WeatherID hailID{toWeatherID(BuiltinWeatherID::Hail)};
@@ -46,7 +49,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("sun weather becomes active")
 			{
@@ -66,7 +69,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied again")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("sun weather remains active exactly once")
 			{
@@ -83,7 +86,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("sun weather replaces the existing weather")
 			{
@@ -101,7 +104,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("the existing weather is retained and sun weather is not added")
 			{
@@ -119,7 +122,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("sun weather is added alongside the existing weather")
 			{
@@ -135,7 +138,7 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider);
+			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
 
 			THEN("no weather becomes active")
 			{
@@ -153,8 +156,8 @@ SCENARIO("SetHarshSunlightHandler")
 
 		WHEN("applied to empty active weathers")
 		{
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider);
+			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("the free function yields the same active weathers as the handler")
 			{
@@ -168,8 +171,8 @@ SCENARIO("SetHarshSunlightHandler")
 			handlerState.mWeatherIDs = {sunID};
 			freeFunctionState.mWeatherIDs = {sunID};
 
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider);
+			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both leave sun weather active exactly once")
 			{
@@ -187,8 +190,8 @@ SCENARIO("SetHarshSunlightHandler")
 			freeFunctionState.mRuleset.mMaxWeathers = 1;
 			freeFunctionState.mRuleset.mReplaceWeatherWhenFull = true;
 
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider);
+			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("both replace the existing weather identically")
 			{
@@ -203,8 +206,8 @@ SCENARIO("SetHarshSunlightHandler")
 			handlerState.mRuleset.mMaxWeathers = 0;
 			freeFunctionState.mRuleset.mMaxWeathers = 0;
 
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider);
+			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("neither activates a weather")
 			{

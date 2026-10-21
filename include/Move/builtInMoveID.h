@@ -1,13 +1,14 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 09/11/2026
-	@since 0.5.2
-	@version 0.12.24
+	@date 10/21/2026
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_MOVE_BUILTIN_MOVE_ID_H
 #define INCLUDE_MOVE_BUILTIN_MOVE_ID_H
+
+#include <utility>
 
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -24,9 +25,9 @@ namespace PocketCore::Move
 		@details This closed enum is only a catalog of built-in moves. Runtime state and user-facing APIs use the open @ref MoveID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 10/21/2026
 		@version 0.5.2
-		@version 0.12.13
+		@version 0.12.51
 		@author Matthew Moore
 	*/
 	enum class BuiltinMoveID : ub
@@ -35,8 +36,10 @@ namespace PocketCore::Move
 		Pound,
 		KarateChop,
 
+		QuickAttack,
 		Facade,
 		HydroSteam,
+		ExtremeSpeed,
 		FinalMove,
 	};
 
@@ -44,12 +47,15 @@ namespace PocketCore::Move
 		@param[in] builtinMoveID The built-in move to convert.
 		@return The corresponding open move identifier.
 		@since 0.5.2
-		@version 0.12.13
+		@version 0.12.51
 	*/
 	ATTR_NODISCARD constexpr MoveID toMoveID(const BuiltinMoveID builtinMoveID) noexcept
 	{
-		return MoveID{static_cast<ub>(builtinMoveID)};
+		return MoveID{std::to_underlying(builtinMoveID)};
 	}
+
+	/*! @brief The stable identifier representing no move. */
+	inline constexpr MoveID NO_MOVE_ID{toMoveID(BuiltinMoveID::None)};
 } // namespace PocketCore::Move
 
 #endif

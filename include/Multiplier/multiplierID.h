@@ -1,13 +1,13 @@
 /*! @file multiplierID.h
-	@brief Contains the multiplier status
-	@date 07/30/2026
+	@brief Defines the open identifier used for built-in and user-defined multipliers.
+	@date 10/09/2026
 	@since 0.8.1
-	@version 0.8.1
+	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_MULTIPLIER_MULTIPLIERID_H
-#define INCLUDE_MULTIPLIER_MULTIPLIERID_H
+#ifndef INCLUDE_MULTIPLIER_MULTIPLIER_ID_H
+#define INCLUDE_MULTIPLIER_MULTIPLIER_ID_H
 
 #include "ID/idInterface.h"
 

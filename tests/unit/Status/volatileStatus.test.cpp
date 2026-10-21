@@ -1,8 +1,8 @@
 /*! @file volatileStatus.test.cpp
 	@brief C++ file for running tests for the VolatileStatus.
-	@date 09/28/2026
+	@date 10/13/2026
 	@since 0.12.45
-	@version 0.12.45
+	@version 0.12.51
 	@author Matthew Moore
 */
 
@@ -34,7 +34,7 @@ SCENARIO("VolatileStatus")
 			}
 		}
 
-		GIVEN("for mStatusID modified in one meta")
+		GIVEN("for mStatusID modified in one volatile status")
 		{
 			VolatileStatus other{.mStatusID = toStatusID(BuiltinStatusID::Autotomize)};
 

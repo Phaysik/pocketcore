@@ -1,14 +1,15 @@
 /*! @file terrainRegistry.test.cpp
 	@brief C++ file for running tests for the TerrainRegistry.
-	@date 10/09/2026
+	@date 10/13/2026
 	@since 0.12.20
-	@version 0.12.50
+	@version 0.12.51
 	@author Matthew Moore
 */
 
 #include "Registry/terrainRegistry.h"
 
 #include <expected>
+#include <memory>
 #include <optional>
 #include <span>
 #include <string>
@@ -17,17 +18,16 @@
 
 #include "Configuration/terrainRegistryConfiguration.h"
 #include "Core/typedefs.h"
-#include "Registry/registryError.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Terrain/constants.h"
 #include "Terrain/terrainID.h"
 #include "Terrain/terrainMeta.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::TerrainRegistryConfiguration;
 using PocketCore::Core::ub;
-using PocketCore::Registry::RegistryErrorInfo;
 using PocketCore::Registry::Terrain::TerrainRegistry;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::NO_TERRAIN_ID;
@@ -39,6 +39,7 @@ using PocketCore::Terrain::TERRAIN_NAME_PSYCHIC;
 using PocketCore::Terrain::TerrainID;
 using PocketCore::Terrain::TerrainMeta;
 using PocketCore::Terrain::toTerrainID;
+using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
 concept PubliclyStructurallyMutable = requires(Registry &registry) { registry.setAmountRegistered(0); };
@@ -49,7 +50,8 @@ static_assert(!PubliclyStructurallyMutable<TerrainRegistry>);
 
 SCENARIO("TerrainRegistry")
 {
-	TerrainRegistry registry{};
+	std::unique_ptr<TerrainRegistry> registryStorage{std::make_unique<TerrainRegistry>()};
+	TerrainRegistry &registry{*registryStorage};
 	ub finalTerrainUnderlyingValue{std::to_underlying(BuiltinTerrainID::FinalTerrain)};
 
 	GIVEN("a default constructed terrain registry")
@@ -253,49 +255,49 @@ SCENARIO("TerrainRegistry")
 	{
 		GIVEN("two default constructed registries")
 		{
-			TerrainRegistry other{};
+			std::unique_ptr<TerrainRegistry> other{std::make_unique<TerrainRegistry>()};
 
 			THEN("they are equal")
 			{
-				CHECK((registry == other));
+				CHECK((registry == *other));
 			}
 		}
 
 		GIVEN("for an entry added in one registry")
 		{
-			TerrainRegistryConfiguration other{};
-			std::expected<TerrainID, RegistryErrorInfo> result{other.addTerrain({.mName = "test"})};
+			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
+			std::expected<TerrainID, RegistryError> result{other->addTerrain({.mName = "test"})};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry removed in one registry")
 		{
-			TerrainRegistryConfiguration other{};
-			std::expected<TerrainID, RegistryErrorInfo> result{other.removeTerrain(toTerrainID(BuiltinTerrainID::None))};
+			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
+			std::expected<TerrainID, RegistryError> result{other->removeTerrain(toTerrainID(BuiltinTerrainID::None))};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 
 		GIVEN("for an entry modified in one registry")
 		{
-			TerrainRegistryConfiguration other{};
-			std::expected<void, RegistryErrorInfo> result{
-				other.updateTerrain(toTerrainID(BuiltinTerrainID::None), {.mName = "test"}),
+			std::unique_ptr<TerrainRegistryConfiguration> other{std::make_unique<TerrainRegistryConfiguration>()};
+			std::expected<void, RegistryError> result{
+				other->updateTerrain(toTerrainID(BuiltinTerrainID::None), {.mName = "test"}),
 			};
 
 			THEN("they are not equal")
 			{
 				REQUIRE(result.has_value());
-				CHECK((registry != other.getRuntimeRegistry()));
+				CHECK((registry != other->getRuntimeRegistry()));
 			}
 		}
 	}
