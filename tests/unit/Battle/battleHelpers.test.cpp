@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/20/2026
+	@date 10/21/2026
 	@since 0.12.45
 	@version 0.12.51
 	@author Matthew Moore
@@ -42,7 +42,9 @@
 #include "Status/volatileStatus.h"
 #include "Type/builtInTypeID.h"
 #include "Utility/Math/floatUtility.h"
+#include "Utility/Random/callableRandomSource.h"
 #include "Utility/Random/random.testHelper.h"
+#include "Utility/Random/randomSourceInterface.h"
 #include "Validation/Battle/battleError.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -70,6 +72,7 @@ using PocketCore::Battle::getMoveTargets;
 using PocketCore::Battle::getOppositeSide;
 using PocketCore::Battle::getResult;
 using PocketCore::Battle::getSideOrder;
+using PocketCore::Battle::handleMovePrioritization;
 using PocketCore::Battle::hasDuplicatePokemonPointers;
 using PocketCore::Battle::hasReserve;
 using PocketCore::Battle::isAdjacent;
@@ -120,6 +123,8 @@ using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Utility::Math::approximatelyEqualAbsRel;
+using PocketCore::Utility::Random::CallableRandomSource;
+using PocketCore::Utility::Random::IRandomSource;
 using PocketCore::Validation::Battle::BattleEngineError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
@@ -1183,7 +1188,43 @@ SCENARIO("Battle free function")
 			THEN("it returns appropriately and does not trigger a random function call")
 			{
 				REQUIRE((resolveHitCount(meta, std::ref(unused)) == 2));
+				CHECK((resolveHitCount(meta, FixedRandom<double>{0.0}) == 2));
 				CHECK((unused.calls() == 0));
+			}
+		}
+
+		GIVEN("an engine-style random source reference wrapper")
+		{
+			SequenceRandom<double> sequence{0.0, 9.0, 10.0};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> source{std::ref(sequence)};
+			IRandomSource<double> &interface{source};
+			auto randomSource{std::ref(interface)};
+
+			WHEN("the hit count is fixed")
+			{
+				MoveMeta meta{.mHitCountPolicy = FixedHitCount{2}};
+
+				THEN("the fixed count is returned without invoking the source")
+				{
+					CHECK((resolveHitCount(meta, randomSource) == 2));
+					CHECK((sequence.calls() == 0));
+				}
+			}
+
+			WHEN("the hit count is weighted")
+			{
+				WeightedHitCount weighted{
+					.mOutcomes = {{.mHitCount = 5, .mWeight = 9.0}, {.mHitCount = 2, .mWeight = 1.0}},
+				};
+				MoveMeta meta{.mHitCountPolicy = weighted};
+
+				THEN("the source selects the expected buckets and the final outcome fallback")
+				{
+					CHECK((resolveHitCount(meta, randomSource) == 5));
+					CHECK((resolveHitCount(meta, randomSource) == 2));
+					CHECK((resolveHitCount(meta, randomSource) == 2));
+					CHECK((sequence.calls() == 3));
+				}
 			}
 		}
 
@@ -2169,6 +2210,140 @@ SCENARIO("Battle free function")
 		}
 	}
 
+	GIVEN("handleMovePrioritization")
+	{
+		RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+		const MoveRegistry *moveRegistry{provider.mMoveRegistry};
+		BattleTarget target1{.mSide = Side::B, .mSlotIndex = 0};
+		BattleTarget target2{.mSide = Side::B, .mSlotIndex = 1};
+		BattleTarget target3{.mSide = Side::B, .mSlotIndex = 2};
+		BattleTarget target4{.mSide = Side::A, .mSlotIndex = 0};
+		BattleTarget target5{.mSide = Side::A, .mSlotIndex = 1};
+		BattleTarget target6{.mSide = Side::A, .mSlotIndex = 2};
+		MoveAction pokeAction1{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 0};
+		MoveAction pokeAction2{.mSelectedTarget = target2, .mSide = Side::A, .mUserSlotIndex = 1, .mMoveSlotIndex = 0};
+		MoveAction pokeAction3{.mSelectedTarget = target3, .mSide = Side::A, .mUserSlotIndex = 2, .mMoveSlotIndex = 0};
+		MoveAction pokeAction4{.mSelectedTarget = target4, .mSide = Side::B, .mUserSlotIndex = 0, .mMoveSlotIndex = 0};
+		MoveAction pokeAction5{.mSelectedTarget = target5, .mSide = Side::B, .mUserSlotIndex = 1, .mMoveSlotIndex = 0};
+		MoveAction pokeAction6{.mSelectedTarget = target6, .mSide = Side::B, .mUserSlotIndex = 2, .mMoveSlotIndex = 0};
+		std::vector<MoveAction> actions{pokeAction1, pokeAction2, pokeAction3, pokeAction4, pokeAction5, pokeAction6};
+
+		Pokemon member1{
+			makePokemon({
+				.mStats = {.mSpeed = 10},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mHealth = 50,
+				.mLevel = 1,
+			}),
+		};
+		Pokemon member2{
+			makePokemon({
+				.mStats = {.mSpeed = 20},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::ExtremeSpeed)},
+				.mHealth = 60,
+				.mLevel = 25,
+			}),
+		};
+		Pokemon member3{
+			makePokemon({
+				.mStats = {.mSpeed = 30},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mHealth = 30,
+				.mLevel = 40,
+			}),
+		};
+		Pokemon member4{
+			makePokemon({
+				.mStats = {.mSpeed = 40},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mHealth = 20,
+				.mLevel = 50,
+			}),
+		};
+		Pokemon member5{
+			makePokemon({
+				.mStats = {.mSpeed = 60},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::QuickAttack)},
+				.mHealth = 10,
+				.mLevel = 20,
+			}),
+		};
+		Pokemon member6{
+			makePokemon({
+				.mStats = {.mSpeed = 40},
+				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mHealth = 40,
+				.mLevel = 50,
+			}),
+		};
+		BattleState state{
+			makeBattleState({
+				.mSideA
+				= {{.mPokemon = &member1, .mPosition = 0}, {.mPokemon = &member2, .mPosition = 1}, {.mPokemon = &member3, .mPosition = 2}},
+				.mSideB
+				= {{.mPokemon = &member4, .mPosition = 0}, {.mPokemon = &member5, .mPosition = 1}, {.mPokemon = &member6, .mPosition = 2}},
+			}),
+		};
+
+		WHEN("a move in the stable sort is a nullptr")
+		{
+			member1.setMoveID(1, MoveID{200});
+			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
+			actions.at(1) = newAction2;
+			SequenceRandom<std::size_t> seq{2, 3, 4, 0, 1};
+			handleMovePrioritization(state, actions, moveRegistry, seq);
+
+			THEN("the set of moves is properly sorted with the null move at the end and respects priority and effective speed")
+			{
+				CHECK((actions.at(0) == pokeAction5));
+				CHECK((actions.at(1) == pokeAction6));
+				CHECK((actions.at(2) == pokeAction4));
+				CHECK((actions.at(3) == pokeAction3));
+				CHECK((actions.at(4) == pokeAction1));
+				CHECK((actions.at(5) == newAction2));
+			}
+		}
+
+		WHEN("all moves are valid")
+		{
+			SequenceRandom<std::size_t> seq{2, 3, 4, 0, 1};
+			handleMovePrioritization(state, actions, moveRegistry, seq);
+
+			THEN("the set of moves is properly sorted based on priority and effective speed")
+			{
+				CHECK((actions.at(0) == pokeAction2));
+				CHECK((actions.at(1) == pokeAction5));
+				CHECK((actions.at(2) == pokeAction6));
+				CHECK((actions.at(3) == pokeAction4));
+				CHECK((actions.at(4) == pokeAction3));
+				CHECK((actions.at(5) == pokeAction1));
+			}
+		}
+
+		WHEN("moves are prioritized through an engine-style random source reference wrapper")
+		{
+			member1.setMoveID(1, MoveID{200});
+			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
+			actions.at(1) = newAction2;
+			SequenceRandom<std::size_t> sequence{2, 3, 4, 0, 1};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> source{std::ref(sequence)};
+			IRandomSource<std::size_t> &interface{source};
+			auto randomSource{std::ref(interface)};
+			handleMovePrioritization(state, actions, moveRegistry, randomSource);
+
+			THEN("priority and speed determine execution order while shuffled ties remain stable")
+			{
+				CHECK((actions.at(0) == pokeAction5));
+				CHECK((actions.at(1) == pokeAction6));
+				CHECK((actions.at(2) == pokeAction4));
+				CHECK((actions.at(3) == pokeAction3));
+				CHECK((actions.at(4) == pokeAction1));
+				CHECK((actions.at(5) == newAction2));
+				CHECK((sequence.calls() == 5));
+			}
+		}
+	}
+
 	GIVEN("printBattleSlotWithNames")
 	{
 		GIVEN("valid registries")
@@ -2344,11 +2519,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 3\n"
+						"        ID: 4\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 4\n"
+						"        ID: 5\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"
@@ -2551,11 +2726,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 3\n"
+						"        ID: 4\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 4\n"
+						"        ID: 5\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"

@@ -1,6 +1,6 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/20/2026
+	@date 10/21/2026
 	@since 0.9.14
 	@version 0.12.51
 	@author Matthew Moore
@@ -455,12 +455,12 @@ namespace PocketCore::Battle
 			const MoveMeta *rightMove{moveRegistry->getMoveMetadata(rightSlot.mPokemon->getMoveID(right.mMoveSlotIndex))};
 
 			// Validated engine actions always have metadata; keep direct helper calls null-safe and ordered consistently.
-			if (leftMove == nullptr || rightMove == nullptr)
+			if (leftMove == nullptr || rightMove == nullptr) // LCOV_EXCL_BR (From template specification - Tested)
 			{
 				return leftMove != nullptr;
 			}
 
-			if (leftMove->mPriority != rightMove->mPriority)
+			if (leftMove->mPriority != rightMove->mPriority) // LCOV_EXCL_BR (From template specification - Tested)
 			{
 				return leftMove->mPriority > rightMove->mPriority;
 			}
@@ -469,7 +469,7 @@ namespace PocketCore::Battle
 			const double leftSpeed{getEffectiveSpeed(leftSlot)};
 			const double rightSpeed{getEffectiveSpeed(rightSlot)};
 
-			if (leftSpeed < rightSpeed || leftSpeed > rightSpeed)
+			if (leftSpeed < rightSpeed || leftSpeed > rightSpeed) // LCOV_EXCL_BR (From template specification - Tested)
 			{
 				return leftSpeed > rightSpeed;
 			}
