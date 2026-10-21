@@ -1,6 +1,6 @@
 /*! @file pokemonValidation.h
 	@brief Defines validation functions that help with Pokemon.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.12.48
 	@version 0.12.51
 	@author Matthew Moore
@@ -17,6 +17,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "Pokemon/pokemonStats.h"
 
 #include "pokemonError.h"
 
@@ -28,6 +29,7 @@ namespace PocketCore::Validation::Pokemon
 	using PocketCore::Configuration::MIN_EV_STAT_VALUE;
 	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
 	using PocketCore::Core::us;
+	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 
 	/*! @brief Checks whether an individual value is within the configured IV bounds.
 		@details Accepts values from @ref MIN_IV_STAT_VALUE through @ref MAX_IV_STAT_VALUE, inclusive. This constexpr function can be
@@ -63,7 +65,8 @@ namespace PocketCore::Validation::Pokemon
 	*/
 	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonIVArray(const std::span<const us> pokemonIVArray)
 	{
-		if (std::ranges::any_of(pokemonIVArray, [](const us pokemonIV) { return !isValidPokemonIV(pokemonIV).has_value(); }))
+		if (pokemonIVArray.size() > POKEMON_STAT_COUNT
+			|| std::ranges::any_of(pokemonIVArray, [](const us pokemonIV) { return !isValidPokemonIV(pokemonIV).has_value(); }))
 		{
 			return std::unexpected{PokemonError::INVALID_IV_ARRAY};
 		}
@@ -114,8 +117,9 @@ namespace PocketCore::Validation::Pokemon
 	{
 		const us sum{static_cast<us>(std::ranges::fold_left(pokemonEVArray, 0, std::plus<>()))};
 
-		if (std::ranges::any_of(pokemonEVArray,
-								[sum](const us pokemonEV) { return !isValidPokemonEV(pokemonEV, sum - pokemonEV).has_value(); }))
+		if (pokemonEVArray.size() > POKEMON_STAT_COUNT || std::ranges::any_of(pokemonEVArray, [sum](const us pokemonEV) {
+				return !isValidPokemonEV(pokemonEV, sum - pokemonEV).has_value();
+			}))
 		{
 			return std::unexpected{PokemonError::INVALID_EV_ARRAY};
 		}

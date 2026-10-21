@@ -1,6 +1,6 @@
 /*! @file moveValidation.test.cpp
 	@brief C++ file for running tests for the Move validation functions.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -46,6 +46,19 @@ SCENARIO("validateMoveMetadata")
 		THEN("the metadata is valid")
 		{
 			REQUIRE(result.has_value());
+		}
+	}
+
+	GIVEN("an array with too many value")
+	{
+		std::vector<MoveID> invalidMetadata{MoveID{200}, MoveID{200}, MoveID{200}, MoveID{200}, MoveID{200}};
+
+		std::expected<void, MoveError> result{validateMoveMetadata(invalidMetadata, registry)};
+
+		THEN("the metadata is invalid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == MoveError::MISSING_MOVE_METADATA));
 		}
 	}
 

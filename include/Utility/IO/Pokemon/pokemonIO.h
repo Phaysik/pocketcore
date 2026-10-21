@@ -1,13 +1,13 @@
 /*! @file pokemonIO.h
 	@brief Contains the function declarations for handling IO operations for Pokemon
-	@date 10/14/2026
+	@date 10/21/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
 */
 
-#ifndef INCLUDE_UTILITY_IO_INPUT_H
-#define INCLUDE_UTILITY_IO_INPUT_H
+#ifndef INCLUDE_UTILITY_IO_POKEMON_POKEMON_IO_H
+#define INCLUDE_UTILITY_IO_POKEMON_POKEMON_IO_H
 
 #include <functional>
 #include <ostream>

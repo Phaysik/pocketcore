@@ -1,6 +1,6 @@
 /*! @file pokemonValidation.test.cpp
 	@brief C++ file for running tests for the Pokemon validation functions.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.12.48
 	@version 0.12.51
 	@author Matthew Moore
@@ -86,6 +86,19 @@ SCENARIO("isValidPokemonIVArray")
 		THEN("the IV array is valid")
 		{
 			REQUIRE(result.has_value());
+		}
+	}
+
+	GIVEN("an array with too many value")
+	{
+		std::vector<us> ivs{31, 31, 31, 31, 31, 31, 31};
+
+		std::expected<void, PokemonError> result{isValidPokemonIVArray(ivs)};
+
+		THEN("the IV array is not valid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == PokemonError::INVALID_IV_ARRAY));
 		}
 	}
 
@@ -178,6 +191,19 @@ SCENARIO("isValidPokemonEVArray")
 		THEN("the EV is valid")
 		{
 			REQUIRE(result.has_value());
+		}
+	}
+
+	GIVEN("an array with too many value")
+	{
+		std::vector<us> evs{31, 31, 31, 31, 31, 31, 31};
+
+		std::expected<void, PokemonError> result{isValidPokemonEVArray(evs)};
+
+		THEN("the EV isn't valid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == PokemonError::INVALID_EV_ARRAY));
 		}
 	}
 

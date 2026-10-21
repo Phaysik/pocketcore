@@ -1,6 +1,6 @@
 /*! @file itemValidation.h
 	@brief Defines validation functions that help with Item.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -44,7 +44,7 @@ namespace PocketCore::Validation::Item
 		std::ranges::transform(itemIDs, itemMetas.begin(),
 							   [&itemRegistry](const ItemID itemID) { return itemRegistry.getItemMetadata(itemID); });
 
-		if (std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
+		if (itemIDs.size() > MAX_ITEMS_PER_POKEMON || std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{ItemError::MISSING_ITEM_METADATA};
 		}

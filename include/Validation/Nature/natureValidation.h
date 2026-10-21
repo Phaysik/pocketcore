@@ -1,6 +1,6 @@
 /*! @file natureValidation.h
 	@brief Defines validation functions that help with Nature.
-	@date 10/09/2026
+	@date 10/21/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -44,7 +44,8 @@ namespace PocketCore::Validation::Nature
 		std::ranges::transform(natureIDs, natureMetas.begin(),
 							   [&natureRegistry](const NatureID natureID) { return natureRegistry.getNatureMetadata(natureID); });
 
-		if (std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))
+		if (natureIDs.size() > MAX_NATURES_PER_POKEMON
+			|| std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{NatureError::MISSING_NATURE_METADATA};
 		}

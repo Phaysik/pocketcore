@@ -1,6 +1,6 @@
 /*! @file natureValidation.test.cpp
 	@brief C++ file for running tests for the Nature validation functions.
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.12.51
 	@version 0.12.51
 	@author Matthew Moore
@@ -46,6 +46,19 @@ SCENARIO("validateNatureMetadata")
 		THEN("the metadata is valid")
 		{
 			REQUIRE(result.has_value());
+		}
+	}
+
+	GIVEN("an array with too many value")
+	{
+		std::vector<NatureID> invalidMetadata{NatureID{200}, NatureID{200}};
+
+		std::expected<void, NatureError> result{validateNatureMetadata(invalidMetadata, registry)};
+
+		THEN("the metadata is invalid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == NatureError::MISSING_NATURE_METADATA));
 		}
 	}
 
