@@ -1196,7 +1196,7 @@ namespace PocketCore::Pokemon
 			};
 
 			/*! @brief The non-owning display name. */
-			std::string_view mName{};
+			std::string mName{};
 
 			/*! @brief The base stats for the Pokemon species. */
 			PokemonStats mBaseStats{};

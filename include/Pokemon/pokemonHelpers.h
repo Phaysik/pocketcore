@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 10/14/2026
+	@date 10/23/2026
 	@since 0.12.28
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Core/attributeMacros.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
+#include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/pokemonEncounter.h"
@@ -49,6 +50,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
@@ -100,21 +102,16 @@ namespace PocketCore::Pokemon
 		std::ranges::fill(emptySlots, noID);
 	}
 
-	/*! @brief Validates supplied moves or generates moves from the Pokemon's learnset.
-		@details When @p moveIDs is non-null, the supplied move IDs are checked against @p moveRegistry and copied to @p validMoveIDs;
-		duplicate IDs after their first occurrence are replaced with @ref PocketCore::Move::NO_MOVE_ID. Supplied moves are not checked
-		against @p learnsetMeta. When @p moveIDs is null, eligible level-up moves are generated from @p learnsetMeta, and egg moves are
-		also included when @p encounterData describes an egg encounter. Generated moves are checked against @p moveRegistry.
-		@param[in] moveIDs A non-owning span of supplied move IDs, or nullptr to generate moves from the learnset. The span is read only
-		and is used only for the duration of the call.
-		@param[out] validMoveIDs The fixed-size output array receiving validated or generated move IDs; duplicate supplied slots are
-		set to @ref PocketCore::Move::NO_MOVE_ID.
-		@param[in] moveRegistry The registry used to verify that each resulting move ID has metadata.
-		@param[in] learnsetMeta The learnset used when @p moveIDs is nullptr.
-		@param[in] encounterData The encounter origin, which determines whether egg moves are eligible.
-		@param[in] pokemonEncounterLevel The Pokemon's encounter level; level-up and egg moves above this level are excluded.
-		@return Success when all resulting move IDs have registered metadata; otherwise, @ref
-	   PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA.
+	/*! @brief Validates supplied nature IDs and removes duplicates from the destination slots.
+		@details Nonempty input is validated against @p natureRegistry before being copied to the destination prefix. Remaining slots
+		 retain their previous contents before @ref replaceDuplicatesWithNoID removes duplicates and compacts empty slots. Empty input
+		 succeeds without modifying the destination.
+		@pre natureIDs.size() <= MAX_NATURES_PER_POKEMON; the caller enforces this bound.
+		@param[in] natureIDs Read-only, non-owning span borrowed for this call; no reference is retained.
+		@param[in,out] validNatureIDs Caller-owned destination array; unused slots should initially contain
+		 @ref PocketCore::Nature::NO_NATURE_ID. No reference is retained.
+		@param[in] natureRegistry Registry borrowed for metadata validation; no reference is retained.
+		@return Success for empty or valid input; otherwise, the metadata-validation error. Validation failure leaves the array unchanged.
 		@since 0.12.51
 		@version 0.12.51
 	*/
@@ -138,15 +135,38 @@ namespace PocketCore::Pokemon
 																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
 																	   const ItemRegistry &itemRegistry);
 
-	/*!
+	/*! @brief Validates supplied move IDs or generates moves from a learnset and encounter.
+		@details Nonempty input is validated against @p moveRegistry and copied to the destination prefix without checking learnset
+		 eligibility. @ref replaceDuplicatesWithNoID then preserves the first occurrence of each ID other than
+		 @p duplicateEntryMoveReplacer, replaces later duplicates with that ID, and moves replacement entries to the end while preserving
+		 the relative order of retained moves. The replacement ID must have registered metadata even when no duplicates occur.
+		 Empty input delegates to @ref fillWithValidMoves, selecting eligible level-up moves and, for egg encounters, eligible egg moves.
+		 The replacement ID is neither checked nor used when generating moves.
+		@pre moveIDs.size() <= MAX_MOVES_PER_POKEMON; the caller enforces this bound.
+		@param[in] moveIDs Read-only, non-owning span of supplied IDs; an empty span requests generation. Borrowed only for this call.
+		@param[in,out] validMoveIDs Caller-owned destination. Supplied IDs overwrite its prefix; remaining slots retain their prior
+		 contents before duplicate compaction. Unused slots should initially contain @p duplicateEntryMoveReplacer. Generation overwrites
+		 the entire array and fills unused slots with @ref PocketCore::Move::NO_MOVE_ID. No reference is retained.
+		@param[in] moveRegistry Registry borrowed to validate supplied or generated IDs and the replacement ID; no reference is retained.
+		@param[in] learnsetMeta Learnset borrowed only for generation; no reference is retained.
+		@param[in] encounterData Encounter origin borrowed only for generation; egg encounters permit egg moves. No reference is retained.
+		@param[in] pokemonEncounterLevel Encounter-level cap applied to generated level-up and egg moves; ignored for supplied IDs.
+		@param[in] duplicateEntryMoveReplacer Registered ID used as the duplicate-replacement and compaction sentinel for supplied moves;
+		 defaults to @ref PocketCore::Move::NO_MOVE_ID and is ignored for generation.
+		@return Success when validation or generation succeeds; otherwise,
+		 @ref PocketCore::Validation::Move::MoveError::MISSING_MOVE_METADATA for an unregistered supplied or generated move, or
+		 @ref PocketCore::Validation::Move::MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA for an unregistered replacement ID.
+		@note Invalid supplied metadata leaves the destination unchanged. A missing replacement ID is reported after the supplied prefix
+		 has been copied. Failed generation clears the entire destination to @ref PocketCore::Move::NO_MOVE_ID.
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.52
 	*/
 	ATTR_NODISCARD std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID> moveIDs,
 																	   std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
 																	   const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
 																	   const PokemonEncounter &encounterData,
-																	   const us pokemonEncounterLevel);
+																	   const us pokemonEncounterLevel,
+																	   const MoveID duplicateEntryMoveReplacer = NO_MOVE_ID);
 
 	/*!
 		@since 0.12.51

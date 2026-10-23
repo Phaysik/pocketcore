@@ -285,7 +285,8 @@ namespace PocketCore::Pokemon
 																	   std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
 																	   const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
 																	   const PokemonEncounter &encounterData,
-																	   const us pokemonEncounterLevel)
+																	   const us pokemonEncounterLevel,
+																	   const MoveID duplicateEntryMoveReplacer)
 	{
 		if (!moveIDs.empty())
 		{
@@ -296,8 +297,13 @@ namespace PocketCore::Pokemon
 
 			std::ranges::transform(moveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
 
+			if (moveRegistry.getMoveMetadata(duplicateEntryMoveReplacer) == nullptr)
+			{
+				return std::unexpected{MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
+
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_MOVE_ID, validMoveIDs);
+			replaceDuplicatesWithNoID(duplicateEntryMoveReplacer, validMoveIDs);
 		}
 		else if (const std::expected<void, MoveError> error{
 					 fillWithValidMoves(validMoveIDs, moveRegistry, learnsetMeta, encounterData, pokemonEncounterLevel),

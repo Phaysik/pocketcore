@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.28
 	@version 0.12.52
 	@author Matthew Moore
@@ -390,29 +390,52 @@ SCENARIO("Pokemon free function")
 
 			WHEN("calling with duplicate move IDs")
 			{
-				std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
-					toMoveID(BuiltinMoveID::HydroSteam),
-					toMoveID(BuiltinMoveID::KarateChop),
-					toMoveID(BuiltinMoveID::KarateChop),
-					toMoveID(BuiltinMoveID::Pound),
-				};
-
-				std::expected<void, MoveError> result{
-					getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
-				};
-
-				THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving the "
-					 "other values in their order")
+				GIVEN("the default replacement does not have valid move metadata")
 				{
-					std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
 						toMoveID(BuiltinMoveID::HydroSteam),
 						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
 						toMoveID(BuiltinMoveID::Pound),
-						NO_MOVE_ID,
 					};
 
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(validMoveIDs, expected));
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel, MoveID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+
+				GIVEN("the default replacement has valid move metadata")
+				{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
+						toMoveID(BuiltinMoveID::HydroSteam),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::Pound),
+					};
+
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+					};
+
+					THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving the "
+						 "other values in their order")
+					{
+						std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
+							toMoveID(BuiltinMoveID::HydroSteam),
+							toMoveID(BuiltinMoveID::KarateChop),
+							toMoveID(BuiltinMoveID::Pound),
+							NO_MOVE_ID,
+						};
+
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::equal(validMoveIDs, expected));
+					}
 				}
 			}
 

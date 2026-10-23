@@ -177,8 +177,7 @@ namespace PocketCore::Registry::Pokemon
 		{
 			const MoveID currentMove{validMoveIDs.at(index)};
 			const MoveMeta *meta{dependencyRegistries->mMoveRegistry->getMoveMetadata(currentMove)};
-			moveMetas.at(index)
-				= {.mMoveID = validMoveIDs.at(index), .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
+			moveMetas.at(index) = {.mMoveID = currentMove, .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
 		};
 
 		return Pokemon{
