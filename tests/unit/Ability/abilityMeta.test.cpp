@@ -1,8 +1,8 @@
 /*! @file abilityMeta.test.cpp
 	@brief C++ file for running tests for the AbilityMeta.
-	@date 10/13/2026
+	@date 10/23/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -14,6 +14,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
@@ -71,6 +72,16 @@ SCENARIO("AbilityMeta")
 		GIVEN("for mTargetID modified in one meta")
 		{
 			AbilityMeta other{.mTargetID = BattleTargetID::AllExceptSelf};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mClassification modified in one meta")
+		{
+			AbilityMeta other{.mClassification = AbilityClassification::Hidden};
 
 			THEN("they are not equal")
 			{

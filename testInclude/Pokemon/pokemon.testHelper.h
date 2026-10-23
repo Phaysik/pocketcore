@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.13
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -54,6 +54,7 @@ namespace PocketCore::Testing
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::PokemonStats;
@@ -101,6 +102,8 @@ namespace PocketCore::Testing
 			us mHealth{0};
 
 			us mLevel{1};
+
+			PokemonGender mGender{};
 	};
 
 	inline const NatureRegistry &getDefaultTestNatureRegistry()
@@ -115,7 +118,7 @@ namespace PocketCore::Testing
 
 		Pokemon pokemon{
 			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityIDs, data.mItemIDs,
-			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,
+			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs, data.mGender,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

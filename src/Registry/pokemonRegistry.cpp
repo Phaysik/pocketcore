@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.28
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,12 +11,12 @@
 #include <array>
 #include <cstddef>
 #include <expected>
-#include <numeric>
 #include <span>
 #include <type_traits>
 #include <variant>
 
 #include "Ability/abilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -42,6 +42,7 @@
 namespace PocketCore::Registry::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -61,6 +62,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonEncounter;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::SetLevelEncounter;
@@ -73,9 +75,10 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Validation::Registry::RegistryError;
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
-		const PokemonID pokemonID, const std::size_t encounterIndex, PokemonInstantiationDependencies *dependencyRegistries,
-		const std::span<const us> ivs, const std::span<const us> evs, const std::span<const NatureID> natureIDs,
-		const std::span<const AbilityID> abilityIDs, const std::span<const ItemID> itemIDs, const std::span<const MoveID> moveIDs) const
+		const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
+		PokemonInstantiationDependencies *dependencyRegistries, const std::span<const us> ivs, const std::span<const us> evs,
+		const std::span<const NatureID> natureIDs, const std::span<const AbilityID> abilityIDs, const std::span<const ItemID> itemIDs,
+		const std::span<const MoveID> moveIDs) const
 	{
 		if (dependencyRegistries == nullptr || dependencyRegistries->mAbilityRegistry == nullptr
 			|| dependencyRegistries->mItemRegistry == nullptr || dependencyRegistries->mMoveRegistry == nullptr
@@ -131,7 +134,7 @@ namespace PocketCore::Registry::Pokemon
 		std::array<us, POKEMON_STAT_COUNT> validEVs{};
 
 		if (const std::expected<void, NatureError> error{
-				getValidPokemonNatures(natureIDs, validNatureIDs, *dependencyRegistries->mNatureRegistry),
+				getValidPokemonNatures(natureIDs, validNatureIDs, *dependencyRegistries->mNatureRegistry, randomSources),
 			};
 			!error.has_value())
 		{
@@ -139,7 +142,7 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, AbilityError> error{
-				getValidPokemonAbilities(abilityIDs, validAbilityIDs, *dependencyRegistries->mAbilityRegistry),
+				getValidPokemonAbilities(abilityIDs, validAbilityIDs, *dependencyRegistries->mAbilityRegistry, randomSources),
 			};
 			!error.has_value())
 		{
@@ -180,6 +183,9 @@ namespace PocketCore::Registry::Pokemon
 			moveMetas.at(index) = {.mMoveID = currentMove, .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
 		};
 
+		const std::size_t genderIndex{randomSources.mIndex.get()(std::size_t{0}, pokemonMeta->mGenderPool.size() - 1)};
+		const PokemonGender gender{pokemonMeta->mGenderPool.at(genderIndex)};
+
 		return Pokemon{
 			*pokemonMeta,
 			moveMetas,
@@ -190,6 +196,7 @@ namespace PocketCore::Registry::Pokemon
 			*dependencyRegistries->mNatureRegistry,
 			validIVs,
 			validEVs,
+			gender,
 		};
 	}
 } // namespace PocketCore::Registry::Pokemon

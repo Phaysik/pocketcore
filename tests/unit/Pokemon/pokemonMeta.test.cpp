@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.test.cpp
 	@brief C++ file for running tests for the PokemonMeta.
-	@date 10/13/2026
+	@date 10/23/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -22,6 +22,7 @@ using PocketCore::Ability::toAbilityID;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Pokemon::BuiltinPokemonID;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonOrigin;
@@ -60,6 +61,16 @@ SCENARIO("PokemonMeta")
 		GIVEN("for mAbilityPool modified in one meta")
 		{
 			PokemonMeta other{.mAbilityPool = {{{toAbilityID(BuiltinAbilityID::AirLock)}}}};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mGenderPool modified in one meta")
+		{
+			PokemonMeta other{.mGenderPool = {{PokemonGender::Female}}};
 
 			THEN("they are not equal")
 			{

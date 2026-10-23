@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/20/2026
+	@date 10/23/2026
 	@since 0.12.28
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -21,14 +21,19 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Ability/abilityHelpers.h"
 #include "Ability/abilityID.h"
+#include "Ability/abilityMeta.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
+#include "Nature/natureHelpers.h"
 #include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonMeta.h"
@@ -49,7 +54,10 @@
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::AbilityMeta;
+	using PocketCore::Ability::getRandomAbilityIDFromConfiguration;
 	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -60,7 +68,9 @@ namespace PocketCore::Pokemon
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Learnset::MoveLearnEntry;
 	using PocketCore::Move::NO_MOVE_ID;
+	using PocketCore::Nature::getRandomNatureIDFromConfiguration;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::RegistryProvider;
@@ -208,13 +218,15 @@ namespace PocketCore::Pokemon
 
 		return outStream;
 	}
+
 #if ATTR_ONLY_GCC
 	#pragma GCC diagnostic pop
 #endif
 
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
-																		   const NatureRegistry &natureRegistry)
+																		   const NatureRegistry &natureRegistry,
+																		   const BattleRandomSources &randomSources)
 	{
 		if (!natureIDs.empty())
 		{
@@ -230,6 +242,29 @@ namespace PocketCore::Pokemon
 		}
 		else
 		{
+			const auto eligibleNatureCount{
+				static_cast<std::size_t>(std::ranges::count_if(natureRegistry.getRegisteredNatures(),
+															   [](const NatureMeta &meta) { return meta.mNatureID != NO_NATURE_ID; })),
+			};
+
+			if (eligibleNatureCount == 0)
+			{
+				return std::unexpected{NatureError::NO_REGISTERED_NATURES};
+			}
+
+			if (eligibleNatureCount < MAX_NATURES_PER_POKEMON)
+			{
+				return std::unexpected{NatureError::NOT_ENOUGH_REGISTERED_NATURES};
+			}
+
+			const auto randomNatureValue
+				= [&randomSources](us minimum, us maximum) -> us { return static_cast<us>(randomSources.mIndex.get()(minimum, maximum)); };
+
+			for (const std::size_t index : std::views::iota(std::size_t{0}, randomSources.mIndex.get()(1, MAX_NATURES_PER_POKEMON)))
+			{
+				validNatureIDs.at(index) = getRandomNatureIDFromConfiguration(natureRegistry, randomNatureValue,
+																			  std::span<const NatureID>{validNatureIDs}.first(index));
+			}
 		}
 
 		return {};
@@ -237,7 +272,7 @@ namespace PocketCore::Pokemon
 
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
 		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry)
+		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources)
 	{
 		if (!abilityIDs.empty())
 		{
@@ -253,6 +288,29 @@ namespace PocketCore::Pokemon
 		}
 		else
 		{
+			const auto eligibleAbilityCount{
+				static_cast<std::size_t>(std::ranges::count_if(abilityRegistry.getRegisteredAbilities(),
+															   [](const AbilityMeta &meta) { return meta.mAbilityID != NO_ABILITY_ID; })),
+			};
+
+			if (eligibleAbilityCount == 0)
+			{
+				return std::unexpected{AbilityError::NO_REGISTERED_ABILITIES};
+			}
+
+			if (eligibleAbilityCount < MAX_ABILITIES_PER_POKEMON)
+			{
+				return std::unexpected{AbilityError::NOT_ENOUGH_REGISTERED_ABILITIES};
+			}
+
+			const auto randomAbilityValue
+				= [&randomSources](us minimum, us maximum) -> us { return static_cast<us>(randomSources.mIndex.get()(minimum, maximum)); };
+
+			for (const std::size_t index : std::views::iota(std::size_t{0}, randomSources.mIndex.get()(1, MAX_ABILITIES_PER_POKEMON)))
+			{
+				validAbilityIDs.at(index) = getRandomAbilityIDFromConfiguration(abilityRegistry, randomAbilityValue,
+																			   std::span<const AbilityID>{validAbilityIDs}.first(index));
+			}
 		}
 
 		return {};

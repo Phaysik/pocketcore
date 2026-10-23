@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.1.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -37,6 +37,7 @@
 #include "Nature/builtInNatureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/pokemonRegistry.h"
 #include "Registry/registryProvider.h"
@@ -48,7 +49,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -87,6 +88,7 @@ int main()
 	using PocketCore::Nature::toNatureID;
 	using PocketCore::Pokemon::BuiltinPokemonID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::Pokemon::PokemonInstantiationError;
@@ -165,6 +167,7 @@ int main()
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
+		PokemonGender::Male,
 	};
 
 	Pokemon pokemonB{
@@ -198,6 +201,7 @@ int main()
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
+		PokemonGender::Female,
 	};
 
 	const std::array<Pokemon *, 1> partyA{&pokemonA};

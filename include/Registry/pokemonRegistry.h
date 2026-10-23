@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 10/13/2026
+	@date 10/23/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
@@ -61,6 +62,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -388,6 +390,7 @@ namespace PocketCore::Registry::Pokemon
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier for the Pokemon to create.
 				@param[in] encounterIndex The index of the encounter metadata to use from the pokemon.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@param[in] dependencyRegistries The dependency registries to use for resolving various IDs. Defaults to nullptr.
 				@param[in] ivs The non-owning span of IVs for the Pokemon.
 				@param[in] evs The non-owning span of EVs for the Pokemon.
@@ -397,10 +400,10 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] movesIDs The non-owning span of move IDs for the Pokemon.
 				@return The instantiated Pokemon on success, or @ref PokemonInstantiationError if no matching pokemon exists.
 				@since 0.12.24
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
-				const PokemonID pokemonID, const std::size_t encounterIndex,
+				const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
 				PokemonInstantiationDependencies *dependencyRegistries = nullptr, const std::span<const us> ivs = {},
 				const std::span<const us> evs = {}, const std::span<const NatureID> natureIDs = {},
 				const std::span<const AbilityID> abilityIDs = {}, const std::span<const ItemID> itemIDs = {},

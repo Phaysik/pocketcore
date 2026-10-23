@@ -2,7 +2,7 @@
 	@brief Contains the pokemon
 	@date 10/23/2026
 	@since 0.3.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -104,7 +104,7 @@ namespace PocketCore::Pokemon
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
 		@date 10/23/2026
 		@since 0.3.0
-		@version 0.12.52
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -121,17 +121,18 @@ namespace PocketCore::Pokemon
 				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
+				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.52
+				@version 0.12.53
 			*/
 			explicit constexpr Pokemon(const PokemonMeta &meta, const us level,
 									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
 				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mTypeIDs{meta.mTypeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
-				  mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID)
+				  mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID), mGender(gender)
 			{
 				mMoveIDs.fill(NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -160,17 +161,18 @@ namespace PocketCore::Pokemon
 				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
+				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.52
+				@version 0.12.53
 			*/
 			explicit constexpr Pokemon(const PokemonMeta &pokemonMeta, const std::array<MoveMeta, MAX_MOVES_PER_POKEMON> &moveMetas,
 									   const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
 				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityIDs{abilityIDs},
-				  mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID), mLearnsetID(pokemonMeta.mLearnsetID)
+				  mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID), mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				assignMoves(moveMetas);
 
@@ -545,6 +547,16 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const noexcept
 			{
 				return mLearnsetID;
+			}
+
+			/*! @brief Returns the gender of the Pokemon.
+				@return The Pokemon's gender.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			ATTR_NODISCARD constexpr PokemonGender getGender() const noexcept
+			{
+				return mGender;
 			}
 
 			// Setters
@@ -945,6 +957,16 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
+			/*! @brief Replaces the Pokemon's gender.
+				@param[in] gender The new gender of the Pokemon.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			constexpr void setGender(const PokemonGender gender) noexcept
+			{
+				mGender = gender;
+			}
+
 			// Utility Functions
 
 			/*! @brief Consumes one PP from a move slot when PP remains.
@@ -1243,6 +1265,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The stable identifier for the Learnset species. */
 			LearnsetID mLearnsetID{};
+
+			/*! @brief The gender of the Pokemon. */
+			PokemonGender mGender{};
 	};
 } // namespace PocketCore::Pokemon
 

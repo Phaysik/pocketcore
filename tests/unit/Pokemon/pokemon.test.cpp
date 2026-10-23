@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 10/23/2026
 	@since 0.4.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -80,6 +80,7 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonStats;
 using PocketCore::Pokemon::toPokemonID;
@@ -133,6 +134,7 @@ SCENARIO("Pokemon")
 				natureRegistry,
 				{},
 				{},
+				PokemonGender::Male,
 			};
 
 			THEN("the fields are properly defaulted")
@@ -192,6 +194,7 @@ SCENARIO("Pokemon")
 				natureRegistry,
 				{},
 				{},
+				PokemonGender::Male,
 			};
 
 			THEN("the fields are properly defaulted")
@@ -223,7 +226,7 @@ SCENARIO("Pokemon")
 			},
 		};
 		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{24, 56};
-		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}};
+		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}, PokemonGender::Male};
 
 		REQUIRE(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
 
@@ -1299,6 +1302,29 @@ SCENARIO("Pokemon")
 				CHECK((pokemon.getLearnsetID() == toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset)));
 
 				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
+			}
+		}
+	}
+
+	GIVEN("get/set gender")
+	{
+		Pokemon pokemon{makePokemon({.mGender = PokemonGender::Female})};
+
+		WHEN("calling getGender")
+		{
+			THEN("the name matches")
+			{
+				CHECK((pokemon.getGender() == PokemonGender::Female));
+			}
+		}
+
+		WHEN("calling setGender")
+		{
+			pokemon.setGender(PokemonGender::Genderless);
+
+			THEN("the pokemon's gender is properly updated")
+			{
+				CHECK((pokemon.getGender() == PokemonGender::Genderless));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 10/13/2026
+	@date 10/23/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
@@ -41,13 +42,38 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
 
+	/*! @enum PokemonGender
+		@showenumvalues
+		@brief Identifies the gender categories available to a Pokemon.
+		@details Supplies the values stored in @ref PokemonMeta::mGenderPool for a species or form.
+		@date 10/23/2026
+		@since 0.12.53
+		@version 0.12.53
+		@author Matthew Moore
+	*/
+	enum class PokemonGender : ub
+	{
+		/*! @brief Represents a male Pokemon. */
+		Male,
+		/*! @brief Represents a female Pokemon. */
+		Female,
+		/*! @brief Represents a Pokemon without a gender. */
+		Genderless,
+	};
+
+	/*! @brief The number of categories defined by @ref PokemonGender.
+		@details Supplies the compile-time array size for @ref PokemonMeta::mGenderPool.
+		@note Assumes contiguous, zero-based enum values with @ref PokemonGender::Genderless as the final value.
+	*/
+	inline constexpr ub MAX_GENDERS{std::to_underlying(PokemonGender::Genderless) + 1};
+
 	/*! @struct PokemonMeta Pokemon/pokemonMeta.h
 		@brief Stores shared species or form metadata and species-specific encounter definitions.
 		@details Owns its display name and encounter array. Encounter entries reference shared location identities while defining their own
 			acquisition levels and origins. Individual current levels and acquisition histories are not stored here.
-		@date 10/09/2026
+		@date 10/23/2026
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -69,6 +95,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The Pokemon's pool of available abilities. */
 			std::array<AbilityID, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
+
+			/*! @brief The Pokemon's pool of available genders. */
+			std::array<PokemonGender, MAX_GENDERS> mGenderPool{};
 
 			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
 			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
