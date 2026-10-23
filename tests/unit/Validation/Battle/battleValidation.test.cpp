@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the Battle validation functions.
 	@date 10/21/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -173,9 +173,21 @@ SCENARIO("validateSwitchAction")
 
 SCENARIO("validateMoveAction")
 {
-	Pokemon member1{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), MoveID{200}}, .mCurrentPP = {20, 20}, .mHealth = 50})};
+	Pokemon member1{
+		makePokemon({
+			.mMoveMetas
+			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mHealth = 50,
+		}),
+	};
 	Pokemon member2{makePokemon({.mHealth = 50})};
-	Pokemon member3{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), MoveID{200}}, .mCurrentPP = {20, 20}, .mHealth = 50})};
+	Pokemon member3{
+		makePokemon({
+			.mMoveMetas
+			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mHealth = 50,
+		}),
+	};
 	Pokemon member4{makePokemon({.mHealth = 50})};
 	Pokemon member5{makePokemon({.mHealth = 50})};
 	Pokemon member6{makePokemon({.mHealth = 50})};
@@ -322,9 +334,21 @@ SCENARIO("validateMoveAction")
 
 SCENARIO("getValidationResult")
 {
-	Pokemon member1{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), MoveID{200}}, .mCurrentPP = {20, 20}, .mHealth = 50})};
+	Pokemon member1{
+		makePokemon({
+			.mMoveMetas
+			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mHealth = 50,
+		}),
+	};
 	Pokemon member2{makePokemon({.mHealth = 50})};
-	Pokemon member3{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), MoveID{200}}, .mCurrentPP = {20, 20}, .mHealth = 50})};
+	Pokemon member3{
+		makePokemon({
+			.mMoveMetas
+			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mHealth = 50,
+		}),
+	};
 	Pokemon member4{makePokemon({.mHealth = 50})};
 	Pokemon member5{makePokemon({.mHealth = 50})};
 	Pokemon member6{makePokemon({.mHealth = 50})};

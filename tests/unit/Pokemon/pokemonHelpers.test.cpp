@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.28
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -390,29 +390,52 @@ SCENARIO("Pokemon free function")
 
 			WHEN("calling with duplicate move IDs")
 			{
-				std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
-					toMoveID(BuiltinMoveID::HydroSteam),
-					toMoveID(BuiltinMoveID::KarateChop),
-					toMoveID(BuiltinMoveID::KarateChop),
-					toMoveID(BuiltinMoveID::Pound),
-				};
-
-				std::expected<void, MoveError> result{
-					getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
-				};
-
-				THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving the "
-					 "other values in their order")
+				GIVEN("the default replacement does not have valid move metadata")
 				{
-					std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
 						toMoveID(BuiltinMoveID::HydroSteam),
 						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
 						toMoveID(BuiltinMoveID::Pound),
-						NO_MOVE_ID,
 					};
 
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(validMoveIDs, expected));
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel, MoveID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+
+				GIVEN("the default replacement has valid move metadata")
+				{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
+						toMoveID(BuiltinMoveID::HydroSteam),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::Pound),
+					};
+
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+					};
+
+					THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving the "
+						 "other values in their order")
+					{
+						std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
+							toMoveID(BuiltinMoveID::HydroSteam),
+							toMoveID(BuiltinMoveID::KarateChop),
+							toMoveID(BuiltinMoveID::Pound),
+							NO_MOVE_ID,
+						};
+
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::equal(validMoveIDs, expected));
+					}
 				}
 			}
 
@@ -1418,22 +1441,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -1535,22 +1581,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -1655,22 +1724,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -1775,22 +1867,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -1895,22 +2010,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -2015,22 +2153,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -2135,22 +2296,45 @@ SCENARIO("Pokemon free function")
 		{
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},

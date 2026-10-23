@@ -1,8 +1,8 @@
 /*! @file moveError.h
 	@brief Contains the error codes for the Move validation results.
-	@date 10/09/2026
+	@date 10/23/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -22,15 +22,17 @@ namespace PocketCore::Validation::Move
 		Move validation handles additional constraints.
 		@note No enumerator represents success; a successful validation result has a value and contains no error.
 		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
-		@date 10/09/2026
+		@date 10/23/2026
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.52
 		@author Matthew Moore
 	*/
 	enum class MoveError : ub
 	{
 		/*! @brief Indicates a Move ID has no matching registered metadata. */
 		MISSING_MOVE_METADATA,
+		/*! @brief Indicates that the duplicate Move ID replacement value has no valid metadata. */
+		DUPLICATE_REPLACEMENT_MISSING_METADATA,
 	};
 } // namespace PocketCore::Validation::Move
 

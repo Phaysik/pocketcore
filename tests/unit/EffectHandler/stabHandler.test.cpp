@@ -1,8 +1,8 @@
 /*! @file stabHandler.test.cpp
 	@brief C++ file for running tests for the StabHandler.
-	@date 10/19/2026
+	@date 10/21/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -48,7 +48,7 @@ SCENARIO("StabHandler")
 
 	GIVEN("a user Pokemon with a matching move type")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Fire)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)}}})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}})};
 
@@ -65,7 +65,7 @@ SCENARIO("StabHandler")
 
 	GIVEN("a user Pokemon without a matching move type")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Water)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Water)}}})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}})};
 

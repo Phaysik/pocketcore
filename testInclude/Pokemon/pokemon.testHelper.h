@@ -2,25 +2,26 @@
 	@brief Test helper for dealing with Pokemon concepts.
 	@date 10/21/2026
 	@since 0.12.13
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
 #ifndef TEST_INCLUDE_POKEMON_POKEMON_TEST_HELPER_H
 #define TEST_INCLUDE_POKEMON_POKEMON_TEST_HELPER_H
 
-#include <string_view>
-
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
+#include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
+#include "Move/moveMeta.h"
 #include "Nature/natureID.h"
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/natureRegistry.h"
 #include "Status/statusID.h"
@@ -45,6 +46,7 @@ namespace PocketCore::Testing
 	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::NO_LEARNSET_ID;
 	using PocketCore::Move::MoveID;
+	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NO_NATURE_ID;
@@ -53,6 +55,7 @@ namespace PocketCore::Testing
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonID;
+	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::PokemonStats;
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Status::NO_STATUS_ID;
@@ -65,13 +68,24 @@ namespace PocketCore::Testing
 		public:
 			const NatureRegistry *mNatureRegistry{nullptr};
 
-			std::string_view mName{POKEMON_NAME_BULBASAUR};
+			PokemonMeta mMetadata{
+				.mName = std::string(POKEMON_NAME_BULBASAUR),
+				.mBaseStats = {},
+				.mPokemonID = NO_POKEMON_ID,
+				.mLearnsetID = NO_LEARNSET_ID,
+			};
 
-			PokemonStats mStats{};
+			std::array<MoveMeta, MAX_MOVES_PER_POKEMON> mMoveMetas{
+				{
+					{
+						.mMoveID = NO_MOVE_ID,
+						.mPPMaxAmount = 0,
+						.mPPDefaultAmount = 0,
+					},
+				},
+			};
 
 			std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> mStatusIDs{NO_STATUS_ID};
-
-			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{NO_MOVE_ID};
 
 			std::array<us, POKEMON_STAT_COUNT> mPokemonIVs{
 				MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE,
@@ -80,10 +94,6 @@ namespace PocketCore::Testing
 
 			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
 
-			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{0};
-			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{0};
-
-			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypesIDs{NO_TYPE_ID};
 			std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> mAbilityIDs{NO_ABILITY_ID};
 			std::array<ItemID, MAX_ITEMS_PER_POKEMON> mItemIDs{NO_ITEM_ID};
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{NO_NATURE_ID};
@@ -91,9 +101,6 @@ namespace PocketCore::Testing
 			us mHealth{0};
 
 			us mLevel{1};
-
-			PokemonID mPokemonID{NO_POKEMON_ID};
-			LearnsetID mLearnsetID{NO_LEARNSET_ID};
 	};
 
 	inline const NatureRegistry &getDefaultTestNatureRegistry()
@@ -107,9 +114,8 @@ namespace PocketCore::Testing
 		const NatureRegistry &natureRegistry{data.mNatureRegistry != nullptr ? *data.mNatureRegistry : getDefaultTestNatureRegistry()};
 
 		Pokemon pokemon{
-			data.mPokemonID, data.mLearnsetID, data.mName,	   data.mMoveIDs,	 data.mMaxPP,
-			data.mCurrentPP, data.mStats,	   data.mLevel,	   data.mAbilityIDs, data.mItemIDs,
-			data.mTypesIDs,	 data.mNatureIDs,  natureRegistry, data.mPokemonIVs, data.mPokemonEVs,
+			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityIDs, data.mItemIDs,
+			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

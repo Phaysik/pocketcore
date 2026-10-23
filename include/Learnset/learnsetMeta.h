@@ -1,8 +1,8 @@
 /*! @file learnsetMeta.h
 	@brief Defines the metadata stored for built-in and user-defined learnsets.
-	@date 10/08/2026
+	@date 10/23/2026
 	@since 0.12.24
-	@version 0.12.50
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -80,9 +80,12 @@ namespace PocketCore::Learnset
 		@brief Stores one learnset's stable ID, owned display name, and owned move learn entries.
 		@details The string owns the display name and the vector owns its move learn entries. Copying this metadata creates independent
 	   copies of both, so the source name and entries do not need to outlive the copy stored in a registry.
-		@date 10/08/2026
+		 Defines which moves a species or form can learn, not the moves currently selected by an individual Pokemon. Stores no move PP;
+		 @ref PocketCore::Move::MoveMeta defines default and maximum PP, while @ref PocketCore::Pokemon::Pokemon owns selected move IDs,
+		 current PP, and derived per-slot maximum-PP snapshots.
+		@date 10/23/2026
 		@since 0.12.24
-		@version 0.12.50
+		@version 0.12.52
 		@author Matthew Moore
 	*/
 	struct LearnsetMeta

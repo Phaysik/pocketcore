@@ -1,8 +1,8 @@
 /*! @file battleState.h
 	@brief Contains the battle state
-	@date 10/20/2026
+	@date 10/23/2026
 	@since 0.3.0
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -167,11 +167,13 @@ namespace PocketCore::Battle
 	/*! @struct BattleSlot Battle/battleState.h
 		@brief Stores the active battle state associated with one position on a side.
 		@details The Pokemon pointer is a non-owning reference to the party member occupying the slot and may be nullptr when the position
-	   is empty.
+	   is empty. Neither BattleSlot nor @ref BattleState stores move PP. The referenced @ref Pokemon owns its selected move IDs,
+		 mutable current PP, and maximum-PP snapshots derived from @ref PocketCore::Move::MoveMeta when moves are assigned. Battle code
+		 accesses PP through that Pokemon rather than duplicating it in battle state.
 		@warning The owner of the referenced @ref Pokemon is responsible for keeping it alive while mPokemon is in use.
-		@date 10/20/2026
+		@date 10/23/2026
 		@since 0.3.0
-		@version 0.12.51
+		@version 0.12.52
 		@author Matthew Moore
 	*/
 	struct BattleSlot

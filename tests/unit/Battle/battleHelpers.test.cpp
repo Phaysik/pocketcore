@@ -1,8 +1,8 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.45
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -315,8 +315,8 @@ SCENARIO("Battle free function")
 
 	GIVEN("party")
 	{
-		Pokemon partyA1{makePokemon({.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard)})};
-		Pokemon partyB1{makePokemon({.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise)})};
+		Pokemon partyA1{makePokemon({.mMetadata = {.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard)}})};
+		Pokemon partyB1{makePokemon({.mMetadata = {.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise)}})};
 		BattleState state{makeBattleState({.mPartyA = {&partyA1}, .mPartyB = {&partyB1}})};
 
 		GIVEN("non-const overload")
@@ -394,7 +394,7 @@ SCENARIO("Battle free function")
 
 	GIVEN("isHealthy")
 	{
-		Pokemon pokemon{makePokemon({.mHealth = 20, .mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise)})};
+		Pokemon pokemon{makePokemon({.mMetadata = {.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise)}, .mHealth = 20})};
 
 		GIVEN("BattleSlot overload")
 		{
@@ -612,7 +612,7 @@ SCENARIO("Battle free function")
 
 		Pokemon member1{
 			makePokemon({
-				.mStats = {.mSpeed = 50},
+				.mMetadata = {.mBaseStats = {.mSpeed = 50}},
 				.mPokemonIVs = ivs,
 				.mPokemonEVs = evs,
 				.mNatureIDs = {{toNatureID(BuiltinNatureID::Brave)}}, // -Speed
@@ -621,7 +621,7 @@ SCENARIO("Battle free function")
 		};
 		Pokemon member2{
 			makePokemon({
-				.mStats = {.mSpeed = 50},
+				.mMetadata = {.mBaseStats = {.mSpeed = 50}},
 				.mPokemonIVs = ivs,
 				.mPokemonEVs = evs,
 				.mNatureIDs = {{toNatureID(BuiltinNatureID::Hardy)}}, // Base Speed
@@ -630,7 +630,7 @@ SCENARIO("Battle free function")
 		};
 		Pokemon member3{
 			makePokemon({
-				.mStats = {.mSpeed = 50},
+				.mMetadata = {.mBaseStats = {.mSpeed = 50}},
 				.mPokemonIVs = ivs,
 				.mPokemonEVs = evs,
 				.mNatureIDs = {{toNatureID(BuiltinNatureID::Jolly)}}, // +Speed
@@ -1080,7 +1080,7 @@ SCENARIO("Battle free function")
 
 	GIVEN("applyRecoil")
 	{
-		Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 100}, .mHealth = 100, .mLevel = 50})};
+		Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 100}}, .mHealth = 100, .mLevel = 50})};
 		BattleState state{makeBattleState({.mSideA = {{{.mPokemon = &pokemon}}}})};
 		EffectContext context{makeEffectContext({.mDamage = {.mRecoilRatio = 2.0, .mDamage = 10}, .mUserIndex = 0, .mUserSide = Side::A})};
 
@@ -2095,7 +2095,22 @@ SCENARIO("Battle free function")
 		MoveAction action{.mSelectedTarget = target, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 0};
 
 		Pokemon member1{
-			makePokemon({.mMoveIDs = {{toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), MoveID{200}}}, .mHealth = 50}),
+			makePokemon({
+			    .mMoveMetas = {
+					{
+					    {
+							.mMoveID = toMoveID(BuiltinMoveID::Pound),
+						},
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+						},
+						{
+						    .mMoveID = MoveID{200},
+						}
+					},
+				},
+			    .mHealth = 50
+			}),
 		};
 		Pokemon member2{makePokemon({.mHealth = 60})};
 		Pokemon member3{makePokemon({.mHealth = 60})};
@@ -2230,48 +2245,84 @@ SCENARIO("Battle free function")
 
 		Pokemon member1{
 			makePokemon({
-				.mStats = {.mSpeed = 10},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 10}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+						},
+					},
+				},
 				.mHealth = 50,
 				.mLevel = 1,
 			}),
 		};
 		Pokemon member2{
 			makePokemon({
-				.mStats = {.mSpeed = 20},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::ExtremeSpeed)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 20}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::ExtremeSpeed),
+						},
+					},
+				},
 				.mHealth = 60,
 				.mLevel = 25,
 			}),
 		};
 		Pokemon member3{
 			makePokemon({
-				.mStats = {.mSpeed = 30},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 30}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+						},
+					},
+				},
 				.mHealth = 30,
 				.mLevel = 40,
 			}),
 		};
 		Pokemon member4{
 			makePokemon({
-				.mStats = {.mSpeed = 40},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 40}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+						},
+					},
+				},
 				.mHealth = 20,
 				.mLevel = 50,
 			}),
 		};
 		Pokemon member5{
 			makePokemon({
-				.mStats = {.mSpeed = 60},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::QuickAttack)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 60}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::QuickAttack),
+						},
+					},
+				},
 				.mHealth = 10,
 				.mLevel = 20,
 			}),
 		};
 		Pokemon member6{
 			makePokemon({
-				.mStats = {.mSpeed = 40},
-				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound)},
+				.mMetadata = {.mBaseStats = {.mSpeed = 40}},
+				.mMoveMetas = {
+				    {
+						{
+						    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+						},
+					},
+				},
 				.mHealth = 40,
 				.mLevel = 50,
 			}),
@@ -2287,7 +2338,7 @@ SCENARIO("Battle free function")
 
 		WHEN("a move in the stable sort is a nullptr")
 		{
-			member1.setMoveID(1, MoveID{200});
+			member1.setMove(1, {.mMoveID = MoveID{200}});
 			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
 			actions.at(1) = newAction2;
 			SequenceRandom<std::size_t> seq{2, 3, 4, 0, 1};
@@ -2322,7 +2373,7 @@ SCENARIO("Battle free function")
 
 		WHEN("moves are prioritized through an engine-style random source reference wrapper")
 		{
-			member1.setMoveID(1, MoveID{200});
+			member1.setMove(1, {.mMoveID = MoveID{200}});
 			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
 			actions.at(1) = newAction2;
 			SequenceRandom<std::size_t> sequence{2, 3, 4, 0, 1};
@@ -2352,22 +2403,45 @@ SCENARIO("Battle free function")
 			DamageFormulaModifiers modifiers{.mHealthModifier = 2.3, .mDefenseModifier = 1.2, .mSpeedModifier = 0.85};
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
@@ -2559,22 +2633,45 @@ SCENARIO("Battle free function")
 			DamageFormulaModifiers modifiers{.mHealthModifier = 2.3, .mDefenseModifier = 1.2, .mSpeedModifier = 0.85};
 			Pokemon pokemon{
     			makePokemon({
-    				.mName = "TestMon",
-    				.mStats = {
-    					.mMaxHealth = 150,
-    					.mAttack = 101,
-    					.mDefense = 102,
-    					.mSpAttack = 103,
-    					.mSpDefense = 104,
-    					.mSpeed = 105,
-    				},
+    				.mMetadata = {
+                        .mName = "TestMon",
+        				.mBaseStats = {
+        					.mMaxHealth = 150,
+        					.mAttack = 101,
+        					.mDefense = 102,
+        					.mSpAttack = 103,
+        					.mSpDefense = 104,
+        					.mSpeed = 105,
+        				},
+        				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
+                    },
+                    .mMoveMetas {
+                        {
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                                .mPPMaxAmount = 15,
+                                .mPPDefaultAmount = 5,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+                                .mPPMaxAmount = 20,
+                                .mPPDefaultAmount = 10,
+                           	},
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::Facade),
+                                .mPPMaxAmount = 25,
+                                .mPPDefaultAmount = 15,
+                            },
+                            {
+                                .mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+                                .mPPMaxAmount = 30,
+                                .mPPDefaultAmount = 20,
+                            },
+                        },
+                    },
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mMoveIDs = {toMoveID(BuiltinMoveID::Pound), toMoveID(BuiltinMoveID::KarateChop), toMoveID(BuiltinMoveID::Facade), toMoveID(BuiltinMoveID::HydroSteam)},
-    				.mMaxPP = {15, 20, 25, 30},
-    				.mCurrentPP = {5, 10, 15, 20},
-    				.mTypesIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Bug)},
     				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},

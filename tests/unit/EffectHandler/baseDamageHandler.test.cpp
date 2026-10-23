@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 10/19/2026
+	@date 10/21/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -91,8 +91,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("no move base power")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 123}}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 163}}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
@@ -111,8 +111,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a user with a non-finite modifiers")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 123}}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 163}}, .mLevel = 50})};
 
 		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
@@ -165,8 +165,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a user has a positive attack stat")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123}, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 123}}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 163}}, .mLevel = 50})};
 
 		EffectContext context{makeEffectContext({.mMoveBasePower = 65, .mUserSide = Side::A, .mTargetSide = Side::B})};
 
@@ -213,8 +213,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("the Generation V onward")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123, .mSpAttack = 100}, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163, .mSpDefense = 124}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 123, .mSpAttack = 100}}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 163, .mSpDefense = 124}}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 
@@ -253,8 +253,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("modified stat stages")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 123, .mSpAttack = 100}, .mLevel = 75})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 163, .mSpDefense = 124}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 123, .mSpAttack = 100}}, .mLevel = 75})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 163, .mSpDefense = 124}}, .mLevel = 50})};
 
 		GIVEN("user has increased attack stages and target has increased defense stages")
 		{
@@ -502,8 +502,8 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a damage calculation that exceeds the result type")
 	{
-		Pokemon userPokemon{makePokemon({.mStats = {.mAttack = 65'535}, .mLevel = 65'535})};
-		Pokemon targetPokemon{makePokemon({.mStats = {.mDefense = 1}, .mLevel = 50})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 65'535}}, .mLevel = 65'535})};
+		Pokemon targetPokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 1}}, .mLevel = 50})};
 
 		BattleState battleState{makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mSideB = {{.mPokemon = &targetPokemon}}})};
 

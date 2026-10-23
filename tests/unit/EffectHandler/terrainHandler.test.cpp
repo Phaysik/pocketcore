@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 10/19/2026
+	@date 10/21/2026
 	@since 0.9.10
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -53,7 +53,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("electric terrain with an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
 		};
@@ -70,7 +70,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -87,7 +87,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -104,7 +104,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -122,7 +122,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("electric terrain without an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
 		};
@@ -139,7 +139,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -156,7 +156,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -173,7 +173,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -191,7 +191,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain with a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
 		};
@@ -208,7 +208,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -225,7 +225,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -242,7 +242,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -260,7 +260,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain without a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
 		};
@@ -277,7 +277,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -294,7 +294,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -311,7 +311,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -329,7 +329,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain with a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
 		};
@@ -346,7 +346,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -363,7 +363,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -380,7 +380,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -398,7 +398,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain without a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
 		};
@@ -415,7 +415,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -432,7 +432,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -449,7 +449,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -467,7 +467,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain with a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
 		};
@@ -484,7 +484,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -501,7 +501,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -518,7 +518,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
@@ -536,7 +536,7 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain without a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 		BattleState battleState{
 			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
 		};
@@ -553,7 +553,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target isn't flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Normal)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -570,7 +570,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
 
@@ -587,7 +587,7 @@ SCENARIO("TerrainHandler")
 
 		GIVEN("and the target is flying but is forcibly grounded")
 		{
-			Pokemon groundedTarget{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Flying)}})};
+			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
 			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 

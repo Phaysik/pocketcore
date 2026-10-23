@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/13/2026
+	@date 10/21/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -135,57 +135,70 @@ int main()
 	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 
 	Pokemon pokemonA{
-		toPokemonID(BuiltinPokemonID::Blastoise),
-		toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
-		"Blastoise",
 		{
-			.mMaxHealth = 100U,
-			.mAttack = 100U,
-			.mDefense = 100U,
-			.mSpAttack = 100U,
-			.mSpDefense = 100U,
-			.mSpeed = 90U,
+			.mName = "Blastoise",
+			.mBaseStats = {
+				.mMaxHealth = 100U,
+				.mAttack = 100U,
+				.mDefense = 100U,
+				.mSpAttack = 100U,
+				.mSpDefense = 100U,
+				.mSpeed = 90U,
+			},
+			.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+			.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
+			.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
+		},
+		{
+    		{
+                {
+        		    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                    .mPPMaxAmount = 35,
+                    .mPPDefaultAmount = 35,
+        		},
+            },
 		},
 		50U,
 		{toAbilityID(BuiltinAbilityID::Drizzle)},
 		{toItemID(BuiltinItemID::CheriBerry)},
-		{toTypeID(BuiltinTypeID::Water)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
 	};
-	pokemonA.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
-	pokemonA.setMaxPP(0U, 35U);
-	pokemonA.setCurrentPP(0U, 35U);
-	pokemonA.setTypeID(0, toTypeID(BuiltinTypeID::Water));
 
 	Pokemon pokemonB{
-		toPokemonID(BuiltinPokemonID::Charizard),
-		toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
-		"Charizard",
-		{
-			.mMaxHealth = 100U,
-			.mAttack = 100U,
-			.mDefense = 100U,
-			.mSpAttack = 100U,
-			.mSpDefense = 100U,
-			.mSpeed = 80U,
+    	{
+    		.mName = "Charizard",
+    		.mBaseStats = 	{
+    			.mMaxHealth = 100U,
+    			.mAttack = 100U,
+    			.mDefense = 100U,
+    			.mSpAttack = 100U,
+    			.mSpDefense = 100U,
+    			.mSpeed = 80U,
+    		},
+    		.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
+    		.mPokemonID = 	toPokemonID(BuiltinPokemonID::Charizard),
+    		.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
+    	},
+        {
+       		{
+                {
+           		    .mMoveID = toMoveID(BuiltinMoveID::Pound),
+                    .mPPMaxAmount = 35,
+                    .mPPDefaultAmount = 35,
+           		},
+            },
 		},
 		50U,
 		{toAbilityID(BuiltinAbilityID::Stench)},
 		{toItemID(BuiltinItemID::ChestoBerry)},
-		{toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
 	};
-	pokemonB.setMoveID(0U, toMoveID(BuiltinMoveID::Pound));
-	pokemonB.setMaxPP(0U, 35U);
-	pokemonB.setCurrentPP(0U, 35U);
-	pokemonB.setTypeID(0, toTypeID(BuiltinTypeID::Fire));
-	pokemonB.setTypeID(1, toTypeID(BuiltinTypeID::Flying));
 
 	const std::array<Pokemon *, 1> partyA{&pokemonA};
 	const std::array<Pokemon *, 1> partyB{&pokemonB};

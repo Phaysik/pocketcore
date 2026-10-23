@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.52] - 2026-10-23
+
+### Added
+
+- Added `MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA` to distinguish an unregistered duplicate-replacement move ID from missing metadata for a supplied or generated move.
+- Added a Pokemon snapshot-independence regression test: construct from a mutable `MoveMeta` array with distinct maximum-PP values, verify the initial per-slot copies, mutate every source maximum-PP value, and assert that the entire stored maximum-PP array remains unchanged, including unused slots.
+- Added move-helper regression coverage for supplied moves with an unregistered default replacement ID, alongside the successful registered-replacement path. Updated single-slot and whole-array move-replacement tests to verify the move ID, maximum PP, and default current PP together; retained maximum-PP getter coverage without the removed setters.
+
+### Changed
+
+- Changed both `Pokemon` constructors to accept `PokemonMeta` instead of separate species ID, learnset ID, name, base-stat, and type-array arguments. The move-bearing constructor now takes `std::array<MoveMeta, MAX_MOVES_PER_POKEMON>` instead of independent move-ID, maximum-PP, and current-PP arrays; the move-free constructor still initializes all slots to `NO_MOVE_ID` with zero PP.
+- Made `MoveMeta::mPPMaxAmount` and `mPPDefaultAmount` the authoritative maximum/default PP inputs. Construction copies each selected move ID and maximum PP and initializes current PP from the default. Stored maximum PP is derived per-slot state: later metadata changes do not propagate, but explicitly reassigning a move replaces its snapshot. Current PP remains independently mutable for consumption and recovery.
+- Replaced `Pokemon::setMoveID()` with `setMove(slotIndex, const MoveMeta &)` and `setMoveIDsArray()` with `setMovesArrays(const std::array<MoveMeta, MAX_MOVES_PER_POKEMON> &)`. Both copy IDs and maximum PP and reset current PP to the incoming default. Added private `assignMoves(std::span<const MoveMeta>)` to share assignment between construction and whole-array replacement; slots beyond its input span remain unchanged.
+- Changed Pokemon display-name storage from a non-owning `std::string_view` to an owned `std::string`, so construction and name assignment copy the supplied characters rather than retaining their backing storage. The name accessor continues to return a non-owning view of the stored name.
+- Extended `getValidPokemonMoves()` with optional `duplicateEntryMoveReplacer`, defaulting to `NO_MOVE_ID`. For nonempty supplied moves, this ID must resolve in the move registry even when no duplicates occur. It becomes the duplicate-replacement and compaction sentinel: retained non-sentinel IDs preserve their first occurrence and relative order, while sentinel entries move to the end.
+- Kept supplied-move validation independent of learnset eligibility. Metadata validation precedes copying the supplied prefix; untouched destination slots retain their prior contents until duplicate compaction. Replacement-ID validation occurs after that copy, so its new error can leave the destination prefix changed; invalid supplied metadata still leaves the destination unchanged.
+- Kept empty-span move generation independent of the replacement ID: it is neither validated nor used on that path. Generation continues to select encounter-level-eligible level-up moves and eligible egg moves for egg encounters, validate the resulting IDs, and fill unused slots with `NO_MOVE_ID`; failed generation clears the destination.
+- Reworked `PokemonTestData` around `mMetadata` and `mMoveMetas`, replacing separate species/name/stat/type fields and parallel move-ID/current-PP/maximum-PP arrays. Updated `makePokemon()`, the example battle setup, and Pokemon, helper/formatting, battle-state/helper/validation, base-damage, STAB, terrain, type-effectiveness, and Pokemon IO fixtures to use the metadata-based constructors and PP initialization.
+- Documented PP ownership in Doxygen on `MoveMeta`, `LearnsetMeta`, `Pokemon`, and `BattleSlot`: learnsets define learnable moves rather than selected moves or PP; `PokemonMeta` stores no move PP; Pokemon owns selected move IDs, mutable current PP, and derived maximum-PP snapshots; neither `BattleState` nor `BattleSlot` duplicates PP. Corrected `MoveMeta` documentation to identify its display name as owned storage.
+
+### Removed
+
+- Removed `Pokemon::setMaxPP()` and `setMaxPPArray()`. Maximum PP can no longer be assigned independently of the move metadata; current-PP setters and maximum-PP accessors remain available.
+
+### Fixed
+
+- Fixed `PokemonRegistry::instantiate()` constructing selected moves with zero maximum/current PP. After move validation or generation, it now resolves every slot through the move registry, copies each ID and its maximum/default PP into the constructor metadata array, and constructs Pokemon from the resolved species and move metadata.
+- Corrected the misplaced move-validation Doxygen on `getValidPokemonNatures()` and documented `getValidPokemonMoves()` at its declaration: empty-span generation, caller-enforced bounds, borrowed lifetimes, prefix/tail updates, sentinel registration, error ordering, and generation-failure effects. Updated Pokemon constructor parameter names and the nature-registry description.
+
 ## [0.12.51] - 2026-10-21
 
 ### Added
@@ -2246,7 +2275,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.51]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.52]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.51]: https://github.com/Phaysik/pocketcore/commit/0b746160cbe460be20e0a006f04409d7c7d08167
 [0.12.50]: https://github.com/Phaysik/pocketcore/commit/b87e380fc66c471f200ae1bf81abcd8d9d9909e1
 [0.12.49]: https://github.com/Phaysik/pocketcore/commit/acf73762f2a948421600281c252d4af5c1c500f5
 [0.12.48]: https://github.com/Phaysik/pocketcore/commit/8980057e4dbb9974a16863df96fe425e41a8ca5d

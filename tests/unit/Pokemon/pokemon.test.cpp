@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.4.0
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -26,6 +26,7 @@
 #include "Learnset/builtInLearnsetID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
+#include "Move/moveMeta.h"
 #include "Nature/builtInNatureID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
@@ -69,6 +70,7 @@ using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MoveID;
+using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Nature::BuiltinNatureID;
@@ -94,7 +96,6 @@ using PocketCore::Testing::checkStats;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
-using PocketCore::Type::NO_TYPE_ID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeID;
 using PocketCore::Validation::Registry::RegistryError;
@@ -111,21 +112,23 @@ SCENARIO("Pokemon")
 		WHEN("creating a Pokemon with empty move slots and zero move PP")
 		{
 			Pokemon pokemon{
-				toPokemonID(BuiltinPokemonID::None),
-				toLearnsetID(BuiltinLearnsetID::None),
-				"TestMon",
-				{
-					.mMaxHealth = 100,
-					.mAttack = 100,
-					.mDefense = 100,
-					.mSpAttack = 100,
-					.mSpDefense = 100,
-					.mSpeed = 100,
-				},
+    			{
+    				.mName = "TestMon",
+    				.mBaseStats = {
+    					.mMaxHealth = 100,
+    					.mAttack = 100,
+    					.mDefense = 100,
+    					.mSpAttack = 100,
+    					.mSpDefense = 100,
+    					.mSpeed = 100,
+    				},
+    				.mTypeIDs = {toTypeID(BuiltinTypeID::Dark)},
+    				.mPokemonID = toPokemonID(BuiltinPokemonID::None),
+    				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::None),
+    			},
 				100,
 				{toAbilityID(BuiltinAbilityID::CloudNine)},
 				{toItemID(BuiltinItemID::ChestoBerry)},
-				{toTypeID(BuiltinTypeID::Dark)},
 				{toNatureID(BuiltinNatureID::Hardy)},
 				natureRegistry,
 				{},
@@ -144,29 +147,47 @@ SCENARIO("Pokemon")
 		WHEN("creating a Pokemon with move slots and move PP")
 		{
 			Pokemon pokemon{
-				toPokemonID(BuiltinPokemonID::None),
-				toLearnsetID(BuiltinLearnsetID::None),
-				"TestMon",
 				{
-					toMoveID(BuiltinMoveID::Facade),
-					toMoveID(BuiltinMoveID::Facade),
-					toMoveID(BuiltinMoveID::Facade),
-					toMoveID(BuiltinMoveID::Facade),
+					.mName = "TestMon",
+					.mBaseStats = {
+						.mMaxHealth = 100,
+						.mAttack = 100,
+						.mDefense = 100,
+						.mSpAttack = 100,
+						.mSpDefense = 100,
+						.mSpeed = 100,
+					},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Dark)},
+					.mPokemonID = toPokemonID(BuiltinPokemonID::None),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::None),
 				},
-				{10, 10, 10, 10},
-				{10, 10, 10, 10},
 				{
-					.mMaxHealth = 100,
-					.mAttack = 100,
-					.mDefense = 100,
-					.mSpAttack = 100,
-					.mSpDefense = 100,
-					.mSpeed = 100,
+				    {
+						{
+    						.mMoveID = toMoveID(BuiltinMoveID::Facade),
+    						.mPPMaxAmount = 10,
+    						.mPPDefaultAmount = 10,
+						},
+						{
+    						.mMoveID = toMoveID(BuiltinMoveID::Facade),
+    						.mPPMaxAmount = 10,
+    						.mPPDefaultAmount = 10,
+						},
+						{
+    						.mMoveID = toMoveID(BuiltinMoveID::Facade),
+    						.mPPMaxAmount = 10,
+    						.mPPDefaultAmount = 10,
+						},
+						{
+    						.mMoveID = toMoveID(BuiltinMoveID::Facade),
+    						.mPPMaxAmount = 10,
+    						.mPPDefaultAmount = 10,
+						},
+					},
 				},
 				100,
 				{toAbilityID(BuiltinAbilityID::CloudNine)},
 				{toItemID(BuiltinItemID::ChestoBerry)},
-				{toTypeID(BuiltinTypeID::Dark)},
 				{toNatureID(BuiltinNatureID::Hardy)},
 				natureRegistry,
 				{},
@@ -184,9 +205,45 @@ SCENARIO("Pokemon")
 		}
 	}
 
+	GIVEN("move metadata used to construct a Pokemon")
+	{
+		const PokemonMeta pokemonMeta{.mName = "SnapshotMon"};
+		std::array<MoveMeta, MAX_MOVES_PER_POKEMON> moveMetas{
+			{
+				{
+					.mMoveID = toMoveID(BuiltinMoveID::Facade),
+					.mPPMaxAmount = 24,
+					.mPPDefaultAmount = 15,
+				},
+				{
+					.mMoveID = toMoveID(BuiltinMoveID::Pound),
+					.mPPMaxAmount = 56,
+					.mPPDefaultAmount = 35,
+				},
+			},
+		};
+		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{24, 56};
+		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}};
+
+		REQUIRE(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
+
+		WHEN("the source move metadata's maximum PP changes after construction")
+		{
+			for (MoveMeta &moveMeta : moveMetas)
+			{
+				moveMeta.mPPMaxAmount = 1;
+			}
+
+			THEN("the Pokemon retains its original maximum PP snapshots for every slot")
+			{
+				CHECK(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
+			}
+		}
+	}
+
 	GIVEN("get/set name")
 	{
-		Pokemon pokemon{makePokemon({.mName = "Name"})};
+		Pokemon pokemon{makePokemon({.mMetadata = {.mName = "Name"}})};
 
 		WHEN("calling getName")
 		{
@@ -237,7 +294,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("move array")
 		{
-			Pokemon pokemon{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::HydroSteam)}})};
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::HydroSteam)}}}})};
 
 			WHEN("calling getMoveIDsArray")
 			{
@@ -248,44 +305,23 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMoveIDsArray")
+			WHEN("calling setMovesArrays")
 			{
-				pokemon.setMoveIDsArray({toMoveID(BuiltinMoveID::Facade)});
+				MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+				pokemon.setMovesArrays({meta});
 
-				THEN("the pokemon's moves are properly updated")
+				THEN("the pokemon's move IDs, and PP amounts are properly updated")
 				{
-					CHECK(std::ranges::equal(std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::Facade)},
-											 pokemon.getMoveIDsArray()));
-				}
-			}
-		}
-
-		GIVEN("max pp array")
-		{
-			Pokemon pokemon{makePokemon({.mMaxPP = {0}})};
-
-			WHEN("calling getMaxPPArray")
-			{
-				THEN("the max pps match")
-				{
-					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{0}, pokemon.getMaxPPArray()));
-				}
-			}
-
-			WHEN("calling setMaxPPArray")
-			{
-				pokemon.setMaxPPArray({1});
-
-				THEN("the pokemon's max pps are properly updated")
-				{
-					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{1}, pokemon.getMaxPPArray()));
+					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+					CHECK((pokemon.getMaxPP(0) == 5));
+					CHECK((pokemon.getCurrentPP(0) == 2));
 				}
 			}
 		}
 
 		GIVEN("current pp array")
 		{
-			Pokemon pokemon{makePokemon({.mCurrentPP = {0}})};
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 0}}}})};
 
 			WHEN("calling getCurrentPPArray")
 			{
@@ -308,7 +344,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("type array")
 		{
-			Pokemon pokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Bug)}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Bug)}}})};
 
 			WHEN("calling getTypesIDsArray")
 			{
@@ -385,7 +421,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 					.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)},
@@ -439,7 +477,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 					.mHealth = 100,
 					.mLevel = 10,
@@ -492,7 +532,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 					.mHealth = 100,
 					.mLevel = 10,
@@ -579,7 +621,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("move array index")
 		{
-			Pokemon pokemon{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::HydroSteam)}})};
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::HydroSteam)}}}})};
 
 			WHEN("calling getMoveID")
 			{
@@ -589,43 +631,23 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMoveID")
+			WHEN("calling setMove")
 			{
-				pokemon.setMoveID(0, toMoveID(BuiltinMoveID::Facade));
+				MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+				pokemon.setMove(0, meta);
 
 				THEN("the pokemon's move is properly updated")
 				{
-					CHECK((toMoveID(BuiltinMoveID::Facade) == pokemon.getMoveID(0)));
-				}
-			}
-		}
-
-		GIVEN("max pp array index")
-		{
-			Pokemon pokemon{makePokemon({.mMaxPP = {0}})};
-
-			WHEN("calling getMaxPP")
-			{
-				THEN("the max pp matches")
-				{
-					CHECK((0 == pokemon.getMaxPP(0)));
-				}
-			}
-
-			WHEN("calling setMaxPP")
-			{
-				pokemon.setMaxPP(0, 1);
-
-				THEN("the pokemon's max pp is properly updated")
-				{
-					CHECK((1 == pokemon.getMaxPP(0)));
+					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+					CHECK((pokemon.getMaxPP(0) == 5));
+					CHECK((pokemon.getCurrentPP(0) == 2));
 				}
 			}
 		}
 
 		GIVEN("current pp array index")
 		{
-			Pokemon pokemon{makePokemon({.mCurrentPP = {0}})};
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 0}}}})};
 
 			WHEN("calling getCurrentPP")
 			{
@@ -648,7 +670,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("type array index")
 		{
-			Pokemon pokemon{makePokemon({.mTypesIDs = {toTypeID(BuiltinTypeID::Bug)}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Bug)}}})};
 
 			WHEN("calling getTypeID")
 			{
@@ -719,7 +741,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 					.mNatureIDs = {toNatureID(BuiltinNatureID::Hasty)},
@@ -770,7 +794,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 					.mHealth = 100,
 					.mLevel = 10,
@@ -854,7 +880,9 @@ SCENARIO("Pokemon")
 		{
 			Pokemon pokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mMetadata = {
+					    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					},
 					.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 					.mHealth = 100,
 					.mLevel = 10,
@@ -947,7 +975,7 @@ SCENARIO("Pokemon")
 	{
 		GIVEN("health")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 30}, .mHealth = 15, .mLevel = 50})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 30}}, .mHealth = 15, .mLevel = 50})};
 
 			WHEN("calling getHealth")
 			{
@@ -980,7 +1008,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("maximumHealth")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 5}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 5}}})};
 
 			WHEN("calling getMaximumHealth")
 			{
@@ -1021,7 +1049,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("attack")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mAttack = 5}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 5}}})};
 
 			WHEN("calling getAttack")
 			{
@@ -1044,7 +1072,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("defense")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mDefense = 10}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 10}}})};
 
 			WHEN("calling getDefense")
 			{
@@ -1067,7 +1095,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("special attack")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mSpAttack = 9}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpAttack = 9}}})};
 
 			WHEN("calling getSpAttack")
 			{
@@ -1090,7 +1118,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("special defense")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mSpDefense = 8}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpDefense = 8}}})};
 
 			WHEN("calling getSpDefense")
 			{
@@ -1113,7 +1141,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("speed")
 		{
-			Pokemon pokemon{makePokemon({.mStats = {.mSpeed = 12}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpeed = 12}}})};
 
 			WHEN("calling getSpeed")
 			{
@@ -1139,7 +1167,9 @@ SCENARIO("Pokemon")
 	{
 		Pokemon pokemon{
 			makePokemon({
-				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mMetadata = {
+				    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				},
 				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 				.mHealth = 100,
@@ -1176,12 +1206,14 @@ SCENARIO("Pokemon")
 	{
 		Pokemon pokemon{
 			makePokemon({
-				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mMetadata = {
+					.mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				    .mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+				},
 				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 				.mHealth = 100,
 				.mLevel = 20,
-				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 			}),
 		};
 
@@ -1215,17 +1247,48 @@ SCENARIO("Pokemon")
 		}
 	}
 
+	GIVEN("get max pp array and array index")
+	{
+		GIVEN("max pp array")
+		{
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 0}}}})};
+
+			WHEN("calling getMaxPPArray")
+			{
+				THEN("the max pps match")
+				{
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{0}, pokemon.getMaxPPArray()));
+				}
+			}
+		}
+
+		GIVEN("max pp array index")
+		{
+			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 0}}}})};
+
+			WHEN("calling getMaxPP")
+			{
+				THEN("the max pp matches")
+				{
+					CHECK((0 == pokemon.getMaxPP(0)));
+				}
+			}
+		}
+	}
+
 	GIVEN("get Learnset ID")
 	{
 		Pokemon pokemon{
 			makePokemon({
-				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mMetadata = {
+				    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+				},
 				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
 				.mHealth = 100,
 				.mLevel = 20,
-				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
-				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 			}),
 		};
 
@@ -1242,7 +1305,15 @@ SCENARIO("Pokemon")
 
 	GIVEN("usePP")
 	{
-		Pokemon pokemon{makePokemon({.mMoveIDs = {toMoveID(BuiltinMoveID::Facade)}, .mMaxPP = {1}, .mCurrentPP = {1}})};
+		Pokemon pokemon{makePokemon({.mMoveMetas = {
+										 {
+											 {
+												 .mMoveID = toMoveID(BuiltinMoveID::Facade),
+												 .mPPMaxAmount = 1,
+												 .mPPDefaultAmount = 1,
+											 },
+										 },
+									 },}),};
 
 		WHEN("using a move")
 		{
@@ -1268,7 +1339,7 @@ SCENARIO("Pokemon")
 
 	GIVEN("isFainted")
 	{
-		Pokemon pokemon{makePokemon({.mStats = {.mMaxHealth = 10}, .mHealth = 5})};
+		Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 10}}, .mHealth = 5})};
 
 		WHEN("the pokemon has health")
 		{
@@ -1296,13 +1367,15 @@ SCENARIO("Pokemon")
 
 		Pokemon pokemon{
 			makePokemon({
-				.mName = "MissingNo",
-				.mStats = {
-					.mMaxHealth = 1,
-					.mAttack = 1,
-					.mDefense = 1,
-					.mSpAttack = 1,
-					.mSpDefense = 1,
+				.mMetadata = {
+    				.mName = "MissingNo",
+    				.mBaseStats = {
+    					.mMaxHealth = 1,
+    					.mAttack = 1,
+    					.mDefense = 1,
+    					.mSpAttack = 1,
+    					.mSpDefense = 1,
+    				},
 				},
 				.mAbilityIDs = {AbilityID{}},
 				.mItemIDs = {ItemID{}},
@@ -1557,20 +1630,43 @@ SCENARIO("Pokemon")
 	{
 		Pokemon pokemon{
 			makePokemon({
-				.mName = "TestMon",
-				.mStats = {
-					.mMaxHealth = 150,
-					.mAttack = 101,
-					.mDefense = 102,
-					.mSpAttack = 103,
-					.mSpDefense = 104,
-					.mSpeed = 105,
+				.mMetadata = {
+    				.mName = "TestMon",
+    				.mBaseStats = {
+    					.mMaxHealth = 150,
+    					.mAttack = 101,
+    					.mDefense = 102,
+    					.mSpAttack = 103,
+    					.mSpDefense = 104,
+    					.mSpeed = 105,
+    				},
+                    .mTypeIDs = {TypeID{2}, TypeID{3}},
+				},
+				.mMoveMetas = {
+        			{
+                        {
+                            .mMoveID = MoveID{10},
+                            .mPPMaxAmount = 15,
+                            .mPPDefaultAmount = 5,
+                        },
+                        {
+                            .mMoveID = MoveID{11},
+                            .mPPMaxAmount = 20,
+                            .mPPDefaultAmount = 10,
+            			},
+                        {
+                            .mMoveID = MoveID{12},
+                            .mPPMaxAmount = 25,
+                            .mPPDefaultAmount = 15,
+            			},
+                        {
+                            .mMoveID = MoveID{13},
+                            .mPPMaxAmount = 30,
+                            .mPPDefaultAmount = 20,
+            			},
+                    },
 				},
 				.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
-				.mMoveIDs = {MoveID{10}, MoveID{11}, MoveID{12}, MoveID{13}},
-				.mMaxPP = {15, 20, 25, 30},
-				.mCurrentPP = {5, 10, 15, 20},
-				.mTypesIDs = {TypeID{2}, TypeID{3}},
 				.mAbilityIDs = {AbilityID{6}},
 				.mItemIDs = {ItemID{7}},
 				.mNatureIDs = {NatureID{1}},
@@ -1632,15 +1728,17 @@ SCENARIO("Pokemon")
 		Pokemon pokemon{
     		makePokemon({
         		.mNatureRegistry = &natureRegistry,
-    			.mName = "MissingNo",
-    			.mStats = {
-    				.mMaxHealth = 100,
-    				.mAttack = 100,
-    				.mDefense = 100,
-    				.mSpAttack = 100,
-    				.mSpDefense = 100,
-                    .mSpeed = 100,
-    			},
+    			.mMetadata = {
+                    .mName = "MissingNo",
+        			.mBaseStats = {
+        				.mMaxHealth = 100,
+        				.mAttack = 100,
+        				.mDefense = 100,
+        				.mSpAttack = 100,
+        				.mSpDefense = 100,
+                        .mSpeed = 100,
+        			},
+                },
     			.mAbilityIDs = {AbilityID{}},
     			.mItemIDs = {ItemID{}},
     			.mHealth = 1,
@@ -2195,7 +2293,9 @@ SCENARIO("Pokemon")
 	{
 		Pokemon pokemon{
 			makePokemon({
-				.mStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				.mMetadata = {
+				    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				},
 				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
 				.mHealth = 100,
 				.mLevel = 10,
@@ -2206,7 +2306,7 @@ SCENARIO("Pokemon")
 		{
 			Pokemon damagedPokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100},
+					.mMetadata = {.mBaseStats = {.mMaxHealth = 100}},
 					.mHealth = 25,
 					.mLevel = 10,
 				}),
@@ -2241,7 +2341,7 @@ SCENARIO("Pokemon")
 		{
 			Pokemon lowHealthPokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100},
+					.mMetadata = {.mBaseStats = {.mMaxHealth = 100}},
 					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
 					.mHealth = 5,
 					.mLevel = 10,
@@ -2262,7 +2362,7 @@ SCENARIO("Pokemon")
 		{
 			Pokemon lowHealthPokemon{
 				makePokemon({
-					.mStats = {.mMaxHealth = 100},
+					.mMetadata = {.mBaseStats = {.mMaxHealth = 100}},
 					.mPokemonIVs = {31, 0, 0, 0, 0, 0},
 					.mHealth = 2,
 					.mLevel = 10,
