@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.12.45
 	@version 0.12.52
 	@author Matthew Moore
@@ -2338,7 +2338,7 @@ SCENARIO("Battle free function")
 
 		WHEN("a move in the stable sort is a nullptr")
 		{
-			member1.setMoveID(1, MoveID{200});
+			member1.setMove(1, {.mMoveID = MoveID{200}});
 			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
 			actions.at(1) = newAction2;
 			SequenceRandom<std::size_t> seq{2, 3, 4, 0, 1};
@@ -2373,7 +2373,7 @@ SCENARIO("Battle free function")
 
 		WHEN("moves are prioritized through an engine-style random source reference wrapper")
 		{
-			member1.setMoveID(1, MoveID{200});
+			member1.setMove(1, {.mMoveID = MoveID{200}});
 			MoveAction newAction2{.mSelectedTarget = target1, .mSide = Side::A, .mUserSlotIndex = 0, .mMoveSlotIndex = 1};
 			actions.at(1) = newAction2;
 			SequenceRandom<std::size_t> sequence{2, 3, 4, 0, 1};

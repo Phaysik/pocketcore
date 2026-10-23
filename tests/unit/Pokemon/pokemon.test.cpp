@@ -1,6 +1,6 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.4.0
 	@version 0.12.52
 	@author Matthew Moore
@@ -26,6 +26,7 @@
 #include "Learnset/builtInLearnsetID.h"
 #include "Move/builtInMoveID.h"
 #include "Move/moveID.h"
+#include "Move/moveMeta.h"
 #include "Nature/builtInNatureID.h"
 #include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
@@ -69,6 +70,7 @@ using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MoveID;
+using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Nature::BuiltinNatureID;
@@ -203,6 +205,42 @@ SCENARIO("Pokemon")
 		}
 	}
 
+	GIVEN("move metadata used to construct a Pokemon")
+	{
+		const PokemonMeta pokemonMeta{.mName = "SnapshotMon"};
+		std::array<MoveMeta, MAX_MOVES_PER_POKEMON> moveMetas{
+			{
+				{
+					.mMoveID = toMoveID(BuiltinMoveID::Facade),
+					.mPPMaxAmount = 24,
+					.mPPDefaultAmount = 15,
+				},
+				{
+					.mMoveID = toMoveID(BuiltinMoveID::Pound),
+					.mPPMaxAmount = 56,
+					.mPPDefaultAmount = 35,
+				},
+			},
+		};
+		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{24, 56};
+		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}};
+
+		REQUIRE(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
+
+		WHEN("the source move metadata's maximum PP changes after construction")
+		{
+			for (MoveMeta &moveMeta : moveMetas)
+			{
+				moveMeta.mPPMaxAmount = 1;
+			}
+
+			THEN("the Pokemon retains its original maximum PP snapshots for every slot")
+			{
+				CHECK(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
+			}
+		}
+	}
+
 	GIVEN("get/set name")
 	{
 		Pokemon pokemon{makePokemon({.mMetadata = {.mName = "Name"}})};
@@ -267,14 +305,16 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMoveIDsArray")
+			WHEN("calling setMovesArrays")
 			{
-				pokemon.setMoveIDsArray({toMoveID(BuiltinMoveID::Facade)});
+				MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+				pokemon.setMovesArrays({meta});
 
-				THEN("the pokemon's moves are properly updated")
+				THEN("the pokemon's move IDs, and PP amounts are properly updated")
 				{
-					CHECK(std::ranges::equal(std::array<MoveID, MAX_MOVES_PER_POKEMON>{toMoveID(BuiltinMoveID::Facade)},
-											 pokemon.getMoveIDsArray()));
+					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+					CHECK((pokemon.getMaxPP(0) == 5));
+					CHECK((pokemon.getCurrentPP(0) == 2));
 				}
 			}
 		}
@@ -591,13 +631,16 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMoveID")
+			WHEN("calling setMove")
 			{
-				pokemon.setMoveID(0, toMoveID(BuiltinMoveID::Facade));
+				MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+				pokemon.setMove(0, meta);
 
 				THEN("the pokemon's move is properly updated")
 				{
-					CHECK((toMoveID(BuiltinMoveID::Facade) == pokemon.getMoveID(0)));
+					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+					CHECK((pokemon.getMaxPP(0) == 5));
+					CHECK((pokemon.getCurrentPP(0) == 2));
 				}
 			}
 		}

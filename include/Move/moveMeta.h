@@ -1,9 +1,9 @@
 
 /*! @file moveMeta.h
 	@brief Defines the metadata stored for built-in and user-defined moves.
-	@date 10/13/2026
+	@date 10/23/2026
 	@since 0.5.2
-	@version 0.12.51
+	@version 0.12.52
 	@author Matthew Moore
 */
 
@@ -37,11 +37,12 @@ namespace PocketCore::Move
 
 	/*! @struct MoveMeta Move/moveMeta.h
 		@brief Stores one move's stable ID, display name, and owned trigger definitions.
-		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
-	   must remain valid while this metadata is registered.
-		@date 09/11/2026
+		@details Owns its display name, trigger vector, and nested effect vectors. This metadata is the authoritative source of the move's
+		 default and maximum PP, stored in @ref mPPDefaultAmount and @ref mPPMaxAmount. @ref PocketCore::Pokemon::Pokemon copies these
+		 values when constructing or replacing a move slot; later metadata changes do not update existing slot snapshots.
+		@date 09/23/2026
 		@since 0.5.2
-		@version 0.12.24
+		@version 0.12.52
 		@author Matthew Moore
 	*/
 	struct MoveMeta
@@ -88,10 +89,10 @@ namespace PocketCore::Move
 			/*! @brief The move's priority. */
 			sb mPriority{};
 
-			/*! @brief The move's max PP value. This can only be achieved with items. */
+			/*! @brief The authoritative maximum PP for this move, achievable with items. */
 			ub mPPMaxAmount{};
 
-			/*! @brief The move's default PP amount. */
+			/*! @brief The authoritative default PP used to initialize current PP when assigning this move to a Pokemon slot. */
 			ub mPPDefaultAmount{};
 
 			/*! @brief Whether the move is a special move. */

@@ -1,6 +1,6 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/21/2026
+	@date 10/23/2026
 	@since 0.3.0
 	@version 0.12.52
 	@author Matthew Moore
@@ -96,8 +96,13 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
 		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
+		 Selected move IDs and current PP are runtime state. @ref PocketCore::Move::MoveMeta is the authoritative source of default and
+		 maximum PP. Construction with moves, @ref setMove, and @ref setMovesArrays copy each move's ID and maximum PP and initialize
+		 current PP from its default PP. The maximum-PP array is derived state, unchanged until the corresponding move is reassigned;
+		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery.
+		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/21/2026
+		@date 10/23/2026
 		@since 0.3.0
 		@version 0.12.52
 		@author Matthew Moore
@@ -108,7 +113,7 @@ namespace PocketCore::Pokemon
 			// Constructors
 
 			/*! @brief Constructs a Pokemon with empty move slots and zero move PP.
-				@param[in] meta The metadata of the Pokemon.
+				@param[in] meta Species metadata; its display-name storage must outlive this object.
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
@@ -143,16 +148,16 @@ namespace PocketCore::Pokemon
 				setHealth(mCalculatedStats.mMaxHealth);
 			}
 
-			/*! @brief Constructs a Pokemon from complete move and PP arrays.
-				@param[in] pokemonMeta The metadata of the Pokemon.
-				@param[in] moveIDs Fixed move identifier slots.
-				@param[in] maxPP Maximum PP for each move slot.
-				@param[in] currentPP Current PP for each move slot.
+			/*! @brief Constructs a Pokemon with move IDs and PP copied from move metadata.
+				@details Copies each move's maximum PP as a slot snapshot and initializes current PP from its default PP. Later changes to
+				 the source metadata do not affect these stored values.
+				@param[in] pokemonMeta Species metadata; its display-name storage must outlive this object.
+				@param[in] moveMetas Move metadata borrowed during construction; IDs and PP are copied without retaining references.
 				@param[in] level Pokemon level used to compute the level damage factor.
 				@param[in] abilityIDs Fixed ability identifier slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
-				@param[in] natureRegistry The registry used to resolve the incoming status metadata.
+				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@since 0.3.0
@@ -564,14 +569,16 @@ namespace PocketCore::Pokemon
 				mNonVolatileStatusIDs = statusIDs;
 			}
 
-			/*! @brief Replaces all move identifier slots.
-				@param[in] moveIDs The move identifiers to store.
+			/*! @brief Replaces all move identifier slots, current PP slots, and max PP slots.
+				@details Copies each move's ID and maximum PP and resets current PP to its default PP. Later metadata edits do not
+				 change the copied values.
+				@param[in] moves Move metadata borrowed for this call; no references to the metadata are retained.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.52
 			*/
-			constexpr void setMoveIDsArray(const std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs)
+			constexpr void setMovesArrays(const std::array<MoveMeta, MAX_MOVES_PER_POKEMON> &moves)
 			{
-				mMoveIDs = moveIDs;
+				assignMoves(moves);
 			}
 
 			/*! @brief Sets all individual values (IVs) and immediately recomputes the calculated stats.
@@ -675,18 +682,22 @@ namespace PocketCore::Pokemon
 				mNonVolatileStatusIDs.at(slotIndex) = statusID;
 			}
 
-			/*! @brief Sets one move slot.
+			/*! @brief Sets one move ID, max PP, and current PP slot.
+				@details Copies the move's ID and maximum PP and resets current PP to its default PP. The maximum-PP snapshot remains
+				 unchanged until this slot's move is reassigned, regardless of later changes to the source metadata.
 				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@param[in] moveID The move identifier to store.
+				@param[in] move Move metadata borrowed for this call; no reference to the metadata is retained.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.52
 			*/
-			constexpr void setMoveID(const ub slotIndex, const MoveID moveID)
+			constexpr void setMove(const ub slotIndex, const MoveMeta &move)
 			{
 				assert(slotIndex < mMoveIDs.size());
 
-				mMoveIDs.at(slotIndex) = moveID;
+				mMoveIDs.at(slotIndex) = move.mMoveID;
+				mMaxPP.at(slotIndex) = move.mPPMaxAmount;
+				mCurrentPP.at(slotIndex) = move.mPPDefaultAmount;
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
@@ -1166,9 +1177,7 @@ namespace PocketCore::Pokemon
 			{
 				for (const auto &&[index, meta] : moveMetas | std::views::enumerate)
 				{
-					setMoveID(static_cast<ub>(index), meta.mMoveID);
-					setCurrentPP(static_cast<ub>(index), meta.mPPDefaultAmount);
-					mMaxPP.at(static_cast<std::size_t>(index)) = meta.mPPMaxAmount;
+					setMove(static_cast<ub>(index), meta);
 				}
 			}
 
@@ -1206,9 +1215,9 @@ namespace PocketCore::Pokemon
 			/*! @brief The owned move identifier slots. */
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 
-			/*! @brief The maximum PP values for each move slot. */
+			/*! @brief The derived maximum-PP snapshots copied from MoveMeta during construction or move replacement. */
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
-			/*! @brief The current PP values for each move slot. */
+			/*! @brief The mutable current PP for each move slot, initialized from MoveMeta's default PP when a move is assigned. */
 			std::array<ub, MAX_MOVES_PER_POKEMON> mCurrentPP{};
 			/*! @brief The owned type identifier slots. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
