@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -39,11 +39,13 @@
 #include "Validation/Pokemon/pokemonError.h"
 
 #include "pokemon.h"
+#include "pokemonInstantiationContext.h"
 #include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Ability::NO_ABILITY_ID;
 	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
@@ -54,6 +56,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
 	using PocketCore::Registry::Move::MoveRegistry;
@@ -115,6 +118,8 @@ namespace PocketCore::Pokemon
 		 @ref PocketCore::Nature::NO_NATURE_ID. No reference is retained.
 		@param[in] natureRegistry Registry borrowed for metadata validation; no reference is retained.
 		@param[in] randomSources The random sources used for battle-related numeric types.
+		@param[in] duplicateEntryNatureReplacer Registered ID used as the duplicate-replacement and compaction sentinel for supplied
+	   natures;
 		@return Success after validation or random selection; otherwise, the metadata-validation error,
 		 @ref NatureError::NO_REGISTERED_NATURES, or @ref NatureError::NOT_ENOUGH_REGISTERED_NATURES.
 		 Validation and candidate-count failures leave the array unchanged.
@@ -124,7 +129,8 @@ namespace PocketCore::Pokemon
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
 																		   const NatureRegistry &natureRegistry,
-																		   const BattleRandomSources &randomSources);
+																		   const BattleRandomSources &randomSources,
+																		   const NatureID duplicateEntryNatureReplacer = NO_NATURE_ID);
 
 	/*!
 		@since 0.12.51
@@ -132,7 +138,8 @@ namespace PocketCore::Pokemon
 	*/
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
 		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources);
+		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext,
+		const PokemonEncounter &encounterData, const AbilityID duplicateEntryAbilityReplacer = NO_ABILITY_ID);
 
 	/*!
 		@since 0.12.51
@@ -188,6 +195,9 @@ namespace PocketCore::Pokemon
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
+
+	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoMaleParents(const Pokemon &parent1, const Pokemon &parent2);
+	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoFemaleParents(const Pokemon &parent1, const Pokemon &parent2);
 
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.
 		@details Selects level-up moves whose requirements do not exceed @p pokemonEncounterLevel. For egg encounters, eligible egg moves

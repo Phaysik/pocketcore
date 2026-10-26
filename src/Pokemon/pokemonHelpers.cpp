@@ -36,6 +36,7 @@
 #include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonEncounter.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/moveRegistry.h"
@@ -226,7 +227,8 @@ namespace PocketCore::Pokemon
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
 																		   const NatureRegistry &natureRegistry,
-																		   const BattleRandomSources &randomSources)
+																		   const BattleRandomSources &randomSources,
+																		   const NatureID duplicateEntryNatureReplacer)
 	{
 		if (!natureIDs.empty())
 		{
@@ -237,8 +239,13 @@ namespace PocketCore::Pokemon
 
 			std::ranges::transform(natureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
 
+			if (natureRegistry.getNatureMetadata(duplicateEntryNatureReplacer) == nullptr)
+			{
+				return std::unexpected{NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
+
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_NATURE_ID, validNatureIDs);
+			replaceDuplicatesWithNoID(duplicateEntryNatureReplacer, validNatureIDs);
 		}
 		else
 		{
@@ -272,7 +279,8 @@ namespace PocketCore::Pokemon
 
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
 		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources)
+		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext,
+		const PokemonEncounter &encounterData, const AbilityID duplicateEntryAbilityReplacer)
 	{
 		if (!abilityIDs.empty())
 		{
@@ -283,8 +291,13 @@ namespace PocketCore::Pokemon
 
 			std::ranges::transform(abilityIDs, validAbilityIDs.begin(), [](const AbilityID abilityID) { return abilityID; });
 
+			if (abilityRegistry.getAbilityMetadata(duplicateEntryAbilityReplacer) == nullptr)
+			{
+				return std::unexpected{AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
+
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_ABILITY_ID, validAbilityIDs);
+			replaceDuplicatesWithNoID(duplicateEntryAbilityReplacer, validAbilityIDs);
 		}
 		else
 		{
@@ -309,7 +322,42 @@ namespace PocketCore::Pokemon
 			for (const std::size_t index : std::views::iota(std::size_t{0}, randomSources.mIndex.get()(1, MAX_ABILITIES_PER_POKEMON)))
 			{
 				validAbilityIDs.at(index) = getRandomAbilityIDFromConfiguration(abilityRegistry, randomAbilityValue,
-																			   std::span<const AbilityID>{validAbilityIDs}.first(index));
+																				std::span<const AbilityID>{validAbilityIDs}.first(index));
+			}
+
+			if (encounterData.mOrigin == PokemonOrigin::Egg)
+			{
+				if (breedingContext.mFirstParent == nullptr || breedingContext.mSecondParent == nullptr)
+				{
+					return std::unexpected{AbilityError::INVALID_BREEDING_CONTEXT};
+				}
+
+				if (const std::expected<void, AbilityError> error{
+						hasTwoMaleParents(*breedingContext.mFirstParent, *breedingContext.mSecondParent),
+					};
+					!error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				if (const std::expected<void, AbilityError> error{
+						hasTwoFemaleParents(*breedingContext.mFirstParent, *breedingContext.mSecondParent),
+					};
+					!error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				// const Pokemon *momPokemon{
+				// 	breedingContext.mFirstParent->getGender() == PokemonGender::Female ? breedingContext.mFirstParent
+				// 																	   : breedingContext.mSecondParent,
+				// };
+
+				// const std::span<const AbilityID> momAbilityIDs{momPokemon->getAbilityIDsArray()};
+
+				// for (const std::size_t index : std::views::iota(std::size_t{0}, momAbilityIDs.size()))
+				// {
+				// }
 			}
 		}
 
@@ -473,6 +521,26 @@ namespace PocketCore::Pokemon
 		{
 			moveIDs.fill(NO_MOVE_ID);
 			return std::unexpected{error.error()};
+		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoMaleParents(const Pokemon &parent1, const Pokemon &parent2)
+	{
+		if (parent1.getGender() == PokemonGender::Male && parent2.getGender() == PokemonGender::Male)
+		{
+			return std::unexpected{AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE};
+		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoFemaleParents(const Pokemon &parent1, const Pokemon &parent2)
+	{
+		if (parent1.getGender() == PokemonGender::Female && parent2.getGender() == PokemonGender::Female)
+		{
+			return std::unexpected{AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE};
 		}
 
 		return {};

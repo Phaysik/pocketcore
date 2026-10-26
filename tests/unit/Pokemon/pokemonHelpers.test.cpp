@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -29,6 +29,7 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Pokemon/pokemonEncounter.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
 #include "Registry/itemRegistry.h"
@@ -80,6 +81,7 @@ using PocketCore::Pokemon::getValidPokemonMoves;
 using PocketCore::Pokemon::getValidPokemonNatures;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Registry::Ability::AbilityRegistry;
@@ -175,10 +177,14 @@ SCENARIO("Pokemon free function")
 	{
 		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> validAbilityIDs{};
 		AbilityRegistry abilityRegistry{*provider.mAbilityRegistry};
+		PokemonBreedingContext breedingContext{};
+		PokemonEncounter encounterData{};
 
 		WHEN("no passed in ability IDs")
 		{
-			std::expected<void, AbilityError> result{getValidPokemonAbilities({}, validAbilityIDs, abilityRegistry, randomSources)};
+			std::expected<void, AbilityError> result{
+				getValidPokemonAbilities({}, validAbilityIDs, abilityRegistry, randomSources, breedingContext, encounterData),
+			};
 
 			THEN("it returns nothing")
 			{
@@ -193,7 +199,8 @@ SCENARIO("Pokemon free function")
 				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{toAbilityID(BuiltinAbilityID::CloudNine)};
 
 				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources)};
+					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources, breedingContext, encounterData),
+				};
 
 				THEN("it successfully validates and puts the data in the validAbilityIDs")
 				{
@@ -207,7 +214,8 @@ SCENARIO("Pokemon free function")
 				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{NO_ABILITY_ID};
 
 				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources)};
+					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources, breedingContext, encounterData),
+				};
 
 				THEN("it successfully validates and puts the data in the validAbilityIDs")
 				{
@@ -221,7 +229,8 @@ SCENARIO("Pokemon free function")
 				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{AbilityID{200}};
 
 				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources)};
+					getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry, randomSources, breedingContext, encounterData),
+				};
 
 				THEN("it successfully invalidates and returns an error")
 				{

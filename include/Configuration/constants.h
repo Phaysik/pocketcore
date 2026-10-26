@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 10/09/2026
+	@date 10/26/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -110,6 +110,11 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr us MAX_LEARNSETS{1'000};
+
+	/*! @brief The maximum number of registered egg groups.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr us MAX_EGG_GROUPS{1'000};
 
 	/*! @brief The maximum number of registered weather conditions.
 		@see docs/config-boundary.md
@@ -326,6 +331,29 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr ub MAX_ACTIVE_SLOTS_PER_SIDE{6};
+
+	/*! @brief The inclusive lower bound of a breeding ability-inheritance random roll.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub BREEDING_ABILITY_MINIMUM{1};
+
+	/*! @brief The inclusive upper bound of a breeding ability-inheritance random roll.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub BREEDING_ABILITY_MAXIMUM{100};
+
+	/*! @brief The percentage chance of inheriting a parent's regular ability during breeding.
+		@details Applies to regular-ability inheritance, separately from @ref HIDDEN_ABILITY_CHANCE.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub REGULAR_ABILITY_CHANCE{80};
+
+	/*! @brief The percentage chance of inheriting a parent's hidden ability during breeding.
+		@details Applies to hidden-ability inheritance, separately from @ref REGULAR_ABILITY_CHANCE.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub HIDDEN_ABILITY_CHANCE{60};
+
 } // namespace PocketCore::Configuration
 
 #endif

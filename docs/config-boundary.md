@@ -15,6 +15,7 @@ This document defines the boundary between compile-time storage capacities in `i
 | `MAX_LOCATIONS`                         | Registry capacity            | Location registry                         | None                                     |
 | `MAX_POKEMON`                           | Registry capacity            | Pokemon registry                          | None                                     |
 | `MAX_LEARNSETS`                         | Registry capacity            | Learnset registry                         | None                                     |
+| `MAX_EGG_GROUPS`                        | Registry capacity            | Egg Group registry                        | None                                     |
 | `MAX_WEATHERS`                          | Registry capacity            | Weather registry                          | None                                     |
 | `MAX_TERRAINS`                          | Registry capacity            | Terrain registry                          | None                                     |
 | `MAX_MULTIPLIERS`                       | Registry capacity            | Multiplier registry                       | None                                     |
@@ -40,6 +41,19 @@ This document defines the boundary between compile-time storage capacities in `i
 | `MAX_IV_STAT_VALUE`                     | Runtime semantic restriction | Persistent Pokemon individual-value bound | None                                     |
 
 The remaining `MIN_*` and value constants in `constants.h` are also runtime mechanics, but they are outside this `MAX_*` capacity audit. They remain compile-time constants because they describe global mechanics or persistent Pokemon data invariants rather than battle-specific policy choices.
+
+### Breeding Mechanics
+
+The following constants define global breeding mechanics, not storage capacities or battle-specific policy choices. They remain compile-time constants and have no `RulesetPolicy` fields.
+
+| Constant | Meaning | Default |
+| --- | --- | --- |
+| `BREEDING_ABILITY_MINIMUM` | Inclusive lower bound of an ability-inheritance roll | 1 |
+| `BREEDING_ABILITY_MAXIMUM` | Inclusive upper bound of an ability-inheritance roll | 100 |
+| `REGULAR_ABILITY_CHANCE` | Regular-ability inheritance probability, as a percent | 80 |
+| `HIDDEN_ABILITY_CHANCE` | Hidden-ability inheritance probability, as a percent | 60 |
+
+The two probabilities apply to separate inheritance cases; they are not weights that must sum to 100. These constants currently declare the intended mechanics but are not yet consumed by the instantiation code.
 
 ## Rules
 

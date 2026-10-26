@@ -1,6 +1,6 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.1.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -18,6 +18,7 @@
 #include "Battle/battleEngine.h"
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/effectRegistryConfiguration.h"
+#include "Configuration/eggGroupRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/learnsetRegistryConfiguration.h"
 #include "Configuration/locationRegistryConfiguration.h"
@@ -64,6 +65,7 @@ int main()
 	using PocketCore::Battle::MoveAction;
 	using PocketCore::Configuration::AbilityRegistryConfiguration;
 	using PocketCore::Configuration::EffectRegistryConfiguration;
+	using PocketCore::Configuration::EggGroupRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
 	using PocketCore::Configuration::LearnsetRegistryConfiguration;
 	using PocketCore::Configuration::LocationRegistryConfiguration;
@@ -119,6 +121,7 @@ int main()
 	std::unique_ptr<PokemonRegistryConfiguration> pokemonRegistryConfig{std::make_unique<PokemonRegistryConfiguration>()};
 	std::unique_ptr<LearnsetRegistryConfiguration> learnsetRegistryConfig{std::make_unique<LearnsetRegistryConfiguration>()};
 	std::unique_ptr<LocationRegistryConfiguration> locationRegistryConfig{std::make_unique<LocationRegistryConfiguration>()};
+	std::unique_ptr<EggGroupRegistryConfiguration> eggGroupRegistryConfig{std::make_unique<EggGroupRegistryConfiguration>()};
 
 	const RegistryProvider registryProvider{
 		.mAbilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
@@ -133,6 +136,7 @@ int main()
 		.mPokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
 		.mLearnsetRegistry = &learnsetRegistryConfig->getRuntimeRegistry(),
 		.mLocationRegistry = &locationRegistryConfig->getRuntimeRegistry(),
+		.mEggGroupRegistry = &eggGroupRegistryConfig->getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 

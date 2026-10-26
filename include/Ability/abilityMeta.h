@@ -1,6 +1,6 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.3.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -47,9 +47,9 @@ namespace PocketCore::Ability
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 10/23/2026
+		@date 9/10/2026
 		@since 0.3.0
-		@version 0.12.53
+		@version 0.12.20
 		@author Matthew Moore
 	*/
 	struct AbilityMeta
@@ -77,9 +77,6 @@ namespace PocketCore::Ability
 
 			/*! @brief The target ID for this ability's effects. */
 			BattleTargetID mTargetID{};
-
-			/*! @brief The ability's category, defaulting to @ref AbilityClassification::Standard. */
-			AbilityClassification mClassification{AbilityClassification::Standard};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};

@@ -1,14 +1,15 @@
 /*! @file registryProvider.h
 	@brief Provides a registry provider that holds references to all registry objects.
-	@date 10/09/2026
+	@date 10/26/2026
 	@since 0.8.2
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_REGISTRY_REGISTRY_PROVIDER_H
 #define INCLUDE_REGISTRY_REGISTRY_PROVIDER_H
 
+#include "Registry/eggGroupRegistry.h"
 #include "Registry/learnsetRegistry.h"
 #include "Registry/locationRegistry.h"
 #include "Registry/pokemonRegistry.h"
@@ -27,6 +28,7 @@
 namespace PocketCore::Registry
 {
 	using PocketCore::Registry::Ability::AbilityRegistry;
+	using PocketCore::Registry::EggGroup::EggGroupRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
 	using PocketCore::Registry::Learnset::LearnsetRegistry;
 	using PocketCore::Registry::Location::LocationRegistry;
@@ -44,9 +46,9 @@ namespace PocketCore::Registry
 		@details Provides a lightweight dependency bundle passed into systems that require cross-registry lookup access.
 		All pointers are non-owning and must refer to registry instances whose lifetime exceeds the provider usage.
 		@warning Dereferencing any null member pointer is undefined behavior.
-		@date 10/09/2026
+		@date 10/26/2026
 		@since 0.8.2
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	struct RegistryProvider
@@ -111,6 +113,11 @@ namespace PocketCore::Registry
 				@details Must point to a valid @ref LocationRegistry instance for location metadata queries.
 			*/
 			const LocationRegistry *mLocationRegistry{nullptr};
+
+			/*! @brief Non-owning pointer to the egg group metadata registry.
+				@details Must point to a valid @ref EggGroupRegistry instance for egg group metadata queries.
+			*/
+			const EggGroupRegistry *mEggGroupRegistry{nullptr};
 	};
 } // namespace PocketCore::Registry
 

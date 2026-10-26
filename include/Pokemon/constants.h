@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 10/09/2026
+	@date 10/26/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -108,6 +108,16 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 85,
 		.mSpDefense = 105,
 		.mSpeed = 78,
+	};
+
+	inline constexpr std::string_view POKEMON_NAME_DITTO{"Ditto"};
+	inline constexpr PokemonStats DITTO_BASE_STATS{
+		.mMaxHealth = 48,
+		.mAttack = 48,
+		.mDefense = 48,
+		.mSpAttack = 48,
+		.mSpDefense = 48,
+		.mSpeed = 48,
 	};
 } // namespace PocketCore::Pokemon
 

@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -29,6 +29,7 @@
 #include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonHelpers.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Utility/Random/random.h"
@@ -59,8 +60,10 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::getValidPokemonIVs;
 	using PocketCore::Pokemon::getValidPokemonMoves;
 	using PocketCore::Pokemon::getValidPokemonNatures;
+	using PocketCore::Pokemon::IDContext;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonBreedingContext;
 	using PocketCore::Pokemon::PokemonEncounter;
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
@@ -76,9 +79,8 @@ namespace PocketCore::Registry::Pokemon
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
 		const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
-		PokemonInstantiationDependencies *dependencyRegistries, const std::span<const us> ivs, const std::span<const us> evs,
-		const std::span<const NatureID> natureIDs, const std::span<const AbilityID> abilityIDs, const std::span<const ItemID> itemIDs,
-		const std::span<const MoveID> moveIDs) const
+		PokemonInstantiationDependencies *dependencyRegistries, const IDContext &idContext, const IVEVContext &ivevContext,
+		const PokemonBreedingContext &breedingContext) const
 	{
 		if (dependencyRegistries == nullptr || dependencyRegistries->mAbilityRegistry == nullptr
 			|| dependencyRegistries->mItemRegistry == nullptr || dependencyRegistries->mMoveRegistry == nullptr
@@ -134,7 +136,7 @@ namespace PocketCore::Registry::Pokemon
 		std::array<us, POKEMON_STAT_COUNT> validEVs{};
 
 		if (const std::expected<void, NatureError> error{
-				getValidPokemonNatures(natureIDs, validNatureIDs, *dependencyRegistries->mNatureRegistry, randomSources),
+				getValidPokemonNatures(idContext.natureIDs, validNatureIDs, *dependencyRegistries->mNatureRegistry, randomSources),
 			};
 			!error.has_value())
 		{
@@ -142,21 +144,24 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, AbilityError> error{
-				getValidPokemonAbilities(abilityIDs, validAbilityIDs, *dependencyRegistries->mAbilityRegistry, randomSources),
+				getValidPokemonAbilities(idContext.abilityIDs, validAbilityIDs, *dependencyRegistries->mAbilityRegistry, randomSources,
+										 breedingContext, encounterData),
 			};
 			!error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, ItemError> error{getValidPokemonItems(itemIDs, validItemIDs, *dependencyRegistries->mItemRegistry)};
+		if (const std::expected<void, ItemError> error{
+				getValidPokemonItems(idContext.itemIDs, validItemIDs, *dependencyRegistries->mItemRegistry),
+			};
 			!error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
 		if (const std::expected<void, MoveError> error{
-				getValidPokemonMoves(moveIDs, validMoveIDs, *dependencyRegistries->mMoveRegistry, *learnsetMeta, encounterData,
+				getValidPokemonMoves(idContext.moveIDs, validMoveIDs, *dependencyRegistries->mMoveRegistry, *learnsetMeta, encounterData,
 									 pokemonEncounterLevel),
 			};
 			!error.has_value())
@@ -164,12 +169,12 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(ivs, validIVs)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(ivevContext.ivs, validIVs)}; !error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(evs, validEVs)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(ivevContext.evs, validEVs)}; !error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}

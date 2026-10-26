@@ -1,6 +1,6 @@
 /*! @file natureError.h
 	@brief Contains the error codes for the Nature validation results.
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.12.51
 	@version 0.12.53
 	@author Matthew Moore
@@ -22,7 +22,7 @@ namespace PocketCore::Validation::Nature
 		Nature validation handles additional constraints.
 		@note No enumerator represents success; a successful validation result has a value and contains no error.
 		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
-		@date 10/23/2026
+		@date 10/26/2026
 		@since 0.12.51
 		@version 0.12.53
 		@author Matthew Moore
@@ -31,6 +31,8 @@ namespace PocketCore::Validation::Nature
 	{
 		/*! @brief Indicates a Nature ID has no matching registered metadata. */
 		MISSING_NATURE_METADATA,
+		/*! @brief Indicates that the duplicate Nature ID replacement value has no valid metadata. */
+		DUPLICATE_REPLACEMENT_MISSING_METADATA,
 		/*! @brief Indicates that the nature registry has no registered natures. */
 		NO_REGISTERED_NATURES,
 		/*! @brief Indicates that the nature registry does not have enough entries to fill the Pokemon's natures array. */
