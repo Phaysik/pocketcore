@@ -33,6 +33,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Ability::AbilityClassification;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
+	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ENCOUNTERS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
@@ -128,32 +129,32 @@ namespace PocketCore::Pokemon
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
+			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
+			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
+
 			/*! @brief The case-sensitive display name stored. */
 			std::string mName{};
 
 			/*! @brief The Pokemon's pool of available abilities. */
 			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
 
-			/*! @brief The Pokemon's pool of available genders. */
-			std::array<PokemonGender, MAX_GENDERS> mGenderPool{};
-
-			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
-			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
-
 			/*! @brief The Pokemon's base stats. */
 			PokemonStats mBaseStats{};
 
+			/*! @brief The egg groups associated with the Pokemon. */
+			std::array<EggGroupID, MAX_EGG_GROUPS_PER_POKEMON> mEggGroupIDs{};
+
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+
+			/*! @brief The Pokemon's pool of available genders. */
+			std::array<PokemonGender, MAX_GENDERS> mGenderPool{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			PokemonID mPokemonID{};
 
 			/*! @brief The learnset ID associated with the Pokemon. */
 			LearnsetID mLearnsetID{};
-
-			/*! @brief The egg group ID associated with the Pokemon. */
-			EggGroupID mEggGroupID{};
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};

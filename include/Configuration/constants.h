@@ -116,6 +116,11 @@ namespace PocketCore::Configuration
 	*/
 	inline constexpr us MAX_EGG_GROUPS{1'000};
 
+	/*! @brief The maximum number of egg groups known by one Pokemon.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub MAX_EGG_GROUPS_PER_POKEMON{2};
+
 	/*! @brief The maximum number of registered weather conditions.
 		@see docs/config-boundary.md
 	*/

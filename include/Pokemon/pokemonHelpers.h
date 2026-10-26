@@ -196,9 +196,6 @@ namespace PocketCore::Pokemon
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
 
-	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoMaleParents(const Pokemon &parent1, const Pokemon &parent2);
-	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoFemaleParents(const Pokemon &parent1, const Pokemon &parent2);
-
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.
 		@details Selects level-up moves whose requirements do not exceed @p pokemonEncounterLevel. For egg encounters, eligible egg moves
 		are also selected and take precedence over level-up entries with the same ID. Duplicate entries are ignored, selected moves are

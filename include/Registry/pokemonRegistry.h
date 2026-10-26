@@ -24,6 +24,7 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
@@ -72,6 +73,8 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Configuration::MIN_EV_STAT_VALUE;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::EggGroup::BuiltinEggGroupID;
+	using PocketCore::EggGroup::toEggGroupID;
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
@@ -213,81 +216,90 @@ namespace PocketCore::Registry::Pokemon
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BULBASAUR),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = BULBASAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = IVYSAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = VENUSAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = CHARMANDER_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = CHARMELEON_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = CHARIZARD_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = SQUIRTLE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = WARTORTLE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mBaseStats = BLASTOISE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 				});
@@ -295,9 +307,10 @@ namespace PocketCore::Registry::Pokemon
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_DITTO),
 					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
-					.mGenderPool = {PokemonGender::Genderless},
 					.mBaseStats = DITTO_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},
+					.mGenderPool = {PokemonGender::Genderless},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ditto),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
 				});

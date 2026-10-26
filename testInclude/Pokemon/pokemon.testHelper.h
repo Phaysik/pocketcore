@@ -1,6 +1,6 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.12.13
 	@version 0.12.53
 	@author Matthew Moore
@@ -12,6 +12,7 @@
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
 #include "Move/builtInMoveID.h"
@@ -41,6 +42,7 @@ namespace PocketCore::Testing
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::NO_EGG_GROUP_ID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::LearnsetID;
@@ -72,6 +74,7 @@ namespace PocketCore::Testing
 			PokemonMeta mMetadata{
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
 				.mBaseStats = {},
+				.mEggGroupIDs = {NO_EGG_GROUP_ID},
 				.mPokemonID = NO_POKEMON_ID,
 				.mLearnsetID = NO_LEARNSET_ID,
 			};

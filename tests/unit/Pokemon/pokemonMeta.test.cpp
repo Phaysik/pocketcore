@@ -185,9 +185,9 @@ SCENARIO("PokemonMeta")
 			}
 		}
 
-		GIVEN("for mEggGroupID modified in one meta")
+		GIVEN("for mEggGroupIDs modified in one meta")
 		{
-			PokemonMeta other{.mEggGroupID = toEggGroupID(BuiltinEggGroupID::Water1)};
+			PokemonMeta other{.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Water1)}};
 
 			THEN("they are not equal")
 			{

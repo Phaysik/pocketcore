@@ -1,6 +1,6 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/23/2026
+	@date 10/26/2026
 	@since 0.3.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -25,6 +25,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "EggGroup/eggGroupID.h"
 #include "Interaction/interactionApplicationError.h"
 #include "Interaction/interactionHelpers.h"
 #include "Item/itemID.h"
@@ -58,6 +59,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -67,6 +69,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::EggGroupID;
 	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Item::ItemID;
@@ -102,7 +105,7 @@ namespace PocketCore::Pokemon
 		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/23/2026
+		@date 10/26/2026
 		@since 0.3.0
 		@version 0.12.53
 		@author Matthew Moore
@@ -131,8 +134,8 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mTypeIDs{meta.mTypeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
-				  mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID), mGender(gender)
+				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mEggGroupIDs(meta.mEggGroupIDs), mTypeIDs{meta.mTypeIDs},
+				  mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID), mGender(gender)
 			{
 				mMoveIDs.fill(NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -171,8 +174,9 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityIDs{abilityIDs},
-				  mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID), mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
+				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mEggGroupIDs(pokemonMeta.mEggGroupIDs),
+				  mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				assignMoves(moveMetas);
 
@@ -237,6 +241,16 @@ namespace PocketCore::Pokemon
 			ATTR_NODISCARD constexpr const std::span<const us> getPokemonEVsArray() const noexcept
 			{
 				return mPokemonEVs;
+			}
+
+			/*! @brief Returns all egg group identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			ATTR_NODISCARD constexpr const std::span<const EggGroupID> getEggGroupIDsArray() const noexcept
+			{
+				return mEggGroupIDs;
 			}
 
 			/*! @brief Returns maximum PP for every move slot.
@@ -539,10 +553,10 @@ namespace PocketCore::Pokemon
 				return mPokemonID;
 			}
 
-			/*! @brief Returns the stable identifier for the Learnset species.
+			/*! @brief Returns the stable identifier for the learnset.
 				@return The LearnsetID value.
 				@since 0.12.50
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const noexcept
 			{
@@ -1237,6 +1251,9 @@ namespace PocketCore::Pokemon
 			/*! @brief The owned move identifier slots. */
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 
+			/*! @brief The egg groups associated with the Pokemon. */
+			std::array<EggGroupID, MAX_EGG_GROUPS_PER_POKEMON> mEggGroupIDs{};
+
 			/*! @brief The derived maximum-PP snapshots copied from MoveMeta during construction or move replacement. */
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			/*! @brief The mutable current PP for each move slot, initialized from MoveMeta's default PP when a move is assigned. */
@@ -1263,7 +1280,7 @@ namespace PocketCore::Pokemon
 			/*! @brief The stable identifier for the Pokemon species. */
 			PokemonID mPokemonID{};
 
-			/*! @brief The stable identifier for the Learnset species. */
+			/*! @brief The stable identifier for the learnset. */
 			LearnsetID mLearnsetID{};
 
 			/*! @brief The gender of the Pokemon. */

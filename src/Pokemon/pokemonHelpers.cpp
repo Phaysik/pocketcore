@@ -28,6 +28,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "EggGroup/eggGroupID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
@@ -64,6 +65,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::EggGroupID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::LearnsetMeta;
@@ -76,6 +78,9 @@ namespace PocketCore::Pokemon
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Validation::Ability::AbilityError;
+	using PocketCore::Validation::Ability::hasTwoFemaleParents;
+	using PocketCore::Validation::Ability::hasTwoMaleParents;
+	using PocketCore::Validation::Ability::hasValidEggGroup;
 	using PocketCore::Validation::Ability::validateAbilityMetadata;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Item::validateItemMetadata;
@@ -348,6 +353,14 @@ namespace PocketCore::Pokemon
 					return std::unexpected{error.error()};
 				}
 
+				if (const std::expected<void, AbilityError> error{
+						hasValidEggGroup(*breedingContext.mFirstParent, *breedingContext.mSecondParent),
+					};
+					!error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
 				// const Pokemon *momPokemon{
 				// 	breedingContext.mFirstParent->getGender() == PokemonGender::Female ? breedingContext.mFirstParent
 				// 																	   : breedingContext.mSecondParent,
@@ -521,26 +534,6 @@ namespace PocketCore::Pokemon
 		{
 			moveIDs.fill(NO_MOVE_ID);
 			return std::unexpected{error.error()};
-		}
-
-		return {};
-	}
-
-	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoMaleParents(const Pokemon &parent1, const Pokemon &parent2)
-	{
-		if (parent1.getGender() == PokemonGender::Male && parent2.getGender() == PokemonGender::Male)
-		{
-			return std::unexpected{AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE};
-		}
-
-		return {};
-	}
-
-	ATTR_NODISCARD ATTR_PURE std::expected<void, AbilityError> hasTwoFemaleParents(const Pokemon &parent1, const Pokemon &parent2)
-	{
-		if (parent1.getGender() == PokemonGender::Female && parent2.getGender() == PokemonGender::Female)
-		{
-			return std::unexpected{AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE};
 		}
 
 		return {};

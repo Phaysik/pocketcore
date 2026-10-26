@@ -41,6 +41,14 @@ namespace PocketCore::Validation::Ability
 		INVALID_BREEDING_CONTEXT,
 		/*! @brief Indicates that the ability cannot be registered since both parents are the same sex. */
 		SAME_SEX_PARENTS_CANT_REPRODUCE,
+		/*! @brief Indicates that the ability cannot be registered since one or both of the parents cannot produce eggs. */
+		PARENT_CANNOT_REPRODUCE,
+		/*! @brief Indicates that the ability cannot be registered since both parents are dittos. */
+		BOTH_PARENTS_ARE_DITTO,
+		/*! @brief Indicates that the ability cannot be registered since the parents do not share a common egg group. */
+		NO_COMMON_EGG_GROUP,
+		/*! @brief Indicates that the ability cannot be registered since the a parent has no valid egg groups. */
+		PARENT_HAS_NO_VALID_EGG_GROUP,
 	};
 } // namespace PocketCore::Validation::Ability
 
