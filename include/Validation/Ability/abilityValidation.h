@@ -59,8 +59,7 @@ namespace PocketCore::Validation::Ability
 		std::ranges::transform(abilityIDs, abilityMetas.begin(),
 							   [&abilityRegistry](const AbilityID abilityID) { return abilityRegistry.getAbilityMetadata(abilityID); });
 
-		if (abilityIDs.size() > MAX_ABILITIES_PER_POKEMON
-			|| std::ranges::any_of(abilityMetas, [](const AbilityMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(abilityMetas, [](const AbilityMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{AbilityError::MISSING_ABILITY_METADATA};
 		}
@@ -79,7 +78,7 @@ namespace PocketCore::Validation::Ability
 		constexpr auto allHasNoEggGroupIDs{
 			[](const Pokemon &pokemon) {
 				return std::ranges::all_of(pokemon.getEggGroupIDsArray(),
-										   [](const EggGroupID eggGroupID) -> bool { return eggGroupID == NO_EGG_GROUP_ID; });
+										   [](const EggGroupID eggGroupID) noexcept -> bool { return eggGroupID == NO_EGG_GROUP_ID; });
 			},
 		};
 

@@ -49,7 +49,7 @@ namespace PocketCore::Validation::Move
 		std::ranges::transform(moveIDs, moveMetas.begin(),
 							   [&moveRegistry](const MoveID moveID) { return moveRegistry.getMoveMetadata(moveID); });
 
-		if (moveIDs.size() > MAX_MOVES_PER_POKEMON || std::ranges::any_of(moveMetas, [](const MoveMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(moveMetas, [](const MoveMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{MoveError::MISSING_MOVE_METADATA};
 		}

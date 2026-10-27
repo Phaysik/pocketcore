@@ -49,8 +49,7 @@ namespace PocketCore::Validation::Nature
 		std::ranges::transform(natureIDs, natureMetas.begin(),
 							   [&natureRegistry](const NatureID natureID) { return natureRegistry.getNatureMetadata(natureID); });
 
-		if (natureIDs.size() > MAX_NATURES_PER_POKEMON
-			|| std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{NatureError::MISSING_NATURE_METADATA};
 		}

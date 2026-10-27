@@ -49,7 +49,7 @@ namespace PocketCore::Validation::Item
 		std::ranges::transform(itemIDs, itemMetas.begin(),
 							   [&itemRegistry](const ItemID itemID) { return itemRegistry.getItemMetadata(itemID); });
 
-		if (itemIDs.size() > MAX_ITEMS_PER_POKEMON || std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{ItemError::MISSING_ITEM_METADATA};
 		}
