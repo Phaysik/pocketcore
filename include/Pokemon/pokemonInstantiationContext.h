@@ -1,6 +1,6 @@
 /*! @file pokemonInstantiationContext.h
 	@brief Defines the contexts needed to instantiate Pokemon
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -15,6 +15,7 @@
 #include "Item/itemID.h"
 #include "Move/moveID.h"
 #include "Nature/natureID.h"
+#include "Pokemon/pokemonMeta.h"
 
 #include "pokemon.h"
 
@@ -54,7 +55,7 @@ namespace PocketCore::Pokemon
 		@details Borrows nature, ability, item, and move identifier sequences without copying their elements.
 			The backing storage must remain valid for every use of the corresponding span, including through copies of this context.
 		@note All spans are empty by default. This data carrier does not validate identifiers or sequence lengths.
-		@date 10/26/2026
+		@date 10/27/2026
 		@since 0.12.53
 		@version 0.12.53
 		@author Matthew Moore
@@ -65,8 +66,8 @@ namespace PocketCore::Pokemon
 			/*! @brief Provides a read-only, non-owning view of the supplied nature identifiers. */
 			std::span<const NatureID> natureIDs = {};
 
-			/*! @brief Provides a read-only, non-owning view of the supplied ability identifiers. */
-			std::span<const AbilityID> abilityIDs = {};
+			/*! @brief Provides a read-only, non-owning view of the supplied ability entries. */
+			std::span<const PokemonAbilityEntry> abilityEntries = {};
 
 			/*! @brief Provides a read-only, non-owning view of the supplied item identifiers. */
 			std::span<const ItemID> itemIDs = {};

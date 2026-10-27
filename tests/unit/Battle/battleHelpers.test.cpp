@@ -1,8 +1,8 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/23/2026
+	@date 10/27/2026
 	@since 0.12.45
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 
+#include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
 #include "Battle/battleAction.h"
 #include "Battle/battleState.h"
@@ -49,6 +50,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::activeSlots;
@@ -332,7 +334,7 @@ SCENARIO("Battle free function")
 					REQUIRE((result.at(0) != nullptr));
 					CHECK(std::ranges::equal(result, expected));
 
-					result.at(0)->setAbilityID(0, toAbilityID(BuiltinAbilityID::CloudNine));
+					result.at(0)->setAbilityEntry(0, {.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)});
 					expected.at(0)->setItemID(0, toItemID(BuiltinItemID::CheriBerry));
 
 					std::vector<Pokemon *> &proveModifiable{party(state, Side::A)};
@@ -352,7 +354,7 @@ SCENARIO("Battle free function")
 					REQUIRE((result.at(0) != nullptr));
 					CHECK(std::ranges::equal(result, expected));
 
-					result.at(0)->setAbilityID(0, toAbilityID(BuiltinAbilityID::CloudNine));
+					result.at(0)->setAbilityEntry(0, {.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)});
 					expected.at(0)->setItemID(0, toItemID(BuiltinItemID::CheriBerry));
 
 					std::vector<Pokemon *> &proveModifiable{party(state, Side::B)};
@@ -2106,10 +2108,10 @@ SCENARIO("Battle free function")
 						},
 						{
 						    .mMoveID = MoveID{200},
-						}
+						},
 					},
 				},
-			    .mHealth = 50
+			    .mHealth = 50,
 			}),
 		};
 		Pokemon member2{makePokemon({.mHealth = 60})};
@@ -2442,7 +2444,7 @@ SCENARIO("Battle free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -2561,8 +2563,9 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 6\n"
+						"        ID: 9\n"
 						"        Name: Air Lock\n"
+						"        Classification: Standard\n"
 						"    Items:\n"
 						"      [0]:\n"
 						"        ID: 1\n"
@@ -2593,11 +2596,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 4\n"
+						"        ID: 5\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 5\n"
+						"        ID: 6\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"
@@ -2672,7 +2675,7 @@ SCENARIO("Battle free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -2791,8 +2794,9 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 6\n"
+						"        ID: 9\n"
 						"        Name: Air Lock\n"
+						"        Classification: Hidden\n"
 						"    Items:\n"
 						"      [0]:\n"
 						"        ID: 1\n"
@@ -2823,11 +2827,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 4\n"
+						"        ID: 5\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 5\n"
+						"        ID: 6\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"

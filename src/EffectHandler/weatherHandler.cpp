@@ -1,8 +1,8 @@
 /*! @file weatherHandler.cpp
 	@brief Contains the weather effect handler implementation
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.9.8
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -23,6 +23,7 @@
 #include "Move/builtInMoveID.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/registryProvider.h"
 #include "Type/builtInTypeID.h"
 #include "Weather/builtInWeatherID.h"
@@ -43,6 +44,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::BuiltinMultiplierID;
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
@@ -56,8 +58,9 @@ namespace PocketCore::Effect
 
 		for (const Pokemon *pokemon : partyA)
 		{
-			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityIDsArray(), [](const AbilityID ability) {
-					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityEntriesArray(), [](const PokemonAbilityEntry &abilityEntry) {
+					return abilityEntry.mAbilityID == toAbilityID(BuiltinAbilityID::AirLock)
+						|| abilityEntry.mAbilityID == toAbilityID(BuiltinAbilityID::CloudNine);
 				}))
 			{
 				context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Weather), WEATHER_NULLIFICATION_MULTIPLIER_VALUE);
@@ -70,8 +73,9 @@ namespace PocketCore::Effect
 		for (const Pokemon *pokemon : partyB)
 		{
 
-			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityIDsArray(), [](const AbilityID ability) {
-					return ability == toAbilityID(BuiltinAbilityID::AirLock) || ability == toAbilityID(BuiltinAbilityID::CloudNine);
+			if (pokemon != nullptr && std::ranges::any_of(pokemon->getAbilityEntriesArray(), [](const PokemonAbilityEntry &abilityEntry) {
+					return abilityEntry.mAbilityID == toAbilityID(BuiltinAbilityID::AirLock)
+						|| abilityEntry.mAbilityID == toAbilityID(BuiltinAbilityID::CloudNine);
 				}))
 			{
 				context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Weather), WEATHER_NULLIFICATION_MULTIPLIER_VALUE);

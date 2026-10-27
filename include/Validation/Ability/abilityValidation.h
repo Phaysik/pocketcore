@@ -1,6 +1,6 @@
 /*! @file abilityValidation.h
 	@brief Defines validation functions that help with Ability.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.51
 	@version 0.12.53
 	@author Matthew Moore
@@ -45,11 +45,16 @@ namespace PocketCore::Validation::Ability
 		@param[in] abilityRegistry The registry to validate ability metadata.
 		@return A @ref AbilityError if any ability IDs are invalid, or std::nullopt if all are valid.
 		@since 0.12.26
-		@version 0.12.51
+		@version 0.12.53
 	 */
 	ATTR_NODISCARD constexpr std::expected<void, AbilityError> validateAbilityMetadata(const std::span<const AbilityID> abilityIDs,
 																					   const AbilityRegistry &abilityRegistry)
 	{
+		if (abilityIDs.size() > MAX_ABILITIES_PER_POKEMON)
+		{
+			return std::unexpected{AbilityError::TOO_MANY_ABILITIES};
+		}
+
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
 		std::ranges::transform(abilityIDs, abilityMetas.begin(),
 							   [&abilityRegistry](const AbilityID abilityID) { return abilityRegistry.getAbilityMetadata(abilityID); });

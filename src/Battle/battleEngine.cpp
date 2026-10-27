@@ -1,6 +1,6 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.9.16
 	@version 0.12.53
 	@author Matthew Moore
@@ -43,6 +43,7 @@
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
@@ -76,6 +77,7 @@ namespace PocketCore::Battle
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Ruleset::RulesetPolicy;
 	using PocketCore::Ruleset::RulesetPolicyError;
 	using PocketCore::Ruleset::validateRulesetPolicy;
@@ -920,10 +922,11 @@ namespace PocketCore::Battle
 		// Preserve the outer source across nested ability and item trigger dispatch.
 		const EffectSource previousSource{context.mSourceType};
 
-		const std::span<const AbilityID> abilityIDs{pokemon->getAbilityIDsArray()};
+		const std::span<const PokemonAbilityEntry> abilityEntries{pokemon->getAbilityEntriesArray()};
 		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
-		std::ranges::transform(abilityIDs, abilityMetas.begin(), [this](const AbilityID abilityID) {
-			return abilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityID) : nullptr;
+		std::ranges::transform(abilityEntries, abilityMetas.begin(), [this](const PokemonAbilityEntry abilityEntry) {
+			return abilityEntry.mAbilityID != NO_ABILITY_ID ? mProvider->mAbilityRegistry->getAbilityMetadata(abilityEntry.mAbilityID)
+															: nullptr;
 		});
 
 		const std::span<const ItemID> itemIDs{pokemon->getItemsIDsArray()};

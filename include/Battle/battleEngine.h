@@ -1,6 +1,6 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.10.3
 	@version 0.12.53
 	@author Matthew Moore
@@ -114,7 +114,7 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 10/26/2026
+		@date 10/27/2026
 		@since 0.10.3
 		@version 0.12.53
 		@author Matthew Moore
@@ -512,7 +512,7 @@ namespace PocketCore::Battle
 				@param[in,out] context The event or move context shared by the dispatched sources.
 				@param[in] targeting Selects metadata target resolution or preservation of the context's existing target.
 				@since 0.10.3
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			void dispatchSlotSources(const BattleTarget &owner, const Pokemon *pokemon, const BattleEventID eventID,
 									 const BattleEventRole role, EffectContext &context, const SlotTriggerTargeting targeting);

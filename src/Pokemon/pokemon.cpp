@@ -1,8 +1,8 @@
 /*! @file pokemon.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/20/2026
+	@date 10/27/2026
 	@since 0.3.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -69,12 +69,13 @@ namespace PocketCore::Pokemon
 				outStream, [&pokemon](const ub natureIndex) { return pokemon.getNatureID(natureIndex); }, static_cast<ub>(index));
 		}
 
-		outStream << "]\n  Ability IDs: [";
+		outStream << "]\n  Ability Entries: [";
 
-		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityIDsArray().size()))
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityEntriesArray().size()))
 		{
 			outputPokemonDataID(
-				outStream, [&pokemon](const ub abilityIndex) { return pokemon.getAbilityID(abilityIndex); }, static_cast<ub>(index));
+				outStream, [&pokemon](const ub abilityIndex) { return pokemon.getAbilityEntry(abilityIndex).mAbilityID; },
+				static_cast<ub>(index));
 		}
 
 		outStream << "]\n  Item IDs: [";

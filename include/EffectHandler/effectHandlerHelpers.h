@@ -1,8 +1,8 @@
 /*! @file effectHandlerHelpers.h
 	@brief Contains the effect handler helpers
-	@date 10/13/2026
+	@date 10/27/2026
 	@since 0.7.2
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -21,6 +21,7 @@
 #include "Effect/effectContext.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/registryProvider.h"
 #include "Type/builtInTypeID.h"
 #include "Type/typeID.h"
@@ -35,6 +36,7 @@ namespace PocketCore::Effect
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::toItemID;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Type::BuiltinTypeID;
 	using PocketCore::Type::toTypeID;
@@ -116,7 +118,7 @@ namespace PocketCore::Effect
 		@return `true` when a resolved ability name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the ability registry is unavailable, or no ability matches.
 		@since 0.9.10
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																 const std::string_view expectedName)
@@ -126,10 +128,11 @@ namespace PocketCore::Effect
 			return false;
 		}
 
-		return std::ranges::any_of(battleSlot.mPokemon->getAbilityIDsArray(), [expectedName, &provider](const AbilityID pokemonAbility) {
-			const std::optional<std::string_view> abilityName{provider.mAbilityRegistry->getAbilityName(pokemonAbility)};
-			return abilityName.has_value() && abilityName.value() == expectedName;
-		});
+		return std::ranges::any_of(
+			battleSlot.mPokemon->getAbilityEntriesArray(), [expectedName, &provider](const PokemonAbilityEntry abilityEntry) {
+				const std::optional<std::string_view> abilityName{provider.mAbilityRegistry->getAbilityName(abilityEntry.mAbilityID)};
+				return abilityName.has_value() && abilityName.value() == expectedName;
+			});
 	}
 
 	/*! @brief Determines whether a battle slot's Pokemon has a specified ability identifier.
@@ -138,7 +141,7 @@ namespace PocketCore::Effect
 		@return `true` when the slot contains a Pokemon with @p abilityID; otherwise, `false`.
 		@note Returns `false` when the slot does not contain a Pokemon.
 		@since 0.9.10
-		@version 0.12.17
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasAbilityByID(const BattleSlot &battleSlot, const AbilityID &abilityID)
 	{
@@ -146,7 +149,7 @@ namespace PocketCore::Effect
 		{
 			return false;
 		}
-		return std::ranges::contains(battleSlot.mPokemon->getAbilityIDsArray(), abilityID);
+		return std::ranges::contains(battleSlot.mPokemon->getAbilityEntriesArray(), abilityID, &PokemonAbilityEntry::mAbilityID);
 	}
 
 	/*! @brief Determines whether a battle slot's Pokemon holds an item with a specified name.

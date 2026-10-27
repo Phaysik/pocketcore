@@ -1,6 +1,6 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.13
 	@version 0.12.53
 	@author Matthew Moore
@@ -56,6 +56,7 @@ namespace PocketCore::Testing
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
@@ -98,7 +99,7 @@ namespace PocketCore::Testing
 
 			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
 
-			std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> mAbilityIDs{NO_ABILITY_ID};
+			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> mAbilityEntries{};
 			std::array<ItemID, MAX_ITEMS_PER_POKEMON> mItemIDs{NO_ITEM_ID};
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{NO_NATURE_ID};
 
@@ -120,8 +121,8 @@ namespace PocketCore::Testing
 		const NatureRegistry &natureRegistry{data.mNatureRegistry != nullptr ? *data.mNatureRegistry : getDefaultTestNatureRegistry()};
 
 		Pokemon pokemon{
-			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityIDs, data.mItemIDs,
-			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs, data.mGender,
+			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityEntries, data.mItemIDs,
+			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,	  data.mGender,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

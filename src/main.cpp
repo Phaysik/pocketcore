@@ -1,6 +1,6 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.1.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -165,7 +165,7 @@ int main()
             },
 		},
 		50U,
-		{toAbilityID(BuiltinAbilityID::Drizzle)},
+		{{{.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle)}}},
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,
@@ -199,7 +199,7 @@ int main()
             },
 		},
 		50U,
-		{toAbilityID(BuiltinAbilityID::Stench)},
+		{{{.mAbilityID = toAbilityID(BuiltinAbilityID::Stench)}}},
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,

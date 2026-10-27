@@ -1,8 +1,8 @@
 /*! @file builtInTypeID.h
 	@brief Declares the canonical enumeration of Pokemon elemental types.
-	@date 10/13/2026
+	@date 10/27/2026
 	@since 0.9.2
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Type
 {
+	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum Types
@@ -54,6 +56,8 @@ namespace PocketCore::Type
 		Stellar,
 		FinalType,
 	};
+
+	static_assert(MAX_TYPES_PER_POKEMON < std::to_underlying(BuiltinTypeID::FinalType));
 
 	/*! @brief Converts a built-in type catalog value to its stable registry identifier.
 		@param[in] builtinType The built-in type to convert.

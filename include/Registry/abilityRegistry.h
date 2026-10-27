@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
-	@date 10/13/2026
+	@date 10/27/2026
 	@since 0.4.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -27,13 +27,16 @@
 namespace PocketCore::Registry::Ability
 {
 	using PocketCore::Ability::ABILITY_NAME_AIR_LOCK;
+	using PocketCore::Ability::ABILITY_NAME_BATTLE_ARMOR;
 	using PocketCore::Ability::ABILITY_NAME_CLOUD_NINE;
 	using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
 	using PocketCore::Ability::ABILITY_NAME_ELEVATE;
 	using PocketCore::Ability::ABILITY_NAME_GUTS;
 	using PocketCore::Ability::ABILITY_NAME_LEVITATE;
 	using PocketCore::Ability::ABILITY_NAME_NONE;
+	using PocketCore::Ability::ABILITY_NAME_SPEED_BOOST;
 	using PocketCore::Ability::ABILITY_NAME_STENCH;
+	using PocketCore::Ability::ABILITY_NAME_STURDY;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
@@ -52,9 +55,9 @@ namespace PocketCore::Registry::Ability
 		@details Built-in abilities are registered during construction with IDs derived from @ref BuiltinAbilityID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ABILITIES.
-		@date 10/13/2026
+		@date 10/27/2026
 		@since 0.4.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class AbilityRegistry : private FixedMetadataRegistry<AbilityMeta, AbilityID, MAX_ABILITIES, &AbilityMeta::mAbilityID>
@@ -75,7 +78,7 @@ namespace PocketCore::Registry::Ability
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinAbilityID.
 				@since 0.4.0
-				@version 0.12.51
+				@version 0.12.53
 			 */
 			ATTR_NOINLINE explicit constexpr AbilityRegistry()
 			{
@@ -97,11 +100,26 @@ namespace PocketCore::Registry::Ability
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle),
 					.mTargetID = BattleTargetID::Self,
 				});
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_SPEED_BOOST),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::SpeedBoost),
+				});
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_BATTLE_ARMOR),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::BattleArmor),
+				});
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_STURDY),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Sturdy),
+				});
 
 				addBuiltin({
-					.mName = std::string(ABILITY_NAME_GUTS),
+					.mName = std::string(ABILITY_NAME_CLOUD_NINE),
 					.mTriggers = {},
-					.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+					.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
 				});
 
 				addBuiltin({
@@ -111,9 +129,9 @@ namespace PocketCore::Registry::Ability
 				});
 
 				addBuiltin({
-					.mName = std::string(ABILITY_NAME_ELEVATE),
+					.mName = std::string(ABILITY_NAME_GUTS),
 					.mTriggers = {},
-					.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate),
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
 				});
 
 				addBuiltin({
@@ -123,9 +141,9 @@ namespace PocketCore::Registry::Ability
 				});
 
 				addBuiltin({
-					.mName = std::string(ABILITY_NAME_CLOUD_NINE),
+					.mName = std::string(ABILITY_NAME_ELEVATE),
 					.mTriggers = {},
-					.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate),
 				});
 			}
 

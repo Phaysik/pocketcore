@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -40,6 +40,7 @@
 
 #include "pokemon.h"
 #include "pokemonInstantiationContext.h"
+#include "pokemonMeta.h"
 #include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
@@ -68,6 +69,8 @@ namespace PocketCore::Pokemon
 	using PocketCore::Validation::Nature::NatureError;
 	using PocketCore::Validation::Pokemon::PokemonError;
 
+	inline constexpr PokemonAbilityEntry DEFAULT_ABILITY_REPLACEMENT_VALUE{.mAbilityID = NO_ABILITY_ID};
+
 	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.
 		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
 		   printed as `<unregistered>`.
@@ -76,7 +79,7 @@ namespace PocketCore::Pokemon
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.11.2
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 
@@ -137,9 +140,11 @@ namespace PocketCore::Pokemon
 		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry, const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext,
-		const PokemonEncounter &encounterData, const AbilityID duplicateEntryAbilityReplacer = NO_ABILITY_ID);
+		const std::span<const PokemonAbilityEntry> abilityIDs,
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext, const PokemonEncounter &encounterData,
+		const PokemonAbilityEntry duplicateEntryAbilityReplacer = DEFAULT_ABILITY_REPLACEMENT_VALUE);
 
 	/*!
 		@since 0.12.51
@@ -195,6 +200,23 @@ namespace PocketCore::Pokemon
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
+
+	/*!
+		@since 0.12.53
+		@version 0.12.53
+	*/
+	ATTR_NODISCARD std::expected<void, AbilityError> getAbilitiesFromAbilityPool(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources);
+
+	/*!
+		@since 0.12.53
+		@version 0.12.53
+	*/
+	ATTR_NODISCARD std::expected<void, AbilityError> getEggAbilities(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries, const PokemonBreedingContext &breedingContext,
+		const BattleRandomSources &randomSources);
 
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.
 		@details Selects level-up moves whose requirements do not exceed @p pokemonEncounterLevel. For egg encounters, eligible egg moves

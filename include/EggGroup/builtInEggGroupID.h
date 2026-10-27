@@ -1,6 +1,6 @@
 /*! @file builtInEggGroupID.h
 	@brief Defines identifiers for egg groups compiled into PocketCore.
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -18,6 +19,7 @@
 
 namespace PocketCore::EggGroup
 {
+	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum BuiltinEggGroupID
@@ -51,6 +53,8 @@ namespace PocketCore::EggGroup
 		NoEggs,
 		FinalEggGroup,
 	};
+
+	static_assert(MAX_EGG_GROUPS_PER_POKEMON < std::to_underlying(BuiltinEggGroupID::FinalEggGroup));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinEggGroupID The built-in egg group to convert.

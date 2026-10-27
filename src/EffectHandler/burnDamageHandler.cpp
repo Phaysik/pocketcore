@@ -1,8 +1,8 @@
 /*! @file burnDamageHandler.cpp
 	@brief Contains the burn damage effect handler implementation
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.9.5
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -22,6 +22,7 @@
 #include "Move/builtInMoveID.h"
 #include "Multiplier/builtInMultiplierID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/registryProvider.h"
 #include "Status/builtInStatusID.h"
 
@@ -38,6 +39,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::BuiltinMultiplierID;
 	using PocketCore::Multiplier::toMultiplierID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Status::BuiltinStatusID;
 	using PocketCore::Status::toStatusID;
@@ -55,7 +57,10 @@ namespace PocketCore::Effect
 		}
 
 		const bool isBurned{std::ranges::contains(userPokemon->getStatusIDsArray(), toStatusID(BuiltinStatusID::Burn))};
-		const bool abilityIsntGuts{!std::ranges::contains(userPokemon->getAbilityIDsArray(), toAbilityID(BuiltinAbilityID::Guts))};
+		const bool abilityIsntGuts{
+			!std::ranges::contains(userPokemon->getAbilityEntriesArray(), toAbilityID(BuiltinAbilityID::Guts),
+								   &PokemonAbilityEntry::mAbilityID),
+		};
 		const bool moveIsntFacade{context.mMoveID != toMoveID(BuiltinMoveID::Facade)};
 
 		if (isBurned && !context.mIsSpecial && abilityIsntGuts && moveIsntFacade)

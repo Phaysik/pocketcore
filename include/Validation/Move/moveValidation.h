@@ -1,8 +1,8 @@
 /*! @file moveValidation.h
 	@brief Defines validation functions that help with Move.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -35,11 +35,16 @@ namespace PocketCore::Validation::Move
 		@param[in] moveRegistry The registry to validate move metadata.
 		@return A @ref MoveError if any move IDs are invalid, or std::nullopt if all are valid.
 		@since 0.12.26
-		@version 0.12.51
+		@version 0.12.53
 	 */
 	ATTR_NODISCARD constexpr std::expected<void, MoveError> validateMoveMetadata(const std::span<const MoveID> moveIDs,
 																				 const MoveRegistry &moveRegistry)
 	{
+		if (moveIDs.size() > MAX_MOVES_PER_POKEMON)
+		{
+			return std::unexpected{MoveError::TOO_MANY_MOVES};
+		}
+
 		std::array<const MoveMeta *, MAX_MOVES_PER_POKEMON> moveMetas{};
 		std::ranges::transform(moveIDs, moveMetas.begin(),
 							   [&moveRegistry](const MoveID moveID) { return moveRegistry.getMoveMetadata(moveID); });

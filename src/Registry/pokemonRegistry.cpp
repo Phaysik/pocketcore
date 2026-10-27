@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/26/2026
+	@date 10/27/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -63,6 +63,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::IDContext;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
 	using PocketCore::Pokemon::PokemonBreedingContext;
 	using PocketCore::Pokemon::PokemonEncounter;
 	using PocketCore::Pokemon::PokemonGender;
@@ -129,7 +130,7 @@ namespace PocketCore::Registry::Pokemon
 		};
 
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
-		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> validAbilityIDs{};
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
 		std::array<ItemID, MAX_ITEMS_PER_POKEMON> validItemIDs{};
 		std::array<MoveID, MAX_MOVES_PER_POKEMON> validMoveIDs{};
 		std::array<us, POKEMON_STAT_COUNT> validIVs{};
@@ -144,8 +145,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, AbilityError> error{
-				getValidPokemonAbilities(idContext.abilityIDs, validAbilityIDs, *dependencyRegistries->mAbilityRegistry, randomSources,
-										 breedingContext, encounterData),
+				getValidPokemonAbilities(idContext.abilityEntries, validAbilityEntries, pokemonMeta->mAbilityPool,
+										 *dependencyRegistries->mAbilityRegistry, randomSources, breedingContext, encounterData),
 			};
 			!error.has_value())
 		{
@@ -195,7 +196,7 @@ namespace PocketCore::Registry::Pokemon
 			*pokemonMeta,
 			moveMetas,
 			pokemonEncounterLevel,
-			validAbilityIDs,
+			validAbilityEntries,
 			validItemIDs,
 			validNatureIDs,
 			*dependencyRegistries->mNatureRegistry,
