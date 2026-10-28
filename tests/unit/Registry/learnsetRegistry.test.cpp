@@ -1,6 +1,6 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 10/26/2026
+	@date 10/28/2026
 	@since 0.12.50
 	@version 0.12.53
 	@author Matthew Moore
@@ -213,7 +213,7 @@ SCENARIO("LearnsetRegistry")
 			REQUIRE(learnsetID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetID.value() == toLearnsetID(BuiltinLearnsetID::None)));
+			CHECK((learnsetID == toLearnsetID(BuiltinLearnsetID::None)));
 		}
 	}
 
@@ -231,7 +231,7 @@ SCENARIO("LearnsetRegistry")
 			REQUIRE(learnsetName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetName.value() == LEARNSET_NAME_NONE));
+			CHECK((learnsetName == LEARNSET_NAME_NONE));
 		}
 	}
 
@@ -294,7 +294,7 @@ SCENARIO("LearnsetRegistry")
 
 			REQUIRE(learnsetIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetIndex.value() == 0));
+			CHECK((learnsetIndex == 0));
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 10/27/2026
+	@date 10/28/2026
 	@since 0.4.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -241,7 +241,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
+			CHECK((abilityID == toAbilityID(BuiltinAbilityID::None)));
 		}
 	}
 
@@ -259,7 +259,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityName.value() == ABILITY_NAME_NONE));
+			CHECK((abilityName == ABILITY_NAME_NONE));
 		}
 	}
 
@@ -323,7 +323,7 @@ SCENARIO("AbilityRegistry")
 
 			REQUIRE(abilityIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityIndex.value() == 0));
+			CHECK((abilityIndex == 0));
 		}
 	}
 

@@ -1,8 +1,8 @@
 /*! @file weatherRegistry.test.cpp
 	@brief C++ file for running tests for the WeatherRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -215,7 +215,7 @@ SCENARIO("WeatherRegistry")
 			REQUIRE(weatherID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherID.value() == toWeatherID(BuiltinWeatherID::None)));
+			CHECK((weatherID == toWeatherID(BuiltinWeatherID::None)));
 		}
 	}
 
@@ -233,7 +233,7 @@ SCENARIO("WeatherRegistry")
 			REQUIRE(weatherName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherName.value() == WEATHER_NAME_NONE));
+			CHECK((weatherName == WEATHER_NAME_NONE));
 		}
 	}
 
@@ -296,7 +296,7 @@ SCENARIO("WeatherRegistry")
 
 			REQUIRE(weatherIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherIndex.value() == 0));
+			CHECK((weatherIndex == 0));
 		}
 	}
 

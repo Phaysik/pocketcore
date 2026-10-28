@@ -1,8 +1,8 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.5.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -133,7 +133,7 @@ SCENARIO("ItemRegistry")
 			REQUIRE(itemID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemID.value() == toItemID(BuiltinItemID::None)));
+			CHECK((itemID == toItemID(BuiltinItemID::None)));
 		}
 	}
 
@@ -151,7 +151,7 @@ SCENARIO("ItemRegistry")
 			REQUIRE(itemName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemName.value() == ITEM_NAME_NONE));
+			CHECK((itemName == ITEM_NAME_NONE));
 		}
 	}
 
@@ -215,7 +215,7 @@ SCENARIO("ItemRegistry")
 
 			REQUIRE(itemIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemIndex.value() == 0));
+			CHECK((itemIndex == 0));
 		}
 	}
 

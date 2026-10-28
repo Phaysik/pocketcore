@@ -1,8 +1,8 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 10/20/2026
+	@date 10/28/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -115,7 +115,7 @@ SCENARIO("MoveRegistryConfiguration")
 			REQUIRE(moveID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((moveID.value() == toMoveID(BuiltinMoveID::None)));
+			CHECK((moveID == toMoveID(BuiltinMoveID::None)));
 		}
 	}
 
@@ -133,7 +133,7 @@ SCENARIO("MoveRegistryConfiguration")
 			REQUIRE(moveName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((moveName.value() == MOVE_NAME_NONE));
+			CHECK((moveName == MOVE_NAME_NONE));
 		}
 	}
 
@@ -623,7 +623,7 @@ SCENARIO("MoveRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toMoveID(BuiltinMoveID::None)));
+					CHECK((result == toMoveID(BuiltinMoveID::None)));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue - 1));
 				}
 			}
@@ -650,7 +650,7 @@ SCENARIO("MoveRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toMoveID(BuiltinMoveID::None)));
+					CHECK((result == toMoveID(BuiltinMoveID::None)));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue - 1));
 				}
 			}

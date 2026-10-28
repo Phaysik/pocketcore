@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 10/26/2026
+	@date 10/28/2026
 	@since 0.1.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -213,14 +213,29 @@ namespace PocketCore::Configuration
 	/*! @brief The water-move damage multiplier during rain. */
 	inline constexpr double WATER_MOVE_IN_RAIN_MULTIPLIER_VALUE{1.5};
 
+	/*! @brief The water-move damage multiplier during heavy rain. */
+	inline constexpr double WATER_MOVE_IN_HEAVY_RAIN_MULTIPLIER_VALUE{1.5};
+
 	/*! @brief The fire-move damage multiplier during rain. */
 	inline constexpr double FIRE_MOVE_IN_RAIN_MULTIPLIER_VALUE{0.5};
+
+	/*! @brief The fire-move damage multiplier during heavy rain. */
+	inline constexpr double FIRE_MOVE_IN_HEAVY_RAIN_MULTIPLIER_VALUE{0.0};
 
 	/*! @brief The fire-move damage multiplier during harsh sunlight. */
 	inline constexpr double FIRE_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
 
+	/*! @brief The fire-move damage multiplier during extremely harsh sunlight. */
+	inline constexpr double FIRE_MOVE_IN_EXTREMELY_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
+
+	/*! @brief The hydro steam damage multiplier during harsh sunlight. */
+	inline constexpr double HYDRO_STEAM_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
+
 	/*! @brief The water-move damage multiplier during harsh sunlight. */
 	inline constexpr double WATER_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.5};
+
+	/*! @brief The water-move damage multiplier during extremely harsh sunlight. */
+	inline constexpr double WATER_MOVE_IN_EXTREMELY_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.0};
 
 	/*! @brief The electric-move base-damage multiplier in electric terrain. */
 	inline constexpr double ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};

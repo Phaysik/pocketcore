@@ -1,8 +1,8 @@
 /*! @file effectHandlerInterface.h
 	@brief Contains the effect handler interface
-	@date 10/19/2026
+	@date 10/28/2026
 	@since 0.7.2
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -28,9 +28,9 @@ namespace PocketCore::Effect
 		 metadata. The static accessors resolve the user or target slot identified by the context.
 		@warning The context indexes must refer to existing slots in the selected side's team.
 		@note The class is not copyable or movable.
-		@date 10/19/2026
+		@date 10/28/2026
 		@since 0.7.2
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class IEffectHandler
@@ -109,11 +109,11 @@ namespace PocketCore::Effect
 				@pre `context.mUserIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.9.10
-				@version 0.12.7
+				@version 0.12.53
 			*/
 			static const BattleSlot &getConstUserBattleSlot(BattleState &state, EffectContext &context)
 			{
-				const std::vector<BattleSlot> &userTeam{getTeamConst(state, context.mUserSide)};
+				const std::span<const BattleSlot> userTeam{getTeam(state, context.mUserSide)};
 				assert(context.mUserIndex < userTeam.size());
 
 				return userTeam.at(context.mUserIndex);
@@ -143,11 +143,11 @@ namespace PocketCore::Effect
 				@pre `context.mTargetIndex` is less than the selected team's size.
 				@note An invalid index triggers an assertion and is also rejected by vector bounds checking.
 				@since 0.9.10
-				@version 0.12.7
+				@version 0.12.53
 			*/
 			static const BattleSlot &getConstTargetBattleSlot(BattleState &state, EffectContext &context)
 			{
-				const std::vector<BattleSlot> &targetTeam{getTeamConst(state, context.mTargetSide)};
+				const std::span<const BattleSlot> targetTeam{getTeam(state, context.mTargetSide)};
 				assert(context.mTargetIndex < targetTeam.size());
 
 				return targetTeam.at(context.mTargetIndex);

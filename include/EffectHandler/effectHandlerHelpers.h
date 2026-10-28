@@ -61,11 +61,10 @@ namespace PocketCore::Effect
 		@return A const reference to the selected team, valid for the lifetime of @p state unless the team is invalidated.
 		@note The state parameter is non-const because the existing helper API accepts @ref BattleState by mutable reference.
 		@since 0.7.2
-		@version 0.12.7
+		@version 0.12.53
 	*/
-	ATTR_NODISCARD static inline const std::vector<BattleSlot> &getTeamConst(BattleState &state, Side side)
+	ATTR_NODISCARD static inline std::span<const BattleSlot> getTeam(const BattleState &state, Side side)
 	{
-
 		return (side == Side::A) ? state.mSideA : state.mSideB;
 	}
 
@@ -76,7 +75,7 @@ namespace PocketCore::Effect
 		@return `true` when a resolved type name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the type registry is unavailable, or no type matches.
 		@since 0.12.17
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasTypeByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 															  const std::string_view expectedName)
@@ -88,7 +87,7 @@ namespace PocketCore::Effect
 
 		return std::ranges::any_of(battleSlot.mPokemon->getTypeIDsArray(), [expectedName, &provider](const TypeID pokemonAbility) {
 			const std::optional<std::string_view> typeName{provider.mTypeRegistry->getTypeName(pokemonAbility)};
-			return typeName.has_value() && typeName.value() == expectedName;
+			return typeName == expectedName;
 		});
 	}
 
@@ -131,7 +130,7 @@ namespace PocketCore::Effect
 		return std::ranges::any_of(
 			battleSlot.mPokemon->getAbilityEntriesArray(), [expectedName, &provider](const PokemonAbilityEntry abilityEntry) {
 				const std::optional<std::string_view> abilityName{provider.mAbilityRegistry->getAbilityName(abilityEntry.mAbilityID)};
-				return abilityName.has_value() && abilityName.value() == expectedName;
+				return abilityName == expectedName;
 			});
 	}
 
@@ -159,7 +158,7 @@ namespace PocketCore::Effect
 		@return `true` when a resolved item name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the item registry is unavailable, or no item matches.
 		@since 0.9.10
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasItemByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 															  const std::string_view expectedName)
@@ -171,7 +170,7 @@ namespace PocketCore::Effect
 
 		return std::ranges::any_of(battleSlot.mPokemon->getItemsIDsArray(), [expectedName, &provider](const ItemID pokemonItem) {
 			const std::optional<std::string_view> itemName{provider.mItemRegistry->getItemName(pokemonItem)};
-			return itemName.has_value() && itemName.value() == expectedName;
+			return itemName == expectedName;
 		});
 	}
 
@@ -200,7 +199,7 @@ namespace PocketCore::Effect
 		@return `true` when a resolved nature name matches @p expectedName; otherwise, `false`.
 		@note Returns `false` when the slot has no Pokemon, the nature registry is unavailable, or no nature matches.
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD static inline bool battleSlotHasNatureByName(const BattleSlot &battleSlot, const RegistryProvider &provider,
 																const std::string_view expectedName)
@@ -212,7 +211,7 @@ namespace PocketCore::Effect
 
 		return std::ranges::any_of(battleSlot.mPokemon->getNatureIDsArray(), [expectedName, &provider](const NatureID natureID) {
 			const std::optional<std::string_view> natureName{provider.mNatureRegistry->getNatureName(natureID)};
-			return natureName.has_value() && natureName.value() == expectedName;
+			return natureName == expectedName;
 		});
 	}
 

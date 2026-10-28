@@ -1,8 +1,8 @@
 /*! @file typeRegistry.test.cpp
 	@brief C++ file for running tests for the TypeRegistry.
-	@date 10/14/2026
+	@date 10/28/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -380,7 +380,7 @@ SCENARIO("TypeRegistry")
 			REQUIRE(typeID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((typeID.value() == toTypeID(BuiltinTypeID::None)));
+			CHECK((typeID == toTypeID(BuiltinTypeID::None)));
 		}
 	}
 
@@ -398,7 +398,7 @@ SCENARIO("TypeRegistry")
 			REQUIRE(typeName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((typeName.value() == TYPE_NAME_NONE));
+			CHECK((typeName == TYPE_NAME_NONE));
 		}
 	}
 
@@ -461,7 +461,7 @@ SCENARIO("TypeRegistry")
 
 			REQUIRE(typeIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((typeIndex.value() == 0));
+			CHECK((typeIndex == 0));
 		}
 	}
 

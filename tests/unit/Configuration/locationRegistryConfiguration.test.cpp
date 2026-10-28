@@ -1,8 +1,8 @@
 /*! @file locationRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LocationRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("LocationRegistryConfiguration")
 			REQUIRE(locationID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((locationID.value() == toLocationID(BuiltinLocationID::None)));
+			CHECK((locationID == toLocationID(BuiltinLocationID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("LocationRegistryConfiguration")
 			REQUIRE(locationName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((locationName.value() == LOCATION_NAME_NONE));
+			CHECK((locationName == LOCATION_NAME_NONE));
 		}
 	}
 
@@ -447,7 +447,7 @@ SCENARIO("LocationRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toLocationID(BuiltinLocationID::None)));
+					CHECK((result == toLocationID(BuiltinLocationID::None)));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue - 1));
 				}
 			}
@@ -474,7 +474,7 @@ SCENARIO("LocationRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toLocationID(BuiltinLocationID::None)));
+					CHECK((result == toLocationID(BuiltinLocationID::None)));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue - 1));
 				}
 			}

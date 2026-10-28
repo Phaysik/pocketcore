@@ -1,8 +1,8 @@
 /*! @file locationRegistry.test.cpp
 	@brief C++ file for running tests for the LocationRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -98,7 +98,7 @@ SCENARIO("LocationRegistry")
 			REQUIRE(locationID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((locationID.value() == toLocationID(BuiltinLocationID::None)));
+			CHECK((locationID == toLocationID(BuiltinLocationID::None)));
 		}
 	}
 
@@ -116,7 +116,7 @@ SCENARIO("LocationRegistry")
 			REQUIRE(locationName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((locationName.value() == LOCATION_NAME_NONE));
+			CHECK((locationName == LOCATION_NAME_NONE));
 		}
 	}
 
@@ -179,7 +179,7 @@ SCENARIO("LocationRegistry")
 
 			REQUIRE(locationIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((locationIndex.value() == 0));
+			CHECK((locationIndex == 0));
 		}
 	}
 

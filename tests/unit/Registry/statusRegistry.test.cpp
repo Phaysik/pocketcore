@@ -1,8 +1,8 @@
 /*! @file statusRegistry.test.cpp
 	@brief C++ file for running tests for the StatusRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -212,7 +212,7 @@ SCENARIO("StatusRegistry")
 			REQUIRE(statusID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusID.value() == toStatusID(BuiltinStatusID::None)));
+			CHECK((statusID == toStatusID(BuiltinStatusID::None)));
 		}
 	}
 
@@ -230,7 +230,7 @@ SCENARIO("StatusRegistry")
 			REQUIRE(statusName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusName.value() == STATUS_NAME_NONE));
+			CHECK((statusName == STATUS_NAME_NONE));
 		}
 	}
 
@@ -293,7 +293,7 @@ SCENARIO("StatusRegistry")
 
 			REQUIRE(statusIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusIndex.value() == 0));
+			CHECK((statusIndex == 0));
 		}
 	}
 

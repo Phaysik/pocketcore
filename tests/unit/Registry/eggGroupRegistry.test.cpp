@@ -1,6 +1,6 @@
 /*! @file eggGroupRegistry.test.cpp
 	@brief C++ file for running tests for the EggGroupRegistry.
-	@date 10/26/2026
+	@date 10/28/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -278,7 +278,7 @@ SCENARIO("EggGroupRegistry")
 			REQUIRE(eggGroupID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((eggGroupID.value() == toEggGroupID(BuiltinEggGroupID::None)));
+			CHECK((eggGroupID == toEggGroupID(BuiltinEggGroupID::None)));
 		}
 	}
 
@@ -296,7 +296,7 @@ SCENARIO("EggGroupRegistry")
 			REQUIRE(eggGroupName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((eggGroupName.value() == EGG_GROUP_NAME_NONE));
+			CHECK((eggGroupName == EGG_GROUP_NAME_NONE));
 		}
 	}
 
@@ -359,7 +359,7 @@ SCENARIO("EggGroupRegistry")
 
 			REQUIRE(eggGroupIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((eggGroupIndex.value() == 0));
+			CHECK((eggGroupIndex == 0));
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*! @file eggGroupRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the EggGroupRegistryConfiguration.
-	@date 10/26/2026
+	@date 10/28/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -105,7 +105,7 @@ SCENARIO("EggGroupRegistryConfiguration")
 			REQUIRE(eggGroupID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((eggGroupID.value() == toEggGroupID(BuiltinEggGroupID::None)));
+			CHECK((eggGroupID == toEggGroupID(BuiltinEggGroupID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("EggGroupRegistryConfiguration")
 			REQUIRE(eggGroupName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((eggGroupName.value() == EGG_GROUP_NAME_NONE));
+			CHECK((eggGroupName == EGG_GROUP_NAME_NONE));
 		}
 	}
 
@@ -446,7 +446,7 @@ SCENARIO("EggGroupRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toEggGroupID(BuiltinEggGroupID::None)));
+					CHECK((result == toEggGroupID(BuiltinEggGroupID::None)));
 					CHECK((config.getAmountRegistered() == finalEggGroupUnderlyingValue - 1));
 				}
 			}
@@ -473,7 +473,7 @@ SCENARIO("EggGroupRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toEggGroupID(BuiltinEggGroupID::None)));
+					CHECK((result == toEggGroupID(BuiltinEggGroupID::None)));
 					CHECK((config.getAmountRegistered() == finalEggGroupUnderlyingValue - 1));
 				}
 			}

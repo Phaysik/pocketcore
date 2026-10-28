@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/26/2026
+	@date 10/28/2026
 	@since 0.12.20
 	@version 0.12.53
 	@author Matthew Moore
@@ -298,7 +298,7 @@ SCENARIO("PokemonRegistry")
 			REQUIRE(pokemonID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonID.value() == toPokemonID(BuiltinPokemonID::None)));
+			CHECK((pokemonID == toPokemonID(BuiltinPokemonID::None)));
 		}
 	}
 
@@ -316,7 +316,7 @@ SCENARIO("PokemonRegistry")
 			REQUIRE(pokemonName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonName.value() == POKEMON_NAME_NONE));
+			CHECK((pokemonName == POKEMON_NAME_NONE));
 		}
 	}
 
@@ -379,7 +379,7 @@ SCENARIO("PokemonRegistry")
 
 			REQUIRE(pokemonIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonIndex.value() == 0));
+			CHECK((pokemonIndex == 0));
 		}
 	}
 

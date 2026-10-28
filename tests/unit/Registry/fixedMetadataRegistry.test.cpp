@@ -121,7 +121,7 @@ SCENARIO("FixedMetadataRegistry")
 			REQUIRE(FixedMetaDataID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((FixedMetaDataID.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
+			CHECK((FixedMetaDataID == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
 		}
 	}
 
@@ -139,7 +139,7 @@ SCENARIO("FixedMetadataRegistry")
 			REQUIRE(weatherName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherName.value() == NONE_NAME));
+			CHECK((weatherName == NONE_NAME));
 		}
 	}
 
@@ -202,7 +202,7 @@ SCENARIO("FixedMetadataRegistry")
 
 			REQUIRE(weatherIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherIndex.value() == 0));
+			CHECK((weatherIndex == 0));
 		}
 	}
 
