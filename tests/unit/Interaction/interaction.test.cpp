@@ -1,20 +1,22 @@
 /*! @file interaction.test.cpp
 	@brief C++ file for running tests for the Interaction.
-	@date 09/11/2026
+	@date 10/28/2026
 	@since 0.12.22
-	@version 0.12.22
+	@version 0.12.53
 	@author Matthew Moore
 */
 
 #include "Interaction/interaction.h"
 
 #include "ID/idInterface.h"
+#include "Terrain/terrainID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::ID::IDInterface;
 using PocketCore::Interaction::Interaction;
 using PocketCore::Interaction::InteractionAction;
+using PocketCore::Terrain::TerrainID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 
@@ -65,6 +67,37 @@ SCENARIO("Interaction")
 			THEN("they are equal")
 			{
 				CHECK((interaction == other));
+			}
+		}
+
+		GIVEN("interactions using terrain identifiers")
+		{
+			Interaction<TerrainID> terrainInteraction{.mExistingID = TerrainID{1}, .mAction = InteractionAction::ReplaceCurrent};
+			Interaction<TerrainID> other{terrainInteraction};
+
+			THEN("matching identifiers and actions compare equal")
+			{
+				CHECK((terrainInteraction == other));
+			}
+
+			WHEN("the terrain identifiers differ")
+			{
+				other.mExistingID = TerrainID{2};
+
+				THEN("the interactions compare unequal")
+				{
+					CHECK((terrainInteraction != other));
+				}
+			}
+
+			WHEN("the actions differ")
+			{
+				other.mAction = InteractionAction::RemoveCurrent;
+
+				THEN("the interactions compare unequal")
+				{
+					CHECK((terrainInteraction != other));
+				}
 			}
 		}
 	}

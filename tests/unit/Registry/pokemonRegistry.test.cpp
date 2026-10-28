@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Ability/builtInAbilityID.h"
 #include "Configuration/pokemonRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Learnset/builtInLearnsetID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/constants.h"
@@ -33,6 +34,8 @@ using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Configuration::PokemonRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::EggGroup::BuiltinEggGroupID;
+using PocketCore::EggGroup::toEggGroupID;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
@@ -41,6 +44,7 @@ using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
 using PocketCore::Pokemon::CHARIZARD_BASE_STATS;
 using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
 using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
+using PocketCore::Pokemon::DITTO_BASE_STATS;
 using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 using PocketCore::Pokemon::NO_POKEMON_ID;
 using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
@@ -48,11 +52,13 @@ using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 using PocketCore::Pokemon::POKEMON_NAME_CHARIZARD;
 using PocketCore::Pokemon::POKEMON_NAME_CHARMANDER;
 using PocketCore::Pokemon::POKEMON_NAME_CHARMELEON;
+using PocketCore::Pokemon::POKEMON_NAME_DITTO;
 using PocketCore::Pokemon::POKEMON_NAME_IVYSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_NONE;
 using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
 using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
@@ -83,9 +89,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = BULBASAUR_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 			};
@@ -99,9 +107,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_IVYSAUR),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = IVYSAUR_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 			};
@@ -115,9 +125,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_VENUSAUR),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = VENUSAUR_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 			};
@@ -131,9 +143,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMANDER),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = CHARMANDER_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 			};
@@ -147,9 +161,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMELEON),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = CHARMELEON_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 			};
@@ -163,9 +179,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARIZARD),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = CHARIZARD_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 			};
@@ -179,9 +197,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_SQUIRTLE),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = SQUIRTLE_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 			};
@@ -195,9 +215,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_WARTORTLE),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = WARTORTLE_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 			};
@@ -211,14 +233,34 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BLASTOISE),
-				.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 				.mBaseStats = BLASTOISE_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 				.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Blastoise))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Ditto has the appropriate properties")
+		{
+			PokemonMeta expected{
+				.mName = std::string(POKEMON_NAME_DITTO),
+				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mBaseStats = DITTO_BASE_STATS,
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},
+				.mGenderPool = {PokemonGender::Genderless},
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Ditto),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
+			};
+
+			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Ditto))};
 
 			CHECK((expected == *actual));
 		}
@@ -256,7 +298,7 @@ SCENARIO("PokemonRegistry")
 			REQUIRE(pokemonID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonID.value() == toPokemonID(BuiltinPokemonID::None)));
+			CHECK((pokemonID == toPokemonID(BuiltinPokemonID::None)));
 		}
 	}
 
@@ -274,7 +316,7 @@ SCENARIO("PokemonRegistry")
 			REQUIRE(pokemonName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonName.value() == POKEMON_NAME_NONE));
+			CHECK((pokemonName == POKEMON_NAME_NONE));
 		}
 	}
 
@@ -337,7 +379,7 @@ SCENARIO("PokemonRegistry")
 
 			REQUIRE(pokemonIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonIndex.value() == 0));
+			CHECK((pokemonIndex == 0));
 		}
 	}
 

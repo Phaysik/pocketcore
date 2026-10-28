@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 10/13/2026
+	@date 10/26/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,10 +11,13 @@
 
 #include <array>
 #include <string>
+#include <utility>
 
 #include "Ability/abilityID.h"
+#include "Ability/abilityMeta.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "EggGroup/eggGroupID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
 #include "Location/locationID.h"
@@ -27,13 +30,16 @@
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::AbilityClassification;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
+	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ENCOUNTERS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::EggGroupID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::LearnsetID;
@@ -41,13 +47,72 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
 
+	/*! @enum PokemonGender
+		@showenumvalues
+		@brief Identifies the gender categories available to a Pokemon.
+		@details Supplies the values stored in @ref PokemonMeta::mGenderPool for a species or form.
+		@date 10/23/2026
+		@since 0.12.53
+		@version 0.12.53
+		@author Matthew Moore
+	*/
+	enum class PokemonGender : ub
+	{
+		/*! @brief Represents a male Pokemon. */
+		Male,
+		/*! @brief Represents a female Pokemon. */
+		Female,
+		/*! @brief Represents a Pokemon without a gender. */
+		Genderless,
+	};
+
+	/*! @struct PokemonAbilityEntry Pokemon/pokemonMeta.h
+		@brief Stores an ability identifier and its classification for a Pokemon species or form.
+		@details Serves as a data carrier for entries in @ref PokemonMeta::mAbilityPool, pairing @ref mAbilityID with @ref mClassification.
+		@date 10/26/2026
+		@since 0.12.53
+		@version 0.12.53
+		@author Matthew Moore
+	*/
+	struct PokemonAbilityEntry
+	{
+		public:
+			/*! @brief Compares the ability identifier and classification of two entries.
+				@param[in] other The entry to compare; the reference is not retained.
+				@return True when both fields match; otherwise false.
+				@note Supports compile-time and runtime evaluation without throwing. The nodiscard result discourages ignoring the
+			   comparison.
+				@date 10/26/2026
+				@since 0.12.53
+				@version 0.12.53
+				@author Matthew Moore
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const PokemonAbilityEntry &other) const noexcept = default;
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The stable built-in or user-assigned Ability identifier. */
+			AbilityID mAbilityID{};
+
+			/*! @brief The ability's category, defaulting to @ref AbilityClassification::Standard. */
+			AbilityClassification mClassification{AbilityClassification::Standard};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+	};
+
+	/*! @brief The number of categories defined by @ref PokemonGender.
+		@details Supplies the compile-time array size for @ref PokemonMeta::mGenderPool.
+		@note Assumes contiguous, zero-based enum values with @ref PokemonGender::Genderless as the final value.
+	*/
+	inline constexpr ub MAX_GENDERS{std::to_underlying(PokemonGender::Genderless) + 1};
+
 	/*! @struct PokemonMeta Pokemon/pokemonMeta.h
 		@brief Stores shared species or form metadata and species-specific encounter definitions.
 		@details Owns its display name and encounter array. Encounter entries reference shared location identities while defining their own
 			acquisition levels and origins. Individual current levels and acquisition histories are not stored here.
-		@date 10/09/2026
+		@date 10/26/2026
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -64,20 +129,26 @@ namespace PocketCore::Pokemon
 
 			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 
+			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
+			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
+
 			/*! @brief The case-sensitive display name stored. */
 			std::string mName{};
 
 			/*! @brief The Pokemon's pool of available abilities. */
-			std::array<AbilityID, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
-
-			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
-			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
+			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
 
 			/*! @brief The Pokemon's base stats. */
 			PokemonStats mBaseStats{};
 
+			/*! @brief The egg groups associated with the Pokemon. */
+			std::array<EggGroupID, MAX_EGG_GROUPS_PER_POKEMON> mEggGroupIDs{};
+
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
+
+			/*! @brief The Pokemon's pool of available genders. */
+			std::array<PokemonGender, MAX_GENDERS> mGenderPool{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			PokemonID mPokemonID{};

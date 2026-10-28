@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 10/13/2026
+	@date 10/26/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,10 +19,12 @@
 #include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Effect/builtInEffectID.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Item/itemMeta.h"
@@ -37,6 +39,7 @@
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
@@ -61,6 +64,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -69,6 +73,8 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Configuration::MIN_EV_STAT_VALUE;
 	using PocketCore::Core::us;
 	using PocketCore::Effect::BuiltinEffectID;
+	using PocketCore::EggGroup::BuiltinEggGroupID;
+	using PocketCore::EggGroup::toEggGroupID;
 	using PocketCore::Item::BuiltinItemID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::ItemMeta;
@@ -87,6 +93,9 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::CHARIZARD_BASE_STATS;
 	using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
 	using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
+	using PocketCore::Pokemon::DITTO_BASE_STATS;
+	using PocketCore::Pokemon::IDContext;
+	using PocketCore::Pokemon::IVEVContext;
 	using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
@@ -94,12 +103,15 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::POKEMON_NAME_CHARIZARD;
 	using PocketCore::Pokemon::POKEMON_NAME_CHARMANDER;
 	using PocketCore::Pokemon::POKEMON_NAME_CHARMELEON;
+	using PocketCore::Pokemon::POKEMON_NAME_DITTO;
 	using PocketCore::Pokemon::POKEMON_NAME_IVYSAUR;
 	using PocketCore::Pokemon::POKEMON_NAME_NONE;
 	using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
 	using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 	using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonBreedingContext;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
@@ -173,9 +185,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 10/13/2026
+		@date 10/26/2026
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -196,82 +208,111 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID.
 				@since 0.11.6
-				@version 0.12.51
+				@version 0.12.53
 			 */
 			ATTR_NOINLINE explicit constexpr PokemonRegistry()
 			{
 				addBuiltin({.mName = std::string(POKEMON_NAME_NONE), .mPokemonID = toPokemonID(BuiltinPokemonID::None)});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BULBASAUR),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = BULBASAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = IVYSAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = VENUSAUR_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Venusaur),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = CHARMANDER_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = CHARMELEON_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charmeleon),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = CHARIZARD_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = SQUIRTLE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Squirtle),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = WARTORTLE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Wartortle),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
-					.mAbilityPool = {toAbilityID(BuiltinAbilityID::None)},
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
 					.mBaseStats = BLASTOISE_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Blastoise),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
+				});
+
+				addBuiltin({
+					.mName = std::string(POKEMON_NAME_DITTO),
+					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mBaseStats = DITTO_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},
+					.mGenderPool = {PokemonGender::Genderless},
+					.mPokemonID = toPokemonID(BuiltinPokemonID::Ditto),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
 				});
 			}
 
@@ -388,23 +429,19 @@ namespace PocketCore::Registry::Pokemon
 			/*! @brief Instantiates a Pokemon from the registry.
 				@param[in] pokemonID The built-in or custom stable identifier for the Pokemon to create.
 				@param[in] encounterIndex The index of the encounter metadata to use from the pokemon.
+				@param[in] randomSources The random sources used for battle-related numeric types.
 				@param[in] dependencyRegistries The dependency registries to use for resolving various IDs. Defaults to nullptr.
-				@param[in] ivs The non-owning span of IVs for the Pokemon.
-				@param[in] evs The non-owning span of EVs for the Pokemon.
-				@param[in] natureIDs The non-owning span of nature IDs for the Pokemon.
-				@param[in] abilityIDs The non-owning span of ability IDs for the Pokemon.
-				@param[in] itemIDs The non-owning span of item IDs for the Pokemon.
-				@param[in] movesIDs The non-owning span of move IDs for the Pokemon.
+				@param[in] idContext The context containing IDs for various dependencies.
+				@param[in] ivevContext The context containing IV and EV values for the Pokemon.
+				@param[in] breedingContext The context containing breeding-related information for the Pokemon.
 				@return The instantiated Pokemon on success, or @ref PokemonInstantiationError if no matching pokemon exists.
 				@since 0.12.24
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
-				const PokemonID pokemonID, const std::size_t encounterIndex,
-				PokemonInstantiationDependencies *dependencyRegistries = nullptr, const std::span<const us> ivs = {},
-				const std::span<const us> evs = {}, const std::span<const NatureID> natureIDs = {},
-				const std::span<const AbilityID> abilityIDs = {}, const std::span<const ItemID> itemIDs = {},
-				const std::span<const MoveID> moveIDs = {}) const;
+				const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
+				PokemonInstantiationDependencies *dependencyRegistries = nullptr, const IDContext &idContext = {},
+				const IVEVContext &ivevContext = {}, const PokemonBreedingContext &breedingContext = {}) const;
 	};
 } // namespace PocketCore::Registry::Pokemon
 

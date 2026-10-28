@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 10/21/2026
+	@date 10/28/2026
 	@since 0.6.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -40,6 +40,8 @@ using PocketCore::Effect::toEffectID;
 using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::BuiltinMoveID;
 using PocketCore::Move::MOVE_NAME_EXTREME_SPEED;
+using PocketCore::Move::MOVE_NAME_FACADE;
+using PocketCore::Move::MOVE_NAME_HYDRO_STEAM;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 using PocketCore::Move::MOVE_NAME_NONE;
 using PocketCore::Move::MOVE_NAME_POUND;
@@ -191,6 +193,30 @@ SCENARIO("MoveRegistry")
 
 			CHECK((expected == *actual));
 		}
+
+		THEN("Facade has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_FACADE),
+				.mMoveID = toMoveID(BuiltinMoveID::Facade),
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Facade))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Hydro Steam has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_HYDRO_STEAM),
+				.mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::HydroSteam))};
+
+			CHECK((expected == *actual));
+		}
 	}
 
 	GIVEN("getMoveMetadata")
@@ -226,7 +252,7 @@ SCENARIO("MoveRegistry")
 			REQUIRE(moveID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((moveID.value() == toMoveID(BuiltinMoveID::None)));
+			CHECK((moveID == toMoveID(BuiltinMoveID::None)));
 		}
 	}
 
@@ -244,7 +270,7 @@ SCENARIO("MoveRegistry")
 			REQUIRE(moveName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((moveName.value() == MOVE_NAME_NONE));
+			CHECK((moveName == MOVE_NAME_NONE));
 		}
 	}
 
@@ -308,7 +334,7 @@ SCENARIO("MoveRegistry")
 
 			REQUIRE(moveIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((moveIndex.value() == 0));
+			CHECK((moveIndex == 0));
 		}
 	}
 

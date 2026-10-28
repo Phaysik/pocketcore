@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the NatureRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("NatureRegistryConfiguration")
 			REQUIRE(natureID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((natureID.value() == toNatureID(BuiltinNatureID::None)));
+			CHECK((natureID == toNatureID(BuiltinNatureID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("NatureRegistryConfiguration")
 			REQUIRE(natureName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((natureName.value() == NATURE_NAME_NONE));
+			CHECK((natureName == NATURE_NAME_NONE));
 		}
 	}
 
@@ -445,7 +445,7 @@ SCENARIO("NatureRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toNatureID(BuiltinNatureID::None)));
+					CHECK((result == toNatureID(BuiltinNatureID::None)));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue - 1));
 				}
 			}
@@ -472,7 +472,7 @@ SCENARIO("NatureRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toNatureID(BuiltinNatureID::None)));
+					CHECK((result == toNatureID(BuiltinNatureID::None)));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue - 1));
 				}
 			}

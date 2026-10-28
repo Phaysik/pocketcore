@@ -1,8 +1,8 @@
 /*! @file builtinNatureID.h
 	@brief Defines identifiers for natures compiled into PocketCore.
-	@date 10/09/2026
+	@date 10/27/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Nature
 {
+	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum BuiltinNatureID
@@ -61,6 +63,8 @@ namespace PocketCore::Nature
 		Quirky,
 		FinalNature,
 	};
+
+	static_assert(MAX_NATURES_PER_POKEMON < std::to_underlying(BuiltinNatureID::FinalNature));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinNatureID The built-in nature to convert.

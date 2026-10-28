@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.4.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -27,9 +27,17 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::ABILITY_NAME_AIR_LOCK;
+using PocketCore::Ability::ABILITY_NAME_BATTLE_ARMOR;
+using PocketCore::Ability::ABILITY_NAME_CLOUD_NINE;
 using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
+using PocketCore::Ability::ABILITY_NAME_ELEVATE;
+using PocketCore::Ability::ABILITY_NAME_GUTS;
+using PocketCore::Ability::ABILITY_NAME_LEVITATE;
 using PocketCore::Ability::ABILITY_NAME_NONE;
+using PocketCore::Ability::ABILITY_NAME_SPEED_BOOST;
 using PocketCore::Ability::ABILITY_NAME_STENCH;
+using PocketCore::Ability::ABILITY_NAME_STURDY;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
@@ -94,6 +102,110 @@ SCENARIO("AbilityRegistry")
 
 			CHECK((expected == *actual));
 		}
+
+		THEN("Speed Boost has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_SPEED_BOOST),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::SpeedBoost),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::SpeedBoost))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Battle Armor has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_BATTLE_ARMOR),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::BattleArmor),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::BattleArmor))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Sturdy has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_STURDY),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Sturdy),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Sturdy))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("CloudNine has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_CLOUD_NINE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::CloudNine))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Levitate has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_LEVITATE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Levitate),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Levitate))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Guts has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_GUTS),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Guts))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("AirLock has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_AIR_LOCK),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::AirLock))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Elevate has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_ELEVATE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Elevate))};
+
+			CHECK((expected == *actual));
+		}
 	}
 
 	GIVEN("getAbilityMetadata")
@@ -129,7 +241,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
+			CHECK((abilityID == toAbilityID(BuiltinAbilityID::None)));
 		}
 	}
 
@@ -147,7 +259,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityName.value() == ABILITY_NAME_NONE));
+			CHECK((abilityName == ABILITY_NAME_NONE));
 		}
 	}
 
@@ -211,7 +323,7 @@ SCENARIO("AbilityRegistry")
 
 			REQUIRE(abilityIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityIndex.value() == 0));
+			CHECK((abilityIndex == 0));
 		}
 	}
 

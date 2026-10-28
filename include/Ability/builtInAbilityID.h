@@ -1,8 +1,8 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 10/09/2026
+	@date 10/27/2026
 	@since 0.4.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -18,6 +19,8 @@
 
 namespace PocketCore::Ability
 {
+	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum BuiltinAbilityID
@@ -26,9 +29,9 @@ namespace PocketCore::Ability
 		@details This closed enum is only a catalog of built-in abilities. Runtime state and user-facing APIs use the open @ref AbilityID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/22/2026
+		@date 10/27/2026
 		@since 0.4.0
-		@version 0.11.6
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	enum class BuiltinAbilityID : ub
@@ -36,14 +39,20 @@ namespace PocketCore::Ability
 		None,
 		Stench,
 		Drizzle,
+		SpeedBoost,
+		BattleArmor,
+		Sturdy,
 
-		Guts,
-		Levitate,
-		Elevate,
-		AirLock,
-		CloudNine,
+		CloudNine, // 13
+		Levitate,  // 26
+		Guts,	   // 62
+		AirLock,   // 76
+		Elevate,   // 313
 		FinalAbility,
 	};
+
+	static_assert(MAX_ABILITIES_PER_POKEMON < std::to_underlying(BuiltinAbilityID::FinalAbility));
+	static_assert(MAX_ABILITY_POOL_PER_POKEMON < std::to_underlying(BuiltinAbilityID::FinalAbility));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinAbilityID The built-in ability to convert.

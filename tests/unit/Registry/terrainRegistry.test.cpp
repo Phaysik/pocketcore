@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.test.cpp
 	@brief C++ file for running tests for the TerrainRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -137,7 +137,7 @@ SCENARIO("TerrainRegistry")
 			REQUIRE(terrainID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((terrainID.value() == toTerrainID(BuiltinTerrainID::None)));
+			CHECK((terrainID == toTerrainID(BuiltinTerrainID::None)));
 		}
 	}
 
@@ -155,7 +155,7 @@ SCENARIO("TerrainRegistry")
 			REQUIRE(terrainName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((terrainName.value() == TERRAIN_NAME_NONE));
+			CHECK((terrainName == TERRAIN_NAME_NONE));
 		}
 	}
 
@@ -218,7 +218,7 @@ SCENARIO("TerrainRegistry")
 
 			REQUIRE(terrainIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((terrainIndex.value() == 0));
+			CHECK((terrainIndex == 0));
 		}
 	}
 

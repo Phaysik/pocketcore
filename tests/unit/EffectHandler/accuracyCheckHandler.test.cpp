@@ -1,8 +1,8 @@
 /*! @file accuracyCheckHandler.test.cpp
 	@brief C++ file for running tests for the AccuracyCheckHandler.
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 #include "Utility/Random/callableRandomSource.h"
 #include "Utility/Random/random.testHelper.h"
 
@@ -29,10 +30,12 @@ using PocketCore::Battle::BattleSlot;
 using PocketCore::Battle::BattleState;
 using PocketCore::Core::sb;
 using PocketCore::Effect::AccuracyCheckHandler;
+using PocketCore::Effect::applyAccuracyCheck;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
+using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makeBattleState;
 using PocketCore::Testing::makeEffectContext;
 using PocketCore::Testing::makePokemon;
@@ -43,293 +46,311 @@ using PocketCore::Utility::Random::CallableRandomSource;
 
 SCENARIO("AccuracyCheckHandler")
 {
+	Pokemon userPokemon{makePokemon({})};
+	Pokemon targetPokemon{makePokemon({})};
+
 	AccuracyCheckHandler accuracyCheckHandler{};
-	RegistryProvider provider{};
-	BattleRandomSources randomSources{};
+	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources handlerRandomSources{};
+	BattleRandomSources freeFunctionRandomSources{};
+
+	BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon})};
+	BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
+
+	BattleState handlerState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+	BattleState freeFunctionState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+
+	EffectContext handlerContext{
+		makeEffectContext({
+			.mUserIndex = 0,
+			.mTargetIndex = 0,
+			.mMoveAccuracy = 100U,
+			.mUserSide = Side::A,
+			.mTargetSide = Side::B,
+		}),
+	};
+	EffectContext freeFunctionContext{
+		makeEffectContext({
+			.mUserIndex = 0,
+			.mTargetIndex = 0,
+			.mMoveAccuracy = 100U,
+			.mUserSide = Side::A,
+			.mTargetSide = Side::B,
+		}),
+	};
 
 	GIVEN("perfect move accuracy and neutral stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
-
-		EffectContext effectContext{
-			makeEffectContext({
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mMoveAccuracy = 100U,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
-
 		WHEN("the handler is applied")
 		{
-			accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+			accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+			applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
 
 			THEN("the attack never misses")
 			{
-				CHECK(effectContext.mDamage.mShouldApplyDamage);
-				CHECK(effectContext.mDamage.mShouldContinue);
-				CHECK_FALSE(effectContext.mDamage.mIsMiss);
+				CHECK(handlerContext.mDamage.mShouldApplyDamage);
+				CHECK(handlerContext.mDamage.mShouldContinue);
+				CHECK_FALSE(handlerContext.mDamage.mIsMiss);
+
+				CHECK(freeFunctionContext.mDamage.mShouldApplyDamage);
+				CHECK(freeFunctionContext.mDamage.mShouldContinue);
+				CHECK_FALSE(freeFunctionContext.mDamage.mIsMiss);
 			}
 		}
 	}
 
 	GIVEN("perfect move accuracy and increased target evasion stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = 6}})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		targetSlot.mStatStages = {.mEvasion = 6};
+		handlerState.mSideB = {targetSlot};
+		freeFunctionState.mSideB = {targetSlot};
 
 		WHEN("the handler is applied 3 times")
 		{
-			std::size_t missCount{0};
-			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
-			randomSources.mSigned = signedSource;
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
+			CallableRandomSource<sb, SequenceRandom<sb>> handlerSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			CallableRandomSource<sb, SequenceRandom<sb>> freeFunctionSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			handlerRandomSources.mSigned = handlerSignedSource;
+			freeFunctionRandomSources.mSigned = freeFunctionSignedSource;
 
 			for (std::size_t i{0}; i < 3; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 100U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
-
-				if (effectContext.mDamage.mIsMiss)
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack will miss on average 66% of the time")
 			{
-				CHECK((missCount == 2));
+				CHECK((handlerMissCount == 2));
+				CHECK((freeFunctionMissCount == 2));
 			}
 		}
 	}
 
 	GIVEN("perfect move accuracy and decreased user accuracy stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = -6}})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		userSlot.mStatStages = {.mAccuracy = -6};
+		handlerState.mSideA = {userSlot};
+		freeFunctionState.mSideA = {userSlot};
 
 		WHEN("the handler is applied 3 times")
 		{
-			std::size_t missCount{0};
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
 
-			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
-			randomSources.mSigned = signedSource;
+			CallableRandomSource<sb, SequenceRandom<sb>> handlerSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			CallableRandomSource<sb, SequenceRandom<sb>> freeFunctionSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			handlerRandomSources.mSigned = handlerSignedSource;
+			freeFunctionRandomSources.mSigned = freeFunctionSignedSource;
 
 			for (std::size_t i{0}; i < 3; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 100U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
 
-				if (effectContext.mDamage.mIsMiss)
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack will miss on average 66% of the time")
 			{
-				CHECK((missCount == 2));
+				CHECK((handlerMissCount == 2));
+				CHECK((freeFunctionMissCount == 2));
 			}
 		}
 	}
 
 	GIVEN("perfect move accuracy, equal increase of user accuracy stages and decreased target evasion stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = -6}})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		userSlot.mStatStages = {.mAccuracy = 6};
+		targetSlot.mStatStages = {.mEvasion = -6};
+		handlerState.mSideA = {userSlot};
+		freeFunctionState.mSideA = {userSlot};
+		handlerState.mSideB = {targetSlot};
+		freeFunctionState.mSideB = {targetSlot};
 
 		WHEN("the handler is applied 100 times")
 		{
-			std::size_t missCount{0};
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
 
 			for (std::size_t i{0}; i < 100; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 100U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
 
-				if (effectContext.mDamage.mIsMiss)
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack will never miss")
 			{
-				CHECK((missCount == 0));
+				CHECK((handlerMissCount == 0));
+				CHECK((freeFunctionMissCount == 0));
 			}
 		}
 	}
 
 	GIVEN("50% move accuracy, max user accuracy stages and -3 target evasion stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon, .mStatStages = {.mEvasion = -3}})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		userSlot.mStatStages = {.mAccuracy = 6};
+		targetSlot.mStatStages = {.mEvasion = -3};
+		handlerState.mSideA = {userSlot};
+		freeFunctionState.mSideA = {userSlot};
+		handlerState.mSideB = {targetSlot};
+		freeFunctionState.mSideB = {targetSlot};
 
 		WHEN("the handler is applied 100 times")
 		{
-			std::size_t missCount{0};
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
 
 			for (std::size_t i{0}; i < 100; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 50U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+				handlerContext.mMoveAccuracy = 50U;
+				freeFunctionContext.mMoveAccuracy = 50U;
 
-				if (effectContext.mDamage.mIsMiss)
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
+
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack will never miss")
 			{
-				CHECK((missCount == 0));
+				CHECK((handlerMissCount == 0));
+				CHECK((freeFunctionMissCount == 0));
 			}
 		}
 	}
 
 	GIVEN("34% move accuracy and max user accuracy stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		userSlot.mStatStages = {.mAccuracy = 6};
+		handlerState.mSideA = {userSlot};
+		freeFunctionState.mSideA = {userSlot};
 
 		WHEN("the handler is applied 100 times")
 		{
-			std::size_t missCount{0};
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
 
 			for (std::size_t i{0}; i < 100; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 34U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+				handlerContext.mMoveAccuracy = 34U;
+				freeFunctionContext.mMoveAccuracy = 34U;
 
-				if (effectContext.mDamage.mIsMiss)
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
+
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack never misses")
 			{
-				CHECK((missCount == 0));
+				CHECK((handlerMissCount == 0));
+				CHECK((freeFunctionMissCount == 0));
 			}
 		}
 	}
 
 	GIVEN("10% move accuracy and max user accuracy stages")
 	{
-		Pokemon userPokemon{makePokemon({})};
-		Pokemon targetPokemon{makePokemon({})};
-
-		BattleSlot userSlot{BattleSlot({.mPokemon = &userPokemon, .mStatStages = {.mAccuracy = 6}})};
-		BattleSlot targetSlot{BattleSlot({.mPokemon = &targetPokemon})};
-
-		BattleState battleState{makeBattleState({.mSideA = {userSlot}, .mSideB = {targetSlot}})};
+		userSlot.mStatStages = {.mAccuracy = 6};
+		handlerState.mSideA = {userSlot};
+		freeFunctionState.mSideA = {userSlot};
 
 		WHEN("the handler is applied 3 times")
 		{
-			std::size_t missCount{0};
+			std::size_t handlerMissCount{0};
+			std::size_t freeFunctionMissCount{0};
 
-			CallableRandomSource<sb, SequenceRandom<sb>> signedSource{SequenceRandom<sb>{100, 100, 0}};
-			randomSources.mSigned = signedSource;
+			CallableRandomSource<sb, SequenceRandom<sb>> handlerSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			CallableRandomSource<sb, SequenceRandom<sb>> freeFunctionSignedSource{SequenceRandom<sb>{100, 100, 0}};
+			handlerRandomSources.mSigned = handlerSignedSource;
+			freeFunctionRandomSources.mSigned = freeFunctionSignedSource;
 
 			for (std::size_t i{0}; i < 3; ++i)
 			{
-				EffectContext effectContext{
-					makeEffectContext({
-						.mUserIndex = 0,
-						.mTargetIndex = 0,
-						.mMoveAccuracy = 10U,
-						.mUserSide = Side::A,
-						.mTargetSide = Side::B,
-					}),
-				};
+				handlerContext.mDamage.mIsMiss = false;
+				freeFunctionContext.mDamage.mIsMiss = false;
 
-				accuracyCheckHandler.apply(battleState, effectContext, provider, randomSources);
+				handlerContext.mMoveAccuracy = 10U;
+				freeFunctionContext.mMoveAccuracy = 10U;
 
-				if (effectContext.mDamage.mIsMiss)
+				accuracyCheckHandler.apply(handlerState, handlerContext, provider, handlerRandomSources);
+				applyAccuracyCheck(freeFunctionState, freeFunctionContext, provider, freeFunctionRandomSources);
+
+				if (handlerContext.mDamage.mIsMiss)
 				{
-					++missCount;
+					++handlerMissCount;
+				}
+
+				if (freeFunctionContext.mDamage.mIsMiss)
+				{
+					++freeFunctionMissCount;
 				}
 			}
 
 			THEN("the attack hits 66% of the time")
 			{
-				CHECK((missCount == 2));
+				CHECK((handlerMissCount == 2));
+				CHECK((freeFunctionMissCount == 2));
 			}
 		}
 	}

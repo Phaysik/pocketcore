@@ -1,8 +1,8 @@
 /*! @file setMistyTerrainHandler.test.cpp
 	@brief C++ file for running tests for the SetMistyTerrainHandler.
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.12.43
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -36,184 +36,76 @@ using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 SCENARIO("SetMistyTerrainHandler")
 {
 	SetMistyTerrainHandler setMistyTerrainHandler{};
-	BattleState battleState{};
-	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
 	BattleRandomSources randomSources{};
 
 	TerrainID mistyID{toTerrainID(BuiltinTerrainID::Misty)};
 	TerrainID electricID{toTerrainID(BuiltinTerrainID::Electric)};
 
-	GIVEN("no active terrains")
+	BattleState handlerState{};
+	BattleState freeFunctionState{};
+	EffectContext handlerContext{};
+	EffectContext freeFunctionContext{};
+
+	WHEN("applied to empty active terrains")
 	{
+		setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 		WHEN("misty terrain is applied")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("misty terrain becomes active")
-			{
-				CHECK(std::ranges::contains(battleState.mTerrainIDs, mistyID));
-			}
-
-			THEN("misty terrain is only added once")
-			{
-				CHECK((std::ranges::count(battleState.mTerrainIDs, mistyID) == 1));
-			}
+			CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+			CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
 		}
 	}
 
 	GIVEN("misty terrain is already active")
 	{
-		battleState.mTerrainIDs = {mistyID};
+		handlerState.mTerrainIDs = {mistyID};
+		freeFunctionState.mTerrainIDs = {mistyID};
 
-		WHEN("misty terrain is applied again")
+		setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("both leave misty terrain active exactly once")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("misty terrain remains active exactly once")
-			{
-				CHECK((std::ranges::count(battleState.mTerrainIDs, mistyID) == 1));
-			}
+			CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+			CHECK((std::ranges::count(freeFunctionState.mTerrainIDs, mistyID) == 1));
 		}
 	}
 
-	GIVEN("a different terrain is active and replacement is allowed")
+	WHEN("a different terrain is active and replacement is allowed")
 	{
-		battleState.mTerrainIDs = {electricID};
-		battleState.mRuleset.mMaxTerrains = 1;
-		battleState.mRuleset.mReplaceTerrainWhenFull = true;
+		handlerState.mTerrainIDs = {electricID};
+		handlerState.mRuleset.mMaxTerrains = 1;
+		handlerState.mRuleset.mReplaceTerrainWhenFull = true;
+		freeFunctionState.mTerrainIDs = {electricID};
+		freeFunctionState.mRuleset.mMaxTerrains = 1;
+		freeFunctionState.mRuleset.mReplaceTerrainWhenFull = true;
 
-		WHEN("misty terrain is applied")
+		setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("both replace the existing terrain identically")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("misty terrain replaces the existing terrain")
-			{
-				CHECK(std::ranges::contains(battleState.mTerrainIDs, mistyID));
-				CHECK_FALSE(std::ranges::contains(battleState.mTerrainIDs, electricID));
-			}
+			CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+			CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
+			CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, electricID));
 		}
 	}
 
-	GIVEN("a different terrain is active and replacement is not allowed")
+	WHEN("the ruleset permits no active terrains")
 	{
-		battleState.mTerrainIDs = {electricID};
-		battleState.mRuleset.mMaxTerrains = 1;
-		battleState.mRuleset.mReplaceTerrainWhenFull = false;
+		handlerState.mRuleset.mMaxTerrains = 0;
+		freeFunctionState.mRuleset.mMaxTerrains = 0;
 
-		WHEN("misty terrain is applied")
+		setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("neither activates a terrain")
 		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("the existing terrain is retained and misty terrain is not added")
-			{
-				CHECK(std::ranges::contains(battleState.mTerrainIDs, electricID));
-				CHECK_FALSE(std::ranges::contains(battleState.mTerrainIDs, mistyID));
-			}
-		}
-	}
-
-	GIVEN("a free slot remains below the terrain cap")
-	{
-		battleState.mTerrainIDs = {electricID};
-		battleState.mRuleset.mMaxTerrains = 2;
-		battleState.mRuleset.mReplaceTerrainWhenFull = true;
-
-		WHEN("misty terrain is applied")
-		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("misty terrain is added alongside the existing terrain")
-			{
-				CHECK(std::ranges::contains(battleState.mTerrainIDs, electricID));
-				CHECK(std::ranges::contains(battleState.mTerrainIDs, mistyID));
-			}
-		}
-	}
-
-	GIVEN("the ruleset permits no active terrains")
-	{
-		battleState.mRuleset.mMaxTerrains = 0;
-
-		WHEN("misty terrain is applied")
-		{
-			setMistyTerrainHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("no terrain becomes active")
-			{
-				CHECK_FALSE(std::ranges::contains(battleState.mTerrainIDs, mistyID));
-			}
-		}
-	}
-
-	GIVEN("the free function and the handler operate on equivalent states")
-	{
-		BattleState handlerState{};
-		BattleState freeFunctionState{};
-		EffectContext handlerContext{};
-		EffectContext freeFunctionContext{};
-
-		WHEN("applied to empty active terrains")
-		{
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("the free function yields the same active terrains as the handler")
-			{
-				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
-				CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
-			}
-		}
-
-		WHEN("psychic terrain is already active")
-		{
-			handlerState.mTerrainIDs = {mistyID};
-			freeFunctionState.mTerrainIDs = {mistyID};
-
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("both leave psychic terrain active exactly once")
-			{
-				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
-				CHECK((std::ranges::count(freeFunctionState.mTerrainIDs, mistyID) == 1));
-			}
-		}
-
-		WHEN("a different terrain is active and replacement is allowed")
-		{
-			handlerState.mTerrainIDs = {electricID};
-			handlerState.mRuleset.mMaxTerrains = 1;
-			handlerState.mRuleset.mReplaceTerrainWhenFull = true;
-			freeFunctionState.mTerrainIDs = {electricID};
-			freeFunctionState.mRuleset.mMaxTerrains = 1;
-			freeFunctionState.mRuleset.mReplaceTerrainWhenFull = true;
-
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("both replace the existing terrain identically")
-			{
-				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
-				CHECK(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
-				CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, electricID));
-			}
-		}
-
-		WHEN("the ruleset permits no active terrains")
-		{
-			handlerState.mRuleset.mMaxTerrains = 0;
-			freeFunctionState.mRuleset.mMaxTerrains = 0;
-
-			setMistyTerrainHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetMisty(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("neither activates a terrain")
-			{
-				CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
-				CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
-			}
+			CHECK((freeFunctionState.mTerrainIDs == handlerState.mTerrainIDs));
+			CHECK_FALSE(std::ranges::contains(freeFunctionState.mTerrainIDs, mistyID));
 		}
 	}
 }

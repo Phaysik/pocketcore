@@ -1,8 +1,8 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 			REQUIRE(multiplierID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((multiplierID.value() == toMultiplierID(BuiltinMultiplierID::None)));
+			CHECK((multiplierID == toMultiplierID(BuiltinMultiplierID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 			REQUIRE(multiplierName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((multiplierName.value() == MULTIPLIER_NAME_NONE));
+			CHECK((multiplierName == MULTIPLIER_NAME_NONE));
 		}
 	}
 
@@ -447,7 +447,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toMultiplierID(BuiltinMultiplierID::None)));
+					CHECK((result == toMultiplierID(BuiltinMultiplierID::None)));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue - 1));
 				}
 			}
@@ -474,7 +474,7 @@ SCENARIO("MultiplierRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toMultiplierID(BuiltinMultiplierID::None)));
+					CHECK((result == toMultiplierID(BuiltinMultiplierID::None)));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue - 1));
 				}
 			}

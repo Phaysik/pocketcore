@@ -1,8 +1,8 @@
 /*! @file effectRegistry.test.cpp
 	@brief C++ file for running tests for the EffectRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -492,7 +492,7 @@ SCENARIO("EffectRegistry")
 			REQUIRE(effectID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((effectID.value() == toEffectID(BuiltinEffectID::None)));
+			CHECK((effectID == toEffectID(BuiltinEffectID::None)));
 		}
 	}
 
@@ -510,7 +510,7 @@ SCENARIO("EffectRegistry")
 			REQUIRE(effectName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((effectName.value() == EFFECT_NAME_NONE));
+			CHECK((effectName == EFFECT_NAME_NONE));
 		}
 	}
 
@@ -573,7 +573,7 @@ SCENARIO("EffectRegistry")
 
 			REQUIRE(effectIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((effectIndex.value() == 0));
+			CHECK((effectIndex == 0));
 		}
 	}
 

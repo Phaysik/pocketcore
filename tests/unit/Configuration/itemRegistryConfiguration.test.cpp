@@ -1,8 +1,8 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 10/20/2026
+	@date 10/28/2026
 	@since 0.5.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -115,7 +115,7 @@ SCENARIO("ItemRegistryConfiguration")
 			REQUIRE(itemID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemID.value() == toItemID(BuiltinItemID::None)));
+			CHECK((itemID == toItemID(BuiltinItemID::None)));
 		}
 	}
 
@@ -133,7 +133,7 @@ SCENARIO("ItemRegistryConfiguration")
 			REQUIRE(itemName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemName.value() == ITEM_NAME_NONE));
+			CHECK((itemName == ITEM_NAME_NONE));
 		}
 	}
 
@@ -625,7 +625,7 @@ SCENARIO("ItemRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toItemID(BuiltinItemID::None)));
+					CHECK((result == toItemID(BuiltinItemID::None)));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue - 1));
 				}
 			}
@@ -652,7 +652,7 @@ SCENARIO("ItemRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toItemID(BuiltinItemID::None)));
+					CHECK((result == toItemID(BuiltinItemID::None)));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue - 1));
 				}
 			}

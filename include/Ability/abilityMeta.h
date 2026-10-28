@@ -1,8 +1,8 @@
 /*! @file abilityMeta.h
 	@brief Defines the metadata stored for built-in and user-defined abilities.
-	@date 09/10/2026
+	@date 10/26/2026
 	@since 0.3.0
-	@version 0.12.20
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Battle/battleTargetsAndTriggers.h"
+#include "Core/typedefs.h"
 #include "Effect/effectTrigger.h"
 
 #include "abilityID.h"
@@ -22,13 +23,31 @@ namespace PocketCore::Ability
 	using PocketCore::Battle::BattleEventID;
 	using PocketCore::Battle::BattleEventRole;
 	using PocketCore::Battle::BattleTargetID;
+	using PocketCore::Core::ub;
 	using PocketCore::Effect::EffectTrigger;
+
+	/*! @enum AbilityClassification
+		@showenumvalues
+		@brief Distinguishes standard abilities from hidden abilities.
+		@details Records an ability's category in @ref AbilityMeta independently of its trigger and effect definitions.
+		@date 10/23/2026
+		@since 0.12.53
+		@version 0.12.53
+		@author Matthew Moore
+	*/
+	enum class AbilityClassification : ub
+	{
+		/*! @brief Identifies a standard ability. */
+		Standard,
+		/*! @brief Identifies a hidden ability. */
+		Hidden,
+	};
 
 	/*! @struct AbilityMeta Ability/abilityMeta.h
 		@brief Stores one ability's stable ID, display name, and owned trigger definitions.
 		@details The trigger vector owns its elements and their effect vectors. The display name is a non-owning view whose backing storage
 	   must remain valid while this metadata is registered.
-		@date 09/10/2026
+		@date 9/10/2026
 		@since 0.3.0
 		@version 0.12.20
 		@author Matthew Moore

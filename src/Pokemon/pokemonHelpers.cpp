@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/20/2026
+	@date 10/23/2026
 	@since 0.12.28
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -22,15 +22,23 @@
 #include <vector>
 
 #include "Ability/abilityID.h"
+#include "Ability/abilityMeta.h"
+#include "Ability/constants.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
+#include "EggGroup/eggGroupID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
+#include "Nature/natureHelpers.h"
 #include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemonEncounter.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/moveRegistry.h"
@@ -49,22 +57,39 @@
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::ABILITY_CLASSIFICATION_HIDDEN;
+	using PocketCore::Ability::ABILITY_CLASSIFICATION_STANDARD;
+	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Battle::BattleRandomSources;
+	using PocketCore::Configuration::BREEDING_ABILITY_MAXIMUM;
+	using PocketCore::Configuration::BREEDING_ABILITY_MINIMUM;
+	using PocketCore::Configuration::HIDDEN_ABILITY_CHANCE;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+	using PocketCore::Configuration::REGULAR_ABILITY_CHANCE;
+	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::BuiltinEggGroupID;
+	using PocketCore::EggGroup::EggGroupID;
+	using PocketCore::EggGroup::toEggGroupID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Learnset::MoveLearnEntry;
 	using PocketCore::Move::NO_MOVE_ID;
+	using PocketCore::Nature::getRandomNatureIDFromConfiguration;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Registry::RegistryProvider;
 	using PocketCore::Validation::Ability::AbilityError;
+	using PocketCore::Validation::Ability::hasTwoFemaleParents;
+	using PocketCore::Validation::Ability::hasTwoMaleParents;
+	using PocketCore::Validation::Ability::hasValidEggGroup;
 	using PocketCore::Validation::Ability::validateAbilityMetadata;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Item::validateItemMetadata;
@@ -84,9 +109,11 @@ namespace PocketCore::Pokemon
 
 	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider)
 	{
-		const auto printIDAndName = [&outStream]<typename StableID, typename NameLookup>(
-										const std::string_view indentation, const StableID stableID, const NameLookup &nameLookup) {
-			constexpr std::string_view unregisteredName{"<unregistered>"};
+		constexpr std::string_view indentation{"      "};
+		constexpr std::string_view unregisteredName{"<unregistered>"};
+
+		const auto printIDAndName = [&outStream, indentation, unregisteredName]<typename StableID, typename NameLookup>(
+										const StableID stableID, const NameLookup &nameLookup) {
 			const std::optional<std::string_view> name{nameLookup(stableID)};
 
 			outStream << indentation << "ID: " << stableID.getValue() << '\n' << indentation << "Name: " << name.value_or(unregisteredName);
@@ -122,7 +149,7 @@ namespace PocketCore::Pokemon
 			const TypeID typeID{pokemon.getTypeID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", typeID, [&registryProvider](const TypeID identifier) {
+			printIDAndName(typeID, [&registryProvider](const TypeID identifier) {
 				return registryProvider.mTypeRegistry != nullptr ? registryProvider.mTypeRegistry->getTypeName(identifier) : std::nullopt;
 			});
 
@@ -136,7 +163,7 @@ namespace PocketCore::Pokemon
 			const NatureID natureID{pokemon.getNatureID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", natureID, [&registryProvider](const NatureID identifier) {
+			printIDAndName(natureID, [&registryProvider](const NatureID identifier) {
 				return registryProvider.mNatureRegistry != nullptr ? registryProvider.mNatureRegistry->getNatureName(identifier)
 																   : std::nullopt;
 			});
@@ -146,15 +173,23 @@ namespace PocketCore::Pokemon
 
 		outStream << "  Abilities:\n";
 
-		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityIDsArray().size()))
+		for (const std::size_t index : std::views::iota(std::size_t{0}, pokemon.getAbilityEntriesArray().size()))
 		{
-			const AbilityID abilityID{pokemon.getAbilityID(static_cast<ub>(index))};
+			const PokemonAbilityEntry abilityEntry{pokemon.getAbilityEntry(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", abilityID, [&registryProvider](const AbilityID identifier) {
-				return registryProvider.mAbilityRegistry != nullptr ? registryProvider.mAbilityRegistry->getAbilityName(identifier)
-																	: std::nullopt;
-			});
+			const std::optional<std::string_view> name{
+				registryProvider.mAbilityRegistry != nullptr ? registryProvider.mAbilityRegistry->getAbilityName(abilityEntry.mAbilityID)
+															 : std::nullopt,
+			};
+
+			const std::string_view classification{abilityEntry.mClassification == AbilityClassification::Standard
+													  ? ABILITY_CLASSIFICATION_STANDARD
+													  : ABILITY_CLASSIFICATION_HIDDEN};
+
+			outStream << indentation << "ID: " << abilityEntry.mAbilityID.getValue() << '\n'
+					  << indentation << "Name: " << name.value_or(unregisteredName) << '\n'
+					  << indentation << "Classification: " << classification;
 
 			outStream << '\n';
 		}
@@ -166,7 +201,7 @@ namespace PocketCore::Pokemon
 			const ItemID itemID{pokemon.getItemID(static_cast<ub>(index))};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", itemID, [&registryProvider](const ItemID identifier) {
+			printIDAndName(itemID, [&registryProvider](const ItemID identifier) {
 				return registryProvider.mItemRegistry != nullptr ? registryProvider.mItemRegistry->getItemName(identifier) : std::nullopt;
 			});
 
@@ -180,7 +215,7 @@ namespace PocketCore::Pokemon
 			const StatusID statusID{pokemon.getStatusID(static_cast<us>(index))};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", statusID, [&registryProvider](const StatusID identifier) {
+			printIDAndName(statusID, [&registryProvider](const StatusID identifier) {
 				return registryProvider.mStatusRegistry != nullptr ? registryProvider.mStatusRegistry->getStatusName(identifier)
 																   : std::nullopt;
 			});
@@ -196,7 +231,7 @@ namespace PocketCore::Pokemon
 			const MoveID moveID{pokemon.getMoveID(moveSlotIndex)};
 			outStream << "    [" << index << "]:\n";
 
-			printIDAndName("      ", moveID, [&registryProvider](const MoveID identifier) {
+			printIDAndName(moveID, [&registryProvider](const MoveID identifier) {
 				return registryProvider.mMoveRegistry != nullptr ? registryProvider.mMoveRegistry->getMoveName(identifier) : std::nullopt;
 			});
 
@@ -208,13 +243,16 @@ namespace PocketCore::Pokemon
 
 		return outStream;
 	}
+
 #if ATTR_ONLY_GCC
 	#pragma GCC diagnostic pop
 #endif
 
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
-																		   const NatureRegistry &natureRegistry)
+																		   const NatureRegistry &natureRegistry,
+																		   const BattleRandomSources &randomSources,
+																		   const NatureID duplicateEntryNatureReplacer)
 	{
 		if (!natureIDs.empty())
 		{
@@ -225,34 +263,121 @@ namespace PocketCore::Pokemon
 
 			std::ranges::transform(natureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
 
+			if (natureRegistry.getNatureMetadata(duplicateEntryNatureReplacer) == nullptr)
+			{
+				return std::unexpected{NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
+
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_NATURE_ID, validNatureIDs);
+			replaceDuplicatesWithNoID(duplicateEntryNatureReplacer, validNatureIDs);
 		}
 		else
 		{
+			const auto eligibleNatureCount{
+				static_cast<std::size_t>(std::ranges::count_if(natureRegistry.getRegisteredNatures(),
+															   [](const NatureMeta &meta) { return meta.mNatureID != NO_NATURE_ID; })),
+			};
+
+			if (eligibleNatureCount == 0)
+			{
+				return std::unexpected{NatureError::NO_REGISTERED_NATURES};
+			}
+
+			if (eligibleNatureCount < MAX_NATURES_PER_POKEMON)
+			{
+				return std::unexpected{NatureError::NOT_ENOUGH_REGISTERED_NATURES};
+			}
+
+			const auto randomNatureValue
+				= [&randomSources](us minimum, us maximum) -> us { return static_cast<us>(randomSources.mIndex.get()(minimum, maximum)); };
+
+			for (const std::size_t index : std::views::iota(std::size_t{0}, randomSources.mIndex.get()(1, MAX_NATURES_PER_POKEMON)))
+			{
+				validNatureIDs.at(index) = getRandomNatureIDFromConfiguration(natureRegistry, randomNatureValue,
+																			  std::span<const NatureID>{validNatureIDs}.first(index));
+			}
 		}
 
 		return {};
 	}
 
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry)
+		const std::span<const PokemonAbilityEntry> abilityIDs,
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext, const PokemonEncounter &encounterData,
+		const PokemonAbilityEntry duplicateEntryAbilityReplacer)
 	{
 		if (!abilityIDs.empty())
 		{
-			if (const std::expected<void, AbilityError> error{validateAbilityMetadata(abilityIDs, abilityRegistry)}; !error.has_value())
+			if (const std::expected<void, AbilityError> error{
+					validateAbilityMetadata(std::ranges::to<std::vector<AbilityID>>(
+												abilityIDs | std::views::transform([](const PokemonAbilityEntry &abilityEntry) noexcept {
+													return abilityEntry.mAbilityID;
+												})),
+											abilityRegistry),
+				};
+				!error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
 
-			std::ranges::transform(abilityIDs, validAbilityIDs.begin(), [](const AbilityID abilityID) { return abilityID; });
+			std::ranges::transform(abilityIDs, validAbilityEntries.begin(),
+								   [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry; });
+
+			if (abilityRegistry.getAbilityMetadata(duplicateEntryAbilityReplacer.mAbilityID) == nullptr)
+			{
+				return std::unexpected{AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
 
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_ABILITY_ID, validAbilityIDs);
+			std::unordered_set<AbilityID> seenAbilityIDs;
+			const auto emptySlots{
+				std::ranges::remove_if(validAbilityEntries,
+									   [&seenAbilityIDs, duplicateEntryAbilityReplacer](const PokemonAbilityEntry &entry) {
+										   return entry.mAbilityID == duplicateEntryAbilityReplacer.mAbilityID
+											   || !seenAbilityIDs.insert(entry.mAbilityID).second;
+									   }),
+			};
+			std::ranges::fill(emptySlots, duplicateEntryAbilityReplacer);
 		}
 		else
 		{
+			const auto eligibleAbilityCount{
+				static_cast<std::size_t>(std::ranges::count_if(abilityRegistry.getRegisteredAbilities(),
+															   [](const AbilityMeta &meta) { return meta.mAbilityID != NO_ABILITY_ID; })),
+			};
+
+			if (eligibleAbilityCount == 0)
+			{
+				return std::unexpected{AbilityError::NO_REGISTERED_ABILITIES};
+			}
+
+			if (eligibleAbilityCount < MAX_ABILITIES_PER_POKEMON)
+			{
+				return std::unexpected{AbilityError::NOT_ENOUGH_REGISTERED_ABILITIES};
+			}
+
+			const std::expected<void, AbilityError> abilityPoolResult{
+				getAbilitiesFromAbilityPool(validAbilityEntries, abilityPool, abilityRegistry, randomSources),
+			};
+
+			if (!abilityPoolResult.has_value())
+			{
+				return std::unexpected{abilityPoolResult.error()};
+			}
+
+			if (encounterData.mOrigin == PokemonOrigin::Egg)
+			{
+				const std::expected<void, AbilityError> eggAbilitiesResult{
+					getEggAbilities(validAbilityEntries, breedingContext, randomSources),
+				};
+
+				if (!eggAbilitiesResult.has_value())
+				{
+					return std::unexpected{eggAbilitiesResult.error()};
+				}
+			}
 		}
 
 		return {};
@@ -349,6 +474,141 @@ namespace PocketCore::Pokemon
 		else
 		{
 		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, AbilityError> getAbilitiesFromAbilityPool(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources)
+	{
+		std::vector<PokemonAbilityEntry> candidates;
+
+		for (const PokemonAbilityEntry &entry : abilityPool)
+		{
+			if (entry.mAbilityID == NO_ABILITY_ID)
+			{
+				continue;
+			}
+
+			if (abilityRegistry.getAbilityMetadata(entry.mAbilityID) == nullptr)
+			{
+				return std::unexpected{AbilityError::MISSING_ABILITY_METADATA};
+			}
+
+			if (!std::ranges::contains(candidates, entry.mAbilityID, &PokemonAbilityEntry::mAbilityID))
+			{
+				candidates.emplace_back(entry);
+			}
+		}
+
+		const std::size_t maximumCount{std::min(candidates.size(), validAbilityEntries.size())};
+
+		if (maximumCount == 0)
+		{
+			return std::unexpected{AbilityError::NOT_ENOUGH_REGISTERED_ABILITIES};
+		}
+
+		const std::size_t selectedCount{randomSources.mIndex.get()(1, maximumCount)};
+
+		for (const std::size_t index : std::views::iota(std::size_t{0}, selectedCount))
+		{
+			const std::size_t candidateIndex{
+				randomSources.mIndex.get()(0, candidates.size() - 1),
+			};
+
+			validAbilityEntries.at(index) = candidates.at(candidateIndex);
+			candidates.at(candidateIndex) = candidates.back();
+			candidates.pop_back();
+		}
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, AbilityError> getEggAbilities(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries, const PokemonBreedingContext &breedingContext,
+		const BattleRandomSources &randomSources)
+	{
+		const Pokemon *firstParent{breedingContext.mFirstParent};
+		const Pokemon *secondParent{breedingContext.mSecondParent};
+
+		if (firstParent == nullptr || secondParent == nullptr)
+		{
+			return std::unexpected{AbilityError::INVALID_BREEDING_CONTEXT};
+		}
+
+		if (const std::expected<void, AbilityError> error{
+				hasTwoMaleParents(*firstParent, *secondParent),
+			};
+			!error.has_value())
+		{
+			return std::unexpected{error.error()};
+		}
+
+		if (const std::expected<void, AbilityError> error{
+				hasTwoFemaleParents(*firstParent, *secondParent),
+			};
+			!error.has_value())
+		{
+			return std::unexpected{error.error()};
+		}
+
+		if (const std::expected<void, AbilityError> error{
+				hasValidEggGroup(*firstParent, *secondParent),
+			};
+			!error.has_value())
+		{
+			return std::unexpected{error.error()};
+		}
+
+		const bool useSecondParent{
+			secondParent->getGender() == PokemonGender::Female
+				|| std::ranges::contains(firstParent->getEggGroupIDsArray(), toEggGroupID(BuiltinEggGroupID::Ditto)),
+		};
+
+		const Pokemon *abilityPassOnPokemon{
+			useSecondParent ? secondParent : firstParent,
+		};
+
+		const std::span<const PokemonAbilityEntry> abilityEntries{abilityPassOnPokemon->getAbilityEntriesArray()};
+
+		const auto hasAbilityEntry{
+			[&validAbilityEntries](const PokemonAbilityEntry &abilityEntry) {
+				return std::ranges::contains(validAbilityEntries, abilityEntry.mAbilityID, &PokemonAbilityEntry::mAbilityID);
+			},
+		};
+
+		std::ranges::stable_partition(validAbilityEntries,
+									  [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry.mAbilityID == NO_ABILITY_ID; });
+
+		std::size_t destinationIndex{0};
+
+		for (const PokemonAbilityEntry &abilityEntry :
+			 abilityEntries | std::views::filter([](const PokemonAbilityEntry &abilityEntry) noexcept {
+				 return abilityEntry.mAbilityID != NO_ABILITY_ID;
+			 }))
+		{
+			if (destinationIndex == validAbilityEntries.size())
+			{
+				break;
+			}
+
+			const ub inheritanceChance{
+				abilityEntry.mClassification == AbilityClassification::Hidden ? HIDDEN_ABILITY_CHANCE : REGULAR_ABILITY_CHANCE,
+			};
+
+			if (randomSources.mUnsigned.get()(BREEDING_ABILITY_MINIMUM, BREEDING_ABILITY_MAXIMUM) > inheritanceChance
+				|| hasAbilityEntry(abilityEntry))
+			{
+				continue;
+			}
+
+			validAbilityEntries.at(destinationIndex++) = abilityEntry;
+		}
+
+		std::ranges::stable_partition(validAbilityEntries,
+									  [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry.mAbilityID != NO_ABILITY_ID; });
 
 		return {};
 	}

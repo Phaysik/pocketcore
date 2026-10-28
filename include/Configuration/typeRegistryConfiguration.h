@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.2.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -107,9 +107,9 @@ namespace PocketCore::Configuration
 		@details Provides a high-level API for adding, removing, renaming, and querying types and their matchup relationships. All mutation
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryError. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
-		@date 10/09/2026
+		@date 10/28/2026
 		@since 0.1.0
-		@version 0.12.50
+		@version 0.12.53
 	*/
 	class TypeRegistryConfiguration
 		: private FixedMetadataRegistryConfiguration<TypeRegistry, TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID,
@@ -327,7 +327,7 @@ namespace PocketCore::Configuration
 				@param[in] defaultBehavior Controls how unspecified matchups are handled (defaults to @ref UnspecifiedMatchup::NotDefined).
 				@return The stable type ID assigned to the new type on success, or @ref RegistryError on failure.
 				@since 0.1.0
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD std::expected<TypeID, RegistryError> addType(const TypeDefinition &definition,
 																		const UnspecifiedMatchup defaultBehavior

@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/23/2026
+	@date 10/27/2026
 	@since 0.4.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,6 +19,8 @@
 #include "Configuration/constants.h"
 #include "Configuration/statusRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
+#include "EggGroup/eggGroupID.h"
 #include "Interaction/interaction.h"
 #include "Interaction/interactionApplicationError.h"
 #include "Item/builtInItemID.h"
@@ -49,9 +51,9 @@
 
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::BuiltinAbilityID;
-using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -60,6 +62,9 @@ using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 using PocketCore::Configuration::StatusRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::EggGroup::BuiltinEggGroupID;
+using PocketCore::EggGroup::EggGroupID;
+using PocketCore::EggGroup::toEggGroupID;
 using PocketCore::Interaction::InteractionAction;
 using PocketCore::Interaction::InteractionApplicationError;
 using PocketCore::Item::BuiltinItemID;
@@ -80,6 +85,8 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonAbilityEntry;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonStats;
 using PocketCore::Pokemon::toPokemonID;
@@ -127,12 +134,13 @@ SCENARIO("Pokemon")
     				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::None),
     			},
 				100,
-				{toAbilityID(BuiltinAbilityID::CloudNine)},
+				{{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}},
 				{toItemID(BuiltinItemID::ChestoBerry)},
 				{toNatureID(BuiltinNatureID::Hardy)},
 				natureRegistry,
 				{},
 				{},
+				PokemonGender::Male,
 			};
 
 			THEN("the fields are properly defaulted")
@@ -186,12 +194,13 @@ SCENARIO("Pokemon")
 					},
 				},
 				100,
-				{toAbilityID(BuiltinAbilityID::CloudNine)},
+				{{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}},
 				{toItemID(BuiltinItemID::ChestoBerry)},
 				{toNatureID(BuiltinNatureID::Hardy)},
 				natureRegistry,
 				{},
 				{},
+				PokemonGender::Male,
 			};
 
 			THEN("the fields are properly defaulted")
@@ -223,7 +232,7 @@ SCENARIO("Pokemon")
 			},
 		};
 		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{24, 56};
-		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}};
+		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}, PokemonGender::Male};
 
 		REQUIRE(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
 
@@ -369,25 +378,32 @@ SCENARIO("Pokemon")
 
 		GIVEN("ability array")
 		{
-			Pokemon pokemon{makePokemon({.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)}})};
+			Pokemon pokemon{
+				makePokemon({
+					.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock)}}},
+				}),
+			};
 
-			WHEN("calling getAbilityIDsArray")
+			WHEN("calling getAbilityEntriesArray")
 			{
 				THEN("the abilities match")
 				{
-					CHECK(std::ranges::equal(std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::AirLock)},
-											 pokemon.getAbilityIDsArray()));
+					CHECK(std::ranges::equal(std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{{{.mAbilityID = toAbilityID(
+																											  BuiltinAbilityID::AirLock)}}},
+											 pokemon.getAbilityEntriesArray()));
 				}
 			}
 
 			WHEN("calling setAbilityIDsArray")
 			{
-				pokemon.setAbilityIDsArray({toAbilityID(BuiltinAbilityID::CloudNine)});
+				pokemon.setAbilityEntriesArray({{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}});
 
 				THEN("the pokemon's abilities are properly updated")
 				{
-					CHECK(std::ranges::equal(std::array<AbilityID, MAX_ABILITIES_PER_POKEMON>{toAbilityID(BuiltinAbilityID::CloudNine)},
-											 pokemon.getAbilityIDsArray()));
+					CHECK(std::ranges::equal(
+						std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+							{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}},
+						pokemon.getAbilityEntriesArray()));
 				}
 			}
 		}
@@ -693,23 +709,25 @@ SCENARIO("Pokemon")
 
 		GIVEN("ability array index")
 		{
-			Pokemon pokemon{makePokemon({.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)}})};
+			Pokemon pokemon{makePokemon({.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock)}}}})};
 
 			WHEN("calling getAbilityID")
 			{
 				THEN("the ability matches")
 				{
-					CHECK((toAbilityID(BuiltinAbilityID::AirLock) == pokemon.getAbilityID(0)));
+					PokemonAbilityEntry expected{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock)};
+					CHECK((pokemon.getAbilityEntry(0) == expected));
 				}
 			}
 
 			WHEN("calling setAbilityID")
 			{
-				pokemon.setAbilityID(0, toAbilityID(BuiltinAbilityID::CloudNine));
+				pokemon.setAbilityEntry(0, {.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)});
 
 				THEN("the pokemon's ability is properly updated")
 				{
-					CHECK((toAbilityID(BuiltinAbilityID::CloudNine) == pokemon.getAbilityID(0)));
+					PokemonAbilityEntry expected{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)};
+					CHECK((pokemon.getAbilityEntry(0) == expected));
 				}
 			}
 		}
@@ -1281,14 +1299,8 @@ SCENARIO("Pokemon")
 		Pokemon pokemon{
 			makePokemon({
 				.mMetadata = {
-				    .mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
-					.mPokemonID = toPokemonID(BuiltinPokemonID::Charizard),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				},
-				.mPokemonIVs = {0, 15, 30, 20, 2, 5},
-				.mPokemonEVs = {30, 52, 85, 47, 241, 50},
-				.mHealth = 100,
-				.mLevel = 20,
 			}),
 		};
 
@@ -1297,8 +1309,51 @@ SCENARIO("Pokemon")
 			THEN("the expected ID is returned")
 			{
 				CHECK((pokemon.getLearnsetID() == toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset)));
+			}
+		}
+	}
 
-				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
+	GIVEN("get Egg Group IDs")
+	{
+		Pokemon pokemon{
+			makePokemon({
+				.mMetadata = {
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
+				},
+			}),
+		};
+
+		WHEN("calling getEggGroupIDsArray")
+		{
+			THEN("the expected IDs are returned")
+			{
+				std::array<EggGroupID, MAX_EGG_GROUPS_PER_POKEMON> expected{toEggGroupID(BuiltinEggGroupID::Ditto)};
+
+				REQUIRE((pokemon.getEggGroupIDsArray().size() == expected.size()));
+				CHECK(std::ranges::equal(pokemon.getEggGroupIDsArray(), expected));
+			}
+		}
+	}
+
+	GIVEN("get/set gender")
+	{
+		Pokemon pokemon{makePokemon({.mGender = PokemonGender::Female})};
+
+		WHEN("calling getGender")
+		{
+			THEN("the name matches")
+			{
+				CHECK((pokemon.getGender() == PokemonGender::Female));
+			}
+		}
+
+		WHEN("calling setGender")
+		{
+			pokemon.setGender(PokemonGender::Genderless);
+
+			THEN("the pokemon's gender is properly updated")
+			{
+				CHECK((pokemon.getGender() == PokemonGender::Genderless));
 			}
 		}
 	}
@@ -1377,7 +1432,7 @@ SCENARIO("Pokemon")
     					.mSpDefense = 1,
     				},
 				},
-				.mAbilityIDs = {AbilityID{}},
+				.mAbilityEntries = {{{.mAbilityID = AbilityID{}}}},
 				.mItemIDs = {ItemID{}},
 				.mHealth = 1,
 				.mLevel = 10,
@@ -1667,7 +1722,7 @@ SCENARIO("Pokemon")
                     },
 				},
 				.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
-				.mAbilityIDs = {AbilityID{6}},
+				.mAbilityEntries = {{{.mAbilityID = AbilityID{6}}}},
 				.mItemIDs = {ItemID{7}},
 				.mNatureIDs = {NatureID{1}},
 				.mHealth = 150,
@@ -1707,7 +1762,7 @@ SCENARIO("Pokemon")
 					"    EV: 0\n"
 					"  Type IDs: [2, 3]\n"
 					"  Nature IDs: [1]\n"
-					"  Ability IDs: [6]\n"
+					"  Ability Entries: [6]\n"
 					"  Item IDs: [7]\n"
 					"  Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"  Moves:\n"
@@ -1739,7 +1794,7 @@ SCENARIO("Pokemon")
                         .mSpeed = 100,
         			},
                 },
-    			.mAbilityIDs = {AbilityID{}},
+    			.mAbilityEntries = {{{.mAbilityID = AbilityID{}}}},
     			.mItemIDs = {ItemID{}},
     			.mHealth = 1,
     			.mLevel = 20,

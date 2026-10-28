@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 10/23/2026
+	@date 10/27/2026
 	@since 0.12.28
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -17,6 +17,7 @@
 #include <unordered_set>
 
 #include "Ability/abilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Item/itemID.h"
@@ -38,11 +39,15 @@
 #include "Validation/Pokemon/pokemonError.h"
 
 #include "pokemon.h"
+#include "pokemonInstantiationContext.h"
+#include "pokemonMeta.h"
 #include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {
 	using PocketCore::Ability::AbilityID;
+	using PocketCore::Ability::NO_ABILITY_ID;
+	using PocketCore::Battle::BattleRandomSources;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -52,6 +57,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::NO_MOVE_ID;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Nature::NO_NATURE_ID;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
 	using PocketCore::Registry::Move::MoveRegistry;
@@ -63,6 +69,8 @@ namespace PocketCore::Pokemon
 	using PocketCore::Validation::Nature::NatureError;
 	using PocketCore::Validation::Pokemon::PokemonError;
 
+	inline constexpr PokemonAbilityEntry DEFAULT_ABILITY_REPLACEMENT_VALUE{.mAbilityID = NO_ABILITY_ID};
+
 	/*! @brief Writes a Pokemon with stable identifier names resolved from runtime registries.
 		@details Ability, item, type, status, and move identifiers are printed with their registered names. Missing registry entries are
 		   printed as `<unregistered>`.
@@ -71,7 +79,7 @@ namespace PocketCore::Pokemon
 		@param[in] registryProvider The registries used to resolve stable identifier names. Its registry pointers may be nullptr.
 		@return The supplied stream after writing the complete representation.
 		@since 0.11.2
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	std::ostream &printPokemonWithNames(std::ostream &outStream, const Pokemon &pokemon, const RegistryProvider &registryProvider);
 
@@ -105,27 +113,38 @@ namespace PocketCore::Pokemon
 	/*! @brief Validates supplied nature IDs and removes duplicates from the destination slots.
 		@details Nonempty input is validated against @p natureRegistry before being copied to the destination prefix. Remaining slots
 		 retain their previous contents before @ref replaceDuplicatesWithNoID removes duplicates and compacts empty slots. Empty input
-		 succeeds without modifying the destination.
+		 fills every destination slot with a distinct registered ID other than @ref PocketCore::Nature::NO_NATURE_ID using
+		 @ref PocketCore::Nature::getRandomNatureIDFromConfiguration, excluding IDs selected for earlier slots.
 		@pre natureIDs.size() <= MAX_NATURES_PER_POKEMON; the caller enforces this bound.
 		@param[in] natureIDs Read-only, non-owning span borrowed for this call; no reference is retained.
 		@param[in,out] validNatureIDs Caller-owned destination array; unused slots should initially contain
 		 @ref PocketCore::Nature::NO_NATURE_ID. No reference is retained.
 		@param[in] natureRegistry Registry borrowed for metadata validation; no reference is retained.
-		@return Success for empty or valid input; otherwise, the metadata-validation error. Validation failure leaves the array unchanged.
+		@param[in] randomSources The random sources used for battle-related numeric types.
+		@param[in] duplicateEntryNatureReplacer Registered ID used as the duplicate-replacement and compaction sentinel for supplied
+	   natures;
+		@return Success after validation or random selection; otherwise, the metadata-validation error,
+		 @ref NatureError::NO_REGISTERED_NATURES, or @ref NatureError::NOT_ENOUGH_REGISTERED_NATURES.
+		 Validation and candidate-count failures leave the array unchanged.
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
-																		   const NatureRegistry &natureRegistry);
+																		   const NatureRegistry &natureRegistry,
+																		   const BattleRandomSources &randomSources,
+																		   const NatureID duplicateEntryNatureReplacer = NO_NATURE_ID);
 
 	/*!
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const AbilityID> abilityIDs, std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &validAbilityIDs,
-		const AbilityRegistry &abilityRegistry);
+		const std::span<const PokemonAbilityEntry> abilityIDs,
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext, const PokemonEncounter &encounterData,
+		const PokemonAbilityEntry duplicateEntryAbilityReplacer = DEFAULT_ABILITY_REPLACEMENT_VALUE);
 
 	/*!
 		@since 0.12.51
@@ -181,6 +200,23 @@ namespace PocketCore::Pokemon
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
+
+	/*!
+		@since 0.12.53
+		@version 0.12.53
+	*/
+	ATTR_NODISCARD std::expected<void, AbilityError> getAbilitiesFromAbilityPool(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
+		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
+		const BattleRandomSources &randomSources);
+
+	/*!
+		@since 0.12.53
+		@version 0.12.53
+	*/
+	ATTR_NODISCARD std::expected<void, AbilityError> getEggAbilities(
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries, const PokemonBreedingContext &breedingContext,
+		const BattleRandomSources &randomSources);
 
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.
 		@details Selects level-up moves whose requirements do not exceed @p pokemonEncounterLevel. For egg encounters, eligible egg moves

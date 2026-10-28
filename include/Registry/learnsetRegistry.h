@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined learnsets.
-	@date 10/13/2026
+	@date 10/26/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -32,6 +32,7 @@ namespace PocketCore::Registry::Learnset
 	using PocketCore::Learnset::LEARNSET_NAME_CHARIZARD;
 	using PocketCore::Learnset::LEARNSET_NAME_CHARMANDER;
 	using PocketCore::Learnset::LEARNSET_NAME_CHARMELEON;
+	using PocketCore::Learnset::LEARNSET_NAME_DITTO;
 	using PocketCore::Learnset::LEARNSET_NAME_IVYSAUR;
 	using PocketCore::Learnset::LEARNSET_NAME_NONE;
 	using PocketCore::Learnset::LEARNSET_NAME_SQUIRTLE;
@@ -47,9 +48,9 @@ namespace PocketCore::Registry::Learnset
 		@details Built-in learnsets are registered during construction with IDs derived from @ref BuiltinLearnsetID. Configuration code may
 	   append, replace, or remove owned metadata through protected mutators while battle-time callers use allocation-free lookup operations.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n), where n is bounded by @ref MAX_LEARNSETS.
-		@date 10/13/2026
+		@date 10/26/2026
 		@since 0.12.50
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class LearnsetRegistry : private FixedMetadataRegistry<LearnsetMeta, LearnsetID, MAX_LEARNSETS, &LearnsetMeta::mLearnsetID>
@@ -70,7 +71,7 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Constructs a registry populated with all built-in learnsets, including None but excluding the FinalLearnset sentinel.
 				@since 0.12.50
-				@version 0.12.51
+				@version 0.12.53
 			 */
 			ATTR_NOINLINE explicit constexpr LearnsetRegistry()
 			{
@@ -81,17 +82,19 @@ namespace PocketCore::Registry::Learnset
 				addBuiltin(
 					{.mName = std::string(LEARNSET_NAME_VENUSAUR), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset)});
 				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_SQUIRTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_WARTORTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_BLASTOISE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset)});
-				addBuiltin(
 					{.mName = std::string(LEARNSET_NAME_CHARMANDER), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset)});
 				addBuiltin(
 					{.mName = std::string(LEARNSET_NAME_CHARMELEON), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset)});
 				addBuiltin(
 					{.mName = std::string(LEARNSET_NAME_CHARIZARD), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset)});
+				addBuiltin(
+					{.mName = std::string(LEARNSET_NAME_SQUIRTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset)});
+				addBuiltin(
+					{.mName = std::string(LEARNSET_NAME_WARTORTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset)});
+				addBuiltin(
+					{.mName = std::string(LEARNSET_NAME_BLASTOISE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset)});
+
+				addBuiltin({.mName = std::string(LEARNSET_NAME_DITTO), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset)});
 			}
 
 			// LCOV_EXCL_STOP

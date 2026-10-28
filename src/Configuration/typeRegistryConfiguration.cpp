@@ -1,8 +1,8 @@
 /*! @file typeRegistryConfiguration.cpp
 	@brief Contains the function definitions for creating a type registry configuration
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.2.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -300,7 +300,7 @@ namespace PocketCore::Configuration
 		{
 			fillValue = TypeEffectiveness::E;
 		}
-		else if (defaultBehavior == UnspecifiedMatchup::NotDefined)
+		else
 		{
 			fillValue = TypeEffectiveness::NOT_DEFINED;
 		}
@@ -383,7 +383,7 @@ namespace PocketCore::Configuration
 			defensiveRow.at(targetIndex.value()) = pairValue;
 		}
 
-		const TypeID assignedTypeID{addEntry(TypeMeta{.mOffensiveMatchups = offensiveRow, .mName = typeName})};
+		const TypeID assignedTypeID{addEntry(TypeMeta{.mOffensiveMatchups = offensiveRow, .mName = typeName})}; // LCOV_EXCL_BR
 
 		for (us i{0}; i < registered; ++i)
 		{

@@ -1,8 +1,8 @@
 /*! @file builtinItemID.h
 	@brief Defines identifiers for items compiled into PocketCore.
-	@date 10/09/2026
+	@date 10/27/2026
 	@since 0.4.1
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -18,6 +19,7 @@
 
 namespace PocketCore::Item
 {
+	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum BuiltinItemID
@@ -38,6 +40,8 @@ namespace PocketCore::Item
 		ChestoBerry,
 		FinalItem,
 	};
+
+	static_assert(MAX_ITEMS_PER_POKEMON < std::to_underlying(BuiltinItemID::FinalItem));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinItemID The built-in item to convert.

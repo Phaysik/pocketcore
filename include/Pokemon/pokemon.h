@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/23/2026
+	@date 10/27/2026
 	@since 0.3.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -25,6 +25,7 @@
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
+#include "EggGroup/eggGroupID.h"
 #include "Interaction/interactionApplicationError.h"
 #include "Interaction/interactionHelpers.h"
 #include "Item/itemID.h"
@@ -58,6 +59,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_NUMERATOR;
 	using PocketCore::Configuration::LEVEL_DAMAGE_FACTOR_OFFSET;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -67,6 +69,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::EggGroupID;
 	using PocketCore::Interaction::applyInteractions;
 	using PocketCore::Interaction::InteractionApplicationError;
 	using PocketCore::Item::ItemID;
@@ -102,9 +105,9 @@ namespace PocketCore::Pokemon
 		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/23/2026
+		@date 10/27/2026
 		@since 0.3.0
-		@version 0.12.52
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -115,23 +118,25 @@ namespace PocketCore::Pokemon
 			/*! @brief Constructs a Pokemon with empty move slots and zero move PP.
 				@param[in] meta Species metadata; its display-name storage must outlive this object.
 				@param[in] level Pokemon level used to compute the level damage factor.
-				@param[in] abilityIDs Fixed ability identifier slots.
+				@param[in] abilityEntries Fixed ability entry slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
 				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
+				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.52
+				@version 0.12.53
 			*/
 			explicit constexpr Pokemon(const PokemonMeta &meta, const us level,
-									   const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+									   const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &abilityEntries,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mTypeIDs{meta.mTypeIDs}, mAbilityIDs{abilityIDs}, mItemIDs{itemIDs},
-				  mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID)
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
+				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mEggGroupIDs(meta.mEggGroupIDs), mTypeIDs{meta.mTypeIDs},
+				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID),
+				  mGender(gender)
 			{
 				mMoveIDs.fill(NO_MOVE_ID);
 				mMaxPP.fill(0);
@@ -154,23 +159,25 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonMeta Species metadata; its display-name storage must outlive this object.
 				@param[in] moveMetas Move metadata borrowed during construction; IDs and PP are copied without retaining references.
 				@param[in] level Pokemon level used to compute the level damage factor.
-				@param[in] abilityIDs Fixed ability identifier slots.
+				@param[in] abilityEntries Fixed ability entry slots.
 				@param[in] itemIDs Fixed held-item identifier slots.
 				@param[in] natureIDs Fixed nature identifier slots.
 				@param[in] natureRegistry The registry used to resolve the incoming nature metadata.
 				@param[in] pokemonIVs Fixed individual values for the Pokemon's base stats.
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
+				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.52
+				@version 0.12.53
 			*/
 			explicit constexpr Pokemon(const PokemonMeta &pokemonMeta, const std::array<MoveMeta, MAX_MOVES_PER_POKEMON> &moveMetas,
-									   const us level, const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs,
+									   const us level, const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &abilityEntries,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
-									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs)
-				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityIDs{abilityIDs},
-				  mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID), mLearnsetID(pokemonMeta.mLearnsetID)
+									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
+				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mEggGroupIDs(pokemonMeta.mEggGroupIDs),
+				  mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				assignMoves(moveMetas);
 
@@ -237,6 +244,16 @@ namespace PocketCore::Pokemon
 				return mPokemonEVs;
 			}
 
+			/*! @brief Returns all egg group identifier slots.
+				@return A read-only reference valid for the object's lifetime.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			ATTR_NODISCARD constexpr const std::span<const EggGroupID> getEggGroupIDsArray() const noexcept
+			{
+				return mEggGroupIDs;
+			}
+
 			/*! @brief Returns maximum PP for every move slot.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.3.0
@@ -267,14 +284,14 @@ namespace PocketCore::Pokemon
 				return mTypeIDs;
 			}
 
-			/*! @brief Returns all ability identifier slots.
+			/*! @brief Returns all ability entry slots.
 				@return A read-only reference valid for the object's lifetime.
 				@since 0.11.6
-				@version 0.12.51
+				@version 0.12.53
 			*/
-			ATTR_NODISCARD constexpr const std::span<const AbilityID> getAbilityIDsArray() const noexcept
+			ATTR_NODISCARD constexpr const std::span<const PokemonAbilityEntry> getAbilityEntriesArray() const noexcept
 			{
-				return mAbilityIDs;
+				return mAbilityEntries;
 			}
 
 			/*! @brief Returns all held-item identifier slots.
@@ -395,18 +412,18 @@ namespace PocketCore::Pokemon
 				return mTypeIDs.at(index);
 			}
 
-			/*! @brief Returns an ability identifier by slot index.
+			/*! @brief Returns an ability entry by slot index.
 				@param[in] index Ability slot index; must be less than MAX_ABILITIES_PER_POKEMON.
-				@return The ability identifier stored in the slot.
+				@return The ability entry stored in the slot.
 				@pre index < MAX_ABILITIES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.53
 			*/
-			ATTR_NODISCARD constexpr AbilityID getAbilityID(const ub index) const
+			ATTR_NODISCARD constexpr PokemonAbilityEntry getAbilityEntry(const ub index) const
 			{
-				assert(index < mAbilityIDs.size());
+				assert(index < mAbilityEntries.size());
 
-				return mAbilityIDs.at(index);
+				return mAbilityEntries.at(index);
 			}
 
 			/*! @brief Returns a held-item identifier by slot index.
@@ -537,14 +554,24 @@ namespace PocketCore::Pokemon
 				return mPokemonID;
 			}
 
-			/*! @brief Returns the stable identifier for the Learnset species.
+			/*! @brief Returns the stable identifier for the learnset.
 				@return The LearnsetID value.
 				@since 0.12.50
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD constexpr LearnsetID getLearnsetID() const noexcept
 			{
 				return mLearnsetID;
+			}
+
+			/*! @brief Returns the gender of the Pokemon.
+				@return The Pokemon's gender.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			ATTR_NODISCARD constexpr PokemonGender getGender() const noexcept
+			{
+				return mGender;
 			}
 
 			// Setters
@@ -633,13 +660,13 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces all ability identifier slots.
-				@param[in] abilityIDs The ability identifiers to store.
+				@param[in] abilityIDs The ability entries to store.
 				@since 0.11.6
-				@version 0.12.2
+				@version 0.12.53
 			*/
-			constexpr void setAbilityIDsArray(const std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> &abilityIDs)
+			constexpr void setAbilityEntriesArray(const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &abilityEntries)
 			{
-				mAbilityIDs = abilityIDs;
+				mAbilityEntries = abilityEntries;
 			}
 
 			/*! @brief Replaces all held-item identifier slots.
@@ -779,16 +806,16 @@ namespace PocketCore::Pokemon
 
 			/*! @brief Sets one ability slot.
 				@param[in] slotIndex Ability slot index; must be less than MAX_ABILITIES_PER_POKEMON.
-				@param[in] abilityID The ability identifier to store.
+				@param[in] abilityID The ability entry to store.
 				@pre slotIndex < MAX_ABILITIES_PER_POKEMON; violation triggers an assertion.
 				@since 0.3.0
-				@version 0.12.17
+				@version 0.12.53
 			*/
-			constexpr void setAbilityID(const ub slotIndex, const AbilityID abilityID)
+			constexpr void setAbilityEntry(const ub slotIndex, const PokemonAbilityEntry &abilityEntry)
 			{
-				assert(slotIndex < mAbilityIDs.size());
+				assert(slotIndex < mAbilityEntries.size());
 
-				mAbilityIDs.at(slotIndex) = abilityID;
+				mAbilityEntries.at(slotIndex) = abilityEntry;
 			}
 
 			/*! @brief Sets one held-item slot.
@@ -945,6 +972,16 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
+			/*! @brief Replaces the Pokemon's gender.
+				@param[in] gender The new gender of the Pokemon.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			constexpr void setGender(const PokemonGender gender) noexcept
+			{
+				mGender = gender;
+			}
+
 			// Utility Functions
 
 			/*! @brief Consumes one PP from a move slot when PP remains.
@@ -1009,7 +1046,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemon The Pokemon to write.
 				@return The supplied stream after writing the representation.
 				@since 0.11.2
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 
@@ -1215,6 +1252,9 @@ namespace PocketCore::Pokemon
 			/*! @brief The owned move identifier slots. */
 			std::array<MoveID, MAX_MOVES_PER_POKEMON> mMoveIDs{};
 
+			/*! @brief The egg groups associated with the Pokemon. */
+			std::array<EggGroupID, MAX_EGG_GROUPS_PER_POKEMON> mEggGroupIDs{};
+
 			/*! @brief The derived maximum-PP snapshots copied from MoveMeta during construction or move replacement. */
 			std::array<ub, MAX_MOVES_PER_POKEMON> mMaxPP{};
 			/*! @brief The mutable current PP for each move slot, initialized from MoveMeta's default PP when a move is assigned. */
@@ -1223,7 +1263,7 @@ namespace PocketCore::Pokemon
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
 
 			/*! @brief The owned ability identifier slots. */
-			std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> mAbilityIDs{};
+			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> mAbilityEntries{};
 			/*! @brief The owned held-item identifier slots. */
 			std::array<ItemID, MAX_ITEMS_PER_POKEMON> mItemIDs{};
 			/*! @brief The owned nature identifier slots. */
@@ -1241,8 +1281,11 @@ namespace PocketCore::Pokemon
 			/*! @brief The stable identifier for the Pokemon species. */
 			PokemonID mPokemonID{};
 
-			/*! @brief The stable identifier for the Learnset species. */
+			/*! @brief The stable identifier for the learnset. */
 			LearnsetID mLearnsetID{};
+
+			/*! @brief The gender of the Pokemon. */
+			PokemonGender mGender{};
 	};
 } // namespace PocketCore::Pokemon
 

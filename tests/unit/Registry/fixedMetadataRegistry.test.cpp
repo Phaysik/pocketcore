@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.7.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -22,6 +22,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::Testing::BuiltinFixedMetaDataID;
 using PocketCore::Testing::CheckpointRegistry;
 using PocketCore::Testing::FixedMetaDataID;
@@ -120,7 +121,7 @@ SCENARIO("FixedMetadataRegistry")
 			REQUIRE(FixedMetaDataID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((FixedMetaDataID.value() == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
+			CHECK((FixedMetaDataID == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
 		}
 	}
 
@@ -138,7 +139,7 @@ SCENARIO("FixedMetadataRegistry")
 			REQUIRE(weatherName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherName.value() == NONE_NAME));
+			CHECK((weatherName == NONE_NAME));
 		}
 	}
 
@@ -201,7 +202,7 @@ SCENARIO("FixedMetadataRegistry")
 
 			REQUIRE(weatherIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((weatherIndex.value() == 0));
+			CHECK((weatherIndex == 0));
 		}
 	}
 
@@ -234,8 +235,122 @@ SCENARIO("FixedMetadataRegistry")
 		}
 	}
 
+	GIVEN("an unregistered storage slot")
+	{
+		CheckpointRegistry stagedRegistry{};
+		CheckpointRegistry originalRegistry{stagedRegistry};
+		us unregisteredIndex{stagedRegistry.getAmountRegistered()};
+		Metadata stagedMetadata{.mName = "Staged", .mID = FixedMetaDataID{200}};
+
+		WHEN("metadata is written without registering the slot")
+		{
+			stagedRegistry.setEntry(unregisteredIndex, stagedMetadata);
+
+			THEN("the storage changes without exposing the entry through registered lookups")
+			{
+				const Metadata *storedMetadata{stagedRegistry.getEntry(unregisteredIndex)};
+				REQUIRE((storedMetadata != nullptr));
+				CHECK((*storedMetadata == stagedMetadata));
+				CHECK((stagedRegistry == originalRegistry));
+				CHECK((stagedRegistry.getAmountRegistered() == originalRegistry.getAmountRegistered()));
+				CHECK((stagedRegistry.getNextID() == originalRegistry.getNextID()));
+				CHECK_FALSE(stagedRegistry.hasEntry(stagedMetadata.mID));
+				CHECK_FALSE(stagedRegistry.hasEntry(stagedMetadata.mName));
+				CHECK_FALSE(stagedRegistry.getID(stagedMetadata.mName).has_value());
+				CHECK((stagedRegistry.getMetadata(stagedMetadata.mID) == nullptr));
+			}
+		}
+	}
+
+	GIVEN("low-level metadata entries sharing a stable ID")
+	{
+		CheckpointRegistry tiedRegistry{};
+		FixedMetaDataID sharedID{200};
+		Metadata firstMetadata{.mName = "First shared ID", .mID = sharedID};
+		Metadata lastMetadata{.mName = "Last shared ID", .mID = sharedID};
+		us originalCount{tiedRegistry.getAmountRegistered()};
+		us originalNextID{tiedRegistry.getNextID()};
+		tiedRegistry.setEntry(0, firstMetadata);
+		tiedRegistry.setEntry(static_cast<us>(originalCount - 1U), lastMetadata);
+
+		THEN("stable-ID lookup deterministically returns the earliest registered entry")
+		{
+			const Metadata *foundMetadata{tiedRegistry.getMetadata(sharedID)};
+			REQUIRE((foundMetadata != nullptr));
+			CHECK((*foundMetadata == firstMetadata));
+			CHECK((tiedRegistry.findIndexByID(sharedID) == 0));
+		}
+
+		WHEN("the last registered entry is removed from the lookup index")
+		{
+			tiedRegistry.decrementAmountRegistered();
+
+			THEN("the earlier equal-ID entry remains registered and searchable")
+			{
+				const Metadata *foundMetadata{tiedRegistry.getMetadata(sharedID)};
+				REQUIRE((foundMetadata != nullptr));
+				CHECK((*foundMetadata == firstMetadata));
+				CHECK((tiedRegistry.getAmountRegistered() == originalCount - 1U));
+				CHECK((tiedRegistry.getNextID() == originalNextID));
+				CHECK((tiedRegistry.findIndexByID(sharedID) == 0));
+				CHECK(tiedRegistry.hasEntry(firstMetadata.mName));
+				CHECK_FALSE(tiedRegistry.hasEntry(lastMetadata.mName));
+			}
+		}
+	}
+
+	GIVEN("the final storage entry is not last in stable-ID order")
+	{
+		CheckpointRegistry compactedRegistry{};
+		const Metadata retainedMetadata{.mName = "Retained high ID", .mID = FixedMetaDataID{200}};
+		const us originalCount{compactedRegistry.getAmountRegistered()};
+		const us originalNextID{compactedRegistry.getNextID()};
+		const FixedMetaDataID removedID{toFixedMetaDataID(BuiltinFixedMetaDataID::Test3)};
+		compactedRegistry.setEntry(0, retainedMetadata);
+
+		WHEN("the final stored entry is removed from the lookup index")
+		{
+			compactedRegistry.decrementAmountRegistered();
+
+			THEN("later index mappings shift without losing retained entries")
+			{
+				const Metadata *foundMetadata{compactedRegistry.getMetadata(retainedMetadata.mID)};
+				REQUIRE((foundMetadata != nullptr));
+				CHECK((*foundMetadata == retainedMetadata));
+				CHECK((compactedRegistry.findIndexByID(retainedMetadata.mID) == 0));
+				CHECK((compactedRegistry.getAmountRegistered() == originalCount - 1U));
+				CHECK((static_cast<us>(compactedRegistry.getRegisteredEntries().size()) == originalCount - 1U));
+				CHECK((compactedRegistry.getNextID() == originalNextID));
+				CHECK(compactedRegistry.hasEntry(toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)));
+				CHECK(compactedRegistry.hasEntry(toFixedMetaDataID(BuiltinFixedMetaDataID::Test2)));
+				CHECK_FALSE(compactedRegistry.hasEntry(removedID));
+				CHECK_FALSE(compactedRegistry.hasEntry(TEST3_NAME));
+			}
+		}
+	}
+
 	GIVEN("restoreCheckpoint")
 	{
+		WHEN("restoring a checkpoint after the same registry loses an entry")
+		{
+			CheckpointRegistry targetRegistry{};
+			auto checkpoint{targetRegistry.createCheckpoint()};
+			targetRegistry.eraseEntry(0);
+			CheckpointRegistry beforeRestore{targetRegistry};
+
+			targetRegistry.restoreCheckpoint(checkpoint);
+
+			THEN("the checkpoint cannot resurrect entries or change the remaining registry")
+			{
+				CHECK((targetRegistry == beforeRestore));
+				CHECK((targetRegistry.getAmountRegistered() == beforeRestore.getAmountRegistered()));
+				CHECK((targetRegistry.getNextID() == beforeRestore.getNextID()));
+				CHECK_FALSE(targetRegistry.hasEntry(NO_ID));
+				CHECK_FALSE(targetRegistry.hasEntry(NONE_NAME));
+				CHECK(targetRegistry.hasEntry(toFixedMetaDataID(BuiltinFixedMetaDataID::Test1)));
+			}
+		}
+
 		WHEN("restoring a checkpoint created by another registry")
 		{
 			CheckpointRegistry sourceRegistry{};

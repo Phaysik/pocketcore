@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the StatusRegistryConfiguration.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("StatusRegistryConfiguration")
 			REQUIRE(statusID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusID.value() == toStatusID(BuiltinStatusID::None)));
+			CHECK((statusID == toStatusID(BuiltinStatusID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("StatusRegistryConfiguration")
 			REQUIRE(statusName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusName.value() == STATUS_NAME_NONE));
+			CHECK((statusName == STATUS_NAME_NONE));
 		}
 	}
 
@@ -443,7 +443,7 @@ SCENARIO("StatusRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toStatusID(BuiltinStatusID::None)));
+					CHECK((result == toStatusID(BuiltinStatusID::None)));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue - 1));
 				}
 			}
@@ -470,7 +470,7 @@ SCENARIO("StatusRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toStatusID(BuiltinStatusID::None)));
+					CHECK((result == toStatusID(BuiltinStatusID::None)));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue - 1));
 				}
 			}

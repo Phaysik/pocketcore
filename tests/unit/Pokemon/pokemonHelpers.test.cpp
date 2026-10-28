@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/23/2026
+	@date 10/27/2026
 	@since 0.12.28
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -15,7 +15,9 @@
 #include <vector>
 
 #include "Ability/abilityID.h"
+#include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
 #include "Item/builtInItemID.h"
@@ -28,6 +30,8 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Pokemon/pokemonEncounter.h"
+#include "Pokemon/pokemonInstantiationContext.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
 #include "Registry/itemRegistry.h"
@@ -45,10 +49,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
@@ -78,6 +84,8 @@ using PocketCore::Pokemon::getValidPokemonMoves;
 using PocketCore::Pokemon::getValidPokemonNatures;
 using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+using PocketCore::Pokemon::PokemonAbilityEntry;
+using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Registry::Ability::AbilityRegistry;
@@ -108,6 +116,7 @@ using PocketCore::Validation::Pokemon::PokemonError;
 SCENARIO("Pokemon free function")
 {
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+	BattleRandomSources randomSources{};
 
 	GIVEN("getValidPokemonNatures")
 	{
@@ -116,7 +125,7 @@ SCENARIO("Pokemon free function")
 
 		WHEN("no passed in nature IDs")
 		{
-			std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry)};
+			std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
 
 			THEN("it returns nothing")
 			{
@@ -130,7 +139,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
 
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry)};
+				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
 
 				THEN("it successfully validates and puts the data in the validNatureIDs")
 				{
@@ -143,7 +152,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NO_NATURE_ID};
 
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry)};
+				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
 
 				THEN("it successfully validates and puts the data in the validNatureIDs")
 				{
@@ -156,7 +165,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NatureID{200}};
 
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry)};
+				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
 
 				THEN("it successfully invalidates and returns an error")
 				{
@@ -170,12 +179,20 @@ SCENARIO("Pokemon free function")
 
 	GIVEN("getValidPokemonAbilities")
 	{
-		std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> validAbilityIDs{};
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
 		AbilityRegistry abilityRegistry{*provider.mAbilityRegistry};
+		PokemonBreedingContext breedingContext{};
+		PokemonEncounter encounterData{};
 
 		WHEN("no passed in ability IDs")
 		{
-			std::expected<void, AbilityError> result{getValidPokemonAbilities({}, validAbilityIDs, abilityRegistry)};
+			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{};
+			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
+
+			std::expected<void, AbilityError> result{
+				getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+										 encounterData),
+			};
 
 			THEN("it returns nothing")
 			{
@@ -187,41 +204,56 @@ SCENARIO("Pokemon free function")
 		{
 			WHEN("calling with valid ability IDs")
 			{
-				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{toAbilityID(BuiltinAbilityID::CloudNine)};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
 
-				std::expected<void, AbilityError> result{getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry)};
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
 
-				THEN("it successfully validates and puts the data in the validAbilityIDs")
+				THEN("it successfully validates and puts the data in the validabilityEntries")
 				{
 					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(abilityIDs, validAbilityIDs));
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
 				}
 			}
 
 			WHEN("calling with NO_ABILITY_ID")
 			{
-				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{NO_ABILITY_ID};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
 
-				std::expected<void, AbilityError> result{getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry)};
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
 
-				THEN("it successfully validates and puts the data in the validAbilityIDs")
+				THEN("it successfully validates and puts the data in the validabilityEntries")
 				{
 					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(abilityIDs, validAbilityIDs));
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
 				}
 			}
 
 			WHEN("calling with invalid ability IDs")
 			{
-				std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> abilityIDs{AbilityID{200}};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = AbilityID{200}}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
 
-				std::expected<void, AbilityError> result{getValidPokemonAbilities(abilityIDs, validAbilityIDs, abilityRegistry)};
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
 
 				THEN("it successfully invalidates and returns an error")
 				{
+					PokemonAbilityEntry expected{.mAbilityID = NO_ABILITY_ID};
+
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
-					CHECK((validAbilityIDs.at(0) == NO_ABILITY_ID));
+					CHECK((validAbilityEntries.at(0) == expected));
 				}
 			}
 		}
@@ -1480,7 +1512,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -1530,8 +1562,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -1562,11 +1595,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1620,7 +1653,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -1673,8 +1706,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -1705,11 +1739,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1763,7 +1797,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -1816,8 +1850,9 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -1848,11 +1883,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -1906,7 +1941,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -1959,8 +1994,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: <unregistered>\n"
+						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -1991,11 +2027,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2049,7 +2085,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -2102,8 +2138,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -2134,11 +2171,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2192,7 +2229,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -2245,8 +2282,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -2277,11 +2315,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2335,7 +2373,7 @@ SCENARIO("Pokemon free function")
     				.mStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
-    				.mAbilityIDs = {toAbilityID(BuiltinAbilityID::AirLock)},
+    				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
     				.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
     				.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)},
     				.mHealth = 150,
@@ -2388,8 +2426,9 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 6\n"
+						"      ID: 9\n"
 						"      Name: Air Lock\n"
+						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
 						"      ID: 1\n"
@@ -2420,11 +2459,11 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 4\n"
+						"      ID: 5\n"
 						"      Name: <unregistered>\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 5\n"
+						"      ID: 6\n"
 						"      Name: <unregistered>\n"
 						"      PP: 20/30\n"
 						"}",

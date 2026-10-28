@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 10/20/2026
+	@date 10/28/2026
 	@since 0.5.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -34,9 +34,9 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 10/20/2026
+		@date 10/28/2026
 		@since 0.5.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	template <typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember,
@@ -263,7 +263,7 @@ namespace PocketCore::Registry
 				@pre @p index < getAmountRegistered().
 				@param[in] index The registered entry to remove.
 				@since 0.8.7
-				@version 0.12.18
+				@version 0.12.53
 			*/
 			ATTR_NOINLINE constexpr void eraseEntry(const us index)
 			{
@@ -278,7 +278,7 @@ namespace PocketCore::Registry
 				--mAmountRegistered;
 				++mMutationVersion;
 				rebuildIDIndex();
-			}
+			} // LCOV_EXCL_BR
 
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.
@@ -309,7 +309,7 @@ namespace PocketCore::Registry
 				@pre Since creating @p checkpoint, the registry has only been mutated by @ref addEntry.
 				@param[in] checkpoint The opaque state returned by @ref createCheckpoint.
 				@since 0.12.18
-				@version 0.12.51
+				@version 0.12.53
 			*/
 			constexpr void restoreCheckpoint(const Checkpoint &checkpoint)
 			{
@@ -328,7 +328,7 @@ namespace PocketCore::Registry
 				mNextID = checkpoint.mNextID;
 				++mMutationVersion;
 				rebuildIDIndex();
-			}
+			} // LCOV_EXCL_BR
 
 			/*! @brief Increments the registered count.
 				@since 0.5.0
