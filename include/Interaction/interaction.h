@@ -1,8 +1,8 @@
 /*! @file interaction.h
 	@brief Defines reusable metadata interactions between objects of the same framework.
-	@date 09/03/2026
+	@date 10/28/2026
 	@since 0.12.16
-	@version 0.12.19
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -43,9 +43,9 @@ namespace PocketCore::Interaction
 	/*! @struct Interaction Core/interaction.h
 		@brief Associates an existing object with the action taken when another object is applied.
 		@tparam ID The stable identifier type shared by the incoming and existing objects.
-		@date 09/03/2026
+		@date 10/28/2026
 		@since 0.12.16
-		@version 0.12.19
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	template <typename ID>
@@ -66,7 +66,7 @@ namespace PocketCore::Interaction
 			ID mExistingID{};
 
 			/*! @brief The action taken between the incoming object and the existing object. */
-			InteractionAction mAction{InteractionAction::Coexist};
+			InteractionAction mAction{InteractionAction::Coexist}; // LCOV_EXCL_BR
 
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};

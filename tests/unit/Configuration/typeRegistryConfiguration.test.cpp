@@ -15,6 +15,8 @@
 #include <format>
 #include <memory>
 #include <optional>
+#include <ranges>
+#include <span>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -310,6 +312,26 @@ SCENARIO("TypeRegistryConfiguration")
 					CHECK(std::ranges::equal(config.getMatchupRow(TYPE_NAME_NONE).value(), FIRE_TYPE_MATCHUP));
 				}
 			}
+
+			WHEN("calling with a row shorter than the registered type count")
+			{
+				std::array<TypeEffectiveness, 2> shortRow{SE, NVE};
+				std::expected<void, RegistryError> result{config.setMatchupRow(TYPE_NAME_FIRE, shortRow)};
+
+				THEN("the supplied matchups are set and the remaining registered matchups are not defined")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getMatchupRow(TYPE_NAME_FIRE).has_value());
+
+					const std::span<const TypeEffectiveness> row{
+						config.getMatchupRow(TYPE_NAME_FIRE).value().first(config.getAmountRegistered()),
+					};
+
+					CHECK(std::ranges::equal(row.first(shortRow.size()), shortRow));
+					CHECK(std::ranges::all_of(row.subspan(shortRow.size()),
+											  [](const TypeEffectiveness matchup) { return matchup == NOT_DEFINED; }));
+				}
+			}
 		}
 
 		WHEN("calling the MatchupPair overload")
@@ -416,6 +438,26 @@ SCENARIO("TypeRegistryConfiguration")
 					REQUIRE(result.has_value());
 					REQUIRE(config.getDefensiveColumn(TYPE_NAME_NONE).has_value());
 					CHECK(std::ranges::equal(config.getDefensiveColumn(TYPE_NAME_NONE).value(), FIRE_TYPE_MATCHUP));
+				}
+			}
+
+			WHEN("calling with a column shorter than the registered type count")
+			{
+				std::array<TypeEffectiveness, 2> shortColumn{SE, NVE};
+				std::expected<void, RegistryError> result{config.setDefensiveColumn(TYPE_NAME_FIRE, shortColumn)};
+
+				THEN("the supplied matchups are set and the remaining registered matchups are not defined")
+				{
+					REQUIRE(result.has_value());
+					REQUIRE(config.getDefensiveColumn(TYPE_NAME_FIRE).has_value());
+
+					const std::span<const TypeEffectiveness> column{
+						config.getDefensiveColumn(TYPE_NAME_FIRE).value() | std::views::take(config.getAmountRegistered()),
+					};
+
+					CHECK(std::ranges::equal(column.first(shortColumn.size()), shortColumn));
+					CHECK(std::ranges::all_of(column.subspan(shortColumn.size()),
+											  [](const TypeEffectiveness matchup) { return matchup == NOT_DEFINED; }));
 				}
 			}
 		}
@@ -547,6 +589,29 @@ SCENARIO("TypeRegistryConfiguration")
 				REQUIRE_FALSE(result.has_value());
 				CHECK((result.error() == RegistryError::MaxCapacity));
 				CHECK((config.getAmountRegistered() == MAX_TYPES));
+			}
+		}
+
+		WHEN("the stable type ID space wraps before the registry reaches capacity")
+		{
+			bool cycledEveryID{true};
+
+			while (cycledEveryID && config.getRuntimeRegistry().getNextTypeID() != NO_TYPE_ID.getValue())
+			{
+				const std::expected<TypeID, RegistryError> added{config.addType(TypeDefinition{.mName = "Recycled"})};
+				cycledEveryID = added.has_value() && config.removeType(added.value()).has_value();
+			}
+
+			const us registeredBefore{config.getAmountRegistered()};
+			std::expected<TypeID, RegistryError> result{config.addType(TypeDefinition{.mName = "AfterWrap"})};
+
+			THEN("registration reports ID exhaustion and nothing is added")
+			{
+				REQUIRE(cycledEveryID);
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == RegistryError::MaxCapacity));
+				CHECK((config.getAmountRegistered() == registeredBefore));
+				CHECK_FALSE(config.hasType("AfterWrap"));
 			}
 		}
 

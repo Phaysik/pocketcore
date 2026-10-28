@@ -1,8 +1,8 @@
 /*! @file interactionHelpers.test.cpp
 	@brief C++ file for running tests for the Interaction application functions.
-	@date 09/29/2026
+	@date 10/28/2026
 	@since 0.12.22
-	@version 0.12.46
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -11,10 +11,13 @@
 #include <array>
 #include <cstddef>
 #include <expected>
+#include <vector>
 
 #include "Core/typedefs.h"
 #include "Interaction/interactionApplicationError.h"
 #include "Interaction/interactionHelpers.testHelper.h"
+#include "Terrain/terrainID.h"
+#include "Weather/weatherID.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -27,9 +30,11 @@ using PocketCore::Interaction::removeCurrent;
 using PocketCore::Interaction::replaceCurrent;
 using PocketCore::Interaction::shiftAndGetNextAvailable;
 using PocketCore::Interaction::willBlockIncoming;
+using PocketCore::Terrain::TerrainID;
 using PocketCore::Testing::TEST_INCOMING_ID;
 using PocketCore::Testing::TestMetadata;
 using PocketCore::Testing::TestRegistry;
+using PocketCore::Weather::WeatherID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -75,6 +80,38 @@ SCENARIO("Interaction Helpers")
 			THEN("it returns true")
 			{
 				CHECK(result);
+			}
+		}
+
+		WHEN("querying nonempty weather interactions")
+		{
+			WeatherID existingID{1};
+			WeatherID otherID{2};
+			std::vector<Interaction<WeatherID>> weatherInteractions{
+				{.mExistingID = existingID, .mAction = InteractionAction::BlockIncoming},
+			};
+
+			THEN("both the weather identifier and action must match")
+			{
+				CHECK(hasInteraction(existingID, InteractionAction::BlockIncoming, weatherInteractions));
+				CHECK_FALSE(hasInteraction(otherID, InteractionAction::BlockIncoming, weatherInteractions));
+				CHECK_FALSE(hasInteraction(existingID, InteractionAction::RemoveCurrent, weatherInteractions));
+			}
+		}
+
+		WHEN("querying nonempty terrain interactions")
+		{
+			TerrainID existingID{1};
+			TerrainID otherID{2};
+			std::vector<Interaction<TerrainID>> terrainInteractions{
+				{.mExistingID = existingID, .mAction = InteractionAction::BlockIncoming},
+			};
+
+			THEN("both the terrain identifier and action must match")
+			{
+				CHECK(hasInteraction(existingID, InteractionAction::BlockIncoming, terrainInteractions));
+				CHECK_FALSE(hasInteraction(otherID, InteractionAction::BlockIncoming, terrainInteractions));
+				CHECK_FALSE(hasInteraction(existingID, InteractionAction::RemoveCurrent, terrainInteractions));
 			}
 		}
 	}
@@ -144,6 +181,18 @@ SCENARIO("Interaction Helpers")
 			{
 				CHECK(result);
 				CHECK((IDs == std::array{5, 7, 0}));
+			}
+		}
+
+		WHEN("multiple replacement targets occur in a four-slot array")
+		{
+			std::array<si, 4> existingIDs{2, 7, 3, 8};
+			bool result{replaceCurrent(5, 0, existingIDs, interactions)};
+
+			THEN("the first target is replaced and later targets are cleared without changing unrelated identifiers")
+			{
+				CHECK(result);
+				CHECK((existingIDs == std::array{5, 7, 0, 8}));
 			}
 		}
 	}

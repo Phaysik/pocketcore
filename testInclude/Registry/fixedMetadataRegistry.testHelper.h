@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistry.testHelper.h
 	@brief Test helper for dealing with FixedMetadataRegistry concepts.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.22
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,8 +105,10 @@ namespace PocketCore::Testing
 
 			using FixedRegistry::addEntry;
 			using FixedRegistry::createCheckpoint;
+			using FixedRegistry::decrementAmountRegistered;
 			using FixedRegistry::eraseEntry;
 			using FixedRegistry::restoreCheckpoint;
+			using FixedRegistry::setEntry;
 	};
 } // namespace PocketCore::Testing
 

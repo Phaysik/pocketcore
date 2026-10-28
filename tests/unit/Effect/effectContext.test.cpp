@@ -1,8 +1,8 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -294,6 +294,16 @@ SCENARIO("EffectContext")
 			THEN("base damage is unchanged")
 			{
 				CHECK((context.applyMultiplier(37, multiplierRegistry) == 37));
+			}
+		}
+
+		GIVEN("null multiplier metadata")
+		{
+			context.setMultiplier(MultiplierID{200}, 1.5);
+
+			THEN("the multiplied damage rounds down")
+			{
+				CHECK((context.applyMultiplier(11, multiplierRegistry) == 16));
 			}
 		}
 
