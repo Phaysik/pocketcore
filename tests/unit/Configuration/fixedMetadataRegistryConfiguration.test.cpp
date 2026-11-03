@@ -1,6 +1,6 @@
 /*! @file fixedMetadataRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the FixedMetadataRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.50
 	@version 0.12.53
 	@author Matthew Moore
@@ -525,6 +525,38 @@ SCENARIO("FixedMetadataRegistryConfiguration")
 					CHECK((result == toFixedMetaDataID(BuiltinFixedMetaDataID::None)));
 					CHECK((config.getAmountRegistered() == finalFixedUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllMetadata")
+	{
+		Metadata definition{.mName = "TestFixedMetadataName"};
+		std::expected<FixedMetaDataID, RegistryError> added{config.addMetadata(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllMetadata();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredEntries().empty());
+				CHECK_FALSE(config.hasEntry(NONE_NAME));
+				CHECK_FALSE(config.hasEntry(added.value()));
+				CHECK((config.getMetadata(NO_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<FixedMetaDataID, RegistryError> readded{config.addMetadata(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

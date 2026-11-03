@@ -1,6 +1,6 @@
 /*! @file itemRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.4.1
 	@version 0.12.53
 	@author Matthew Moore
@@ -48,7 +48,7 @@ namespace PocketCore::Registry::Item
 		@details Built-in items are registered during construction with IDs derived from @ref BuiltinItemID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
-		@date 10/28/2026
+		@date 11/03/2026
 		@since 0.4.1
 		@version 0.12.53
 		@author Matthew Moore
@@ -107,6 +107,7 @@ namespace PocketCore::Registry::Item
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

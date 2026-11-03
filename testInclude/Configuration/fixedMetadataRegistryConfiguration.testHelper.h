@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.testHelper.h
 	@brief Provides a concrete test facade for fixed metadata registry configuration.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -74,6 +74,7 @@ namespace PocketCore::Testing
 			using Base::getRegistry;
 			using Base::hasEntry;
 			using Base::mutateMetadata;
+			using Base::removeAllMetadata;
 			using Base::removeMetadata;
 			using Base::renameMetadata;
 	};

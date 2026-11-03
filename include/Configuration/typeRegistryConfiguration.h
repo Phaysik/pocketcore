@@ -1,6 +1,6 @@
 /*! @file typeRegistryConfiguration.h
 	@brief Contains the function declarations for the user-configurable type registry facade.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.2.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -107,7 +107,7 @@ namespace PocketCore::Configuration
 		@details Provides a high-level API for adding, removing, renaming, and querying types and their matchup relationships. All mutation
 	   methods return @ref std::expected to communicate success or structured error information via @ref RegistryError. Batch operations
 	   provide all-or-nothing (atomic rollback) semantics.
-		@date 10/28/2026
+		@date 11/03/2026
 		@since 0.1.0
 		@version 0.12.53
 	*/
@@ -393,6 +393,16 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<TypeID, RegistryError> removeType(const TypeID typeID);
+
+			/*! @brief Removes every registered type, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllTypes()
+			{
+				removeAllMetadata();
+			}
 
 			/*! @brief Resets all matchup data for a type identified by display name.
 				@details Clears the type's entire offensive row and defensive column to @ref

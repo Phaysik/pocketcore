@@ -1,6 +1,6 @@
 /*! @file eggGroupRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined eggGroups.
-	@date 10/26/2026
+	@date 11/03/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -54,7 +54,7 @@ namespace PocketCore::Registry::EggGroup
 		@details Built-in eggGroups are registered during construction with IDs derived from @ref BuiltinEggGroupID. Configuration code may
 	   append, replace, or remove owned metadata through protected mutators while battle-time callers use allocation-free lookup operations.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n), where n is bounded by @ref MAX_EGG_GROUPS.
-		@date 10/26/2026
+		@date 11/03/2026
 		@since 0.12.53
 		@version 0.12.53
 		@author Matthew Moore
@@ -103,6 +103,7 @@ namespace PocketCore::Registry::EggGroup
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

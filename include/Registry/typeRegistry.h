@@ -1,8 +1,8 @@
 /*! @file typeRegistry.h
 	@brief Provides a compile-time registry for Pokemon types with fixed-capacity storage and lookup.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -88,9 +88,9 @@ namespace PocketCore::Registry::Type
 	   @ref PocketCore::Configuration::Configuration, which mutates the registry through its public getters and setters.
 		@note All lookup operations are O(n) where n is the number of registered types due to linear search over a fixed-size array. This is
 	   acceptable because n is bounded by @ref MAX_TYPES.
-		@date 10/09/2026
+		@date 11/03/2026
 		@since 0.1.0
-		@version 0.12.50
+		@version 0.12.53
 	*/
 	class TypeRegistry : private FixedMetadataRegistry<TypeMeta, TypeID, MAX_TYPES, &TypeMeta::mTypeID, &TypeMeta::mName>
 	{
@@ -218,6 +218,7 @@ namespace PocketCore::Registry::Type
 		protected:
 			using Base::addEntry;
 			using Base::Checkpoint;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

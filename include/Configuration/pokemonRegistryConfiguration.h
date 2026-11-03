@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring pokemon metadata.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -63,9 +63,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal pokemon registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.12.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class PokemonRegistryConfiguration
@@ -224,6 +224,16 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<PokemonID, RegistryError> removePokemon(const PokemonID pokemonID);
+
+			/*! @brief Removes every registered Pokemon, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllPokemons()
+			{
+				removeAllMetadata();
+			}
 	};
 } // namespace PocketCore::Configuration
 

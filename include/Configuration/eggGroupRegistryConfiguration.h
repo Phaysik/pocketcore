@@ -1,6 +1,6 @@
 /*! @file eggGroupRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring eggGroup metadata.
-	@date 10/26/2026
+	@date 11/03/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -38,7 +38,7 @@ namespace PocketCore::Configuration
 			@details Encapsulates the eggGroup-specific error categories and display names used by the generic
 			 @ref FixedMetadataRegistryConfiguration template to report validation and lookup failures with
 			 domain-specific terminology.
-			@date 10/26/2026
+			@date 11/03/2026
 			@since 0.12.53
 			@version 0.12.53
 			@author Matthew Moore
@@ -236,6 +236,16 @@ namespace PocketCore::Configuration
 				@version 0.12.53
 			*/
 			ATTR_NODISCARD std::expected<EggGroupID, RegistryError> removeEggGroup(const EggGroupID eggGroupID);
+
+			/*! @brief Removes every registered egg group, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllEggGroups()
+			{
+				removeAllMetadata();
+			}
 	};
 } // namespace PocketCore::Configuration
 

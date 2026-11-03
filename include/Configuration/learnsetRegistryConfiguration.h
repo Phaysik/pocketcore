@@ -1,8 +1,8 @@
 /*! @file learnsetRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring learnset metadata.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -65,9 +65,9 @@ namespace PocketCore::Configuration
 		@details Supports lookup, addition, batch addition, move learn entry replacement, renaming, and removal. The registry owns copies
 	   of registered names and entries. Custom IDs are assigned monotonically and are preserved during updates and renaming, and are not
 	   reused after removal. Batch additions provide all-or-nothing semantics for reported validation errors.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.12.50
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class LearnsetRegistryConfiguration
@@ -236,6 +236,16 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<LearnsetID, RegistryError> removeLearnset(const LearnsetID learnsetID);
+
+			/*! @brief Removes every registered learnset, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllLearnsets()
+			{
+				removeAllMetadata();
+			}
 	};
 } // namespace PocketCore::Configuration
 

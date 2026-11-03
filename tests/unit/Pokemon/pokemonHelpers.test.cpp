@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <expected>
+#include <memory>
 #include <sstream>
 #include <vector>
 
@@ -19,6 +20,8 @@
 #include "Ability/builtInAbilityID.h"
 #include "Battle/battleRandomSources.h"
 #include "Configuration/constants.h"
+#include "Configuration/itemRegistryConfiguration.h"
+#include "Configuration/natureRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
@@ -41,6 +44,8 @@
 #include "Registry/registryProvider.testHelper.h"
 #include "Status/builtInStatusID.h"
 #include "Type/builtInTypeID.h"
+#include "Utility/Random/callableRandomSource.h"
+#include "Utility/Random/random.testHelper.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
@@ -55,12 +60,14 @@ using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleRandomSources;
+using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEM_POOL_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+using PocketCore::Configuration::NatureRegistryConfiguration;
 using PocketCore::Core::us;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemID;
@@ -106,8 +113,10 @@ using PocketCore::Testing::getNullNatureRegistryProvider;
 using PocketCore::Testing::getNullStatusRegistryProvider;
 using PocketCore::Testing::getNullTypeRegistryProvider;
 using PocketCore::Testing::makePokemon;
+using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Utility::Random::CallableRandomSource;
 using PocketCore::Validation::Ability::AbilityError;
 using PocketCore::Validation::Item::ItemError;
 using PocketCore::Validation::Move::MoveError;
@@ -124,7 +133,8 @@ SCENARIO("Pokemon free function")
 	GIVEN("getValidPokemonNatures")
 	{
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
-		NatureRegistry natureRegistry{*provider.mNatureRegistry};
+		std::unique_ptr<NatureRegistryConfiguration> configRegistryStorage{std::make_unique<NatureRegistryConfiguration>()};
+		NatureRegistry natureRegistry{configRegistryStorage->getRuntimeRegistry()};
 
 		WHEN("no passed in nature IDs")
 		{
@@ -148,6 +158,24 @@ SCENARIO("Pokemon free function")
 				{
 					REQUIRE(result.has_value());
 					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
+				}
+			}
+
+			WHEN("calling with duplicate nature replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
+
+					std::expected<void, NatureError> result{
+						getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, NatureID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
 				}
 			}
 
@@ -224,6 +252,28 @@ SCENARIO("Pokemon free function")
 				}
 			}
 
+			WHEN("calling with duplicate ability replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+						{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+					};
+					std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+
+					std::expected<void, AbilityError> result{
+						getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+												 breedingContext, encounterData, {.mAbilityID = AbilityID{200}}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
 			WHEN("calling with NO_ABILITY_ID")
 			{
 				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
@@ -294,6 +344,25 @@ SCENARIO("Pokemon free function")
 				{
 					REQUIRE(result.has_value());
 					CHECK(std::ranges::equal(itemIDs, validItemIDs));
+				}
+			}
+
+			WHEN("calling with duplicate item replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+					std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
+
+					std::expected<void, ItemError> result{
+						getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, ItemID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
 				}
 			}
 
@@ -1376,14 +1445,20 @@ SCENARIO("Pokemon free function")
 	GIVEN("getValidPokemonIVs")
 	{
 		std::array<us, POKEMON_STAT_COUNT> validPokemonIVs{};
+		CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{5, 8, 20, 25, 14, 31}};
+		randomSources.mIndex = indexSource;
 
 		WHEN("no passed in Pokemon IVs")
 		{
 			std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources)};
 
-			THEN("it returns nothing")
+			THEN("it passes and initializes random ivs")
 			{
-				CHECK(result.has_value());
+				REQUIRE(result.has_value());
+
+				std::array<us, POKEMON_STAT_COUNT> expectedIVs{5, 8, 20, 25, 14, 31};
+
+				CHECK(std::ranges::equal(validPokemonIVs, expectedIVs));
 			}
 		}
 
@@ -1426,9 +1501,10 @@ SCENARIO("Pokemon free function")
 		{
 			std::expected<void, PokemonError> result{getValidPokemonEVs({}, validPokemonEVs)};
 
-			THEN("it returns nothing")
+			THEN("it passes and initializes all evs to 0")
 			{
 				CHECK(result.has_value());
+				CHECK(std::ranges::all_of(validPokemonEVs, [](const us pokemonEV) { return pokemonEV == 0; }));
 			}
 		}
 

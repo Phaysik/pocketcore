@@ -1,6 +1,6 @@
 /*! @file fixedMetadataRegistry.h
 	@brief Provides shared fixed-capacity storage and lookup for metadata registries.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.5.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -34,7 +34,7 @@ namespace PocketCore::Registry
 		@tparam Capacity The maximum number of metadata records stored by the registry.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n). Storage operations do not allocate.
-		@date 10/28/2026
+		@date 11/03/2026
 		@since 0.5.0
 		@version 0.12.53
 		@author Matthew Moore
@@ -279,6 +279,26 @@ namespace PocketCore::Registry
 				++mMutationVersion;
 				rebuildIDIndex();
 			} // LCOV_EXCL_BR
+
+			/*! @brief Removes every registered entry, including built-ins.
+				@details Resets registered storage to default-constructed metadata and empties the stable-ID index. The next stable ID is
+			   preserved so removed IDs are never reassigned. Invalidates all outstanding checkpoints.
+				@post @ref getAmountRegistered() == 0.
+				@note Time complexity is O(n), where n is the registered count. Does not allocate.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			ATTR_NOINLINE constexpr void clearEntries()
+			{
+				for (us index{0}; index < mAmountRegistered; ++index)
+				{
+					mEntries.at(index) = Metadata{};
+				}
+
+				mAmountRegistered = 0;
+				mIndexedAmount = 0;
+				++mMutationVersion;
+			}
 
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.

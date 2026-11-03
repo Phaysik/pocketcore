@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 10/26/2026
+	@date 11/03/2026
 	@since 0.11.6
 	@version 0.12.53
 	@author Matthew Moore
@@ -186,7 +186,7 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 10/26/2026
+		@date 11/03/2026
 		@since 0.11.6
 		@version 0.12.53
 		@author Matthew Moore
@@ -360,6 +360,7 @@ namespace PocketCore::Registry::Pokemon
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

@@ -1,8 +1,8 @@
 /*! @file fixedMetadataRegistryConfiguration.h
 	@brief Provides shared validated lifecycle operations for fixed metadata registries.
-	@date 10/14/2026
+	@date 11/03/2026
 	@since 0.5.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -43,9 +43,9 @@ namespace PocketCore::Configuration
 		@tparam Capacity The registry's fixed maximum entry count.
 		@tparam IDMember A pointer to the StableID member within Metadata.
 		@tparam Policy A domain policy exposing configurationName, entityName, duplicateError, and notFoundError constants.
-		@date 10/14/2026
+		@date 11/03/2026
 		@since 0.5.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	template <typename Registry, typename Metadata, typename StableID, us Capacity, StableID Metadata::*IDMember, typename Policy>
@@ -60,6 +60,7 @@ namespace PocketCore::Configuration
 
 		protected:
 			using Registry::addEntry;
+			using Registry::clearEntries;
 			using Registry::createCheckpoint;
 			using Registry::eraseEntry;
 			using Registry::findIndexByID;
@@ -396,6 +397,18 @@ namespace PocketCore::Configuration
 
 				removeEntry(index.value());
 				return stableID;
+			}
+
+			/*! @brief Removes every registered metadata record, including built-ins.
+				@details Stable IDs are not reused after clearing; subsequent additions continue from the previous next ID.
+				@post @ref getAmountRegistered() == 0.
+				@note Time complexity is O(n), where n is the registered count.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllMetadata()
+			{
+				clearEntries();
 			}
 
 		private:

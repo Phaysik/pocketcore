@@ -1,8 +1,8 @@
 /*! @file natureRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined natures.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -93,9 +93,9 @@ namespace PocketCore::Registry::Nature
 		@details Built-in natures are registered during construction with IDs derived from @ref BuiltinNatureID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_NATURES.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class NatureRegistry : private FixedMetadataRegistry<NatureMeta, NatureID, MAX_NATURES, &NatureMeta::mNatureID>
@@ -267,6 +267,7 @@ namespace PocketCore::Registry::Nature
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;
