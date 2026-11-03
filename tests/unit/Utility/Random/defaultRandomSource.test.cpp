@@ -1,8 +1,8 @@
 /*! @file defaultRandomSource.test.cpp
 	@brief C++ file for running tests for the DefaultRandomSource.
-	@date 10/19/2026
+	@date 11/03/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -20,6 +20,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 using PocketCore::Core::si;
+using PocketCore::Core::ub;
 using PocketCore::Utility::Random::DefaultRandomSource;
 using PocketCore::Utility::Random::getDefaultRandomSource;
 using PocketCore::Utility::Random::IRandomSource;
@@ -58,7 +59,38 @@ SCENARIO("DefaultRandomSource")
 {
 	RandomStateGuard stateGuard{};
 
-	GIVEN("an integral default random source")
+	GIVEN("an unsigned integral default random source")
+	{
+		DefaultRandomSource<ub> source{};
+
+		THEN("generated values stay within the inclusive bounds")
+		{
+			for (ub draw{0}; draw < 100; ++draw)
+			{
+				ub result{source(0, 10)};
+				CHECK((result >= 0));
+				CHECK((result <= 10));
+			}
+		}
+
+		THEN("equal bounds return the only possible value")
+		{
+			CHECK((source(7, 7) == 7));
+		}
+
+		THEN("generation delegates to the shared random utility")
+		{
+			Random::setSeed(42UL);
+			ub expectedFirst{Random::get<ub>(0, 10)};
+			ub expectedSecond{Random::get<ub>(0, 10)};
+			Random::setSeed(42UL);
+
+			CHECK((source(0, 10) == expectedFirst));
+			CHECK((source(0, 10) == expectedSecond));
+		}
+	}
+
+	GIVEN("a signed integral default random source")
 	{
 		DefaultRandomSource<si> source{};
 

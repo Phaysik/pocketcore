@@ -36,6 +36,7 @@ using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::ITEM_NAME_ABILITY_CAPSULE;
 using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
 using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
 using PocketCore::Item::ITEM_NAME_NONE;
@@ -61,6 +62,19 @@ SCENARIO("ItemRegistry")
 
 	GIVEN("a default constructed item registry")
 	{
+		THEN("Ability Capsule has the appropriate properties")
+		{
+			ItemMeta expected{
+				.mName = std::string(ITEM_NAME_ABILITY_CAPSULE),
+				.mTriggers = {},
+				.mItemID = toItemID(BuiltinItemID::AbilityCapsule),
+			};
+
+			const ItemMeta *actual{registry.getItemMetadata(toItemID(BuiltinItemID::AbilityCapsule))};
+
+			CHECK((expected == *actual));
+		}
+
 		THEN("Cheri Berry has the appropriate properties")
 		{
 			ItemMeta expected{

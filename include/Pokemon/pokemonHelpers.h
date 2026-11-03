@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 10/27/2026
+	@date 11/03/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -53,6 +53,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Item::ItemID;
+	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::NO_MOVE_ID;
@@ -148,11 +149,14 @@ namespace PocketCore::Pokemon
 
 	/*!
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID> itemIDs,
 																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
-																	   const ItemRegistry &itemRegistry);
+																	   const std::span<const PokemonItemEntry> itemPool,
+																	   const ItemRegistry &itemRegistry,
+																	   const BattleRandomSources &randomSources,
+																	   const ItemID duplicateEntryItemReplacer = NO_ITEM_ID);
 
 	/*! @brief Validates supplied move IDs or generates moves from a learnset and encounter.
 		@details Nonempty input is validated against @p moveRegistry and copied to the destination prefix without checking learnset
@@ -189,14 +193,15 @@ namespace PocketCore::Pokemon
 
 	/*!
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us> ivs,
-																		std::array<us, POKEMON_STAT_COUNT> &validIVs);
+																		std::array<us, POKEMON_STAT_COUNT> &validIVs,
+																		const BattleRandomSources &randomSources);
 
 	/*!
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonEVs(const std::span<const us> evs,
 																		std::array<us, POKEMON_STAT_COUNT> &validEVs);
@@ -217,6 +222,15 @@ namespace PocketCore::Pokemon
 	ATTR_NODISCARD std::expected<void, AbilityError> getEggAbilities(
 		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries, const PokemonBreedingContext &breedingContext,
 		const BattleRandomSources &randomSources);
+
+	/*!
+		@since 0.12.53
+		@version 0.12.53
+	*/
+	ATTR_NODISCARD std::expected<void, ItemError> getItemsFromItemPool(std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemEntries,
+																	   const std::span<const PokemonItemEntry> itemPool,
+																	   const ItemRegistry &itemRegistry,
+																	   const BattleRandomSources &randomSources);
 
 	/*! @brief Generates the moves available to a Pokemon from its learnset and encounter.
 		@details Selects level-up moves whose requirements do not exceed @p pokemonEncounterLevel. For egg encounters, eligible egg moves

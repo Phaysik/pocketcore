@@ -42,6 +42,11 @@ namespace PocketCore::Configuration
 	*/
 	inline constexpr ub MAX_ABILITY_POOL_PER_POKEMON{10};
 
+	/*! @brief The maximum number of abilities available in one Pokemon's item pool.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub MAX_ITEM_POOL_PER_POKEMON{3};
+
 	/*! @brief The maximum number of registered items.
 		@see docs/config-boundary.md
 	*/

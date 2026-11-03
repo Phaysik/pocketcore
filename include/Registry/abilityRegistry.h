@@ -1,6 +1,6 @@
 /*! @file abilityRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined abilities.
-	@date 10/27/2026
+	@date 11/03/2026
 	@since 0.4.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -28,15 +28,23 @@ namespace PocketCore::Registry::Ability
 {
 	using PocketCore::Ability::ABILITY_NAME_AIR_LOCK;
 	using PocketCore::Ability::ABILITY_NAME_BATTLE_ARMOR;
+	using PocketCore::Ability::ABILITY_NAME_BLAZE;
+	using PocketCore::Ability::ABILITY_NAME_CHLOROPHYLL;
 	using PocketCore::Ability::ABILITY_NAME_CLOUD_NINE;
 	using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
 	using PocketCore::Ability::ABILITY_NAME_ELEVATE;
 	using PocketCore::Ability::ABILITY_NAME_GUTS;
+	using PocketCore::Ability::ABILITY_NAME_IMPOSTER;
 	using PocketCore::Ability::ABILITY_NAME_LEVITATE;
+	using PocketCore::Ability::ABILITY_NAME_LIMBER;
 	using PocketCore::Ability::ABILITY_NAME_NONE;
+	using PocketCore::Ability::ABILITY_NAME_OVERGROW;
+	using PocketCore::Ability::ABILITY_NAME_RAIN_DISH;
+	using PocketCore::Ability::ABILITY_NAME_SOLAR_POWER;
 	using PocketCore::Ability::ABILITY_NAME_SPEED_BOOST;
 	using PocketCore::Ability::ABILITY_NAME_STENCH;
 	using PocketCore::Ability::ABILITY_NAME_STURDY;
+	using PocketCore::Ability::ABILITY_NAME_TORRENT;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
@@ -55,7 +63,7 @@ namespace PocketCore::Registry::Ability
 		@details Built-in abilities are registered during construction with IDs derived from @ref BuiltinAbilityID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ABILITIES.
-		@date 10/27/2026
+		@date 11/03/2026
 		@since 0.4.0
 		@version 0.12.53
 		@author Matthew Moore
@@ -117,6 +125,12 @@ namespace PocketCore::Registry::Ability
 				});
 
 				addBuiltin({
+					.mName = std::string(ABILITY_NAME_LIMBER),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Limber),
+				});
+
+				addBuiltin({
 					.mName = std::string(ABILITY_NAME_CLOUD_NINE),
 					.mTriggers = {},
 					.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
@@ -129,15 +143,55 @@ namespace PocketCore::Registry::Ability
 				});
 
 				addBuiltin({
+					.mName = std::string(ABILITY_NAME_CHLOROPHYLL),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll),
+				});
+
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_RAIN_DISH),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish),
+				});
+
+				addBuiltin({
 					.mName = std::string(ABILITY_NAME_GUTS),
 					.mTriggers = {},
 					.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
 				});
 
 				addBuiltin({
+					.mName = std::string(ABILITY_NAME_OVERGROW),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow),
+				});
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_BLAZE),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+				});
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_TORRENT),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent),
+				});
+
+				addBuiltin({
 					.mName = std::string(ABILITY_NAME_AIR_LOCK),
 					.mTriggers = {},
 					.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock),
+				});
+
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_SOLAR_POWER),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower),
+				});
+
+				addBuiltin({
+					.mName = std::string(ABILITY_NAME_IMPOSTER),
+					.mTriggers = {},
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter),
 				});
 
 				addBuiltin({

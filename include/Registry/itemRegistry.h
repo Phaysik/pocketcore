@@ -1,8 +1,8 @@
 /*! @file itemRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined items.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.4.1
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -34,6 +34,7 @@ namespace PocketCore::Registry::Item
 	using PocketCore::Effect::BuiltinEffectID;
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Item::BuiltinItemID;
+	using PocketCore::Item::ITEM_NAME_ABILITY_CAPSULE;
 	using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
 	using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
 	using PocketCore::Item::ITEM_NAME_NONE;
@@ -47,9 +48,9 @@ namespace PocketCore::Registry::Item
 		@details Built-in items are registered during construction with IDs derived from @ref BuiltinItemID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_ITEMS.
-		@date 10/13/2026
+		@date 10/28/2026
 		@since 0.4.1
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class ItemRegistry : private FixedMetadataRegistry<ItemMeta, ItemID, MAX_ITEMS, &ItemMeta::mItemID>
@@ -70,11 +71,14 @@ namespace PocketCore::Registry::Item
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinItemID.
 				@since 0.4.1
-				@version 0.12.51
+				@version 0.12.53
 			 */
 			ATTR_NOINLINE explicit constexpr ItemRegistry()
 			{
 				addBuiltin({.mName = std::string(ITEM_NAME_NONE), .mTriggers = {}, .mItemID = toItemID(BuiltinItemID::None)});
+				addBuiltin(
+					{.mName = std::string(ITEM_NAME_ABILITY_CAPSULE), .mTriggers = {}, .mItemID = toItemID(BuiltinItemID::AbilityCapsule)});
+
 				addBuiltin({
 					.mName = std::string(ITEM_NAME_CHERI_BERRY),
 					.mTriggers = {{

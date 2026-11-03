@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 10/27/2026
+	@date 11/03/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -56,6 +56,8 @@ using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
+using PocketCore::Configuration::MAX_ITEM_POOL_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -87,6 +89,7 @@ using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
+using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Registry::Ability::AbilityRegistry;
 using PocketCore::Registry::Item::ItemRegistry;
@@ -187,7 +190,7 @@ SCENARIO("Pokemon free function")
 		WHEN("no passed in ability IDs")
 		{
 			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{};
-			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
+			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
 
 			std::expected<void, AbilityError> result{
 				getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
@@ -205,8 +208,9 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with valid ability IDs")
 			{
 				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
-					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}};
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+				};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
 
 				std::expected<void, AbilityError> result{
 					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
@@ -223,7 +227,7 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with NO_ABILITY_ID")
 			{
 				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
 
 				std::expected<void, AbilityError> result{
 					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
@@ -240,7 +244,7 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with invalid ability IDs")
 			{
 				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = AbilityID{200}}}};
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityPool{};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
 
 				std::expected<void, AbilityError> result{
 					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
@@ -266,7 +270,10 @@ SCENARIO("Pokemon free function")
 
 		WHEN("no passed in item IDs")
 		{
-			std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemRegistry)};
+			std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{};
+			std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
+
+			std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
 			THEN("it returns nothing")
 			{
@@ -279,8 +286,9 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with valid item IDs")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemRegistry)};
+				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
 				THEN("it successfully validates and puts the data in the validItemIDs")
 				{
@@ -292,8 +300,9 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with NO_ITEM_ID")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{NO_ITEM_ID};
+				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemRegistry)};
+				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
 				THEN("it successfully validates and puts the data in the validItemIDs")
 				{
@@ -305,8 +314,9 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with invalid item IDs")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{ItemID{200}};
+				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemRegistry)};
+				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
 				THEN("it successfully invalidates and returns an error")
 				{
@@ -1369,7 +1379,7 @@ SCENARIO("Pokemon free function")
 
 		WHEN("no passed in Pokemon IVs")
 		{
-			std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs)};
+			std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources)};
 
 			THEN("it returns nothing")
 			{
@@ -1383,7 +1393,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 24};
 
-				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs)};
+				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources)};
 
 				THEN("it successfully validates and puts the data in the validItemIDs")
 				{
@@ -1396,7 +1406,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 32};
 
-				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs)};
+				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources)};
 
 				THEN("it successfully invalidates and returns an error")
 				{
@@ -1562,12 +1572,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -1706,12 +1716,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -1850,12 +1860,12 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -1994,12 +2004,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: <unregistered>\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -2138,12 +2148,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: <unregistered>\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -2282,12 +2292,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"
@@ -2426,12 +2436,12 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 9\n"
+						"      ID: 15\n"
 						"      Name: Air Lock\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
 						"    [0]:\n"
-						"      ID: 1\n"
+						"      ID: 2\n"
 						"      Name: Cheri Berry\n"
 						"  Non-Volatile Statuses:\n"
 						"    [0]:\n"

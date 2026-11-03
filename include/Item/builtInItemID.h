@@ -1,6 +1,6 @@
 /*! @file builtinItemID.h
 	@brief Defines identifiers for items compiled into PocketCore.
-	@date 10/27/2026
+	@date 10/28/2026
 	@since 0.4.1
 	@version 0.12.53
 	@author Matthew Moore
@@ -19,6 +19,7 @@
 
 namespace PocketCore::Item
 {
+	using PocketCore::Configuration::MAX_ITEM_POOL_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 	using PocketCore::Core::ub;
 
@@ -28,20 +29,22 @@ namespace PocketCore::Item
 		@details This closed enum is only a catalog of built-in items. Runtime state and user-facing APIs use the open @ref ItemID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 08/31/2026
+		@date 10/28/2026
 		@since 0.4.1
-		@version 0.12.13
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	enum class BuiltinItemID : ub
 	{
 		None,
+		AbilityCapsule,
 		CheriBerry,
 		ChestoBerry,
 		FinalItem,
 	};
 
 	static_assert(MAX_ITEMS_PER_POKEMON < std::to_underlying(BuiltinItemID::FinalItem));
+	static_assert(MAX_ITEM_POOL_PER_POKEMON < std::to_underlying(BuiltinItemID::FinalItem));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinItemID The built-in item to convert.

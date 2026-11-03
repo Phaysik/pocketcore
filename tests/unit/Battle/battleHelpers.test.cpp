@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 10/27/2026
+	@date 11/03/2026
 	@since 0.12.45
 	@version 0.12.53
 	@author Matthew Moore
@@ -2563,12 +2563,12 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 9\n"
+						"        ID: 15\n"
 						"        Name: Air Lock\n"
 						"        Classification: Standard\n"
 						"    Items:\n"
 						"      [0]:\n"
-						"        ID: 1\n"
+						"        ID: 2\n"
 						"        Name: Cheri Berry\n"
 						"    Non-Volatile Statuses:\n"
 						"      [0]:\n"
@@ -2794,12 +2794,12 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 9\n"
+						"        ID: 15\n"
 						"        Name: Air Lock\n"
 						"        Classification: Hidden\n"
 						"    Items:\n"
 						"      [0]:\n"
-						"        ID: 1\n"
+						"        ID: 2\n"
 						"        Name: Cheri Berry\n"
 						"    Non-Volatile Statuses:\n"
 						"      [0]:\n"

@@ -1,6 +1,6 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.4.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -29,15 +29,23 @@
 
 using PocketCore::Ability::ABILITY_NAME_AIR_LOCK;
 using PocketCore::Ability::ABILITY_NAME_BATTLE_ARMOR;
+using PocketCore::Ability::ABILITY_NAME_BLAZE;
+using PocketCore::Ability::ABILITY_NAME_CHLOROPHYLL;
 using PocketCore::Ability::ABILITY_NAME_CLOUD_NINE;
 using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
 using PocketCore::Ability::ABILITY_NAME_ELEVATE;
 using PocketCore::Ability::ABILITY_NAME_GUTS;
+using PocketCore::Ability::ABILITY_NAME_IMPOSTER;
 using PocketCore::Ability::ABILITY_NAME_LEVITATE;
+using PocketCore::Ability::ABILITY_NAME_LIMBER;
 using PocketCore::Ability::ABILITY_NAME_NONE;
+using PocketCore::Ability::ABILITY_NAME_OVERGROW;
+using PocketCore::Ability::ABILITY_NAME_RAIN_DISH;
+using PocketCore::Ability::ABILITY_NAME_SOLAR_POWER;
 using PocketCore::Ability::ABILITY_NAME_SPEED_BOOST;
 using PocketCore::Ability::ABILITY_NAME_STENCH;
 using PocketCore::Ability::ABILITY_NAME_STURDY;
+using PocketCore::Ability::ABILITY_NAME_TORRENT;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
@@ -142,7 +150,20 @@ SCENARIO("AbilityRegistry")
 			CHECK((expected == *actual));
 		}
 
-		THEN("CloudNine has the appropriate properties")
+		THEN("Limber has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_LIMBER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Limber),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Limber))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Cloud Nine has the appropriate properties")
 		{
 			AbilityMeta expected{
 				.mName = std::string(ABILITY_NAME_CLOUD_NINE),
@@ -168,6 +189,32 @@ SCENARIO("AbilityRegistry")
 			CHECK((expected == *actual));
 		}
 
+		THEN("Chlorophyll has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_CHLOROPHYLL),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Chlorophyll))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Rain Dish has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_RAIN_DISH),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::RainDish))};
+
+			CHECK((expected == *actual));
+		}
+
 		THEN("Guts has the appropriate properties")
 		{
 			AbilityMeta expected{
@@ -181,7 +228,46 @@ SCENARIO("AbilityRegistry")
 			CHECK((expected == *actual));
 		}
 
-		THEN("AirLock has the appropriate properties")
+		THEN("Overgrow has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_OVERGROW),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Overgrow))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Blaze has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_BLAZE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Blaze))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Torrent has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_TORRENT),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Torrent))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Air Lock has the appropriate properties")
 		{
 			AbilityMeta expected{
 				.mName = std::string(ABILITY_NAME_AIR_LOCK),
@@ -190,6 +276,32 @@ SCENARIO("AbilityRegistry")
 			};
 
 			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::AirLock))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Solar Power has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_SOLAR_POWER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::SolarPower))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Imposter has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_IMPOSTER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Imposter))};
 
 			CHECK((expected == *actual));
 		}

@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.20
 	@version 0.12.53
 	@author Matthew Moore
@@ -16,6 +16,7 @@
 #include <string_view>
 #include <utility>
 
+#include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
 #include "Configuration/pokemonRegistryConfiguration.h"
 #include "Core/typedefs.h"
@@ -30,6 +31,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Configuration::PokemonRegistryConfiguration;
@@ -89,7 +91,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = BULBASAUR_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -107,7 +113,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_IVYSAUR),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = IVYSAUR_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -125,7 +135,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_VENUSAUR),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = VENUSAUR_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -143,7 +157,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMANDER),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = CHARMANDER_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
@@ -161,7 +179,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARMELEON),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = CHARMELEON_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
@@ -179,7 +201,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_CHARIZARD),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = CHARIZARD_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
@@ -197,7 +223,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_SQUIRTLE),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = SQUIRTLE_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -215,7 +245,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_WARTORTLE),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = WARTORTLE_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -233,7 +267,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_BLASTOISE),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = BLASTOISE_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -251,7 +289,11 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mName = std::string(POKEMON_NAME_DITTO),
-				.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Limber), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter), .mClassification = AbilityClassification::Hidden},
+				},},
 				.mBaseStats = DITTO_BASE_STATS,
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},

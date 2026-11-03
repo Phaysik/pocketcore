@@ -1,6 +1,6 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 10/26/2026
+	@date 11/03/2026
 	@since 0.11.6
 	@version 0.12.53
 	@author Matthew Moore
@@ -23,6 +23,7 @@
 #include "Location/locationID.h"
 #include "Move/moveID.h"
 #include "Type/typeID.h"
+#include "Utility/Math/floatUtility.h"
 
 #include "pokemonEncounter.h"
 #include "pokemonID.h"
@@ -35,6 +36,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
 	using PocketCore::Configuration::MAX_EGG_GROUPS_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ENCOUNTERS_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ITEM_POOL_PER_POKEMON;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
 	using PocketCore::Core::ub;
@@ -46,6 +48,7 @@ namespace PocketCore::Pokemon
 	using PocketCore::Location::LocationID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Type::TypeID;
+	using PocketCore::Utility::Math::approximatelyEqualAbsRel;
 
 	/*! @enum PokemonGender
 		@showenumvalues
@@ -100,6 +103,42 @@ namespace PocketCore::Pokemon
 			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
+	/*! @struct PokemonItemEntry Pokemon/pokemonMeta.h
+		@brief Stores an item identifier and its chance for a Pokemon species or form.
+		@details Serves as a data carrier for entries in @ref PokemonMeta::mItemPool.
+		@date 11/03/2026
+		@since 0.12.53
+		@version 0.12.53
+		@author Matthew Moore
+	*/
+	struct PokemonItemEntry
+	{
+			/*! @brief Compares the item identifier and chance of the two entries.
+				@param[in] other The entry to compare; the reference is not retained.
+				@return True when both fields match; otherwise false.
+				@note Supports compile-time and runtime evaluation without throwing. The nodiscard result discourages ignoring the
+			   comparison.
+				@date 10/28/2026
+				@since 0.12.53
+				@version 0.12.53
+				@author Matthew Moore
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const PokemonItemEntry &other) const noexcept
+			{
+				return mItemID == other.mItemID && approximatelyEqualAbsRel(mChance, other.mChance);
+			}
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The stable built-in or user-assigned Item identifier. */
+			ItemID mItemID{};
+
+			/*! @brief The items's chance to spawn. Bounds should be [0.0, 1.0). Defaults to 0.0 which means it will never be selected. */
+			double mChance{0.0};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+	};
+
 	/*! @brief The number of categories defined by @ref PokemonGender.
 		@details Supplies the compile-time array size for @ref PokemonMeta::mGenderPool.
 		@note Assumes contiguous, zero-based enum values with @ref PokemonGender::Genderless as the final value.
@@ -134,6 +173,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The case-sensitive display name stored. */
 			std::string mName{};
+
+			/*! @brief The Pokemon's pool of available items. */
+			std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> mItemPool{};
 
 			/*! @brief The Pokemon's pool of available abilities. */
 			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};

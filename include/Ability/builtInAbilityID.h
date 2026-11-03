@@ -1,6 +1,6 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 10/27/2026
+	@date 11/03/2026
 	@since 0.4.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -29,7 +29,7 @@ namespace PocketCore::Ability
 		@details This closed enum is only a catalog of built-in abilities. Runtime state and user-facing APIs use the open @ref AbilityID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 10/27/2026
+		@date 11/03/2026
 		@since 0.4.0
 		@version 0.12.53
 		@author Matthew Moore
@@ -41,13 +41,23 @@ namespace PocketCore::Ability
 		Drizzle,
 		SpeedBoost,
 		BattleArmor,
-		Sturdy,
+		Sturdy, // 5
 
-		CloudNine, // 13
-		Levitate,  // 26
-		Guts,	   // 62
-		AirLock,   // 76
-		Elevate,   // 313
+		Limber,		 // 7
+		CloudNine,	 // 13
+		Levitate,	 // 26
+		Chlorophyll, // 34
+		RainDish,	 // 44
+		Guts,		 // 62
+
+		Overgrow, // 65
+		Blaze,
+		Torrent, // 67
+
+		AirLock,	// 76
+		SolarPower, // 94
+		Imposter,	// 150
+		Elevate,	// 313
 		FinalAbility,
 	};
 

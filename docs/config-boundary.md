@@ -24,6 +24,7 @@ This document defines the boundary between compile-time storage capacities in `i
 | `MAX_ABILITIES_PER_POKEMON`             | Physical storage capacity    | Pokemon ability array                     | None                                     |
 | `MAX_ABILITY_POOL_PER_POKEMON`          | Physical storage capacity    | Pokemon ability-pool array                | None                                     |
 | `MAX_ITEMS_PER_POKEMON`                 | Physical storage capacity    | Pokemon item array                        | None                                     |
+| `MAX_ITEM_POOL_PER_POKEMON`             | Physical storage capacity    | Pokemon item-pool array                   | None                                     |
 | `MAX_MOVES_PER_POKEMON`                 | Physical storage capacity    | Pokemon move and PP arrays                | None                                     |
 | `MAX_NATURES_PER_POKEMON`               | Physical storage capacity    | Pokemon nature arrays                     | None                                     |
 | `MAX_ENCOUNTERS_PER_POKEMON`            | Physical storage capacity    | Pokemon location arrays                   | None                                     |

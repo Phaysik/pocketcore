@@ -60,6 +60,7 @@
 namespace PocketCore::Registry::Pokemon
 {
 
+	using PocketCore::Ability::AbilityClassification;
 	using PocketCore::Ability::AbilityID;
 	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Ability::BuiltinAbilityID;
@@ -215,7 +216,11 @@ namespace PocketCore::Registry::Pokemon
 				addBuiltin({.mName = std::string(POKEMON_NAME_NONE), .mPokemonID = toPokemonID(BuiltinPokemonID::None)});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BULBASAUR),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = BULBASAUR_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -225,7 +230,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = IVYSAUR_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -235,7 +244,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = VENUSAUR_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
@@ -245,7 +258,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = CHARMANDER_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
@@ -255,7 +272,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = CHARMELEON_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
@@ -265,7 +286,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = CHARIZARD_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
@@ -275,7 +300,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = SQUIRTLE_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -285,7 +314,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = WARTORTLE_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -295,7 +328,11 @@ namespace PocketCore::Registry::Pokemon
 				});
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mItemPool = {},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = BLASTOISE_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
@@ -306,7 +343,10 @@ namespace PocketCore::Registry::Pokemon
 
 				addBuiltin({
 					.mName = std::string(POKEMON_NAME_DITTO),
-					.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::None)}}},
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Limber), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter), .mClassification = AbilityClassification::Hidden},
+					},},
 					.mBaseStats = DITTO_BASE_STATS,
 					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
 					.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},

@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 10/23/2026
+	@date 11/03/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -31,6 +31,7 @@
 #include "EggGroup/builtInEggGroupID.h"
 #include "EggGroup/eggGroupID.h"
 #include "Item/itemID.h"
+#include "Item/itemMeta.h"
 #include "Learnset/learnsetMeta.h"
 #include "Move/builtInMoveID.h"
 #include "Nature/natureHelpers.h"
@@ -67,14 +68,17 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::HIDDEN_ABILITY_CHANCE;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
+	using PocketCore::Configuration::MAX_IV_STAT_VALUE;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
 	using PocketCore::Configuration::REGULAR_ABILITY_CHANCE;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
 	using PocketCore::EggGroup::BuiltinEggGroupID;
 	using PocketCore::EggGroup::EggGroupID;
 	using PocketCore::EggGroup::toEggGroupID;
+	using PocketCore::Item::ItemMeta;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::LearnsetMeta;
@@ -344,8 +348,9 @@ namespace PocketCore::Pokemon
 		else
 		{
 			const auto eligibleAbilityCount{
-				static_cast<std::size_t>(std::ranges::count_if(abilityRegistry.getRegisteredAbilities(),
-															   [](const AbilityMeta &meta) { return meta.mAbilityID != NO_ABILITY_ID; })),
+				static_cast<std::size_t>(
+					std::ranges::count_if(abilityRegistry.getRegisteredAbilities(),
+										  [](const AbilityMeta &meta) noexcept { return meta.mAbilityID != NO_ABILITY_ID; })),
 			};
 
 			if (eligibleAbilityCount == 0)
@@ -385,7 +390,10 @@ namespace PocketCore::Pokemon
 
 	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID> itemIDs,
 																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
-																	   const ItemRegistry &itemRegistry)
+																	   const std::span<const PokemonItemEntry> itemPool,
+																	   const ItemRegistry &itemRegistry,
+																	   const BattleRandomSources &randomSources,
+																	   const ItemID duplicateEntryItemReplacer)
 	{
 		if (!itemIDs.empty())
 		{
@@ -397,10 +405,39 @@ namespace PocketCore::Pokemon
 			std::ranges::transform(itemIDs, validItemIDs.begin(), [](const ItemID itemID) { return itemID; });
 
 			// Remove duplicate entries
-			replaceDuplicatesWithNoID(NO_ITEM_ID, validItemIDs);
+			if (itemRegistry.getItemMetadata(duplicateEntryItemReplacer) == nullptr)
+			{
+				return std::unexpected{ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+			}
+
+			// Remove duplicate entries
+			replaceDuplicatesWithNoID(duplicateEntryItemReplacer, validItemIDs);
 		}
 		else
 		{
+			const auto eligibleItemCount{
+				static_cast<std::size_t>(std::ranges::count_if(itemRegistry.getRegisteredItems(),
+															   [](const ItemMeta &meta) noexcept { return meta.mItemID != NO_ITEM_ID; })),
+			};
+
+			if (eligibleItemCount == 0)
+			{
+				return std::unexpected{ItemError::NO_REGISTERED_ITEMS};
+			}
+
+			if (eligibleItemCount < MAX_ITEMS_PER_POKEMON)
+			{
+				return std::unexpected{ItemError::NOT_ENOUGH_REGISTERED_ITEMS};
+			}
+
+			const std::expected<void, ItemError> itemPoolResult{
+				getItemsFromItemPool(validItemIDs, itemPool, itemRegistry, randomSources),
+			};
+
+			if (!itemPoolResult.has_value())
+			{
+				return std::unexpected{itemPoolResult.error()};
+			}
 		}
 
 		return {};
@@ -442,7 +479,8 @@ namespace PocketCore::Pokemon
 	}
 
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us> ivs,
-																		std::array<us, POKEMON_STAT_COUNT> &validIVs)
+																		std::array<us, POKEMON_STAT_COUNT> &validIVs,
+																		const BattleRandomSources &randomSources)
 	{
 		if (!ivs.empty())
 		{
@@ -455,7 +493,15 @@ namespace PocketCore::Pokemon
 		}
 		else
 		{
+			const auto randomIVValue
+				= [&randomSources](us minimum, us maximum) -> us { return static_cast<us>(randomSources.mIndex.get()(minimum, maximum)); };
+
+			for (const std::size_t index : std::views::iota(std::size_t{0}, POKEMON_STAT_COUNT))
+			{
+				validIVs.at(index) = randomIVValue(MIN_IV_STAT_VALUE, MAX_IV_STAT_VALUE);
+			}
 		}
+
 		return {};
 	}
 
@@ -473,6 +519,7 @@ namespace PocketCore::Pokemon
 		}
 		else
 		{
+			validEVs.fill(0);
 		}
 
 		return {};
@@ -609,6 +656,55 @@ namespace PocketCore::Pokemon
 
 		std::ranges::stable_partition(validAbilityEntries,
 									  [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry.mAbilityID != NO_ABILITY_ID; });
+
+		return {};
+	}
+
+	ATTR_NODISCARD std::expected<void, ItemError> getItemsFromItemPool(std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemEntries,
+																	   const std::span<const PokemonItemEntry> itemPool,
+																	   const ItemRegistry &itemRegistry,
+																	   const BattleRandomSources &randomSources)
+	{
+		std::vector<PokemonItemEntry> candidates;
+
+		for (const PokemonItemEntry &entry : itemPool)
+		{
+			if (entry.mItemID == NO_ITEM_ID)
+			{
+				continue;
+			}
+
+			if (itemRegistry.getItemMetadata(entry.mItemID) == nullptr)
+			{
+				return std::unexpected{ItemError::MISSING_ITEM_METADATA};
+			}
+
+			if (!std::ranges::contains(candidates, entry.mItemID, &PokemonItemEntry::mItemID))
+			{
+				candidates.emplace_back(entry);
+			}
+		}
+
+		if (candidates.empty())
+		{
+			return std::unexpected{ItemError::NOT_ENOUGH_REGISTERED_ITEMS};
+		}
+
+		// Chances are probabilities in [0, 1]; the real source yields [0, 1), so 1.0 always passes and 0.0 never does.
+		std::erase_if(candidates, [&randomSources](const PokemonItemEntry &entry) { return randomSources.mReal.get()(0.0, 1.0) >= entry.mChance; });
+
+		const std::size_t selectedCount{std::min(candidates.size(), validItemEntries.size())};
+
+		for (const std::size_t index : std::views::iota(std::size_t{0}, selectedCount))
+		{
+			const std::size_t candidateIndex{
+				randomSources.mIndex.get()(0, candidates.size() - 1),
+			};
+
+			validItemEntries.at(index) = candidates.at(candidateIndex).mItemID;
+			candidates.at(candidateIndex) = candidates.back();
+			candidates.pop_back();
+		}
 
 		return {};
 	}

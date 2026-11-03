@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/27/2026
+	@date 10/28/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -154,7 +154,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, ItemError> error{
-				getValidPokemonItems(idContext.itemIDs, validItemIDs, *dependencyRegistries->mItemRegistry),
+				getValidPokemonItems(idContext.itemIDs, validItemIDs, pokemonMeta->mItemPool, *dependencyRegistries->mItemRegistry,
+									 randomSources),
 			};
 			!error.has_value())
 		{
@@ -170,7 +171,7 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(ivevContext.ivs, validIVs)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(ivevContext.ivs, validIVs, randomSources)}; !error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
