@@ -1,6 +1,6 @@
 /*! @file locationRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LocationRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.51
 	@version 0.12.53
 	@author Matthew Moore
@@ -477,6 +477,38 @@ SCENARIO("LocationRegistryConfiguration")
 					CHECK((result == toLocationID(BuiltinLocationID::None)));
 					CHECK((config.getAmountRegistered() == finalLocationUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllLocations")
+	{
+		LocationMeta definition{.mName = "TestLocationMetadataName"};
+		std::expected<LocationID, RegistryError> added{config.addLocation(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllLocations();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredLocations().empty());
+				CHECK_FALSE(config.hasLocation(LOCATION_NAME_NONE));
+				CHECK_FALSE(config.hasLocation(added.value()));
+				CHECK((config.getLocationMetadata(NO_LOCATION_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<LocationID, RegistryError> readded{config.addLocation(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getLocationMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

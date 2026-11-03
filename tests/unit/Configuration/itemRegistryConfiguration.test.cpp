@@ -1,6 +1,6 @@
 /*! @file itemRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the ItemRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.5.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -655,6 +655,38 @@ SCENARIO("ItemRegistryConfiguration")
 					CHECK((result == toItemID(BuiltinItemID::None)));
 					CHECK((config.getAmountRegistered() == finalItemUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllItems")
+	{
+		ItemMeta definition{.mName = "TestItemMetadataName"};
+		std::expected<ItemID, RegistryError> added{config.addItem(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllItems();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredItems().empty());
+				CHECK_FALSE(config.hasItem(ITEM_NAME_NONE));
+				CHECK_FALSE(config.hasItem(added.value()));
+				CHECK((config.getItemMetadata(NO_ITEM_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<ItemID, RegistryError> readded{config.addItem(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getItemMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

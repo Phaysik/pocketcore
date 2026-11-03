@@ -284,7 +284,6 @@ namespace PocketCore::Registry
 				@details Resets registered storage to default-constructed metadata and empties the stable-ID index. The next stable ID is
 			   preserved so removed IDs are never reassigned. Invalidates all outstanding checkpoints.
 				@post @ref getAmountRegistered() == 0.
-				@note Time complexity is O(n), where n is the registered count. Does not allocate.
 				@since 0.12.53
 				@version 0.12.53
 			*/
@@ -298,7 +297,7 @@ namespace PocketCore::Registry
 				mAmountRegistered = 0;
 				mIndexedAmount = 0;
 				++mMutationVersion;
-			}
+			} // LCOV_EXCL_BR
 
 			/*! @brief Sets the number of valid entries.
 				@param[in] amount The new registered count.

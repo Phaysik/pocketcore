@@ -1,6 +1,6 @@
 /*! @file weatherRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the WeatherRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.8.7
 	@version 0.12.53
 	@author Matthew Moore
@@ -482,6 +482,38 @@ SCENARIO("WeatherRegistryConfiguration")
 					CHECK((result == toWeatherID(BuiltinWeatherID::None)));
 					CHECK((config.getAmountRegistered() == finalWeatherUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllWeathers")
+	{
+		WeatherMeta definition{.mName = "TestWeatherMetadataName"};
+		std::expected<WeatherID, RegistryError> added{config.addWeather(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllWeathers();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredWeathers().empty());
+				CHECK_FALSE(config.hasWeather(WEATHER_NAME_NONE));
+				CHECK_FALSE(config.hasWeather(added.value()));
+				CHECK((config.getWeatherMetadata(NO_WEATHER_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<WeatherID, RegistryError> readded{config.addWeather(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getWeatherMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

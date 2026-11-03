@@ -1,6 +1,6 @@
 /*! @file moveRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MoveRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.8.7
 	@version 0.12.53
 	@author Matthew Moore
@@ -653,6 +653,38 @@ SCENARIO("MoveRegistryConfiguration")
 					CHECK((result == toMoveID(BuiltinMoveID::None)));
 					CHECK((config.getAmountRegistered() == finalMoveUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllMoves")
+	{
+		MoveMeta definition{.mName = "TestMoveMetadataName"};
+		std::expected<MoveID, RegistryError> added{config.addMove(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllMoves();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredMoves().empty());
+				CHECK_FALSE(config.hasMove(MOVE_NAME_NONE));
+				CHECK_FALSE(config.hasMove(added.value()));
+				CHECK((config.getMoveMetadata(NO_MOVE_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<MoveID, RegistryError> readded{config.addMove(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getMoveMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

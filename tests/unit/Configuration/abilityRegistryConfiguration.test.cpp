@@ -1,6 +1,6 @@
 /*! @file abilityRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the AbilityRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.4.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -660,6 +660,38 @@ SCENARIO("AbilityRegistryConfiguration")
 					CHECK((result == toAbilityID(BuiltinAbilityID::None)));
 					CHECK((config.getAmountRegistered() == finalAbilityUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllAbilities")
+	{
+		AbilityMeta definition{.mName = "TestAbilityMetaName"};
+		std::expected<AbilityID, RegistryError> added{config.addAbility(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllAbilities();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredAbilities().empty());
+				CHECK_FALSE(config.hasAbility(ABILITY_NAME_NONE));
+				CHECK_FALSE(config.hasAbility(added.value()));
+				CHECK((config.getAbilityMetadata(NO_ABILITY_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<AbilityID, RegistryError> readded{config.addAbility(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getAbilityMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

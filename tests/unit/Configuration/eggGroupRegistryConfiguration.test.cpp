@@ -1,6 +1,6 @@
 /*! @file eggGroupRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the EggGroupRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.53
 	@version 0.12.53
 	@author Matthew Moore
@@ -476,6 +476,38 @@ SCENARIO("EggGroupRegistryConfiguration")
 					CHECK((result == toEggGroupID(BuiltinEggGroupID::None)));
 					CHECK((config.getAmountRegistered() == finalEggGroupUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllEggGroups")
+	{
+		EggGroupMeta definition{.mName = "TestEggGroupMetadataName"};
+		std::expected<EggGroupID, RegistryError> added{config.addEggGroup(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllEggGroups();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredEggGroups().empty());
+				CHECK_FALSE(config.hasEggGroup(EGG_GROUP_NAME_NONE));
+				CHECK_FALSE(config.hasEggGroup(added.value()));
+				CHECK((config.getEggGroupMetadata(NO_EGG_GROUP_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<EggGroupID, RegistryError> readded{config.addEggGroup(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getEggGroupMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

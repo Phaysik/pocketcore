@@ -1,6 +1,6 @@
 /*! @file multiplierRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.8.7
 	@version 0.12.53
 	@author Matthew Moore
@@ -477,6 +477,38 @@ SCENARIO("MultiplierRegistryConfiguration")
 					CHECK((result == toMultiplierID(BuiltinMultiplierID::None)));
 					CHECK((config.getAmountRegistered() == finalMultiplierUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllMultipliers")
+	{
+		MultiplierMeta definition{.mName = "TestMultiplierMetadataName"};
+		std::expected<MultiplierID, RegistryError> added{config.addMultiplier(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllMultipliers();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredMultipliers().empty());
+				CHECK_FALSE(config.hasMultiplier(MULTIPLIER_NAME_NONE));
+				CHECK_FALSE(config.hasMultiplier(added.value()));
+				CHECK((config.getMultiplierMetadata(NO_MULTIPLIER_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<MultiplierID, RegistryError> readded{config.addMultiplier(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getMultiplierMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

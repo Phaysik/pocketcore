@@ -1,6 +1,6 @@
 /*! @file effectRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the EffectRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.20
 	@version 0.12.53
 	@author Matthew Moore
@@ -475,6 +475,38 @@ SCENARIO("EffectRegistryConfiguration")
 					CHECK((result == toEffectID(BuiltinEffectID::None)));
 					CHECK((config.getAmountRegistered() == finalEffectUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllEffects")
+	{
+		EffectMeta definition{.mName = "TestEffectMetadataName"};
+		std::expected<EffectID, RegistryError> added{config.addEffect(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllEffects();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredEffects().empty());
+				CHECK_FALSE(config.hasEffect(EFFECT_NAME_NONE));
+				CHECK_FALSE(config.hasEffect(added.value()));
+				CHECK((config.getEffectMetadata(NO_EFFECT_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<EffectID, RegistryError> readded{config.addEffect(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getEffectMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

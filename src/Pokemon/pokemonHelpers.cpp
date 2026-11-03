@@ -691,7 +691,8 @@ namespace PocketCore::Pokemon
 		}
 
 		// Chances are probabilities in [0, 1]; the real source yields [0, 1), so 1.0 always passes and 0.0 never does.
-		std::erase_if(candidates, [&randomSources](const PokemonItemEntry &entry) { return randomSources.mReal.get()(0.0, 1.0) >= entry.mChance; });
+		std::erase_if(candidates,
+					  [&randomSources](const PokemonItemEntry &entry) { return randomSources.mReal.get()(0.0, 1.0) >= entry.mChance; });
 
 		const std::size_t selectedCount{std::min(candidates.size(), validItemEntries.size())};
 

@@ -1,6 +1,6 @@
 /*! @file natureRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the NatureRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.12.20
 	@version 0.12.53
 	@author Matthew Moore
@@ -475,6 +475,38 @@ SCENARIO("NatureRegistryConfiguration")
 					CHECK((result == toNatureID(BuiltinNatureID::None)));
 					CHECK((config.getAmountRegistered() == finalNatureUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllNatures")
+	{
+		NatureMeta definition{.mName = "TestNatureMetadataName"};
+		std::expected<NatureID, RegistryError> added{config.addNature(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllNatures();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredNatures().empty());
+				CHECK_FALSE(config.hasNature(NATURE_NAME_NONE));
+				CHECK_FALSE(config.hasNature(added.value()));
+				CHECK((config.getNatureMetadata(NO_NATURE_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<NatureID, RegistryError> readded{config.addNature(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getNatureMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

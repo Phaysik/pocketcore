@@ -1,6 +1,6 @@
 /*! @file terrainRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TerrainRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.8.7
 	@version 0.12.53
 	@author Matthew Moore
@@ -475,6 +475,38 @@ SCENARIO("TerrainRegistryConfiguration")
 					CHECK((result == toTerrainID(BuiltinTerrainID::None)));
 					CHECK((config.getAmountRegistered() == finalTerrainUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllTerrains")
+	{
+		TerrainMeta definition{.mName = "TestTerrainMetadataName"};
+		std::expected<TerrainID, RegistryError> added{config.addTerrain(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllTerrains();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredTerrains().empty());
+				CHECK_FALSE(config.hasTerrain(TERRAIN_NAME_NONE));
+				CHECK_FALSE(config.hasTerrain(added.value()));
+				CHECK((config.getTerrainMetadata(NO_TERRAIN_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<TerrainID, RegistryError> readded{config.addTerrain(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getTerrainMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

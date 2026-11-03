@@ -1,6 +1,6 @@
 /*! @file typeRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the TypeRegistryConfiguration.
-	@date 10/28/2026
+	@date 11/03/2026
 	@since 0.2.19
 	@version 0.12.53
 	@author Matthew Moore
@@ -1164,6 +1164,38 @@ SCENARIO("TypeRegistryConfiguration")
 					CHECK(std::ranges::equal(config.getMatchupRow(TYPE_NAME_FIRE).value(), expected));
 					CHECK(std::ranges::equal(config.getDefensiveColumn(TYPE_NAME_FIRE).value(), expected));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllTypes")
+	{
+		TypeDefinition definition{.mName = "TestTypeMetadataName"};
+		std::expected<TypeID, RegistryError> added{config.addType(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllTypes();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredTypes().empty());
+				CHECK_FALSE(config.hasType(TYPE_NAME_NONE));
+				CHECK_FALSE(config.hasType(added.value()));
+				CHECK((config.getTypeMetadata(NO_TYPE_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<TypeID, RegistryError> readded{config.addType(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getTypeMetadata(readded.value()) != nullptr));
 			}
 		}
 	}
