@@ -339,7 +339,8 @@ namespace PocketCore::Pokemon
 				std::ranges::remove_if(validAbilityEntries,
 									   [&seenAbilityIDs, duplicateEntryAbilityReplacer](const PokemonAbilityEntry &entry) {
 										   return entry.mAbilityID == duplicateEntryAbilityReplacer.mAbilityID
-											   || !seenAbilityIDs.insert(entry.mAbilityID).second; // LCOV_EXCL_BR - Unreachable while MAX_ABILITIES_PER_POKEMON == 1
+											   || !seenAbilityIDs.insert(entry.mAbilityID)
+													   .second; // LCOV_EXCL_BR - Unreachable while MAX_ABILITIES_PER_POKEMON == 1
 									   }),
 			};
 			std::ranges::fill(emptySlots, duplicateEntryAbilityReplacer);

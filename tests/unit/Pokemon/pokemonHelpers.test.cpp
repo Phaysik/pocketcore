@@ -97,6 +97,7 @@ using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::fillWithValidMoves;
 using PocketCore::Pokemon::getAbilitiesFromAbilityPool;
 using PocketCore::Pokemon::getEggAbilities;
+using PocketCore::Pokemon::getItemsFromItemPool;
 using PocketCore::Pokemon::getValidPokemonAbilities;
 using PocketCore::Pokemon::getValidPokemonEVs;
 using PocketCore::Pokemon::getValidPokemonItems;
@@ -887,7 +888,8 @@ SCENARIO("Pokemon free function")
 	GIVEN("getValidPokemonItems")
 	{
 		std::array<ItemID, MAX_ITEMS_PER_POKEMON> validItemIDs{};
-		ItemRegistry itemRegistry{*provider.mItemRegistry};
+		std::unique_ptr<ItemRegistryConfiguration> configRegistryStorage{std::make_unique<ItemRegistryConfiguration>()};
+		const ItemRegistry &itemRegistry{configRegistryStorage->getRuntimeRegistry()};
 
 		WHEN("no passed in item IDs")
 		{
