@@ -69,7 +69,6 @@ using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
-using PocketCore::Configuration::MAX_ITEM_POOL_PER_POKEMON;
 using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
@@ -304,7 +303,7 @@ SCENARIO("Pokemon free function")
 				{.mAbilityID = toAbilityID(BuiltinAbilityID::Guts), .mClassification = AbilityClassification::Hidden},
 			};
 
-			WHEN("theres no eligble natures in the registry")
+			WHEN("theres no eligble abilities in the registry")
 			{
 				configRegistryStorage->removeAllAbilities();
 
@@ -890,17 +889,56 @@ SCENARIO("Pokemon free function")
 		std::array<ItemID, MAX_ITEMS_PER_POKEMON> validItemIDs{};
 		std::unique_ptr<ItemRegistryConfiguration> configRegistryStorage{std::make_unique<ItemRegistryConfiguration>()};
 		const ItemRegistry &itemRegistry{configRegistryStorage->getRuntimeRegistry()};
+		std::vector<PokemonItemEntry> itemPool{
+			{.mItemID = toItemID(BuiltinItemID::AbilityCapsule), .mChance = 0.1},
+			{.mItemID = toItemID(BuiltinItemID::CheriBerry), .mChance = 0.5},
+			{.mItemID = toItemID(BuiltinItemID::ChestoBerry), .mChance = 0.7},
+		};
 
-		WHEN("no passed in item IDs")
+		GIVEN("no passed in item IDs")
 		{
-			std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{};
-			std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
-
-			std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
-
-			THEN("it returns nothing")
+			WHEN("theres no eligble items in the registry")
 			{
-				CHECK(result.has_value());
+				configRegistryStorage->removeAllItems();
+
+				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+
+				THEN("it returns NOT_ENOUGH_REGISTERED_ITEMS")
+				{
+					REQUIRE(!result.has_value());
+					CHECK((result.error() == ItemError::NOT_ENOUGH_REGISTERED_ITEMS));
+				}
+			}
+
+			WHEN("there's an invalid item ID in the item pool")
+			{
+				itemPool.push_back({.mItemID = ItemID{200}});
+
+				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+
+				THEN("it returns MISSING_ITEM_METADATA")
+				{
+					REQUIRE(!result.has_value());
+					CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
+				}
+			}
+
+			WHEN("there's valid item IDs in the item pool")
+			{
+				CallableRandomSource<double, SequenceRandom<double>> realSource{SequenceRandom<double>{0.3, 0.4, 0.8}};
+				CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{0}};
+
+				randomSources.mReal = realSource;
+				randomSources.mIndex = indexSource;
+
+				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+
+				THEN("it adds the ability IDs to the array")
+				{
+					REQUIRE(result.has_value());
+
+					CHECK((validItemIDs.at(0) == toItemID(BuiltinItemID::CheriBerry)));
+				}
 			}
 		}
 
@@ -909,7 +947,6 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with valid item IDs")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
-				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
 				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
@@ -925,7 +962,6 @@ SCENARIO("Pokemon free function")
 				GIVEN("the default replacement does not have valid move metadata")
 				{
 					std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
-					std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
 					std::expected<void, ItemError> result{
 						getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, ItemID{200}),
@@ -942,7 +978,6 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with NO_ITEM_ID")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{NO_ITEM_ID};
-				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
 				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
@@ -956,7 +991,6 @@ SCENARIO("Pokemon free function")
 			WHEN("calling with invalid item IDs")
 			{
 				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{ItemID{200}};
-				std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> itemPool{};
 
 				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
 
@@ -966,6 +1000,83 @@ SCENARIO("Pokemon free function")
 					CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
 					CHECK((validItemIDs.at(0) == NO_ITEM_ID));
 				}
+			}
+		}
+	}
+
+	GIVEN("getItemsFromItemPool")
+	{
+		std::array<ItemID, MAX_ITEMS_PER_POKEMON> validItemIDs{};
+		std::unique_ptr<ItemRegistryConfiguration> configRegistryStorage{std::make_unique<ItemRegistryConfiguration>()};
+		const ItemRegistry &itemRegistry{configRegistryStorage->getRuntimeRegistry()};
+		std::vector<PokemonItemEntry> itemPool{
+			{.mItemID = NO_ITEM_ID},
+			{.mItemID = toItemID(BuiltinItemID::AbilityCapsule), .mChance = 0.1},
+			{.mItemID = toItemID(BuiltinItemID::CheriBerry), .mChance = 0.5},
+			{.mItemID = toItemID(BuiltinItemID::ChestoBerry), .mChance = 0.7},
+			{.mItemID = toItemID(BuiltinItemID::AbilityCapsule), .mChance = 0.9},
+		};
+
+		WHEN("calling with no selectable entries")
+		{
+			std::expected<void, ItemError> result{
+				getItemsFromItemPool(validItemIDs, {}, itemRegistry, randomSources),
+			};
+
+			THEN("it returns EMPTY_ITEM_POOL")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == ItemError::EMPTY_ITEM_POOL));
+			}
+		}
+
+		WHEN("calling with an invalid ability ID")
+		{
+			itemPool.push_back({.mItemID = ItemID{200}});
+
+			std::expected<void, ItemError> result{
+				getItemsFromItemPool(validItemIDs, itemPool, itemRegistry, randomSources),
+			};
+
+			THEN("it returns MISSING_ITEM_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
+			}
+		}
+
+		WHEN("calling when all items fail their chance")
+		{
+			CallableRandomSource<double, SequenceRandom<double>> realSource{SequenceRandom<double>{0.2, 0.7, 0.9}};
+			randomSources.mReal = realSource;
+
+			std::expected<void, ItemError> result{
+				getItemsFromItemPool(validItemIDs, itemPool, itemRegistry, randomSources),
+			};
+
+			THEN("no items from item pool are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK(std::ranges::all_of(validItemIDs, [](const ItemID itemID) { return itemID == NO_ITEM_ID; }));
+			}
+		}
+
+		WHEN("calling when an item passes")
+		{
+			CallableRandomSource<double, SequenceRandom<double>> realSource{SequenceRandom<double>{0.2, 0.4, 0.9}};
+			CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{0}};
+
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
+
+			std::expected<void, ItemError> result{
+				getItemsFromItemPool(validItemIDs, itemPool, itemRegistry, randomSources),
+			};
+
+			THEN("no items from item pool are added")
+			{
+				REQUIRE(result.has_value());
+				CHECK((validItemIDs.at(0) == toItemID(BuiltinItemID::CheriBerry)));
 			}
 		}
 	}
