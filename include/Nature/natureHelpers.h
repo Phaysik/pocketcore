@@ -1,6 +1,6 @@
 /*! @file natureHelpers.h
 	@brief Houses free functions that aide in handling natures.
-	@date 10/23/2026
+	@date 11/04/2026
 	@since 0.12.26
 	@version 0.12.53
 	@author Matthew Moore
@@ -22,7 +22,6 @@
 #include "Registry/natureRegistry.h"
 #include "Utility/Random/random.h"
 
-#include "builtInNatureID.h"
 #include "natureID.h"
 #include "natureMeta.h"
 
@@ -33,32 +32,11 @@ namespace PocketCore::Nature
 	using PocketCore::Registry::Nature::NatureRegistry;
 	using PocketCore::Utility::Random::Random;
 
-	/*! @brief Selects a built-in nature ID using an injectable random callable.
-		@details Invokes @p func once with inclusive bounds from one past @ref BuiltinNatureID::None to one before
-		   @ref BuiltinNatureID::FinalNature, excluding both sentinel values. The default @ref Random::get uses a uniform distribution.
-		@tparam RandomFunc The callable type satisfying @ref RandomFn for @ref us.
-		@param[in,out] func The callable accepting two inclusive bounds and returning a value of type @ref us. Defaults to
-		   @ref Random::get specialized for @ref us. The callable is forwarded, may update its state, and is not retained.
-		@pre @p func is valid for invocation and returns a value within the supplied bounds.
-		@note Not thread-safe with the default generator unless the caller synchronizes access to its shared state.
-		   Custom callables determine their own synchronization requirements.
-		@return The built-in @ref NatureID wrapping the generated value; the result should not be discarded.
-		@since 0.12.26
-		@version 0.12.53
-	*/
-	template <RandomFn<us> RandomFunc = decltype(&Random::get<us>)>
-	ATTR_NODISCARD constexpr NatureID getRandomNatureIDFromBuiltIns(RandomFunc &&func = &Random::get<us>)
-	{
-		return NatureID{
-			std::invoke(std::forward<RandomFunc>(func), std::to_underlying(BuiltinNatureID::None) + 1,
-						std::to_underlying(BuiltinNatureID::FinalNature) - 1), // FinalNature has no registered metadata so subtract one
-		};
-	}
-
 	/*! @brief Selects a registered nature ID other than @ref NO_NATURE_ID using an injectable random callable.
 		@details Filters @ref NatureRegistry::getRegisteredNatures to exclude entries whose ID is @ref NO_NATURE_ID, then invokes
 		   @p func once with inclusive index bounds [0, eligible entry count - 1] and returns the selected entry's stored ID.
-		   Entries listed in @p excludedNatureIDs are also excluded. IDs need not be contiguous.
+		   Entries listed in @p excludedNatureIDs are also excluded. IDs need not be contiguous. Eligible entries are sorted by ascending
+		   @ref NatureID before indexing, so a given index always maps to the same ID regardless of registration order.
 		   The default @ref Random::get selects eligible entries uniformly.
 		@tparam RandomFunc The callable type satisfying @ref RandomFn for @ref us.
 		@param[in] config The non-owning registry reference, which must remain valid for the call and is not retained or modified.
@@ -75,7 +53,7 @@ namespace PocketCore::Nature
 		   The caller must also prevent registry mutation throughout the call, including from @p func, and meet any custom callable's
 		   synchronization requirements.
 		@return A copy of the selected entry's @ref NatureID, independent of the registry's lifetime; the result should not be discarded.
-		@date 10/23/2026
+		@date 11/04/2026
 		@since 0.12.26
 		@version 0.12.53
 	*/
@@ -83,12 +61,15 @@ namespace PocketCore::Nature
 	ATTR_NODISCARD constexpr NatureID getRandomNatureIDFromConfiguration(const NatureRegistry &config, RandomFunc &&func = &Random::get<us>,
 																		 const std::span<const NatureID> excludedNatureIDs = {})
 	{
-		const std::vector<NatureMeta> metas{
+		std::vector<NatureMeta> metas{
 			std::ranges::to<std::vector<NatureMeta>>(
 				config.getRegisteredNatures() | std::views::filter([excludedNatureIDs](const NatureMeta &meta) {
 					return meta.mNatureID != NO_NATURE_ID && !std::ranges::contains(excludedNatureIDs, meta.mNatureID);
 				})),
 		};
+
+		// Registry order changes with removal compaction; sorting makes the index-to-ID mapping deterministic.
+		std::ranges::sort(metas, std::ranges::less{}, &NatureMeta::mNatureID);
 
 		const us index{std::invoke(std::forward<RandomFunc>(func), us{0}, static_cast<us>(metas.size() - 1))};
 

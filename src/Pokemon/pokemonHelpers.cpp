@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 11/03/2026
+	@date 11/04/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -71,7 +71,10 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_IV_STAT_VALUE;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+	using PocketCore::Configuration::MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL;
+	using PocketCore::Configuration::MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL;
 	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
+	using PocketCore::Configuration::MIN_NATURES_PER_POKEMON_ROLL;
 	using PocketCore::Configuration::REGULAR_ABILITY_CHANCE;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
@@ -278,14 +281,9 @@ namespace PocketCore::Pokemon
 		else
 		{
 			const auto eligibleNatureCount{
-				static_cast<std::size_t>(std::ranges::count_if(natureRegistry.getRegisteredNatures(),
-															   [](const NatureMeta &meta) { return meta.mNatureID != NO_NATURE_ID; })),
+				static_cast<std::size_t>(std::ranges::count_if(
+					natureRegistry.getRegisteredNatures(), [](const NatureMeta &meta) noexcept { return meta.mNatureID != NO_NATURE_ID; })),
 			};
-
-			if (eligibleNatureCount == 0)
-			{
-				return std::unexpected{NatureError::NO_REGISTERED_NATURES};
-			}
 
 			if (eligibleNatureCount < MAX_NATURES_PER_POKEMON)
 			{
@@ -295,7 +293,8 @@ namespace PocketCore::Pokemon
 			const auto randomNatureValue
 				= [&randomSources](us minimum, us maximum) -> us { return static_cast<us>(randomSources.mIndex.get()(minimum, maximum)); };
 
-			for (const std::size_t index : std::views::iota(std::size_t{0}, randomSources.mIndex.get()(1, MAX_NATURES_PER_POKEMON)))
+			for (const std::size_t index :
+				 std::views::iota(std::size_t{0}, randomSources.mIndex.get()(MIN_NATURES_PER_POKEMON_ROLL, MAX_NATURES_PER_POKEMON)))
 			{
 				validNatureIDs.at(index) = getRandomNatureIDFromConfiguration(natureRegistry, randomNatureValue,
 																			  std::span<const NatureID>{validNatureIDs}.first(index));
@@ -340,7 +339,7 @@ namespace PocketCore::Pokemon
 				std::ranges::remove_if(validAbilityEntries,
 									   [&seenAbilityIDs, duplicateEntryAbilityReplacer](const PokemonAbilityEntry &entry) {
 										   return entry.mAbilityID == duplicateEntryAbilityReplacer.mAbilityID
-											   || !seenAbilityIDs.insert(entry.mAbilityID).second;
+											   || !seenAbilityIDs.insert(entry.mAbilityID).second; // LCOV_EXCL_BR - Unreachable while MAX_ABILITIES_PER_POKEMON == 1
 									   }),
 			};
 			std::ranges::fill(emptySlots, duplicateEntryAbilityReplacer);
@@ -352,11 +351,6 @@ namespace PocketCore::Pokemon
 					std::ranges::count_if(abilityRegistry.getRegisteredAbilities(),
 										  [](const AbilityMeta &meta) noexcept { return meta.mAbilityID != NO_ABILITY_ID; })),
 			};
-
-			if (eligibleAbilityCount == 0)
-			{
-				return std::unexpected{AbilityError::NO_REGISTERED_ABILITIES};
-			}
 
 			if (eligibleAbilityCount < MAX_ABILITIES_PER_POKEMON)
 			{
@@ -419,11 +413,6 @@ namespace PocketCore::Pokemon
 				static_cast<std::size_t>(std::ranges::count_if(itemRegistry.getRegisteredItems(),
 															   [](const ItemMeta &meta) noexcept { return meta.mItemID != NO_ITEM_ID; })),
 			};
-
-			if (eligibleItemCount == 0)
-			{
-				return std::unexpected{ItemError::NO_REGISTERED_ITEMS};
-			}
 
 			if (eligibleItemCount < MAX_ITEMS_PER_POKEMON)
 			{
@@ -550,14 +539,14 @@ namespace PocketCore::Pokemon
 			}
 		}
 
-		const std::size_t maximumCount{std::min(candidates.size(), validAbilityEntries.size())};
+		const std::size_t maxSelectableCount{std::min(candidates.size(), validAbilityEntries.size())};
 
-		if (maximumCount == 0)
+		if (maxSelectableCount == 0)
 		{
-			return std::unexpected{AbilityError::NOT_ENOUGH_REGISTERED_ABILITIES};
+			return std::unexpected{AbilityError::EMPTY_ABILITY_POOL};
 		}
 
-		const std::size_t selectedCount{randomSources.mIndex.get()(1, maximumCount)};
+		const std::size_t selectedCount{randomSources.mIndex.get()(MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL, maxSelectableCount)};
 
 		for (const std::size_t index : std::views::iota(std::size_t{0}, selectedCount))
 		{
@@ -636,11 +625,6 @@ namespace PocketCore::Pokemon
 				 return abilityEntry.mAbilityID != NO_ABILITY_ID;
 			 }))
 		{
-			if (destinationIndex == validAbilityEntries.size())
-			{
-				break;
-			}
-
 			const ub inheritanceChance{
 				abilityEntry.mClassification == AbilityClassification::Hidden ? HIDDEN_ABILITY_CHANCE : REGULAR_ABILITY_CHANCE,
 			};
@@ -687,14 +671,22 @@ namespace PocketCore::Pokemon
 
 		if (candidates.empty())
 		{
-			return std::unexpected{ItemError::NOT_ENOUGH_REGISTERED_ITEMS};
+			return std::unexpected{ItemError::EMPTY_ITEM_POOL};
 		}
 
 		// Chances are probabilities in [0, 1]; the real source yields [0, 1), so 1.0 always passes and 0.0 never does.
 		std::erase_if(candidates,
 					  [&randomSources](const PokemonItemEntry &entry) { return randomSources.mReal.get()(0.0, 1.0) >= entry.mChance; });
 
-		const std::size_t selectedCount{std::min(candidates.size(), validItemEntries.size())};
+		// Every chance roll failed, so the Pokemon holds no item.
+		if (candidates.empty())
+		{
+			return {};
+		}
+
+		const std::size_t maxSelectableCount{std::min(candidates.size(), validItemEntries.size())};
+
+		const std::size_t selectedCount{std::max(maxSelectableCount, static_cast<std::size_t>(MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL))};
 
 		for (const std::size_t index : std::views::iota(std::size_t{0}, selectedCount))
 		{

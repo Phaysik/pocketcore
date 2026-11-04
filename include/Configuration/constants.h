@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 10/28/2026
+	@date 11/04/2026
 	@since 0.1.0
 	@version 0.12.53
 	@author Matthew Moore
@@ -378,6 +378,21 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr ub HIDDEN_ABILITY_CHANCE{60};
+
+	/*! @brief The minimum amount of natures a Pokemon can roll. */
+	inline constexpr ub MIN_NATURES_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_NATURES_PER_POKEMON_ROLL <= MAX_NATURES_PER_POKEMON);
+
+	/*! @brief The minimum amount of abilities a Pokemon can roll from their ability pool. */
+	inline constexpr ub MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL <= MAX_ABILITIES_PER_POKEMON);
+
+	/*! @brief The minimum amount of items a Pokemon can roll from their item pool. */
+	inline constexpr ub MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL <= MAX_ITEMS_PER_POKEMON);
 
 } // namespace PocketCore::Configuration
 

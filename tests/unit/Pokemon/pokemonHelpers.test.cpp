@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/03/2026
+	@date 11/04/2026
 	@since 0.12.28
 	@version 0.12.53
 	@author Matthew Moore
@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <expected>
 #include <memory>
 #include <sstream>
@@ -19,10 +20,12 @@
 #include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
 #include "Battle/battleRandomSources.h"
+#include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/constants.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/natureRegistryConfiguration.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Item/builtInItemID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetMeta.h"
@@ -30,6 +33,7 @@
 #include "Move/moveID.h"
 #include "Nature/builtInNatureID.h"
 #include "Nature/natureID.h"
+#include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Pokemon/pokemonEncounter.h"
@@ -51,6 +55,7 @@
 #include "Validation/Move/moveError.h"
 #include "Validation/Nature/natureError.h"
 #include "Validation/Pokemon/pokemonError.h"
+#include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -60,6 +65,7 @@ using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::NO_ABILITY_ID;
 using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleRandomSources;
+using PocketCore::Configuration::AbilityRegistryConfiguration;
 using PocketCore::Configuration::ItemRegistryConfiguration;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::MAX_ABILITY_POOL_PER_POKEMON;
@@ -68,7 +74,10 @@ using PocketCore::Configuration::MAX_ITEMS_PER_POKEMON;
 using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 using PocketCore::Configuration::NatureRegistryConfiguration;
+using PocketCore::Core::ub;
 using PocketCore::Core::us;
+using PocketCore::EggGroup::BuiltinEggGroupID;
+using PocketCore::EggGroup::toEggGroupID;
 using PocketCore::Item::BuiltinItemID;
 using PocketCore::Item::ItemID;
 using PocketCore::Item::NO_ITEM_ID;
@@ -82,9 +91,12 @@ using PocketCore::Move::NO_MOVE_ID;
 using PocketCore::Move::toMoveID;
 using PocketCore::Nature::BuiltinNatureID;
 using PocketCore::Nature::NatureID;
+using PocketCore::Nature::NatureMeta;
 using PocketCore::Nature::NO_NATURE_ID;
 using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::fillWithValidMoves;
+using PocketCore::Pokemon::getAbilitiesFromAbilityPool;
+using PocketCore::Pokemon::getEggAbilities;
 using PocketCore::Pokemon::getValidPokemonAbilities;
 using PocketCore::Pokemon::getValidPokemonEVs;
 using PocketCore::Pokemon::getValidPokemonItems;
@@ -96,6 +108,7 @@ using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Registry::Ability::AbilityRegistry;
@@ -105,6 +118,7 @@ using PocketCore::Registry::Nature::NatureRegistry;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Status::BuiltinStatusID;
 using PocketCore::Status::toStatusID;
+using PocketCore::Testing::FixedRandom;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::getNullAbilityRegistryProvider;
 using PocketCore::Testing::getNullItemRegistryProvider;
@@ -122,6 +136,7 @@ using PocketCore::Validation::Item::ItemError;
 using PocketCore::Validation::Move::MoveError;
 using PocketCore::Validation::Nature::NatureError;
 using PocketCore::Validation::Pokemon::PokemonError;
+using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
 
@@ -134,15 +149,63 @@ SCENARIO("Pokemon free function")
 	{
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
 		std::unique_ptr<NatureRegistryConfiguration> configRegistryStorage{std::make_unique<NatureRegistryConfiguration>()};
-		NatureRegistry natureRegistry{configRegistryStorage->getRuntimeRegistry()};
+		const NatureRegistry &natureRegistry{configRegistryStorage->getRuntimeRegistry()};
 
-		WHEN("no passed in nature IDs")
+		GIVEN("no passed in nature IDs")
 		{
-			std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
-
-			THEN("it returns nothing")
+			WHEN("theres no eligble natures in the registry")
 			{
-				CHECK(result.has_value());
+				configRegistryStorage->removeAllNatures();
+				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+
+				THEN("it returns NOT_ENOUGH_REGISTERED_NATURES")
+				{
+					REQUIRE(!result.has_value());
+					CHECK((result.error() == NatureError::NOT_ENOUGH_REGISTERED_NATURES));
+				}
+			}
+
+			WHEN("selecting a nature from builtins")
+			{
+				CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 5}};
+				randomSources.mIndex = indexSource;
+
+				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+
+				THEN("it returns Naughty Nature")
+				{
+					REQUIRE(result.has_value());
+					CHECK((validNatureIDs.at(0) == toNatureID(BuiltinNatureID::Bold)));
+				}
+			}
+
+			WHEN("selecting a custom nature")
+			{
+				std::expected<NatureID, RegistryError> addedResult{configRegistryStorage->addNature({.mName = "TestNature"})};
+
+				REQUIRE(addedResult.has_value());
+
+				NatureID addedID{addedResult.value()};
+				const NatureMeta *metadata{natureRegistry.getNatureMetadata(addedID)};
+
+				REQUIRE(metadata != nullptr);
+
+				// Eligible natures are sorted by ID and exclude NO_NATURE_ID (0), so ID N maps to index N - 1.
+				const std::size_t nextID{static_cast<std::size_t>(metadata->mNatureID.getValue()) - 1};
+
+				CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, nextID}};
+
+				randomSources.mIndex = indexSource;
+
+				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+
+				THEN("it returns Naughty Nature")
+				{
+					REQUIRE(result.has_value());
+					CHECK((validNatureIDs.at(0) == addedID));
+
+					CHECK((metadata->mName == "TestNature"));
+				}
 			}
 		}
 
@@ -211,23 +274,135 @@ SCENARIO("Pokemon free function")
 	GIVEN("getValidPokemonAbilities")
 	{
 		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
-		AbilityRegistry abilityRegistry{*provider.mAbilityRegistry};
-		PokemonBreedingContext breedingContext{};
+		std::unique_ptr<AbilityRegistryConfiguration> configRegistryStorage{std::make_unique<AbilityRegistryConfiguration>()};
+		const AbilityRegistry &abilityRegistry{configRegistryStorage->getRuntimeRegistry()};
+		Pokemon firstParent{
+			makePokemon({.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}}, .mGender = PokemonGender::Male}),
+		};
+		Pokemon secondParent{
+			makePokemon({
+			    .mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+				.mAbilityEntries = {{
+    				{
+    					.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
+    					.mClassification = AbilityClassification::Standard,
+    				},
+    			},},
+				.mGender = PokemonGender::Female,
+			}),
+		};
+		PokemonBreedingContext breedingContext{.mFirstParent = &firstParent, .mSecondParent = &secondParent};
 		PokemonEncounter encounterData{};
 
-		WHEN("no passed in ability IDs")
+		GIVEN("no passed in ability IDs")
 		{
-			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{};
-			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
-
-			std::expected<void, AbilityError> result{
-				getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
-										 encounterData),
+			std::vector<PokemonAbilityEntry> abilityPool{
+				{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+				{.mAbilityID = toAbilityID(BuiltinAbilityID::Guts), .mClassification = AbilityClassification::Standard},
+				{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+				{.mAbilityID = toAbilityID(BuiltinAbilityID::Guts), .mClassification = AbilityClassification::Hidden},
 			};
 
-			THEN("it returns nothing")
+			WHEN("theres no eligble natures in the registry")
 			{
-				CHECK(result.has_value());
+				configRegistryStorage->removeAllAbilities();
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				THEN("it returns NOT_ENOUGH_REGISTERED_ABILITIES")
+				{
+					REQUIRE(!result.has_value());
+					CHECK((result.error() == AbilityError::NOT_ENOUGH_REGISTERED_ABILITIES));
+				}
+			}
+
+			WHEN("there's an invalid ability ID in the ability pool")
+			{
+				abilityPool.push_back({.mAbilityID = AbilityID{200}});
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				THEN("it returns MISSING_ABILITY_METADATA")
+				{
+					REQUIRE(!result.has_value());
+					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
+				}
+			}
+
+			WHEN("there's valid ability IDs in the ability pool")
+			{
+				CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 1}};
+				randomSources.mIndex = indexSource;
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				PokemonAbilityEntry expected{
+					.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+					.mClassification = AbilityClassification::Standard,
+				};
+
+				THEN("it adds the ability IDs to the array")
+				{
+					REQUIRE(result.has_value());
+
+					CHECK((validAbilityEntries.at(0) == expected));
+				}
+			}
+
+			GIVEN("the encounter is an egg")
+			{
+				encounterData.mOrigin = PokemonOrigin::Egg;
+
+				WHEN("calling with invalid breeding context")
+				{
+					Pokemon newSecondPokemon{makePokemon({.mGender = PokemonGender::Male})};
+					breedingContext.mSecondParent = &newSecondPokemon;
+
+					std::expected<void, AbilityError> result{
+						getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+												 encounterData),
+					};
+
+					THEN("it returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE));
+					}
+				}
+
+				WHEN("calling with valid breeding context")
+				{
+					CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 1}};
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{80}};
+
+					randomSources.mIndex = indexSource;
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{
+						getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+												 encounterData),
+					};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
+						.mClassification = AbilityClassification::Standard,
+					};
+
+					THEN("the ability pool ability is overwritten by the parent's ability")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
 			}
 		}
 
@@ -308,6 +483,402 @@ SCENARIO("Pokemon free function")
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
 					CHECK((validAbilityEntries.at(0) == expected));
+				}
+			}
+		}
+	}
+
+	GIVEN("getAbilitiesFromAbilityPool")
+	{
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
+		std::vector<PokemonAbilityEntry> abilityPool{
+			{.mAbilityID = NO_ABILITY_ID},
+			{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
+			{.mAbilityID = toAbilityID(BuiltinAbilityID::Guts), .mClassification = AbilityClassification::Standard},
+			{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
+			{.mAbilityID = toAbilityID(BuiltinAbilityID::Guts), .mClassification = AbilityClassification::Hidden},
+		};
+		std::unique_ptr<AbilityRegistryConfiguration> configRegistryStorage{std::make_unique<AbilityRegistryConfiguration>()};
+		const AbilityRegistry &abilityRegistry{configRegistryStorage->getRuntimeRegistry()};
+
+		WHEN("calling with no selectable entries")
+		{
+			std::expected<void, AbilityError> result{
+				getAbilitiesFromAbilityPool(validAbilityEntries, {}, abilityRegistry, randomSources),
+			};
+
+			THEN("it returns EMPTY_ABILITY_POOL")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::EMPTY_ABILITY_POOL));
+			}
+		}
+
+		WHEN("calling with an invalid ability ID")
+		{
+			abilityPool.push_back({.mAbilityID = AbilityID{200}});
+
+			std::expected<void, AbilityError> result{
+				getAbilitiesFromAbilityPool(validAbilityEntries, abilityPool, abilityRegistry, randomSources),
+			};
+
+			THEN("it returns MISSING_ABILITY_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
+			}
+		}
+
+		WHEN("calling with an valid ability IDs")
+		{
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 1}};
+			randomSources.mIndex = indexSource;
+
+			std::expected<void, AbilityError> result{
+				getAbilitiesFromAbilityPool(validAbilityEntries, abilityPool, abilityRegistry, randomSources),
+			};
+
+			PokemonAbilityEntry expected{
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+				.mClassification = AbilityClassification::Standard,
+			};
+
+			THEN("it adds the ability IDs to the array")
+			{
+				REQUIRE(result.has_value());
+
+				CHECK((validAbilityEntries.at(0) == expected));
+			}
+		}
+	}
+
+	GIVEN("getEggAbilities")
+	{
+		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
+		Pokemon firstParent{
+			makePokemon({.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}}, .mGender = PokemonGender::Male}),
+		};
+		Pokemon secondParent{
+			makePokemon({
+			    .mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+				.mAbilityEntries = {{
+    				{
+    					.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+    					.mClassification = AbilityClassification::Standard,
+    				},
+    			},},
+				.mGender = PokemonGender::Female,
+			}),
+		};
+		PokemonBreedingContext breedingContext{.mFirstParent = &firstParent, .mSecondParent = &secondParent};
+
+		WHEN("calling when the first parent is null")
+		{
+			breedingContext.mFirstParent = nullptr;
+
+			std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+			THEN("it returns INVALID_BREEDING_CONTEXT")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::INVALID_BREEDING_CONTEXT));
+			}
+		}
+
+		WHEN("calling when the second parent is null")
+		{
+			breedingContext.mSecondParent = nullptr;
+
+			std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+			THEN("it returns INVALID_BREEDING_CONTEXT")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::INVALID_BREEDING_CONTEXT));
+			}
+		}
+
+		WHEN("calling when both parents are male")
+		{
+			secondParent.setGender(PokemonGender::Male);
+
+			std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+			THEN("it returns SAME_SEX_PARENTS_CANT_REPRODUCE")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE));
+			}
+		}
+
+		WHEN("calling when both parents are female")
+		{
+			firstParent.setGender(PokemonGender::Female);
+
+			std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+			THEN("it returns SAME_SEX_PARENTS_CANT_REPRODUCE")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE));
+			}
+		}
+
+		WHEN("calling when the parents's egg groups are not compatible")
+		{
+			Pokemon newSecondPokemon{
+				makePokemon(
+					{.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::HumanLike)}}, .mGender = PokemonGender::Female}),
+			};
+			breedingContext.mSecondParent = &newSecondPokemon;
+
+			std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+			THEN("it returns NO_COMMON_EGG_GROUP")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == AbilityError::NO_COMMON_EGG_GROUP));
+			}
+		}
+
+		GIVEN("calling when inheriting from the second pokemon")
+		{
+			WHEN("the second parent is female with a standard ability")
+			{
+				Pokemon newSecondPokemon{
+					makePokemon({
+						.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+						.mAbilityEntries = {{
+							{
+								.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+								.mClassification = AbilityClassification::Standard,
+							},
+						},},
+						.mGender = PokemonGender::Female,
+					}),
+				};
+				breedingContext.mSecondParent = &newSecondPokemon;
+
+				WHEN("the chance fails")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{81}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					THEN("the ability is not added")
+					{
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::all_of(validAbilityEntries,
+												  [](const PokemonAbilityEntry &entry) { return entry.mAbilityID == NO_ABILITY_ID; }));
+					}
+				}
+
+				WHEN("the array already holds it")
+				{
+					validAbilityEntries.at(0) = {
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{80}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+
+					THEN("the ability is not added and the original is retained")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
+
+				WHEN("the chance passes")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{80}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+
+					THEN("the ability is added")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
+			}
+
+			WHEN("the second parent is male with a standard ability and the first parent is a ditto")
+			{
+				Pokemon newSecondPokemon{
+					makePokemon({
+						.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+						.mAbilityEntries = {{
+							{
+								.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+								.mClassification = AbilityClassification::Standard,
+							},
+						},},
+						.mGender = PokemonGender::Male,
+					}),
+				};
+				Pokemon newFirstPokemon{
+					makePokemon({
+						.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)}},
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+				breedingContext.mFirstParent = &newFirstPokemon;
+				breedingContext.mSecondParent = &newSecondPokemon;
+
+				WHEN("the chance fails")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{81}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					THEN("the ability is not added")
+					{
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::all_of(validAbilityEntries,
+												  [](const PokemonAbilityEntry &entry) { return entry.mAbilityID == NO_ABILITY_ID; }));
+					}
+				}
+
+				WHEN("the array already holds it")
+				{
+					validAbilityEntries.at(0) = {
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{80}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+
+					THEN("the ability is not added and the original is retained")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
+
+				WHEN("the chance passes")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{80}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Standard,
+					};
+
+					THEN("the ability is added")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
+			}
+		}
+
+		GIVEN("calling when inheriting from the first pokemon")
+		{
+			WHEN("the second parent is male with a hidden ability and the first parent is a ditto")
+			{
+				Pokemon newSecondPokemon{
+					makePokemon({
+						.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+						.mGender = PokemonGender::Male,
+					}),
+				};
+				Pokemon newFirstPokemon{
+					makePokemon({
+						.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Fairy)}},
+						.mAbilityEntries = {{
+							{
+								.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+								.mClassification = AbilityClassification::Hidden,
+							},
+						},},
+						.mGender = PokemonGender::Female,
+					}),
+				};
+				breedingContext.mFirstParent = &newFirstPokemon;
+				breedingContext.mSecondParent = &newSecondPokemon;
+
+				WHEN("the chance fails")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{61}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					THEN("the ability is not added")
+					{
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::all_of(validAbilityEntries,
+												  [](const PokemonAbilityEntry &entry) { return entry.mAbilityID == NO_ABILITY_ID; }));
+					}
+				}
+
+				WHEN("the array already holds it")
+				{
+					validAbilityEntries.at(0) = {
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Hidden,
+					};
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{60}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Hidden,
+					};
+
+					THEN("the ability is not added and the original is retained")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
+				}
+
+				WHEN("the chance passes")
+				{
+					CallableRandomSource<ub, FixedRandom<ub>> unsignedSource{FixedRandom<ub>{60}};
+					randomSources.mUnsigned = unsignedSource;
+
+					std::expected<void, AbilityError> result{getEggAbilities(validAbilityEntries, breedingContext, randomSources)};
+
+					PokemonAbilityEntry expected{
+						.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+						.mClassification = AbilityClassification::Hidden,
+					};
+
+					THEN("the ability is added")
+					{
+						REQUIRE(result.has_value());
+						CHECK((validAbilityEntries.at(0) == expected));
+					}
 				}
 			}
 		}
@@ -534,7 +1105,8 @@ SCENARIO("Pokemon free function")
 						getValidPokemonMoves(moveIDs, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
 					};
 
-					THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving the "
+					THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving "
+						 "the "
 						 "other values in their order")
 					{
 						std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
@@ -681,7 +1253,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to the end")
+							THEN("all unique moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to the "
+								 "end")
 							{
 								REQUIRE(result.has_value());
 								CHECK(std::ranges::equal(moveIDs, expected));
@@ -804,7 +1377,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique non-egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to "
+							THEN("all unique non-egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved "
+								 "to "
 								 "the "
 								 "end")
 							{
@@ -924,7 +1498,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("it grabs the top 4 level requirement moves of level up method, and shifts any NO_MOVE_ID entries to the "
+							THEN("it grabs the top 4 level requirement moves of level up method, and shifts any NO_MOVE_ID entries to "
+								 "the "
 								 "end")
 							{
 								REQUIRE(result.has_value());
@@ -964,7 +1539,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique non-egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to "
+							THEN("all unique non-egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved "
+								 "to "
 								 "the end")
 							{
 								REQUIRE(result.has_value());
@@ -1107,7 +1683,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to the end")
+							THEN("all unique moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and moved to the "
+								 "end")
 							{
 								REQUIRE(result.has_value());
 								CHECK(std::ranges::equal(moveIDs, expected));
@@ -1231,7 +1808,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique level-up and egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and "
+							THEN("all unique level-up and egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID "
+								 "and "
 								 "moved to the end")
 							{
 								REQUIRE(result.has_value());
@@ -1389,7 +1967,8 @@ SCENARIO("Pokemon free function")
 								NO_MOVE_ID,
 							};
 
-							THEN("all unique level-up and egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID and "
+							THEN("all unique level-up and egg moves are assigned to moveIDs and duplicate moves are set to NO_MOVE_ID "
+								 "and "
 								 "moved to the end")
 							{
 								REQUIRE(result.has_value());
