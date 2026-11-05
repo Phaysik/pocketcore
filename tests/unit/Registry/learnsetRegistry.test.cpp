@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 10/28/2026
+	@date 11/05/2026
 	@since 0.12.50
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -20,12 +20,14 @@
 #include "Learnset/constants.h"
 #include "Learnset/learnsetID.h"
 #include "Learnset/learnsetMeta.h"
+#include "Move/builtInMoveID.h"
 #include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Configuration::LearnsetRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::Learnset::AcquisitionMethod;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::LEARNSET_NAME_BLASTOISE;
 using PocketCore::Learnset::LEARNSET_NAME_BULBASAUR;
@@ -42,6 +44,8 @@ using PocketCore::Learnset::LearnsetID;
 using PocketCore::Learnset::LearnsetMeta;
 using PocketCore::Learnset::NO_LEARNSET_ID;
 using PocketCore::Learnset::toLearnsetID;
+using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::toMoveID;
 using PocketCore::Registry::Learnset::LearnsetRegistry;
 using PocketCore::Validation::Registry::RegistryError;
 
@@ -64,6 +68,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_BULBASAUR),
+				.mEntries = {
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 			};
 
@@ -76,6 +97,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_IVYSAUR),
+				.mEntries = {
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 			};
 
@@ -88,6 +126,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_VENUSAUR),
+				.mEntries = {
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 			};
 
@@ -100,6 +155,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_CHARMANDER),
+				.mEntries = {
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                        .mLevelRequirement = 4,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 			};
 
@@ -112,6 +184,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_CHARMELEON),
+				.mEntries = {
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                        .mLevelRequirement = 4,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 			};
 
@@ -124,6 +213,28 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_CHARIZARD),
+				.mEntries = {
+				    {
+  						.mMoveID = toMoveID(BuiltinMoveID::DragonClaw),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                        .mLevelRequirement = 4,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 			};
 
@@ -136,6 +247,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_SQUIRTLE),
+				.mEntries = {
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 			};
 
@@ -148,6 +276,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_WARTORTLE),
+				.mEntries = {
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 			};
 
@@ -160,6 +305,23 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_BLASTOISE),
+				.mEntries = {
+   					{
+  						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+  						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+  						.mLevelRequirement = 1,
+  						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+   					},
+                    {
+                        .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                        .mLevelRequirement = 3,
+                        .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                    },
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
 			};
 
@@ -172,6 +334,13 @@ SCENARIO("LearnsetRegistry")
 		{
 			LearnsetMeta expected{
 				.mName = std::string(LEARNSET_NAME_DITTO),
+				.mEntries = {
+				    {
+						.mMoveID = toMoveID(BuiltinMoveID::Transform),
+						.mLevelRequirement = 1,
+						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+					},
+				},
 				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
 			};
 

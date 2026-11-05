@@ -1,8 +1,8 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 10/20/2026
+	@date 11/05/2026
 	@since 0.9.14
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -327,11 +327,15 @@ namespace PocketCore::Battle
 		std::vector<BattleTarget> targets{};
 
 		const auto singleTargetHandler{
-			[&selectedTarget, &source, &targets, &state, rangeID](const Side targetSide, const bool singleAlly = false) {
+			[&selectedTarget, &source, &targets, &state, rangeID](const Side targetSide, const BattleTargetID battleTargetID) {
 				// A supplied selection must identify an eligible target.
 				if (selectedTarget.has_value())
 				{
-					if (selectedTarget->mSide != targetSide || !canTarget(state, source, *selectedTarget, rangeID))
+					const bool selectedTargetCond{
+						battleTargetID == BattleTargetID::SingleOther ? *selectedTarget == source : selectedTarget->mSide != targetSide,
+					};
+
+					if (selectedTargetCond || !canTarget(state, source, *selectedTarget, rangeID))
 					{
 						return true;
 					}
@@ -344,7 +348,12 @@ namespace PocketCore::Battle
 				// Without a selection, implicit targeting is valid only when exactly one target is eligible.
 				appendEligibleTargets(targets, state, source, rangeID, targetSide);
 
-				if (singleAlly)
+				if (battleTargetID == BattleTargetID::SingleOther)
+				{
+					appendEligibleTargets(targets, state, source, rangeID, getOppositeSide(targetSide));
+				}
+
+				if (battleTargetID == BattleTargetID::SingleAlly || battleTargetID == BattleTargetID::SingleOther)
 				{
 					std::erase(targets, source); // Erase self from target selection since BattleTargetID::Self exists
 				}
@@ -362,14 +371,21 @@ namespace PocketCore::Battle
 				break;
 			case BattleTargetID::SingleAlly:
 				// A supplied selection must identify an eligible ally.
-				if (singleTargetHandler(source.mSide, true))
+				if (singleTargetHandler(source.mSide, BattleTargetID::SingleAlly))
 				{
 					return std::unexpected{BattleEngineError::InvalidTarget};
 				}
 
 				break;
 			case BattleTargetID::SingleOpponent:
-				if (singleTargetHandler(getOppositeSide(source.mSide)))
+				if (singleTargetHandler(getOppositeSide(source.mSide), BattleTargetID::SingleOpponent))
+				{
+					return std::unexpected{BattleEngineError::InvalidTarget};
+				}
+
+				break;
+			case BattleTargetID::SingleOther:
+				if (singleTargetHandler(getOppositeSide(source.mSide), BattleTargetID::SingleOther))
 				{
 					return std::unexpected{BattleEngineError::InvalidTarget};
 				}
@@ -383,8 +399,17 @@ namespace PocketCore::Battle
 
 				std::erase(targets, source);
 				break;
+			case BattleTargetID::AllAdjacentOpponents:
+				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, getOppositeSide(source.mSide));
+				break;
 			case BattleTargetID::AllOpponents:
 				appendEligibleTargets(targets, state, source, rangeID, getOppositeSide(source.mSide));
+				break;
+			case BattleTargetID::AllAdjacent:
+				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::A);
+				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::B);
+
+				std::erase(targets, source);
 				break;
 			case BattleTargetID::AllExceptSelf:
 				appendEligibleTargets(targets, state, source, rangeID, Side::A);
