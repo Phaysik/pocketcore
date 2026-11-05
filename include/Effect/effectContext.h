@@ -1,8 +1,8 @@
 /*! @file effectContext.h
 	@brief Contains the effect context
-	@date 10/15/2026
+	@date 11/05/2026
 	@since 0.3.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -165,9 +165,9 @@ namespace PocketCore::Effect
 		@brief Stores the mutable state shared by effects during one effect dispatch.
 		@details The context carries damage results, source metadata, move parameters, target-selection data, hit-attempt state, and
 		 ordered active multipliers. The active multiplier view is non-owning and remains valid until the next multiplier mutation.
-		@date 10/15/2026
+		@date 11/05/2026
 		@since 0.3.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	struct EffectContext
@@ -191,7 +191,7 @@ namespace PocketCore::Effect
 				@param[in] multiplierRegistry The registry used to resolve multiplier application policies.
 				@return The damage value after all active multipliers have been applied, with a minimum value of 1.
 				@since 0.8.3
-				@version 0.12.3
+				@version 0.12.53
 			*/
 			ATTR_NODISCARD us applyMultiplier(const us baseDamage, const MultiplierRegistry &multiplierRegistry) const;
 

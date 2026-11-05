@@ -1,8 +1,8 @@
 /*! @file effectContext.cpp
 	@brief Contains the effect context implementation
-	@date 09/01/2026
+	@date 11/05/2026
 	@since 0.8.2
-	@version 0.12.14
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 #include "Multiplier/multiplierID.h"
 #include "Multiplier/multiplierMeta.h"
 #include "Registry/multiplierRegistry.h"
+#include "Utility/Math/floatUtility.h"
 
 namespace PocketCore::Effect
 {
@@ -30,6 +31,7 @@ namespace PocketCore::Effect
 	using PocketCore::Multiplier::MultiplierID;
 	using PocketCore::Multiplier::MultiplierMeta;
 	using PocketCore::Registry::Multiplier::MultiplierRegistry;
+	using PocketCore::Utility::Math::approximatelyEqualAbsRel;
 
 	void EffectContext::setMultiplier(const MultiplierID multID, const double value)
 	{
@@ -90,6 +92,11 @@ namespace PocketCore::Effect
 		for (const auto &[multID, multiplier] : mActiveMultipliers)
 		{
 			const double normalizedMultiplier{std::isfinite(multiplier) ? std::max(multiplier, 0.0) : 1.0};
+
+			if (approximatelyEqualAbsRel(normalizedMultiplier, 0.0))
+			{
+				return 0;
+			}
 
 			const MultiplierMeta *multiplierMeta{multiplierRegistry.getMultiplierMetadata(multID)};
 			const MultiplierApplicationPolicy policy{

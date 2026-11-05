@@ -1,6 +1,6 @@
 /*! @file abilityValidation.h
 	@brief Defines validation functions that help with Ability.
-	@date 10/27/2026
+	@date 11/05/2026
 	@since 0.12.51
 	@version 0.12.53
 	@author Matthew Moore
@@ -67,6 +67,15 @@ namespace PocketCore::Validation::Ability
 		return {};
 	}
 
+	/*! @brief Checks whether two Pokemon can reproduce based on their egg groups and genders.
+		@details Rejects Pokemon in the No Eggs group, two Ditto, genderless non-Ditto parents, pairs without a common egg group, and Ditto
+	   pairs whose other parent has no valid egg group.
+		@param[in] parent1 The first parent to validate.
+		@param[in] parent2 The second parent to validate.
+		@return An empty value when the pair passes validation, or the applicable @ref AbilityError.
+		@since 0.12.53
+		@version 0.12.53
+	 */
 	ATTR_NODISCARD constexpr std::expected<void, AbilityError> hasValidEggGroup(const Pokemon &parent1, const Pokemon &parent2)
 	{
 		constexpr auto hasMatchingEggGroup{
@@ -119,6 +128,11 @@ namespace PocketCore::Validation::Ability
 			return {};
 		}
 
+		if (parent1.getGender() == PokemonGender::Genderless || parent2.getGender() == PokemonGender::Genderless)
+		{
+			return std::unexpected{AbilityError::PARENT_CANNOT_REPRODUCE};
+		}
+
 		if (!std::ranges::any_of(parent1.getEggGroupIDsArray(), [&hasMatchingEggGroup, &parent2](const EggGroupID eggGroupID) {
 				return hasMatchingEggGroup(parent2, eggGroupID);
 			}))
@@ -129,6 +143,13 @@ namespace PocketCore::Validation::Ability
 		return {};
 	}
 
+	/*! @brief Checks whether both parents are male.
+		@param[in] parent1 The first parent to inspect.
+		@param[in] parent2 The second parent to inspect.
+		@return @ref AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE when both parents are male; otherwise, an empty value.
+		@since 0.12.53
+		@version 0.12.53
+	 */
 	ATTR_NODISCARD ATTR_PURE constexpr std::expected<void, AbilityError> hasTwoMaleParents(const Pokemon &parent1, const Pokemon &parent2)
 	{
 		if (parent1.getGender() == PokemonGender::Male && parent2.getGender() == PokemonGender::Male)
@@ -139,6 +160,13 @@ namespace PocketCore::Validation::Ability
 		return {};
 	}
 
+	/*! @brief Checks whether both parents are female.
+		@param[in] parent1 The first parent to inspect.
+		@param[in] parent2 The second parent to inspect.
+		@return @ref AbilityError::SAME_SEX_PARENTS_CANT_REPRODUCE when both parents are female; otherwise, an empty value.
+		@since 0.12.53
+		@version 0.12.53
+	 */
 	ATTR_NODISCARD ATTR_PURE constexpr std::expected<void, AbilityError> hasTwoFemaleParents(const Pokemon &parent1, const Pokemon &parent2)
 	{
 		if (parent1.getGender() == PokemonGender::Female && parent2.getGender() == PokemonGender::Female)
@@ -148,7 +176,6 @@ namespace PocketCore::Validation::Ability
 
 		return {};
 	}
-
 } // namespace PocketCore::Validation::Ability
 
 #endif

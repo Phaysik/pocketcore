@@ -1,6 +1,6 @@
 /*! @file natureHelpers.h
 	@brief Houses free functions that aide in handling natures.
-	@date 11/04/2026
+	@date 11/05/2026
 	@since 0.12.26
 	@version 0.12.53
 	@author Matthew Moore
@@ -34,7 +34,8 @@ namespace PocketCore::Nature
 
 	/*! @brief Selects a registered nature ID other than @ref NO_NATURE_ID using an injectable random callable.
 		@details Filters @ref NatureRegistry::getRegisteredNatures to exclude entries whose ID is @ref NO_NATURE_ID, then invokes
-		   @p func once with inclusive index bounds [0, eligible entry count - 1] and returns the selected entry's stored ID.
+		   @p func once with inclusive index bounds [0, eligible entry count - 1] and returns the selected entry's stored ID. If no eligible
+		   entries remain, the function returns @ref NO_NATURE_ID without invoking @p func.
 		   Entries listed in @p excludedNatureIDs are also excluded. IDs need not be contiguous. Eligible entries are sorted by ascending
 		   @ref NatureID before indexing, so a given index always maps to the same ID regardless of registration order.
 		   The default @ref Random::get selects eligible entries uniformly.
@@ -44,16 +45,17 @@ namespace PocketCore::Nature
 		   @ref Random::get specialized for @ref us. The callable is forwarded, may update its state, and is not retained.
 		@param[in] excludedNatureIDs Optional non-owning span of IDs to omit; it must remain valid for the call and is not retained or
 	   modified.
-		@pre At least one registered entry remains after excluding @ref NO_NATURE_ID and @p excludedNatureIDs; the caller ensures this.
 		@pre @p func is valid for invocation and returns a value within the supplied bounds.
-		@post The returned ID is registered, differs from @ref NO_NATURE_ID, and is absent from @p excludedNatureIDs.
+		@post If an eligible entry exists, the returned ID is registered, differs from @ref NO_NATURE_ID, and is absent from
+		   @p excludedNatureIDs. Otherwise, the function returns @ref NO_NATURE_ID.
 		@throws std::out_of_range If @p func returns an index outside the eligible-entry range.
 		@throws ... Propagates any exception thrown by @p func.
 		@note Not thread-safe with the default generator unless the caller synchronizes access to its shared state.
 		   The caller must also prevent registry mutation throughout the call, including from @p func, and meet any custom callable's
 		   synchronization requirements.
-		@return A copy of the selected entry's @ref NatureID, independent of the registry's lifetime; the result should not be discarded.
-		@date 11/04/2026
+		@return A copy of the selected entry's @ref NatureID, independent of the registry's lifetime, or @ref NO_NATURE_ID if no eligible
+		   entry remains; the result should not be discarded.
+		@date 11/05/2026
 		@since 0.12.26
 		@version 0.12.53
 	*/
@@ -61,19 +63,25 @@ namespace PocketCore::Nature
 	ATTR_NODISCARD constexpr NatureID getRandomNatureIDFromConfiguration(const NatureRegistry &config, RandomFunc &&func = &Random::get<us>,
 																		 const std::span<const NatureID> excludedNatureIDs = {})
 	{
-		std::vector<NatureMeta> metas{
-			std::ranges::to<std::vector<NatureMeta>>(
+		std::vector<NatureID> natureIDs{
+			std::ranges::to<std::vector<NatureID>>(
 				config.getRegisteredNatures() | std::views::filter([excludedNatureIDs](const NatureMeta &meta) {
 					return meta.mNatureID != NO_NATURE_ID && !std::ranges::contains(excludedNatureIDs, meta.mNatureID);
-				})),
+				})
+				| std::views::transform([](const NatureMeta &meta) noexcept { return meta.mNatureID; })),
 		};
 
+		if (natureIDs.empty())
+		{
+			return NO_NATURE_ID;
+		}
+
 		// Registry order changes with removal compaction; sorting makes the index-to-ID mapping deterministic.
-		std::ranges::sort(metas, std::ranges::less{}, &NatureMeta::mNatureID);
+		std::ranges::sort(natureIDs, std::ranges::less{});
 
-		const us index{std::invoke(std::forward<RandomFunc>(func), us{0}, static_cast<us>(metas.size() - 1))};
+		const us index{std::invoke(std::forward<RandomFunc>(func), us{0}, static_cast<us>(natureIDs.size() - 1))};
 
-		return metas.at(index).mNatureID;
+		return natureIDs.at(index);
 	}
 } // namespace PocketCore::Nature
 

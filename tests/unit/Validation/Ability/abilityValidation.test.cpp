@@ -1,6 +1,6 @@
 /*! @file abilityValidation.test.cpp
 	@brief C++ file for running tests for the Ability validation functions.
-	@date 10/27/2026
+	@date 11/05/2026
 	@since 0.12.51
 	@version 0.12.53
 	@author Matthew Moore
@@ -196,6 +196,32 @@ SCENARIO("hasValidEggGroup")
 
 				REQUIRE(result.has_value());
 			}
+		}
+	}
+
+	WHEN("calling when parent1 is Genderless")
+	{
+		parent1.setGender(PokemonGender::Genderless);
+
+		THEN("it returns PARENT_CANNOT_REPRODUCE")
+		{
+			std::expected<void, AbilityError> result{hasValidEggGroup(parent1, parent2)};
+
+			REQUIRE(!result.has_value());
+			CHECK((result.error() == AbilityError::PARENT_CANNOT_REPRODUCE));
+		}
+	}
+
+	WHEN("calling when parent2 is Genderless")
+	{
+		parent2.setGender(PokemonGender::Genderless);
+
+		THEN("it returns PARENT_CANNOT_REPRODUCE")
+		{
+			std::expected<void, AbilityError> result{hasValidEggGroup(parent1, parent2)};
+
+			REQUIRE(!result.has_value());
+			CHECK((result.error() == AbilityError::PARENT_CANNOT_REPRODUCE));
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 10/28/2026
+	@date 11/05/2026
 	@since 0.8.7
 	@version 0.12.53
 	@author Matthew Moore
@@ -364,9 +364,9 @@ SCENARIO("EffectContext")
 		{
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 0.0);
 
-			THEN("damage is clamped to at least one")
+			THEN("damage is early returned as 0.0")
 			{
-				CHECK((context.applyMultiplier(0, multiplierRegistry) == 1));
+				CHECK((context.applyMultiplier(0, multiplierRegistry) == 0));
 			}
 		}
 	}
