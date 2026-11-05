@@ -1,8 +1,8 @@
 /*! @file effectContext.test.cpp
 	@brief C++ file for running tests for the EffectContext.
-	@date 10/13/2026
+	@date 11/05/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -297,6 +297,16 @@ SCENARIO("EffectContext")
 			}
 		}
 
+		GIVEN("null multiplier metadata")
+		{
+			context.setMultiplier(MultiplierID{200}, 1.5);
+
+			THEN("the multiplied damage rounds down")
+			{
+				CHECK((context.applyMultiplier(11, multiplierRegistry) == 16));
+			}
+		}
+
 		GIVEN("a multiplier with a fractional value over one half")
 		{
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 1.6);
@@ -354,9 +364,9 @@ SCENARIO("EffectContext")
 		{
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Ability), 0.0);
 
-			THEN("damage is clamped to at least one")
+			THEN("damage is early returned as 0.0")
 			{
-				CHECK((context.applyMultiplier(0, multiplierRegistry) == 1));
+				CHECK((context.applyMultiplier(0, multiplierRegistry) == 0));
 			}
 		}
 	}

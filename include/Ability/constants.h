@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the type registry.
-	@date 09/03/2026
+	@date 11/03/2026
 	@since 0.3.0
-	@version 0.12.19
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -13,15 +13,29 @@
 
 namespace PocketCore::Ability
 {
+	inline constexpr std::string_view ABILITY_CLASSIFICATION_STANDARD{"Standard"};
+	inline constexpr std::string_view ABILITY_CLASSIFICATION_HIDDEN{"Hidden"};
+
 	inline constexpr std::string_view ABILITY_NAME_NONE{"None"};
 	inline constexpr std::string_view ABILITY_NAME_DRIZZLE{"Drizzle"};
 	inline constexpr std::string_view ABILITY_NAME_STENCH{"Stench"};
+	inline constexpr std::string_view ABILITY_NAME_SPEED_BOOST{"Speed Boost"};
+	inline constexpr std::string_view ABILITY_NAME_BATTLE_ARMOR{"Battle Armor"};
+	inline constexpr std::string_view ABILITY_NAME_STURDY{"Sturdy"};
 
-	inline constexpr std::string_view ABILITY_NAME_GUTS{"Guts"};
-	inline constexpr std::string_view ABILITY_NAME_LEVITATE{"Levitate"};
-	inline constexpr std::string_view ABILITY_NAME_ELEVATE{"Elevate"};
-	inline constexpr std::string_view ABILITY_NAME_AIR_LOCK{"Air Lock"};
+	inline constexpr std::string_view ABILITY_NAME_LIMBER{"Limber"};
 	inline constexpr std::string_view ABILITY_NAME_CLOUD_NINE{"Cloud Nine"};
+	inline constexpr std::string_view ABILITY_NAME_LEVITATE{"Levitate"};
+	inline constexpr std::string_view ABILITY_NAME_CHLOROPHYLL{"Chlorophyll"};
+	inline constexpr std::string_view ABILITY_NAME_RAIN_DISH{"Rain Dish"};
+	inline constexpr std::string_view ABILITY_NAME_GUTS{"Guts"};
+	inline constexpr std::string_view ABILITY_NAME_OVERGROW{"Overgrow"};
+	inline constexpr std::string_view ABILITY_NAME_BLAZE{"Blaze"};
+	inline constexpr std::string_view ABILITY_NAME_TORRENT{"Torrent"};
+	inline constexpr std::string_view ABILITY_NAME_AIR_LOCK{"Air Lock"};
+	inline constexpr std::string_view ABILITY_NAME_SOLAR_POWER{"Solar Power"};
+	inline constexpr std::string_view ABILITY_NAME_IMPOSTER{"Imposter"};
+	inline constexpr std::string_view ABILITY_NAME_ELEVATE{"Elevate"};
 } // namespace PocketCore::Ability
 
 #endif

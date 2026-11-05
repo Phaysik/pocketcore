@@ -1,14 +1,18 @@
 /*! @file pokemonMeta.test.cpp
 	@brief C++ file for running tests for the PokemonMeta.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
 #include "Pokemon/pokemonMeta.h"
 
+#include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "EggGroup/builtInEggGroupID.h"
+#include "EggGroup/eggGroupID.h"
+#include "Item/builtInItemID.h"
 #include "Learnset/builtInLearnsetID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemonEncounter.h"
@@ -17,12 +21,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::EggGroup::BuiltinEggGroupID;
+using PocketCore::EggGroup::EggGroupID;
+using PocketCore::EggGroup::toEggGroupID;
+using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::toItemID;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
 using PocketCore::Pokemon::BuiltinPokemonID;
+using PocketCore::Pokemon::PokemonAbilityEntry;
+using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
+using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Pokemon::toPokemonID;
@@ -30,6 +43,104 @@ using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
+
+SCENARIO("PokemonItemEntry")
+{
+	PokemonItemEntry itemEntry{};
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed ability entries")
+		{
+			PokemonItemEntry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((itemEntry == other));
+			}
+		}
+
+		GIVEN("for mItemID modified in one ability entry")
+		{
+			PokemonItemEntry other{.mItemID = toItemID(BuiltinItemID::CheriBerry)};
+
+			THEN("they are not equal")
+			{
+				CHECK((itemEntry != other));
+			}
+		}
+
+		GIVEN("for mChance modified in one ability entry")
+		{
+			PokemonItemEntry other{.mChance = 0.2};
+
+			THEN("they are not equal")
+			{
+				CHECK((itemEntry != other));
+			}
+		}
+
+		GIVEN("two ability entries modified the same way")
+		{
+			PokemonItemEntry other{.mChance = 0.5};
+			itemEntry.mChance = 0.5;
+
+			THEN("they are equal")
+			{
+				CHECK((itemEntry == other));
+			}
+		}
+	}
+}
+
+SCENARIO("PokemonAbilityEntry")
+{
+	PokemonAbilityEntry abilityEntry{};
+
+	WHEN("operator==")
+	{
+		GIVEN("two default constructed ability entries")
+		{
+			PokemonAbilityEntry other{};
+
+			THEN("they are equal")
+			{
+				CHECK((abilityEntry == other));
+			}
+		}
+
+		GIVEN("for mAbilityID modified in one ability entry")
+		{
+			PokemonAbilityEntry other{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)};
+
+			THEN("they are not equal")
+			{
+				CHECK((abilityEntry != other));
+			}
+		}
+
+		GIVEN("for mClassification modified in one ability entry")
+		{
+			PokemonAbilityEntry other{.mClassification = AbilityClassification::Hidden};
+
+			THEN("they are not equal")
+			{
+				CHECK((abilityEntry != other));
+			}
+		}
+
+		GIVEN("two ability entries modified the same way")
+		{
+			PokemonAbilityEntry other{.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate)};
+			abilityEntry.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate);
+
+			THEN("they are equal")
+			{
+				CHECK((abilityEntry == other));
+			}
+		}
+	}
+}
 
 SCENARIO("PokemonMeta")
 {
@@ -57,9 +168,29 @@ SCENARIO("PokemonMeta")
 			}
 		}
 
+		GIVEN("for mItemPool modified in one meta")
+		{
+			PokemonMeta other{.mItemPool = {{{.mItemID = toItemID(BuiltinItemID::ChestoBerry)}}}};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
 		GIVEN("for mAbilityPool modified in one meta")
 		{
-			PokemonMeta other{.mAbilityPool = {{{toAbilityID(BuiltinAbilityID::AirLock)}}}};
+			PokemonMeta other{.mAbilityPool = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock)}}}};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mGenderPool modified in one meta")
+		{
+			PokemonMeta other{.mGenderPool = {{PokemonGender::Female}}};
 
 			THEN("they are not equal")
 			{
@@ -110,6 +241,16 @@ SCENARIO("PokemonMeta")
 		GIVEN("for mLearnsetID modified in one meta")
 		{
 			PokemonMeta other{.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset)};
+
+			THEN("they are not equal")
+			{
+				CHECK((meta != other));
+			}
+		}
+
+		GIVEN("for mEggGroupIDs modified in one meta")
+		{
+			PokemonMeta other{.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Water1)}};
 
 			THEN("they are not equal")
 			{

@@ -1,8 +1,8 @@
 /*! @file locationRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined locations.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -39,9 +39,9 @@ namespace PocketCore::Registry::Location
 		@details Built-in locations are registered during construction with IDs derived from @ref BuiltinLocationID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_LOCATIONS.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class LocationRegistry : private FixedMetadataRegistry<LocationMeta, LocationID, MAX_LOCATIONS, &LocationMeta::mLocationID>
@@ -77,6 +77,7 @@ namespace PocketCore::Registry::Location
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

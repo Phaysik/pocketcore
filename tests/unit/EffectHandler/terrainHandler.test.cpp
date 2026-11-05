@@ -1,8 +1,8 @@
 /*! @file terrainHandler.test.cpp
 	@brief C++ file for running tests for the TerrainHandler.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.9.10
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -17,6 +17,7 @@
 #include "Pokemon/pokemon.h"
 #include "Pokemon/pokemon.testHelper.h"
 #include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 #include "Terrain/builtInTerrainID.h"
 #include "Type/builtInTypeID.h"
 #include "Type/typeID.h"
@@ -25,6 +26,7 @@
 
 using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
+using PocketCore::Effect::applyTerrain;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::Side;
 using PocketCore::Effect::TerrainHandler;
@@ -32,6 +34,7 @@ using PocketCore::Pokemon::Pokemon;
 using PocketCore::Registry::RegistryProvider;
 using PocketCore::Terrain::BuiltinTerrainID;
 using PocketCore::Terrain::toTerrainID;
+using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::hasDragonDebuffInTerrain;
 using PocketCore::Testing::hasElectricBuffInTerrain;
 using PocketCore::Testing::hasGrassBuffInTerrain;
@@ -47,40 +50,55 @@ using PocketCore::Type::TypeID;
 
 SCENARIO("TerrainHandler")
 {
+	Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 	TerrainHandler terrainHandler{};
-	RegistryProvider provider{};
+	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
 	BattleRandomSources randomSources{};
+
+	BattleState handlerState{
+		makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
+	};
+	BattleState freeFunctionState{
+		makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
+	};
+
+	EffectContext handlerContext{
+		makeEffectContext({
+			.mMoveTypeID = toTypeID(BuiltinTypeID::Electric),
+			.mUserIndex = 0,
+			.mTargetIndex = 0,
+			.mUserSide = Side::A,
+			.mTargetSide = Side::B,
+		}),
+	};
+	EffectContext freeFunctionContext{
+		makeEffectContext({
+			.mMoveTypeID = toTypeID(BuiltinTypeID::Electric),
+			.mUserIndex = 0,
+			.mTargetIndex = 0,
+			.mUserSide = Side::A,
+			.mTargetSide = Side::B,
+		}),
+	};
 
 	GIVEN("electric terrain with an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
-		};
-
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Electric),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
-
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasElectricBuffInTerrain(battleState, 0));
+					CHECK(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -89,15 +107,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -106,15 +127,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasElectricBuffInTerrain(battleState, 0));
+					CHECK(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -122,34 +146,25 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("electric terrain without an electric move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Electric)}}),
-		};
-
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -158,15 +173,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -175,15 +193,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasElectricBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasElectricBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -191,34 +212,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain with a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Grass),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Grass);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Grass);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasGrassBuffInTerrain(battleState, 0));
+					CHECK(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -227,15 +242,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -244,15 +262,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasGrassBuffInTerrain(battleState, 0));
+					CHECK(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -260,34 +281,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("grass terrain without a grass move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Grassy)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -296,15 +311,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -313,15 +331,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasGrassBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasGrassBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -329,34 +350,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain with a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Psychic),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Psychic);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Psychic);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -365,15 +380,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -382,15 +400,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -398,34 +419,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("psychic terrain without a psychic move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Psychic)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -434,15 +449,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -451,15 +469,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasPsychicBuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasPsychicBuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -467,34 +488,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain with a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Dragon),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Dragon);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Dragon);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -503,15 +518,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -520,15 +538,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is applied")
 				{
-					CHECK(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -536,34 +557,28 @@ SCENARIO("TerrainHandler")
 
 	GIVEN("misty terrain without a dragon move")
 	{
-		Pokemon userPokemon{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
-		BattleState battleState{
-			makeBattleState({.mSideA = {{.mPokemon = &userPokemon}}, .mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)}}),
-		};
+		handlerState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)};
+		freeFunctionState.mTerrainIDs = {toTerrainID(BuiltinTerrainID::Misty)};
 
-		EffectContext context{
-			makeEffectContext({
-				.mMoveTypeID = toTypeID(BuiltinTypeID::Normal),
-				.mUserIndex = 0,
-				.mTargetIndex = 0,
-				.mUserSide = Side::A,
-				.mTargetSide = Side::B,
-			}),
-		};
+		handlerContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
+		freeFunctionContext.mMoveTypeID = toTypeID(BuiltinTypeID::Normal);
 
 		GIVEN("and the target isn't flying")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -572,15 +587,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}
@@ -589,15 +607,18 @@ SCENARIO("TerrainHandler")
 		{
 			Pokemon groundedTarget{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Flying)}}})};
 
-			battleState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			handlerState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
+			freeFunctionState.mSideB.push_back({.mPokemon = &groundedTarget, .mIsGrounded = true});
 
 			WHEN("terrain effects are applied")
 			{
-				terrainHandler.apply(battleState, context, provider, randomSources);
+				terrainHandler.apply(handlerState, handlerContext, provider, randomSources);
+				applyTerrain(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 				THEN("the terrain attack boost is not applied")
 				{
-					CHECK_FALSE(hasDragonDebuffInTerrain(battleState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(handlerState, 0));
+					CHECK_FALSE(hasDragonDebuffInTerrain(freeFunctionState, 0));
 				}
 			}
 		}

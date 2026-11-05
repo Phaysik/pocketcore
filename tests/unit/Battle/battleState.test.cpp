@@ -1,8 +1,8 @@
 /*! @file battleState.test.cpp
 	@brief C++ file for running tests for the BattleState.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.12.45
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -359,7 +359,7 @@ SCENARIO("BattleSlot")
                 },
 			},
 			.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
-			.mAbilityIDs = {AbilityID{6}},
+			.mAbilityEntries = {{{.mAbilityID = AbilityID{6}}}},
 			.mItemIDs = {ItemID{7}},
 			.mNatureIDs = {NatureID{1}},
 			.mHealth = 150,
@@ -981,7 +981,7 @@ SCENARIO("BattleSlot")
 					"      EV: 0\n"
 					"    Type IDs: [2, 3]\n"
 					"    Nature IDs: [1]\n"
-					"    Ability IDs: [6]\n"
+					"    Ability Entries: [6]\n"
 					"    Item IDs: [7]\n"
 					"    Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"    Moves:\n"

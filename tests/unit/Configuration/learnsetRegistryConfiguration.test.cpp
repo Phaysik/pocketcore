@@ -1,8 +1,8 @@
 /*! @file learnsetRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistryConfiguration.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -109,7 +109,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 			REQUIRE(learnsetID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetID.value() == toLearnsetID(BuiltinLearnsetID::None)));
+			CHECK((learnsetID == toLearnsetID(BuiltinLearnsetID::None)));
 		}
 	}
 
@@ -127,7 +127,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 			REQUIRE(learnsetName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetName.value() == LEARNSET_NAME_NONE));
+			CHECK((learnsetName == LEARNSET_NAME_NONE));
 		}
 	}
 
@@ -454,7 +454,7 @@ SCENARIO("LearnsetRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toLearnsetID(BuiltinLearnsetID::None)));
+					CHECK((result == toLearnsetID(BuiltinLearnsetID::None)));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue - 1));
 				}
 			}
@@ -481,9 +481,41 @@ SCENARIO("LearnsetRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					REQUIRE(result.has_value());
-					CHECK((result.value() == toLearnsetID(BuiltinLearnsetID::None)));
+					CHECK((result == toLearnsetID(BuiltinLearnsetID::None)));
 					CHECK((config.getAmountRegistered() == finalLearnsetUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllLearnsets")
+	{
+		LearnsetMeta definition{.mName = "TestLearnsetMetadataName"};
+		std::expected<LearnsetID, RegistryError> added{config.addLearnset(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllLearnsets();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredLearnsets().empty());
+				CHECK_FALSE(config.hasLearnset(LEARNSET_NAME_NONE));
+				CHECK_FALSE(config.hasLearnset(added.value()));
+				CHECK((config.getLearnsetMetadata(NO_LEARNSET_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<LearnsetID, RegistryError> readded{config.addLearnset(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getLearnsetMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

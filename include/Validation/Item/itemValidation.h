@@ -1,8 +1,8 @@
 /*! @file itemValidation.h
 	@brief Defines validation functions that help with Item.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -35,16 +35,21 @@ namespace PocketCore::Validation::Item
 		@param[in] itemRegistry The registry to validate item metadata.
 		@return A @ref ItemError if any item IDs are invalid, or std::nullopt if all are valid.
 		@since 0.12.26
-		@version 0.12.51
+		@version 0.12.53
 	 */
 	ATTR_NODISCARD constexpr std::expected<void, ItemError> validateItemMetadata(const std::span<const ItemID> itemIDs,
 																				 const ItemRegistry &itemRegistry)
 	{
+		if (itemIDs.size() > MAX_ITEMS_PER_POKEMON)
+		{
+			return std::unexpected{ItemError::TOO_MANY_ITEMS};
+		}
+
 		std::array<const ItemMeta *, MAX_ITEMS_PER_POKEMON> itemMetas{};
 		std::ranges::transform(itemIDs, itemMetas.begin(),
 							   [&itemRegistry](const ItemID itemID) { return itemRegistry.getItemMetadata(itemID); });
 
-		if (itemIDs.size() > MAX_ITEMS_PER_POKEMON || std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(itemMetas, [](const ItemMeta *meta) { return meta == nullptr; }))
 		{
 			return std::unexpected{ItemError::MISSING_ITEM_METADATA};
 		}

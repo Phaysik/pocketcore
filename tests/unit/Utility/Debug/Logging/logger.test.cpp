@@ -2,9 +2,9 @@
 	@brief Catch2 BDD unit tests for the static Logger wrapper.
 	@details Exercises initialization, level get/set, name/file replacement, and all seven logging-level template methods using Catch2's BDD
    syntax. Each test scenario manages temporary files that are cleaned up after the scenario completes.
-	@date 10/19/2026
+	@date 10/28/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -682,7 +682,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::log(spdlog::level::info, "{} {}", 77)};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::LOG_LOG_FAILURE));
+			CHECK((result == Logging::LOG_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -695,7 +695,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::trace("{} {}", 42)};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::TRACE_LOG_FAILURE));
+			CHECK((result == Logging::TRACE_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 			Logger::setLevel(spdlog::level::info);
@@ -709,7 +709,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::debug("{} {}", "hello")};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::DEBUG_LOG_FAILURE));
+			CHECK((result == Logging::DEBUG_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 			Logger::setLevel(spdlog::level::info);
@@ -722,7 +722,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::info("{} {}", 100)};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::INFO_LOG_FAILURE));
+			CHECK((result == Logging::INFO_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -734,7 +734,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::warn("{} {}", 3.14)};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::WARN_LOG_FAILURE));
+			CHECK((result == Logging::WARN_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -746,7 +746,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::error("{} {}", "failure")};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::ERROR_LOG_FAILURE));
+			CHECK((result == Logging::ERROR_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}
@@ -758,7 +758,7 @@ SCENARIO("Logger")
 			std::optional<std::string_view> result{Logger::critical("{} {}", 999)};
 
 			REQUIRE(result.has_value());
-			CHECK((result.value() == Logging::CRITICAL_LOG_FAILURE));
+			CHECK((result == Logging::CRITICAL_LOG_FAILURE));
 
 			spdlog::set_error_handler([](const std::string & /*msg*/) {});
 		}

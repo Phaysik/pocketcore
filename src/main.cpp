@@ -1,8 +1,8 @@
 /*! @file main.cpp
 	@brief Contains the function definitions for creating a main
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.1.0
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -18,6 +18,7 @@
 #include "Battle/battleEngine.h"
 #include "Configuration/abilityRegistryConfiguration.h"
 #include "Configuration/effectRegistryConfiguration.h"
+#include "Configuration/eggGroupRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/learnsetRegistryConfiguration.h"
 #include "Configuration/locationRegistryConfiguration.h"
@@ -37,6 +38,7 @@
 #include "Nature/builtInNatureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonMeta.h"
 #include "Registry/effectRegistry.h"
 #include "Registry/pokemonRegistry.h"
 #include "Registry/registryProvider.h"
@@ -48,7 +50,7 @@
 
 /*! @brief The entry point for the program
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 	@return int The status code of the program
 */
@@ -63,6 +65,7 @@ int main()
 	using PocketCore::Battle::MoveAction;
 	using PocketCore::Configuration::AbilityRegistryConfiguration;
 	using PocketCore::Configuration::EffectRegistryConfiguration;
+	using PocketCore::Configuration::EggGroupRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
 	using PocketCore::Configuration::LearnsetRegistryConfiguration;
 	using PocketCore::Configuration::LocationRegistryConfiguration;
@@ -87,6 +90,7 @@ int main()
 	using PocketCore::Nature::toNatureID;
 	using PocketCore::Pokemon::BuiltinPokemonID;
 	using PocketCore::Pokemon::Pokemon;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Registry::Effect::EffectRegistry;
 	using PocketCore::Registry::Pokemon::PokemonInstantiationError;
@@ -117,6 +121,7 @@ int main()
 	std::unique_ptr<PokemonRegistryConfiguration> pokemonRegistryConfig{std::make_unique<PokemonRegistryConfiguration>()};
 	std::unique_ptr<LearnsetRegistryConfiguration> learnsetRegistryConfig{std::make_unique<LearnsetRegistryConfiguration>()};
 	std::unique_ptr<LocationRegistryConfiguration> locationRegistryConfig{std::make_unique<LocationRegistryConfiguration>()};
+	std::unique_ptr<EggGroupRegistryConfiguration> eggGroupRegistryConfig{std::make_unique<EggGroupRegistryConfiguration>()};
 
 	const RegistryProvider registryProvider{
 		.mAbilityRegistry = &abilityRegistryConfig->getRuntimeRegistry(),
@@ -131,6 +136,7 @@ int main()
 		.mPokemonRegistry = &pokemonRegistryConfig->getRuntimeRegistry(),
 		.mLearnsetRegistry = &learnsetRegistryConfig->getRuntimeRegistry(),
 		.mLocationRegistry = &locationRegistryConfig->getRuntimeRegistry(),
+		.mEggGroupRegistry = &eggGroupRegistryConfig->getRuntimeRegistry(),
 	};
 	const EffectRegistry &effectRegistry{effectRegistryConfig->getRuntimeRegistry()};
 
@@ -159,12 +165,13 @@ int main()
             },
 		},
 		50U,
-		{toAbilityID(BuiltinAbilityID::Drizzle)},
+		{{{.mAbilityID = toAbilityID(BuiltinAbilityID::Drizzle)}}},
 		{toItemID(BuiltinItemID::CheriBerry)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
+		PokemonGender::Male,
 	};
 
 	Pokemon pokemonB{
@@ -192,12 +199,13 @@ int main()
             },
 		},
 		50U,
-		{toAbilityID(BuiltinAbilityID::Stench)},
+		{{{.mAbilityID = toAbilityID(BuiltinAbilityID::Stench)}}},
 		{toItemID(BuiltinItemID::ChestoBerry)},
 		{toNatureID(BuiltinNatureID::Hardy)},
 		*registryProvider.mNatureRegistry,
 		{},
 		{},
+		PokemonGender::Female,
 	};
 
 	const std::array<Pokemon *, 1> partyA{&pokemonA};

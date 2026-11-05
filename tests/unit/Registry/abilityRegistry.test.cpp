@@ -1,8 +1,8 @@
 /*! @file abilityRegistry.test.cpp
 	@brief C++ file for running tests for the AbilityRegistry.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.4.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -27,9 +27,25 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+using PocketCore::Ability::ABILITY_NAME_AIR_LOCK;
+using PocketCore::Ability::ABILITY_NAME_BATTLE_ARMOR;
+using PocketCore::Ability::ABILITY_NAME_BLAZE;
+using PocketCore::Ability::ABILITY_NAME_CHLOROPHYLL;
+using PocketCore::Ability::ABILITY_NAME_CLOUD_NINE;
 using PocketCore::Ability::ABILITY_NAME_DRIZZLE;
+using PocketCore::Ability::ABILITY_NAME_ELEVATE;
+using PocketCore::Ability::ABILITY_NAME_GUTS;
+using PocketCore::Ability::ABILITY_NAME_IMPOSTER;
+using PocketCore::Ability::ABILITY_NAME_LEVITATE;
+using PocketCore::Ability::ABILITY_NAME_LIMBER;
 using PocketCore::Ability::ABILITY_NAME_NONE;
+using PocketCore::Ability::ABILITY_NAME_OVERGROW;
+using PocketCore::Ability::ABILITY_NAME_RAIN_DISH;
+using PocketCore::Ability::ABILITY_NAME_SOLAR_POWER;
+using PocketCore::Ability::ABILITY_NAME_SPEED_BOOST;
 using PocketCore::Ability::ABILITY_NAME_STENCH;
+using PocketCore::Ability::ABILITY_NAME_STURDY;
+using PocketCore::Ability::ABILITY_NAME_TORRENT;
 using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::AbilityMeta;
 using PocketCore::Ability::BuiltinAbilityID;
@@ -94,6 +110,214 @@ SCENARIO("AbilityRegistry")
 
 			CHECK((expected == *actual));
 		}
+
+		THEN("Speed Boost has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_SPEED_BOOST),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::SpeedBoost),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::SpeedBoost))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Battle Armor has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_BATTLE_ARMOR),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::BattleArmor),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::BattleArmor))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Sturdy has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_STURDY),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Sturdy),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Sturdy))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Limber has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_LIMBER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Limber),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Limber))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Cloud Nine has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_CLOUD_NINE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::CloudNine))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Levitate has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_LEVITATE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Levitate),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Levitate))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Chlorophyll has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_CHLOROPHYLL),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Chlorophyll))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Rain Dish has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_RAIN_DISH),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::RainDish))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Guts has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_GUTS),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Guts),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Guts))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Overgrow has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_OVERGROW),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Overgrow))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Blaze has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_BLAZE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Blaze))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Torrent has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_TORRENT),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Torrent))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Air Lock has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_AIR_LOCK),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::AirLock))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Solar Power has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_SOLAR_POWER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::SolarPower))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Imposter has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_IMPOSTER),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Imposter))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Elevate has the appropriate properties")
+		{
+			AbilityMeta expected{
+				.mName = std::string(ABILITY_NAME_ELEVATE),
+				.mTriggers = {},
+				.mAbilityID = toAbilityID(BuiltinAbilityID::Elevate),
+			};
+
+			const AbilityMeta *actual{registry.getAbilityMetadata(toAbilityID(BuiltinAbilityID::Elevate))};
+
+			CHECK((expected == *actual));
+		}
 	}
 
 	GIVEN("getAbilityMetadata")
@@ -129,7 +353,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityID.value() == toAbilityID(BuiltinAbilityID::None)));
+			CHECK((abilityID == toAbilityID(BuiltinAbilityID::None)));
 		}
 	}
 
@@ -147,7 +371,7 @@ SCENARIO("AbilityRegistry")
 			REQUIRE(abilityName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityName.value() == ABILITY_NAME_NONE));
+			CHECK((abilityName == ABILITY_NAME_NONE));
 		}
 	}
 
@@ -211,7 +435,7 @@ SCENARIO("AbilityRegistry")
 
 			REQUIRE(abilityIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((abilityIndex.value() == 0));
+			CHECK((abilityIndex == 0));
 		}
 	}
 

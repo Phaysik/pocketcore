@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.53] - 2026-11-05
+
+### Added
+
+- Added the egg group domain: open `EggGroupID`, the 15-entry `BuiltinEggGroupID` catalog plus `None`, owned-name `EggGroupMeta`, the fixed-capacity `EggGroupRegistry`, and `EggGroupRegistryConfiguration` with the standard lookup, add, batch-add, rename, update, and remove operations. Added the matching `RegistryError` values and a non-owning `RegistryProvider::mEggGroupRegistry`, which `BattleEngine::startBattle()` now requires.
+- Added species egg groups and gender: `PokemonMeta` stores egg-group IDs and a gender pool, and `Pokemon` copies the egg groups at construction and stores a mutable gender.
+- Added `AbilityClassification` (standard or hidden) and `PokemonAbilityEntry`, which pairs an ability ID with its classification. Added `PokemonItemEntry`, which pairs an item ID with a spawn chance, and a per-species item pool on `PokemonMeta`.
+- Added eleven built-in abilities, the Ability Capsule item, and the Ditto species and learnset. Starter-family species now have canonical standard/hidden ability pools and egg groups; built-in item pools are empty.
+- Added `PokemonBreedingContext`, `IDContext`, and `IVEVContext`, non-owning carriers for breeding parents, supplied IDs, and supplied IVs/EVs during instantiation.
+- Added `removeAll...()` to every registry configuration through a shared `clearEntries()` registry primitive. Clearing removes built-in and custom entries, invalidates checkpoints, and preserves the next stable ID so cleared IDs are not reused.
+- Added breeding validators for same-sex parents and egg-group compatibility (`NoEggs`, Ditto pairings, and a shared egg group), with dedicated `AbilityError` values.
+- Added pool-based generation helpers:
+  - `getAbilitiesFromAbilityPool()` selects a random count of distinct, registered abilities from the species pool.
+  - `getEggAbilities()` validates both parents, selects the female or non-Ditto parent, and inherits each of its abilities on a 1-100 roll (80% standard, 60% hidden). Inherited abilities are written from the first slot.
+  - `getItemsFromItemPool()` keeps each distinct, registered item whose chance roll succeeds and assigns the survivors in random order. If every roll fails, no item is assigned.
+- Added configuration constants for egg-group and item-pool capacities, breeding inheritance chances, minimum generation counts, and heavy-rain, extremely-harsh-sunlight, and Hydro Steam weather multipliers. Documented the new capacities and breeding constants in `docs/config-boundary.md`.
+- Added `TOO_MANY_*`, `NOT_ENOUGH_REGISTERED_*`, empty-pool, and duplicate-replacement validation errors for the ability, item, move, and nature domains, as applicable.
+- Added static assertions that per-Pokemon capacities stay below the size of their built-in catalogs.
+- Added test suites for the egg group domain, `BurnDamageHandler`, `PopulationBombHandler`, `WeatherHandler`, the effect-handler helper predicates, the new Pokemon entry types, and the breeding validators. Added `removeAll...()` coverage to every configuration suite, along with supporting multiplier and null-registry test helpers.
+- Expanded coverage for nature, ability, item, and IV/EV generation and for egg inheritance, the expanded ability catalog, and Ditto. Also added interaction lookups, default random sources, short type-matchup rows, stable-ID exhaustion, and fixed-registry index and checkpoint edge cases.
+
+### Changed
+
+- Changed `PokemonRegistry::instantiate()` to require `BattleRandomSources` and to receive supplied IDs, IVs/EVs, and breeding parents through the new context structs instead of six positional spans.
+- Changed instantiation with empty inputs to generate values instead of leaving them unset:
+  - Natures are distinct random registered natures.
+  - Abilities come from the species pool, followed by egg inheritance for egg-origin encounters.
+  - Items come from the species item pool.
+  - IVs are random within bounds, and EVs are zero.
+  - Gender is randomly selected from the species gender pool.
+  - Generation fails when the registry lacks enough entries or a pool is empty. With the default breeding context, egg-origin ability generation fails.
+- Extended nature, ability, and item validation helpers with the random-source bundle, species pools where applicable, and a configurable duplicate-replacement sentinel that must be registered, matching the move helper introduced in 0.12.52.
+- Changed the metadata validators to reject oversized spans with the new `TOO_MANY_*` errors instead of `MISSING_*_METADATA`.
+- Changed `getRandomNatureIDFromConfiguration()` to select from the actually registered natures through an injectable random callable, with optional excluded IDs.
+- Replaced Pokemon ability IDs with `PokemonAbilityEntry` values throughout construction, accessors, mutators, and `PokemonMeta::mAbilityPool`. Pokemon constructors also take a gender, and `PokemonMeta` members were reordered for designated initialization.
+- Migrated battle dispatch, Guts and weather-nullifier checks, and ability predicates to compare entry IDs. Named Pokemon output now includes each ability's classification.
+- Reworked `WeatherHandler` to support heavy rain and extremely harsh sunlight. Hydro Steam now uses its own multiplier, and moves unaffected by the active weather explicitly receive a neutral multiplier.
+- Renumbered built-in ability, item, and move IDs to accommodate the new catalog entries. Learnset registration now follows enum order.
+- Replaced `getTeamConst()` with `getTeam()`, which takes a const `BattleState` and returns a `std::span`. Simplified registry-name comparisons in the effect-handler predicates.
+- Updated the example battle, test fixtures, and expectations for ability entries, gender, egg groups, and renumbered IDs.
+- Restructured effect-handler suites to verify each handler class against its free-function entry point. Consolidated the weather and terrain setter suites into fewer scenarios.
+- Added `LCOV_EXCL_BR` annotations to unreachable registry, interaction, and type-registration branches, and made minor include and documentation cleanups.
+
+### Removed
+
+- Removed the ability, item, and move random-ID helper headers and `getRandomNatureIDFromBuiltIns()`, all of which assumed contiguous IDs.
+- Removed `getTeamConst()` and the ability-ID accessors and mutators on `Pokemon`.
+
+### Fixed
+
+- Fixed the ability, item, move, and nature metadata validators writing past their fixed buffers when given oversized spans; length is now checked before transformation.
+- Fixed random nature selection returning unregistered IDs or skipping registered ones after removals or non-contiguous registration.
+
 ## [0.12.52] - 2026-10-23
 
 ### Added
@@ -2275,7 +2328,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.52]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.53]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.52]: https://github.com/Phaysik/pocketcore/commit/f1015081b1b4c294940f579d1bee362c83c6e942
 [0.12.51]: https://github.com/Phaysik/pocketcore/commit/0b746160cbe460be20e0a006f04409d7c7d08167
 [0.12.50]: https://github.com/Phaysik/pocketcore/commit/b87e380fc66c471f200ae1bf81abcd8d9d9909e1
 [0.12.49]: https://github.com/Phaysik/pocketcore/commit/acf73762f2a948421600281c252d4af5c1c500f5
@@ -2347,10 +2401,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 [0.10.2]: https://github.com/Phaysik/pocketcore/commit/a76e6814e9c4a56eaf14f1d61781ccf7f3b49f01
 [0.10.1]: https://github.com/Phaysik/pocketcore/commit/19c7b46aa69982f5661553c89926e3e4ca9304b6
 [0.10.0]: https://github.com/Phaysik/pocketcore/compare/v0.9.0...v0.10.0
-[0.9.19]: https://github.com/Phaysik/pocketcore/commit/17f208e5da35a1f896f83aea363b066148a6f9d5
-[0.9.18]: https://github.com/Phaysik/pocketcore/commit/ce47285096501ba3f140e275c0bcbf1ebcd55533
-[0.9.17]: https://github.com/Phaysik/pocketcore/commit/2daa16b939a4ad52c06231d9a6acb9b84e056db3
-[0.9.16]: https://github.com/Phaysik/pocketcore/commit/594e950ef9b32c56f6cb4c0cf11bc442054e0dea
 [0.9.15]: https://github.com/Phaysik/pocketcore/commit/6ddf41c5e2e4d9f15b34ad480de3a65293c57438
 [0.9.14]: https://github.com/Phaysik/pocketcore/commit/7a51a0f1d8a20cf45cbcb51a2f194668883f1757
 [0.9.13]: https://github.com/Phaysik/pocketcore/commit/24ef5d4744da3f1075f92f01f6135975e9aba23a

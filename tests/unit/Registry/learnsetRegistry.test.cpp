@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.50
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -32,6 +32,7 @@ using PocketCore::Learnset::LEARNSET_NAME_BULBASAUR;
 using PocketCore::Learnset::LEARNSET_NAME_CHARIZARD;
 using PocketCore::Learnset::LEARNSET_NAME_CHARMANDER;
 using PocketCore::Learnset::LEARNSET_NAME_CHARMELEON;
+using PocketCore::Learnset::LEARNSET_NAME_DITTO;
 using PocketCore::Learnset::LEARNSET_NAME_IVYSAUR;
 using PocketCore::Learnset::LEARNSET_NAME_NONE;
 using PocketCore::Learnset::LEARNSET_NAME_SQUIRTLE;
@@ -95,6 +96,42 @@ SCENARIO("LearnsetRegistry")
 			CHECK((expected == *actual));
 		}
 
+		THEN("Charmander Learnset has the appropriate properties")
+		{
+			LearnsetMeta expected{
+				.mName = std::string(LEARNSET_NAME_CHARMANDER),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
+			};
+
+			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharmanderLearnset))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Charmeleon Learnset has the appropriate properties")
+		{
+			LearnsetMeta expected{
+				.mName = std::string(LEARNSET_NAME_CHARMELEON),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
+			};
+
+			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Charizard Learnset has the appropriate properties")
+		{
+			LearnsetMeta expected{
+				.mName = std::string(LEARNSET_NAME_CHARIZARD),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
+			};
+
+			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharizardLearnset))};
+
+			CHECK((expected == *actual));
+		}
+
 		THEN("Squirtle Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
@@ -131,38 +168,14 @@ SCENARIO("LearnsetRegistry")
 			CHECK((expected == *actual));
 		}
 
-		THEN("Charmander Learnset has the appropriate properties")
+		THEN("Ditto Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARMANDER),
-				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
+				.mName = std::string(LEARNSET_NAME_DITTO),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
 			};
 
-			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharmanderLearnset))};
-
-			CHECK((expected == *actual));
-		}
-
-		THEN("Charmeleon Learnset has the appropriate properties")
-		{
-			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARMELEON),
-				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
-			};
-
-			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset))};
-
-			CHECK((expected == *actual));
-		}
-
-		THEN("Charizard Learnset has the appropriate properties")
-		{
-			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARIZARD),
-				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
-			};
-
-			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::CharizardLearnset))};
+			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::DittoLearnset))};
 
 			CHECK((expected == *actual));
 		}
@@ -200,7 +213,7 @@ SCENARIO("LearnsetRegistry")
 			REQUIRE(learnsetID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetID.value() == toLearnsetID(BuiltinLearnsetID::None)));
+			CHECK((learnsetID == toLearnsetID(BuiltinLearnsetID::None)));
 		}
 	}
 
@@ -218,7 +231,7 @@ SCENARIO("LearnsetRegistry")
 			REQUIRE(learnsetName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetName.value() == LEARNSET_NAME_NONE));
+			CHECK((learnsetName == LEARNSET_NAME_NONE));
 		}
 	}
 
@@ -281,7 +294,7 @@ SCENARIO("LearnsetRegistry")
 
 			REQUIRE(learnsetIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((learnsetIndex.value() == 0));
+			CHECK((learnsetIndex == 0));
 		}
 	}
 

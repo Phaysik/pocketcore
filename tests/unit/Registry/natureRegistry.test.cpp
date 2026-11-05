@@ -1,8 +1,8 @@
 /*! @file natureRegistry.test.cpp
 	@brief C++ file for running tests for the NatureRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -459,7 +459,7 @@ SCENARIO("NatureRegistry")
 			REQUIRE(natureID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((natureID.value() == toNatureID(BuiltinNatureID::None)));
+			CHECK((natureID == toNatureID(BuiltinNatureID::None)));
 		}
 	}
 
@@ -477,7 +477,7 @@ SCENARIO("NatureRegistry")
 			REQUIRE(natureName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((natureName.value() == NATURE_NAME_NONE));
+			CHECK((natureName == NATURE_NAME_NONE));
 		}
 	}
 
@@ -540,7 +540,7 @@ SCENARIO("NatureRegistry")
 
 			REQUIRE(natureIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((natureIndex.value() == 0));
+			CHECK((natureIndex == 0));
 		}
 	}
 

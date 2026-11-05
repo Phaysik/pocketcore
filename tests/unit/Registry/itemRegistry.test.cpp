@@ -1,8 +1,8 @@
 /*! @file itemRegistry.test.cpp
 	@brief C++ file for running tests for the ItemRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.5.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -36,6 +36,7 @@ using PocketCore::Core::ub;
 using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::ITEM_NAME_ABILITY_CAPSULE;
 using PocketCore::Item::ITEM_NAME_CHERI_BERRY;
 using PocketCore::Item::ITEM_NAME_CHESTO_BERRY;
 using PocketCore::Item::ITEM_NAME_NONE;
@@ -61,6 +62,19 @@ SCENARIO("ItemRegistry")
 
 	GIVEN("a default constructed item registry")
 	{
+		THEN("Ability Capsule has the appropriate properties")
+		{
+			ItemMeta expected{
+				.mName = std::string(ITEM_NAME_ABILITY_CAPSULE),
+				.mTriggers = {},
+				.mItemID = toItemID(BuiltinItemID::AbilityCapsule),
+			};
+
+			const ItemMeta *actual{registry.getItemMetadata(toItemID(BuiltinItemID::AbilityCapsule))};
+
+			CHECK((expected == *actual));
+		}
+
 		THEN("Cheri Berry has the appropriate properties")
 		{
 			ItemMeta expected{
@@ -133,7 +147,7 @@ SCENARIO("ItemRegistry")
 			REQUIRE(itemID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemID.value() == toItemID(BuiltinItemID::None)));
+			CHECK((itemID == toItemID(BuiltinItemID::None)));
 		}
 	}
 
@@ -151,7 +165,7 @@ SCENARIO("ItemRegistry")
 			REQUIRE(itemName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemName.value() == ITEM_NAME_NONE));
+			CHECK((itemName == ITEM_NAME_NONE));
 		}
 	}
 
@@ -215,7 +229,7 @@ SCENARIO("ItemRegistry")
 
 			REQUIRE(itemIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((itemIndex.value() == 0));
+			CHECK((itemIndex == 0));
 		}
 	}
 

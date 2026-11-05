@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.12.13
-	@version 0.12.52
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -12,6 +12,7 @@
 #include "Ability/abilityID.h"
 #include "Configuration/constants.h"
 #include "Core/typedefs.h"
+#include "EggGroup/builtInEggGroupID.h"
 #include "Item/itemID.h"
 #include "Learnset/learnsetID.h"
 #include "Move/builtInMoveID.h"
@@ -41,6 +42,7 @@ namespace PocketCore::Testing
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
+	using PocketCore::EggGroup::NO_EGG_GROUP_ID;
 	using PocketCore::Item::ItemID;
 	using PocketCore::Item::NO_ITEM_ID;
 	using PocketCore::Learnset::LearnsetID;
@@ -54,6 +56,8 @@ namespace PocketCore::Testing
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
+	using PocketCore::Pokemon::PokemonAbilityEntry;
+	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::PokemonStats;
@@ -71,6 +75,7 @@ namespace PocketCore::Testing
 			PokemonMeta mMetadata{
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
 				.mBaseStats = {},
+				.mEggGroupIDs = {NO_EGG_GROUP_ID},
 				.mPokemonID = NO_POKEMON_ID,
 				.mLearnsetID = NO_LEARNSET_ID,
 			};
@@ -94,13 +99,15 @@ namespace PocketCore::Testing
 
 			std::array<us, POKEMON_STAT_COUNT> mPokemonEVs{};
 
-			std::array<AbilityID, MAX_ABILITIES_PER_POKEMON> mAbilityIDs{NO_ABILITY_ID};
+			std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> mAbilityEntries{};
 			std::array<ItemID, MAX_ITEMS_PER_POKEMON> mItemIDs{NO_ITEM_ID};
 			std::array<NatureID, MAX_NATURES_PER_POKEMON> mNatureIDs{NO_NATURE_ID};
 
 			us mHealth{0};
 
 			us mLevel{1};
+
+			PokemonGender mGender{};
 	};
 
 	inline const NatureRegistry &getDefaultTestNatureRegistry()
@@ -114,8 +121,8 @@ namespace PocketCore::Testing
 		const NatureRegistry &natureRegistry{data.mNatureRegistry != nullptr ? *data.mNatureRegistry : getDefaultTestNatureRegistry()};
 
 		Pokemon pokemon{
-			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityIDs, data.mItemIDs,
-			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,
+			data.mMetadata,	 data.mMoveMetas, data.mLevel,		data.mAbilityEntries, data.mItemIDs,
+			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,	  data.mGender,
 		};
 
 		pokemon.setStatusIDsArray(data.mStatusIDs);

@@ -1,8 +1,8 @@
 /*! @file battleRandomSources.h
 	@brief Provides access to default random sources for battle-related numeric types.
-	@date 10/19/2026
+	@date 10/23/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -31,27 +31,23 @@ namespace PocketCore::Battle
 			These type-specific sources share the underlying generator.
 		@warning The default sources are not thread-safe. Callers must synchronize concurrent access to their shared generator.
 			Custom sources define their own synchronization requirements.
-		@date 10/19/2026
+		@date 10/23/2026
 		@version 0.12.51
-		@since 0.12.51
+		@since 0.12.53
 	*/
 	struct BattleRandomSources
 	{
 		public:
-			/*! @brief Holds the non-owning random source reference for unsigned bytes of type @ref PocketCore::Core::ub.
-			 */
+			/*! @brief Holds the non-owning random source reference for unsigned bytes of type @ref PocketCore::Core::ub. */
 			std::reference_wrapper<IRandomSource<ub>> mUnsigned{getDefaultRandomSource<ub>()};
 
-			/*! @brief Holds the non-owning random source reference for signed bytes of type @ref PocketCore::Core::sb.
-			 */
+			/*! @brief Holds the non-owning random source reference for signed bytes of type @ref PocketCore::Core::sb. */
 			std::reference_wrapper<IRandomSource<sb>> mSigned{getDefaultRandomSource<sb>()};
 
-			/*! @brief Holds the non-owning random source reference for double-precision floating-point values.
-			 */
+			/*! @brief Holds the non-owning random source reference for double-precision floating-point values. */
 			std::reference_wrapper<IRandomSource<double>> mReal{getDefaultRandomSource<double>()};
 
-			/*! @brief Holds the non-owning random source reference for indices of type std::size_t.
-			 */
+			/*! @brief Holds the non-owning random source reference for indices of type std::size_t. */
 			std::reference_wrapper<IRandomSource<std::size_t>> mIndex{getDefaultRandomSource<std::size_t>()};
 	};
 } // namespace PocketCore::Battle

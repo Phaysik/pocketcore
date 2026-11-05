@@ -1,8 +1,8 @@
 /*! @file battleEngine.test.cpp
 	@brief C++ file for running tests for the BattleEngine.
-	@date 10/20/2026
+	@date 10/26/2026
 	@since 0.12.37
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -53,6 +53,7 @@ using PocketCore::Ruleset::GEN9_BASE_GAME;
 using PocketCore::Ruleset::RulesetPolicy;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::getNullAbilityRegistryProvider;
+using PocketCore::Testing::getNullEggGroupRegistryProvider;
 using PocketCore::Testing::getNullItemRegistryProvider;
 using PocketCore::Testing::getNullLearnsetRegistryProvider;
 using PocketCore::Testing::getNullLocationRegistryProvider;
@@ -291,6 +292,20 @@ SCENARIO("BattleEngine")
 			{
 				RegistryProvider nullLocationProvider{getNullLocationRegistryProvider()};
 				BattleEngine nullEngine{nullLocationProvider, effectRegistry};
+				std::expected<void, BattleEngineError> result{nullEngine.startBattle(pokemonA, pokemonB, ruleset)};
+
+				THEN("it will return an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == BattleEngineError::MissingRegistry));
+					CHECK((nullEngine.getPhase() == BattlePhase::NotStarted));
+				}
+			}
+
+			GIVEN("a null egg group registry")
+			{
+				RegistryProvider nullEggGroupProvider{getNullEggGroupRegistryProvider()};
+				BattleEngine nullEngine{nullEggGroupProvider, effectRegistry};
 				std::expected<void, BattleEngineError> result{nullEngine.startBattle(pokemonA, pokemonB, ruleset)};
 
 				THEN("it will return an error")

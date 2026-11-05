@@ -1,15 +1,13 @@
 /*! @file terrainHandler.testHelper.h
 	@brief Test helper for dealing with TerrainHandler concepts.
-	@date 09/01/2026
+	@date 10/28/2026
 	@since 0.12.14
-	@version 0.12.14
+	@version 0.12.53
 	@author Matthew Moore
 */
 
 #ifndef TEST_INCLUDE_EFFECT_HANDLER_TERRAIN_HANDLER_TEST_HELPER_H
 #define TEST_INCLUDE_EFFECT_HANDLER_TERRAIN_HANDLER_TEST_HELPER_H
-
-#include <cmath>
 
 #include "Battle/battleState.h"
 #include "Configuration/constants.h"

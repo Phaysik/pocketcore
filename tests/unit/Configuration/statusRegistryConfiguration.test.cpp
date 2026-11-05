@@ -1,8 +1,8 @@
 /*! @file statusRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the StatusRegistryConfiguration.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("StatusRegistryConfiguration")
 			REQUIRE(statusID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusID.value() == toStatusID(BuiltinStatusID::None)));
+			CHECK((statusID == toStatusID(BuiltinStatusID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("StatusRegistryConfiguration")
 			REQUIRE(statusName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((statusName.value() == STATUS_NAME_NONE));
+			CHECK((statusName == STATUS_NAME_NONE));
 		}
 	}
 
@@ -443,7 +443,7 @@ SCENARIO("StatusRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toStatusID(BuiltinStatusID::None)));
+					CHECK((result == toStatusID(BuiltinStatusID::None)));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue - 1));
 				}
 			}
@@ -470,9 +470,41 @@ SCENARIO("StatusRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toStatusID(BuiltinStatusID::None)));
+					CHECK((result == toStatusID(BuiltinStatusID::None)));
 					CHECK((config.getAmountRegistered() == finalStatusUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllStatuss")
+	{
+		StatusMeta definition{.mName = "TestStatusMetadataName"};
+		std::expected<StatusID, RegistryError> added{config.addStatus(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllStatuses();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredStatuses().empty());
+				CHECK_FALSE(config.hasStatus(STATUS_NAME_NONE));
+				CHECK_FALSE(config.hasStatus(added.value()));
+				CHECK((config.getStatusMetadata(NO_STATUS_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<StatusID, RegistryError> readded{config.addStatus(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getStatusMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

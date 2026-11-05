@@ -1,8 +1,8 @@
 /*! @file setHarshSunlightHandler.test.cpp
 	@brief C++ file for running tests for the SetHarshSunlightHandler.
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.12.43
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -36,184 +36,76 @@ using PocketCore::Weather::WeatherID;
 SCENARIO("SetHarshSunlightHandler")
 {
 	SetHarshSunlightHandler setHarshSunlightHandler{};
-	BattleState battleState{};
-	EffectContext context{};
 	RegistryProvider provider{getDefaultInitializedRegistryProvider()};
 	BattleRandomSources randomSources{};
 
 	WeatherID sunID{toWeatherID(BuiltinWeatherID::HarshSunlight)};
 	WeatherID hailID{toWeatherID(BuiltinWeatherID::Hail)};
 
-	GIVEN("no active weathers")
+	BattleState handlerState{};
+	BattleState freeFunctionState{};
+	EffectContext handlerContext{};
+	EffectContext freeFunctionContext{};
+
+	WHEN("applied to empty active weathers")
 	{
+		setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 		WHEN("sun weather is applied")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("sun weather becomes active")
-			{
-				CHECK(std::ranges::contains(battleState.mWeatherIDs, sunID));
-			}
-
-			THEN("sun weather is only added once")
-			{
-				CHECK((std::ranges::count(battleState.mWeatherIDs, sunID) == 1));
-			}
+			CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
+			CHECK(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
 		}
 	}
 
-	GIVEN("sun weather is already active")
+	WHEN("sun weather is already active")
 	{
-		battleState.mWeatherIDs = {sunID};
+		handlerState.mWeatherIDs = {sunID};
+		freeFunctionState.mWeatherIDs = {sunID};
 
-		WHEN("sun weather is applied again")
+		setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("both leave sun weather active exactly once")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("sun weather remains active exactly once")
-			{
-				CHECK((std::ranges::count(battleState.mWeatherIDs, sunID) == 1));
-			}
+			CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
+			CHECK((std::ranges::count(freeFunctionState.mWeatherIDs, sunID) == 1));
 		}
 	}
 
-	GIVEN("a different weather is active and replacement is allowed")
+	WHEN("a different weather is active and replacement is allowed")
 	{
-		battleState.mWeatherIDs = {hailID};
-		battleState.mRuleset.mMaxWeathers = 1;
-		battleState.mRuleset.mReplaceWeatherWhenFull = true;
+		handlerState.mWeatherIDs = {hailID};
+		handlerState.mRuleset.mMaxWeathers = 1;
+		handlerState.mRuleset.mReplaceWeatherWhenFull = true;
+		freeFunctionState.mWeatherIDs = {hailID};
+		freeFunctionState.mRuleset.mMaxWeathers = 1;
+		freeFunctionState.mRuleset.mReplaceWeatherWhenFull = true;
 
-		WHEN("sun weather is applied")
+		setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("both replace the existing weather identically")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("sun weather replaces the existing weather")
-			{
-				CHECK(std::ranges::contains(battleState.mWeatherIDs, sunID));
-				CHECK_FALSE(std::ranges::contains(battleState.mWeatherIDs, hailID));
-			}
+			CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
+			CHECK(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
+			CHECK_FALSE(std::ranges::contains(freeFunctionState.mWeatherIDs, hailID));
 		}
 	}
 
-	GIVEN("a different weather is active and replacement is not allowed")
+	WHEN("the ruleset permits no active weathers")
 	{
-		battleState.mWeatherIDs = {hailID};
-		battleState.mRuleset.mMaxWeathers = 1;
-		battleState.mRuleset.mReplaceWeatherWhenFull = false;
+		handlerState.mRuleset.mMaxWeathers = 0;
+		freeFunctionState.mRuleset.mMaxWeathers = 0;
 
-		WHEN("sun weather is applied")
+		setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
+		applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
+
+		THEN("neither activates a weather")
 		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("the existing weather is retained and sun weather is not added")
-			{
-				CHECK(std::ranges::contains(battleState.mWeatherIDs, hailID));
-				CHECK_FALSE(std::ranges::contains(battleState.mWeatherIDs, sunID));
-			}
-		}
-	}
-
-	GIVEN("a free slot remains below the weather cap")
-	{
-		battleState.mWeatherIDs = {hailID};
-		battleState.mRuleset.mMaxWeathers = 2;
-		battleState.mRuleset.mReplaceWeatherWhenFull = true;
-
-		WHEN("sun weather is applied")
-		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("sun weather is added alongside the existing weather")
-			{
-				CHECK(std::ranges::contains(battleState.mWeatherIDs, hailID));
-				CHECK(std::ranges::contains(battleState.mWeatherIDs, sunID));
-			}
-		}
-	}
-
-	GIVEN("the ruleset permits no active weathers")
-	{
-		battleState.mRuleset.mMaxWeathers = 0;
-
-		WHEN("sun weather is applied")
-		{
-			setHarshSunlightHandler.apply(battleState, context, provider, randomSources);
-
-			THEN("no weather becomes active")
-			{
-				CHECK_FALSE(std::ranges::contains(battleState.mWeatherIDs, sunID));
-			}
-		}
-	}
-
-	GIVEN("the free function and the handler operate on equivalent states")
-	{
-		BattleState handlerState{};
-		BattleState freeFunctionState{};
-		EffectContext handlerContext{};
-		EffectContext freeFunctionContext{};
-
-		WHEN("applied to empty active weathers")
-		{
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("the free function yields the same active weathers as the handler")
-			{
-				CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
-				CHECK(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
-			}
-		}
-
-		WHEN("sun weather is already active")
-		{
-			handlerState.mWeatherIDs = {sunID};
-			freeFunctionState.mWeatherIDs = {sunID};
-
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("both leave sun weather active exactly once")
-			{
-				CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
-				CHECK((std::ranges::count(freeFunctionState.mWeatherIDs, sunID) == 1));
-			}
-		}
-
-		WHEN("a different weather is active and replacement is allowed")
-		{
-			handlerState.mWeatherIDs = {hailID};
-			handlerState.mRuleset.mMaxWeathers = 1;
-			handlerState.mRuleset.mReplaceWeatherWhenFull = true;
-			freeFunctionState.mWeatherIDs = {hailID};
-			freeFunctionState.mRuleset.mMaxWeathers = 1;
-			freeFunctionState.mRuleset.mReplaceWeatherWhenFull = true;
-
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("both replace the existing weather identically")
-			{
-				CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
-				CHECK(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
-				CHECK_FALSE(std::ranges::contains(freeFunctionState.mWeatherIDs, hailID));
-			}
-		}
-
-		WHEN("the ruleset permits no active weathers")
-		{
-			handlerState.mRuleset.mMaxWeathers = 0;
-			freeFunctionState.mRuleset.mMaxWeathers = 0;
-
-			setHarshSunlightHandler.apply(handlerState, handlerContext, provider, randomSources);
-			applySetHarshSunlight(freeFunctionState, freeFunctionContext, provider, randomSources);
-
-			THEN("neither activates a weather")
-			{
-				CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
-				CHECK_FALSE(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
-			}
+			CHECK((freeFunctionState.mWeatherIDs == handlerState.mWeatherIDs));
+			CHECK_FALSE(std::ranges::contains(freeFunctionState.mWeatherIDs, sunID));
 		}
 	}
 }

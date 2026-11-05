@@ -1,7 +1,8 @@
 /*! @file builtinMoveID.h
 	@brief Defines identifiers for moves compiled into PocketCore.
-	@date 10/21/2026
-	@version 0.12.51
+	@date 10/27/2026
+	@since 0.5.2
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -10,6 +11,7 @@
 
 #include <utility>
 
+#include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 
@@ -17,6 +19,7 @@
 
 namespace PocketCore::Move
 {
+	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Core::ub;
 
 	/*! @enum BuiltinMoveID
@@ -25,9 +28,9 @@ namespace PocketCore::Move
 		@details This closed enum is only a catalog of built-in moves. Runtime state and user-facing APIs use the open @ref MoveID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 10/21/2026
-		@version 0.5.2
-		@version 0.12.51
+		@date 10/27/2026
+		@since 0.5.2
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	enum class BuiltinMoveID : ub
@@ -36,12 +39,14 @@ namespace PocketCore::Move
 		Pound,
 		KarateChop,
 
-		QuickAttack,
-		Facade,
-		HydroSteam,
-		ExtremeSpeed,
+		QuickAttack,  // 98
+		ExtremeSpeed, // 245
+		Facade,		  // 263
+		HydroSteam,	  // 876
 		FinalMove,
 	};
+
+	static_assert(MAX_MOVES_PER_POKEMON < std::to_underlying(BuiltinMoveID::FinalMove));
 
 	/*! @brief Converts a built-in catalog value to its stable registry identifier.
 		@param[in] builtinMoveID The built-in move to convert.

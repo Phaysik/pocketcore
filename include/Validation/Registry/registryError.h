@@ -1,8 +1,8 @@
 /*! @file registryError.h
 	@brief Defines registry error types and metadata.
-	@date 10/13/2026
+	@date 10/26/2026
 	@since 0.12.1
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@ namespace PocketCore::Validation::Registry
 		@brief Describes the kinds of errors that can occur when mutating configurable registries.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 		@since 0.1.0
-		@version 0.12.51
+		@version 0.12.53
 	*/
 	enum class RegistryError : ub
 	{
@@ -54,6 +54,8 @@ namespace PocketCore::Validation::Registry
 		LearnsetNotFound,	 /*!< No Learnset matching the input was found. */
 		DuplicateLocation,	 /*!< A location with the given name already exists. */
 		LocationNotFound,	 /*!< No location matching the input was found. */
+		DuplicateEggGroup,	 /*!< An egg group with the given name already exists. */
+		EggGroupNotFound,	 /*!< No egg group matching the input was found. */
 	};
 
 	/*! @enum UnspecifiedMatchup

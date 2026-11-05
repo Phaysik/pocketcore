@@ -1,8 +1,8 @@
 /*! @file locationRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring location metadata.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -64,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal location registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class LocationRegistryConfiguration
@@ -226,6 +226,16 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<LocationID, RegistryError> removeLocation(const LocationID locationID);
+
+			/*! @brief Removes every registered location, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllLocations()
+			{
+				removeAllMetadata();
+			}
 	};
 } // namespace PocketCore::Configuration
 

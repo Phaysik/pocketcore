@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the PokemonRegistryConfiguration.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -105,7 +105,7 @@ SCENARIO("PokemonRegistryConfiguration")
 			REQUIRE(pokemonID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonID.value() == toPokemonID(BuiltinPokemonID::None)));
+			CHECK((pokemonID == toPokemonID(BuiltinPokemonID::None)));
 		}
 	}
 
@@ -123,7 +123,7 @@ SCENARIO("PokemonRegistryConfiguration")
 			REQUIRE(pokemonName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((pokemonName.value() == POKEMON_NAME_NONE));
+			CHECK((pokemonName == POKEMON_NAME_NONE));
 		}
 	}
 
@@ -445,7 +445,7 @@ SCENARIO("PokemonRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toPokemonID(BuiltinPokemonID::None)));
+					CHECK((result == toPokemonID(BuiltinPokemonID::None)));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue - 1));
 				}
 			}
@@ -472,9 +472,41 @@ SCENARIO("PokemonRegistryConfiguration")
 				THEN("the result is a success and the registry is updated")
 				{
 					CHECK(result.has_value());
-					CHECK((result.value() == toPokemonID(BuiltinPokemonID::None)));
+					CHECK((result == toPokemonID(BuiltinPokemonID::None)));
 					CHECK((config.getAmountRegistered() == finalPokemonUnderlyingValue - 1));
 				}
+			}
+		}
+	}
+
+	GIVEN("removeAllPokemons")
+	{
+		PokemonMeta definition{.mName = "TestPokemonMetadataName"};
+		std::expected<PokemonID, RegistryError> added{config.addPokemon(definition)};
+		REQUIRE(added.has_value());
+		us nextIDBeforeClear{config.getRuntimeRegistry().getNextID()};
+
+		WHEN("removing all metadata")
+		{
+			config.removeAllPokemons();
+
+			THEN("every built-in and custom entry is removed")
+			{
+				CHECK((config.getAmountRegistered() == 0));
+				CHECK(config.getRegisteredPokemons().empty());
+				CHECK_FALSE(config.hasPokemon(POKEMON_NAME_NONE));
+				CHECK_FALSE(config.hasPokemon(added.value()));
+				CHECK((config.getPokemonMetadata(NO_POKEMON_ID) == nullptr));
+			}
+
+			THEN("subsequent additions do not reuse stable IDs")
+			{
+				std::expected<PokemonID, RegistryError> readded{config.addPokemon(definition)};
+
+				REQUIRE(readded.has_value());
+				CHECK((readded.value().getValue() == nextIDBeforeClear));
+				CHECK((config.getAmountRegistered() == 1));
+				CHECK((config.getPokemonMetadata(readded.value()) != nullptr));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file natureRegistryConfiguration.h
 	@brief Declares the user-facing facade for configuring nature metadata.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.11.6
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -64,9 +64,9 @@ namespace PocketCore::Configuration
 		@brief Provides validated user customization over an internal nature registry.
 		@details Supports lookup, addition, batch addition, trigger replacement, renaming, and removal. Custom IDs are assigned
 	   monotonically and are not reused after removal. Batch additions provide all-or-nothing semantics.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.11.6
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class NatureRegistryConfiguration
@@ -224,6 +224,16 @@ namespace PocketCore::Configuration
 				@version 0.12.51
 			*/
 			ATTR_NODISCARD std::expected<NatureID, RegistryError> removeNature(const NatureID natureID);
+
+			/*! @brief Removes every registered nature, including built-ins.
+				@details Stable IDs are not reused after clearing.
+				@since 0.12.53
+				@version 0.12.53
+			*/
+			void removeAllNatures()
+			{
+				removeAllMetadata();
+			}
 	};
 } // namespace PocketCore::Configuration
 

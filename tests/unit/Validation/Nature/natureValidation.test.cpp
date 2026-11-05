@@ -1,8 +1,8 @@
 /*! @file natureValidation.test.cpp
 	@brief C++ file for running tests for the Nature validation functions.
-	@date 10/21/2026
+	@date 10/27/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -58,7 +58,7 @@ SCENARIO("validateNatureMetadata")
 		THEN("the metadata is invalid")
 		{
 			REQUIRE_FALSE(result.has_value());
-			CHECK((result.error() == NatureError::MISSING_NATURE_METADATA));
+			CHECK((result.error() == NatureError::TOO_MANY_NATURES));
 		}
 	}
 

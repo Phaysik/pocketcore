@@ -1,8 +1,8 @@
 /*! @file terrainRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined terrains.
-	@date 10/13/2026
+	@date 11/03/2026
 	@since 0.8.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -42,9 +42,9 @@ namespace PocketCore::Registry::Terrain
 		@details Built-in terrains are registered during construction with IDs derived from @ref BuiltinTerrainID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_TERRAINS.
-		@date 10/13/2026
+		@date 11/03/2026
 		@since 0.8.0
-		@version 0.12.51
+		@version 0.12.53
 		@author Matthew Moore
 	*/
 	class TerrainRegistry : private FixedMetadataRegistry<TerrainMeta, TerrainID, MAX_TERRAINS, &TerrainMeta::mTerrainID>
@@ -92,6 +92,7 @@ namespace PocketCore::Registry::Terrain
 
 		protected:
 			using Base::addEntry;
+			using Base::clearEntries;
 			using Base::createCheckpoint;
 			using Base::decrementAmountRegistered;
 			using Base::eraseEntry;

@@ -1,8 +1,8 @@
 /*! @file targetsHandler.test.cpp
 	@brief C++ file for running tests for the TargetsHandler.
-	@date 10/19/2026
+	@date 10/27/2026
 	@since 0.8.7
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -28,6 +28,7 @@ using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Battle::BattleState;
 using PocketCore::Battle::BattleTargetID;
 using PocketCore::Configuration::MoveRegistryConfiguration;
+using PocketCore::Effect::applyTargets;
 using PocketCore::Effect::EffectContext;
 using PocketCore::Effect::TargetsHandler;
 using PocketCore::Move::BuiltinMoveID;
@@ -45,86 +46,102 @@ using PocketCore::Testing::registerMove;
 SCENARIO("TargetsHandler")
 {
 	TargetsHandler targetsHandler{};
-	BattleState battleState{};
+	BattleState handlerState{};
+	BattleState freeFunctionState{};
 	MoveRegistryConfiguration moveConfiguration{};
 	const MoveRegistry &moveRegistry{moveConfiguration.getRuntimeRegistry()};
 	RegistryProvider provider{.mMoveRegistry = &moveRegistry};
 	BattleRandomSources randomSources{};
+	EffectContext handlerContext{makeEffectContext({.mMoveID = toMoveID(BuiltinMoveID::Pound)})};
+	EffectContext freeFunctionContext{makeEffectContext({.mMoveID = toMoveID(BuiltinMoveID::Pound)})};
 
 	GIVEN("a null move provider")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = toMoveID(BuiltinMoveID::Pound)})};
 		RegistryProvider nullProvider{getNullMoveRegistryProvider()};
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, nullProvider, randomSources);
+			targetsHandler.apply(handlerState, handlerContext, nullProvider, randomSources);
+			applyTargets(freeFunctionState, freeFunctionContext, nullProvider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
-				CHECK_FALSE(hasTargetsMultiplier(context));
+				CHECK_FALSE(hasTargetsMultiplier(handlerContext));
+				CHECK_FALSE(hasTargetsMultiplier(freeFunctionContext));
 			}
 		}
 	}
 
 	GIVEN("an invalid moveID")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = MoveID{200}})};
+		handlerContext.mMoveID = MoveID{200};
+		freeFunctionContext.mMoveID = MoveID{200};
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider, randomSources);
+			targetsHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applyTargets(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
-				CHECK_FALSE(hasTargetsMultiplier(context));
+				CHECK_FALSE(hasTargetsMultiplier(handlerContext));
+				CHECK_FALSE(hasTargetsMultiplier(freeFunctionContext));
 			}
 		}
 	}
 
 	GIVEN("a move that targets a single opponent")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = toMoveID(BuiltinMoveID::Pound)})};
+		handlerContext.mMoveID = toMoveID(BuiltinMoveID::Pound);
+		freeFunctionContext.mMoveID = toMoveID(BuiltinMoveID::Pound);
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider, randomSources);
+			targetsHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applyTargets(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
-				CHECK_FALSE(hasTargetsMultiplier(context));
+				CHECK_FALSE(hasTargetsMultiplier(handlerContext));
+				CHECK_FALSE(hasTargetsMultiplier(freeFunctionContext));
 			}
 		}
 	}
 
 	GIVEN("a move that targets only self")
 	{
-		EffectContext context{makeEffectContext({.mMoveID = registerMove(moveConfiguration, {.mTargetID = BattleTargetID::Self})})};
+		MoveID registeredMove{registerMove(moveConfiguration, {.mTargetID = BattleTargetID::Self})};
+		handlerContext.mMoveID = registeredMove;
+		freeFunctionContext.mMoveID = registeredMove;
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider, randomSources);
+			targetsHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applyTargets(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("no targets spread multiplier is added")
 			{
-				CHECK_FALSE(hasTargetsMultiplier(context));
+				CHECK_FALSE(hasTargetsMultiplier(handlerContext));
+				CHECK_FALSE(hasTargetsMultiplier(freeFunctionContext));
 			}
 		}
 	}
 
 	GIVEN("a move that can hit multiple targets")
 	{
-		EffectContext context{
-			makeEffectContext({.mMoveID = registerMove(moveConfiguration, {.mTargetID = BattleTargetID::AllOpponents})}),
-		};
+		MoveID registeredMove{registerMove(moveConfiguration, {.mTargetID = BattleTargetID::AllOpponents})};
+		handlerContext.mMoveID = registeredMove;
+		freeFunctionContext.mMoveID = registeredMove;
 
 		WHEN("applying target handling")
 		{
-			targetsHandler.apply(battleState, context, provider, randomSources);
+			targetsHandler.apply(handlerState, handlerContext, provider, randomSources);
+			applyTargets(freeFunctionState, freeFunctionContext, provider, randomSources);
 
 			THEN("the targets spread multiplier is added")
 			{
-				CHECK(hasTargetsMultiplier(context));
+				CHECK(hasTargetsMultiplier(handlerContext));
+				CHECK(hasTargetsMultiplier(freeFunctionContext));
 			}
 		}
 	}

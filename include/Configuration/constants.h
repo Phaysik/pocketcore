@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 10/09/2026
+	@date 11/04/2026
 	@since 0.1.0
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -41,6 +41,11 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr ub MAX_ABILITY_POOL_PER_POKEMON{10};
+
+	/*! @brief The maximum number of abilities available in one Pokemon's item pool.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub MAX_ITEM_POOL_PER_POKEMON{3};
 
 	/*! @brief The maximum number of registered items.
 		@see docs/config-boundary.md
@@ -110,6 +115,16 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr us MAX_LEARNSETS{1'000};
+
+	/*! @brief The maximum number of registered egg groups.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr us MAX_EGG_GROUPS{1'000};
+
+	/*! @brief The maximum number of egg groups known by one Pokemon.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub MAX_EGG_GROUPS_PER_POKEMON{2};
 
 	/*! @brief The maximum number of registered weather conditions.
 		@see docs/config-boundary.md
@@ -203,14 +218,29 @@ namespace PocketCore::Configuration
 	/*! @brief The water-move damage multiplier during rain. */
 	inline constexpr double WATER_MOVE_IN_RAIN_MULTIPLIER_VALUE{1.5};
 
+	/*! @brief The water-move damage multiplier during heavy rain. */
+	inline constexpr double WATER_MOVE_IN_HEAVY_RAIN_MULTIPLIER_VALUE{1.5};
+
 	/*! @brief The fire-move damage multiplier during rain. */
 	inline constexpr double FIRE_MOVE_IN_RAIN_MULTIPLIER_VALUE{0.5};
+
+	/*! @brief The fire-move damage multiplier during heavy rain. */
+	inline constexpr double FIRE_MOVE_IN_HEAVY_RAIN_MULTIPLIER_VALUE{0.0};
 
 	/*! @brief The fire-move damage multiplier during harsh sunlight. */
 	inline constexpr double FIRE_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
 
+	/*! @brief The fire-move damage multiplier during extremely harsh sunlight. */
+	inline constexpr double FIRE_MOVE_IN_EXTREMELY_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
+
+	/*! @brief The hydro steam damage multiplier during harsh sunlight. */
+	inline constexpr double HYDRO_STEAM_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{1.5};
+
 	/*! @brief The water-move damage multiplier during harsh sunlight. */
 	inline constexpr double WATER_MOVE_IN_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.5};
+
+	/*! @brief The water-move damage multiplier during extremely harsh sunlight. */
+	inline constexpr double WATER_MOVE_IN_EXTREMELY_HARSH_SUNLIGHT_MULTIPLIER_VALUE{0.0};
 
 	/*! @brief The electric-move base-damage multiplier in electric terrain. */
 	inline constexpr double ELECTRIC_BUFF_IN_TERRAIN_BASE_DAMAGE_VALUE{1.3};
@@ -326,6 +356,44 @@ namespace PocketCore::Configuration
 		@see docs/config-boundary.md
 	*/
 	inline constexpr ub MAX_ACTIVE_SLOTS_PER_SIDE{6};
+
+	/*! @brief The inclusive lower bound of a breeding ability-inheritance random roll.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub BREEDING_ABILITY_MINIMUM{1};
+
+	/*! @brief The inclusive upper bound of a breeding ability-inheritance random roll.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub BREEDING_ABILITY_MAXIMUM{100};
+
+	/*! @brief The percentage chance of inheriting a parent's regular ability during breeding.
+		@details Applies to regular-ability inheritance, separately from @ref HIDDEN_ABILITY_CHANCE.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub REGULAR_ABILITY_CHANCE{80};
+
+	/*! @brief The percentage chance of inheriting a parent's hidden ability during breeding.
+		@details Applies to hidden-ability inheritance, separately from @ref REGULAR_ABILITY_CHANCE.
+		@see docs/config-boundary.md
+	*/
+	inline constexpr ub HIDDEN_ABILITY_CHANCE{60};
+
+	/*! @brief The minimum amount of natures a Pokemon can roll. */
+	inline constexpr ub MIN_NATURES_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_NATURES_PER_POKEMON_ROLL <= MAX_NATURES_PER_POKEMON);
+
+	/*! @brief The minimum amount of abilities a Pokemon can roll from their ability pool. */
+	inline constexpr ub MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL <= MAX_ABILITIES_PER_POKEMON);
+
+	/*! @brief The minimum amount of items a Pokemon can roll from their item pool. */
+	inline constexpr ub MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL{1};
+
+	static_assert(MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL <= MAX_ITEMS_PER_POKEMON);
+
 } // namespace PocketCore::Configuration
 
 #endif

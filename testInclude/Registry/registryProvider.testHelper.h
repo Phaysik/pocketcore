@@ -1,8 +1,8 @@
 /*! @file registryProivder.testHelper.h
 	@brief Test helper for dealing with RegistryProvider concepts.
-	@date 10/09/2026
+	@date 10/26/2026
 	@since 0.12.17
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 #define TEST_INCLUDE_REGISTRY_REGISTRY_PROVIDER_TEST_HELPER_H
 
 #include "Configuration/abilityRegistryConfiguration.h"
+#include "Configuration/eggGroupRegistryConfiguration.h"
 #include "Configuration/itemRegistryConfiguration.h"
 #include "Configuration/learnsetRegistryConfiguration.h"
 #include "Configuration/locationRegistryConfiguration.h"
@@ -26,6 +27,7 @@
 namespace PocketCore::Testing
 {
 	using PocketCore::Configuration::AbilityRegistryConfiguration;
+	using PocketCore::Configuration::EggGroupRegistryConfiguration;
 	using PocketCore::Configuration::ItemRegistryConfiguration;
 	using PocketCore::Configuration::LearnsetRegistryConfiguration;
 	using PocketCore::Configuration::LocationRegistryConfiguration;
@@ -53,6 +55,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -67,6 +70,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -83,6 +87,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = nullptr,
@@ -97,6 +102,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -113,6 +119,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -127,6 +134,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -143,6 +151,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -157,6 +166,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -173,6 +183,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -187,6 +198,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -203,6 +215,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -217,6 +230,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -233,6 +247,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -247,6 +262,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -263,6 +279,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -277,6 +294,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -293,6 +311,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -307,6 +326,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -323,6 +343,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -337,6 +358,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -354,6 +376,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -368,6 +391,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = nullptr,
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -385,6 +409,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -399,6 +424,7 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = nullptr,
 			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
 		};
 	}
 
@@ -416,6 +442,7 @@ namespace PocketCore::Testing
 		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
 		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
 		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
 
 		return {
 			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
@@ -430,6 +457,40 @@ namespace PocketCore::Testing
 			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
 			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
 			.mLocationRegistry = nullptr,
+			.mEggGroupRegistry = &eggGroupRegistryConfig.getRuntimeRegistry(),
+		};
+	}
+
+	inline RegistryProvider getNullEggGroupRegistryProvider()
+	{
+		static const TypeRegistryConfiguration typeRegistryConfig{};
+		static const ItemRegistryConfiguration itemRegistryConfig{};
+		static const MoveRegistryConfiguration moveRegistryConfig{};
+		static const AbilityRegistryConfiguration abilityRegistryConfig{};
+		static const StatusRegistryConfiguration statusRegistryConfig{};
+		static const TerrainRegistryConfiguration terrainRegistryConfig{};
+		static const WeatherRegistryConfiguration weatherRegistryConfig{};
+		static const MultiplierRegistryConfiguration multiplierRegistryConfig{};
+		static const NatureRegistryConfiguration natureRegistryConfig{};
+		static const PokemonRegistryConfiguration pokemonRegistryConfig{};
+		static const LearnsetRegistryConfiguration learnsetRegistryConfig{};
+		static const LocationRegistryConfiguration locationRegistryConfig{};
+		static const EggGroupRegistryConfiguration eggGroupRegistryConfig{};
+
+		return {
+			.mAbilityRegistry = &abilityRegistryConfig.getRuntimeRegistry(),
+			.mMoveRegistry = &moveRegistryConfig.getRuntimeRegistry(),
+			.mItemRegistry = &itemRegistryConfig.getRuntimeRegistry(),
+			.mTypeRegistry = &typeRegistryConfig.getRuntimeRegistry(),
+			.mStatusRegistry = &statusRegistryConfig.getRuntimeRegistry(),
+			.mWeatherRegistry = &weatherRegistryConfig.getRuntimeRegistry(),
+			.mTerrainRegistry = &terrainRegistryConfig.getRuntimeRegistry(),
+			.mMultiplierRegistry = &multiplierRegistryConfig.getRuntimeRegistry(),
+			.mNatureRegistry = &natureRegistryConfig.getRuntimeRegistry(),
+			.mPokemonRegistry = &pokemonRegistryConfig.getRuntimeRegistry(),
+			.mLearnsetRegistry = &learnsetRegistryConfig.getRuntimeRegistry(),
+			.mLocationRegistry = &locationRegistryConfig.getRuntimeRegistry(),
+			.mEggGroupRegistry = nullptr,
 		};
 	}
 } // namespace PocketCore::Testing

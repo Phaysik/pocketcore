@@ -1,8 +1,8 @@
 /*! @file multiplierRegistry.test.cpp
 	@brief C++ file for running tests for the MultiplierRegistry.
-	@date 10/13/2026
+	@date 10/28/2026
 	@since 0.12.20
-	@version 0.12.51
+	@version 0.12.53
 	@author Matthew Moore
 */
 
@@ -221,7 +221,7 @@ SCENARIO("MultiplierRegistry")
 			REQUIRE(multiplierID.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((multiplierID.value() == toMultiplierID(BuiltinMultiplierID::None)));
+			CHECK((multiplierID == toMultiplierID(BuiltinMultiplierID::None)));
 		}
 	}
 
@@ -239,7 +239,7 @@ SCENARIO("MultiplierRegistry")
 			REQUIRE(multiplierName.has_value());
 
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((multiplierName.value() == MULTIPLIER_NAME_NONE));
+			CHECK((multiplierName == MULTIPLIER_NAME_NONE));
 		}
 	}
 
@@ -302,7 +302,7 @@ SCENARIO("MultiplierRegistry")
 
 			REQUIRE(multiplierIndex.has_value());
 			// NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-			CHECK((multiplierIndex.value() == 0));
+			CHECK((multiplierIndex == 0));
 		}
 	}
 
