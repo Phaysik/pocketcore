@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 10/28/2026
+	@date 11/05/2026
 	@since 0.12.28
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -11,6 +11,7 @@
 #include <array>
 #include <cstddef>
 #include <expected>
+#include <optional>
 #include <span>
 #include <type_traits>
 #include <variant>
@@ -32,7 +33,6 @@
 #include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
 #include "Pokemon/pokemonStats.h"
-#include "Utility/Random/random.h"
 #include "Validation/Ability/abilityError.h"
 #include "Validation/Item/itemError.h"
 #include "Validation/Move/moveError.h"
@@ -60,17 +60,14 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::getValidPokemonIVs;
 	using PocketCore::Pokemon::getValidPokemonMoves;
 	using PocketCore::Pokemon::getValidPokemonNatures;
-	using PocketCore::Pokemon::IDContext;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonAbilityEntry;
-	using PocketCore::Pokemon::PokemonBreedingContext;
 	using PocketCore::Pokemon::PokemonEncounter;
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::SetLevelEncounter;
-	using PocketCore::Utility::Random::Random;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Move::MoveError;
@@ -79,54 +76,57 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Validation::Registry::RegistryError;
 
 	ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> PokemonRegistry::instantiate(
-		const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
-		PokemonInstantiationDependencies *dependencyRegistries, const IDContext &idContext, const IVEVContext &ivevContext,
-		const PokemonBreedingContext &breedingContext) const
+		const PokemonSpec &pokemonSpec, const PokemonInstantiationDependencies &dependencyRegistries,
+		const BattleRandomSources &randomSources) const
 	{
-		if (dependencyRegistries == nullptr || dependencyRegistries->mAbilityRegistry == nullptr
-			|| dependencyRegistries->mItemRegistry == nullptr || dependencyRegistries->mMoveRegistry == nullptr
-			|| dependencyRegistries->mNatureRegistry == nullptr || dependencyRegistries->mLearnsetRegistry == nullptr
-			|| dependencyRegistries->mLocationRegistry == nullptr)
+		if (dependencyRegistries.mAbilityRegistry == nullptr || dependencyRegistries.mItemRegistry == nullptr
+			|| dependencyRegistries.mMoveRegistry == nullptr || dependencyRegistries.mNatureRegistry == nullptr
+			|| dependencyRegistries.mLearnsetRegistry == nullptr || dependencyRegistries.mLocationRegistry == nullptr)
 		{
 			return std::unexpected{RegistryError::MissingRegistry};
 		}
 
-		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonID)};
+		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonSpec.mPokemonID)};
 
 		if (pokemonMeta == nullptr)
 		{
 			return std::unexpected{RegistryError::PokemonNotFound};
 		}
 
-		const LearnsetMeta *learnsetMeta{dependencyRegistries->mLearnsetRegistry->getLearnsetMetadata(pokemonMeta->mLearnsetID)};
+		const LearnsetMeta *learnsetMeta{dependencyRegistries.mLearnsetRegistry->getLearnsetMetadata(pokemonMeta->mLearnsetID)};
 
 		if (learnsetMeta == nullptr)
 		{
 			return std::unexpected{RegistryError::LearnsetNotFound};
 		}
 
-		if (encounterIndex > pokemonMeta->mEncounters.size())
+		if (pokemonSpec.mEncounterIndex >= pokemonMeta->mEncounters.size())
 		{
 			return std::unexpected{RegistryError::LocationNotFound};
 		}
 
-		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(encounterIndex)};
+		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(pokemonSpec.mEncounterIndex)};
 
 		const us pokemonEncounterLevel{
-			std::visit(
-				[](const auto &policy) {
-					using Policy = std::decay_t<decltype(policy)>;
+			pokemonSpec.mLevel.has_value() ? pokemonSpec.mLevel.value()
+										   : std::visit(
+												 [&randomSources](const auto &policy) {
+													 using Policy = std::decay_t<decltype(policy)>;
 
-					if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
-					{
-						return policy.mLevel;
-					}
-					else
-					{
-						return Random::get(policy.mMinLevel, policy.mMaxLevel);
-					}
-				},
-				encounterData.mLevel),
+													 if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
+													 {
+														 return policy.mLevel;
+													 }
+													 else
+													 {
+														 const auto randomLevelValue = [&randomSources](us minimum, us maximum) -> us {
+															 return static_cast<us>(randomSources.mIndex.get()(minimum, maximum));
+														 };
+
+														 return randomLevelValue(policy.mMinLevel, policy.mMaxLevel);
+													 }
+												 },
+												 encounterData.mLevel),
 		};
 
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
@@ -137,7 +137,8 @@ namespace PocketCore::Registry::Pokemon
 		std::array<us, POKEMON_STAT_COUNT> validEVs{};
 
 		if (const std::expected<void, NatureError> error{
-				getValidPokemonNatures(idContext.natureIDs, validNatureIDs, *dependencyRegistries->mNatureRegistry, randomSources),
+				getValidPokemonNatures(pokemonSpec.mIDContext.natureIDs, validNatureIDs, *dependencyRegistries.mNatureRegistry,
+									   randomSources),
 			};
 			!error.has_value())
 		{
@@ -145,8 +146,9 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, AbilityError> error{
-				getValidPokemonAbilities(idContext.abilityEntries, validAbilityEntries, pokemonMeta->mAbilityPool,
-										 *dependencyRegistries->mAbilityRegistry, randomSources, breedingContext, encounterData),
+				getValidPokemonAbilities(pokemonSpec.mIDContext.abilityEntries, validAbilityEntries, pokemonMeta->mAbilityPool,
+										 *dependencyRegistries.mAbilityRegistry, randomSources, pokemonSpec.mBreedingContext,
+										 encounterData),
 			};
 			!error.has_value())
 		{
@@ -154,8 +156,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, ItemError> error{
-				getValidPokemonItems(idContext.itemIDs, validItemIDs, pokemonMeta->mItemPool, *dependencyRegistries->mItemRegistry,
-									 randomSources),
+				getValidPokemonItems(pokemonSpec.mIDContext.itemIDs, validItemIDs, pokemonMeta->mItemPool,
+									 *dependencyRegistries.mItemRegistry, randomSources),
 			};
 			!error.has_value())
 		{
@@ -163,20 +165,21 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, MoveError> error{
-				getValidPokemonMoves(idContext.moveIDs, validMoveIDs, *dependencyRegistries->mMoveRegistry, *learnsetMeta, encounterData,
-									 pokemonEncounterLevel),
+				getValidPokemonMoves(pokemonSpec.mIDContext.moveIDs, validMoveIDs, *dependencyRegistries.mMoveRegistry, *learnsetMeta,
+									 encounterData, pokemonEncounterLevel),
 			};
 			!error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(ivevContext.ivs, validIVs, randomSources)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(pokemonSpec.mIVEVContext.ivs, validIVs, randomSources)};
+			!error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(ivevContext.evs, validEVs)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(pokemonSpec.mIVEVContext.evs, validEVs)}; !error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
@@ -186,12 +189,21 @@ namespace PocketCore::Registry::Pokemon
 		for (const std::size_t index : std::views::iota(std::size_t{0}, MAX_MOVES_PER_POKEMON))
 		{
 			const MoveID currentMove{validMoveIDs.at(index)};
-			const MoveMeta *meta{dependencyRegistries->mMoveRegistry->getMoveMetadata(currentMove)};
+			const MoveMeta *meta{dependencyRegistries.mMoveRegistry->getMoveMetadata(currentMove)};
 			moveMetas.at(index) = {.mMoveID = currentMove, .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
 		};
 
-		const std::size_t genderIndex{randomSources.mIndex.get()(std::size_t{0}, pokemonMeta->mGenderPool.size() - 1)};
-		const PokemonGender gender{pokemonMeta->mGenderPool.at(genderIndex)};
+		const auto getRandomGender{
+			[&pokemonMeta, &randomSources] {
+				const std::size_t genderIndex{randomSources.mIndex.get()(std::size_t{0}, pokemonMeta->mGenderPool.size() - 1)};
+
+				return pokemonMeta->mGenderPool.at(genderIndex);
+			},
+		};
+
+		const PokemonGender gender{
+			pokemonSpec.mGender.has_value() ? pokemonSpec.mGender.value() : getRandomGender(),
+		};
 
 		return Pokemon{
 			*pokemonMeta,
@@ -200,7 +212,7 @@ namespace PocketCore::Registry::Pokemon
 			validAbilityEntries,
 			validItemIDs,
 			validNatureIDs,
-			*dependencyRegistries->mNatureRegistry,
+			*dependencyRegistries.mNatureRegistry,
 			validIVs,
 			validEVs,
 			gender,
