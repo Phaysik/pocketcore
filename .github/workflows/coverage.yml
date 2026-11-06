@@ -170,9 +170,10 @@ jobs:
 
       - name: Install Tooling Dependencies
         run: |
-            wget -qO- https://llvm.org | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
-            CODENAME=$(lsb_release -cs)
-            echo "deb https://llvm.org{CODENAME}/ llvm-toolchain-${CODENAME}-24 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+            wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+            sudo chmod +x llvm.sh
+            sudo ./llvm.sh 24
+            rm llvm.sh
             sudo apt-get update
             sudo apt-get install python3-pip clang++-24 python3-sphinx build-essential libcapture-tiny-perl libdatetime-perl -y
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
@@ -180,7 +181,7 @@ jobs:
             pip3 install --upgrade pip --break-system-packages
             pip3 install cmake --break-system-packages
             sudo pip3 install sphinx-rtd-theme --break-system-packages
-      
+
       - name: Build & Install LCOV Source Layer
         if: steps.cache-lcov-binary.outputs.cache-hit != 'true'
         run: |
