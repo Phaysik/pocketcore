@@ -1,8 +1,8 @@
 /*! @file targetsHandler.h
 	@brief Contains the targets effect handler
-	@date 10/19/2026
+	@date 11/05/2026
 	@since 0.8.1
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -30,9 +30,9 @@ namespace PocketCore::Effect
 			than a single opponent or the user.
 		@warning The registry provider must contain an available move registry.
 		@note Missing move metadata leaves the effect context unchanged. The battle state is not inspected or modified.
-		@date 10/19/2026
+		@date 11/05/2026
 		@since 0.8.1
-		@version 0.12.51
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class TargetsHandler : public IEffectHandler
@@ -47,7 +47,7 @@ namespace PocketCore::Effect
 				@post Moves targeting more than a single opponent or the user receive the configured targets multiplier. Missing move
 			   metadata leaves @p context unchanged.
 				@since 0.8.1
-				@version 0.12.51
+				@version 0.12.54
 			*/
 			void apply(ATTR_MAYBE_UNUSED BattleState &state, EffectContext &context, const RegistryProvider &provider,
 					   ATTR_MAYBE_UNUSED const BattleRandomSources &randomSources) const override;

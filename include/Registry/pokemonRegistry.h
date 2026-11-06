@@ -1,15 +1,14 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 11/03/2026
+	@date 11/05/2026
 	@since 0.11.6
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_REGISTRY_POKEMON_REGISTRY_H
 #define INCLUDE_REGISTRY_POKEMON_REGISTRY_H
 
-#include <cstddef>
 #include <expected>
 #include <optional>
 #include <span>
@@ -95,8 +94,6 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
 	using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
 	using PocketCore::Pokemon::DITTO_BASE_STATS;
-	using PocketCore::Pokemon::IDContext;
-	using PocketCore::Pokemon::IVEVContext;
 	using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
@@ -111,10 +108,10 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 	using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
-	using PocketCore::Pokemon::PokemonBreedingContext;
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
+	using PocketCore::Pokemon::PokemonSpec;
 	using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
@@ -186,9 +183,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 11/03/2026
+		@date 11/05/2026
 		@since 0.11.6
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -468,21 +465,36 @@ namespace PocketCore::Registry::Pokemon
 			}
 
 			/*! @brief Instantiates a Pokemon from the registry.
-				@param[in] pokemonID The built-in or custom stable identifier for the Pokemon to create.
-				@param[in] encounterIndex The index of the encounter metadata to use from the pokemon.
-				@param[in] randomSources The random sources used for battle-related numeric types.
-				@param[in] dependencyRegistries The dependency registries to use for resolving various IDs. Defaults to nullptr.
-				@param[in] idContext The context containing IDs for various dependencies.
-				@param[in] ivevContext The context containing IV and EV values for the Pokemon.
-				@param[in] breedingContext The context containing breeding-related information for the Pokemon.
-				@return The instantiated Pokemon on success, or @ref PokemonInstantiationError if no matching pokemon exists.
+				@details Uses caller-supplied species ID and encounter index from @ref PokemonSpec.
+					Non-empty IDContext and IVEVContext spans supply nature IDs, ability entries, item IDs, move IDs, IVs, and EVs.
+					Supplied identifiers and stat arrays pass through their validation helpers and existing duplicate normalization.
+					Non-empty sentinel-only identifier spans supply unused slots rather than requesting generation.
+					Empty spans independently request nature selection from registered natures, ability selection from the species pool
+					(with breeding inheritance for egg encounters), item selection from the species pool, learnset/encounter-based move
+					selection, random IVs, or zero EVs. Supplied moves require registered metadata, not encounter eligibility.
+					A supplied level or gender is used without sampling that field. An omitted level uses the fixed encounter level or
+					samples its inclusive range; an omitted gender is sampled from the species gender pool.
+					Species metadata resolves name, base stats, types, egg groups, and learnset ID. Selected move metadata resolves
+					maximum/default PP; selected nature metadata resolves stat multipliers. Construction derives calculated stats and
+					the level damage factor, initializes full health and default current PP, and leaves statuses empty.
+					A fully supplied spec generates no fields and consumes no randomness; mixed specs generate only omitted fields.
+				@pre Ability, item, move, nature, and learnset registry pointers are non-null and refer to live registries.
+					The encounter index is within the species encounter array, even when all instance fields are supplied.
+					Inputs and metadata satisfy the applicable construction/helper constraints.
+				@param[in] pokemonSpec The borrowed specification; span storage and any accessed breeding parents remain valid throughout
+					the call. Its species ID is not generated.
+				@param[in] dependencyRegistries The borrowed dependency bundle used for metadata resolution; it has no default argument.
+				@param[in] randomSources The borrowed random sources used only by automatic policies requiring random draws.
+					Referenced sources remain valid throughout the call and may advance their state.
+				@return A Pokemon on success, or @ref PokemonInstantiationError containing a registry lookup or nature, ability, item,
+					move, or Pokemon validation/generation error. The returned display name borrows species metadata storage, which
+					must remain valid for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
 				@since 0.12.24
-				@version 0.12.53
+				@version 0.12.54
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
-				const PokemonID pokemonID, const std::size_t encounterIndex, const BattleRandomSources &randomSources,
-				PokemonInstantiationDependencies *dependencyRegistries = nullptr, const IDContext &idContext = {},
-				const IVEVContext &ivevContext = {}, const PokemonBreedingContext &breedingContext = {}) const;
+				const PokemonSpec &pokemonSpec, const PokemonInstantiationDependencies &dependencyRegistries,
+				const BattleRandomSources &randomSources) const;
 	};
 } // namespace PocketCore::Registry::Pokemon
 

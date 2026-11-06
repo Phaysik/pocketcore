@@ -1,8 +1,8 @@
 /*! @file targetsHandler.cpp
 	@brief Contains the targets effect handler implementation
-	@date 10/19/2026
+	@date 11/05/2026
 	@since 0.8.1
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -50,7 +50,12 @@ namespace PocketCore::Effect
 
 		const BattleTargetID moveTarget{moveMeta->mTargetID};
 
-		if (moveTarget != BattleTargetID::SingleOpponent && moveTarget != BattleTargetID::Self)
+		const bool hitsMultiple{
+			moveTarget != BattleTargetID::SingleOpponent && moveTarget != BattleTargetID::SingleAlly
+				&& moveTarget != BattleTargetID::SingleOther && moveTarget != BattleTargetID::Self,
+		};
+
+		if (hitsMultiple)
 		{
 			context.setMultiplier(toMultiplierID(BuiltinMultiplierID::Targets), TARGETS_HIT_MULTIPLIER_VALUE);
 		}

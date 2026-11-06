@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined learnsets.
-	@date 11/03/2026
+	@date 11/05/2026
 	@since 0.12.50
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -20,12 +20,14 @@
 #include "Learnset/constants.h"
 #include "Learnset/learnsetID.h"
 #include "Learnset/learnsetMeta.h"
+#include "Move/builtInMoveID.h"
 #include "Registry/fixedMetadataRegistry.h"
 
 namespace PocketCore::Registry::Learnset
 {
 	using PocketCore::Configuration::MAX_LEARNSETS;
 	using PocketCore::Core::us;
+	using PocketCore::Learnset::AcquisitionMethod;
 	using PocketCore::Learnset::BuiltinLearnsetID;
 	using PocketCore::Learnset::LEARNSET_NAME_BLASTOISE;
 	using PocketCore::Learnset::LEARNSET_NAME_BULBASAUR;
@@ -41,6 +43,8 @@ namespace PocketCore::Registry::Learnset
 	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Learnset::toLearnsetID;
+	using PocketCore::Move::BuiltinMoveID;
+	using PocketCore::Move::toMoveID;
 	using PocketCore::Registry::FixedMetadataRegistry;
 
 	/*! @class LearnsetRegistry Registry/learnsetRegistry.h
@@ -48,9 +52,9 @@ namespace PocketCore::Registry::Learnset
 		@details Built-in learnsets are registered during construction with IDs derived from @ref BuiltinLearnsetID. Configuration code may
 	   append, replace, or remove owned metadata through protected mutators while battle-time callers use allocation-free lookup operations.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n), where n is bounded by @ref MAX_LEARNSETS.
-		@date 11/03/2026
+		@date 11/05/2026
 		@since 0.12.50
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class LearnsetRegistry : private FixedMetadataRegistry<LearnsetMeta, LearnsetID, MAX_LEARNSETS, &LearnsetMeta::mLearnsetID>
@@ -71,30 +75,217 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Constructs a registry populated with all built-in learnsets, including None but excluding the FinalLearnset sentinel.
 				@since 0.12.50
-				@version 0.12.53
+				@version 0.12.54
 			 */
 			ATTR_NOINLINE explicit constexpr LearnsetRegistry()
 			{
 				addBuiltin({.mName = std::string(LEARNSET_NAME_NONE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::None)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_BULBASAUR), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset)});
-				addBuiltin({.mName = std::string(LEARNSET_NAME_IVYSAUR), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_VENUSAUR), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_CHARMANDER), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_CHARMELEON), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_CHARIZARD), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_SQUIRTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_WARTORTLE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset)});
-				addBuiltin(
-					{.mName = std::string(LEARNSET_NAME_BLASTOISE), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset)});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_BULBASAUR),
+					.mEntries = {
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_IVYSAUR),
+					.mEntries = {
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_VENUSAUR),
+					.mEntries = {
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_CHARMANDER),
+					.mEntries = {
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                            .mLevelRequirement = 4,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_CHARMELEON),
+					.mEntries = {
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                            .mLevelRequirement = 4,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_CHARIZARD),
+					.mEntries = {
+					    {
+    						.mMoveID = toMoveID(BuiltinMoveID::DragonClaw),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::Growl),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::Ember),
+                            .mLevelRequirement = 4,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_SQUIRTLE),
+					.mEntries = {
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_WARTORTLE),
+					.mEntries = {
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
+				});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_BLASTOISE),
+					.mEntries = {
+    					{
+    						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+    						.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+    						.mLevelRequirement = 1,
+    						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+    					},
+                        {
+                            .mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+                            .mLevelRequirement = 3,
+                            .mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                        },
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BlastoiseLearnset),
+				});
 
-				addBuiltin({.mName = std::string(LEARNSET_NAME_DITTO), .mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset)});
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_DITTO),
+					.mEntries = {
+					    {
+							.mMoveID = toMoveID(BuiltinMoveID::Transform),
+							.mLevelRequirement = 1,
+							.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+						},
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
+				});
 			}
 
 			// LCOV_EXCL_STOP

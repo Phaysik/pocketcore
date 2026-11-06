@@ -1,8 +1,8 @@
 /*! @file moveRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined moves.
-	@date 11/03/2026
+	@date 11/05/2026
 	@since 0.5.3
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -37,13 +37,21 @@ namespace PocketCore::Registry::Move
 	using PocketCore::Effect::toEffectID;
 	using PocketCore::Move::baseAttackEffects;
 	using PocketCore::Move::BuiltinMoveID;
+	using PocketCore::Move::MOVE_NAME_DRAGON_CLAW;
+	using PocketCore::Move::MOVE_NAME_EMBER;
 	using PocketCore::Move::MOVE_NAME_EXTREME_SPEED;
 	using PocketCore::Move::MOVE_NAME_FACADE;
+	using PocketCore::Move::MOVE_NAME_GROWL;
 	using PocketCore::Move::MOVE_NAME_HYDRO_STEAM;
 	using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 	using PocketCore::Move::MOVE_NAME_NONE;
 	using PocketCore::Move::MOVE_NAME_POUND;
 	using PocketCore::Move::MOVE_NAME_QUICK_ATTACK;
+	using PocketCore::Move::MOVE_NAME_TACKLE;
+	using PocketCore::Move::MOVE_NAME_TAIL_WHIP;
+	using PocketCore::Move::MOVE_NAME_TRANSFORM;
+	using PocketCore::Move::MOVE_NAME_VINE_WHIP;
+	using PocketCore::Move::MOVE_NAME_WATER_GUN;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Move::toMoveID;
@@ -57,9 +65,9 @@ namespace PocketCore::Registry::Move
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup
 	   operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_MOVES.
-		@date 11/03/2026
+		@date 11/05/2026
 		@since 0.5.3
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class MoveRegistry : private FixedMetadataRegistry<MoveMeta, MoveID, MAX_MOVES, &MoveMeta::mMoveID>
@@ -102,7 +110,7 @@ namespace PocketCore::Registry::Move
 					.mMoveID = toMoveID(BuiltinMoveID::Pound),
 					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 					.mPower = 40,
-					.mTargetID = BattleTargetID::SingleOpponent,
+					.mTargetID = BattleTargetID::SingleOther,
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
@@ -125,13 +133,126 @@ namespace PocketCore::Registry::Move
 					.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 					.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 					.mPower = 50,
-					.mTargetID = BattleTargetID::SingleOpponent,
+					.mTargetID = BattleTargetID::SingleOther,
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 0,
 					.mPPMaxAmount = 40,
 					.mPPDefaultAmount = 25,
 					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_VINE_WHIP),
+					.mTriggers = {{
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
+					},
+					{
+						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
+					},},
+					.mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+					.mTypeID = toTypeID(BuiltinTypeID::Grass),
+					.mPower = 45,
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 40,
+					.mPPDefaultAmount = 25,
+					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_TACKLE),
+					.mTriggers = {{
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
+					},
+					{
+						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
+					},},
+					.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+					.mTypeID = toTypeID(BuiltinTypeID::Normal),
+					.mPower = 40,
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 56,
+					.mPPDefaultAmount = 35,
+					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_TAIL_WHIP),
+					.mTriggers = {},
+					.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+					.mTypeID = toTypeID(BuiltinTypeID::Normal),
+					.mTargetID = BattleTargetID::AllAdjacentOpponents,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 48,
+					.mPPDefaultAmount = 30,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_GROWL),
+					.mTriggers = {},
+					.mMoveID = toMoveID(BuiltinMoveID::Growl),
+					.mTypeID = toTypeID(BuiltinTypeID::Normal),
+					.mTargetID = BattleTargetID::AllAdjacentOpponents,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 64,
+					.mPPDefaultAmount = 40,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_EMBER),
+					.mTriggers = {},
+					.mMoveID = toMoveID(BuiltinMoveID::Ember),
+					.mTypeID = toTypeID(BuiltinTypeID::Fire),
+					.mPower = 40,
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 40,
+					.mPPDefaultAmount = 25,
+					.mSpecial = true,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_WATER_GUN),
+					.mTriggers = {{
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
+					},
+					{
+						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
+					},},
+					.mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+					.mTypeID = toTypeID(BuiltinTypeID::Water),
+					.mPower = 40,
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 40,
+					.mPPDefaultAmount = 25,
+					.mSpecial = true,
 				});
 
 				addBuiltin({
@@ -149,13 +270,25 @@ namespace PocketCore::Registry::Move
 					.mMoveID = toMoveID(BuiltinMoveID::QuickAttack),
 					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 					.mPower = 40,
-					.mTargetID = BattleTargetID::SingleOpponent,
+					.mTargetID = BattleTargetID::SingleOther,
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 1,
 					.mPPMaxAmount = 48,
 					.mPPDefaultAmount = 30,
 					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_TRANSFORM),
+					.mTriggers = {},
+					.mMoveID = toMoveID(BuiltinMoveID::Transform),
+					.mTypeID = toTypeID(BuiltinTypeID::Normal),
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mPriority = 0,
+					.mPPMaxAmount = 16,
+					.mPPDefaultAmount = 10,
 				});
 
 				addBuiltin({
@@ -173,12 +306,36 @@ namespace PocketCore::Registry::Move
 					.mMoveID = toMoveID(BuiltinMoveID::ExtremeSpeed),
 					.mTypeID = toTypeID(BuiltinTypeID::Normal),
 					.mPower = 80,
-					.mTargetID = BattleTargetID::SingleOpponent,
+					.mTargetID = BattleTargetID::SingleOther,
 					.mRangeID = BattleRangeID::Adjacent,
 					.mAccuracy = 100,
 					.mPriority = 2,
 					.mPPMaxAmount = 8,
 					.mPPDefaultAmount = 5,
+					.mSpecial = false,
+				});
+
+				addBuiltin({
+					.mName = std::string(MOVE_NAME_DRAGON_CLAW),
+					.mTriggers = {{
+					    .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+					    .mTrigger = BattleEventID::BeforeHit,
+						.mRole = BattleEventRole::Target,
+					},
+					{
+						.mEffects = {Move::baseAttackEffects().begin(), Move::baseAttackEffects().end()},
+						.mTrigger = BattleEventID::Hit,
+						.mRole = BattleEventRole::Target,
+					},},
+					.mMoveID = toMoveID(BuiltinMoveID::DragonClaw),
+					.mTypeID = toTypeID(BuiltinTypeID::Dragon),
+					.mPower = 80,
+					.mTargetID = BattleTargetID::SingleOther,
+					.mRangeID = BattleRangeID::Adjacent,
+					.mAccuracy = 100,
+					.mPriority = 0,
+					.mPPMaxAmount = 24,
+					.mPPDefaultAmount = 15,
 					.mSpecial = false,
 				});
 
