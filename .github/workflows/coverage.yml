@@ -81,6 +81,11 @@ jobs:
         run: |
           mkdir -p ./cache/gcc-latest
 
+      - name: Set up Tooling Cache Sites
+        run: |
+          mkdir -p ./cache/pip-wheels
+          mkdir -p ./cache/lcov-binary
+
       - name: Cache Apt Packages
         id: cache-apt-packages
         uses: actions/cache@v5
@@ -103,11 +108,28 @@ jobs:
         id: cache-gcc-latest
         uses: actions/cache@v5
         with:
-          path: |
-            ./cache/gcc-latest
+          path: ./cache/gcc-latest
           key: ${{ runner.os }}-gcc-latest-${{ hashFiles('makefileDependencies.sh') }}
           restore-keys: |
             ${{ runner.os }}-gcc-latest-
+
+      - name: Cache Pip Wheels
+        id: cache-pip-wheels
+        uses: actions/cache@v5
+        with:
+            path: ./cache/pip-wheels
+            key: ${{ runner.os }}-pip-wheels-${{ hashFiles('makefileDependencies.sh') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-wheels-
+
+      - name: Cache LCOV Installation
+        id: cache-lcov-binary
+        uses: actions/cache@v5
+        with:
+            path: ./cache/lcov-binary
+            key: ${{ runner.os }}-lcov-binary-${{ hashFiles('makefileDependencies.sh') }}
+            restore-keys: |
+              ${{ runner.os }}-lcov-binary-
 
       - name: Install Apt Packages From Cache
         if: steps.cache-apt-packages.outputs.cache-hit == 'true'
@@ -130,16 +152,27 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/local/gcc-latest/bin/gcc 100
           sudo update-alternatives --install /usr/bin/gcov gcov /usr/local/gcc-latest/bin/gcov 100
 
+      - name: Bind Mount Pip Cache to Local Folder
+        run: |
+          mkdir -p ~/.cache/pip
+          sudo mount --bind $(pwd)/cache/pip-wheels ~/.cache/pip
+
+      - name: Install LCOV From Cache
+        if: steps.cache-lcov-binary.outputs.cache-hit == 'true'
+        run: |
+          sudo cp -r ./cache/lcov-binary/bin/* /usr/local/bin/
+          sudo mkdir -p /usr/local/share/man/man1
+          sudo cp -r ./cache/lcov-binary/share/* /usr/local/share/man/man1/
+
       - name: Install dependencies
         if: steps.cache-apt-packages.outputs.cache-hit != 'true' || steps.cache-apt-lists.outputs.cache-hit != 'true' || steps.cache-gcc-latest.outputs.cache-hit != 'true'
         run: sudo bash $GITHUB_WORKSPACE/makefileDependencies.sh a
 
       - name: Install Tooling Dependencies
         run: |
-            wget -qO llvm.sh https://apt.llvm.org/llvm.sh
-            sudo chmod +x llvm.sh
-            sudo ./llvm.sh 24
-            rm llvm.sh
+            wget -qO- https://llvm.org | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null
+            CODENAME=$(lsb_release -cs)
+            echo "deb https://llvm.org{CODENAME}/ llvm-toolchain-${CODENAME}-24 main" | sudo tee /etc/apt/sources.list.d/llvm.list
             sudo apt-get update
             sudo apt-get install python3-pip clang++-24 python3-sphinx build-essential libcapture-tiny-perl libdatetime-perl -y
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-24 24
@@ -147,7 +180,11 @@ jobs:
             pip3 install --upgrade pip --break-system-packages
             pip3 install cmake --break-system-packages
             sudo pip3 install sphinx-rtd-theme --break-system-packages
-            curl -L -o lcov-latest.tar.gz https://github.com/linux-test-project/lcov/releases/download/v2.5/lcov-2.5.tar.gz
+      
+      - name: Build & Install LCOV Source Layer
+        if: steps.cache-lcov-binary.outputs.cache-hit != 'true'
+        run: |
+            curl -L -o lcov-latest.tar.gz https://github.com
             mkdir -p lcov-latest
             tar -xvzf lcov-latest.tar.gz -C lcov-latest --strip-components=1
             sudo rm -rf lcov-latest.tar.gz
@@ -212,5 +249,23 @@ jobs:
         run: |
           sudo cp -r "$LATEST_GCC"/* ./cache/gcc-latest
 
+      - name: Save LCOV Cache
+        if: steps.cache-lcov-binary.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./cache/lcov-binary/bin
+          mkdir -p ./cache/lcov-binary/share
+          cp -r /usr/local/bin/lcov /usr/local/bin/genhtml /usr/local/bin/gendata ./cache/lcov-binary/bin/
+          cp -r /usr/local/share/man/man1/lcov.1 /usr/local/share/man/man1/genhtml.1 ./cache/lcov-binary/share/
+
       - name: Give Read Access For Apt Folder
-        run: sudo chown -R $USER:$USER ./cache/apt-packages/apt/archives/lock ./cache/apt-packages/apt/archives/partial ./cache/apt-lists/lists/lock ./cache/apt-lists/lists/partial
+        run: |
+          # Safely unmount the pip directory so it compiles cleanly inside the workspace cache target
+          sudo umount ~/.cache/pip || true
+
+          sudo chown -R $USER:$USER \
+            ./cache/apt-packages/apt/archives/lock \
+            ./cache/apt-packages/apt/archives/partial \
+            ./cache/apt-lists/lists/lock \
+            ./cache/apt-lists/lists/partial \
+            ./cache/pip-wheels \
+            ./cache/lcov-binary
