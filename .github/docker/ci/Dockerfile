@@ -1,6 +1,6 @@
-# Toolchain image for .github/workflows/coverage.yml.
-# The workflow tags this image with a hash of this directory, so editing any
-# version below automatically produces and publishes a new image.
+# Shared toolchain image for the coverage, testing, valgrind, and CodeQL workflows.
+# .github/workflows/ci-image.yml tags this image with a hash of this directory,
+# so editing any version below automatically produces and publishes a new image.
 
 ARG UBUNTU_VERSION=24.04
 
@@ -41,9 +41,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        build-essential ca-certificates curl git gnupg gpg-agent libcapture-tiny-perl \
+        build-essential ca-certificates curl g++-14 git gnupg gpg-agent libcapture-tiny-perl \
         libdatetime-perl libjson-xs-perl libtimedate-perl lsb-release make ninja-build \
-        perl pkg-config python3-pip software-properties-common tar unzip wget xz-utils zip \
+        perl pkg-config python3-pip software-properties-common tar unzip valgrind wget \
+        xz-utils zip \
     && wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh \
     && chmod +x /tmp/llvm.sh \
     && /tmp/llvm.sh "${LLVM_VERSION}" \
@@ -70,13 +71,16 @@ RUN mkdir /tmp/lcov \
 RUN python3 -m pip install --no-cache-dir --break-system-packages cmake
 
 RUN printf '#include <format>\n#include <iostream>\nint main() { std::cout << std::format("{}", 42) << "\\n"; }\n' > /tmp/check.cpp \
-    && g++ -std=c++23 /tmp/check.cpp -o /tmp/check \
-    && /tmp/check \
-    && rm -f /tmp/check /tmp/check.cpp \
+    && g++ -std=c++26 /tmp/check.cpp -o /tmp/check-gcc \
+    && /tmp/check-gcc \
+    && clang++ -std=c++26 /tmp/check.cpp -o /tmp/check-clang \
+    && /tmp/check-clang \
+    && rm -f /tmp/check-gcc /tmp/check-clang /tmp/check.cpp \
     && g++ --version \
     && gcov --version \
     && clang++ --version \
     && cmake --version \
     && ninja --version \
     && lcov --version \
-    && genhtml --version
+    && genhtml --version \
+    && valgrind --version
