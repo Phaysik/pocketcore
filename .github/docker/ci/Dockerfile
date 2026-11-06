@@ -43,8 +43,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential ca-certificates curl g++-14 git gnupg gpg-agent libcapture-tiny-perl \
         libdatetime-perl libjson-xs-perl libtimedate-perl lsb-release make ninja-build \
-        perl pkg-config python3-pip software-properties-common tar unzip valgrind wget \
-        xz-utils zip \
+        perl pkg-config python3-pip python3-sphinx python3-sphinx-rtd-theme \
+        software-properties-common tar unzip valgrind wget xz-utils zip \
     && wget -qO /tmp/llvm.sh https://apt.llvm.org/llvm.sh \
     && chmod +x /tmp/llvm.sh \
     && /tmp/llvm.sh "${LLVM_VERSION}" \
