@@ -1,6 +1,6 @@
 /*! @file battleHelpers.cpp
 	@brief Contains the function definitions for battle helper functions
-	@date 11/05/2026
+	@date 11/06/2026
 	@since 0.9.14
 	@version 0.12.54
 	@author Matthew Moore
@@ -332,7 +332,8 @@ namespace PocketCore::Battle
 				if (selectedTarget.has_value())
 				{
 					const bool selectedTargetCond{
-						battleTargetID == BattleTargetID::SingleOther ? *selectedTarget == source : selectedTarget->mSide != targetSide,
+						battleTargetID == BattleTargetID::SingleOther ? *selectedTarget == source
+																	  : selectedTarget->mSide != targetSide || *selectedTarget == source,
 					};
 
 					if (selectedTargetCond || !canTarget(state, source, *selectedTarget, rangeID))
@@ -385,7 +386,7 @@ namespace PocketCore::Battle
 
 				break;
 			case BattleTargetID::SingleOther:
-				if (singleTargetHandler(getOppositeSide(source.mSide), BattleTargetID::SingleOther))
+				if (singleTargetHandler(source.mSide, BattleTargetID::SingleOther))
 				{
 					return std::unexpected{BattleEngineError::InvalidTarget};
 				}
@@ -406,8 +407,8 @@ namespace PocketCore::Battle
 				appendEligibleTargets(targets, state, source, rangeID, getOppositeSide(source.mSide));
 				break;
 			case BattleTargetID::AllAdjacent:
-				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::A);
-				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, Side::B);
+				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, source.mSide);
+				appendEligibleTargets(targets, state, source, BattleRangeID::Adjacent, getOppositeSide(source.mSide));
 
 				std::erase(targets, source);
 				break;

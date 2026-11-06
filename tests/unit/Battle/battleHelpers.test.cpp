@@ -1,6 +1,6 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 11/05/2026
+	@date 11/06/2026
 	@since 0.12.45
 	@version 0.12.54
 	@author Matthew Moore
@@ -1797,6 +1797,19 @@ SCENARIO("Battle free function")
 
 			WHEN("calling with a supplied selected target")
 			{
+				WHEN("the selected target is the source")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleAlly, BattleRangeID::Adjacent, source),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
 				WHEN("the selected target is targeting the same side as the source")
 				{
 					ally.mSide = Side::A;
@@ -1972,6 +1985,118 @@ SCENARIO("Battle free function")
 			}
 		}
 
+		WHEN("calling when the targetID is SingleOther")
+		{
+			WHEN("calling with a supplied selected target")
+			{
+				BattleTarget target{.mSide = Side::A, .mSlotIndex = 1};
+
+				WHEN("the selected target is the source")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent, source),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is targeting the same side as the source")
+				{
+					target.mSide = Side::B;
+					target.mSlotIndex = 0;
+
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent, target),
+					};
+
+					REQUIRE(result.has_value());
+
+					std::vector<BattleTarget> &targets{result.value()};
+
+					THEN("it returns the singular target")
+					{
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == target));
+					}
+				}
+
+				WHEN("the selected target is not able to be hit by the BattleRangeID")
+				{
+					target.mSlotIndex = 3;
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent, target),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("the selected target is targeting the opposite side of the source")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent, target),
+					};
+
+					THEN("it returns the singular target")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == target));
+					}
+				}
+			}
+
+			WHEN("calling without a supplied selected target")
+			{
+				WHEN("there's more than one valid target")
+				{
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns InvalidTarget")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == BattleEngineError::InvalidTarget));
+					}
+				}
+
+				WHEN("there's only one valid target")
+				{
+					state.mSideA = {{.mPokemon = &member1, .mPosition = 0}};
+					state.mSideB = {{.mPokemon = &member5, .mPosition = 0}};
+
+					source.mSlotIndex = 0;
+
+					std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+						resolveTargets(state, source, BattleTargetID::SingleOther, BattleRangeID::Adjacent),
+					};
+
+					THEN("it returns an array with the singular opponent")
+					{
+						REQUIRE(result.has_value());
+
+						std::vector<BattleTarget> &targets{result.value()};
+
+						BattleTarget opp{.mSide = Side::A, .mSlotIndex = 0};
+
+						CHECK((targets.size() == 1));
+						CHECK((targets.at(0) == opp));
+					}
+				}
+			}
+		}
+
 		WHEN("calling when the targetID is AllAlliesIncludingSelf")
 		{
 			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
@@ -2011,26 +2136,128 @@ SCENARIO("Battle free function")
 			}
 		}
 
+		WHEN("calling when the targetID is AllAdjacentOpponents")
+		{
+			WHEN("calling with an adjacent range")
+			{
+				std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+					resolveTargets(state, source, BattleTargetID::AllAdjacentOpponents, BattleRangeID::Adjacent),
+				};
+
+				THEN("it returns an array with the all opponent Pokemon adjacent to the source")
+				{
+					REQUIRE(result.has_value());
+
+					std::vector<BattleTarget> &targets{result.value()};
+
+					BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+					BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+					BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+
+					CHECK((targets.size() == 3));
+					CHECK((targets.at(0) == opp1));
+					CHECK((targets.at(1) == opp2));
+					CHECK((targets.at(2) == opp3));
+				}
+			}
+
+			WHEN("calling with an unrestricted range")
+			{
+				std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+					resolveTargets(state, source, BattleTargetID::AllAdjacentOpponents, BattleRangeID::Unrestricted),
+				};
+
+				THEN("it ignores the range and returns an array with the all opponent Pokemon adjacent to the source")
+				{
+					REQUIRE(result.has_value());
+
+					std::vector<BattleTarget> &targets{result.value()};
+
+					BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+					BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+					BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+
+					CHECK((targets.size() == 3));
+					CHECK((targets.at(0) == opp1));
+					CHECK((targets.at(1) == opp2));
+					CHECK((targets.at(2) == opp3));
+				}
+			}
+		}
+
 		WHEN("calling when the targetID is AllOpponents")
 		{
+			WHEN("calling with an adjacent range")
+			{
+				std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+					resolveTargets(state, source, BattleTargetID::AllOpponents, BattleRangeID::Adjacent),
+				};
+
+				THEN("it returns an array with the all opponent Pokemon adjacent to the source")
+				{
+					REQUIRE(result.has_value());
+
+					std::vector<BattleTarget> &targets{result.value()};
+
+					BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+					BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+					BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+
+					CHECK((targets.size() == 3));
+					CHECK((targets.at(0) == opp1));
+					CHECK((targets.at(1) == opp2));
+					CHECK((targets.at(2) == opp3));
+				}
+			}
+
+			WHEN("calling with an unrestricted range")
+			{
+				std::expected<std::vector<BattleTarget>, BattleEngineError> result{
+					resolveTargets(state, source, BattleTargetID::AllOpponents, BattleRangeID::Unrestricted),
+				};
+
+				THEN("it returns an array with the all opponent Pokemon adjacent to the source")
+				{
+					REQUIRE(result.has_value());
+
+					std::vector<BattleTarget> &targets{result.value()};
+
+					BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
+					BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
+					BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
+					BattleTarget opp4{.mSide = Side::A, .mSlotIndex = 3};
+
+					CHECK((targets.size() == 4));
+					CHECK((targets.at(0) == opp1));
+					CHECK((targets.at(1) == opp2));
+					CHECK((targets.at(2) == opp3));
+					CHECK((targets.at(3) == opp4));
+				}
+			}
+		}
+
+		WHEN("calling when the targetID is AllAdjacent")
+		{
 			std::expected<std::vector<BattleTarget>, BattleEngineError> result{
-				resolveTargets(state, source, BattleTargetID::AllOpponents, BattleRangeID::Adjacent),
+				resolveTargets(state, source, BattleTargetID::AllAdjacent, BattleRangeID::Adjacent),
 			};
 
-			THEN("it returns an array with the all Pokemon onsource only")
+			THEN("it returns an array with the all opponent Pokemon adjacent to the source")
 			{
 				REQUIRE(result.has_value());
 
 				std::vector<BattleTarget> &targets{result.value()};
 
+				BattleTarget ally1{.mSide = Side::B, .mSlotIndex = 0};
 				BattleTarget opp1{.mSide = Side::A, .mSlotIndex = 0};
 				BattleTarget opp2{.mSide = Side::A, .mSlotIndex = 1};
 				BattleTarget opp3{.mSide = Side::A, .mSlotIndex = 2};
 
-				CHECK((targets.size() == 3));
-				CHECK((targets.at(0) == opp1));
-				CHECK((targets.at(1) == opp2));
-				CHECK((targets.at(2) == opp3));
+				CHECK((targets.size() == 4));
+				CHECK((targets.at(0) == ally1));
+				CHECK((targets.at(1) == opp1));
+				CHECK((targets.at(2) == opp2));
+				CHECK((targets.at(3) == opp3));
 			}
 		}
 
