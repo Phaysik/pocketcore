@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 11/05/2026
+	@date 11/09/2026
 	@since 0.11.6
 	@version 0.12.54
 	@author Matthew Moore
@@ -29,7 +29,6 @@
 #include "Item/itemMeta.h"
 #include "Learnset/builtInLearnsetID.h"
 #include "Learnset/learnsetID.h"
-#include "Location/locationID.h"
 #include "Move/moveID.h"
 #include "Move/moveMeta.h"
 #include "Nature/natureID.h"
@@ -37,6 +36,7 @@
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/constants.h"
 #include "Pokemon/pokemon.h"
+#include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonID.h"
 #include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
@@ -82,19 +82,25 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Learnset::BuiltinLearnsetID;
 	using PocketCore::Learnset::LearnsetID;
 	using PocketCore::Learnset::toLearnsetID;
-	using PocketCore::Location::LocationID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Move::MoveMeta;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
+	using PocketCore::Pokemon::BLASTOISE_ENCOUNTERS;
 	using PocketCore::Pokemon::BuiltinPokemonID;
 	using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
+	using PocketCore::Pokemon::BULBASAUR_ENCOUNTERS;
 	using PocketCore::Pokemon::CHARIZARD_BASE_STATS;
+	using PocketCore::Pokemon::CHARIZARD_ENCOUNTERS;
 	using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
+	using PocketCore::Pokemon::CHARMANDER_ENCOUNTERS;
 	using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
+	using PocketCore::Pokemon::CHARMELEON_ENCOUNTERS;
 	using PocketCore::Pokemon::DITTO_BASE_STATS;
+	using PocketCore::Pokemon::DITTO_ENCOUNTERS;
 	using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
+	using PocketCore::Pokemon::IVYSAUR_ENCOUNTERS;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
 	using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
@@ -111,11 +117,16 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
+	using PocketCore::Pokemon::PokemonOrigin;
 	using PocketCore::Pokemon::PokemonSpec;
+	using PocketCore::Pokemon::SetLevelEncounter;
 	using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
+	using PocketCore::Pokemon::SQUIRTLE_ENCOUNTERS;
 	using PocketCore::Pokemon::toPokemonID;
 	using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
+	using PocketCore::Pokemon::VENUSAUR_ENCOUNTERS;
 	using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
+	using PocketCore::Pokemon::WARTORTLE_ENCOUNTERS;
 	using PocketCore::Registry::Ability::AbilityRegistry;
 	using PocketCore::Registry::FixedMetadataRegistry;
 	using PocketCore::Registry::Item::ItemRegistry;
@@ -183,7 +194,7 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 11/05/2026
+		@date 11/09/2026
 		@since 0.11.6
 		@version 0.12.54
 		@author Matthew Moore
@@ -212,6 +223,7 @@ namespace PocketCore::Registry::Pokemon
 			{
 				addBuiltin({.mName = std::string(POKEMON_NAME_NONE), .mPokemonID = toPokemonID(BuiltinPokemonID::None)});
 				addBuiltin({
+				    .mEncounters = BULBASAUR_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_BULBASAUR),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -226,6 +238,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
 				});
 				addBuiltin({
+                    .mEncounters = IVYSAUR_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_IVYSAUR),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -240,6 +253,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::IvysaurLearnset),
 				});
 				addBuiltin({
+				    .mEncounters = VENUSAUR_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_VENUSAUR),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -254,6 +268,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::VenusaurLearnset),
 				});
 				addBuiltin({
+                    .mEncounters = CHARMANDER_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_CHARMANDER),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -268,6 +283,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmanderLearnset),
 				});
 				addBuiltin({
+				.mEncounters = CHARMELEON_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_CHARMELEON),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -282,6 +298,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset),
 				});
 				addBuiltin({
+				    .mEncounters = CHARIZARD_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_CHARIZARD),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -296,6 +313,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharizardLearnset),
 				});
 				addBuiltin({
+                    .mEncounters = SQUIRTLE_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_SQUIRTLE),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -310,6 +328,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::SquirtleLearnset),
 				});
 				addBuiltin({
+				    .mEncounters = WARTORTLE_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_WARTORTLE),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -324,6 +343,7 @@ namespace PocketCore::Registry::Pokemon
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::WartortleLearnset),
 				});
 				addBuiltin({
+					.mEncounters = BLASTOISE_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_BLASTOISE),
 					.mItemPool = {},
 					.mAbilityPool = {{
@@ -339,6 +359,7 @@ namespace PocketCore::Registry::Pokemon
 				});
 
 				addBuiltin({
+				    .mEncounters = DITTO_ENCOUNTERS,
 					.mName = std::string(POKEMON_NAME_DITTO),
 					.mAbilityPool = {{
 						{.mAbilityID = toAbilityID(BuiltinAbilityID::Limber), .mClassification = AbilityClassification::Standard},

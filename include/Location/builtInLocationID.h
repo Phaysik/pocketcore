@@ -1,8 +1,8 @@
 /*! @file builtinLocationID.h
 	@brief Defines identifiers for locations compiled into PocketCore.
-	@date 10/09/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -26,15 +26,16 @@ namespace PocketCore::Location
 		@details This closed enum is only a catalog of built-in locations. Runtime state and user-facing APIs use the open @ref LocationID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 10/09/2026
+		@date 11/09/2026
 		@since 0.12.51
-		@version 0.12.51
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	enum class BuiltinLocationID : ub
 	{
 		None,
 		Route1,
+		ProfessorOaksLab,
 		FinalLocation,
 	};
 

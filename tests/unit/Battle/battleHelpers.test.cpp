@@ -2668,7 +2668,7 @@ SCENARIO("Battle free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
@@ -2899,7 +2899,7 @@ SCENARIO("Battle free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},

@@ -1,8 +1,8 @@
 /*! @file burnDamageHandler.test.cpp
 	@brief C++ file for running tests for the BurnDamageHandler.
-	@date 10/27/2026
+	@date 11/06/2026
 	@since 0.12.53
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -59,7 +59,7 @@ SCENARIO("BurnDamageHandler")
 	BurnDamageHandler burnDamageHandler{};
 	Pokemon sideA{
 		makePokemon({
-			.mStatusIDs = {toStatusID(BuiltinStatusID::Burn)},
+			.mNonVolatileStatusIDs = {toStatusID(BuiltinStatusID::Burn)},
 			.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock)}}},
 		}),
 	};
@@ -91,7 +91,7 @@ SCENARIO("BurnDamageHandler")
 
 	WHEN("calling without a burned Pokemon")
 	{
-		sideA.setStatusID(0, NO_STATUS_ID);
+		sideA.setNonVolatileStatusID(0, NO_STATUS_ID);
 		burnDamageHandler.apply(handlerState, handlerContext, provider, randomSources);
 		applyBurnDamage(freeFunctionState, freeFunctionContext, provider, randomSources);
 

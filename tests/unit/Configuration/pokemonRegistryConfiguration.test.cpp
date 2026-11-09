@@ -1,8 +1,8 @@
 /*! @file pokemonRegistryConfiguration.test.cpp
 	@brief C++ file for running tests for the PokemonRegistryConfiguration.
-	@date 11/03/2026
+	@date 11/09/2026
 	@since 0.12.20
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -264,7 +264,7 @@ SCENARIO("PokemonRegistryConfiguration")
 			}
 
 			pokemonMetas.push_back({.mName = std::string(POKEMON_NAME_SQUIRTLE)});
-			const PokemonRegistry beforeBatch{config.getRuntimeRegistry()};
+			const PokemonRegistry &beforeBatch{config.getRuntimeRegistry()};
 			std::expected<void, RegistryError> result{config.addPokemons(pokemonMetas)};
 
 			THEN("registration reports a duplicate pokemon and the registry is rollback to the checkpoint before the erroneous addition")

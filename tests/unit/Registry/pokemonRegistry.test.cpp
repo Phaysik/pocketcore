@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/03/2026
+	@date 11/09/2026
 	@since 0.12.20
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -15,17 +15,33 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
+#include "Configuration/constants.h"
 #include "Configuration/pokemonRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "EggGroup/builtInEggGroupID.h"
+#include "Item/builtInItemID.h"
+#include "Item/itemID.h"
 #include "Learnset/builtInLearnsetID.h"
+#include "Location/builtInLocationID.h"
+#include "Move/builtInMoveID.h"
+#include "Move/moveID.h"
+#include "Nature/builtInNatureID.h"
+#include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/constants.h"
+#include "Pokemon/pokemon.h"
+#include "Pokemon/pokemon.testHelper.h"
+#include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 #include "Type/builtInTypeID.h"
 #include "Validation/Registry/registryError.h"
 
@@ -34,12 +50,26 @@
 using PocketCore::Ability::AbilityClassification;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::Battle::BattleRandomSources;
+using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::PokemonRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::EggGroup::BuiltinEggGroupID;
 using PocketCore::EggGroup::toEggGroupID;
+using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::ItemID;
+using PocketCore::Item::toItemID;
 using PocketCore::Learnset::BuiltinLearnsetID;
 using PocketCore::Learnset::toLearnsetID;
+using PocketCore::Location::BuiltinLocationID;
+using PocketCore::Location::toLocationID;
+using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::MoveID;
+using PocketCore::Move::toMoveID;
+using PocketCore::Nature::BuiltinNatureID;
+using PocketCore::Nature::NatureID;
+using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
@@ -49,6 +79,7 @@ using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
 using PocketCore::Pokemon::DITTO_BASE_STATS;
 using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 using PocketCore::Pokemon::NO_POKEMON_ID;
+using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
 using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 using PocketCore::Pokemon::POKEMON_NAME_CHARIZARD;
@@ -60,14 +91,23 @@ using PocketCore::Pokemon::POKEMON_NAME_NONE;
 using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
 using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
+using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
+using PocketCore::Pokemon::PokemonOrigin;
+using PocketCore::Pokemon::PokemonSpec;
+using PocketCore::Pokemon::SetLevelEncounter;
 using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
 using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
+using PocketCore::Registry::Pokemon::PokemonInstantiationDependencies;
+using PocketCore::Registry::Pokemon::PokemonInstantiationError;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
+using PocketCore::Registry::RegistryProvider;
+using PocketCore::Testing::getDefaultInitializedRegistryProvider;
+using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Validation::Registry::RegistryError;
@@ -90,6 +130,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Bulbasaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {
+					{
+						{
+                		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll)}},
+                    			},
+                			.mLevel = SetLevelEncounter{5},
+                			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                			.mOrigin = PokemonOrigin::Starter,
+						},
+					},
+				},
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -112,6 +164,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Ivysaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+    			.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_IVYSAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -134,6 +187,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Venusaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {},
 				.mName = std::string(POKEMON_NAME_VENUSAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -156,6 +210,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Charmander has the appropriate properties")
 		{
 			PokemonMeta expected{
+    			.mEncounters = {
+                	{
+                		{
+                  		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower)}},
+                     			},
+                 			.mLevel = SetLevelEncounter{5},
+                 			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                 			.mOrigin = PokemonOrigin::Starter,
+                		},
+                	},
+                },
 				.mName = std::string(POKEMON_NAME_CHARMANDER),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -178,6 +244,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Charmeleon has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {},
 				.mName = std::string(POKEMON_NAME_CHARMELEON),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -200,6 +267,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Charizard has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_CHARIZARD),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -222,6 +290,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Squirtle has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {
+                	{
+                		{
+                  		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish)}},
+                     			},
+                 			.mLevel = SetLevelEncounter{5},
+                 			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                 			.mOrigin = PokemonOrigin::Starter,
+                		},
+                	},
+                },
 				.mName = std::string(POKEMON_NAME_SQUIRTLE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -244,6 +324,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Wartortle has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_WARTORTLE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -266,6 +347,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Blastoise has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_BLASTOISE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -288,6 +370,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Ditto has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_DITTO),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -450,6 +533,60 @@ SCENARIO("PokemonRegistry")
 			THEN("a known pokemon ID has an entry")
 			{
 				CHECK(registry.hasPokemon(NO_POKEMON_ID));
+			}
+		}
+	}
+
+	GIVEN("instantiate")
+	{
+		RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+		PokemonSpec spec{};
+		PokemonInstantiationDependencies instantiateDependencies{
+			.mAbilityRegistry = provider.mAbilityRegistry,
+			.mMoveRegistry = provider.mMoveRegistry,
+			.mItemRegistry = provider.mItemRegistry,
+			.mNatureRegistry = provider.mNatureRegistry,
+			.mLearnsetRegistry = provider.mLearnsetRegistry,
+			.mLocationRegistry = provider.mLocationRegistry,
+		};
+		BattleRandomSources randomSources{};
+		std::vector<NatureID> natureIDs{};
+		std::vector<PokemonAbilityEntry> abilityEntries{};
+		std::vector<ItemID> itemIDs{};
+		std::vector<MoveID> moveIDs{};
+		std::vector<us> ivs{};
+		std::vector<us> evs{};
+
+		WHEN("calling with a spec completely filled out with user defined values")
+		{
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			spec.mIVEVContext = {.ivs = ivs, .evs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+			spec.mIDContext = {
+				.natureIDs = natureIDs,
+				.abilityEntries = abilityEntries,
+				.itemIDs = itemIDs,
+				.moveIDs = moveIDs,
+			};
+
+			spec.mGender = PokemonGender::Genderless;
+			spec.mLevel = 50;
+			spec.mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur);
+			spec.mBreedingContext = {};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(spec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{makePokemon({})};
+
+				// CHECK((result.value() == expected));
 			}
 		}
 	}

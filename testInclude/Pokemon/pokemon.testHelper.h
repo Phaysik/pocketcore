@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 10/27/2026
+	@date 11/06/2026
 	@since 0.12.13
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -90,7 +90,7 @@ namespace PocketCore::Testing
 				},
 			};
 
-			std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> mStatusIDs{NO_STATUS_ID};
+			std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> mNonVolatileStatusIDs{NO_STATUS_ID};
 
 			std::array<us, POKEMON_STAT_COUNT> mPokemonIVs{
 				MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE, MIN_IV_STAT_VALUE,
@@ -125,7 +125,7 @@ namespace PocketCore::Testing
 			data.mNatureIDs, natureRegistry,  data.mPokemonIVs, data.mPokemonEVs,	  data.mGender,
 		};
 
-		pokemon.setStatusIDsArray(data.mStatusIDs);
+		pokemon.setNonVolatileStatusIDsArray(data.mNonVolatileStatusIDs);
 		pokemon.setHealth(data.mHealth);
 
 		return pokemon;

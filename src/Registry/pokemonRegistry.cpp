@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 11/05/2026
+	@date 11/09/2026
 	@since 0.12.28
 	@version 0.12.54
 	@author Matthew Moore
@@ -52,6 +52,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Item::ItemID;
 	using PocketCore::Learnset::LearnsetMeta;
 	using PocketCore::Location::LocationID;
+	using PocketCore::Location::NO_LOCATION_ID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
 	using PocketCore::Pokemon::getValidPokemonAbilities;
@@ -100,12 +101,23 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{RegistryError::LearnsetNotFound};
 		}
 
-		if (pokemonSpec.mEncounterIndex >= pokemonMeta->mEncounters.size())
-		{
-			return std::unexpected{RegistryError::LocationNotFound};
-		}
+		PokemonEncounter encounterData{};
 
-		const PokemonEncounter encounterData{pokemonMeta->mEncounters.at(pokemonSpec.mEncounterIndex)};
+		if (pokemonSpec.mEncounterIndex.has_value())
+		{
+			const std::size_t index{*pokemonSpec.mEncounterIndex};
+
+			if (index >= pokemonMeta->mEncounters.size() || pokemonMeta->mEncounters.at(index).mLocationID == NO_LOCATION_ID)
+			{
+				return std::unexpected{RegistryError::EncounterNotFound};
+			}
+
+			encounterData = pokemonMeta->mEncounters.at(index);
+		}
+		else if (!pokemonSpec.mLevel.has_value())
+		{
+			return std::unexpected{PokemonError::MISSING_LEVEL};
+		}
 
 		const us pokemonEncounterLevel{
 			pokemonSpec.mLevel.has_value() ? pokemonSpec.mLevel.value()
@@ -138,7 +150,7 @@ namespace PocketCore::Registry::Pokemon
 
 		if (const std::expected<void, NatureError> error{
 				getValidPokemonNatures(pokemonSpec.mIDContext.natureIDs, validNatureIDs, *dependencyRegistries.mNatureRegistry,
-									   randomSources),
+									   randomSources, encounterData),
 			};
 			!error.has_value())
 		{
@@ -157,7 +169,7 @@ namespace PocketCore::Registry::Pokemon
 
 		if (const std::expected<void, ItemError> error{
 				getValidPokemonItems(pokemonSpec.mIDContext.itemIDs, validItemIDs, pokemonMeta->mItemPool,
-									 *dependencyRegistries.mItemRegistry, randomSources),
+									 *dependencyRegistries.mItemRegistry, randomSources, encounterData),
 			};
 			!error.has_value())
 		{
@@ -173,7 +185,9 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonIVs(pokemonSpec.mIVEVContext.ivs, validIVs, randomSources)};
+		if (const std::expected<void, PokemonError> error{
+				getValidPokemonIVs(pokemonSpec.mIVEVContext.ivs, validIVs, randomSources, encounterData),
+			};
 			!error.has_value())
 		{
 			return std::unexpected{error.error()};

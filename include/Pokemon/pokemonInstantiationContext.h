@@ -1,6 +1,6 @@
 /*! @file pokemonInstantiationContext.h
 	@brief Defines the contexts needed to instantiate Pokemon
-	@date 11/05/2026
+	@date 11/09/2026
 	@since 0.12.53
 	@version 0.12.54
 	@author Matthew Moore
@@ -105,7 +105,7 @@ namespace PocketCore::Pokemon
 			Supplying every identifier/stat sequence, level, and gender requests construction without field generation.
 		@warning Referenced span storage and breeding parents must remain valid throughout instantiation.
 			Copying this spec does not extend their lifetimes. This data carrier performs no validation.
-		@date 11/05/2026
+		@date 11/09/2026
 		@since 0.12.54
 		@version 0.12.54
 		@author Matthew Moore
@@ -131,7 +131,7 @@ namespace PocketCore::Pokemon
 			/*! @brief Selects the species encounter metadata used by automatic policies.
 				@details Defaults to index zero; this value does not indicate whether the encounter exists or is usable.
 			*/
-			std::size_t mEncounterIndex{};
+			std::optional<std::size_t> mEncounterIndex{};
 
 			/*! @brief Supplies the instance level, or requests encounter-based selection when std::nullopt.
 				@details Automatic selection uses the fixed encounter level or samples its inclusive level range.

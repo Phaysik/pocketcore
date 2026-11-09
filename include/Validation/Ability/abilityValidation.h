@@ -1,8 +1,8 @@
 /*! @file abilityValidation.h
 	@brief Defines validation functions that help with Ability.
-	@date 11/05/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -14,14 +14,12 @@
 #include <span>
 
 #include "Ability/abilityID.h"
-#include "Ability/abilityMeta.h"
 #include "Configuration/constants.h"
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "EggGroup/builtInEggGroupID.h"
 #include "EggGroup/eggGroupID.h"
 #include "Pokemon/pokemon.h"
-#include "Pokemon/pokemonMeta.h"
 #include "Registry/abilityRegistry.h"
 
 #include "abilityError.h"
@@ -29,7 +27,6 @@
 namespace PocketCore::Validation::Ability
 {
 	using PocketCore::Ability::AbilityID;
-	using PocketCore::Ability::AbilityMeta;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 	using PocketCore::Core::us;
 	using PocketCore::EggGroup::BuiltinEggGroupID;
@@ -45,7 +42,7 @@ namespace PocketCore::Validation::Ability
 		@param[in] abilityRegistry The registry to validate ability metadata.
 		@return A @ref AbilityError if any ability IDs are invalid, or std::nullopt if all are valid.
 		@since 0.12.26
-		@version 0.12.53
+		@version 0.12.54
 	 */
 	ATTR_NODISCARD constexpr std::expected<void, AbilityError> validateAbilityMetadata(const std::span<const AbilityID> abilityIDs,
 																					   const AbilityRegistry &abilityRegistry)
@@ -55,11 +52,9 @@ namespace PocketCore::Validation::Ability
 			return std::unexpected{AbilityError::TOO_MANY_ABILITIES};
 		}
 
-		std::array<const AbilityMeta *, MAX_ABILITIES_PER_POKEMON> abilityMetas{};
-		std::ranges::transform(abilityIDs, abilityMetas.begin(),
-							   [&abilityRegistry](const AbilityID abilityID) { return abilityRegistry.getAbilityMetadata(abilityID); });
-
-		if (std::ranges::any_of(abilityMetas, [](const AbilityMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(abilityIDs, [&abilityRegistry](const AbilityID abilityID) {
+				return abilityRegistry.getAbilityMetadata(abilityID) == nullptr;
+			}))
 		{
 			return std::unexpected{AbilityError::MISSING_ABILITY_METADATA};
 		}

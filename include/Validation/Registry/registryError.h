@@ -1,8 +1,8 @@
 /*! @file registryError.h
 	@brief Defines registry error types and metadata.
-	@date 10/26/2026
+	@date 11/09/2026
 	@since 0.12.1
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -19,7 +19,7 @@ namespace PocketCore::Validation::Registry
 		@brief Describes the kinds of errors that can occur when mutating configurable registries.
 		@note All enum values should be handled exhaustively by callers mapping error behavior.
 		@since 0.1.0
-		@version 0.12.53
+		@version 0.12.54
 	*/
 	enum class RegistryError : ub
 	{
@@ -56,6 +56,7 @@ namespace PocketCore::Validation::Registry
 		LocationNotFound,	 /*!< No location matching the input was found. */
 		DuplicateEggGroup,	 /*!< An egg group with the given name already exists. */
 		EggGroupNotFound,	 /*!< No egg group matching the input was found. */
+		EncounterNotFound,	 /*!< An encounter matching the encounter index was not found. */
 	};
 
 	/*! @enum UnspecifiedMatchup
