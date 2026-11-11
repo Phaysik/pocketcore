@@ -56,25 +56,25 @@ namespace PocketCore::Pokemon
 		@details Borrows nature, ability, item, and move identifier sequences without copying their elements.
 			The backing storage must remain valid for every use of the corresponding span, including through copies of this context.
 		@note All spans are empty by default. This data carrier does not validate identifiers or sequence lengths.
-		@date 10/27/2026
+		@date 11/09/2026
 		@since 0.12.53
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	struct IDContext
 	{
 		public:
 			/*! @brief Provides a read-only, non-owning view of the supplied nature identifiers. */
-			std::span<const NatureID> natureIDs = {};
+			std::span<const NatureID> mNatureIDs = {};
 
 			/*! @brief Provides a read-only, non-owning view of the supplied ability entries. */
-			std::span<const PokemonAbilityEntry> abilityEntries = {};
+			std::span<const PokemonAbilityEntry> mAbilityEntries = {};
 
 			/*! @brief Provides a read-only, non-owning view of the supplied item identifiers. */
-			std::span<const ItemID> itemIDs = {};
+			std::span<const ItemID> mItemIDs = {};
 
 			/*! @brief Provides a read-only, non-owning view of the supplied move identifiers. */
-			std::span<const MoveID> moveIDs = {};
+			std::span<const MoveID> mMoveIDs = {};
 	};
 
 	/*! @struct IVEVContext Pokemon/pokemonInstantiationContext.h
@@ -82,19 +82,19 @@ namespace PocketCore::Pokemon
 		@details Borrows stat-value sequences without copying their elements. The backing storage must remain valid for every use
 			of the corresponding span, including through copies of this context.
 		@note Both spans are empty by default. This data carrier does not validate stat values or sequence lengths.
-		@date 10/26/2026
+		@date 11/09/2026
 		@since 0.12.53
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	struct IVEVContext
 	{
 		public:
 			/*! @brief Provides a read-only, non-owning view of the supplied individual stat values. */
-			std::span<const us> ivs = {};
+			std::span<const us> mIVs = {};
 
 			/*! @brief Provides a read-only, non-owning view of the supplied effort stat values. */
-			std::span<const us> evs = {};
+			std::span<const us> mEVs = {};
 	};
 
 	/*! @struct PokemonSpec Pokemon/pokemonInstantiationContext.h

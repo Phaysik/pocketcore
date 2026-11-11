@@ -149,7 +149,7 @@ namespace PocketCore::Registry::Pokemon
 		std::array<us, POKEMON_STAT_COUNT> validEVs{};
 
 		if (const std::expected<void, NatureError> error{
-				getValidPokemonNatures(pokemonSpec.mIDContext.natureIDs, validNatureIDs, *dependencyRegistries.mNatureRegistry,
+				getValidPokemonNatures(pokemonSpec.mIDContext.mNatureIDs, validNatureIDs, *dependencyRegistries.mNatureRegistry,
 									   randomSources, encounterData),
 			};
 			!error.has_value())
@@ -158,7 +158,7 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, AbilityError> error{
-				getValidPokemonAbilities(pokemonSpec.mIDContext.abilityEntries, validAbilityEntries, pokemonMeta->mAbilityPool,
+				getValidPokemonAbilities(pokemonSpec.mIDContext.mAbilityEntries, validAbilityEntries, pokemonMeta->mAbilityPool,
 										 *dependencyRegistries.mAbilityRegistry, randomSources, pokemonSpec.mBreedingContext,
 										 encounterData),
 			};
@@ -168,7 +168,7 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, ItemError> error{
-				getValidPokemonItems(pokemonSpec.mIDContext.itemIDs, validItemIDs, pokemonMeta->mItemPool,
+				getValidPokemonItems(pokemonSpec.mIDContext.mItemIDs, validItemIDs, pokemonMeta->mItemPool,
 									 *dependencyRegistries.mItemRegistry, randomSources, encounterData),
 			};
 			!error.has_value())
@@ -177,7 +177,7 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, MoveError> error{
-				getValidPokemonMoves(pokemonSpec.mIDContext.moveIDs, validMoveIDs, *dependencyRegistries.mMoveRegistry, *learnsetMeta,
+				getValidPokemonMoves(pokemonSpec.mIDContext.mMoveIDs, validMoveIDs, *dependencyRegistries.mMoveRegistry, *learnsetMeta,
 									 encounterData, pokemonEncounterLevel),
 			};
 			!error.has_value())
@@ -186,14 +186,14 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		if (const std::expected<void, PokemonError> error{
-				getValidPokemonIVs(pokemonSpec.mIVEVContext.ivs, validIVs, randomSources, encounterData),
+				getValidPokemonIVs(pokemonSpec.mIVEVContext.mIVs, validIVs, randomSources, encounterData),
 			};
 			!error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}
 
-		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(pokemonSpec.mIVEVContext.evs, validEVs)}; !error.has_value())
+		if (const std::expected<void, PokemonError> error{getValidPokemonEVs(pokemonSpec.mIVEVContext.mEVs, validEVs)}; !error.has_value())
 		{
 			return std::unexpected{error.error()};
 		}

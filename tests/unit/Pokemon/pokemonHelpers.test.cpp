@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/06/2026
+	@date 11/11/2026
 	@since 0.12.28
 	@version 0.12.54
 	@author Matthew Moore
@@ -1276,10 +1276,9 @@ SCENARIO("Pokemon free function")
 				getItemsFromItemPool(validItemIDs, {}, itemRegistry, randomSources),
 			};
 
-			THEN("it returns EMPTY_ITEM_POOL")
+			THEN("it returns")
 			{
-				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error() == ItemError::EMPTY_ITEM_POOL));
+				REQUIRE(result.has_value());
 			}
 		}
 

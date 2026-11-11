@@ -1,8 +1,8 @@
 /*! @file itemError.h
 	@brief Contains the error codes for the Item validation results.
-	@date 11/04/2026
+	@date 11/11/2026
 	@since 0.12.51
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -22,9 +22,9 @@ namespace PocketCore::Validation::Item
 		Item validation handles additional constraints.
 		@note No enumerator represents success; a successful validation result has a value and contains no error.
 		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
-		@date 11/04/2026
+		@date 11/11/2026
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	enum class ItemError : ub
@@ -38,8 +38,6 @@ namespace PocketCore::Validation::Item
 		TOO_MANY_ITEMS,
 		/*! @brief Indicates that the item registry does not have enough entries to fill the Pokemon's items array. */
 		NOT_ENOUGH_REGISTERED_ITEMS,
-		/*! @brief Indicates that the item pool contains no selectable (non-empty, unique) entries. */
-		EMPTY_ITEM_POOL,
 	};
 } // namespace PocketCore::Validation::Item
 

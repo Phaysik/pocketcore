@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 11/09/2026
+	@date 11/11/2026
 	@since 0.1.0
 	@version 0.12.54
 	@author Matthew Moore
@@ -390,7 +390,7 @@ namespace PocketCore::Configuration
 	static_assert(MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL <= MAX_ABILITIES_PER_POKEMON);
 
 	/*! @brief The minimum amount of items a Pokemon can roll from their item pool. */
-	inline constexpr ub MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL{1};
+	inline constexpr ub MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL{0};
 
 	static_assert(MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL <= MAX_ITEMS_PER_POKEMON);
 

@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 11/09/2026
+	@date 11/11/2026
 	@since 0.12.28
 	@version 0.12.54
 	@author Matthew Moore
@@ -780,9 +780,10 @@ namespace PocketCore::Pokemon
 			}
 		}
 
+		// If there is no valid items in the pool, just return
 		if (candidates.empty())
 		{
-			return std::unexpected{ItemError::EMPTY_ITEM_POOL};
+			return {};
 		}
 
 		// Chances are probabilities in [0, 1]; the real source yields [0, 1), so 1.0 always passes and 0.0 never does.
