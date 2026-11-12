@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.54] - 2026-11-12
+
+### Added
+
+- Added `PokemonSpec`, a single instantiation input that composes `IDContext`, `IVEVContext`, and `PokemonBreedingContext` with the species ID and optional encounter index, level, and gender. Empty spans and omitted optionals request automatic selection independently for each field; a fully supplied spec generates no fields and consumes no randomness.
+- Added optional per-encounter overrides to `PokemonEncounter` for IVs, move IDs, ability entries, item IDs, and nature IDs. When the caller supplies no value for a field, a present encounter override is validated and used before falling back to automatic generation.
+- Added `PokemonOrigin::Starter`, the Professor Oak's Lab built-in location, and level-5 starter encounters for Bulbasaur, Charmander, and Squirtle. Each starter encounter overrides abilities with its species' hidden ability; the remaining built-in species have no active encounters.
+- Added the Vine Whip, Tackle, Tail Whip, Growl, Ember, Water Gun, Transform, and Dragon Claw built-in moves. Built-in learnsets now contain level-up entries for these moves, replacing the previously empty starter-family and Ditto learnsets. Tail Whip, Growl, Ember, and Transform are registered without triggers.
+- Added the `AllAdjacentOpponents`, `AllAdjacent`, and `SingleOther` target selectors. `SingleOther` accepts one eligible ally or opponent other than the source, and the adjacent selectors always resolve with adjacent range regardless of the move's range.
+- Added `RegistryError::EncounterNotFound`, `PokemonError::MISSING_LEVEL`, and `Configuration::MIN_ENCOUNTER_LEVEL`.
+- Added a defaulted, memberwise `Pokemon::operator==`.
+- Added `docs/pokemon-construction-api.md`, which evaluates the candidate construction APIs and documents the selected `PokemonSpec` contract, field provenance, validation, randomness, and ownership rules.
+- Added a shared CI toolchain image (`.github/docker/ci/Dockerfile`) with GCC 16.2.0, LLVM 24, lcov 2.5, CMake, Valgrind, and Sphinx, and a reusable `ci-image.yml` workflow that publishes it to GHCR under a content-hash tag. Fork pull requests never publish; they reuse an existing image or fall back to the base commit's image after a non-pushing validation build.
+- Added `PokemonRegistry::instantiate()` coverage for missing registries, unknown species and learnsets, invalid encounter indexes, missing levels, invalid supplied values, fully supplied, partially supplied, and fully generated specs, and fixed and variable encounter levels.
+- Added encounter-override coverage to every generation helper, `Pokemon` and `PokemonEncounter` equality tests, and target-resolution and `TargetsHandler` tests for the new selectors.
+
+### Changed
+
+- Changed `PokemonRegistry::instantiate()` to take `(const PokemonSpec &, const PokemonInstantiationDependencies &, const BattleRandomSources &)`. The dependency bundle is now a required reference instead of a defaulted pointer, and the species ID, encounter index, contexts, and breeding parents move into the spec.
+- Changed the encounter index to be optional. Without an index, instantiation requires a supplied level and uses a default encounter; with an index, it must identify an active encounter. A supplied level or gender is used without sampling.
+- Extended `getValidPokemonNatures()`, `getValidPokemonItems()`, and `getValidPokemonIVs()` with the selected encounter, and renamed the `getValidPokemonAbilities()` input parameter to `abilityEntries`. Supplied and encounter-provided values share the same validation and duplicate-replacement path.
+- Changed automatic item selection to succeed with no items when the species pool has no registered candidates, and lowered `MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL` from 1 to 0.
+- Changed Pound, Karate Chop, Quick Attack, and Extreme Speed to target `SingleOther`. Single-target selectors now reject a supplied selection that is the source.
+- Renumbered built-in move IDs and `BattleTargetID` values to accommodate the new entries.
+- Renamed the `IDContext` and `IVEVContext` members with the `m` prefix (`mNatureIDs`, `mAbilityEntries`, `mItemIDs`, `mMoveIDs`, `mIVs`, `mEVs`).
+- Renamed `Pokemon::setStatusID()` and `setStatusIDsArray()` to `setNonVolatileStatusID()` and `setNonVolatileStatusIDsArray()`.
+- Moved `PokemonGender`, `PokemonAbilityEntry`, `PokemonItemEntry`, and `MAX_GENDERS` from `pokemonMeta.h` to the new `Pokemon/pokemonMetaEntries.h`, which `pokemonMeta.h` still includes. Moved `MIN_ENCOUNTER_LEVEL` from the Pokemon constants into `Configuration`.
+- Simplified the ability, item, move, and nature metadata validators to check registry lookups directly instead of collecting metadata pointers.
+- Moved the coverage, testing, Valgrind, and CodeQL jobs into the shared CI image and removed their per-job apt, GCC, LLVM, and lcov installation and caching steps. The clang-format workflow no longer installs build dependencies. Changes to the image or its workflow now trigger these workflows.
+- Renamed the `FixedRandom` and `SequenceRandom` test-helper members with the `m` prefix and updated test fixtures for the renamed status setters.
+
+### Removed
+
+- Removed `ItemError::EMPTY_ITEM_POOL`.
+- Removed the positional `instantiate()` overload and `Pokemon::setStatusID()` and `setStatusIDsArray()`.
+
+### Fixed
+
+- Fixed `PokemonRegistry::instantiate()` accepting an encounter index equal to the encounter count, which then threw from `at()`, and accepting unused encounter slots. Both now return `RegistryError::EncounterNotFound` instead of `LocationNotFound`.
+- Fixed variable encounter levels being sampled from the global random generator instead of the supplied `BattleRandomSources`.
+- Fixed automatic instantiation of species with an empty item pool, including every built-in species, failing with `EMPTY_ITEM_POOL`.
+- Fixed `TargetsHandler` applying the spread-move multiplier to `SingleAlly` moves; `SingleAlly` and `SingleOther` moves are now treated as single-target.
+
 ## [0.12.53] - 2026-11-05
 
 ### Added
@@ -2328,7 +2371,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.53]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.54]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.53]: https://github.com/Phaysik/pocketcore/commit/92b9bcff5122397faac8f469e7ccc0e28b7a34cc
 [0.12.52]: https://github.com/Phaysik/pocketcore/commit/f1015081b1b4c294940f579d1bee362c83c6e942
 [0.12.51]: https://github.com/Phaysik/pocketcore/commit/0b746160cbe460be20e0a006f04409d7c7d08167
 [0.12.50]: https://github.com/Phaysik/pocketcore/commit/b87e380fc66c471f200ae1bf81abcd8d9d9909e1

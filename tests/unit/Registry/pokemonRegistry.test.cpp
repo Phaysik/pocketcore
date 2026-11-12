@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include <expected>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <span>
@@ -64,6 +65,7 @@ using PocketCore::Ability::toAbilityID;
 using PocketCore::Battle::BattleRandomSources;
 using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::PokemonRegistryConfiguration;
+using PocketCore::Core::sb;
 using PocketCore::Core::ub;
 using PocketCore::Core::us;
 using PocketCore::EggGroup::BuiltinEggGroupID;
@@ -904,6 +906,21 @@ SCENARIO("PokemonRegistry")
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
 
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
+
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
 
 			THEN("it returns a custom built Pokemon")
@@ -941,6 +958,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 0));
 			}
 		}
 
@@ -982,85 +1004,19 @@ SCENARIO("PokemonRegistry")
 
 				REQUIRE(updateResult.has_value());
 
-				std::expected<Pokemon, PokemonInstantiationError> result{
-					registry.instantiate(newSpec, instantiateDependencies, randomSources),
-				};
+				SequenceRandom<ub> unsignedSequence{};
+				SequenceRandom<sb> signedSequence{};
+				SequenceRandom<double> realSequence{};
+				SequenceRandom<std::size_t> indexSequence{};
 
-				THEN("it returns a semi-custom built Pokemon")
-				{
-					REQUIRE(result.has_value());
+				CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+				CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
 
-					Pokemon expected{
-    					makePokemon({
-    						.mMetadata = {
-    						    .mName = "Bulbasaur",
-    							.mBaseStats = {
-    								.mMaxHealth = 45,
-    								.mAttack = 49,
-    								.mDefense = 49,
-    								.mSpAttack = 65,
-    								.mSpDefense = 65,
-    								.mSpeed = 45,
-    							},
-    							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
-    							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
-    							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
-    							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
-    						},
-    						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
-    						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
-    						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
-    						.mAbilityEntries
-    						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
-    						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
-    						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
-    						.mHealth = 51,
-    						.mLevel = 20,
-    						.mGender = PokemonGender::Genderless,
-    					}),
-    				};
-
-					CHECK((result.value() == expected));
-				}
-			}
-
-			WHEN("calling with a VariableLevelEncounter")
-			{
-				PokemonSpec newSpec{};
-
-				ivs = {5, 22, 31, 14, 20, 10};
-				evs = {42, 56, 0, 23, 100, 85};
-				newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
-
-				natureIDs = {toNatureID(BuiltinNatureID::Calm)};
-				abilityEntries
-					= {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
-				itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
-				moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
-
-				newSpec.mIDContext = {
-					.mNatureIDs = natureIDs,
-					.mAbilityEntries = abilityEntries,
-					.mItemIDs = itemIDs,
-					.mMoveIDs = moveIDs,
-				};
-
-				newSpec.mGender = PokemonGender::Genderless;
-				newSpec.mBreedingContext = {};
-				newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
-				newSpec.mEncounterIndex = 0;
-
-				// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
-				PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
-				updatedMeta.mEncounters.at(0).mLevel = VariableLevelEncounter{.mMinLevel = 7, .mMaxLevel = 51};
-
-				std::expected<void, RegistryError> updateResult{
-					configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
-				};
-
-				REQUIRE(updateResult.has_value());
-
-				CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{20}};
+				randomSources.mUnsigned = unsignedSource;
+				randomSources.mSigned = signedSource;
+				randomSources.mReal = realSource;
 				randomSources.mIndex = indexSource;
 
 				std::expected<Pokemon, PokemonInstantiationError> result{
@@ -1102,6 +1058,109 @@ SCENARIO("PokemonRegistry")
     				};
 
 					CHECK((result.value() == expected));
+
+					CHECK((unsignedSequence.calls() == 0));
+					CHECK((signedSequence.calls() == 0));
+					CHECK((realSequence.calls() == 0));
+					CHECK((indexSequence.calls() == 0));
+				}
+			}
+
+			WHEN("calling with a VariableLevelEncounter")
+			{
+				PokemonSpec newSpec{};
+
+				ivs = {5, 22, 31, 14, 20, 10};
+				evs = {42, 56, 0, 23, 100, 85};
+				newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+				natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+				abilityEntries
+					= {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+				itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+				moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+				newSpec.mIDContext = {
+					.mNatureIDs = natureIDs,
+					.mAbilityEntries = abilityEntries,
+					.mItemIDs = itemIDs,
+					.mMoveIDs = moveIDs,
+				};
+
+				newSpec.mGender = PokemonGender::Genderless;
+				newSpec.mBreedingContext = {};
+				newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+				newSpec.mEncounterIndex = 0;
+
+				// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
+				PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
+				updatedMeta.mEncounters.at(0).mLevel = VariableLevelEncounter{.mMinLevel = 7, .mMaxLevel = 51};
+
+				std::expected<void, RegistryError> updateResult{
+					configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
+				};
+
+				REQUIRE(updateResult.has_value());
+
+				SequenceRandom<ub> unsignedSequence{};
+				SequenceRandom<sb> signedSequence{};
+				SequenceRandom<double> realSequence{};
+				SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{20}};
+
+				CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+				CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+				randomSources.mUnsigned = unsignedSource;
+				randomSources.mSigned = signedSource;
+				randomSources.mReal = realSource;
+				randomSources.mIndex = indexSource;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(newSpec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns a semi-custom built Pokemon")
+				{
+					REQUIRE(result.has_value());
+
+					Pokemon expected{
+    					makePokemon({
+    						.mMetadata = {
+    						    .mName = "Bulbasaur",
+    							.mBaseStats = {
+    								.mMaxHealth = 45,
+    								.mAttack = 49,
+    								.mDefense = 49,
+    								.mSpAttack = 65,
+    								.mSpDefense = 65,
+    								.mSpeed = 45,
+    							},
+    							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+    							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+    							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+    							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+    						},
+    						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+    						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+    						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+    						.mAbilityEntries
+    						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+    						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+    						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+    						.mHealth = 51,
+    						.mLevel = 20,
+    						.mGender = PokemonGender::Genderless,
+    					}),
+    				};
+
+					CHECK((result.value() == expected));
+
+					CHECK((unsignedSequence.calls() == 0));
+					CHECK((signedSequence.calls() == 0));
+					CHECK((realSequence.calls() == 0));
+					CHECK((indexSequence.calls() == 1));
 				}
 			}
 		}
@@ -1129,7 +1188,19 @@ SCENARIO("PokemonRegistry")
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
 
-			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 5}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{1, 5}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
@@ -1169,6 +1240,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 2));
 			}
 		}
 
@@ -1195,7 +1271,19 @@ SCENARIO("PokemonRegistry")
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
 
-			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 1}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{1, 1}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
@@ -1235,6 +1323,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 2));
 			}
 		}
 
@@ -1271,8 +1364,18 @@ SCENARIO("PokemonRegistry")
 
 			REQUIRE(updateResult.has_value());
 
-			CallableRandomSource<double, FixedRandom<double>> realSource{FixedRandom<double>{0.05}};
-			CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{0}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{SequenceRandom<double>{0.05}};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{0}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
 			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
@@ -1313,6 +1416,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 1));
+				CHECK((indexSequence.calls() == 1));
 			}
 		}
 
@@ -1338,6 +1446,21 @@ SCENARIO("PokemonRegistry")
 			newSpec.mBreedingContext = {};
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
 
@@ -1380,6 +1503,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 0));
 			}
 		}
 
@@ -1407,7 +1535,19 @@ SCENARIO("PokemonRegistry")
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
 
-			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{8, 7, 15, 24, 31, 27}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{8, 7, 15, 24, 31, 27}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
@@ -1447,6 +1587,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 6));
 			}
 		}
 
@@ -1473,6 +1618,21 @@ SCENARIO("PokemonRegistry")
 			newSpec.mBreedingContext = {};
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
 
@@ -1511,6 +1671,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 0));
 			}
 		}
 
@@ -1538,7 +1703,19 @@ SCENARIO("PokemonRegistry")
 			newSpec.mLevel = 5;
 			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
 
-			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{1}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
 			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
@@ -1578,6 +1755,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 1));
 			}
 		}
 
@@ -1599,9 +1781,18 @@ SCENARIO("PokemonRegistry")
 
 			REQUIRE(updateResult.has_value());
 
-			CallableRandomSource<double, FixedRandom<double>> realSource{FixedRandom<double>{0.05}};
-			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{
-				SequenceRandom<std::size_t>{1, 5, 0, 8, 7, 15, 24, 31, 27, 1}};
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{SequenceRandom<double>{0.05}};
+			SequenceRandom<std::size_t> indexSequence{SequenceRandom<std::size_t>{1, 5, 0, 8, 7, 15, 24, 31, 27, 1}};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
 			randomSources.mReal = realSource;
 			randomSources.mIndex = indexSource;
 
@@ -1646,6 +1837,11 @@ SCENARIO("PokemonRegistry")
 				};
 
 				CHECK((result.value() == expected));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 1));
+				CHECK((indexSequence.calls() == 10));
 			}
 		}
 	}
