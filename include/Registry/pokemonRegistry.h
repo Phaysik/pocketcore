@@ -508,9 +508,9 @@ namespace PocketCore::Registry::Pokemon
 				@param[in] randomSources The borrowed random sources used only by automatic policies requiring random draws.
 					Referenced sources remain valid throughout the call and may advance their state.
 				@return A Pokemon on success, or @ref PokemonInstantiationError containing a missing registry, registry lookup, or nature,
-					ability, item, move, or Pokemon validation/generation error. A missing encounter index requires a supplied level; a supplied
-					index must identify an active encounter. The returned display name borrows species metadata storage, which must remain valid
-					for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
+					ability, item, move, or Pokemon validation/generation error. A missing encounter index requires a supplied level; a
+			   supplied index must identify an active encounter. The returned display name borrows species metadata storage, which must
+			   remain valid for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
 				@since 0.12.24
 				@version 0.12.54
 			*/
