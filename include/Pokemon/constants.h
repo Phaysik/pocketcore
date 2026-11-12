@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 11/09/2026
+	@date 11/12/2026
 	@since 0.11.6
 	@version 0.12.54
 	@author Matthew Moore
@@ -12,6 +12,7 @@
 #include <array>
 #include <string_view>
 
+#include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
 #include "Configuration/constants.h"
 #include "Location/builtInLocationID.h"
@@ -21,6 +22,7 @@
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::AbilityClassification;
 	using PocketCore::Ability::BuiltinAbilityID;
 	using PocketCore::Ability::toAbilityID;
 	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
@@ -43,7 +45,7 @@ namespace PocketCore::Pokemon
 		{
 			{
 				.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
-					{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll)}},
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden}},
 				},
 				.mLevel = SetLevelEncounter{5},
 				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
@@ -87,7 +89,7 @@ namespace PocketCore::Pokemon
 		{
 			{
     			.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
-    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower)}},
+    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden}},
     			},
 				.mLevel = SetLevelEncounter{5},
 				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
@@ -131,7 +133,7 @@ namespace PocketCore::Pokemon
 		{
 			{
     			.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
-    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish)}},
+    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden}},
     			},
 				.mLevel = SetLevelEncounter{5},
 				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),

@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 11/09/2026
+	@date 11/12/2026
 	@since 0.11.6
 	@version 0.12.54
 	@author Matthew Moore
@@ -194,7 +194,7 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 11/09/2026
+		@date 11/12/2026
 		@since 0.11.6
 		@version 0.12.54
 		@author Matthew Moore
@@ -490,26 +490,27 @@ namespace PocketCore::Registry::Pokemon
 					Non-empty IDContext and IVEVContext spans supply nature IDs, ability entries, item IDs, move IDs, IVs, and EVs.
 					Supplied identifiers and stat arrays pass through their validation helpers and existing duplicate normalization.
 					Non-empty sentinel-only identifier spans supply unused slots rather than requesting generation.
-					Empty spans independently request nature selection from registered natures, ability selection from the species pool
-					(with breeding inheritance for egg encounters), item selection from the species pool, learnset/encounter-based move
-					selection, random IVs, or zero EVs. Supplied moves require registered metadata, not encounter eligibility.
+					For empty nature, ability, item, move, or IV spans, the selected encounter's corresponding values are used when present.
+					Otherwise, natures are selected from registered natures, abilities from the species pool (with breeding inheritance for
+					egg encounters), items from the species pool, moves from the learnset and encounter, and IVs randomly. Empty EV spans
+					produce zero EVs. Supplied moves require registered metadata, not encounter eligibility.
 					A supplied level or gender is used without sampling that field. An omitted level uses the fixed encounter level or
 					samples its inclusive range; an omitted gender is sampled from the species gender pool.
 					Species metadata resolves name, base stats, types, egg groups, and learnset ID. Selected move metadata resolves
 					maximum/default PP; selected nature metadata resolves stat multipliers. Construction derives calculated stats and
 					the level damage factor, initializes full health and default current PP, and leaves statuses empty.
 					A fully supplied spec generates no fields and consumes no randomness; mixed specs generate only omitted fields.
-				@pre Ability, item, move, nature, and learnset registry pointers are non-null and refer to live registries.
-					The encounter index is within the species encounter array, even when all instance fields are supplied.
-					Inputs and metadata satisfy the applicable construction/helper constraints.
+				@pre Non-null dependency pointers refer to live registries. Inputs and metadata satisfy the applicable construction/helper
+					constraints.
 				@param[in] pokemonSpec The borrowed specification; span storage and any accessed breeding parents remain valid throughout
 					the call. Its species ID is not generated.
 				@param[in] dependencyRegistries The borrowed dependency bundle used for metadata resolution; it has no default argument.
 				@param[in] randomSources The borrowed random sources used only by automatic policies requiring random draws.
 					Referenced sources remain valid throughout the call and may advance their state.
-				@return A Pokemon on success, or @ref PokemonInstantiationError containing a registry lookup or nature, ability, item,
-					move, or Pokemon validation/generation error. The returned display name borrows species metadata storage, which
-					must remain valid for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
+				@return A Pokemon on success, or @ref PokemonInstantiationError containing a missing registry, registry lookup, or nature,
+					ability, item, move, or Pokemon validation/generation error. A missing encounter index requires a supplied level; a supplied
+					index must identify an active encounter. The returned display name borrows species metadata storage, which must remain valid
+					for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
 				@since 0.12.24
 				@version 0.12.54
 			*/

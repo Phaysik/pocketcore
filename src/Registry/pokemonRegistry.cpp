@@ -204,8 +204,11 @@ namespace PocketCore::Registry::Pokemon
 		{
 			const MoveID currentMove{validMoveIDs.at(index)};
 			const MoveMeta *meta{dependencyRegistries.mMoveRegistry->getMoveMetadata(currentMove)};
-			moveMetas.at(index) = {.mMoveID = currentMove, .mPPMaxAmount = meta->mPPMaxAmount, .mPPDefaultAmount = meta->mPPDefaultAmount};
-		};
+			MoveMeta &moveMeta{moveMetas.at(index)};
+			moveMeta.mMoveID = currentMove;
+			moveMeta.mPPMaxAmount = meta->mPPMaxAmount;
+			moveMeta.mPPDefaultAmount = meta->mPPDefaultAmount;
+		}
 
 		const auto getRandomGender{
 			[&pokemonMeta, &randomSources] {

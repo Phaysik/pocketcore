@@ -1,7 +1,6 @@
 # Pokemon Construction API
 
-**Status:** Option C API implemented; acceptance tests, validation hardening,
-build verification, and merge remain pending.
+**Status:** Option C API implemented.
 
 **Decision:** Option C, a `PokemonSpec` builder struct with `std::optional` fields
 and a single `instantiate(spec)` entry point.
@@ -44,17 +43,19 @@ three existing contexts:
 - `IVEVContext` borrows IV and EV sequences.
 - `PokemonBreedingContext` borrows optional breeding parents.
 
-Empty input spans select automatic behavior. Missing natures, abilities, items,
-and IVs use generation helpers; missing moves are selected from the learnset and
-encounter; missing EVs become zero. Optional level and gender values are used
-when supplied. Otherwise, level comes from encounter metadata (using supplied
-random sources for variable levels), and gender is sampled from the species
-pool. The gender draw occurs only in the omitted-value branch.
+Empty input spans select automatic behavior. For missing natures, abilities,
+items, moves, and IVs, encounter-provided values take precedence over the
+generation helpers. Otherwise, moves are selected from the learnset and
+encounter, and the remaining fields use their generation policies; missing EVs
+become zero. Optional level and gender values are used when supplied. Otherwise,
+level comes from encounter metadata (using supplied random sources for variable
+levels), and gender is sampled from the species pool. The gender draw occurs
+only in the omitted-value branch.
 
 Supplying all six sequences plus level and gender now provides the
-no-generation path. The implementation still looks up learnset and encounter
-metadata for this path. No in-repository calls to the superseded instantiation
-signature were found during the implementation review.
+no-generation path. The implementation still looks up learnset metadata and
+validates encounter metadata when an index is supplied. No in-repository calls to
+the superseded instantiation signature were found during the implementation review.
 
 The existing low-level [Pokemon constructors](../include/Pokemon/pokemon.h)
 accept references and values, not a wall of nullable property pointers. They
@@ -189,7 +190,7 @@ not a fluent builder framework. It contains:
 - An `IVEVContext` member containing the existing IV and EV spans.
 - A `PokemonBreedingContext` member containing the existing parent pointers.
 - `std::optional` fields for level and gender.
-- A `std::size_t` encounter index, defaulting to zero.
+- An optional `std::size_t` encounter index, defaulting to `std::nullopt`.
 
 These context types are reused directly from
 [pokemonInstantiationContext.h](../include/Pokemon/pokemonInstantiationContext.h),
@@ -203,11 +204,11 @@ below. These decisions are independent: a single spec may supply moves and EVs
 while generating natures, abilities, items, and IVs.
 
 A fully explicit construction supplies every selectable instance field,
-including level and gender, and generates nothing. The current implementation
-still requires an in-range encounter index and registered learnset metadata,
-even for fully supplied construction. Breeding parents are only used by
-automatic egg ability selection. Breeding parent pointers remain non-owning and apply
-only to generated egg abilities.
+including level and gender, and generates nothing. Registered learnset metadata
+is still required. An encounter index is optional when a level is supplied; if
+present, it must identify an active encounter. Breeding parents are only used
+by automatic egg ability selection when the encounter does not supply abilities.
+Breeding parent pointers remain non-owning.
 
 Implemented entry-point signature:
 
@@ -226,8 +227,8 @@ Per-field choices are visible in named initialization:
 
 ```cpp
 PokemonSpec mixedSpec{
-    .mIDContext = {.moveIDs = suppliedMoveIDs},
-    .mIVEVContext = {.evs = suppliedEVs},
+    .mIDContext = {.mMoveIDs = suppliedMoveIDs},
+    .mIVEVContext = {.mEVs = suppliedEVs},
     .mEncounterIndex = encounterIndex,
     .mPokemonID = speciesID,
 };
@@ -246,22 +247,22 @@ but communicate different caller intent.
 
 ### Field provenance
 
-| Field | Supplied scalar or non-empty context span | Omitted scalar or empty context span |
-| --- | --- | --- |
-| Species ID | Caller-supplied | Caller-supplied |
-| Level | Caller-supplied | Fixed encounter level or sampled inclusive encounter range |
-| Gender | Caller-supplied | Sampled from the species gender pool |
-| Nature IDs | Caller-supplied | Selected using registered nature generation policy |
-| Ability entries | Caller-supplied | Selected from the species pool; egg inheritance uses breeding context |
-| Item IDs | Caller-supplied, including empty slots | Selected using the species item pool policy |
-| Move IDs | Caller-supplied, including empty slots | Selected from learnset and encounter eligibility at the resolved level |
-| IVs | Caller-supplied | Sampled within valid IV bounds |
-| EVs | Caller-supplied | Initialized to six zero values; not randomly sampled |
-| Name, base stats, types, egg groups, learnset ID | Resolved from species metadata | Resolved from species metadata |
-| Move maximum/default PP | Resolved from selected move metadata | Resolved from selected move metadata |
-| Nature multipliers | Resolved from selected nature metadata | Resolved from selected nature metadata |
-| Calculated stats and level damage factor | Derived from completed inputs | Derived from completed inputs |
-| Initial health, current PP, statuses | Full calculated health, default move PP, empty statuses | Same initialization |
+| Field                                            | Supplied scalar or non-empty context span               | Omitted scalar or empty context span                                                               |
+| ------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Species ID                                       | Caller-supplied                                         | Caller-supplied                                                                                    |
+| Level                                            | Caller-supplied                                         | Fixed encounter level or sampled inclusive encounter range                                         |
+| Gender                                           | Caller-supplied                                         | Sampled from the species gender pool                                                               |
+| Nature IDs                                       | Caller-supplied                                         | Encounter values, otherwise selected using registered nature generation policy                     |
+| Ability entries                                  | Caller-supplied                                         | Encounter values, otherwise selected from the species pool; egg inheritance uses breeding context  |
+| Item IDs                                         | Caller-supplied, including empty slots                  | Encounter values, otherwise selected using the species item pool policy                            |
+| Move IDs                                         | Caller-supplied, including empty slots                  | Encounter values, otherwise selected from learnset and encounter eligibility at the resolved level |
+| IVs                                              | Caller-supplied                                         | Encounter values, otherwise sampled within valid IV bounds                                         |
+| EVs                                              | Caller-supplied                                         | Initialized to six zero values; not randomly sampled                                               |
+| Name, base stats, types, egg groups, learnset ID | Resolved from species metadata                          | Resolved from species metadata                                                                     |
+| Move maximum/default PP                          | Resolved from selected move metadata                    | Resolved from selected move metadata                                                               |
+| Nature multipliers                               | Resolved from selected nature metadata                  | Resolved from selected nature metadata                                                             |
+| Calculated stats and level damage factor         | Derived from completed inputs                           | Derived from completed inputs                                                                      |
+| Initial health, current PP, statuses             | Full calculated health, default move PP, empty statuses | Same initialization                                                                                |
 
 A present value is validated and retained without sampling that field.
 Supplied moves continue to require registered metadata, not encounter
@@ -275,10 +276,10 @@ that every check has already been implemented.
 - Preserve `std::expected<Pokemon, PokemonInstantiationError>` and existing
   domain-specific validation errors. Add a specific error only where the
   existing error vocabulary cannot express a new failure.
-- Require the dependency bundle by const reference. Validate relevant member
-  pointers before use. The current implementation requires learnset and encounter
-  metadata even for fully supplied construction; removing that dependency is
-  a possible follow-up, not part of the implemented API contract.
+- Require the dependency bundle by const reference. Validate member pointers
+  before use. The current implementation requires learnset metadata even for
+  fully supplied construction; removing that dependency is a possible follow-up,
+  not part of the implemented API contract.
 - Validate explicit values and present overrides before materialization.
   Invalid data must return an error, never trigger generation.
 - Reuse the per-field supplied/automatic branches in
@@ -320,14 +321,3 @@ fields and consumes no randomness. For omitted fields, it identifies each
 random selection, deterministic selection, zero default, and metadata-derived
 value. No `PokemonBuildIntent` is introduced by the selected design; that enum
 belongs only to the evaluated Option A.
-
-## Remaining acceptance work
-
-- Add a deterministic generated-construction test, including a variable-level
-  encounter and comparison of resulting instance fields.
-- Add a fully supplied construction test asserting retained values and zero
-  RNG calls, plus mixed-input coverage.
-- Complete dependency-pointer and encounter-boundary validation and verify
-  applicable scalar and generation-input constraints.
-- Build affected consumers and run focused registry/helper tests.
-- Merge the design document and implementation together after verification.
