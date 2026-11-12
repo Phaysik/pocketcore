@@ -1,8 +1,8 @@
 /*! @file battleHelpers.h
 	@brief Declares helper functions for battle actions.
-	@date 10/21/2026
+	@date 11/05/2026
 	@since 0.9.14
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -392,7 +392,7 @@ namespace PocketCore::Battle
 		@return The non-empty list of eligible targets, or @ref BattleEngineError::InvalidActiveSlot or @ref
 	   BattleEngineError::InvalidTarget.
 		@since 0.10.3
-		@version 0.12.51
+		@version 0.12.54
 	*/
 	ATTR_NODISCARD std::expected<std::vector<BattleTarget>, BattleEngineError> resolveTargets(
 		const BattleState &state, const BattleTarget &source, const BattleTargetID targetID, const BattleRangeID rangeID,

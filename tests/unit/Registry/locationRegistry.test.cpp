@@ -1,8 +1,8 @@
 /*! @file locationRegistry.test.cpp
 	@brief C++ file for running tests for the LocationRegistry.
-	@date 10/28/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -30,6 +30,7 @@ using PocketCore::Configuration::LocationRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Location::BuiltinLocationID;
 using PocketCore::Location::LOCATION_NAME_NONE;
+using PocketCore::Location::LOCATION_NAME_PROFESSOR_OAKS_LAB;
 using PocketCore::Location::LOCATION_NAME_ROUTE1;
 using PocketCore::Location::LocationID;
 using PocketCore::Location::LocationMeta;
@@ -61,6 +62,18 @@ SCENARIO("LocationRegistry")
 			};
 
 			const LocationMeta *actual{registry.getLocationMetadata(toLocationID(BuiltinLocationID::Route1))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Professor Oak's Lab has the appropriate properties")
+		{
+			LocationMeta expected{
+				.mName = std::string(LOCATION_NAME_PROFESSOR_OAKS_LAB),
+				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+			};
+
+			const LocationMeta *actual{registry.getLocationMetadata(toLocationID(BuiltinLocationID::ProfessorOaksLab))};
 
 			CHECK((expected == *actual));
 		}

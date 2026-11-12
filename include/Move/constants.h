@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the move registry.
-	@date 10/27/2026
+	@date 11/05/2026
 	@since 0.5.2
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -17,8 +17,16 @@ namespace PocketCore::Move
 	inline constexpr std::string_view MOVE_NAME_POUND{"Pound"};
 	inline constexpr std::string_view MOVE_NAME_KARATE_CHOP{"Karate Chop"};
 
+	inline constexpr std::string_view MOVE_NAME_VINE_WHIP{"Vine Whip"};
+	inline constexpr std::string_view MOVE_NAME_TACKLE{"Tackle"};
+	inline constexpr std::string_view MOVE_NAME_TAIL_WHIP{"Tail Whip"};
+	inline constexpr std::string_view MOVE_NAME_GROWL{"Growl"};
+	inline constexpr std::string_view MOVE_NAME_EMBER{"Ember"};
+	inline constexpr std::string_view MOVE_NAME_WATER_GUN{"Water Gun"};
 	inline constexpr std::string_view MOVE_NAME_QUICK_ATTACK{"Quick Attack"};
+	inline constexpr std::string_view MOVE_NAME_TRANSFORM{"Transform"};
 	inline constexpr std::string_view MOVE_NAME_EXTREME_SPEED{"Extreme Speed"};
+	inline constexpr std::string_view MOVE_NAME_DRAGON_CLAW{"Dragon Claw"};
 	inline constexpr std::string_view MOVE_NAME_FACADE{"Facade"};
 	inline constexpr std::string_view MOVE_NAME_HYDRO_STEAM{"Hydro Steam"};
 } // namespace PocketCore::Move

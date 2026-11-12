@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 11/03/2026
+	@date 11/09/2026
 	@since 0.12.28
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -122,26 +122,28 @@ namespace PocketCore::Pokemon
 		 @ref PocketCore::Nature::NO_NATURE_ID. No reference is retained.
 		@param[in] natureRegistry Registry borrowed for metadata validation; no reference is retained.
 		@param[in] randomSources The random sources used for battle-related numeric types.
+		@param[in] encounterData Encounter origin borrowed only for generation; egg encounters permit egg moves. No reference is retained.
 		@param[in] duplicateEntryNatureReplacer Registered ID used as the duplicate-replacement and compaction sentinel for supplied
 	   natures;
 		@return Success after validation or random selection; otherwise, the metadata-validation error,
 		 @ref NatureError::NO_REGISTERED_NATURES, or @ref NatureError::NOT_ENOUGH_REGISTERED_NATURES.
 		 Validation and candidate-count failures leave the array unchanged.
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 	*/
 	ATTR_NODISCARD std::expected<void, NatureError> getValidPokemonNatures(const std::span<const NatureID> natureIDs,
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
 																		   const NatureRegistry &natureRegistry,
 																		   const BattleRandomSources &randomSources,
+																		   const PokemonEncounter &encounterData,
 																		   const NatureID duplicateEntryNatureReplacer = NO_NATURE_ID);
 
 	/*!
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 	*/
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const PokemonAbilityEntry> abilityIDs,
+		const std::span<const PokemonAbilityEntry> abilityEntries,
 		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
 		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
 		const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext, const PokemonEncounter &encounterData,
@@ -149,14 +151,12 @@ namespace PocketCore::Pokemon
 
 	/*!
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 	*/
-	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID> itemIDs,
-																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
-																	   const std::span<const PokemonItemEntry> itemPool,
-																	   const ItemRegistry &itemRegistry,
-																	   const BattleRandomSources &randomSources,
-																	   const ItemID duplicateEntryItemReplacer = NO_ITEM_ID);
+	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(
+		const std::span<const ItemID> itemIDs, std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
+		const std::span<const PokemonItemEntry> itemPool, const ItemRegistry &itemRegistry, const BattleRandomSources &randomSources,
+		const PokemonEncounter &encounterData, const ItemID duplicateEntryItemReplacer = NO_ITEM_ID);
 
 	/*! @brief Validates supplied move IDs or generates moves from a learnset and encounter.
 		@details Nonempty input is validated against @p moveRegistry and copied to the destination prefix without checking learnset
@@ -182,7 +182,7 @@ namespace PocketCore::Pokemon
 		@note Invalid supplied metadata leaves the destination unchanged. A missing replacement ID is reported after the supplied prefix
 		 has been copied. Failed generation clears the entire destination to @ref PocketCore::Move::NO_MOVE_ID.
 		@since 0.12.51
-		@version 0.12.52
+		@version 0.12.54
 	*/
 	ATTR_NODISCARD std::expected<void, MoveError> getValidPokemonMoves(const std::span<const MoveID> moveIDs,
 																	   std::array<MoveID, MAX_MOVES_PER_POKEMON> &validMoveIDs,
@@ -193,11 +193,12 @@ namespace PocketCore::Pokemon
 
 	/*!
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 	*/
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us> ivs,
 																		std::array<us, POKEMON_STAT_COUNT> &validIVs,
-																		const BattleRandomSources &randomSources);
+																		const BattleRandomSources &randomSources,
+																		const PokemonEncounter &encounterData);
 
 	/*!
 		@since 0.12.51

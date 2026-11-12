@@ -1,8 +1,8 @@
 /*! @file locationRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined locations.
-	@date 11/03/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -28,6 +28,7 @@ namespace PocketCore::Registry::Location
 	using PocketCore::Core::us;
 	using PocketCore::Location::BuiltinLocationID;
 	using PocketCore::Location::LOCATION_NAME_NONE;
+	using PocketCore::Location::LOCATION_NAME_PROFESSOR_OAKS_LAB;
 	using PocketCore::Location::LOCATION_NAME_ROUTE1;
 	using PocketCore::Location::LocationID;
 	using PocketCore::Location::LocationMeta;
@@ -39,9 +40,9 @@ namespace PocketCore::Registry::Location
 		@details Built-in locations are registered during construction with IDs derived from @ref BuiltinLocationID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_LOCATIONS.
-		@date 11/03/2026
+		@date 11/09/2026
 		@since 0.12.51
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class LocationRegistry : private FixedMetadataRegistry<LocationMeta, LocationID, MAX_LOCATIONS, &LocationMeta::mLocationID>
@@ -62,7 +63,7 @@ namespace PocketCore::Registry::Location
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinLocationID.
 				@since 0.12.51
-				@version 0.12.51
+				@version 0.12.54
 			 */
 			ATTR_NOINLINE explicit constexpr LocationRegistry()
 			{
@@ -70,6 +71,10 @@ namespace PocketCore::Registry::Location
 				addBuiltin({
 					.mName = std::string(LOCATION_NAME_ROUTE1),
 					.mLocationID = toLocationID(BuiltinLocationID::Route1),
+				});
+				addBuiltin({
+					.mName = std::string(LOCATION_NAME_PROFESSOR_OAKS_LAB),
+					.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
 				});
 			}
 

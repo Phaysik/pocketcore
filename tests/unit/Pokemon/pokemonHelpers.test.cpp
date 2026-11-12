@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/04/2026
+	@date 11/11/2026
 	@since 0.12.28
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -150,13 +150,154 @@ SCENARIO("Pokemon free function")
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
 		std::unique_ptr<NatureRegistryConfiguration> configRegistryStorage{std::make_unique<NatureRegistryConfiguration>()};
 		const NatureRegistry &natureRegistry{configRegistryStorage->getRuntimeRegistry()};
+		PokemonEncounter encounterData{};
+
+		GIVEN("a span of nature IDs")
+		{
+			WHEN("calling with valid nature IDs")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validNatureIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
+				}
+			}
+
+			WHEN("calling with duplicate nature replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
+
+					std::expected<void, NatureError> result{
+						getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, encounterData, NatureID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_NATURE_ID")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NO_NATURE_ID};
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validNatureIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
+				}
+			}
+
+			WHEN("calling with invalid nature IDs")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NatureID{200}};
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == NatureError::MISSING_NATURE_METADATA));
+					CHECK((validNatureIDs.at(0) == NO_NATURE_ID));
+				}
+			}
+		}
+
+		GIVEN("encounter data has nature IDs")
+		{
+			WHEN("calling with valid nature IDs")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
+				encounterData.mNatureIDs = natureIDs;
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validNatureIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
+				}
+			}
+
+			WHEN("calling with duplicate nature replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
+					encounterData.mNatureIDs = natureIDs;
+
+					std::expected<void, NatureError> result{
+						getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData, NatureID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_NATURE_ID")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NO_NATURE_ID};
+				encounterData.mNatureIDs = natureIDs;
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validNatureIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
+				}
+			}
+
+			WHEN("calling with invalid nature IDs")
+			{
+				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NatureID{200}};
+				encounterData.mNatureIDs = natureIDs;
+
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == NatureError::MISSING_NATURE_METADATA));
+					CHECK((validNatureIDs.at(0) == NO_NATURE_ID));
+				}
+			}
+		}
 
 		GIVEN("no passed in nature IDs")
 		{
 			WHEN("theres no eligble natures in the registry")
 			{
 				configRegistryStorage->removeAllNatures();
-				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
 
 				THEN("it returns NOT_ENOUGH_REGISTERED_NATURES")
 				{
@@ -170,7 +311,9 @@ SCENARIO("Pokemon free function")
 				CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 5}};
 				randomSources.mIndex = indexSource;
 
-				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
 
 				THEN("it returns Naughty Nature")
 				{
@@ -197,7 +340,9 @@ SCENARIO("Pokemon free function")
 
 				randomSources.mIndex = indexSource;
 
-				std::expected<void, NatureError> result{getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources)};
+				std::expected<void, NatureError> result{
+					getValidPokemonNatures({}, validNatureIDs, natureRegistry, randomSources, encounterData),
+				};
 
 				THEN("it returns Naughty Nature")
 				{
@@ -205,67 +350,6 @@ SCENARIO("Pokemon free function")
 					CHECK((validNatureIDs.at(0) == addedID));
 
 					CHECK((metadata->mName == "TestNature"));
-				}
-			}
-		}
-
-		GIVEN("a span of nature IDs")
-		{
-			WHEN("calling with valid nature IDs")
-			{
-				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
-
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
-
-				THEN("it successfully validates and puts the data in the validNatureIDs")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
-				}
-			}
-
-			WHEN("calling with duplicate nature replacement")
-			{
-				GIVEN("the default replacement does not have valid move metadata")
-				{
-					std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{toNatureID(BuiltinNatureID::Bashful)};
-
-					std::expected<void, NatureError> result{
-						getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources, NatureID{200}),
-					};
-
-					THEN("it rejects and returns an error")
-					{
-						REQUIRE_FALSE(result.has_value());
-						CHECK((result.error() == NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
-					}
-				}
-			}
-
-			WHEN("calling with NO_NATURE_ID")
-			{
-				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NO_NATURE_ID};
-
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
-
-				THEN("it successfully validates and puts the data in the validNatureIDs")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(natureIDs, validNatureIDs));
-				}
-			}
-
-			WHEN("calling with invalid nature IDs")
-			{
-				std::array<NatureID, MAX_NATURES_PER_POKEMON> natureIDs{NatureID{200}};
-
-				std::expected<void, NatureError> result{getValidPokemonNatures(natureIDs, validNatureIDs, natureRegistry, randomSources)};
-
-				THEN("it successfully invalidates and returns an error")
-				{
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == NatureError::MISSING_NATURE_METADATA));
-					CHECK((validNatureIDs.at(0) == NO_NATURE_ID));
 				}
 			}
 		}
@@ -293,6 +377,172 @@ SCENARIO("Pokemon free function")
 		};
 		PokemonBreedingContext breedingContext{.mFirstParent = &firstParent, .mSecondParent = &secondParent};
 		PokemonEncounter encounterData{};
+
+		GIVEN("a span of ability entries")
+		{
+			WHEN("calling with valid ability entries")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+				};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validabilityEntries")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
+				}
+			}
+
+			WHEN("calling with duplicate ability replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+						{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+					};
+					std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+
+					std::expected<void, AbilityError> result{
+						getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+												 breedingContext, encounterData, {.mAbilityID = AbilityID{200}}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_ABILITY_ID")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validabilityEntries")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
+				}
+			}
+
+			WHEN("calling with invalid ability entries")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = AbilityID{200}}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
+											 breedingContext, encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					PokemonAbilityEntry expected{.mAbilityID = NO_ABILITY_ID};
+
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
+					CHECK((validAbilityEntries.at(0) == expected));
+				}
+			}
+		}
+
+		GIVEN("enounter data has ability entries")
+		{
+			WHEN("calling with valid ability entries")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+				};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+				encounterData.mAbilityEntries = abilityEntries;
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validabilityEntries")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
+				}
+			}
+
+			WHEN("calling with duplicate ability replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
+						{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
+					};
+					std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+					encounterData.mAbilityEntries = abilityEntries;
+
+					std::expected<void, AbilityError> result{
+						getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+												 encounterData, {.mAbilityID = AbilityID{200}}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_ABILITY_ID")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+				encounterData.mAbilityEntries = abilityEntries;
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validabilityEntries")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
+				}
+			}
+
+			WHEN("calling with invalid ability entries")
+			{
+				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = AbilityID{200}}}};
+				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
+				encounterData.mAbilityEntries = abilityEntries;
+
+				std::expected<void, AbilityError> result{
+					getValidPokemonAbilities({}, validAbilityEntries, abilityPool, abilityRegistry, randomSources, breedingContext,
+											 encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					PokemonAbilityEntry expected{.mAbilityID = NO_ABILITY_ID};
+
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
+					CHECK((validAbilityEntries.at(0) == expected));
+				}
+			}
+		}
 
 		GIVEN("no passed in ability IDs")
 		{
@@ -402,87 +652,6 @@ SCENARIO("Pokemon free function")
 						REQUIRE(result.has_value());
 						CHECK((validAbilityEntries.at(0) == expected));
 					}
-				}
-			}
-		}
-
-		GIVEN("a span of ability IDs")
-		{
-			WHEN("calling with valid ability IDs")
-			{
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
-					{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
-				};
-				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
-
-				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
-											 breedingContext, encounterData),
-				};
-
-				THEN("it successfully validates and puts the data in the validabilityEntries")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
-				}
-			}
-
-			WHEN("calling with duplicate ability replacement")
-			{
-				GIVEN("the default replacement does not have valid move metadata")
-				{
-					std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{
-						{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}},
-					};
-					std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
-
-					std::expected<void, AbilityError> result{
-						getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
-												 breedingContext, encounterData, {.mAbilityID = AbilityID{200}}),
-					};
-
-					THEN("it rejects and returns an error")
-					{
-						REQUIRE_FALSE(result.has_value());
-						CHECK((result.error() == AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
-					}
-				}
-			}
-
-			WHEN("calling with NO_ABILITY_ID")
-			{
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = NO_ABILITY_ID}}};
-				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
-
-				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
-											 breedingContext, encounterData),
-				};
-
-				THEN("it successfully validates and puts the data in the validabilityEntries")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(abilityEntries, validAbilityEntries));
-				}
-			}
-
-			WHEN("calling with invalid ability IDs")
-			{
-				std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> abilityEntries{{{.mAbilityID = AbilityID{200}}}};
-				std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> abilityPool{};
-
-				std::expected<void, AbilityError> result{
-					getValidPokemonAbilities(abilityEntries, validAbilityEntries, abilityPool, abilityRegistry, randomSources,
-											 breedingContext, encounterData),
-				};
-
-				THEN("it successfully invalidates and returns an error")
-				{
-					PokemonAbilityEntry expected{.mAbilityID = NO_ABILITY_ID};
-
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == AbilityError::MISSING_ABILITY_METADATA));
-					CHECK((validAbilityEntries.at(0) == expected));
 				}
 			}
 		}
@@ -894,6 +1063,145 @@ SCENARIO("Pokemon free function")
 			{.mItemID = toItemID(BuiltinItemID::CheriBerry), .mChance = 0.5},
 			{.mItemID = toItemID(BuiltinItemID::ChestoBerry), .mChance = 0.7},
 		};
+		PokemonEncounter encounterData{};
+
+		GIVEN("a span of item IDs")
+		{
+			WHEN("calling with valid item IDs")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validItemIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(itemIDs, validItemIDs));
+				}
+			}
+
+			WHEN("calling with duplicate item replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+
+					std::expected<void, ItemError> result{
+						getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, encounterData, ItemID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_ITEM_ID")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{NO_ITEM_ID};
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validItemIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(itemIDs, validItemIDs));
+				}
+			}
+
+			WHEN("calling with invalid item IDs")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{ItemID{200}};
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
+					CHECK((validItemIDs.at(0) == NO_ITEM_ID));
+				}
+			}
+		}
+
+		GIVEN("encounter data has item IDs")
+		{
+			WHEN("calling with valid item IDs")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+				encounterData.mItemIDs = itemIDs;
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validItemIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(itemIDs, validItemIDs));
+				}
+			}
+
+			WHEN("calling with duplicate item replacement")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
+					encounterData.mItemIDs = itemIDs;
+
+					std::expected<void, ItemError> result{
+						getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData, ItemID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+			}
+
+			WHEN("calling with NO_ITEM_ID")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{NO_ITEM_ID};
+				encounterData.mItemIDs = itemIDs;
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully validates and puts the data in the validItemIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(itemIDs, validItemIDs));
+				}
+			}
+
+			WHEN("calling with invalid item IDs")
+			{
+				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{ItemID{200}};
+				encounterData.mItemIDs = itemIDs;
+
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
+					CHECK((validItemIDs.at(0) == NO_ITEM_ID));
+				}
+			}
+		}
 
 		GIVEN("no passed in item IDs")
 		{
@@ -901,7 +1209,9 @@ SCENARIO("Pokemon free function")
 			{
 				configRegistryStorage->removeAllItems();
 
-				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
 
 				THEN("it returns NOT_ENOUGH_REGISTERED_ITEMS")
 				{
@@ -914,7 +1224,9 @@ SCENARIO("Pokemon free function")
 			{
 				itemPool.push_back({.mItemID = ItemID{200}});
 
-				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
 
 				THEN("it returns MISSING_ITEM_METADATA")
 				{
@@ -931,74 +1243,15 @@ SCENARIO("Pokemon free function")
 				randomSources.mReal = realSource;
 				randomSources.mIndex = indexSource;
 
-				std::expected<void, ItemError> result{getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources)};
+				std::expected<void, ItemError> result{
+					getValidPokemonItems({}, validItemIDs, itemPool, itemRegistry, randomSources, encounterData),
+				};
 
 				THEN("it adds the ability IDs to the array")
 				{
 					REQUIRE(result.has_value());
 
 					CHECK((validItemIDs.at(0) == toItemID(BuiltinItemID::CheriBerry)));
-				}
-			}
-		}
-
-		GIVEN("a span of item IDs")
-		{
-			WHEN("calling with valid item IDs")
-			{
-				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
-
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
-
-				THEN("it successfully validates and puts the data in the validItemIDs")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(itemIDs, validItemIDs));
-				}
-			}
-
-			WHEN("calling with duplicate item replacement")
-			{
-				GIVEN("the default replacement does not have valid move metadata")
-				{
-					std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{toItemID(BuiltinItemID::CheriBerry)};
-
-					std::expected<void, ItemError> result{
-						getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources, ItemID{200}),
-					};
-
-					THEN("it rejects and returns an error")
-					{
-						REQUIRE_FALSE(result.has_value());
-						CHECK((result.error() == ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
-					}
-				}
-			}
-
-			WHEN("calling with NO_ITEM_ID")
-			{
-				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{NO_ITEM_ID};
-
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
-
-				THEN("it successfully validates and puts the data in the validItemIDs")
-				{
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(itemIDs, validItemIDs));
-				}
-			}
-
-			WHEN("calling with invalid item IDs")
-			{
-				std::array<ItemID, MAX_ITEMS_PER_POKEMON> itemIDs{ItemID{200}};
-
-				std::expected<void, ItemError> result{getValidPokemonItems(itemIDs, validItemIDs, itemPool, itemRegistry, randomSources)};
-
-				THEN("it successfully invalidates and returns an error")
-				{
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == ItemError::MISSING_ITEM_METADATA));
-					CHECK((validItemIDs.at(0) == NO_ITEM_ID));
 				}
 			}
 		}
@@ -1023,10 +1276,9 @@ SCENARIO("Pokemon free function")
 				getItemsFromItemPool(validItemIDs, {}, itemRegistry, randomSources),
 			};
 
-			THEN("it returns EMPTY_ITEM_POOL")
+			THEN("it returns")
 			{
-				REQUIRE_FALSE(result.has_value());
-				CHECK((result.error() == ItemError::EMPTY_ITEM_POOL));
+				REQUIRE(result.has_value());
 			}
 		}
 
@@ -1088,78 +1340,6 @@ SCENARIO("Pokemon free function")
 		PokemonEncounter encounter{.mOrigin = PokemonOrigin::Egg};
 		us pokemonEncounterLevel{10};
 		MoveRegistry moveRegistry{*provider.mMoveRegistry};
-
-		WHEN("no passed in move IDs")
-		{
-			GIVEN("valid metadata")
-			{
-				std::vector<MoveLearnEntry> entries{
-					{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mLevelRequirement = 10},
-					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 2},
-					{
-						.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
-						.mLevelRequirement = 8,
-						.mAcquisitionMethod = AcquisitionMethod::Egg,
-					},
-					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 1},
-					{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mLevelRequirement = 6},
-				};
-
-				meta.mEntries = entries;
-
-				std::expected<void, MoveError> result{
-					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
-				};
-
-				THEN("it properly returns with filled out valid move IDs")
-				{
-					std::vector<MoveID> expected{
-						toMoveID(BuiltinMoveID::KarateChop),
-						toMoveID(BuiltinMoveID::Pound),
-						toMoveID(BuiltinMoveID::Facade),
-						NO_MOVE_ID,
-					};
-
-					REQUIRE(result.has_value());
-					CHECK(std::ranges::equal(validMoveIDs, expected));
-				}
-			}
-
-			GIVEN("invalid metadata")
-			{
-				std::vector<MoveLearnEntry> entries{
-					{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mLevelRequirement = 10},
-					{.mMoveID = MoveID{200}, .mLevelRequirement = 2},
-					{
-						.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
-						.mLevelRequirement = 8,
-						.mAcquisitionMethod = AcquisitionMethod::Egg,
-					},
-					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 1},
-					{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mLevelRequirement = 6},
-				};
-
-				meta.mEntries = entries;
-
-				std::expected<void, MoveError> result{
-					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
-				};
-
-				THEN("it leaves the move ID array empty and returns an error")
-				{
-					std::vector<MoveID> expected{
-						NO_MOVE_ID,
-						NO_MOVE_ID,
-						NO_MOVE_ID,
-						NO_MOVE_ID,
-					};
-
-					REQUIRE_FALSE(result.has_value());
-					CHECK((result.error() == MoveError::MISSING_MOVE_METADATA));
-					CHECK(std::ranges::equal(validMoveIDs, expected));
-				}
-			}
-		}
 
 		GIVEN("a span of move IDs")
 		{
@@ -1263,6 +1443,189 @@ SCENARIO("Pokemon free function")
 					REQUIRE_FALSE(result.has_value());
 					CHECK((result.error() == MoveError::MISSING_MOVE_METADATA));
 					CHECK((validMoveIDs.at(0) == NO_MOVE_ID));
+				}
+			}
+		}
+
+		GIVEN("encounter data has move IDs")
+		{
+			WHEN("calling with valid move IDs")
+			{
+				std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
+					toMoveID(BuiltinMoveID::HydroSteam),
+					toMoveID(BuiltinMoveID::KarateChop),
+					toMoveID(BuiltinMoveID::Facade),
+					toMoveID(BuiltinMoveID::Pound),
+				};
+				encounter.mMoveIDs = moveIDs;
+
+				std::expected<void, MoveError> result{
+					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+				};
+
+				THEN("it successfully validates and puts the data in the validMoveIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(moveIDs, validMoveIDs));
+				}
+			}
+
+			WHEN("calling with duplicate move IDs")
+			{
+				GIVEN("the default replacement does not have valid move metadata")
+				{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
+						toMoveID(BuiltinMoveID::HydroSteam),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::Pound),
+					};
+					encounter.mMoveIDs = moveIDs;
+
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel, MoveID{200}),
+					};
+
+					THEN("it rejects and returns an error")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA));
+					}
+				}
+
+				GIVEN("the default replacement has valid move metadata")
+				{
+					std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{
+						toMoveID(BuiltinMoveID::HydroSteam),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::Pound),
+					};
+					encounter.mMoveIDs = moveIDs;
+
+					std::expected<void, MoveError> result{
+						getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+					};
+
+					THEN("it successfully validates, replaces the duplicate with NO_MOVE_ID, and sorts it to the back while preserving "
+						 "the "
+						 "other values in their order")
+					{
+						std::array<MoveID, MAX_MOVES_PER_POKEMON> expected{
+							toMoveID(BuiltinMoveID::HydroSteam),
+							toMoveID(BuiltinMoveID::KarateChop),
+							toMoveID(BuiltinMoveID::Pound),
+							NO_MOVE_ID,
+						};
+
+						REQUIRE(result.has_value());
+						CHECK(std::ranges::equal(validMoveIDs, expected));
+					}
+				}
+			}
+
+			WHEN("calling with NO_MOVE_ID")
+			{
+				std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{NO_MOVE_ID};
+				encounter.mMoveIDs = moveIDs;
+
+				std::expected<void, MoveError> result{
+					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+				};
+
+				THEN("it successfully validates and puts the data in the validMoveIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(moveIDs, validMoveIDs));
+				}
+			}
+
+			WHEN("calling with invalid move IDs")
+			{
+				std::array<MoveID, MAX_MOVES_PER_POKEMON> moveIDs{MoveID{200}};
+				encounter.mMoveIDs = moveIDs;
+
+				std::expected<void, MoveError> result{
+					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+				};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == MoveError::MISSING_MOVE_METADATA));
+					CHECK((validMoveIDs.at(0) == NO_MOVE_ID));
+				}
+			}
+		}
+
+		WHEN("no passed in move IDs")
+		{
+			GIVEN("valid metadata")
+			{
+				std::vector<MoveLearnEntry> entries{
+					{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mLevelRequirement = 10},
+					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 2},
+					{
+						.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+						.mLevelRequirement = 8,
+						.mAcquisitionMethod = AcquisitionMethod::Egg,
+					},
+					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 1},
+					{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mLevelRequirement = 6},
+				};
+
+				meta.mEntries = entries;
+
+				std::expected<void, MoveError> result{
+					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+				};
+
+				THEN("it properly returns with filled out valid move IDs")
+				{
+					std::vector<MoveID> expected{
+						toMoveID(BuiltinMoveID::KarateChop),
+						toMoveID(BuiltinMoveID::Pound),
+						toMoveID(BuiltinMoveID::Facade),
+						NO_MOVE_ID,
+					};
+
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(validMoveIDs, expected));
+				}
+			}
+
+			GIVEN("invalid metadata")
+			{
+				std::vector<MoveLearnEntry> entries{
+					{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mLevelRequirement = 10},
+					{.mMoveID = MoveID{200}, .mLevelRequirement = 2},
+					{
+						.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
+						.mLevelRequirement = 8,
+						.mAcquisitionMethod = AcquisitionMethod::Egg,
+					},
+					{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mLevelRequirement = 1},
+					{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mLevelRequirement = 6},
+				};
+
+				meta.mEntries = entries;
+
+				std::expected<void, MoveError> result{
+					getValidPokemonMoves({}, validMoveIDs, moveRegistry, meta, encounter, pokemonEncounterLevel),
+				};
+
+				THEN("it leaves the move ID array empty and returns an error")
+				{
+					std::vector<MoveID> expected{
+						NO_MOVE_ID,
+						NO_MOVE_ID,
+						NO_MOVE_ID,
+						NO_MOVE_ID,
+					};
+
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == MoveError::MISSING_MOVE_METADATA));
+					CHECK(std::ranges::equal(validMoveIDs, expected));
 				}
 			}
 		}
@@ -2136,23 +2499,10 @@ SCENARIO("Pokemon free function")
 
 	GIVEN("getValidPokemonIVs")
 	{
+		PokemonEncounter encounterData{};
 		std::array<us, POKEMON_STAT_COUNT> validPokemonIVs{};
 		CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{5, 8, 20, 25, 14, 31}};
 		randomSources.mIndex = indexSource;
-
-		WHEN("no passed in Pokemon IVs")
-		{
-			std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources)};
-
-			THEN("it passes and initializes random ivs")
-			{
-				REQUIRE(result.has_value());
-
-				std::array<us, POKEMON_STAT_COUNT> expectedIVs{5, 8, 20, 25, 14, 31};
-
-				CHECK(std::ranges::equal(validPokemonIVs, expectedIVs));
-			}
-		}
 
 		GIVEN("a span of Pokemon IVs")
 		{
@@ -2160,7 +2510,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 24};
 
-				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources)};
+				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources, encounterData)};
 
 				THEN("it successfully validates and puts the data in the validItemIDs")
 				{
@@ -2173,7 +2523,7 @@ SCENARIO("Pokemon free function")
 			{
 				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 32};
 
-				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources)};
+				std::expected<void, PokemonError> result{getValidPokemonIVs(pokemonIVs, validPokemonIVs, randomSources, encounterData)};
 
 				THEN("it successfully invalidates and returns an error")
 				{
@@ -2183,22 +2533,57 @@ SCENARIO("Pokemon free function")
 				}
 			}
 		}
+
+		GIVEN("encounter data has Pokemon IVs")
+		{
+			WHEN("calling with valid Pokemon IVs")
+			{
+				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 24};
+				encounterData.mIVs = pokemonIVs;
+
+				std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources, encounterData)};
+
+				THEN("it successfully validates and puts the data in the validItemIDs")
+				{
+					REQUIRE(result.has_value());
+					CHECK(std::ranges::equal(pokemonIVs, validPokemonIVs));
+				}
+			}
+
+			WHEN("calling with an invalid Pokemon IV")
+			{
+				std::array<us, POKEMON_STAT_COUNT> pokemonIVs{25, 2, 15, 30, 14, 32};
+				encounterData.mIVs = pokemonIVs;
+
+				std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources, encounterData)};
+
+				THEN("it successfully invalidates and returns an error")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == PokemonError::INVALID_IV_ARRAY));
+					CHECK(std::ranges::all_of(validPokemonIVs, [](const us pokemonIV) { return pokemonIV == 0; }));
+				}
+			}
+		}
+
+		WHEN("no passed in Pokemon IVs")
+		{
+			std::expected<void, PokemonError> result{getValidPokemonIVs({}, validPokemonIVs, randomSources, encounterData)};
+
+			THEN("it passes and initializes random ivs")
+			{
+				REQUIRE(result.has_value());
+
+				std::array<us, POKEMON_STAT_COUNT> expectedIVs{5, 8, 20, 25, 14, 31};
+
+				CHECK(std::ranges::equal(validPokemonIVs, expectedIVs));
+			}
+		}
 	}
 
 	GIVEN("getValidPokemonEVs")
 	{
 		std::array<us, POKEMON_STAT_COUNT> validPokemonEVs{};
-
-		WHEN("no passed in Pokemon EVs")
-		{
-			std::expected<void, PokemonError> result{getValidPokemonEVs({}, validPokemonEVs)};
-
-			THEN("it passes and initializes all evs to 0")
-			{
-				CHECK(result.has_value());
-				CHECK(std::ranges::all_of(validPokemonEVs, [](const us pokemonEV) { return pokemonEV == 0; }));
-			}
-		}
 
 		GIVEN("a span of Pokemon EVs")
 		{
@@ -2241,6 +2626,17 @@ SCENARIO("Pokemon free function")
 					CHECK((result.error() == PokemonError::INVALID_EV_ARRAY));
 					CHECK(std::ranges::all_of(validPokemonEVs, [](const us pokemonEV) { return pokemonEV == 0; }));
 				}
+			}
+		}
+
+		WHEN("no passed in Pokemon EVs")
+		{
+			std::expected<void, PokemonError> result{getValidPokemonEVs({}, validPokemonEVs)};
+
+			THEN("it passes and initializes all evs to 0")
+			{
+				CHECK(result.has_value());
+				CHECK(std::ranges::all_of(validPokemonEVs, [](const us pokemonEV) { return pokemonEV == 0; }));
 			}
 		}
 	}
@@ -2287,7 +2683,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
@@ -2373,11 +2769,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2428,7 +2824,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
@@ -2517,11 +2913,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2572,7 +2968,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
@@ -2661,11 +3057,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2716,7 +3112,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
@@ -2805,11 +3201,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2860,7 +3256,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
@@ -2949,11 +3345,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3004,7 +3400,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Standard}}},
@@ -3093,11 +3489,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3148,7 +3544,7 @@ SCENARIO("Pokemon free function")
                             },
                         },
                     },
-    				.mStatusIDs
+    				.mNonVolatileStatusIDs
     				= {toStatusID(BuiltinStatusID::Poison), toStatusID(BuiltinStatusID::Toxic), toStatusID(BuiltinStatusID::Paralysis),
     				   toStatusID(BuiltinStatusID::Sleep), toStatusID(BuiltinStatusID::Freeze),},
     				.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::AirLock), .mClassification = AbilityClassification::Hidden}}},
@@ -3237,11 +3633,11 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 5\n"
+						"      ID: 13\n"
 						"      Name: <unregistered>\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 6\n"
+						"      ID: 14\n"
 						"      Name: <unregistered>\n"
 						"      PP: 20/30\n"
 						"}",

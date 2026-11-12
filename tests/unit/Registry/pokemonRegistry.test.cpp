@@ -1,13 +1,14 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/03/2026
+	@date 11/12/2026
 	@since 0.12.20
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
 #include "Registry/pokemonRegistry.h"
 
+#include <cstddef>
 #include <expected>
 #include <memory>
 #include <optional>
@@ -15,31 +16,72 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
+#include "Ability/abilityID.h"
 #include "Ability/abilityMeta.h"
 #include "Ability/builtInAbilityID.h"
+#include "Battle/battleRandomSources.h"
+#include "Configuration/constants.h"
 #include "Configuration/pokemonRegistryConfiguration.h"
 #include "Core/typedefs.h"
 #include "EggGroup/builtInEggGroupID.h"
+#include "Item/builtInItemID.h"
+#include "Item/itemID.h"
 #include "Learnset/builtInLearnsetID.h"
+#include "Learnset/learnsetID.h"
+#include "Location/builtInLocationID.h"
+#include "Move/builtInMoveID.h"
+#include "Move/moveID.h"
+#include "Nature/builtInNatureID.h"
+#include "Nature/natureID.h"
 #include "Pokemon/builtInPokemonID.h"
 #include "Pokemon/constants.h"
+#include "Pokemon/pokemon.h"
+#include "Pokemon/pokemon.testHelper.h"
+#include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonID.h"
+#include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Registry/registryProvider.h"
+#include "Registry/registryProvider.testHelper.h"
 #include "Type/builtInTypeID.h"
+#include "Utility/Random/callableRandomSource.h"
+#include "Utility/Random/random.testHelper.h"
+#include "Validation/Ability/abilityError.h"
+#include "Validation/Item/itemError.h"
+#include "Validation/Move/moveError.h"
+#include "Validation/Nature/natureError.h"
+#include "Validation/Pokemon/pokemonError.h"
 #include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
 
 using PocketCore::Ability::AbilityClassification;
+using PocketCore::Ability::AbilityID;
 using PocketCore::Ability::BuiltinAbilityID;
 using PocketCore::Ability::toAbilityID;
+using PocketCore::Battle::BattleRandomSources;
+using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
 using PocketCore::Configuration::PokemonRegistryConfiguration;
 using PocketCore::Core::ub;
+using PocketCore::Core::us;
 using PocketCore::EggGroup::BuiltinEggGroupID;
 using PocketCore::EggGroup::toEggGroupID;
+using PocketCore::Item::BuiltinItemID;
+using PocketCore::Item::ItemID;
+using PocketCore::Item::toItemID;
 using PocketCore::Learnset::BuiltinLearnsetID;
+using PocketCore::Learnset::LearnsetID;
 using PocketCore::Learnset::toLearnsetID;
+using PocketCore::Location::BuiltinLocationID;
+using PocketCore::Location::toLocationID;
+using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::MoveID;
+using PocketCore::Move::toMoveID;
+using PocketCore::Nature::BuiltinNatureID;
+using PocketCore::Nature::NatureID;
+using PocketCore::Nature::toNatureID;
 using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
 using PocketCore::Pokemon::BuiltinPokemonID;
 using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
@@ -49,6 +91,7 @@ using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
 using PocketCore::Pokemon::DITTO_BASE_STATS;
 using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 using PocketCore::Pokemon::NO_POKEMON_ID;
+using PocketCore::Pokemon::Pokemon;
 using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
 using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
 using PocketCore::Pokemon::POKEMON_NAME_CHARIZARD;
@@ -60,16 +103,34 @@ using PocketCore::Pokemon::POKEMON_NAME_NONE;
 using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
 using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
+using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
 using PocketCore::Pokemon::PokemonMeta;
+using PocketCore::Pokemon::PokemonOrigin;
+using PocketCore::Pokemon::PokemonSpec;
+using PocketCore::Pokemon::SetLevelEncounter;
 using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
 using PocketCore::Pokemon::toPokemonID;
+using PocketCore::Pokemon::VariableLevelEncounter;
 using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
 using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
+using PocketCore::Registry::Pokemon::PokemonInstantiationDependencies;
+using PocketCore::Registry::Pokemon::PokemonInstantiationError;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
+using PocketCore::Registry::RegistryProvider;
+using PocketCore::Testing::FixedRandom;
+using PocketCore::Testing::getDefaultInitializedRegistryProvider;
+using PocketCore::Testing::makePokemon;
+using PocketCore::Testing::SequenceRandom;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
+using PocketCore::Utility::Random::CallableRandomSource;
+using PocketCore::Validation::Ability::AbilityError;
+using PocketCore::Validation::Item::ItemError;
+using PocketCore::Validation::Move::MoveError;
+using PocketCore::Validation::Nature::NatureError;
+using PocketCore::Validation::Pokemon::PokemonError;
 using PocketCore::Validation::Registry::RegistryError;
 
 template <typename Registry>
@@ -81,8 +142,8 @@ static_assert(!PubliclyStructurallyMutable<PokemonRegistry>);
 
 SCENARIO("PokemonRegistry")
 {
-	std::unique_ptr<PokemonRegistry> registryStorage{std::make_unique<PokemonRegistry>()};
-	PokemonRegistry &registry{*registryStorage};
+	std::unique_ptr<PokemonRegistryConfiguration> configRegistryStorage{std::make_unique<PokemonRegistryConfiguration>()};
+	const PokemonRegistry &registry{configRegistryStorage->getRuntimeRegistry()};
 	ub finalPokemonUnderlyingValue{std::to_underlying(BuiltinPokemonID::FinalPokemon)};
 
 	GIVEN("a default constructed pokemon registry")
@@ -90,6 +151,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Bulbasaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {
+					{
+						{
+                		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden}},
+                    			},
+                			.mLevel = SetLevelEncounter{5},
+                			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                			.mOrigin = PokemonOrigin::Starter,
+						},
+					},
+				},
 				.mName = std::string(POKEMON_NAME_BULBASAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -112,6 +185,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Ivysaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+    			.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_IVYSAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -134,6 +208,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Venusaur has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {},
 				.mName = std::string(POKEMON_NAME_VENUSAUR),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -156,6 +231,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Charmander has the appropriate properties")
 		{
 			PokemonMeta expected{
+    			.mEncounters = {
+                	{
+                		{
+                  		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden}},
+                     			},
+                 			.mLevel = SetLevelEncounter{5},
+                 			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                 			.mOrigin = PokemonOrigin::Starter,
+                		},
+                	},
+                },
 				.mName = std::string(POKEMON_NAME_CHARMANDER),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -178,6 +265,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Charmeleon has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {},
 				.mName = std::string(POKEMON_NAME_CHARMELEON),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -200,6 +288,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Charizard has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_CHARIZARD),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -222,6 +311,18 @@ SCENARIO("PokemonRegistry")
 		THEN("Squirtle has the appropriate properties")
 		{
 			PokemonMeta expected{
+			    .mEncounters = {
+                	{
+                		{
+                  		    .mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+                    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden}},
+                     			},
+                 			.mLevel = SetLevelEncounter{5},
+                 			.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+                 			.mOrigin = PokemonOrigin::Starter,
+                		},
+                	},
+                },
 				.mName = std::string(POKEMON_NAME_SQUIRTLE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -244,6 +345,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Wartortle has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_WARTORTLE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -266,6 +368,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Blastoise has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_BLASTOISE),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -288,6 +391,7 @@ SCENARIO("PokemonRegistry")
 		THEN("Ditto has the appropriate properties")
 		{
 			PokemonMeta expected{
+				.mEncounters = {},
 				.mName = std::string(POKEMON_NAME_DITTO),
 				.mItemPool = {},
 				.mAbilityPool = {{
@@ -450,6 +554,1098 @@ SCENARIO("PokemonRegistry")
 			THEN("a known pokemon ID has an entry")
 			{
 				CHECK(registry.hasPokemon(NO_POKEMON_ID));
+			}
+		}
+	}
+
+	GIVEN("instantiate")
+	{
+		RegistryProvider provider{getDefaultInitializedRegistryProvider()};
+		PokemonSpec spec{.mLevel = 50, .mPokemonID = toPokemonID(BuiltinPokemonID::Ivysaur)};
+		PokemonInstantiationDependencies instantiateDependencies{
+			.mAbilityRegistry = provider.mAbilityRegistry,
+			.mMoveRegistry = provider.mMoveRegistry,
+			.mItemRegistry = provider.mItemRegistry,
+			.mNatureRegistry = provider.mNatureRegistry,
+			.mLearnsetRegistry = provider.mLearnsetRegistry,
+			.mLocationRegistry = provider.mLocationRegistry,
+		};
+		BattleRandomSources randomSources{};
+		std::vector<NatureID> natureIDs{};
+		std::vector<PokemonAbilityEntry> abilityEntries{};
+		std::vector<ItemID> itemIDs{};
+		std::vector<MoveID> moveIDs{};
+		std::vector<us> ivs{};
+		std::vector<us> evs{};
+
+		GIVEN("calling with invalid dependency registries")
+		{
+			WHEN("calling with a null ability registry")
+			{
+				instantiateDependencies.mAbilityRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+
+			WHEN("calling with a null item registry")
+			{
+				instantiateDependencies.mItemRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+
+			WHEN("calling with a null move registry")
+			{
+				instantiateDependencies.mMoveRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+
+			WHEN("calling with a null nature registry")
+			{
+				instantiateDependencies.mNatureRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+
+			WHEN("calling with a null learnset registry")
+			{
+				instantiateDependencies.mLearnsetRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+
+			WHEN("calling with a null location registry")
+			{
+				instantiateDependencies.mLocationRegistry = nullptr;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns MissingRegistry")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::MissingRegistry));
+				}
+			}
+		}
+
+		WHEN("calling an invalid Pokemon ID")
+		{
+			spec.mPokemonID = PokemonID{2'000};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns PokemonNotFound")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+				CHECK((std::get<RegistryError>(result.error()) == RegistryError::PokemonNotFound));
+			}
+		}
+
+		WHEN("calling an invalid Learnset ID")
+		{
+			PokemonID pokemonID{toPokemonID(BuiltinPokemonID::Bulbasaur)};
+			spec.mPokemonID = pokemonID;
+			std::expected<void, RegistryError> updateResult{
+				configRegistryStorage->updatePokemon(pokemonID, {.mLearnsetID = LearnsetID{200}}),
+			};
+
+			REQUIRE(updateResult.has_value());
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns LearnsetNotFound")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+				CHECK((std::get<RegistryError>(result.error()) == RegistryError::LearnsetNotFound));
+			}
+		}
+
+		GIVEN("calling an invalid Pokemon encounter index")
+		{
+			WHEN("calling with an encounter index out of bounds")
+			{
+				spec.mEncounterIndex = 20;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns EncounterNotFound")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::EncounterNotFound));
+				}
+			}
+
+			WHEN("calling with an encounter index that points to NO_LOCATION_ID")
+			{
+				spec.mEncounterIndex = 0;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(spec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns EncounterNotFound")
+				{
+					REQUIRE_FALSE(result.has_value());
+					REQUIRE(std::holds_alternative<RegistryError>(result.error()));
+					CHECK((std::get<RegistryError>(result.error()) == RegistryError::EncounterNotFound));
+				}
+			}
+		}
+
+		WHEN("calling with no encounter data and no level in the Pokemon Spec")
+		{
+			spec.mLevel = std::nullopt;
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns MISSING_LEVEL")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<PokemonError>(result.error()));
+				CHECK((std::get<PokemonError>(result.error()) == PokemonError::MISSING_LEVEL));
+			}
+		}
+
+		WHEN("calling with an invalid nature ID")
+		{
+			natureIDs = {NatureID{200}};
+			spec.mIDContext = {
+				.mNatureIDs = natureIDs,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns MISSING_NATURE_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<NatureError>(result.error()));
+				CHECK((std::get<NatureError>(result.error()) == NatureError::MISSING_NATURE_METADATA));
+			}
+		}
+
+		WHEN("calling with an invalid ability ID")
+		{
+			abilityEntries = {{.mAbilityID = AbilityID{200}}};
+			spec.mIDContext = {
+				.mAbilityEntries = abilityEntries,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns MISSING_ABILITY_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<AbilityError>(result.error()));
+				CHECK((std::get<AbilityError>(result.error()) == AbilityError::MISSING_ABILITY_METADATA));
+			}
+		}
+
+		WHEN("calling with an invalid item ID")
+		{
+			itemIDs = {ItemID{200}};
+			spec.mIDContext = {
+				.mItemIDs = itemIDs,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns MISSING_ITEM_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<ItemError>(result.error()));
+				CHECK((std::get<ItemError>(result.error()) == ItemError::MISSING_ITEM_METADATA));
+			}
+		}
+
+		WHEN("calling with an invalid move ID")
+		{
+			moveIDs = {MoveID{200}};
+			spec.mIDContext = {
+				.mMoveIDs = moveIDs,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns MISSING_MOVE_METADATA")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<MoveError>(result.error()));
+				CHECK((std::get<MoveError>(result.error()) == MoveError::MISSING_MOVE_METADATA));
+			}
+		}
+
+		WHEN("calling with an invalid IV")
+		{
+			ivs = {200};
+			spec.mIVEVContext = {
+				.mIVs = ivs,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns INVALID_IV_ARRAY")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<PokemonError>(result.error()));
+				CHECK((std::get<PokemonError>(result.error()) == PokemonError::INVALID_IV_ARRAY));
+			}
+		}
+
+		WHEN("calling with an invalid EV")
+		{
+			evs = {600};
+			spec.mIVEVContext = {
+				.mEVs = evs,
+			};
+
+			std::expected<Pokemon, PokemonInstantiationError> result{
+				registry.instantiate(spec, instantiateDependencies, randomSources),
+			};
+
+			THEN("it returns INVALID_EV_ARRAY")
+			{
+				REQUIRE_FALSE(result.has_value());
+				REQUIRE(std::holds_alternative<PokemonError>(result.error()));
+				CHECK((std::get<PokemonError>(result.error()) == PokemonError::INVALID_EV_ARRAY));
+			}
+		}
+
+		WHEN("calling with a spec completely filled out with user defined values")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		GIVEN("calling with a spec partially filled out with user defined values aside from the level")
+		{
+			WHEN("calling with a SetLevelEncounter")
+			{
+				PokemonSpec newSpec{};
+
+				ivs = {5, 22, 31, 14, 20, 10};
+				evs = {42, 56, 0, 23, 100, 85};
+				newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+				natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+				abilityEntries
+					= {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+				itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+				moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+				newSpec.mIDContext = {
+					.mNatureIDs = natureIDs,
+					.mAbilityEntries = abilityEntries,
+					.mItemIDs = itemIDs,
+					.mMoveIDs = moveIDs,
+				};
+
+				newSpec.mGender = PokemonGender::Genderless;
+				newSpec.mBreedingContext = {};
+				newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+				newSpec.mEncounterIndex = 0;
+
+				// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
+				PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
+				updatedMeta.mEncounters.at(0).mLevel = SetLevelEncounter{20};
+
+				std::expected<void, RegistryError> updateResult{
+					configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
+				};
+
+				REQUIRE(updateResult.has_value());
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(newSpec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns a semi-custom built Pokemon")
+				{
+					REQUIRE(result.has_value());
+
+					Pokemon expected{
+    					makePokemon({
+    						.mMetadata = {
+    						    .mName = "Bulbasaur",
+    							.mBaseStats = {
+    								.mMaxHealth = 45,
+    								.mAttack = 49,
+    								.mDefense = 49,
+    								.mSpAttack = 65,
+    								.mSpDefense = 65,
+    								.mSpeed = 45,
+    							},
+    							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+    							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+    							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+    							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+    						},
+    						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+    						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+    						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+    						.mAbilityEntries
+    						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+    						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+    						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+    						.mHealth = 51,
+    						.mLevel = 20,
+    						.mGender = PokemonGender::Genderless,
+    					}),
+    				};
+
+					CHECK((result.value() == expected));
+				}
+			}
+
+			WHEN("calling with a VariableLevelEncounter")
+			{
+				PokemonSpec newSpec{};
+
+				ivs = {5, 22, 31, 14, 20, 10};
+				evs = {42, 56, 0, 23, 100, 85};
+				newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+				natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+				abilityEntries
+					= {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+				itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+				moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+				newSpec.mIDContext = {
+					.mNatureIDs = natureIDs,
+					.mAbilityEntries = abilityEntries,
+					.mItemIDs = itemIDs,
+					.mMoveIDs = moveIDs,
+				};
+
+				newSpec.mGender = PokemonGender::Genderless;
+				newSpec.mBreedingContext = {};
+				newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+				newSpec.mEncounterIndex = 0;
+
+				// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
+				PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
+				updatedMeta.mEncounters.at(0).mLevel = VariableLevelEncounter{.mMinLevel = 7, .mMaxLevel = 51};
+
+				std::expected<void, RegistryError> updateResult{
+					configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
+				};
+
+				REQUIRE(updateResult.has_value());
+
+				CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{20}};
+				randomSources.mIndex = indexSource;
+
+				std::expected<Pokemon, PokemonInstantiationError> result{
+					registry.instantiate(newSpec, instantiateDependencies, randomSources),
+				};
+
+				THEN("it returns a semi-custom built Pokemon")
+				{
+					REQUIRE(result.has_value());
+
+					Pokemon expected{
+    					makePokemon({
+    						.mMetadata = {
+    						    .mName = "Bulbasaur",
+    							.mBaseStats = {
+    								.mMaxHealth = 45,
+    								.mAttack = 49,
+    								.mDefense = 49,
+    								.mSpAttack = 65,
+    								.mSpDefense = 65,
+    								.mSpeed = 45,
+    							},
+    							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+    							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+    							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+    							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+    						},
+    						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+    						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+    						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+    						.mAbilityEntries
+    						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+    						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+    						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+    						.mHealth = 51,
+    						.mLevel = 20,
+    						.mGender = PokemonGender::Genderless,
+    					}),
+    				};
+
+					CHECK((result.value() == expected));
+				}
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the nature")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 5}};
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Bold)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the ability")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1, 1}};
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the item")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
+			PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
+			updatedMeta.mItemPool.at(0) = {.mItemID = toItemID(BuiltinItemID::CheriBerry), .mChance = 0.10};
+
+			std::expected<void, RegistryError> updateResult{
+				configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
+			};
+
+			REQUIRE(updateResult.has_value());
+
+			CallableRandomSource<double, FixedRandom<double>> realSource{FixedRandom<double>{0.05}};
+			CallableRandomSource<std::size_t, FixedRandom<std::size_t>> indexSource{FixedRandom<std::size_t>{0}};
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the move")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{
+							{.mMoveID = toMoveID(BuiltinMoveID::Tackle), .mPPMaxAmount = 56, .mPPDefaultAmount = 35},
+						    {.mMoveID = toMoveID(BuiltinMoveID::Growl), .mPPMaxAmount = 64, .mPPDefaultAmount = 40},
+							{.mMoveID = toMoveID(BuiltinMoveID::VineWhip), .mPPMaxAmount = 40, .mPPDefaultAmount = 25},
+						},},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the IVs")
+		{
+			PokemonSpec newSpec{};
+
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{8, 7, 15, 24, 31, 27}};
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {8, 7, 15, 24, 31, 27},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the EVs")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			newSpec.mIVEVContext = {.mIVs = ivs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Genderless;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {0, 0, 0, 0, 0, 0},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Genderless,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec partially filled out with user defined values aside from the gender")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {5, 22, 31, 14, 20, 10};
+			evs = {42, 56, 0, 23, 100, 85};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Calm)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {toMoveID(BuiltinMoveID::KarateChop)};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+				.mMoveIDs = moveIDs,
+			};
+
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 5;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{SequenceRandom<std::size_t>{1}};
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a semi-custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop), .mPPMaxAmount = 40, .mPPDefaultAmount = 25}}},
+						.mPokemonIVs = {5, 22, 31, 14, 20, 10},
+						.mPokemonEVs = {42, 56, 0, 23, 100, 85},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Calm)},
+						.mHealth = 20,
+						.mLevel = 5,
+						.mGender = PokemonGender::Female,
+					}),
+				};
+
+				CHECK((result.value() == expected));
+			}
+		}
+
+		WHEN("calling with a spec will randomly create all values")
+		{
+			PokemonSpec newSpec{};
+			newSpec.mBreedingContext = {};
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur);
+			newSpec.mEncounterIndex = 0;
+
+			// updatePokemon replaces all metadata, so start from the registered entry to keep its location and learnset.
+			PokemonMeta updatedMeta{*registry.getPokemonMetadata(newSpec.mPokemonID)};
+			updatedMeta.mItemPool.at(0) = {.mItemID = toItemID(BuiltinItemID::CheriBerry), .mChance = 0.10};
+			updatedMeta.mEncounters.at(0).mLevel = SetLevelEncounter{20};
+
+			std::expected<void, RegistryError> updateResult{
+				configRegistryStorage->updatePokemon(newSpec.mPokemonID, updatedMeta),
+			};
+
+			REQUIRE(updateResult.has_value());
+
+			CallableRandomSource<double, FixedRandom<double>> realSource{FixedRandom<double>{0.05}};
+			CallableRandomSource<std::size_t, SequenceRandom<std::size_t>> indexSource{
+				SequenceRandom<std::size_t>{1, 5, 0, 8, 7, 15, 24, 31, 27, 1}};
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a randomly built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+					makePokemon({
+						.mMetadata = {
+						    .mName = "Bulbasaur",
+							.mBaseStats = {
+								.mMaxHealth = 45,
+								.mAttack = 49,
+								.mDefense = 49,
+								.mSpAttack = 65,
+								.mSpDefense = 65,
+								.mSpeed = 45,
+							},
+							.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
+							.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
+							.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+							.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+						},
+						.mMoveMetas = {{
+							{.mMoveID = toMoveID(BuiltinMoveID::Tackle), .mPPMaxAmount = 56, .mPPDefaultAmount = 35},
+						    {.mMoveID = toMoveID(BuiltinMoveID::Growl), .mPPMaxAmount = 64, .mPPDefaultAmount = 40},
+							{.mMoveID = toMoveID(BuiltinMoveID::VineWhip), .mPPMaxAmount = 40, .mPPDefaultAmount = 25},
+						},},
+						.mPokemonIVs = {8, 7, 15, 24, 31, 27},
+						.mPokemonEVs = {0, 0, 0, 0, 0, 0},
+						.mAbilityEntries
+						= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden}}},
+						.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)},
+						.mNatureIDs = {toNatureID(BuiltinNatureID::Bold)},
+						.mHealth = 51,
+						.mLevel = 20,
+						.mGender = PokemonGender::Female,
+					}),
+				};
+
+				CHECK((result.value() == expected));
 			}
 		}
 	}

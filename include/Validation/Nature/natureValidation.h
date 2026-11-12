@@ -1,8 +1,8 @@
 /*! @file natureValidation.h
 	@brief Defines validation functions that help with Nature.
-	@date 10/27/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -17,7 +17,6 @@
 #include "Core/attributeMacros.h"
 #include "Core/typedefs.h"
 #include "Nature/natureID.h"
-#include "Nature/natureMeta.h"
 #include "Registry/natureRegistry.h"
 
 #include "natureError.h"
@@ -27,7 +26,6 @@ namespace PocketCore::Validation::Nature
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Core::us;
 	using PocketCore::Nature::NatureID;
-	using PocketCore::Nature::NatureMeta;
 	using PocketCore::Registry::Nature::NatureRegistry;
 
 	/*! @brief Validates the metadata for the given nature IDs.
@@ -35,7 +33,7 @@ namespace PocketCore::Validation::Nature
 		@param[in] natureRegistry The registry to validate nature metadata.
 		@return A @ref NatureError if any nature IDs are invalid, or std::nullopt if all are valid.
 		@since 0.12.26
-		@version 0.12.53
+		@version 0.12.54
 	 */
 	ATTR_NODISCARD constexpr std::expected<void, NatureError> validateNatureMetadata(const std::span<const NatureID> natureIDs,
 																					 const NatureRegistry &natureRegistry)
@@ -45,11 +43,8 @@ namespace PocketCore::Validation::Nature
 			return std::unexpected{NatureError::TOO_MANY_NATURES};
 		}
 
-		std::array<const NatureMeta *, MAX_NATURES_PER_POKEMON> natureMetas{};
-		std::ranges::transform(natureIDs, natureMetas.begin(),
-							   [&natureRegistry](const NatureID natureID) { return natureRegistry.getNatureMetadata(natureID); });
-
-		if (std::ranges::any_of(natureMetas, [](const NatureMeta *meta) { return meta == nullptr; }))
+		if (std::ranges::any_of(
+				natureIDs, [&natureRegistry](const NatureID natureID) { return natureRegistry.getNatureMetadata(natureID) == nullptr; }))
 		{
 			return std::unexpected{NatureError::MISSING_NATURE_METADATA};
 		}

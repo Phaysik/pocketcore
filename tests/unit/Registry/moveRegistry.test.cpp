@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 10/28/2026
+	@date 11/05/2026
 	@since 0.6.0
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -39,13 +39,21 @@ using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::BuiltinMoveID;
+using PocketCore::Move::MOVE_NAME_DRAGON_CLAW;
+using PocketCore::Move::MOVE_NAME_EMBER;
 using PocketCore::Move::MOVE_NAME_EXTREME_SPEED;
 using PocketCore::Move::MOVE_NAME_FACADE;
+using PocketCore::Move::MOVE_NAME_GROWL;
 using PocketCore::Move::MOVE_NAME_HYDRO_STEAM;
 using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 using PocketCore::Move::MOVE_NAME_NONE;
 using PocketCore::Move::MOVE_NAME_POUND;
 using PocketCore::Move::MOVE_NAME_QUICK_ATTACK;
+using PocketCore::Move::MOVE_NAME_TACKLE;
+using PocketCore::Move::MOVE_NAME_TAIL_WHIP;
+using PocketCore::Move::MOVE_NAME_TRANSFORM;
+using PocketCore::Move::MOVE_NAME_VINE_WHIP;
+using PocketCore::Move::MOVE_NAME_WATER_GUN;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
@@ -87,7 +95,7 @@ SCENARIO("MoveRegistry")
 				.mMoveID = toMoveID(BuiltinMoveID::Pound),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mPower = 40,
-				.mTargetID = BattleTargetID::SingleOpponent,
+				.mTargetID = BattleTargetID::SingleOther,
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 0,
@@ -118,7 +126,7 @@ SCENARIO("MoveRegistry")
 				.mMoveID = toMoveID(BuiltinMoveID::KarateChop),
 				.mTypeID = toTypeID(BuiltinTypeID::Fighting),
 				.mPower = 50,
-				.mTargetID = BattleTargetID::SingleOpponent,
+				.mTargetID = BattleTargetID::SingleOther,
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 0,
@@ -128,6 +136,161 @@ SCENARIO("MoveRegistry")
 			};
 
 			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::KarateChop))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Vine Whip has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_VINE_WHIP),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::VineWhip),
+				.mTypeID = toTypeID(BuiltinTypeID::Grass),
+				.mPower = 45,
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 40,
+				.mPPDefaultAmount = 25,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::VineWhip))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Tackle has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_TACKLE),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mPower = 40,
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 56,
+				.mPPDefaultAmount = 35,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Tackle))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Tail Whip has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_TAIL_WHIP),
+				.mTriggers = {},
+				.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mTargetID = BattleTargetID::AllAdjacentOpponents,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 48,
+				.mPPDefaultAmount = 30,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::TailWhip))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Growl has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_GROWL),
+				.mTriggers = {},
+				.mMoveID = toMoveID(BuiltinMoveID::Growl),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mTargetID = BattleTargetID::AllAdjacentOpponents,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 64,
+				.mPPDefaultAmount = 40,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Growl))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Ember has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_EMBER),
+				.mTriggers = {},
+				.mMoveID = toMoveID(BuiltinMoveID::Ember),
+				.mTypeID = toTypeID(BuiltinTypeID::Fire),
+				.mPower = 40,
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 40,
+				.mPPDefaultAmount = 25,
+				.mSpecial = true,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Ember))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Water Gun has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_WATER_GUN),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::WaterGun),
+				.mTypeID = toTypeID(BuiltinTypeID::Water),
+				.mPower = 40,
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 40,
+				.mPPDefaultAmount = 25,
+				.mSpecial = true,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::WaterGun))};
 
 			CHECK((expected == *actual));
 		}
@@ -149,7 +312,7 @@ SCENARIO("MoveRegistry")
 				.mMoveID = toMoveID(BuiltinMoveID::QuickAttack),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mPower = 40,
-				.mTargetID = BattleTargetID::SingleOpponent,
+				.mTargetID = BattleTargetID::SingleOther,
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 1,
@@ -159,6 +322,25 @@ SCENARIO("MoveRegistry")
 			};
 
 			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::QuickAttack))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Transform has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_TRANSFORM),
+				.mTriggers = {},
+				.mMoveID = toMoveID(BuiltinMoveID::Transform),
+				.mTypeID = toTypeID(BuiltinTypeID::Normal),
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mPriority = 0,
+				.mPPMaxAmount = 16,
+				.mPPDefaultAmount = 10,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::Transform))};
 
 			CHECK((expected == *actual));
 		}
@@ -180,7 +362,7 @@ SCENARIO("MoveRegistry")
 				.mMoveID = toMoveID(BuiltinMoveID::ExtremeSpeed),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
 				.mPower = 80,
-				.mTargetID = BattleTargetID::SingleOpponent,
+				.mTargetID = BattleTargetID::SingleOther,
 				.mRangeID = BattleRangeID::Adjacent,
 				.mAccuracy = 100,
 				.mPriority = 2,
@@ -190,6 +372,37 @@ SCENARIO("MoveRegistry")
 			};
 
 			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::ExtremeSpeed))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Dragon Claw has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = std::string(MOVE_NAME_DRAGON_CLAW),
+				.mTriggers = {{
+								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
+								  .mTrigger = BattleEventID::BeforeHit,
+								  .mRole = BattleEventRole::Target,
+							  },
+							  {
+								  .mEffects = {baseAttackEffects().begin(), baseAttackEffects().end()},
+								  .mTrigger = BattleEventID::Hit,
+								  .mRole = BattleEventRole::Target,
+							  },},
+				.mMoveID = toMoveID(BuiltinMoveID::DragonClaw),
+				.mTypeID = toTypeID(BuiltinTypeID::Dragon),
+				.mPower = 80,
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 100,
+				.mPriority = 0,
+				.mPPMaxAmount = 24,
+				.mPPDefaultAmount = 15,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::DragonClaw))};
 
 			CHECK((expected == *actual));
 		}

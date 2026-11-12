@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the location registry.
-	@date 10/09/2026
+	@date 11/09/2026
 	@since 0.12.51
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -15,6 +15,7 @@ namespace PocketCore::Location
 {
 	inline constexpr std::string_view LOCATION_NAME_NONE{"None"};
 	inline constexpr std::string_view LOCATION_NAME_ROUTE1{"Route 1"};
+	inline constexpr std::string_view LOCATION_NAME_PROFESSOR_OAKS_LAB{"Professor Oak's Lab"};
 } // namespace PocketCore::Location
 
 #endif

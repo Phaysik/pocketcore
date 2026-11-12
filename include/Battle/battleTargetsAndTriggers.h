@@ -1,8 +1,8 @@
 /*! @file battleTargetsAndTriggers.h
 	@brief Defines the shared battle targets, triggers, and ranges.
-	@date 10/20/2026
+	@date 11/05/2026
 	@since 0.9.14
-	@version 0.12.51
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -54,9 +54,9 @@ namespace PocketCore::Battle
 
 	/*! @enum BattleTargetID
 		@brief Identifies the battlers affected by a battle effect.
-		@date 10/20/2026
+		@date 11/05/2026
 		@since 0.9.14
-		@version 0.12.51
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	enum class BattleTargetID : ub
@@ -64,9 +64,12 @@ namespace PocketCore::Battle
 		Self,					/*!< Targets only the Pokemon that owns or uses the effect. */
 		AllAlliesIncludingSelf, /*!< Targets every active Pokemon on the source's side, including the source. */
 		AllAlliesExceptSelf,	/*!< Targets every active Pokemon on the source's side, excluding the source. */
+		AllAdjacentOpponents,	/*!< Targets every adjacent active Pokemon on the opposing side. */
+		AllAdjacent,			/*!< Targets every adjacent active Pokemon on both sides excluding the source. */
 		AllOpponents,			/*!< Targets every eligible active Pokemon on the opposing side. */
 		SingleAlly,				/*!< Targets one explicitly selected or unambiguous eligible ally. */
 		SingleOpponent,			/*!< Targets one explicitly selected or unambiguous eligible opponent. */
+		SingleOther,			/*!< Targets one explicitly selected or unambiguous eligible ally or opponent, excluding the source. */
 		AllExceptSelf,			/*!< Targets every eligible active Pokemon except the source. */
 	};
 

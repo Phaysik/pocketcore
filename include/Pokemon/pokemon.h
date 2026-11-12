@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 10/27/2026
+	@date 11/09/2026
 	@since 0.3.0
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -105,14 +105,23 @@ namespace PocketCore::Pokemon
 		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 10/27/2026
+		@date 11/09/2026
 		@since 0.3.0
-		@version 0.12.53
+		@version 0.12.54
 		@author Matthew Moore
 	*/
 	class Pokemon
 	{
 		public:
+			/*! @brief Compares this Pokemon with another Pokemon.
+				@param[in] other Pokemon whose corresponding data members are compared.
+				@return true if all corresponding data members compare equal.
+				@note The memberwise comparison is constexpr and does not throw.
+				@since 0.12.54
+				@version 0.12.54
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const Pokemon &other) const noexcept = default; // LCOV_EXCL_BR
+
 			// Constructors
 
 			/*! @brief Constructs a Pokemon with empty move slots and zero move PP.
@@ -589,9 +598,9 @@ namespace PocketCore::Pokemon
 			/*! @brief Replaces all status identifier slots.
 				@param[in] statusIDs The status identifiers to store.
 				@since 0.9.11
-				@version 0.12.46
+				@version 0.12.54
 			*/
-			constexpr void setStatusIDsArray(const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> &statusIDs)
+			constexpr void setNonVolatileStatusIDsArray(const std::array<StatusID, MAX_NON_VOLATILE_STATUSES_PER_POKEMON> &statusIDs)
 			{
 				mNonVolatileStatusIDs = statusIDs;
 			}
@@ -700,9 +709,9 @@ namespace PocketCore::Pokemon
 				@param[in] statusID The status identifier to store.
 				@pre slotIndex < MAX_NON_VOLATILE_STATUSES_PER_POKEMON; violation triggers an assertion.
 				@since 0.12.17
-				@version 0.12.46
+				@version 0.12.54
 			*/
-			constexpr void setStatusID(const ub slotIndex, const StatusID statusID)
+			constexpr void setNonVolatileStatusID(const ub slotIndex, const StatusID statusID)
 			{
 				assert(slotIndex < mNonVolatileStatusIDs.size());
 
@@ -1273,10 +1282,10 @@ namespace PocketCore::Pokemon
 			us mHealth{};
 
 			/*! @brief The current level of the Pokemon. */
-			us mLevel{};
+			us mLevel{}; // LCOV_EXCL_BR
 
 			/*! @brief The derived factor used by level-scaled damage calculations. */
-			us mLevelDamageFactor{};
+			us mLevelDamageFactor{}; // LCOV_EXCL_BR
 
 			/*! @brief The stable identifier for the Pokemon species. */
 			PokemonID mPokemonID{};

@@ -1,23 +1,35 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 10/27/2026
+	@date 11/12/2026
 	@since 0.11.6
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
 #ifndef INCLUDE_POKEMON_CONSTANTS_H
 #define INCLUDE_POKEMON_CONSTANTS_H
 
+#include <array>
 #include <string_view>
+
+#include "Ability/abilityMeta.h"
+#include "Ability/builtInAbilityID.h"
+#include "Configuration/constants.h"
+#include "Location/builtInLocationID.h"
+#include "Pokemon/pokemonEncounter.h"
 
 #include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
 {
+	using PocketCore::Ability::AbilityClassification;
+	using PocketCore::Ability::BuiltinAbilityID;
+	using PocketCore::Ability::toAbilityID;
+	using PocketCore::Configuration::MAX_ABILITIES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_ENCOUNTERS_PER_POKEMON;
 	using PocketCore::Core::us;
-
-	inline constexpr us MIN_ENCOUNTER_LEVEL{1};
+	using PocketCore::Location::BuiltinLocationID;
+	using PocketCore::Location::toLocationID;
 
 	inline constexpr std::string_view POKEMON_NAME_NONE{"None"};
 	inline constexpr std::string_view POKEMON_NAME_BULBASAUR{"Bulbasaur"};
@@ -29,6 +41,18 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 65,
 		.mSpeed = 45,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> BULBASAUR_ENCOUNTERS{
+		{
+			{
+				.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+					{{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden}},
+				},
+				.mLevel = SetLevelEncounter{5},
+				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+				.mOrigin = PokemonOrigin::Starter,
+			},
+		},
+	};
 
 	inline constexpr std::string_view POKEMON_NAME_IVYSAUR{"Ivysaur"};
 	inline constexpr PokemonStats IVYSAUR_BASE_STATS{
@@ -39,6 +63,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 80,
 		.mSpeed = 60,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> IVYSAUR_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_VENUSAUR{"Venusaur"};
 	inline constexpr PokemonStats VENUSAUR_BASE_STATS{
@@ -49,6 +74,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 100,
 		.mSpeed = 80,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> VENUSAUR_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_CHARMANDER{"Charmander"};
 	inline constexpr PokemonStats CHARMANDER_BASE_STATS{
@@ -58,6 +84,18 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 60,
 		.mSpDefense = 50,
 		.mSpeed = 65,
+	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARMANDER_ENCOUNTERS{
+		{
+			{
+    			.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden}},
+    			},
+				.mLevel = SetLevelEncounter{5},
+				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+				.mOrigin = PokemonOrigin::Starter,
+			},
+		},
 	};
 
 	inline constexpr std::string_view POKEMON_NAME_CHARMELEON{"Charmeleon"};
@@ -69,6 +107,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 65,
 		.mSpeed = 80,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARMELEON_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_CHARIZARD{"Charizard"};
 	inline constexpr PokemonStats CHARIZARD_BASE_STATS{
@@ -79,6 +118,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 85,
 		.mSpeed = 100,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARIZARD_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_SQUIRTLE{"Squirtle"};
 	inline constexpr PokemonStats SQUIRTLE_BASE_STATS{
@@ -88,6 +128,18 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 50,
 		.mSpDefense = 64,
 		.mSpeed = 43,
+	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> SQUIRTLE_ENCOUNTERS{
+		{
+			{
+    			.mAbilityEntries = std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON>{
+    				{{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden}},
+    			},
+				.mLevel = SetLevelEncounter{5},
+				.mLocationID = toLocationID(BuiltinLocationID::ProfessorOaksLab),
+				.mOrigin = PokemonOrigin::Starter,
+			},
+		},
 	};
 
 	inline constexpr std::string_view POKEMON_NAME_WARTORTLE{"Wartortle"};
@@ -99,6 +151,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 80,
 		.mSpeed = 58,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> WARTORTLE_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_BLASTOISE{"Blastoise"};
 	inline constexpr PokemonStats BLASTOISE_BASE_STATS{
@@ -109,6 +162,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 105,
 		.mSpeed = 78,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> BLASTOISE_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_DITTO{"Ditto"};
 	inline constexpr PokemonStats DITTO_BASE_STATS{
@@ -119,6 +173,7 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 48,
 		.mSpeed = 48,
 	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> DITTO_ENCOUNTERS{};
 } // namespace PocketCore::Pokemon
 
 #endif

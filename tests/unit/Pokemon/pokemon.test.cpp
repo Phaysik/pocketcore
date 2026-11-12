@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 10/27/2026
+	@date 11/09/2026
 	@since 0.4.0
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -277,7 +277,7 @@ SCENARIO("Pokemon")
 	{
 		GIVEN("status array")
 		{
-			Pokemon pokemon{makePokemon({.mStatusIDs = {toStatusID(BuiltinStatusID::Freeze)}})};
+			Pokemon pokemon{makePokemon({.mNonVolatileStatusIDs = {toStatusID(BuiltinStatusID::Freeze)}})};
 
 			WHEN("calling getStatusIDsArray")
 			{
@@ -289,9 +289,9 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setStatusIDsArray")
+			WHEN("calling setNonVolatileStatusIDsArray")
 			{
-				pokemon.setStatusIDsArray({toStatusID(BuiltinStatusID::Burn)});
+				pokemon.setNonVolatileStatusIDsArray({toStatusID(BuiltinStatusID::Burn)});
 
 				THEN("the pokemon's statuses are properly updated")
 				{
@@ -614,7 +614,7 @@ SCENARIO("Pokemon")
 	{
 		GIVEN("status array index")
 		{
-			Pokemon pokemon{makePokemon({.mStatusIDs = {toStatusID(BuiltinStatusID::Freeze)}})};
+			Pokemon pokemon{makePokemon({.mNonVolatileStatusIDs = {toStatusID(BuiltinStatusID::Freeze)}})};
 
 			WHEN("calling getStatusID")
 			{
@@ -624,9 +624,9 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setStatusID")
+			WHEN("calling setNonVolatileStatusID")
 			{
-				pokemon.setStatusID(0, toStatusID(BuiltinStatusID::Burn));
+				pokemon.setNonVolatileStatusID(0, toStatusID(BuiltinStatusID::Burn));
 
 				THEN("the pokemon's status is properly updated")
 				{
@@ -1472,7 +1472,7 @@ SCENARIO("Pokemon")
 			REQUIRE(updateResult.has_value());
 
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the volatile status is applied to non-volatile storage")
 			{
@@ -1492,7 +1492,7 @@ SCENARIO("Pokemon")
 		GIVEN("the incoming ID is the same as the empty ID")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the id is applied")
 			{
@@ -1512,7 +1512,7 @@ SCENARIO("Pokemon")
 		GIVEN("the incoming ID is a duplicate ID")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the id is applied")
 			{
@@ -1534,7 +1534,7 @@ SCENARIO("Pokemon")
 			const StatusID unregisteredStatusID{900};
 
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Burn);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the unregistered status is applied")
 			{
@@ -1555,7 +1555,7 @@ SCENARIO("Pokemon")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Freeze);
 			statusIDs.at(1) = toStatusID(BuiltinStatusID::Poison);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the blocked status would otherwise replace another current status")
 			{
@@ -1575,7 +1575,7 @@ SCENARIO("Pokemon")
 		GIVEN("a current status that the incoming status replaces")
 		{
 			statusIDs.at(0) = toStatusID(BuiltinStatusID::Poison);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the incoming status is applied")
 			{
@@ -1609,7 +1609,7 @@ SCENARIO("Pokemon")
 			statusIDs.at(2) = toStatusID(BuiltinStatusID::Poison);
 			statusIDs.at(3) = toStatusID(BuiltinStatusID::Paralysis);
 
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the incoming status is applied")
 			{
@@ -1637,7 +1637,7 @@ SCENARIO("Pokemon")
 			statusIDs.at(1) = toStatusID(BuiltinStatusID::Sleep);
 			statusIDs.at(2) = toStatusID(BuiltinStatusID::Paralysis);
 			statusIDs.at(3) = toStatusID(BuiltinStatusID::Toxic);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("the incoming status is applied")
 			{
@@ -1663,7 +1663,7 @@ SCENARIO("Pokemon")
 			statusIDs.at(2) = toStatusID(BuiltinStatusID::Poison);
 			statusIDs.at(3) = toStatusID(BuiltinStatusID::Toxic);
 			statusIDs.at(4) = toStatusID(BuiltinStatusID::Burn);
-			pokemon.setStatusIDsArray(statusIDs);
+			pokemon.setNonVolatileStatusIDsArray(statusIDs);
 
 			WHEN("another coexisting status is applied")
 			{
@@ -1721,7 +1721,7 @@ SCENARIO("Pokemon")
             			},
                     },
 				},
-				.mStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
+				.mNonVolatileStatusIDs = {StatusID{20}, StatusID{21}, StatusID{22}, StatusID{23}, StatusID{24}},
 				.mAbilityEntries = {{{.mAbilityID = AbilityID{6}}}},
 				.mItemIDs = {ItemID{7}},
 				.mNatureIDs = {NatureID{1}},
@@ -2431,6 +2431,212 @@ SCENARIO("Pokemon")
 				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
 				CHECK((lowHealthPokemon.getHealth() == 1));
 				CHECK_FALSE(lowHealthPokemon.isFainted());
+			}
+		}
+	}
+
+	WHEN("operator==")
+	{
+		Pokemon pokemon{makePokemon({})};
+
+		GIVEN("two default constructed Pokemon")
+		{
+			Pokemon other{makePokemon({})};
+
+			THEN("they are equal")
+			{
+				CHECK((pokemon == other));
+			}
+		}
+
+		GIVEN("for mName modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mName = "Test"}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for base and calculated stats modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 200}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for IVs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mPokemonIVs = {25}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for EVs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mPokemonEVs = {25}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for non volatile status IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mNonVolatileStatusIDs = {toStatusID(BuiltinStatusID::Paralysis)}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for move IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::KarateChop)}}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for egg group IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Field)}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for max PP modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 2}}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for default PP modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 2}}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for type IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mTypeIDs = {toTypeID(BuiltinTypeID::Bug)}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for ability entries modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mAbilityEntries = {{{.mAbilityID = toAbilityID(BuiltinAbilityID::CloudNine)}}}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for item IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mItemIDs = {toItemID(BuiltinItemID::CheriBerry)}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for nature IDs modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mNatureIDs = {toNatureID(BuiltinNatureID::Hardy)}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for health modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mHealth = 25})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for level and levelDamageFactor modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mLevel = 25})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for pokemon ID modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mPokemonID = toPokemonID(BuiltinPokemonID::Charmander)}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for learnset ID modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mLearnsetID = toLearnsetID(BuiltinLearnsetID::CharmeleonLearnset)}})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("for gender modified in one Pokemon")
+		{
+			Pokemon other{makePokemon({.mGender = PokemonGender::Genderless})};
+
+			THEN("they are not equal")
+			{
+				CHECK((pokemon != other));
+			}
+		}
+
+		GIVEN("two Pokemon modified the same way")
+		{
+			Pokemon other{makePokemon({.mMetadata = {.mName = "Same Name"}})};
+			pokemon.setName("Same Name");
+
+			THEN("they are equal")
+			{
+				CHECK((pokemon == other));
 			}
 		}
 	}

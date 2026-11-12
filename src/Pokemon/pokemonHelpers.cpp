@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 11/04/2026
+	@date 11/11/2026
 	@since 0.12.28
-	@version 0.12.53
+	@version 0.12.54
 	@author Matthew Moore
 */
 
@@ -41,6 +41,7 @@
 #include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonMetaEntries.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/moveRegistry.h"
 #include "Registry/natureRegistry.h"
@@ -259,24 +260,49 @@ namespace PocketCore::Pokemon
 																		   std::array<NatureID, MAX_NATURES_PER_POKEMON> &validNatureIDs,
 																		   const NatureRegistry &natureRegistry,
 																		   const BattleRandomSources &randomSources,
+																		   const PokemonEncounter &encounterData,
 																		   const NatureID duplicateEntryNatureReplacer)
 	{
+		const auto handleNatureValidationAndTransformation{
+			[&validNatureIDs, &natureRegistry,
+			 duplicateEntryNatureReplacer](const std::span<const NatureID> passedInNatureIDs) -> std::expected<void, NatureError> {
+				if (const std::expected<void, NatureError> error{validateNatureMetadata(passedInNatureIDs, natureRegistry)};
+					!error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				std::ranges::transform(passedInNatureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
+
+				// Remove duplicate entries
+				if (natureRegistry.getNatureMetadata(duplicateEntryNatureReplacer) == nullptr)
+				{
+					return std::unexpected{NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				}
+
+				// Remove duplicate entries
+				replaceDuplicatesWithNoID(duplicateEntryNatureReplacer, validNatureIDs);
+
+				return {};
+			},
+		};
+
 		if (!natureIDs.empty())
 		{
-			if (const std::expected<void, NatureError> error{validateNatureMetadata(natureIDs, natureRegistry)}; !error.has_value())
+			if (const std::expected<void, NatureError> error{handleNatureValidationAndTransformation(natureIDs)}; !error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
+		}
+		else if (encounterData.mNatureIDs.has_value())
+		{
+			const std::array<NatureID, MAX_NATURES_PER_POKEMON> encounterNatureIDs{encounterData.mNatureIDs.value()};
 
-			std::ranges::transform(natureIDs, validNatureIDs.begin(), [](const NatureID natureID) { return natureID; });
-
-			if (natureRegistry.getNatureMetadata(duplicateEntryNatureReplacer) == nullptr)
+			if (const std::expected<void, NatureError> error{handleNatureValidationAndTransformation(encounterNatureIDs)};
+				!error.has_value())
 			{
-				return std::unexpected{NatureError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				return std::unexpected{error.error()};
 			}
-
-			// Remove duplicate entries
-			replaceDuplicatesWithNoID(duplicateEntryNatureReplacer, validNatureIDs);
 		}
 		else
 		{
@@ -305,45 +331,68 @@ namespace PocketCore::Pokemon
 	}
 
 	ATTR_NODISCARD std::expected<void, AbilityError> getValidPokemonAbilities(
-		const std::span<const PokemonAbilityEntry> abilityIDs,
+		const std::span<const PokemonAbilityEntry> abilityEntries,
 		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &validAbilityEntries,
 		const std::span<const PokemonAbilityEntry> abilityPool, const AbilityRegistry &abilityRegistry,
 		const BattleRandomSources &randomSources, const PokemonBreedingContext &breedingContext, const PokemonEncounter &encounterData,
 		const PokemonAbilityEntry duplicateEntryAbilityReplacer)
 	{
-		if (!abilityIDs.empty())
-		{
-			if (const std::expected<void, AbilityError> error{
-					validateAbilityMetadata(std::ranges::to<std::vector<AbilityID>>(
-												abilityIDs | std::views::transform([](const PokemonAbilityEntry &abilityEntry) noexcept {
-													return abilityEntry.mAbilityID;
-												})),
-											abilityRegistry),
+		const auto handleAbilityValidationAndTransformation{
+			[&validAbilityEntries, &abilityRegistry, duplicateEntryAbilityReplacer](
+				const std::span<const PokemonAbilityEntry> passedInAbilityEntries) -> std::expected<void, AbilityError> {
+				if (const std::expected<void, AbilityError> error{
+						validateAbilityMetadata(
+							std::ranges::to<std::vector<AbilityID>>(
+								passedInAbilityEntries | std::views::transform([](const PokemonAbilityEntry &abilityEntry) noexcept {
+									return abilityEntry.mAbilityID;
+								})),
+							abilityRegistry),
+					};
+					!error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				std::ranges::transform(passedInAbilityEntries, validAbilityEntries.begin(),
+									   [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry; });
+
+				if (abilityRegistry.getAbilityMetadata(duplicateEntryAbilityReplacer.mAbilityID) == nullptr)
+				{
+					return std::unexpected{AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				}
+
+				// Remove duplicate entries
+				std::unordered_set<AbilityID> seenAbilityIDs;
+				const auto emptySlots{
+					std::ranges::remove_if(validAbilityEntries,
+										   [&seenAbilityIDs, duplicateEntryAbilityReplacer](const PokemonAbilityEntry &entry) {
+											   return entry.mAbilityID == duplicateEntryAbilityReplacer.mAbilityID
+												   || !seenAbilityIDs.insert(entry.mAbilityID)
+														   .second; // LCOV_EXCL_BR - Unreachable while MAX_ABILITIES_PER_POKEMON == 1
+										   }),
 				};
+				std::ranges::fill(emptySlots, duplicateEntryAbilityReplacer);
+
+				return {};
+			},
+		};
+
+		if (!abilityEntries.empty())
+		{
+			if (const std::expected<void, AbilityError> error{handleAbilityValidationAndTransformation(abilityEntries)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
+		}
+		else if (encounterData.mAbilityEntries.has_value())
+		{
+			const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> encounterAbilityEntries{encounterData.mAbilityEntries.value()};
+
+			if (const std::expected<void, AbilityError> error{handleAbilityValidationAndTransformation(encounterAbilityEntries)};
 				!error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
-
-			std::ranges::transform(abilityIDs, validAbilityEntries.begin(),
-								   [](const PokemonAbilityEntry &abilityEntry) { return abilityEntry; });
-
-			if (abilityRegistry.getAbilityMetadata(duplicateEntryAbilityReplacer.mAbilityID) == nullptr)
-			{
-				return std::unexpected{AbilityError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
-			}
-
-			// Remove duplicate entries
-			std::unordered_set<AbilityID> seenAbilityIDs;
-			const auto emptySlots{
-				std::ranges::remove_if(validAbilityEntries,
-									   [&seenAbilityIDs, duplicateEntryAbilityReplacer](const PokemonAbilityEntry &entry) {
-										   return entry.mAbilityID == duplicateEntryAbilityReplacer.mAbilityID
-											   || !seenAbilityIDs.insert(entry.mAbilityID)
-													   .second; // LCOV_EXCL_BR - Unreachable while MAX_ABILITIES_PER_POKEMON == 1
-									   }),
-			};
-			std::ranges::fill(emptySlots, duplicateEntryAbilityReplacer);
 		}
 		else
 		{
@@ -383,30 +432,49 @@ namespace PocketCore::Pokemon
 		return {};
 	}
 
-	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(const std::span<const ItemID> itemIDs,
-																	   std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
-																	   const std::span<const PokemonItemEntry> itemPool,
-																	   const ItemRegistry &itemRegistry,
-																	   const BattleRandomSources &randomSources,
-																	   const ItemID duplicateEntryItemReplacer)
+	ATTR_NODISCARD std::expected<void, ItemError> getValidPokemonItems(
+		const std::span<const ItemID> itemIDs, std::array<ItemID, MAX_ITEMS_PER_POKEMON> &validItemIDs,
+		const std::span<const PokemonItemEntry> itemPool, const ItemRegistry &itemRegistry, const BattleRandomSources &randomSources,
+		const PokemonEncounter &encounterData, const ItemID duplicateEntryItemReplacer)
 	{
+		const auto handleItemValidationAndTransformation{
+			[&validItemIDs, &itemRegistry,
+			 duplicateEntryItemReplacer](const std::span<const ItemID> passedInItemIDs) -> std::expected<void, ItemError> {
+				if (const std::expected<void, ItemError> error{validateItemMetadata(passedInItemIDs, itemRegistry)}; !error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				std::ranges::transform(passedInItemIDs, validItemIDs.begin(), [](const ItemID itemID) { return itemID; });
+
+				// Remove duplicate entries
+				if (itemRegistry.getItemMetadata(duplicateEntryItemReplacer) == nullptr)
+				{
+					return std::unexpected{ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				}
+
+				// Remove duplicate entries
+				replaceDuplicatesWithNoID(duplicateEntryItemReplacer, validItemIDs);
+
+				return {};
+			},
+		};
+
 		if (!itemIDs.empty())
 		{
-			if (const std::expected<void, ItemError> error{validateItemMetadata(itemIDs, itemRegistry)}; !error.has_value())
+			if (const std::expected<void, ItemError> error{handleItemValidationAndTransformation(itemIDs)}; !error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
+		}
+		else if (encounterData.mItemIDs.has_value())
+		{
+			const std::array<ItemID, MAX_ITEMS_PER_POKEMON> encounterItemIDs{encounterData.mItemIDs.value()};
 
-			std::ranges::transform(itemIDs, validItemIDs.begin(), [](const ItemID itemID) { return itemID; });
-
-			// Remove duplicate entries
-			if (itemRegistry.getItemMetadata(duplicateEntryItemReplacer) == nullptr)
+			if (const std::expected<void, ItemError> error{handleItemValidationAndTransformation(encounterItemIDs)}; !error.has_value())
 			{
-				return std::unexpected{ItemError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				return std::unexpected{error.error()};
 			}
-
-			// Remove duplicate entries
-			replaceDuplicatesWithNoID(duplicateEntryItemReplacer, validItemIDs);
 		}
 		else
 		{
@@ -440,22 +508,43 @@ namespace PocketCore::Pokemon
 																	   const us pokemonEncounterLevel,
 																	   const MoveID duplicateEntryMoveReplacer)
 	{
+		const auto handleMoveValidationAndTransformation{
+			[&validMoveIDs, &moveRegistry,
+			 duplicateEntryMoveReplacer](const std::span<const MoveID> passedInMoveIDs) -> std::expected<void, MoveError> {
+				if (const std::expected<void, MoveError> error{validateMoveMetadata(passedInMoveIDs, moveRegistry)}; !error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				std::ranges::transform(passedInMoveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
+
+				if (moveRegistry.getMoveMetadata(duplicateEntryMoveReplacer) == nullptr)
+				{
+					return std::unexpected{MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				}
+
+				// Remove duplicate entries
+				replaceDuplicatesWithNoID(duplicateEntryMoveReplacer, validMoveIDs);
+
+				return {};
+			},
+		};
+
 		if (!moveIDs.empty())
 		{
-			if (const std::expected<void, MoveError> error{validateMoveMetadata(moveIDs, moveRegistry)}; !error.has_value())
+			if (const std::expected<void, MoveError> error{handleMoveValidationAndTransformation(moveIDs)}; !error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
+		}
+		else if (encounterData.mMoveIDs.has_value())
+		{
+			const std::array<MoveID, MAX_MOVES_PER_POKEMON> encounterMoveIDs{encounterData.mMoveIDs.value()};
 
-			std::ranges::transform(moveIDs, validMoveIDs.begin(), [](const MoveID moveID) { return moveID; });
-
-			if (moveRegistry.getMoveMetadata(duplicateEntryMoveReplacer) == nullptr)
+			if (const std::expected<void, MoveError> error{handleMoveValidationAndTransformation(encounterMoveIDs)}; !error.has_value())
 			{
-				return std::unexpected{MoveError::DUPLICATE_REPLACEMENT_MISSING_METADATA};
+				return std::unexpected{error.error()};
 			}
-
-			// Remove duplicate entries
-			replaceDuplicatesWithNoID(duplicateEntryMoveReplacer, validMoveIDs);
 		}
 		else if (const std::expected<void, MoveError> error{
 					 fillWithValidMoves(validMoveIDs, moveRegistry, learnsetMeta, encounterData, pokemonEncounterLevel),
@@ -470,16 +559,37 @@ namespace PocketCore::Pokemon
 
 	ATTR_NODISCARD std::expected<void, PokemonError> getValidPokemonIVs(const std::span<const us> ivs,
 																		std::array<us, POKEMON_STAT_COUNT> &validIVs,
-																		const BattleRandomSources &randomSources)
+																		const BattleRandomSources &randomSources,
+																		const PokemonEncounter &encounterData)
 	{
+		const auto handleIVValidationAndTransformation{
+			[&validIVs](const std::span<const us> passedInIVs) -> std::expected<void, PokemonError> {
+				if (const std::expected<void, PokemonError> error{isValidPokemonIVArray(passedInIVs)}; !error.has_value())
+				{
+					return std::unexpected{error.error()};
+				}
+
+				std::ranges::transform(passedInIVs, validIVs.begin(), [](const us pokemonIV) { return pokemonIV; });
+
+				return {};
+			},
+		};
+
 		if (!ivs.empty())
 		{
-			if (const std::expected<void, PokemonError> error{isValidPokemonIVArray(ivs)}; !error.has_value())
+			if (const std::expected<void, PokemonError> error{handleIVValidationAndTransformation(ivs)}; !error.has_value())
 			{
 				return std::unexpected{error.error()};
 			}
+		}
+		else if (encounterData.mIVs.has_value())
+		{
+			const std::array<us, POKEMON_STAT_COUNT> encounterIVs{encounterData.mIVs.value()};
 
-			std::ranges::transform(ivs, validIVs.begin(), [](const us pokemonIV) { return pokemonIV; });
+			if (const std::expected<void, PokemonError> error{handleIVValidationAndTransformation(encounterIVs)}; !error.has_value())
+			{
+				return std::unexpected{error.error()};
+			}
 		}
 		else
 		{
@@ -670,9 +780,10 @@ namespace PocketCore::Pokemon
 			}
 		}
 
+		// If there is no valid items in the pool, just return
 		if (candidates.empty())
 		{
-			return std::unexpected{ItemError::EMPTY_ITEM_POOL};
+			return {};
 		}
 
 		// Chances are probabilities in [0, 1]; the real source yields [0, 1), so 1.0 always passes and 0.0 never does.
