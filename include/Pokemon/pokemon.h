@@ -741,8 +741,8 @@ namespace PocketCore::Pokemon
 				assert(slotIndex < mMoveIDs.size());
 
 				mMoveIDs.at(slotIndex) = move.mMoveID;
-				mMaxPP.at(slotIndex) = move.mPPMaxAmount;
-				mCurrentPP.at(slotIndex) = std::clamp(move.mPPDefaultAmount, ub{0}, move.mPPMaxAmount);
+				mMaxPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : move.mPPMaxAmount;
+				mCurrentPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : std::clamp(move.mPPDefaultAmount, ub{0}, move.mPPMaxAmount);
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.

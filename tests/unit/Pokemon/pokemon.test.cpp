@@ -332,7 +332,9 @@ SCENARIO("Pokemon")
 
 		GIVEN("current pp array")
 		{
-			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}})};
+			Pokemon pokemon{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+			};
 
 			WHEN("calling getCurrentPPArray")
 			{
@@ -675,6 +677,19 @@ SCENARIO("Pokemon")
 
 			GIVEN("setMove")
 			{
+				WHEN("calling with NO_MOVE_ID")
+				{
+					MoveMeta meta{.mMoveID = NO_MOVE_ID, .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+					pokemon.setMove(0, meta);
+
+					THEN("the pokemon's move ID is set and the PP amounts are set to 0")
+					{
+						CHECK((pokemon.getMoveID(0) == NO_MOVE_ID));
+						CHECK((pokemon.getMaxPP(0) == 0));
+						CHECK((pokemon.getCurrentPP(0) == 0));
+					}
+				}
+
 				WHEN("calling with a current PP amount lower than the max PP amount")
 				{
 					MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
@@ -705,7 +720,9 @@ SCENARIO("Pokemon")
 
 		GIVEN("current pp array index")
 		{
-			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}})};
+			Pokemon pokemon{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+			};
 
 			WHEN("calling getCurrentPP")
 			{
@@ -2619,7 +2636,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("for max PP modified in one Pokemon")
 		{
-			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 2}}}})};
+			Pokemon other{makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 2}}}})};
 
 			THEN("they are not equal")
 			{
@@ -2629,7 +2646,9 @@ SCENARIO("Pokemon")
 
 		GIVEN("for default PP modified in one Pokemon")
 		{
-			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 2, .mPPDefaultAmount = 2}}}})};
+			Pokemon other{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 2, .mPPDefaultAmount = 2}}}}),
+			};
 
 			THEN("they are not equal")
 			{
