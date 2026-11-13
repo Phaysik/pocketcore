@@ -1,8 +1,8 @@
 /*! @file pokemonError.h
 	@brief Contains the error codes for the Pokemon validation results.
-	@date 11/09/2026
+	@date 11/13/2026
 	@since 0.12.48
-	@version 0.12.54
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@ namespace PocketCore::Validation::Pokemon
 		@note No enumerator represents success; a successful validation result has a value and contains no error.
 		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
 		@since 0.12.48
-		@version 0.12.54
+		@version 0.12.55
 		@author Matthew Moore
 	*/
 	enum class PokemonError : ub
@@ -44,6 +44,10 @@ namespace PocketCore::Validation::Pokemon
 		INVALID_EV_ARRAY,
 		/*! @brief Indicates the instantiated Pokemon has no level passed in. */
 		MISSING_LEVEL,
+		/*! @brief Indicates that the chosen move slot is invalid. */
+		INVALID_MOVE_SLOT,
+		/*! @brief Indicates that the chosen move has no more PP to use. */
+		NO_PP,
 	};
 } // namespace PocketCore::Validation::Pokemon
 

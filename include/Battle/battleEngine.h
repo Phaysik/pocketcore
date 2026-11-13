@@ -1,8 +1,8 @@
 /*! @file battleEngine.h
 	@brief Declares battle orchestration for fights between two sides of Pokemon trainers.
-	@date 10/27/2026
+	@date 11/13/2026
 	@since 0.10.3
-	@version 0.12.53
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -114,9 +114,9 @@ namespace PocketCore::Battle
 	   moves; moves execute by priority and effective speed. Equal ordering is resolved in favor of side A and then by active slot index to
 	   keep execution deterministic.
 		@warning Not thread-safe. The caller is responsible for synchronizing all access to the engine and its referenced Pokemon.
-		@date 10/27/2026
+		@date 11/13/2026
 		@since 0.10.3
-		@version 0.12.53
+		@version 0.12.55
 		@author Matthew Moore
 	*/
 	class BattleEngine
@@ -363,7 +363,7 @@ namespace PocketCore::Battle
 			   Missing metadata or invalidated targets cancel execution without reporting an error.
 				@param[in] action The validated move action to execute.
 				@since 0.10.7
-				@version 0.12.51
+				@version 0.12.55
 			*/
 			void executeMove(const MoveAction &action);
 

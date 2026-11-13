@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.55] - 2026-11-13
+
+### Added
+
+- Added `PokemonError::INVALID_MOVE_SLOT` and `PokemonError::NO_PP` for rejected PP consumption.
+- Added `Pokemon` coverage for clamping in `setCurrentPP()`, `setCurrentPPArray()`, and `setMove()` (values above the maximum, values below it, and empty slots) and for each `usePP()` result: an out-of-range slot, an empty slot, a slot with PP, and a slot already at zero PP.
+
+### Changed
+
+- Changed `Pokemon::usePP()` to return `std::expected<void, PokemonError>` and mark it nodiscard. Out-of-range slot indexes now return `INVALID_MOVE_SLOT` instead of asserting, and slots with zero current PP, including empty slots, return `NO_PP` instead of being silently ignored. PP is unchanged on error.
+- Changed `BattleEngine::executeMove()` to cancel a move without reporting an error when its PP cannot be consumed, instead of executing it anyway. Move actions are still rejected with `BattleEngineError::NoPP` during validation.
+- Updated `Pokemon` Doxygen to state that current PP never exceeds the slot's maximum PP and that empty slots hold zero current and maximum PP. Removed an unused `pokemonMeta.h` include from `battleEngine.cpp`.
+- Updated `Pokemon` and battle-validation fixtures to supply an explicit maximum PP alongside the default PP, so the new clamping does not reduce their current PP to zero.
+
+### Fixed
+
+- Fixed current PP exceeding maximum PP. `setCurrentPP()` and `setCurrentPPArray()` now clamp each value to the slot's maximum PP, so empty slots always store 0. `setMove()` clamps the incoming default PP to the move's maximum PP, which also applies to construction with moves and `setMovesArrays()`.
+
 ## [0.12.54] - 2026-11-12
 
 ### Added
@@ -2371,7 +2389,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.54]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.55]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.54]: https://github.com/Phaysik/pocketcore/commit/c4fc10ddfe5a961678ea4aebdc58440787ee966a
 [0.12.53]: https://github.com/Phaysik/pocketcore/commit/92b9bcff5122397faac8f469e7ccc0e28b7a34cc
 [0.12.52]: https://github.com/Phaysik/pocketcore/commit/f1015081b1b4c294940f579d1bee362c83c6e942
 [0.12.51]: https://github.com/Phaysik/pocketcore/commit/0b746160cbe460be20e0a006f04409d7c7d08167
