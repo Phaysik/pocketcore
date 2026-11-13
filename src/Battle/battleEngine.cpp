@@ -1,8 +1,8 @@
 /*! @file battleEngine.cpp
 	@brief Defines battle orchestration for fights between two Pokemon trainers.
-	@date 10/27/2026
+	@date 11/13/2026
 	@since 0.9.16
-	@version 0.12.53
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -43,13 +43,13 @@
 #include "Nature/natureID.h"
 #include "Nature/natureMeta.h"
 #include "Pokemon/pokemon.h"
-#include "Pokemon/pokemonMeta.h"
 #include "Ruleset/rulesetPolicy.h"
 #include "Ruleset/rulesetPolicyError.h"
 #include "Status/statusID.h"
 #include "Terrain/terrainID.h"
 #include "Validation/Battle/battleError.h"
 #include "Validation/Battle/battleValidation.h"
+#include "Validation/Pokemon/pokemonError.h"
 #include "Weather/weatherID.h"
 
 namespace PocketCore::Battle
@@ -84,6 +84,7 @@ namespace PocketCore::Battle
 	using PocketCore::Status::StatusID;
 	using PocketCore::Terrain::TerrainID;
 	using PocketCore::Validation::Battle::BattleEngineError;
+	using PocketCore::Validation::Pokemon::PokemonError;
 	using PocketCore::Weather::WeatherID;
 	using Validation::Battle::getValidationResult;
 	using Validation::Battle::validateSwitchAction;
@@ -612,7 +613,13 @@ namespace PocketCore::Battle
 		// Suppressions are scoped to this move execution and rebuilt by each relevant event.
 		mActiveSuppressions.clear();
 
-		userPokemon->usePP(action.mMoveSlotIndex);
+		const std::expected<void, PokemonError> ppResult{userPokemon->usePP(action.mMoveSlotIndex)};
+
+		if (!ppResult.has_value())
+		{
+			return;
+		}
+
 		const ub hitCount{resolveHitCount(*moveMeta, mRandomSources.mReal)};
 		const BattleTarget user{.mSide = action.mSide, .mSlotIndex = action.mUserSlotIndex};
 		EffectContext moveContext{makeMoveContext(action, *moveMeta, targetsResult->front(), 0U)};

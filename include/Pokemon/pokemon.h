@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 11/09/2026
+	@date 11/13/2026
 	@since 0.3.0
-	@version 0.12.54
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -102,12 +102,13 @@ namespace PocketCore::Pokemon
 		 Selected move IDs and current PP are runtime state. @ref PocketCore::Move::MoveMeta is the authoritative source of default and
 		 maximum PP. Construction with moves, @ref setMove, and @ref setMovesArrays copy each move's ID and maximum PP and initialize
 		 current PP from its default PP. The maximum-PP array is derived state, unchanged until the corresponding move is reassigned;
-		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery.
+		 later changes to the source MoveMeta do not propagate. Current PP remains independently mutable for consumption and recovery, but
+		 is always clamped to the slot's maximum PP; empty slots hold 0 current and 0 maximum PP.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 11/09/2026
+		@date 11/13/2026
 		@since 0.3.0
-		@version 0.12.54
+		@version 0.12.55
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -648,14 +649,20 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Replaces current PP for all move slots.
-				@param[in] currentPP The current PP values to store.
+			/*! @brief Replaces current PP for all move slots, clamping each value to its slot's maximum PP.
+				@details Each value is clamped to the range [0, @ref getMaxPP] of the matching slot, so empty slots (maximum PP of 0) always
+				 store 0. No value is rejected.
+				@param[in] currentPP The requested current PP values; copied without retaining a reference.
+				@post For every slot, @ref getCurrentPP does not exceed @ref getMaxPP.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.55
 			*/
 			constexpr void setCurrentPPArray(const std::array<ub, MAX_MOVES_PER_POKEMON> &currentPP)
 			{
-				mCurrentPP = currentPP;
+				assert(mCurrentPP.size() == currentPP.size());
+
+				std::ranges::transform(currentPP, std::views::iota(ub{0}), mCurrentPP.begin(),
+									   [this](ub paramPP, ub index) { return std::clamp(paramPP, ub{0}, getMaxPP(index)); });
 			}
 
 			/*! @brief Replaces all type identifier slots.
@@ -719,21 +726,23 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets one move ID, max PP, and current PP slot.
-				@details Copies the move's ID and maximum PP and resets current PP to its default PP. The maximum-PP snapshot remains
-				 unchanged until this slot's move is reassigned, regardless of later changes to the source metadata.
+				@details Copies the move's ID and maximum PP and resets current PP to its default PP, clamped to the maximum PP when the
+				 metadata's default exceeds its maximum. The maximum-PP snapshot remains unchanged until this slot's move is reassigned,
+				 regardless of later changes to the source metadata.
 				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
 				@param[in] move Move metadata borrowed for this call; no reference to the metadata is retained.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
+				@post @ref getCurrentPP(slotIndex) does not exceed @ref getMaxPP(slotIndex).
 				@since 0.3.0
-				@version 0.12.52
+				@version 0.12.55
 			*/
 			constexpr void setMove(const ub slotIndex, const MoveMeta &move)
 			{
 				assert(slotIndex < mMoveIDs.size());
 
 				mMoveIDs.at(slotIndex) = move.mMoveID;
-				mMaxPP.at(slotIndex) = move.mPPMaxAmount;
-				mCurrentPP.at(slotIndex) = move.mPPDefaultAmount;
+				mMaxPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : move.mPPMaxAmount;
+				mCurrentPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : std::clamp(move.mPPDefaultAmount, ub{0}, move.mPPMaxAmount);
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.
@@ -785,18 +794,20 @@ namespace PocketCore::Pokemon
 				recomputeStats();
 			}
 
-			/*! @brief Sets current PP for one move slot.
+			/*! @brief Sets current PP for one move slot, clamped to the slot's maximum PP.
+				@details Values above @ref getMaxPP are stored as the maximum; an empty slot (maximum PP of 0) always stores 0.
 				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@param[in] currentPP The current PP value to store.
+				@param[in] currentPP The requested current PP value.
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
+				@post @ref getCurrentPP(slotIndex) does not exceed @ref getMaxPP(slotIndex).
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.55
 			*/
 			constexpr void setCurrentPP(const ub slotIndex, const ub currentPP)
 			{
 				assert(slotIndex < mCurrentPP.size());
 
-				mCurrentPP.at(slotIndex) = currentPP;
+				mCurrentPP.at(slotIndex) = std::clamp(currentPP, ub{0}, getMaxPP(slotIndex));
 			}
 
 			/*! @brief Sets one type slot.
@@ -994,20 +1005,30 @@ namespace PocketCore::Pokemon
 			// Utility Functions
 
 			/*! @brief Consumes one PP from a move slot when PP remains.
-				@param[in] slotIndex Move slot index; must be less than MAX_MOVES_PER_POKEMON.
-				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
-				@post The slot's current PP decreases by one when it was greater than zero; otherwise it is unchanged.
+				@details Out-of-range indices and slots with no PP, including empty slots, are rejected with a structured error and leave
+				 all PP unchanged.
+				@param[in] slotIndex Move slot index; out-of-range values are rejected rather than asserted.
+				@post On success, the slot's current PP is one lower; on error, PP is unchanged.
+				@return An empty value when one PP is consumed; @ref PokemonError::INVALID_MOVE_SLOT when @p slotIndex is not less than
+				 MAX_MOVES_PER_POKEMON; @ref PokemonError::NO_PP when the slot's current PP is 0.
 				@since 0.3.0
-				@version 0.12.2
+				@version 0.12.55
 			*/
-			constexpr void usePP(const ub slotIndex)
+			ATTR_NODISCARD constexpr std::expected<void, PokemonError> usePP(const ub slotIndex)
 			{
-				assert(slotIndex < mCurrentPP.size());
-
-				if (mCurrentPP.at(slotIndex) > 0)
+				if (slotIndex >= mCurrentPP.size())
 				{
-					mCurrentPP.at(slotIndex)--;
+					return std::unexpected{PokemonError::INVALID_MOVE_SLOT};
 				}
+
+				if (mCurrentPP.at(slotIndex) == 0)
+				{
+					return std::unexpected{PokemonError::NO_PP};
+				}
+
+				mCurrentPP.at(slotIndex)--;
+
+				return {};
 			}
 
 			/*! @brief Determines whether current health is zero.

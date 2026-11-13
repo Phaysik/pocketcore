@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/09/2026
+	@date 11/13/2026
 	@since 0.4.0
-	@version 0.12.54
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -45,6 +45,7 @@
 #include "Status/statusMeta.h"
 #include "Type/builtInTypeID.h"
 #include "Type/typeID.h"
+#include "Validation/Pokemon/pokemonError.h"
 #include "Validation/Registry/registryError.h"
 
 #include <catch2/catch_test_macros.hpp>
@@ -105,6 +106,7 @@ using PocketCore::Testing::makePokemon;
 using PocketCore::Type::BuiltinTypeID;
 using PocketCore::Type::toTypeID;
 using PocketCore::Type::TypeID;
+using PocketCore::Validation::Pokemon::PokemonError;
 using PocketCore::Validation::Registry::RegistryError;
 
 // NOLINTBEGIN(misc-const-correctness,cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers,readability-function-cognitive-complexity)
@@ -330,7 +332,9 @@ SCENARIO("Pokemon")
 
 		GIVEN("current pp array")
 		{
-			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 0}}}})};
+			Pokemon pokemon{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+			};
 
 			WHEN("calling getCurrentPPArray")
 			{
@@ -340,13 +344,37 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setCurrentPPArray")
+			GIVEN("setCurrentPPArray")
 			{
-				pokemon.setCurrentPPArray({1});
-
-				THEN("the pokemon's current pps are properly updated")
+				WHEN("calling with a current PP amount on an empty slot")
 				{
-					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{1}, pokemon.getCurrentPPArray()));
+					pokemon.setCurrentPPArray({1, 1});
+
+					THEN("the pokemon's current pp is updated for the non-empty slot and left unchanged for the empty slot")
+					{
+						CHECK((pokemon.getCurrentPP(0) == 1));
+						CHECK((pokemon.getCurrentPP(1) == 0));
+					}
+				}
+
+				WHEN("calling with a current PP amount lower than the max PP amount")
+				{
+					pokemon.setCurrentPPArray({1});
+
+					THEN("the pokemon's current pps are properly updated")
+					{
+						CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{1}, pokemon.getCurrentPPArray()));
+					}
+				}
+
+				WHEN("calling with a current PP amount greater than the max PP amount")
+				{
+					pokemon.setCurrentPPArray({6});
+
+					THEN("the pokemon's current pps are clamped to their maximum")
+					{
+						CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{5}, pokemon.getCurrentPPArray()));
+					}
 				}
 			}
 		}
@@ -647,23 +675,54 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setMove")
+			GIVEN("setMove")
 			{
-				MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
-				pokemon.setMove(0, meta);
-
-				THEN("the pokemon's move is properly updated")
+				WHEN("calling with NO_MOVE_ID")
 				{
-					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
-					CHECK((pokemon.getMaxPP(0) == 5));
-					CHECK((pokemon.getCurrentPP(0) == 2));
+					MoveMeta meta{.mMoveID = NO_MOVE_ID, .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+					pokemon.setMove(0, meta);
+
+					THEN("the pokemon's move ID is set and the PP amounts are set to 0")
+					{
+						CHECK((pokemon.getMoveID(0) == NO_MOVE_ID));
+						CHECK((pokemon.getMaxPP(0) == 0));
+						CHECK((pokemon.getCurrentPP(0) == 0));
+					}
+				}
+
+				WHEN("calling with a current PP amount lower than the max PP amount")
+				{
+					MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 2};
+					pokemon.setMove(0, meta);
+
+					THEN("the pokemon's move is properly updated")
+					{
+						CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+						CHECK((pokemon.getMaxPP(0) == 5));
+						CHECK((pokemon.getCurrentPP(0) == 2));
+					}
+				}
+
+				WHEN("calling with a current PP amount greater than the max PP amount")
+				{
+					MoveMeta meta{.mMoveID = toMoveID(BuiltinMoveID::Facade), .mPPMaxAmount = 5, .mPPDefaultAmount = 10};
+					pokemon.setMove(0, meta);
+
+					THEN("the pokemon's move is properly updated with the current PP clamped to the max PP")
+					{
+						CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
+						CHECK((pokemon.getMaxPP(0) == 5));
+						CHECK((pokemon.getCurrentPP(0) == 5));
+					}
 				}
 			}
 		}
 
 		GIVEN("current pp array index")
 		{
-			Pokemon pokemon{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 0}}}})};
+			Pokemon pokemon{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+			};
 
 			WHEN("calling getCurrentPP")
 			{
@@ -673,13 +732,36 @@ SCENARIO("Pokemon")
 				}
 			}
 
-			WHEN("calling setCurrentPP")
+			GIVEN("setCurrentPP")
 			{
-				pokemon.setCurrentPP(0, 1);
-
-				THEN("the pokemon's current pp is properly updated")
+				WHEN("calling with a current PP amount on an empty slot")
 				{
-					CHECK((1 == pokemon.getCurrentPP(0)));
+					pokemon.setCurrentPP(1, 1);
+
+					THEN("the pokemon's current pp is unchanged")
+					{
+						CHECK((pokemon.getCurrentPP(1) == 0));
+					}
+				}
+
+				WHEN("calling with a current PP amount lower than the max PP amount")
+				{
+					pokemon.setCurrentPP(0, 1);
+
+					THEN("the pokemon's current pp is properly updated")
+					{
+						CHECK((pokemon.getCurrentPP(0) == 1));
+					}
+				}
+
+				WHEN("calling with a current PP amount greater than the max PP amount")
+				{
+					pokemon.setCurrentPP(0, 6);
+
+					THEN("the pokemon's current pp is clamped to the maximum")
+					{
+						CHECK((pokemon.getCurrentPP(0) == 5));
+					}
 				}
 			}
 		}
@@ -1367,12 +1449,41 @@ SCENARIO("Pokemon")
 												 .mPPMaxAmount = 1,
 												 .mPPDefaultAmount = 1,
 											 },
+											 {},
 										 },
 									 },}),};
 
-		WHEN("using a move")
+		WHEN("calling with a move slot greater than the amount of total moves the Pokemon has")
 		{
-			pokemon.usePP(0);
+			ub invalidSlotIndex{7};
+			std::expected<void, PokemonError> result{pokemon.usePP(invalidSlotIndex)};
+
+			THEN("it returns INVALID_MOVE_SLOT and the move's PP is unchanged")
+			{
+				REQUIRE_FALSE(result.has_value());
+				CHECK((result.error() == PokemonError::INVALID_MOVE_SLOT));
+				CHECK((pokemon.getCurrentPP(0) == 1));
+			}
+		}
+
+		WHEN("using a move on an empty slot")
+		{
+			std::expected<void, PokemonError> result{pokemon.usePP(1)};
+
+			REQUIRE_FALSE(result.has_value());
+
+			THEN("it returns NO_PP and the current PP is kept at 0")
+			{
+				CHECK((result.error() == PokemonError::NO_PP));
+				CHECK((pokemon.getCurrentPP(1) == 0));
+			}
+		}
+
+		WHEN("using a move on a non-empty slot")
+		{
+			std::expected<void, PokemonError> result{pokemon.usePP(0)};
+
+			REQUIRE(result.has_value());
 
 			THEN("the current PP is decreased by one")
 			{
@@ -1382,11 +1493,15 @@ SCENARIO("Pokemon")
 
 		WHEN("using a move after it already has no pp left")
 		{
-			pokemon.usePP(0);
-			pokemon.usePP(0);
+			std::expected<void, PokemonError> result{pokemon.usePP(0)};
+			REQUIRE(result.has_value());
 
-			THEN("the current pp stays at zero")
+			std::expected<void, PokemonError> secondResult{pokemon.usePP(0)};
+			REQUIRE_FALSE(secondResult.has_value());
+
+			THEN("it returns NO_PP and the current PP is kept at 0")
 			{
+				CHECK((secondResult.error() == PokemonError::NO_PP));
 				CHECK((pokemon.getCurrentPP(0) == 0));
 			}
 		}
@@ -2521,7 +2636,7 @@ SCENARIO("Pokemon")
 
 		GIVEN("for max PP modified in one Pokemon")
 		{
-			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPMaxAmount = 2}}}})};
+			Pokemon other{makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 2}}}})};
 
 			THEN("they are not equal")
 			{
@@ -2531,7 +2646,9 @@ SCENARIO("Pokemon")
 
 		GIVEN("for default PP modified in one Pokemon")
 		{
-			Pokemon other{makePokemon({.mMoveMetas = {{{.mPPDefaultAmount = 2}}}})};
+			Pokemon other{
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 2, .mPPDefaultAmount = 2}}}}),
+			};
 
 			THEN("they are not equal")
 			{

@@ -1,8 +1,8 @@
 /*! @file battleValidation.test.cpp
 	@brief C++ file for running tests for the Battle validation functions.
-	@date 10/21/2026
+	@date 11/13/2026
 	@since 0.12.51
-	@version 0.12.52
+	@version 0.12.55
 	@author Matthew Moore
 */
 
@@ -175,16 +175,20 @@ SCENARIO("validateMoveAction")
 {
 	Pokemon member1{
 		makePokemon({
-			.mMoveMetas
-			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mMoveMetas = {{
+				{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+				{.mMoveID = MoveID{200}, .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+			},},
 			.mHealth = 50,
 		}),
 	};
 	Pokemon member2{makePokemon({.mHealth = 50})};
 	Pokemon member3{
 		makePokemon({
-			.mMoveMetas
-			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mMoveMetas = {{
+				{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+				{.mMoveID = MoveID{200}, .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+			},},
 			.mHealth = 50,
 		}),
 	};
@@ -336,16 +340,20 @@ SCENARIO("getValidationResult")
 {
 	Pokemon member1{
 		makePokemon({
-			.mMoveMetas
-			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mMoveMetas = {{
+				{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+				{.mMoveID = MoveID{200}, .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+			},},
 			.mHealth = 50,
 		}),
 	};
 	Pokemon member2{makePokemon({.mHealth = 50})};
 	Pokemon member3{
 		makePokemon({
-			.mMoveMetas
-			= {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPDefaultAmount = 20}, {.mMoveID = MoveID{200}, .mPPDefaultAmount = 20}}},
+			.mMoveMetas = {{
+				{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+				{.mMoveID = MoveID{200}, .mPPMaxAmount = 20, .mPPDefaultAmount = 20},
+			},},
 			.mHealth = 50,
 		}),
 	};
