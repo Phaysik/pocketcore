@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/12/2026
+	@date 11/16/2026
 	@since 0.12.20
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -84,27 +84,10 @@ using PocketCore::Move::toMoveID;
 using PocketCore::Nature::BuiltinNatureID;
 using PocketCore::Nature::NatureID;
 using PocketCore::Nature::toNatureID;
-using PocketCore::Pokemon::BLASTOISE_BASE_STATS;
 using PocketCore::Pokemon::BuiltinPokemonID;
-using PocketCore::Pokemon::BULBASAUR_BASE_STATS;
-using PocketCore::Pokemon::CHARIZARD_BASE_STATS;
-using PocketCore::Pokemon::CHARMANDER_BASE_STATS;
-using PocketCore::Pokemon::CHARMELEON_BASE_STATS;
-using PocketCore::Pokemon::DITTO_BASE_STATS;
-using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 using PocketCore::Pokemon::NO_POKEMON_ID;
 using PocketCore::Pokemon::Pokemon;
-using PocketCore::Pokemon::POKEMON_NAME_BLASTOISE;
-using PocketCore::Pokemon::POKEMON_NAME_BULBASAUR;
-using PocketCore::Pokemon::POKEMON_NAME_CHARIZARD;
-using PocketCore::Pokemon::POKEMON_NAME_CHARMANDER;
-using PocketCore::Pokemon::POKEMON_NAME_CHARMELEON;
-using PocketCore::Pokemon::POKEMON_NAME_DITTO;
-using PocketCore::Pokemon::POKEMON_NAME_IVYSAUR;
 using PocketCore::Pokemon::POKEMON_NAME_NONE;
-using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
-using PocketCore::Pokemon::POKEMON_NAME_VENUSAUR;
-using PocketCore::Pokemon::POKEMON_NAME_WARTORTLE;
 using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonGender;
 using PocketCore::Pokemon::PokemonID;
@@ -112,16 +95,13 @@ using PocketCore::Pokemon::PokemonMeta;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Pokemon::PokemonSpec;
 using PocketCore::Pokemon::SetLevelEncounter;
-using PocketCore::Pokemon::SQUIRTLE_BASE_STATS;
 using PocketCore::Pokemon::toPokemonID;
 using PocketCore::Pokemon::VariableLevelEncounter;
-using PocketCore::Pokemon::VENUSAUR_BASE_STATS;
-using PocketCore::Pokemon::WARTORTLE_BASE_STATS;
 using PocketCore::Registry::Pokemon::PokemonInstantiationDependencies;
 using PocketCore::Registry::Pokemon::PokemonInstantiationError;
 using PocketCore::Registry::Pokemon::PokemonRegistry;
 using PocketCore::Registry::RegistryProvider;
-using PocketCore::Testing::FixedRandom;
+using PocketCore::Testing::checkStats;
 using PocketCore::Testing::getDefaultInitializedRegistryProvider;
 using PocketCore::Testing::makePokemon;
 using PocketCore::Testing::SequenceRandom;
@@ -165,13 +145,20 @@ SCENARIO("PokemonRegistry")
 						},
 					},
 				},
-				.mName = std::string(POKEMON_NAME_BULBASAUR),
+				.mName = "Bulbasaur",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = BULBASAUR_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 45,
+					.mAttack = 49,
+					.mDefense = 49,
+					.mSpAttack = 65,
+					.mSpDefense = 65,
+					.mSpeed = 45,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -188,13 +175,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
     			.mEncounters = {},
-				.mName = std::string(POKEMON_NAME_IVYSAUR),
+				.mName = "Ivysaur",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = IVYSAUR_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 60,
+					.mAttack = 62,
+					.mDefense = 63,
+					.mSpAttack = 80,
+					.mSpDefense = 80,
+					.mSpeed = 60,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -211,13 +205,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 			    .mEncounters = {},
-				.mName = std::string(POKEMON_NAME_VENUSAUR),
+				.mName = "Venusaur",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = VENUSAUR_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 80,
+					.mAttack = 82,
+					.mDefense = 83,
+					.mSpAttack = 100,
+					.mSpDefense = 100,
+					.mSpeed = 80,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Grass), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Grass), toTypeID(BuiltinTypeID::Poison)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -245,13 +246,20 @@ SCENARIO("PokemonRegistry")
                 		},
                 	},
                 },
-				.mName = std::string(POKEMON_NAME_CHARMANDER),
+				.mName = "Charmander",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = CHARMANDER_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 39,
+					.mAttack = 52,
+					.mDefense = 43,
+					.mSpAttack = 60,
+					.mSpDefense = 50,
+					.mSpeed = 65,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -268,13 +276,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 			    .mEncounters = {},
-				.mName = std::string(POKEMON_NAME_CHARMELEON),
+				.mName = "Charmeleon",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = CHARMELEON_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 58,
+					.mAttack = 64,
+					.mDefense = 58,
+					.mSpAttack = 80,
+					.mSpDefense = 65,
+					.mSpeed = 80,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -291,13 +306,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = std::string(POKEMON_NAME_CHARIZARD),
+				.mName = "Charizard",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = CHARIZARD_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 78,
+					.mAttack = 84,
+					.mDefense = 78,
+					.mSpAttack = 109,
+					.mSpDefense = 85,
+					.mSpeed = 100,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Fire), toTypeID(BuiltinTypeID::Flying)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -325,13 +347,20 @@ SCENARIO("PokemonRegistry")
                 		},
                 	},
                 },
-				.mName = std::string(POKEMON_NAME_SQUIRTLE),
+				.mName = "Squirtle",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = SQUIRTLE_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 44,
+					.mAttack = 48,
+					.mDefense = 65,
+					.mSpAttack = 50,
+					.mSpDefense = 64,
+					.mSpeed = 43,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -348,13 +377,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = std::string(POKEMON_NAME_WARTORTLE),
+				.mName = "Wartortle",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = WARTORTLE_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 59,
+					.mAttack = 63,
+					.mDefense = 80,
+					.mSpAttack = 65,
+					.mSpDefense = 80,
+					.mSpeed = 58,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -371,13 +407,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = std::string(POKEMON_NAME_BLASTOISE),
+				.mName = "Blastoise",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = BLASTOISE_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 79,
+					.mAttack = 83,
+					.mDefense = 100,
+					.mSpAttack = 85,
+					.mSpDefense = 105,
+					.mSpeed = 78,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Monster), toEggGroupID(BuiltinEggGroupID::Water1)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Water)},
 				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
@@ -394,13 +437,20 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = std::string(POKEMON_NAME_DITTO),
+				.mName = "Ditto",
 				.mItemPool = {},
 				.mAbilityPool = {{
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Limber), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter), .mClassification = AbilityClassification::Hidden},
 				},},
-				.mBaseStats = DITTO_BASE_STATS,
+				.mBaseStats = {
+					.mMaxHealth = 48,
+					.mAttack = 48,
+					.mDefense = 48,
+					.mSpAttack = 48,
+					.mSpDefense = 48,
+					.mSpeed = 48,
+				},
 				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Ditto)},
 				.mTypeIDs = {toTypeID(BuiltinTypeID::Normal)},
 				.mGenderPool = {PokemonGender::Genderless},
@@ -409,6 +459,36 @@ SCENARIO("PokemonRegistry")
 			};
 
 			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Ditto))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Garchomp has the appropriate properties")
+		{
+			PokemonMeta expected{
+				.mEncounters = {},
+				.mName = "Garchomp",
+				.mItemPool = {},
+				.mAbilityPool = {{
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::SandVeil), .mClassification = AbilityClassification::Standard},
+					{.mAbilityID = toAbilityID(BuiltinAbilityID::RoughSkin), .mClassification = AbilityClassification::Hidden},
+				},},
+				.mBaseStats = {
+					.mMaxHealth = 108,
+					.mAttack = 130,
+					.mDefense = 95,
+					.mSpAttack = 80,
+					.mSpDefense = 85,
+					.mSpeed = 102,
+				},
+				.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
+				.mTypeIDs = {toTypeID(BuiltinTypeID::Dragon), toTypeID(BuiltinTypeID::Ground)},
+				.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Garchomp),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::GarchompLearnset),
+			};
+
+			const PokemonMeta *actual{registry.getPokemonMetadata(toPokemonID(BuiltinPokemonID::Garchomp))};
 
 			CHECK((expected == *actual));
 		}
@@ -1842,6 +1922,96 @@ SCENARIO("PokemonRegistry")
 				CHECK((signedSequence.calls() == 0));
 				CHECK((realSequence.calls() == 1));
 				CHECK((indexSequence.calls() == 10));
+			}
+		}
+
+		WHEN("calling with a known example from Bulbapedia")
+		{
+			PokemonSpec newSpec{};
+
+			ivs = {24, 12, 30, 16, 23, 5};
+			evs = {74, 190, 91, 48, 84, 23};
+			newSpec.mIVEVContext = {.mIVs = ivs, .mEVs = evs};
+
+			natureIDs = {toNatureID(BuiltinNatureID::Adamant)};
+			abilityEntries = {{.mAbilityID = toAbilityID(BuiltinAbilityID::SandVeil), .mClassification = AbilityClassification::Standard}};
+			itemIDs = {toItemID(BuiltinItemID::ChestoBerry)};
+			moveIDs = {};
+
+			newSpec.mIDContext = {
+				.mNatureIDs = natureIDs,
+				.mAbilityEntries = abilityEntries,
+				.mItemIDs = itemIDs,
+			};
+
+			newSpec.mGender = PokemonGender::Male;
+			newSpec.mBreedingContext = {};
+			newSpec.mLevel = 78;
+			newSpec.mPokemonID = toPokemonID(BuiltinPokemonID::Garchomp);
+
+			SequenceRandom<ub> unsignedSequence{};
+			SequenceRandom<sb> signedSequence{};
+			SequenceRandom<double> realSequence{};
+			SequenceRandom<std::size_t> indexSequence{};
+
+			CallableRandomSource<ub, std::reference_wrapper<SequenceRandom<ub>>> unsignedSource{std::ref(unsignedSequence)};
+			CallableRandomSource<sb, std::reference_wrapper<SequenceRandom<sb>>> signedSource{std::ref(signedSequence)};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			CallableRandomSource<std::size_t, std::reference_wrapper<SequenceRandom<std::size_t>>> indexSource{std::ref(indexSequence)};
+
+			randomSources.mUnsigned = unsignedSource;
+			randomSources.mSigned = signedSource;
+			randomSources.mReal = realSource;
+			randomSources.mIndex = indexSource;
+
+			std::expected<Pokemon, PokemonInstantiationError> result{registry.instantiate(newSpec, instantiateDependencies, randomSources)};
+
+			THEN("it returns a custom built Pokemon")
+			{
+				REQUIRE(result.has_value());
+
+				Pokemon expected{
+    				makePokemon({
+    					.mMetadata = {
+    					    .mName = "Garchomp",
+    						.mBaseStats = {
+       							.mMaxHealth = 108,
+                        		.mAttack = 130,
+                        		.mDefense = 95,
+                        		.mSpAttack = 80,
+                        		.mSpDefense = 85,
+                        		.mSpeed = 102,
+    						},
+    						.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
+    						.mTypeIDs = {toTypeID(BuiltinTypeID::Dragon), toTypeID(BuiltinTypeID::Ground)},
+    						.mPokemonID = toPokemonID(BuiltinPokemonID::Garchomp),
+    						.mLearnsetID = toLearnsetID(BuiltinLearnsetID::GarchompLearnset),
+    					},
+    					.mMoveMetas = {
+    					    {
+    					        {.mMoveID = toMoveID(BuiltinMoveID::Tackle), .mPPMaxAmount = 56, .mPPDefaultAmount = 35},
+    	                        {.mMoveID = toMoveID(BuiltinMoveID::SandTomb), .mPPMaxAmount = 24, .mPPDefaultAmount = 15},
+    					    },
+    					},
+    					.mPokemonIVs = {24, 12, 30, 16, 23, 5},
+    					.mPokemonEVs = {74, 190, 91, 48, 84, 23},
+    					.mAbilityEntries
+    					= {{{.mAbilityID = toAbilityID(BuiltinAbilityID::SandVeil), .mClassification = AbilityClassification::Standard}}},
+    					.mItemIDs = {toItemID(BuiltinItemID::ChestoBerry)},
+    					.mNatureIDs = {toNatureID(BuiltinNatureID::Adamant)},
+    					.mHealth = 289,
+    					.mLevel = 78,
+    					.mGender = PokemonGender::Male,
+    				}),
+    			};
+
+				CHECK((result.value() == expected));
+				CHECK(checkStats(result.value(), 289, 289, 278, 193, 135, 171, 171));
+
+				CHECK((unsignedSequence.calls() == 0));
+				CHECK((signedSequence.calls() == 0));
+				CHECK((realSequence.calls() == 0));
+				CHECK((indexSequence.calls() == 0));
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 11/12/2026
+	@date 11/16/2026
 	@since 0.11.6
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -174,6 +174,17 @@ namespace PocketCore::Pokemon
 		.mSpeed = 48,
 	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> DITTO_ENCOUNTERS{};
+
+	inline constexpr std::string_view POKEMON_NAME_GARCHOMP{"Garchomp"};
+	inline constexpr PokemonStats GARCHOMP_BASE_STATS{
+		.mMaxHealth = 108,
+		.mAttack = 130,
+		.mDefense = 95,
+		.mSpAttack = 80,
+		.mSpDefense = 85,
+		.mSpeed = 102,
+	};
+	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> GARCHOMP_ENCOUNTERS{};
 } // namespace PocketCore::Pokemon
 
 #endif

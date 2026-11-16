@@ -1,8 +1,8 @@
 /*! @file builtinAbilityID.h
 	@brief Defines identifiers for abilities compiled into PocketCore.
-	@date 11/03/2026
+	@date 11/16/2026
 	@since 0.4.0
-	@version 0.12.53
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -29,9 +29,9 @@ namespace PocketCore::Ability
 		@details This closed enum is only a catalog of built-in abilities. Runtime state and user-facing APIs use the open @ref AbilityID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 11/03/2026
+		@date 11/16/2026
 		@since 0.4.0
-		@version 0.12.53
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	enum class BuiltinAbilityID : ub
@@ -44,7 +44,9 @@ namespace PocketCore::Ability
 		Sturdy, // 5
 
 		Limber,		 // 7
+		SandVeil,	 // 8
 		CloudNine,	 // 13
+		RoughSkin,	 // 24
 		Levitate,	 // 26
 		Chlorophyll, // 34
 		RainDish,	 // 44

@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/13/2026
+	@date 11/16/2026
 	@since 0.4.0
-	@version 0.12.55
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -1281,23 +1281,65 @@ SCENARIO("Pokemon")
 		{
 			THEN("the level and level damage factor matches")
 			{
-				CHECK((20 == pokemon.getLevel()));
-				CHECK((10 == pokemon.getLevelDamageFactor()));
+				CHECK((pokemon.getLevel() == 20));
+				CHECK((pokemon.getLevelDamageFactor() == 10));
 
 				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
-		WHEN("calling setLevel")
+		GIVEN("setLevel")
 		{
-			pokemon.setLevel(30);
-
-			THEN("the pokemon's level and level damage factor are properly updated")
+			WHEN("calling with a number that falls in the bounds")
 			{
-				CHECK((30 == pokemon.getLevel()));
-				CHECK((14 == pokemon.getLevelDamageFactor()));
+				pokemon.setLevel(30);
 
-				CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
+				THEN("the pokemon's level and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 30));
+					CHECK((pokemon.getLevelDamageFactor() == 14));
+
+					CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
+				}
+			}
+
+			WHEN("calling with 0")
+			{
+				pokemon.setLevel(0);
+
+				THEN("the pokemon's level is clamped to 1 and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 1));
+					CHECK((pokemon.getLevelDamageFactor() == 2));
+
+					CHECK(checkStats(pokemon, 13, 13, 7, 7, 7, 7, 7));
+				}
+			}
+
+			WHEN("calling with 101")
+			{
+				pokemon.setLevel(101);
+
+				THEN("the pokemon's level is clamped to 100 and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 100));
+					CHECK((pokemon.getLevelDamageFactor() == 42));
+
+					CHECK(checkStats(pokemon, 317, 317, 233, 256, 236, 267, 222));
+				}
+			}
+
+			WHEN("calling with a level whose unclamped damage factor differs from level 100")
+			{
+				pokemon.setLevel(255);
+
+				THEN("the level damage factor is derived from the clamped level")
+				{
+					CHECK((pokemon.getLevel() == 100));
+					CHECK((pokemon.getLevelDamageFactor() == 42));
+
+					CHECK(checkStats(pokemon, 317, 317, 233, 256, 236, 267, 222));
+				}
 			}
 		}
 	}

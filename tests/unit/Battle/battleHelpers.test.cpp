@@ -1,8 +1,8 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 11/06/2026
+	@date 11/16/2026
 	@since 0.12.45
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -2790,7 +2790,7 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 15\n"
+						"        ID: 17\n"
 						"        Name: Air Lock\n"
 						"        Classification: Standard\n"
 						"    Items:\n"
@@ -2823,11 +2823,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 13\n"
+						"        ID: 14\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 14\n"
+						"        ID: 15\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"
@@ -3021,7 +3021,7 @@ SCENARIO("Battle free function")
 						"        Name: Hardy\n"
 						"    Abilities:\n"
 						"      [0]:\n"
-						"        ID: 15\n"
+						"        ID: 17\n"
 						"        Name: Air Lock\n"
 						"        Classification: Hidden\n"
 						"    Items:\n"
@@ -3054,11 +3054,11 @@ SCENARIO("Battle free function")
 						"        Name: Karate Chop\n"
 						"        PP: 10/20\n"
 						"      [2]:\n"
-						"        ID: 13\n"
+						"        ID: 14\n"
 						"        Name: Facade\n"
 						"        PP: 15/25\n"
 						"      [3]:\n"
-						"        ID: 14\n"
+						"        ID: 15\n"
 						"        Name: Hydro Steam\n"
 						"        PP: 20/30\n"
 						"  }\n"

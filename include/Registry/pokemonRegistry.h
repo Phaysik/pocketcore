@@ -1,8 +1,8 @@
 /*! @file pokemonRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
-	@date 11/12/2026
+	@date 11/16/2026
 	@since 0.11.6
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -99,6 +99,8 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::CHARMELEON_ENCOUNTERS;
 	using PocketCore::Pokemon::DITTO_BASE_STATS;
 	using PocketCore::Pokemon::DITTO_ENCOUNTERS;
+	using PocketCore::Pokemon::GARCHOMP_BASE_STATS;
+	using PocketCore::Pokemon::GARCHOMP_ENCOUNTERS;
 	using PocketCore::Pokemon::IVYSAUR_BASE_STATS;
 	using PocketCore::Pokemon::IVYSAUR_ENCOUNTERS;
 	using PocketCore::Pokemon::Pokemon;
@@ -108,6 +110,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::POKEMON_NAME_CHARMANDER;
 	using PocketCore::Pokemon::POKEMON_NAME_CHARMELEON;
 	using PocketCore::Pokemon::POKEMON_NAME_DITTO;
+	using PocketCore::Pokemon::POKEMON_NAME_GARCHOMP;
 	using PocketCore::Pokemon::POKEMON_NAME_IVYSAUR;
 	using PocketCore::Pokemon::POKEMON_NAME_NONE;
 	using PocketCore::Pokemon::POKEMON_NAME_SQUIRTLE;
@@ -194,9 +197,9 @@ namespace PocketCore::Registry::Pokemon
 		@details Built-in pokemons are registered during construction with IDs derived from @ref BuiltinPokemonID. Configuration code may
 	   append, replace, or remove entries through the low-level mutators while battle-time callers use allocation-free lookup operations.
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
-		@date 11/12/2026
+		@date 11/16/2026
 		@since 0.11.6
-		@version 0.12.54
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -217,7 +220,7 @@ namespace PocketCore::Registry::Pokemon
 
 			/*! @brief Constructs a registry populated with every @ref BuiltinPokemonID.
 				@since 0.11.6
-				@version 0.12.53
+				@version 0.12.56
 			 */
 			ATTR_NOINLINE explicit constexpr PokemonRegistry()
 			{
@@ -371,6 +374,21 @@ namespace PocketCore::Registry::Pokemon
 					.mGenderPool = {PokemonGender::Genderless},
 					.mPokemonID = toPokemonID(BuiltinPokemonID::Ditto),
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
+				});
+
+				addBuiltin({
+				    .mEncounters = GARCHOMP_ENCOUNTERS,
+					.mName = std::string(POKEMON_NAME_GARCHOMP),
+					.mAbilityPool = {{
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::SandVeil), .mClassification = AbilityClassification::Standard},
+						{.mAbilityID = toAbilityID(BuiltinAbilityID::RoughSkin), .mClassification = AbilityClassification::Hidden},
+					},},
+					.mBaseStats = GARCHOMP_BASE_STATS,
+					.mEggGroupIDs = {toEggGroupID(BuiltinEggGroupID::Dragon), toEggGroupID(BuiltinEggGroupID::Monster)},
+					.mTypeIDs = {toTypeID(BuiltinTypeID::Dragon), toTypeID(BuiltinTypeID::Ground)},
+					.mGenderPool = {PokemonGender::Male, PokemonGender::Female},
+					.mPokemonID = toPokemonID(BuiltinPokemonID::Garchomp),
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::GarchompLearnset),
 				});
 			}
 

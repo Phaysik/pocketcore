@@ -1,8 +1,8 @@
 /*! @file builtinPokemonID.h
 	@brief Defines identifiers for pokemons compiled into PocketCore.
-	@date 10/26/2026
+	@date 11/16/2026
 	@since 0.11.6
-	@version 0.12.53
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -26,9 +26,9 @@ namespace PocketCore::Pokemon
 		@details This closed enum is only a catalog of built-in pokemons. Runtime state and user-facing APIs use the open @ref PokemonID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 10/26/2026
+		@date 11/16/2026
 		@since 0.11.6
-		@version 0.12.53
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	enum class BuiltinPokemonID : ub
@@ -44,7 +44,8 @@ namespace PocketCore::Pokemon
 		Wartortle,
 		Blastoise,
 
-		Ditto,
+		Ditto,	  // 132
+		Garchomp, // 447
 
 		FinalPokemon,
 	};

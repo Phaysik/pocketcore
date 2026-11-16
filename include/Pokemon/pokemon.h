@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 11/13/2026
+	@date 11/16/2026
 	@since 0.3.0
-	@version 0.12.55
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -64,7 +64,9 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_POKEMON_LEVEL;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+	using PocketCore::Configuration::MIN_POKEMON_LEVEL;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
@@ -106,9 +108,9 @@ namespace PocketCore::Pokemon
 		 is always clamped to the slot's maximum PP; empty slots hold 0 current and 0 maximum PP.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 11/13/2026
+		@date 11/16/2026
 		@since 0.3.0
-		@version 0.12.55
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -966,11 +968,12 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets the level and immediately recomputes the damage factor and calculated stats.
-				@details Updates the level and damage factor through @ref updateLevel, then invokes @ref recomputeStats.
+				@details Updates the level and damage factor through @ref updateLevel, then invokes @ref recomputeStats. Levels outside
+			   [@ref MIN_POKEMON_LEVEL, @ref MAX_POKEMON_LEVEL] are clamped to the nearest bound.
 				@param[in] level The new Pokemon level.
-				@post The damage factor and calculated stats reflect the new level.
+				@post The damage factor and calculated stats reflect the clamped level.
 				@since 0.7.2
-				@version 0.12.48
+				@version 0.12.56
 			*/
 			constexpr void setLevel(const us level)
 			{
@@ -1186,16 +1189,17 @@ namespace PocketCore::Pokemon
 				mNatureMultipliers = tempValues;
 			}
 
-			/*! @details Stores the level and recomputes its damage factor without updating the calculated stats.
+			/*! @details Stores the level, clamped to [@ref MIN_POKEMON_LEVEL, @ref MAX_POKEMON_LEVEL], and recomputes its damage factor from
+			   the clamped level without updating the calculated stats.
 				@param[in] level The new Pokemon level.
 				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
 				@since 0.12.48
-				@version 0.12.48
+				@version 0.12.56
 			*/
 			constexpr void updateLevel(const us level)
 			{
-				mLevel = level;
-				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
+				mLevel = std::clamp(level, MIN_POKEMON_LEVEL, MAX_POKEMON_LEVEL);
+				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * mLevel) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
 													 + LEVEL_DAMAGE_FACTOR_OFFSET);
 			}
 
