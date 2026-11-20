@@ -1,14 +1,15 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 11/09/2026
+	@date 11/20/2026
 	@since 0.12.28
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
 #include "Registry/pokemonRegistry.h"
 
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <expected>
 #include <optional>
@@ -68,6 +69,7 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonGender;
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
+	using PocketCore::Pokemon::selectRandomGender;
 	using PocketCore::Pokemon::SetLevelEncounter;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
@@ -210,17 +212,25 @@ namespace PocketCore::Registry::Pokemon
 			moveMeta.mPPDefaultAmount = meta->mPPDefaultAmount;
 		}
 
-		const auto getRandomGender{
-			[&pokemonMeta, &randomSources] {
-				const std::size_t genderIndex{randomSources.mIndex.get()(std::size_t{0}, pokemonMeta->mGenderPool.size() - 1)};
+		PokemonGender gender{};
 
-				return pokemonMeta->mGenderPool.at(genderIndex);
-			},
-		};
+		if (pokemonSpec.mGender.has_value())
+		{
+			gender = pokemonSpec.mGender.value();
+		}
+		else
+		{
+			const std::expected<PokemonGender, PokemonError> randomGenderResult{
+				selectRandomGender(pokemonMeta->mGenderPool, randomSources),
+			};
 
-		const PokemonGender gender{
-			pokemonSpec.mGender.has_value() ? pokemonSpec.mGender.value() : getRandomGender(),
-		};
+			if (!randomGenderResult.has_value())
+			{
+				return std::unexpected{randomGenderResult.error()};
+			}
+
+			gender = randomGenderResult.value();
+		}
 
 		return Pokemon{
 			*pokemonMeta,

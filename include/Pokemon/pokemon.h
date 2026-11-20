@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 11/13/2026
+	@date 11/20/2026
 	@since 0.3.0
-	@version 0.12.55
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <expected>
 #include <functional>
@@ -64,7 +63,11 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NON_VOLATILE_STATUSES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_POKEMON_BASE_STAT_VALUE;
+	using PocketCore::Configuration::MAX_POKEMON_LEVEL;
 	using PocketCore::Configuration::MAX_TYPES_PER_POKEMON;
+	using PocketCore::Configuration::MIN_POKEMON_BASE_STAT_VALUE;
+	using PocketCore::Configuration::MIN_POKEMON_LEVEL;
 	using PocketCore::Configuration::NATURE_STAT_BASE_MULTIPLIER;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::ui;
@@ -106,9 +109,9 @@ namespace PocketCore::Pokemon
 		 is always clamped to the slot's maximum PP; empty slots hold 0 current and 0 maximum PP.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 11/13/2026
+		@date 11/20/2026
 		@since 0.3.0
-		@version 0.12.55
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -136,21 +139,23 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.53
+				@version 0.12.56
 			*/
-			explicit constexpr Pokemon(const PokemonMeta &meta, const us level,
+			explicit constexpr Pokemon(const PokemonMeta &pokemonMeta, const us level,
 									   const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &abilityEntries,
 									   const std::array<ItemID, MAX_ITEMS_PER_POKEMON> &itemIDs,
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{meta.mName}, mBaseStats{meta.mBaseStats}, mEggGroupIDs(meta.mEggGroupIDs), mTypeIDs{meta.mTypeIDs},
-				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(meta.mPokemonID), mLearnsetID(meta.mLearnsetID),
-				  mGender(gender)
+				: mName{pokemonMeta.mName}, mEggGroupIDs(pokemonMeta.mEggGroupIDs), mTypeIDs{pokemonMeta.mTypeIDs},
+				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				mMoveIDs.fill(NO_MOVE_ID);
 				mMaxPP.fill(0);
 				mCurrentPP.fill(0);
+
+				updateBaseStats(pokemonMeta.mBaseStats);
 
 				resolveNatureMultipliers(natureIDs, natureRegistry);
 
@@ -177,7 +182,7 @@ namespace PocketCore::Pokemon
 				@param[in] pokemonEVs Fixed effort values for the Pokemon's base stats.
 				@param[in] gender The Pokemon's gender.
 				@since 0.3.0
-				@version 0.12.53
+				@version 0.12.56
 			*/
 			explicit constexpr Pokemon(const PokemonMeta &pokemonMeta, const std::array<MoveMeta, MAX_MOVES_PER_POKEMON> &moveMetas,
 									   const us level, const std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> &abilityEntries,
@@ -185,11 +190,13 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{pokemonMeta.mName}, mBaseStats{pokemonMeta.mBaseStats}, mEggGroupIDs(pokemonMeta.mEggGroupIDs),
-				  mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				: mName{pokemonMeta.mName}, mEggGroupIDs(pokemonMeta.mEggGroupIDs), mTypeIDs{pokemonMeta.mTypeIDs},
+				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
 				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				assignMoves(moveMetas);
+
+				updateBaseStats(pokemonMeta.mBaseStats);
 
 				resolveNatureMultipliers(natureIDs, natureRegistry);
 
@@ -879,8 +886,10 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Sets current health, clamped to maximum health.
-				@details Uses the existing calculated maximum; does not invoke @ref recomputeStats or change stat inputs.
-				@param[in] health The requested current health value.
+				@details Stores the lesser of the requested value and the existing calculated maximum; does not invoke @ref recomputeStats
+			   or change stat inputs.
+				@param[in] health The requested current health value, capped at @ref getMaximumHealth.
+				@post Current health does not exceed @ref getMaximumHealth.
 				@since 0.3.0
 				@version 0.12.49
 			*/
@@ -890,87 +899,99 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces base HP and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats, which adjusts current health by the change in calculated maximum health while
+				@details Clamps the supplied base HP to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE], then invokes
+				@ref recomputeStats, which adjusts current health by the change in calculated maximum health while
 			   preserving the amount of missing health. A Pokemon with zero current health remains fainted; a living Pokemon is never
 			   reduced below 1.
-				@param[in] maximumHealth The new base HP value used by the stat calculation.
+				@param[in] maximumHealth The requested base HP value, clamped to the configured base-stat bounds before calculation.
 				@post Current health does not exceed @ref getMaximumHealth; zero current health remains zero and non-zero health stays at
 			   least 1.
 				@since 0.9.14
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setMaximumHealth(const us maximumHealth)
 			{
-				mBaseStats.mMaxHealth = maximumHealth;
+				mBaseStats.mMaxHealth = std::clamp(maximumHealth, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Replaces base Attack and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats after storing the base stat.
-				@param[in] attack The new base Attack value.
+				@details Clamps the supplied value to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE] before invoking
+				@ref recomputeStats.
+				@param[in] attack The requested base Attack value, clamped to the configured base-stat bounds.
+				@post The calculated stats reflect the clamped base Attack value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setAttack(const us attack)
 			{
-				mBaseStats.mAttack = attack;
+				mBaseStats.mAttack = std::clamp(attack, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Replaces base Defense and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats after storing the base stat.
-				@param[in] defense The new base Defense value.
+				@details Clamps the supplied value to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE] before invoking
+				@ref recomputeStats.
+				@param[in] defense The requested base Defense value, clamped to the configured base-stat bounds.
+				@post The calculated stats reflect the clamped base Defense value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setDefense(const us defense)
 			{
-				mBaseStats.mDefense = defense;
+				mBaseStats.mDefense = std::clamp(defense, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Replaces base Special Attack and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats after storing the base stat.
-				@param[in] spAttack The new base Special Attack value.
+				@details Clamps the supplied value to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE] before invoking
+				@ref recomputeStats.
+				@param[in] spAttack The requested base Special Attack value, clamped to the configured base-stat bounds.
+				@post The calculated stats reflect the clamped base Special Attack value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setSpAttack(const us spAttack)
 			{
-				mBaseStats.mSpAttack = spAttack;
+				mBaseStats.mSpAttack = std::clamp(spAttack, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Replaces base Special Defense and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats after storing the base stat.
-				@param[in] spDefense The new base Special Defense value.
+				@details Clamps the supplied value to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE] before invoking
+				@ref recomputeStats.
+				@param[in] spDefense The requested base Special Defense value, clamped to the configured base-stat bounds.
+				@post The calculated stats reflect the clamped base Special Defense value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setSpDefense(const us spDefense)
 			{
-				mBaseStats.mSpDefense = spDefense;
+				mBaseStats.mSpDefense = std::clamp(spDefense, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Replaces base Speed and immediately recomputes all calculated stats.
-				@details Invokes @ref recomputeStats after storing the base stat.
-				@param[in] speed The new base Speed value.
+				@details Clamps the supplied value to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE] before invoking
+				@ref recomputeStats.
+				@param[in] speed The requested base Speed value, clamped to the configured base-stat bounds.
+				@post The calculated stats reflect the clamped base Speed value.
 				@since 0.3.0
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void setSpeed(const us speed)
 			{
-				mBaseStats.mSpeed = speed;
+				mBaseStats.mSpeed = std::clamp(speed, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 				recomputeStats();
 			}
 
 			/*! @brief Sets the level and immediately recomputes the damage factor and calculated stats.
-				@details Updates the level and damage factor through @ref updateLevel, then invokes @ref recomputeStats.
+				@details Updates the level and damage factor through @ref updateLevel, then invokes @ref recomputeStats. Levels outside
+			   [@ref MIN_POKEMON_LEVEL, @ref MAX_POKEMON_LEVEL] are clamped to the nearest bound.
 				@param[in] level The new Pokemon level.
-				@post The damage factor and calculated stats reflect the new level.
+				@post The damage factor and calculated stats reflect the clamped level.
 				@since 0.7.2
-				@version 0.12.48
+				@version 0.12.56
 			*/
 			constexpr void setLevel(const us level)
 			{
@@ -979,16 +1000,17 @@ namespace PocketCore::Pokemon
 			}
 
 			/*! @brief Replaces species identity and base stats, then immediately recomputes all calculated stats.
-				@details Copies the supplied base-stat record and invokes @ref recomputeStats; does not resolve species metadata.
+				@details Stores the supplied base stats through @ref updateBaseStats, clamping each to [@ref MIN_POKEMON_BASE_STAT_VALUE,
+			   @ref MAX_POKEMON_BASE_STAT_VALUE], then invokes @ref recomputeStats; does not resolve species metadata.
 				@param[in] meta The registry-resolved metadata for the new Pokemon.
 				@since 0.12.23
-				@version 0.12.50
+				@version 0.12.56
 			*/
 			constexpr void setSpecies(const PokemonMeta &meta)
 			{
 				mPokemonID = meta.mPokemonID;
 				mLearnsetID = meta.mLearnsetID;
-				mBaseStats = meta.mBaseStats;
+				updateBaseStats(meta.mBaseStats);
 				recomputeStats();
 			}
 
@@ -1081,24 +1103,41 @@ namespace PocketCore::Pokemon
 			friend std::ostream &operator<<(std::ostream &outStream, const Pokemon &pokemon);
 
 		private:
+			/*! @details Stores every base stat, clamped to [@ref MIN_POKEMON_BASE_STAT_VALUE, @ref MAX_POKEMON_BASE_STAT_VALUE], without
+			   updating the calculated stats.
+				@param[in] baseStats The base stats to clamp and copy; no reference to the input is retained.
+				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
+				@since 0.12.56
+				@version 0.12.56
+			*/
+			constexpr void updateBaseStats(const PokemonStats &baseStats)
+			{
+				mBaseStats.mMaxHealth = std::clamp(baseStats.mMaxHealth, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+				mBaseStats.mAttack = std::clamp(baseStats.mAttack, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+				mBaseStats.mDefense = std::clamp(baseStats.mDefense, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+				mBaseStats.mSpAttack = std::clamp(baseStats.mSpAttack, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+				mBaseStats.mSpDefense = std::clamp(baseStats.mSpDefense, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+				mBaseStats.mSpeed = std::clamp(baseStats.mSpeed, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
+			}
+
 			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, and nature multipliers.
 				@details Owns the stat calculation formula. Constructors and public stat-input setters invoke this function after updating
 			   inputs so calculated stats are immediately consistent on return. Adjusts current health by the change in calculated maximum
 			   health, preserving the amount of missing health. A Pokemon with zero health stays fainted; a living Pokemon is never reduced
 			   below 1 health by a stat change.
 				@since 0.12.23
-				@version 0.12.49
+				@version 0.12.56
 			*/
 			constexpr void recomputeStats()
 			{
 				const auto getBaseComponent = [this](const ub index, const us baseStat) -> us {
 					const ui ivAndEvCalc{
-						mPokemonIVs.at(index) + static_cast<ui>(std::floor(mPokemonEVs.at(index) / CALCULATED_EV_DIVISOR)),
+						mPokemonIVs.at(index) + static_cast<ui>(mPokemonEVs.at(index) / CALCULATED_EV_DIVISOR),
 					};
 
 					const ui numerator{((CALCULATED_NUMERATOR_MULTIPLIER * baseStat) + ivAndEvCalc) * mLevel};
 
-					return static_cast<us>(std::floor(numerator / CALCULATED_NUMERATOR_DIVISOR));
+					return static_cast<us>(numerator / CALCULATED_NUMERATOR_DIVISOR);
 				};
 
 				constexpr std::size_t healthIndex{toIndex(PokemonStat::Health)};
@@ -1186,17 +1225,18 @@ namespace PocketCore::Pokemon
 				mNatureMultipliers = tempValues;
 			}
 
-			/*! @details Stores the level and recomputes its damage factor without updating the calculated stats.
+			/*! @details Stores the level, clamped to [@ref MIN_POKEMON_LEVEL, @ref MAX_POKEMON_LEVEL], and recomputes its damage factor
+			   from the clamped level without updating the calculated stats.
 				@param[in] level The new Pokemon level.
 				@note Callers must invoke @ref recomputeStats after completing updates to the stat inputs.
 				@since 0.12.48
-				@version 0.12.48
+				@version 0.12.56
 			*/
 			constexpr void updateLevel(const us level)
 			{
-				mLevel = level;
-				mLevelDamageFactor = static_cast<us>(std::floor((LEVEL_DAMAGE_FACTOR_NUMERATOR * level) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
-													 + LEVEL_DAMAGE_FACTOR_OFFSET);
+				mLevel = std::clamp(level, MIN_POKEMON_LEVEL, MAX_POKEMON_LEVEL);
+				mLevelDamageFactor = static_cast<us>((LEVEL_DAMAGE_FACTOR_NUMERATOR * mLevel) / LEVEL_DAMAGE_FACTOR_DENOMINATOR)
+								   + LEVEL_DAMAGE_FACTOR_OFFSET;
 			}
 
 			/*! @details Validates and stores all IVs without updating the calculated stats. Valid arrays are copied unchanged; if any

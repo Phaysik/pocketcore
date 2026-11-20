@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the learnset registry.
-	@date 10/26/2026
+	@date 11/16/2026
 	@since 0.12.24
-	@version 0.12.53
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -25,6 +25,7 @@ namespace PocketCore::Learnset
 	inline constexpr std::string_view LEARNSET_NAME_BLASTOISE{"Blastoise Learnset"};
 
 	inline constexpr std::string_view LEARNSET_NAME_DITTO{"Ditto Learnset"};
+	inline constexpr std::string_view LEARNSET_NAME_GARCHOMP{"Garchomp Learnset"};
 } // namespace PocketCore::Learnset
 
 #endif

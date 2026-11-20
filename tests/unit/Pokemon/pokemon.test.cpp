@@ -1,8 +1,8 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/13/2026
+	@date 11/20/2026
 	@since 0.4.0
-	@version 0.12.55
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -212,6 +212,40 @@ SCENARIO("Pokemon")
 				CHECK((std::ranges::all_of(pokemon.getMaxPPArray(), [](const ub maxPP) { return maxPP == 10; })));
 				CHECK((std::ranges::all_of(pokemon.getCurrentPPArray(), [](const ub currentPP) { return currentPP == 10; })));
 				CHECK((pokemon.getLevelDamageFactor() == 42));
+			}
+		}
+
+		GIVEN("species metadata with base stats outside the allowed bounds")
+		{
+			PokemonMeta meta{
+				.mName = "TestMon",
+				.mBaseStats = {.mMaxHealth = 0, .mAttack = 256, .mDefense = 0, .mSpAttack = 256, .mSpDefense = 0, .mSpeed = 256},
+				.mPokemonID = toPokemonID(BuiltinPokemonID::None),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::None),
+			};
+
+			WHEN("creating a Pokemon with empty move slots")
+			{
+				Pokemon pokemon{
+					meta, 100, {}, {}, {toNatureID(BuiltinNatureID::Hardy)}, natureRegistry, {}, {}, PokemonGender::Male,
+				};
+
+				THEN("the base stats are clamped to 1 and 255")
+				{
+					CHECK(checkStats(pokemon, 112, 112, 515, 7, 515, 7, 515));
+				}
+			}
+
+			WHEN("creating a Pokemon with move slots")
+			{
+				Pokemon pokemon{
+					meta, {}, 100, {}, {}, {toNatureID(BuiltinNatureID::Hardy)}, natureRegistry, {}, {}, PokemonGender::Male,
+				};
+
+				THEN("the base stats are clamped to 1 and 255")
+				{
+					CHECK(checkStats(pokemon, 112, 112, 515, 7, 515, 7, 515));
+				}
 			}
 		}
 	}
@@ -569,6 +603,32 @@ SCENARIO("Pokemon")
 						CHECK(checkStats(pokemon, 40, 40, 26, 28, 27, 25, 25));
 					}
 				}
+
+				GIVEN("an array with all IVs of 0")
+				{
+					pokemon.setPokemonIVsArray({0, 0, 0, 0, 0, 0});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 0, 0, 0, 0, 0};
+
+					THEN("the IV array is unchanged")
+					{
+						CHECK(std::ranges::equal(pokemon.getPokemonIVsArray(), expected));
+
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 25, 25));
+					}
+				}
+
+				GIVEN("an array with all IVs of 31")
+				{
+					pokemon.setPokemonIVsArray({31, 31, 31, 31, 31, 31});
+					std::array<us, POKEMON_STAT_COUNT> expected{31, 31, 31, 31, 31, 31};
+
+					THEN("the IV array is unchanged")
+					{
+						CHECK(std::ranges::equal(pokemon.getPokemonIVsArray(), expected));
+
+						CHECK(checkStats(pokemon, 43, 43, 28, 28, 28, 28, 28));
+					}
+				}
 			}
 		}
 
@@ -632,6 +692,42 @@ SCENARIO("Pokemon")
 					{
 						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
 						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
+					}
+				}
+
+				GIVEN("an array with all EVs at 0")
+				{
+					pokemon.setPokemonEVsArray({0, 0, 0, 0, 0, 0});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 0, 0, 0, 0, 0};
+
+					THEN("the EV array is unchanged")
+					{
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
+						CHECK(checkStats(pokemon, 40, 40, 25, 25, 25, 25, 25));
+					}
+				}
+
+				GIVEN("an array with one EV at max value (252)")
+				{
+					pokemon.setPokemonEVsArray({0, 0, 252, 0, 0, 0});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 0, 252, 0, 0, 0};
+
+					THEN("the EV array is unchanged")
+					{
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
+						CHECK(checkStats(pokemon, 40, 40, 25, 31, 25, 25, 25));
+					}
+				}
+
+				GIVEN("an array with EVs at stat total cap (510)")
+				{
+					pokemon.setPokemonEVsArray({0, 252, 252, 6, 0, 0});
+					std::array<us, POKEMON_STAT_COUNT> expected{0, 252, 252, 6, 0, 0};
+
+					THEN("the EV array is unchanged")
+					{
+						CHECK(std::ranges::equal(pokemon.getPokemonEVsArray(), expected));
+						CHECK(checkStats(pokemon, 40, 40, 31, 31, 25, 25, 25));
 					}
 				}
 			}
@@ -887,6 +983,34 @@ SCENARIO("Pokemon")
 						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 57, 52));
 					}
 				}
+
+				GIVEN("a nature that would have no rounding up with stats")
+				{
+					pokemon.setPokemonIV(4, 0);
+					pokemon.setPokemonEV(4, 100);
+					pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Gentle), natureRegistry);
+
+					THEN("the pokemon's nature properly updated and the stats reflect the new nature")
+					{
+						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Gentle)));
+
+						CHECK(checkStats(pokemon, 71, 71, 50, 49, 51, 55, 48));
+					}
+				}
+
+				GIVEN("a nature that would have no rounding down with stats")
+				{
+					pokemon.setSpDefense(200);
+					pokemon.setPokemonIV(4, 19);
+					pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Lax), natureRegistry);
+
+					THEN("the pokemon's nature properly updated and the stats reflect the new nature")
+					{
+						CHECK((pokemon.getNatureID(0) == toNatureID(BuiltinNatureID::Lax)));
+
+						CHECK(checkStats(pokemon, 71, 71, 50, 60, 51, 90, 48));
+					}
+				}
 			}
 		}
 
@@ -1067,6 +1191,85 @@ SCENARIO("Pokemon")
 						CHECK(checkStats(pokemon, 40, 40, 26, 27, 26, 31, 26));
 					}
 				}
+
+				GIVEN("EV bounds by the divisor (4)")
+				{
+					WHEN("an EV one lower than the divisor (3)")
+					{
+						pokemon.setPokemonIV(0, 19);
+						pokemon.setPokemonEV(0, 3);
+
+						THEN("the EV is properly set")
+						{
+							CHECK((pokemon.getPokemonEV(0) == 3));
+
+							CHECK((pokemon.getMaximumHealth() == 41));
+							CHECK((pokemon.getHealth() == 41));
+							CHECK((pokemon.getAttack() == 26));
+							CHECK((pokemon.getDefense() == 27));
+							CHECK((pokemon.getSpAttack() == 26));
+							CHECK((pokemon.getSpDefense() == 31));
+							CHECK((pokemon.getSpeed() == 26));
+						}
+					}
+
+					WHEN("an EV equal to the divisor (4)")
+					{
+						pokemon.setPokemonIV(0, 19);
+						pokemon.setPokemonEV(0, 4);
+
+						THEN("the EV is properly set")
+						{
+							CHECK((pokemon.getPokemonEV(0) == 4));
+
+							CHECK((pokemon.getMaximumHealth() == 42));
+							CHECK((pokemon.getHealth() == 42));
+							CHECK((pokemon.getAttack() == 26));
+							CHECK((pokemon.getDefense() == 27));
+							CHECK((pokemon.getSpAttack() == 26));
+							CHECK((pokemon.getSpDefense() == 31));
+							CHECK((pokemon.getSpeed() == 26));
+						}
+					}
+
+					WHEN("an EV one lower than the next divisor multiple (7)")
+					{
+						pokemon.setPokemonIV(0, 18);
+						pokemon.setPokemonEV(0, 7);
+
+						THEN("the EV is properly set")
+						{
+							CHECK((pokemon.getPokemonEV(0) == 7));
+
+							CHECK((pokemon.getMaximumHealth() == 41));
+							CHECK((pokemon.getHealth() == 41));
+							CHECK((pokemon.getAttack() == 26));
+							CHECK((pokemon.getDefense() == 27));
+							CHECK((pokemon.getSpAttack() == 26));
+							CHECK((pokemon.getSpDefense() == 31));
+							CHECK((pokemon.getSpeed() == 26));
+						}
+					}
+
+					WHEN("an EV equal to the next divisor multiple (8)")
+					{
+						pokemon.setPokemonIV(0, 18);
+						pokemon.setPokemonEV(0, 8);
+
+						THEN("the EV is properly set")
+						{
+							CHECK((pokemon.getPokemonEV(0) == 8));
+
+							CHECK((pokemon.getMaximumHealth() == 42));
+							CHECK((pokemon.getHealth() == 42));
+							CHECK((pokemon.getAttack() == 26));
+							CHECK((pokemon.getDefense() == 27));
+							CHECK((pokemon.getSpAttack() == 26));
+							CHECK((pokemon.getSpDefense() == 31));
+							CHECK((pokemon.getSpeed() == 26));
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1108,23 +1311,46 @@ SCENARIO("Pokemon")
 
 		GIVEN("maximumHealth")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 5}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mMaxHealth = 5}}, .mLevel = 100})};
 
 			WHEN("calling getMaximumHealth")
 			{
 				THEN("the maximumHealth matches")
 				{
-					CHECK((11 == pokemon.getMaximumHealth()));
+					CHECK((pokemon.getMaximumHealth() == 120));
 				}
 			}
 
-			WHEN("calling setMaximumHealth")
+			GIVEN("calling setMaximumHealth")
 			{
-				pokemon.setMaximumHealth(100);
-
-				THEN("the pokemon's maximum health is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((13 == pokemon.getMaximumHealth()));
+					pokemon.setMaximumHealth(0);
+
+					THEN("the pokemon's maximum health is clamped to 1")
+					{
+						CHECK((pokemon.getMaximumHealth() == 112));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setMaximumHealth(100);
+
+					THEN("the pokemon's maximum health is properly updated")
+					{
+						CHECK((pokemon.getMaximumHealth() == 310));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setMaximumHealth(256);
+
+					THEN("the pokemon's maximum health is clamped to 255")
+					{
+						CHECK((pokemon.getMaximumHealth() == 620));
+					}
 				}
 			}
 
@@ -1149,115 +1375,230 @@ SCENARIO("Pokemon")
 
 		GIVEN("attack")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 5}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mAttack = 7}}, .mLevel = 100})};
 
 			WHEN("calling getAttack")
 			{
 				THEN("the attack matches")
 				{
-					CHECK((5 == pokemon.getAttack()));
+					CHECK((pokemon.getAttack() == 19));
 				}
 			}
 
-			WHEN("calling setAttack")
+			GIVEN("calling setAttack")
 			{
-				pokemon.setAttack(100);
-
-				THEN("the pokemon's attack is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((7 == pokemon.getAttack()));
+					pokemon.setAttack(0);
+
+					THEN("the pokemon's attack is clamped to 1")
+					{
+						CHECK((pokemon.getAttack() == 7));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setAttack(100);
+
+					THEN("the pokemon's attack is properly updated")
+					{
+						CHECK((pokemon.getAttack() == 205));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setAttack(256);
+
+					THEN("the pokemon's attack is clamped to 255")
+					{
+						CHECK((pokemon.getAttack() == 515));
+					}
 				}
 			}
 		}
 
 		GIVEN("defense")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 10}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mDefense = 10}}, .mLevel = 100})};
 
 			WHEN("calling getDefense")
 			{
 				THEN("the defense matches")
 				{
-					CHECK((5 == pokemon.getDefense()));
+					CHECK((pokemon.getDefense() == 25));
 				}
 			}
 
-			WHEN("calling setDefense")
+			GIVEN("calling setDefense")
 			{
-				pokemon.setDefense(200);
-
-				THEN("the pokemon's defense is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((9 == pokemon.getDefense()));
+					pokemon.setDefense(0);
+
+					THEN("the pokemon's defense is clamped to 1")
+					{
+						CHECK((pokemon.getDefense() == 7));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setDefense(100);
+
+					THEN("the pokemon's defense is properly updated")
+					{
+						CHECK((pokemon.getDefense() == 205));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setDefense(256);
+
+					THEN("the pokemon's defense is clamped to 255")
+					{
+						CHECK((pokemon.getDefense() == 515));
+					}
 				}
 			}
 		}
 
 		GIVEN("special attack")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpAttack = 9}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpAttack = 9}}, .mLevel = 100})};
 
 			WHEN("calling getSpAttack")
 			{
 				THEN("the spAttack matches")
 				{
-					CHECK((5 == pokemon.getSpAttack()));
+					CHECK((pokemon.getSpAttack() == 23));
 				}
 			}
 
-			WHEN("calling setSpAttack")
+			GIVEN("calling setSpAttack")
 			{
-				pokemon.setSpAttack(300);
-
-				THEN("the pokemon's special attack is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((11 == pokemon.getSpAttack()));
+					pokemon.setSpAttack(0);
+
+					THEN("the pokemon's spAttack is clamped to 1")
+					{
+						CHECK((pokemon.getSpAttack() == 7));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setSpAttack(100);
+
+					THEN("the pokemon's spAttack is properly updated")
+					{
+						CHECK((pokemon.getSpAttack() == 205));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setSpAttack(256);
+
+					THEN("the pokemon's spAttack is clamped to 255")
+					{
+						CHECK((pokemon.getSpAttack() == 515));
+					}
 				}
 			}
 		}
 
 		GIVEN("special defense")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpDefense = 8}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpDefense = 8}}, .mLevel = 100})};
 
 			WHEN("calling getSpDefense")
 			{
 				THEN("the spDefense matches")
 				{
-					CHECK((5 == pokemon.getSpDefense()));
+					CHECK((pokemon.getSpDefense() == 21));
 				}
 			}
 
-			WHEN("calling setSpDefense")
+			GIVEN("calling setSpDefense")
 			{
-				pokemon.setSpDefense(400);
-
-				THEN("the pokemon's special defense is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((13 == pokemon.getSpDefense()));
+					pokemon.setSpDefense(0);
+
+					THEN("the pokemon's spDefense is clamped to 1")
+					{
+						CHECK((pokemon.getSpDefense() == 7));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setSpDefense(100);
+
+					THEN("the pokemon's spDefense is properly updated")
+					{
+						CHECK((pokemon.getSpDefense() == 205));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setSpDefense(256);
+
+					THEN("the pokemon's spDefense is clamped to 255")
+					{
+						CHECK((pokemon.getSpDefense() == 515));
+					}
 				}
 			}
 		}
 
 		GIVEN("speed")
 		{
-			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpeed = 12}}})};
+			Pokemon pokemon{makePokemon({.mMetadata = {.mBaseStats = {.mSpeed = 12}}, .mLevel = 100})};
 
 			WHEN("calling getSpeed")
 			{
 				THEN("the speed matches")
 				{
-					CHECK((5 == pokemon.getSpeed()));
+					CHECK((pokemon.getSpeed() == 29));
 				}
 			}
 
-			WHEN("calling setSpeed")
+			GIVEN("calling setSpeed")
 			{
-				pokemon.setSpeed(500);
-
-				THEN("the pokemon's speed is properly updated")
+				WHEN("calling with 0")
 				{
-					CHECK((15 == pokemon.getSpeed()));
+					pokemon.setSpeed(0);
+
+					THEN("the pokemon's speed is clamped to 1")
+					{
+						CHECK((pokemon.getSpeed() == 7));
+					}
+				}
+
+				WHEN("calling with a value within bounds")
+				{
+					pokemon.setSpeed(100);
+
+					THEN("the pokemon's speed is properly updated")
+					{
+						CHECK((pokemon.getSpeed() == 205));
+					}
+				}
+
+				WHEN("calling with 256")
+				{
+					pokemon.setSpeed(256);
+
+					THEN("the pokemon's speed is clamped to 255")
+					{
+						CHECK((pokemon.getSpeed() == 515));
+					}
 				}
 			}
 		}
@@ -1281,23 +1622,65 @@ SCENARIO("Pokemon")
 		{
 			THEN("the level and level damage factor matches")
 			{
-				CHECK((20 == pokemon.getLevel()));
-				CHECK((10 == pokemon.getLevelDamageFactor()));
+				CHECK((pokemon.getLevel() == 20));
+				CHECK((pokemon.getLevelDamageFactor() == 10));
 
 				CHECK(checkStats(pokemon, 71, 71, 50, 55, 51, 57, 48));
 			}
 		}
 
-		WHEN("calling setLevel")
+		GIVEN("setLevel")
 		{
-			pokemon.setLevel(30);
-
-			THEN("the pokemon's level and level damage factor are properly updated")
+			WHEN("calling with a number that falls in the bounds")
 			{
-				CHECK((30 == pokemon.getLevel()));
-				CHECK((14 == pokemon.getLevelDamageFactor()));
+				pokemon.setLevel(30);
 
-				CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
+				THEN("the pokemon's level and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 30));
+					CHECK((pokemon.getLevelDamageFactor() == 14));
+
+					CHECK(checkStats(pokemon, 102, 102, 73, 80, 74, 83, 70));
+				}
+			}
+
+			WHEN("calling with 0")
+			{
+				pokemon.setLevel(0);
+
+				THEN("the pokemon's level is clamped to 1 and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 1));
+					CHECK((pokemon.getLevelDamageFactor() == 2));
+
+					CHECK(checkStats(pokemon, 13, 13, 7, 7, 7, 7, 7));
+				}
+			}
+
+			WHEN("calling with 101")
+			{
+				pokemon.setLevel(101);
+
+				THEN("the pokemon's level is clamped to 100 and level damage factor are properly updated")
+				{
+					CHECK((pokemon.getLevel() == 100));
+					CHECK((pokemon.getLevelDamageFactor() == 42));
+
+					CHECK(checkStats(pokemon, 317, 317, 233, 256, 236, 267, 222));
+				}
+			}
+
+			WHEN("calling with a level whose unclamped damage factor differs from level 100")
+			{
+				pokemon.setLevel(255);
+
+				THEN("the level damage factor is derived from the clamped level")
+				{
+					CHECK((pokemon.getLevel() == 100));
+					CHECK((pokemon.getLevelDamageFactor() == 42));
+
+					CHECK(checkStats(pokemon, 317, 317, 233, 256, 236, 267, 222));
+				}
 			}
 		}
 	}
@@ -1343,6 +1726,23 @@ SCENARIO("Pokemon")
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Bulbasaur)));
 
 				CHECK(checkStats(pokemon, 111, 111, 90, 95, 91, 97, 88));
+			}
+		}
+
+		WHEN("calling setSpecies with base stats outside the allowed bounds")
+		{
+			PokemonMeta meta{
+				.mBaseStats = {.mMaxHealth = 0, .mAttack = 256, .mDefense = 0, .mSpAttack = 256, .mSpDefense = 0, .mSpeed = 256},
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+			};
+
+			pokemon.setLevel(100);
+			pokemon.setSpecies(meta);
+
+			THEN("the base stats are clamped to 1 and 255")
+			{
+				CHECK(checkStats(pokemon, 119, 119, 543, 58, 546, 69, 532));
 			}
 		}
 	}
@@ -2546,6 +2946,53 @@ SCENARIO("Pokemon")
 				CHECK((lowHealthPokemon.getMaximumHealth() == 40));
 				CHECK((lowHealthPokemon.getHealth() == 1));
 				CHECK_FALSE(lowHealthPokemon.isFainted());
+			}
+		}
+
+		GIVEN("a Pokemon with the largest possible stat")
+		{
+			WHEN("handling the pokemon's health")
+			{
+				pokemon.setMaximumHealth(255);
+				pokemon.setPokemonIV(0, 31);
+				pokemon.setPokemonEV(0, 252);
+				pokemon.setLevel(100);
+
+				THEN("the stat is set properly")
+				{
+					CHECK((pokemon.getMaximumHealth() == 714));
+					CHECK((pokemon.getHealth() == 714));
+				}
+			}
+
+			GIVEN("handling the pokemon's other stats")
+			{
+				WHEN("calling with no stat boosting nature")
+				{
+					pokemon.setAttack(255);
+					pokemon.setPokemonIV(1, 31);
+					pokemon.setPokemonEV(1, 252);
+					pokemon.setLevel(100);
+
+					THEN("the stat is set properly")
+					{
+						CHECK((pokemon.getAttack() == 609));
+					}
+				}
+
+				WHEN("calling with a stat boosting nature")
+				{
+					pokemon.setNatureID(0, toNatureID(BuiltinNatureID::Brave), natureRegistry);
+					pokemon.setAttack(255);
+					pokemon.setPokemonIV(1, 31);
+					pokemon.setPokemonEV(1, 252);
+					pokemon.setLevel(100);
+
+					THEN("the stat is set properly")
+					{
+						CHECK((pokemon.getAttack() == 669));
+					}
+				}
 			}
 		}
 	}

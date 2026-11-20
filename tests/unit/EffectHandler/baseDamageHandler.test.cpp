@@ -1,8 +1,8 @@
 /*! @file baseDamageHandler.test.cpp
 	@brief C++ file for running tests for the BaseDamageHandler.
-	@date 10/27/2026
+	@date 11/16/2026
 	@since 0.8.7
-	@version 0.12.53
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -665,13 +665,13 @@ SCENARIO("BaseDamageHandler")
 
 	GIVEN("a damage calculation that exceeds the result type")
 	{
-		userPokemon.setLevel(65'535);
-		userPokemon.setAttack(65'535);
+		userPokemon.setLevel(100);
+		userPokemon.setAttack(255);
 		targetPokemon.setLevel(50);
 		targetPokemon.setDefense(1);
 
-		handlerContext.mMoveBasePower = 255;
-		freeFunctionContext.mMoveBasePower = 255;
+		handlerContext.mMoveBasePower = 65'535;
+		freeFunctionContext.mMoveBasePower = 65'535;
 
 		WHEN("base damage is applied before external modifiers")
 		{

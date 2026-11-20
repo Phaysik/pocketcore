@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.test.cpp
 	@brief C++ file for running tests for the LearnsetRegistry.
-	@date 11/05/2026
+	@date 11/16/2026
 	@since 0.12.50
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -29,17 +29,7 @@ using PocketCore::Configuration::LearnsetRegistryConfiguration;
 using PocketCore::Core::ub;
 using PocketCore::Learnset::AcquisitionMethod;
 using PocketCore::Learnset::BuiltinLearnsetID;
-using PocketCore::Learnset::LEARNSET_NAME_BLASTOISE;
-using PocketCore::Learnset::LEARNSET_NAME_BULBASAUR;
-using PocketCore::Learnset::LEARNSET_NAME_CHARIZARD;
-using PocketCore::Learnset::LEARNSET_NAME_CHARMANDER;
-using PocketCore::Learnset::LEARNSET_NAME_CHARMELEON;
-using PocketCore::Learnset::LEARNSET_NAME_DITTO;
-using PocketCore::Learnset::LEARNSET_NAME_IVYSAUR;
 using PocketCore::Learnset::LEARNSET_NAME_NONE;
-using PocketCore::Learnset::LEARNSET_NAME_SQUIRTLE;
-using PocketCore::Learnset::LEARNSET_NAME_VENUSAUR;
-using PocketCore::Learnset::LEARNSET_NAME_WARTORTLE;
 using PocketCore::Learnset::LearnsetID;
 using PocketCore::Learnset::LearnsetMeta;
 using PocketCore::Learnset::NO_LEARNSET_ID;
@@ -67,7 +57,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Bulbasaur Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_BULBASAUR),
+				.mName = "Bulbasaur Learnset",
 				.mEntries = {
                     {
   						.mMoveID = toMoveID(BuiltinMoveID::Growl),
@@ -96,7 +86,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Ivysaur Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_IVYSAUR),
+				.mName = "Ivysaur Learnset",
 				.mEntries = {
                     {
   						.mMoveID = toMoveID(BuiltinMoveID::Growl),
@@ -125,7 +115,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Venusaur Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_VENUSAUR),
+				.mName = "Venusaur Learnset",
 				.mEntries = {
                     {
   						.mMoveID = toMoveID(BuiltinMoveID::Growl),
@@ -154,7 +144,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Charmander Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARMANDER),
+				.mName = "Charmander Learnset",
 				.mEntries = {
                     {
   						.mMoveID = toMoveID(BuiltinMoveID::Growl),
@@ -183,7 +173,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Charmeleon Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARMELEON),
+				.mName = "Charmeleon Learnset",
 				.mEntries = {
                     {
   						.mMoveID = toMoveID(BuiltinMoveID::Growl),
@@ -212,7 +202,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Charizard Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_CHARIZARD),
+				.mName = "Charizard Learnset",
 				.mEntries = {
 				    {
   						.mMoveID = toMoveID(BuiltinMoveID::DragonClaw),
@@ -246,7 +236,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Squirtle Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_SQUIRTLE),
+				.mName = "Squirtle Learnset",
 				.mEntries = {
    					{
   						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
@@ -275,7 +265,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Wartortle Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_WARTORTLE),
+				.mName = "Wartortle Learnset",
 				.mEntries = {
    					{
   						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
@@ -304,7 +294,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Blastoise Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_BLASTOISE),
+				.mName = "Blastoise Learnset",
 				.mEntries = {
    					{
   						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
@@ -333,7 +323,7 @@ SCENARIO("LearnsetRegistry")
 		THEN("Ditto Learnset has the appropriate properties")
 		{
 			LearnsetMeta expected{
-				.mName = std::string(LEARNSET_NAME_DITTO),
+				.mName = "Ditto Learnset",
 				.mEntries = {
 				    {
 						.mMoveID = toMoveID(BuiltinMoveID::Transform),
@@ -345,6 +335,30 @@ SCENARIO("LearnsetRegistry")
 			};
 
 			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::DittoLearnset))};
+
+			CHECK((expected == *actual));
+		}
+
+		THEN("Garchomp Learnset has the appropriate properties")
+		{
+			LearnsetMeta expected{
+				.mName = "Garchomp Learnset",
+				.mEntries = {
+    				{
+                		.mMoveID = toMoveID(BuiltinMoveID::SandTomb),
+                		.mLevelRequirement = 1,
+                		.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                	},
+				    {
+						.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+						.mLevelRequirement = 1,
+						.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+					},
+				},
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::GarchompLearnset),
+			};
+
+			const LearnsetMeta *actual{registry.getLearnsetMetadata(toLearnsetID(BuiltinLearnsetID::GarchompLearnset))};
 
 			CHECK((expected == *actual));
 		}

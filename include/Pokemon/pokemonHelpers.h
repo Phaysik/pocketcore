@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 11/09/2026
+	@date 11/20/2026
 	@since 0.12.28
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -252,6 +252,21 @@ namespace PocketCore::Pokemon
 	ATTR_NODISCARD std::expected<void, MoveError> fillWithValidMoves(std::array<MoveID, MAX_MOVES_PER_POKEMON> &moveIDs,
 																	 const MoveRegistry &moveRegistry, const LearnsetMeta &learnsetMeta,
 																	 const PokemonEncounter &encounterData, const us pokemonEncounterLevel);
+
+	/*! @brief Selects a gender from a gender pool, weighted by each entry's chance.
+		@details Entries whose @ref PokemonGenderEntry::mChance is non-finite or not positive are ignored. Chances are relative weights
+		 and need not sum to 1 or 100. A value is drawn uniformly from [0, total) using @p randomSources and the entry whose cumulative
+		 weight range contains it is returned. If rounding leaves the drawn value at or above the final cumulative weight, the last valid
+		 entry is returned.
+		@param[in] genderPool Read-only, non-owning span of weighted gender entries borrowed for this call; no reference is retained.
+		@param[in] randomSources The random sources whose real-number generator draws the weighted selection.
+		@return The selected gender, or @ref PokemonGender::Genderless when @p genderPool is empty, contains no valid weights, or its
+		 total weight is non-finite.
+		@since 0.12.56
+		@version 0.12.56
+	*/
+	ATTR_NODISCARD std::expected<PokemonGender, PokemonError> selectRandomGender(std::span<const PokemonGenderEntry> genderPool,
+																				 const BattleRandomSources &randomSources);
 } // namespace PocketCore::Pokemon
 
 #endif

@@ -1,8 +1,8 @@
 /*! @file builtinLearnsetID.h
 	@brief Defines identifiers for learnsets compiled into PocketCore.
-	@date 10/26/2026
+	@date 11/16/2026
 	@since 0.12.24
-	@version 0.12.53
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -26,9 +26,9 @@ namespace PocketCore::Learnset
 		@details This closed enum is only a catalog of built-in learnsets. Runtime state and user-facing APIs use the open @ref LearnsetID
 	   type.
 		@note All enum values must be handled exhaustively when registering built-in metadata.
-		@date 10/26/2026
+		@date 11/16/2026
 		@since 0.12.24
-		@version 0.12.53
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	enum class BuiltinLearnsetID : ub
@@ -45,6 +45,7 @@ namespace PocketCore::Learnset
 		BlastoiseLearnset,
 
 		DittoLearnset,
+		GarchompLearnset,
 
 		FinalLearnset,
 	};
