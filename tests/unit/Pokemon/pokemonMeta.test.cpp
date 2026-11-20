@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.test.cpp
 	@brief C++ file for running tests for the PokemonMeta.
-	@date 11/09/2026
+	@date 11/20/2026
 	@since 0.12.51
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -90,7 +90,7 @@ SCENARIO("PokemonMeta")
 
 		GIVEN("for mGenderPool modified in one meta")
 		{
-			PokemonMeta other{.mGenderPool = {{PokemonGender::Female}}};
+			PokemonMeta other{.mGenderPool = {{{.mGender = PokemonGender::Female}}}};
 
 			THEN("they are not equal")
 			{

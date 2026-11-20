@@ -30,12 +30,13 @@ All constants live in `include/Configuration/constants.h`.
 
 ## Inputs and bounds
 
-| Input  | Range                            | Enforced by                                                                                      |
-| ------ | -------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Level  | 1–100                            | `updateLevel()` clamps to `MIN_POKEMON_LEVEL`/`MAX_POKEMON_LEVEL`                                |
-| IV     | 0–31 per stat                    | `isValidPokemonIV()`; invalid values leave the stored IVs unchanged                              |
-| EV     | 0–252 per stat, 510 total        | `isValidPokemonEV()`/`isValidPokemonEVArray()`; invalid values leave the stored EVs unchanged    |
-| Nature | 0.9, 1.0, or 1.1 per non-HP stat | `NATURE_STAT_WEAKNESS_MULTIPLIER`, `NATURE_STAT_BASE_MULTIPLIER`, `NATURE_STAT_BOOST_MULTIPLIER` |
+| Input     | Range                            | Enforced by                                                                                                        |
+| --------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Base stat | 1–255 per stat                   | `updateBaseStats()` and the base-stat setters clamp to `MIN_POKEMON_BASE_STAT_VALUE`/`MAX_POKEMON_BASE_STAT_VALUE` |
+| Level     | 1–100                            | `updateLevel()` clamps to `MIN_POKEMON_LEVEL`/`MAX_POKEMON_LEVEL`                                                  |
+| IV        | 0–31 per stat                    | `isValidPokemonIV()`; invalid values leave the stored IVs unchanged                                                |
+| EV        | 0–252 per stat, 510 total        | `isValidPokemonEV()`/`isValidPokemonEVArray()`; invalid values leave the stored EVs unchanged                      |
+| Nature    | 0.9, 1.0, or 1.1 per non-HP stat | `NATURE_STAT_WEAKNESS_MULTIPLIER`, `NATURE_STAT_BASE_MULTIPLIER`, `NATURE_STAT_BOOST_MULTIPLIER`                   |
 
 ## Rounding points
 
@@ -45,7 +46,7 @@ The formula rounds down at exactly three points, in this order:
 2. **Level scaling** — $\lfloor (\ldots) \times L / 100 \rfloor$. Implemented as unsigned integer division of the full product; the level is applied before dividing, never after.
 3. **Nature** — $\lfloor (\text{core} + 5) \times N \rfloor$. Implemented as a `double` multiplication truncated by `static_cast<us>`. Truncation equals floor because every operand is non-negative.
 
-The `std::floor` calls wrapping the first two steps operate on results that are already integers; the rounding comes from integer division.
+The first two steps use no `std::floor`; integer division provides the rounding.
 
 The nature step is applied **after** the `+ 5` offset, matching Gen 9. The `double` values of 1.1 and 0.9 are both stored marginally above their decimal values, so a product whose exact result is an integer (for example $50 \times 1.1 = 55$) never truncates to one below it.
 

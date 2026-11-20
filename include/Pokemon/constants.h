@@ -1,6 +1,6 @@
 /*! @file constants.h
 	@brief Contains constexpr assert message strings for the pokemon registry.
-	@date 11/16/2026
+	@date 11/20/2026
 	@since 0.11.6
 	@version 0.12.56
 	@author Matthew Moore
@@ -16,8 +16,9 @@
 #include "Ability/builtInAbilityID.h"
 #include "Configuration/constants.h"
 #include "Location/builtInLocationID.h"
-#include "Pokemon/pokemonEncounter.h"
 
+#include "pokemonEncounter.h"
+#include "pokemonMetaEntries.h"
 #include "pokemonStats.h"
 
 namespace PocketCore::Pokemon
@@ -41,6 +42,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 65,
 		.mSpeed = 45,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> BULBASAUR_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> BULBASAUR_ENCOUNTERS{
 		{
 			{
@@ -63,6 +70,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 80,
 		.mSpeed = 60,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> IVYSAUR_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> IVYSAUR_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_VENUSAUR{"Venusaur"};
@@ -74,6 +87,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 100,
 		.mSpeed = 80,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> VENUSAUR_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> VENUSAUR_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_CHARMANDER{"Charmander"};
@@ -84,6 +103,12 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 60,
 		.mSpDefense = 50,
 		.mSpeed = 65,
+	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> CHARMANDER_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
 	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARMANDER_ENCOUNTERS{
 		{
@@ -107,6 +132,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 65,
 		.mSpeed = 80,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> CHARMELEON_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARMELEON_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_CHARIZARD{"Charizard"};
@@ -118,6 +149,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 85,
 		.mSpeed = 100,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> CHARIZARD_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> CHARIZARD_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_SQUIRTLE{"Squirtle"};
@@ -128,6 +165,12 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 50,
 		.mSpDefense = 64,
 		.mSpeed = 43,
+	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> SQUIRTLE_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
 	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> SQUIRTLE_ENCOUNTERS{
 		{
@@ -151,6 +194,12 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 80,
 		.mSpeed = 58,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> WARTORTLE_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> WARTORTLE_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_BLASTOISE{"Blastoise"};
@@ -161,6 +210,12 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 85,
 		.mSpDefense = 105,
 		.mSpeed = 78,
+	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> BLASTOISE_GENDER_POOL{
+		{
+			{.mChance = 0.875, .mGender = PokemonGender::Male},
+			{.mChance = 0.125, .mGender = PokemonGender::Female},
+		},
 	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> BLASTOISE_ENCOUNTERS{};
 
@@ -173,6 +228,11 @@ namespace PocketCore::Pokemon
 		.mSpDefense = 48,
 		.mSpeed = 48,
 	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> DITTO_GENDER_POOL{
+		{
+			{.mChance = 1, .mGender = PokemonGender::Genderless},
+		},
+	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> DITTO_ENCOUNTERS{};
 
 	inline constexpr std::string_view POKEMON_NAME_GARCHOMP{"Garchomp"};
@@ -183,6 +243,12 @@ namespace PocketCore::Pokemon
 		.mSpAttack = 80,
 		.mSpDefense = 85,
 		.mSpeed = 102,
+	};
+	inline constexpr std::array<PokemonGenderEntry, MAX_GENDERS> GARCHOMP_GENDER_POOL{
+		{
+			{.mChance = 0.5, .mGender = PokemonGender::Male},
+			{.mChance = 0.5, .mGender = PokemonGender::Female},
+		},
 	};
 	inline constexpr std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> GARCHOMP_ENCOUNTERS{};
 } // namespace PocketCore::Pokemon

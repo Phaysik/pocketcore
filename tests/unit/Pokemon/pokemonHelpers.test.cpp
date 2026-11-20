@@ -1,6 +1,6 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/16/2026
+	@date 11/20/2026
 	@since 0.12.28
 	@version 0.12.56
 	@author Matthew Moore
@@ -39,6 +39,7 @@
 #include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonMetaEntries.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
 #include "Registry/itemRegistry.h"
@@ -109,8 +110,10 @@ using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
 using PocketCore::Pokemon::PokemonGender;
+using PocketCore::Pokemon::PokemonGenderEntry;
 using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonOrigin;
+using PocketCore::Pokemon::selectRandomGender;
 using PocketCore::Registry::Ability::AbilityRegistry;
 using PocketCore::Registry::Item::ItemRegistry;
 using PocketCore::Registry::Move::MoveRegistry;
@@ -2637,6 +2640,25 @@ SCENARIO("Pokemon free function")
 			{
 				CHECK(result.has_value());
 				CHECK(std::ranges::all_of(validPokemonEVs, [](const us pokemonEV) { return pokemonEV == 0; }));
+			}
+		}
+	}
+
+	GIVEN("selectRandomGender")
+	{
+		std::vector<PokemonGenderEntry> genderPool{};
+
+		WHEN("calling with an infinite chance")
+		{
+			genderPool.push_back({.mChance = std::numeric_limits<double>::infinity()});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
 			}
 		}
 	}

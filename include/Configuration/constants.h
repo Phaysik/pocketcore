@@ -397,10 +397,15 @@ namespace PocketCore::Configuration
 	/*! @brief The minimum level a Pokemon can be encountered at. */
 	inline constexpr us MIN_ENCOUNTER_LEVEL{1};
 
-	/*! @brief The maximum level a Pokemon can have. */
-	inline constexpr us MAX_POKEMON_LEVEL{100};
 	/*! @brief The minimum level a Pokemon can have. */
 	inline constexpr us MIN_POKEMON_LEVEL{1};
+	/*! @brief The maximum level a Pokemon can have. */
+	inline constexpr us MAX_POKEMON_LEVEL{100};
+
+	/*! @brief The minimum base stat value a Pokemon can have. */
+	inline constexpr us MIN_POKEMON_BASE_STAT_VALUE{1};
+	/*! @brief The maximum base stat value a Pokemon can have. */
+	inline constexpr us MAX_POKEMON_BASE_STAT_VALUE{255};
 } // namespace PocketCore::Configuration
 
 #endif

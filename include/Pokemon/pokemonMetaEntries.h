@@ -1,8 +1,8 @@
 /*! @file pokemonMetaEntries.h
 	@brief Defines data carriers for Pokemon meta entries, including abilities and items.
-	@date 11/09/2026
+	@date 11/20/2026
 	@since 0.12.54
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -43,6 +43,43 @@ namespace PocketCore::Pokemon
 		Female,
 		/*! @brief Represents a Pokemon without a gender. */
 		Genderless,
+	};
+
+	/*! @struct PokemonGenderEntry Pokemon/pokemonMetaEntries.h
+		@brief Stores a Pokemon gender and its selection chance.
+		@details Serves as a data carrier for entries in @ref PokemonMeta::mGenderPool.
+		@date 11/20/2026
+		@since 0.12.56
+		@version 0.12.56
+		@author Matthew Moore
+	*/
+	struct PokemonGenderEntry
+	{
+		public:
+			/*! @brief Compares the gender exactly and the chance approximately.
+				@param[in] other The entry to compare; the reference is not retained.
+				@return True when the genders match and the chances are approximately equal; otherwise false.
+				@note Chance comparison uses @ref approximatelyEqualAbsRel with its default absolute and relative tolerances. Supports
+				compile-time and runtime evaluation without throwing.
+				@date 11/20/2026
+				@since 0.12.56
+				@version 0.12.56
+				@author Matthew Moore
+			*/
+			ATTR_NODISCARD constexpr bool operator==(const PokemonGenderEntry &other) const noexcept
+			{
+				return mGender == other.mGender && approximatelyEqualAbsRel(mChance, other.mChance);
+			}
+
+			// NOLINTBEGIN(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
+
+			/*! @brief The chance associated with this gender. */
+			double mChance{};
+
+			/*! @brief The gender represented by this entry. */
+			PokemonGender mGender{};
+
+			// NOLINTEND(misc-non-private-member-variables-in-classes,cppcoreguidelines-non-private-member-variables-in-classes)
 	};
 
 	/*! @struct PokemonAbilityEntry Pokemon/pokemonMeta.h987568
