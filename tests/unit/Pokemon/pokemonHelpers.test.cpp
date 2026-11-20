@@ -2661,6 +2661,120 @@ SCENARIO("Pokemon free function")
 				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
 			}
 		}
+
+		WHEN("calling with finite chances whose total overflows")
+		{
+			genderPool.push_back({.mChance = std::numeric_limits<double>::max(), .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = std::numeric_limits<double>::max(), .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with a negative chance")
+		{
+			genderPool.push_back({.mChance = -0.2});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with a zero chance")
+		{
+			genderPool.push_back({.mChance = 0});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with only one valid choice")
+		{
+			genderPool.push_back({.mChance = -0.2, .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns PokemonGender::Female")
+			{
+				REQUIRE(result.has_value());
+				CHECK((result.value() == PokemonGender::Female));
+			}
+		}
+
+		GIVEN("calling with two valid choices")
+		{
+			WHEN("calling with a random value that would get the first valid choice")
+			{
+				SequenceRandom<double> realSequence{0.6};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				randomSources.mReal = realSource;
+
+				genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+				genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+				std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+				THEN("it returns PokemonGender::Male")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == PokemonGender::Male));
+				}
+			}
+
+			WHEN("calling with a random value that would get the first second choice")
+			{
+				SequenceRandom<double> realSequence{0.8};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				randomSources.mReal = realSource;
+
+				genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+				genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+				std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+				THEN("it returns PokemonGender::Female")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == PokemonGender::Female));
+				}
+			}
+		}
+
+		WHEN("calling with a random value that exceeds the total chance")
+		{
+			SequenceRandom<double> realSequence{1.5};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			randomSources.mReal = realSource;
+
+			genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns the last valid entry")
+			{
+				REQUIRE(result.has_value());
+				CHECK((result.value() == PokemonGender::Female));
+			}
+		}
 	}
 
 	GIVEN("printPokemonWithNames")
