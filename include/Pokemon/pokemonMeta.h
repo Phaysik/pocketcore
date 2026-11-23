@@ -1,8 +1,8 @@
 /*! @file pokemonMeta.h
 	@brief Defines the metadata stored for built-in and user-defined pokemons.
-	@date 11/09/2026
+	@date 11/23/2026
 	@since 0.11.6
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -10,6 +10,7 @@
 #define INCLUDE_POKEMON_POKEMONMETA_H
 
 #include <array>
+#include <optional>
 #include <string>
 
 #include "Ability/abilityID.h"
@@ -54,9 +55,9 @@ namespace PocketCore::Pokemon
 		@brief Stores shared species or form metadata and species-specific encounter definitions.
 		@details Owns its display name and encounter array. Encounter entries reference shared location identities while defining their own
 			acquisition levels and origins. Individual current levels and acquisition histories are not stored here.
-		@date 10/26/2026
+		@date 11/23/2026
 		@since 0.11.6
-		@version 0.12.53
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	struct PokemonMeta
@@ -76,14 +77,20 @@ namespace PocketCore::Pokemon
 			/*! @brief The species-specific encounters; entries with NO_LOCATION_ID are unused slots. */
 			std::array<PokemonEncounter, MAX_ENCOUNTERS_PER_POKEMON> mEncounters{};
 
-			/*! @brief The case-sensitive display name stored. */
-			std::string mName{};
-
 			/*! @brief The Pokemon's pool of available items. */
 			std::array<PokemonItemEntry, MAX_ITEM_POOL_PER_POKEMON> mItemPool{};
 
+			/*! @brief The Pokemon's pool of available genders. */
+			std::array<PokemonGenderEntry, MAX_GENDERS> mGenderPool{};
+
 			/*! @brief The Pokemon's pool of available abilities. */
 			std::array<PokemonAbilityEntry, MAX_ABILITY_POOL_PER_POKEMON> mAbilityPool{};
+
+			/*! @brief The case-sensitive display name stored. */
+			std::string mName{};
+
+			/*! @brief The Pokemon's fixed stats, if any. */
+			std::array<std::optional<us>, POKEMON_STAT_COUNT> mFixedStats{};
 
 			/*! @brief The Pokemon's base stats. */
 			PokemonStats mBaseStats{};
@@ -93,9 +100,6 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The Pokemon's type IDs. */
 			std::array<TypeID, MAX_TYPES_PER_POKEMON> mTypeIDs{};
-
-			/*! @brief The Pokemon's pool of available genders. */
-			std::array<PokemonGender, MAX_GENDERS> mGenderPool{};
 
 			/*! @brief The stable built-in or user-assigned identifier. */
 			PokemonID mPokemonID{};

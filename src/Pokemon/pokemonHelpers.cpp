@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 11/11/2026
+	@date 11/20/2026
 	@since 0.12.28
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -879,5 +879,49 @@ namespace PocketCore::Pokemon
 		}
 
 		return {};
+	}
+
+	ATTR_NODISCARD std::expected<PokemonGender, PokemonError> selectRandomGender(std::span<const PokemonGenderEntry> genderPool,
+																				 const BattleRandomSources &randomSources)
+	{
+		const auto isValidChance{[](const PokemonGenderEntry &entry) { return std::isfinite(entry.mChance) && entry.mChance > 0.0; }};
+
+		double totalChance{0.0};
+
+		for (const PokemonGenderEntry &entry : genderPool)
+		{
+			if (isValidChance(entry))
+			{
+				totalChance += entry.mChance;
+			}
+		}
+
+		// No weighted entries (unfilled pool) means the species has no defined gender
+		if (!std::isfinite(totalChance) || totalChance <= 0.0)
+		{
+			return std::unexpected{PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS};
+		}
+
+		const double selectedChance{randomSources.mReal.get()(0.0, totalChance)};
+		double cumulativeChance{0.0};
+		PokemonGender result{PokemonGender::Genderless};
+
+		for (const PokemonGenderEntry &entry : genderPool)
+		{
+			if (!isValidChance(entry))
+			{
+				continue;
+			}
+
+			cumulativeChance += entry.mChance;
+			result = entry.mGender; // Falls back to the last valid entry if rounding leaves selectedChance >= total
+
+			if (selectedChance < cumulativeChance)
+			{
+				break;
+			}
+		}
+
+		return result;
 	}
 } // namespace PocketCore::Pokemon

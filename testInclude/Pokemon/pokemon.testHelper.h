@@ -1,8 +1,8 @@
 /*! @file pokemon.testHelper.h
 	@brief Test helper for dealing with Pokemon concepts.
-	@date 11/06/2026
+	@date 11/20/2026
 	@since 0.12.13
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -134,9 +134,9 @@ namespace PocketCore::Testing
 	constexpr bool checkStats(const Pokemon &pokemon, const us expectedMaxHP, const us expectedHP, const us expectedAttack,
 							  const us expectedDefense, const us expectedSpAttack, const us expectedSpDefense, const us expectedSpeed)
 	{
-		return pokemon.getMaximumHealth() == expectedMaxHP || pokemon.getHealth() == expectedHP || pokemon.getAttack() == expectedAttack
-			|| pokemon.getDefense() == expectedDefense || pokemon.getSpAttack() == expectedSpAttack
-			|| pokemon.getSpDefense() == expectedSpDefense || pokemon.getSpeed() == expectedSpeed;
+		return pokemon.getMaximumHealth() == expectedMaxHP && pokemon.getHealth() == expectedHP && pokemon.getAttack() == expectedAttack
+			&& pokemon.getDefense() == expectedDefense && pokemon.getSpAttack() == expectedSpAttack
+			&& pokemon.getSpDefense() == expectedSpDefense && pokemon.getSpeed() == expectedSpeed;
 	}
 
 } // namespace PocketCore::Testing

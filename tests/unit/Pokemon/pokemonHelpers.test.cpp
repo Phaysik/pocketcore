@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/11/2026
+	@date 11/20/2026
 	@since 0.12.28
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -39,6 +39,7 @@
 #include "Pokemon/pokemonEncounter.h"
 #include "Pokemon/pokemonInstantiationContext.h"
 #include "Pokemon/pokemonMeta.h"
+#include "Pokemon/pokemonMetaEntries.h"
 #include "Pokemon/pokemonStats.h"
 #include "Registry/abilityRegistry.h"
 #include "Registry/itemRegistry.h"
@@ -109,8 +110,10 @@ using PocketCore::Pokemon::PokemonAbilityEntry;
 using PocketCore::Pokemon::PokemonBreedingContext;
 using PocketCore::Pokemon::PokemonEncounter;
 using PocketCore::Pokemon::PokemonGender;
+using PocketCore::Pokemon::PokemonGenderEntry;
 using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonOrigin;
+using PocketCore::Pokemon::selectRandomGender;
 using PocketCore::Registry::Ability::AbilityRegistry;
 using PocketCore::Registry::Item::ItemRegistry;
 using PocketCore::Registry::Move::MoveRegistry;
@@ -2641,6 +2644,139 @@ SCENARIO("Pokemon free function")
 		}
 	}
 
+	GIVEN("selectRandomGender")
+	{
+		std::vector<PokemonGenderEntry> genderPool{};
+
+		WHEN("calling with an infinite chance")
+		{
+			genderPool.push_back({.mChance = std::numeric_limits<double>::infinity()});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with finite chances whose total overflows")
+		{
+			genderPool.push_back({.mChance = std::numeric_limits<double>::max(), .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = std::numeric_limits<double>::max(), .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with a negative chance")
+		{
+			genderPool.push_back({.mChance = -0.2});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with a zero chance")
+		{
+			genderPool.push_back({.mChance = 0});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns NO_VALID_GENDER_ENTRY_WEIGHTS")
+			{
+				REQUIRE_FALSE(result.has_value());
+
+				CHECK((result.error() == PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS));
+			}
+		}
+
+		WHEN("calling with only one valid choice")
+		{
+			genderPool.push_back({.mChance = -0.2, .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns PokemonGender::Female")
+			{
+				REQUIRE(result.has_value());
+				CHECK((result.value() == PokemonGender::Female));
+			}
+		}
+
+		GIVEN("calling with two valid choices")
+		{
+			WHEN("calling with a random value that would get the first valid choice")
+			{
+				SequenceRandom<double> realSequence{0.6};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				randomSources.mReal = realSource;
+
+				genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+				genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+				std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+				THEN("it returns PokemonGender::Male")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == PokemonGender::Male));
+				}
+			}
+
+			WHEN("calling with a random value that would get the first second choice")
+			{
+				SequenceRandom<double> realSequence{0.8};
+				CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+				randomSources.mReal = realSource;
+
+				genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+				genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+				std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+				THEN("it returns PokemonGender::Female")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == PokemonGender::Female));
+				}
+			}
+		}
+
+		WHEN("calling with a random value that exceeds the total chance")
+		{
+			SequenceRandom<double> realSequence{1.5};
+			CallableRandomSource<double, std::reference_wrapper<SequenceRandom<double>>> realSource{std::ref(realSequence)};
+			randomSources.mReal = realSource;
+
+			genderPool.push_back({.mChance = 0.7, .mGender = PokemonGender::Male});
+			genderPool.push_back({.mChance = 0.5, .mGender = PokemonGender::Female});
+
+			std::expected<PokemonGender, PokemonError> result{selectRandomGender(genderPool, randomSources)};
+
+			THEN("it returns the last valid entry")
+			{
+				REQUIRE(result.has_value());
+				CHECK((result.value() == PokemonGender::Female));
+			}
+		}
+	}
+
 	GIVEN("printPokemonWithNames")
 	{
 		GIVEN("valid registries")
@@ -2736,7 +2872,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
@@ -2769,11 +2905,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -2880,7 +3016,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
@@ -2913,11 +3049,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3024,7 +3160,7 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
@@ -3057,11 +3193,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3168,7 +3304,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: <unregistered>\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
@@ -3201,11 +3337,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3312,7 +3448,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
@@ -3345,11 +3481,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3456,7 +3592,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Standard\n"
 						"  Items:\n"
@@ -3489,11 +3625,11 @@ SCENARIO("Pokemon free function")
 						"      Name: Karate Chop\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: Facade\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: Hydro Steam\n"
 						"      PP: 20/30\n"
 						"}",
@@ -3600,7 +3736,7 @@ SCENARIO("Pokemon free function")
 						"      Name: Hardy\n"
 						"  Abilities:\n"
 						"    [0]:\n"
-						"      ID: 15\n"
+						"      ID: 17\n"
 						"      Name: Air Lock\n"
 						"      Classification: Hidden\n"
 						"  Items:\n"
@@ -3633,11 +3769,11 @@ SCENARIO("Pokemon free function")
 						"      Name: <unregistered>\n"
 						"      PP: 10/20\n"
 						"    [2]:\n"
-						"      ID: 13\n"
+						"      ID: 14\n"
 						"      Name: <unregistered>\n"
 						"      PP: 15/25\n"
 						"    [3]:\n"
-						"      ID: 14\n"
+						"      ID: 15\n"
 						"      Name: <unregistered>\n"
 						"      PP: 20/30\n"
 						"}",

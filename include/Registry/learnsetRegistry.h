@@ -1,8 +1,8 @@
 /*! @file learnsetRegistry.h
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined learnsets.
-	@date 11/05/2026
+	@date 11/16/2026
 	@since 0.12.50
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -35,6 +35,7 @@ namespace PocketCore::Registry::Learnset
 	using PocketCore::Learnset::LEARNSET_NAME_CHARMANDER;
 	using PocketCore::Learnset::LEARNSET_NAME_CHARMELEON;
 	using PocketCore::Learnset::LEARNSET_NAME_DITTO;
+	using PocketCore::Learnset::LEARNSET_NAME_GARCHOMP;
 	using PocketCore::Learnset::LEARNSET_NAME_IVYSAUR;
 	using PocketCore::Learnset::LEARNSET_NAME_NONE;
 	using PocketCore::Learnset::LEARNSET_NAME_SQUIRTLE;
@@ -52,9 +53,9 @@ namespace PocketCore::Registry::Learnset
 		@details Built-in learnsets are registered during construction with IDs derived from @ref BuiltinLearnsetID. Configuration code may
 	   append, replace, or remove owned metadata through protected mutators while battle-time callers use allocation-free lookup operations.
 		@note Stable-ID lookups are O(log n), while name lookups are O(n), where n is bounded by @ref MAX_LEARNSETS.
-		@date 11/05/2026
+		@date 11/16/2026
 		@since 0.12.50
-		@version 0.12.54
+		@version 0.12.56
 		@author Matthew Moore
 	*/
 	class LearnsetRegistry : private FixedMetadataRegistry<LearnsetMeta, LearnsetID, MAX_LEARNSETS, &LearnsetMeta::mLearnsetID>
@@ -75,7 +76,7 @@ namespace PocketCore::Registry::Learnset
 
 			/*! @brief Constructs a registry populated with all built-in learnsets, including None but excluding the FinalLearnset sentinel.
 				@since 0.12.50
-				@version 0.12.54
+				@version 0.12.56
 			 */
 			ATTR_NOINLINE explicit constexpr LearnsetRegistry()
 			{
@@ -285,6 +286,23 @@ namespace PocketCore::Registry::Learnset
 						},
 					},
 					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::DittoLearnset),
+				});
+
+				addBuiltin({
+					.mName = std::string(LEARNSET_NAME_GARCHOMP),
+					.mEntries = {
+					    {
+                			.mMoveID = toMoveID(BuiltinMoveID::SandTomb),
+                			.mLevelRequirement = 1,
+                			.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+                		},
+					    {
+							.mMoveID = toMoveID(BuiltinMoveID::Tackle),
+							.mLevelRequirement = 1,
+							.mAcquisitionMethod = AcquisitionMethod::LevelUp,
+						},
+					},
+					.mLearnsetID = toLearnsetID(BuiltinLearnsetID::GarchompLearnset),
 				});
 			}
 

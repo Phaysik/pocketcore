@@ -1,8 +1,8 @@
 /*! @file constants.h
 	@brief Defines configuration constants.
-	@date 11/11/2026
+	@date 11/16/2026
 	@since 0.1.0
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -396,6 +396,16 @@ namespace PocketCore::Configuration
 
 	/*! @brief The minimum level a Pokemon can be encountered at. */
 	inline constexpr us MIN_ENCOUNTER_LEVEL{1};
+
+	/*! @brief The minimum level a Pokemon can have. */
+	inline constexpr us MIN_POKEMON_LEVEL{1};
+	/*! @brief The maximum level a Pokemon can have. */
+	inline constexpr us MAX_POKEMON_LEVEL{100};
+
+	/*! @brief The minimum base stat value a Pokemon can have. */
+	inline constexpr us MIN_POKEMON_BASE_STAT_VALUE{1};
+	/*! @brief The maximum base stat value a Pokemon can have. */
+	inline constexpr us MAX_POKEMON_BASE_STAT_VALUE{255};
 } // namespace PocketCore::Configuration
 
 #endif

@@ -1,8 +1,8 @@
 /*! @file moveRegistry.test.cpp
 	@brief C++ file for running tests for the MoveRegistry.
-	@date 11/05/2026
+	@date 11/16/2026
 	@since 0.6.0
-	@version 0.12.54
+	@version 0.12.56
 	@author Matthew Moore
 */
 
@@ -39,21 +39,7 @@ using PocketCore::Effect::BuiltinEffectID;
 using PocketCore::Effect::toEffectID;
 using PocketCore::Move::baseAttackEffects;
 using PocketCore::Move::BuiltinMoveID;
-using PocketCore::Move::MOVE_NAME_DRAGON_CLAW;
-using PocketCore::Move::MOVE_NAME_EMBER;
-using PocketCore::Move::MOVE_NAME_EXTREME_SPEED;
-using PocketCore::Move::MOVE_NAME_FACADE;
-using PocketCore::Move::MOVE_NAME_GROWL;
-using PocketCore::Move::MOVE_NAME_HYDRO_STEAM;
-using PocketCore::Move::MOVE_NAME_KARATE_CHOP;
 using PocketCore::Move::MOVE_NAME_NONE;
-using PocketCore::Move::MOVE_NAME_POUND;
-using PocketCore::Move::MOVE_NAME_QUICK_ATTACK;
-using PocketCore::Move::MOVE_NAME_TACKLE;
-using PocketCore::Move::MOVE_NAME_TAIL_WHIP;
-using PocketCore::Move::MOVE_NAME_TRANSFORM;
-using PocketCore::Move::MOVE_NAME_VINE_WHIP;
-using PocketCore::Move::MOVE_NAME_WATER_GUN;
 using PocketCore::Move::MoveID;
 using PocketCore::Move::MoveMeta;
 using PocketCore::Move::NO_MOVE_ID;
@@ -81,7 +67,7 @@ SCENARIO("MoveRegistry")
 		THEN("Pound has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_POUND),
+				.mName = "Pound",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -112,7 +98,7 @@ SCENARIO("MoveRegistry")
 		THEN("Karate Chop has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_KARATE_CHOP),
+				.mName = "Karate Chop",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -143,7 +129,7 @@ SCENARIO("MoveRegistry")
 		THEN("Vine Whip has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_VINE_WHIP),
+				.mName = "Vine Whip",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -174,7 +160,7 @@ SCENARIO("MoveRegistry")
 		THEN("Tackle has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_TACKLE),
+				.mName = "Tackle",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -205,7 +191,7 @@ SCENARIO("MoveRegistry")
 		THEN("Tail Whip has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_TAIL_WHIP),
+				.mName = "Tail Whip",
 				.mTriggers = {},
 				.mMoveID = toMoveID(BuiltinMoveID::TailWhip),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
@@ -225,7 +211,7 @@ SCENARIO("MoveRegistry")
 		THEN("Growl has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_GROWL),
+				.mName = "Growl",
 				.mTriggers = {},
 				.mMoveID = toMoveID(BuiltinMoveID::Growl),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
@@ -245,7 +231,7 @@ SCENARIO("MoveRegistry")
 		THEN("Ember has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_EMBER),
+				.mName = "Ember",
 				.mTriggers = {},
 				.mMoveID = toMoveID(BuiltinMoveID::Ember),
 				.mTypeID = toTypeID(BuiltinTypeID::Fire),
@@ -267,7 +253,7 @@ SCENARIO("MoveRegistry")
 		THEN("Water Gun has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_WATER_GUN),
+				.mName = "Water Gun",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -298,7 +284,7 @@ SCENARIO("MoveRegistry")
 		THEN("Quick Attack has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_QUICK_ATTACK),
+				.mName = "Quick Attack",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -329,7 +315,7 @@ SCENARIO("MoveRegistry")
 		THEN("Transform has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_TRANSFORM),
+				.mName = "Transform",
 				.mTriggers = {},
 				.mMoveID = toMoveID(BuiltinMoveID::Transform),
 				.mTypeID = toTypeID(BuiltinTypeID::Normal),
@@ -348,7 +334,7 @@ SCENARIO("MoveRegistry")
 		THEN("Extreme Speed has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_EXTREME_SPEED),
+				.mName = "Extreme Speed",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -376,10 +362,30 @@ SCENARIO("MoveRegistry")
 			CHECK((expected == *actual));
 		}
 
+		THEN("Sand Tomb has the appropriate properties")
+		{
+			MoveMeta expected{
+				.mName = "Sand Tomb",
+				.mMoveID = toMoveID(BuiltinMoveID::SandTomb),
+				.mTypeID = toTypeID(BuiltinTypeID::Ground),
+				.mTargetID = BattleTargetID::SingleOther,
+				.mRangeID = BattleRangeID::Adjacent,
+				.mAccuracy = 85,
+				.mPriority = 0,
+				.mPPMaxAmount = 24,
+				.mPPDefaultAmount = 15,
+				.mSpecial = false,
+			};
+
+			const MoveMeta *actual{registry.getMoveMetadata(toMoveID(BuiltinMoveID::SandTomb))};
+
+			CHECK((expected == *actual));
+		}
+
 		THEN("Dragon Claw has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_DRAGON_CLAW),
+				.mName = "Dragon Claw",
 				.mTriggers = {{
 								  .mEffects = {toEffectID(BuiltinEffectID::AccuracyCheck)},
 								  .mTrigger = BattleEventID::BeforeHit,
@@ -410,7 +416,7 @@ SCENARIO("MoveRegistry")
 		THEN("Facade has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_FACADE),
+				.mName = "Facade",
 				.mMoveID = toMoveID(BuiltinMoveID::Facade),
 			};
 
@@ -422,7 +428,7 @@ SCENARIO("MoveRegistry")
 		THEN("Hydro Steam has the appropriate properties")
 		{
 			MoveMeta expected{
-				.mName = std::string(MOVE_NAME_HYDRO_STEAM),
+				.mName = "Hydro Steam",
 				.mMoveID = toMoveID(BuiltinMoveID::HydroSteam),
 			};
 
