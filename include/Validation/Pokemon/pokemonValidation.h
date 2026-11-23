@@ -1,8 +1,8 @@
 /*! @file pokemonValidation.h
 	@brief Defines validation functions that help with Pokemon.
-	@date 10/21/2026
+	@date 11/23/2026
 	@since 0.12.48
-	@version 0.12.51
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -61,11 +61,11 @@ namespace PocketCore::Validation::Pokemon
 		@param[in] pokemonIVArray The non-owning span of the pokemon's IVs.
 		@return An empty result when every IV is valid; otherwise, @ref PokemonError::INVALID_IV_ARRAY.
 		@since 0.12.48
-		@version 0.12.51
+		@version 0.12.57
 	*/
 	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonIVArray(const std::span<const us> pokemonIVArray)
 	{
-		if (pokemonIVArray.size() > POKEMON_STAT_COUNT
+		if (pokemonIVArray.size() != POKEMON_STAT_COUNT
 			|| std::ranges::any_of(pokemonIVArray, [](const us pokemonIV) { return !isValidPokemonIV(pokemonIV).has_value(); }))
 		{
 			return std::unexpected{PokemonError::INVALID_IV_ARRAY};
@@ -111,13 +111,13 @@ namespace PocketCore::Validation::Pokemon
 		@param[in] pokemonEVArray The non-owning span of the pokemon's EVs.
 		@return An empty result when every EV and the aggregate total are valid; otherwise, @ref PokemonError::INVALID_EV_ARRAY.
 		@since 0.12.48
-		@version 0.12.51
+		@version 0.12.57
 	*/
 	ATTR_NODISCARD constexpr std::expected<void, PokemonError> isValidPokemonEVArray(const std::span<const us> pokemonEVArray)
 	{
 		const us sum{static_cast<us>(std::ranges::fold_left(pokemonEVArray, 0, std::plus<>()))};
 
-		if (pokemonEVArray.size() > POKEMON_STAT_COUNT || std::ranges::any_of(pokemonEVArray, [sum](const us pokemonEV) {
+		if (pokemonEVArray.size() != POKEMON_STAT_COUNT || std::ranges::any_of(pokemonEVArray, [sum](const us pokemonEV) {
 				return !isValidPokemonEV(pokemonEV, sum - pokemonEV).has_value();
 			}))
 		{

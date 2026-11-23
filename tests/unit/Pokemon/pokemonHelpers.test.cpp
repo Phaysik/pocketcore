@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.test.cpp
 	@brief C++ file for running tests for the Pokemon helper functions.
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.28
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -98,6 +98,7 @@ using PocketCore::Pokemon::fillWithValidMoves;
 using PocketCore::Pokemon::getAbilitiesFromAbilityPool;
 using PocketCore::Pokemon::getEggAbilities;
 using PocketCore::Pokemon::getItemsFromItemPool;
+using PocketCore::Pokemon::getPokemonLevel;
 using PocketCore::Pokemon::getValidPokemonAbilities;
 using PocketCore::Pokemon::getValidPokemonEVs;
 using PocketCore::Pokemon::getValidPokemonItems;
@@ -114,6 +115,8 @@ using PocketCore::Pokemon::PokemonGenderEntry;
 using PocketCore::Pokemon::PokemonItemEntry;
 using PocketCore::Pokemon::PokemonOrigin;
 using PocketCore::Pokemon::selectRandomGender;
+using PocketCore::Pokemon::SetLevelEncounter;
+using PocketCore::Pokemon::VariableLevelEncounter;
 using PocketCore::Registry::Ability::AbilityRegistry;
 using PocketCore::Registry::Item::ItemRegistry;
 using PocketCore::Registry::Move::MoveRegistry;
@@ -2773,6 +2776,141 @@ SCENARIO("Pokemon free function")
 			{
 				REQUIRE(result.has_value());
 				CHECK((result.value() == PokemonGender::Female));
+			}
+		}
+	}
+
+	GIVEN("getPokemonLevel")
+	{
+		std::optional<us> pokemonLevel{std::nullopt};
+		PokemonEncounter encounterData{};
+
+		GIVEN("calling with a set level")
+		{
+			WHEN("calling with a level at 0")
+			{
+				pokemonLevel = 0;
+
+				std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+				THEN("it returns INVALID_LEVEL")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == PokemonError::INVALID_LEVEL));
+				}
+			}
+
+			WHEN("calling with a level at 101")
+			{
+				pokemonLevel = 101;
+
+				std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+				THEN("it returns INVALID_LEVEL")
+				{
+					REQUIRE_FALSE(result.has_value());
+					CHECK((result.error() == PokemonError::INVALID_LEVEL));
+				}
+			}
+
+			WHEN("calling with a level at in bounds")
+			{
+				pokemonLevel = 50;
+
+				std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+				THEN("it returns the level")
+				{
+					REQUIRE(result.has_value());
+					CHECK((result.value() == 50));
+				}
+			}
+		}
+
+		GIVEN("calling with an encounter level")
+		{
+			GIVEN("SetLevelEncounter")
+			{
+				WHEN("calling with a level at 0")
+				{
+					encounterData.mLevel = SetLevelEncounter{0};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns INVALID_LEVEL")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == PokemonError::INVALID_LEVEL));
+					}
+				}
+
+				WHEN("calling with a level at 101")
+				{
+					encounterData.mLevel = SetLevelEncounter{101};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns INVALID_LEVEL")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == PokemonError::INVALID_LEVEL));
+					}
+				}
+
+				WHEN("calling with a level at in bounds")
+				{
+					encounterData.mLevel = SetLevelEncounter{50};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns the level")
+					{
+						REQUIRE(result.has_value());
+						CHECK((result.value() == 50));
+					}
+				}
+			}
+
+			GIVEN("VariableLevelEncounter")
+			{
+				WHEN("calling with a level at 0")
+				{
+					encounterData.mLevel = VariableLevelEncounter{0, 0};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns INVALID_LEVEL")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == PokemonError::INVALID_LEVEL));
+					}
+				}
+
+				WHEN("calling with a level at 101")
+				{
+					encounterData.mLevel = VariableLevelEncounter{101, 101};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns INVALID_LEVEL")
+					{
+						REQUIRE_FALSE(result.has_value());
+						CHECK((result.error() == PokemonError::INVALID_LEVEL));
+					}
+				}
+
+				WHEN("calling with a level at in bounds")
+				{
+					encounterData.mLevel = VariableLevelEncounter{50, 50};
+
+					std::expected<us, PokemonError> result{getPokemonLevel(pokemonLevel, encounterData, randomSources)};
+
+					THEN("it returns the level")
+					{
+						REQUIRE(result.has_value());
+						CHECK((result.value() == 50));
+					}
+				}
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 /*! @file pokemonError.h
 	@brief Contains the error codes for the Pokemon validation results.
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.48
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -23,7 +23,7 @@ namespace PocketCore::Validation::Pokemon
 		@note No enumerator represents success; a successful validation result has a value and contains no error.
 		All enum values must be handled exhaustively when dispatching on the error; callers must account for newly added values.
 		@since 0.12.48
-		@version 0.12.56
+		@version 0.12.57
 		@author Matthew Moore
 	*/
 	enum class PokemonError : ub
@@ -50,6 +50,8 @@ namespace PocketCore::Validation::Pokemon
 		NO_PP,
 		/*! @brief Indicates that the chosen Pokemon has no valid gender entry weights. */
 		NO_VALID_GENDER_ENTRY_WEIGHTS,
+		/*! @brief Indicates that the chosen Pokemon has an invalid level. */
+		INVALID_LEVEL,
 	};
 } // namespace PocketCore::Validation::Pokemon
 

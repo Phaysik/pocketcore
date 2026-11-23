@@ -1,21 +1,18 @@
 /*! @file pokemonRegistry.cpp
 	@brief Contains the pokemon registry implementation
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.28
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
 #include "Registry/pokemonRegistry.h"
 
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <expected>
 #include <optional>
 #include <span>
-#include <type_traits>
-#include <variant>
 
 #include "Ability/abilityID.h"
 #include "Battle/battleRandomSources.h"
@@ -56,12 +53,14 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Location::NO_LOCATION_ID;
 	using PocketCore::Move::MoveID;
 	using PocketCore::Nature::NatureID;
+	using PocketCore::Pokemon::getPokemonLevel;
 	using PocketCore::Pokemon::getValidPokemonAbilities;
 	using PocketCore::Pokemon::getValidPokemonEVs;
 	using PocketCore::Pokemon::getValidPokemonItems;
 	using PocketCore::Pokemon::getValidPokemonIVs;
 	using PocketCore::Pokemon::getValidPokemonMoves;
 	using PocketCore::Pokemon::getValidPokemonNatures;
+	using PocketCore::Pokemon::NO_POKEMON_ID;
 	using PocketCore::Pokemon::Pokemon;
 	using PocketCore::Pokemon::POKEMON_STAT_COUNT;
 	using PocketCore::Pokemon::PokemonAbilityEntry;
@@ -70,7 +69,6 @@ namespace PocketCore::Registry::Pokemon
 	using PocketCore::Pokemon::PokemonID;
 	using PocketCore::Pokemon::PokemonMeta;
 	using PocketCore::Pokemon::selectRandomGender;
-	using PocketCore::Pokemon::SetLevelEncounter;
 	using PocketCore::Validation::Ability::AbilityError;
 	using PocketCore::Validation::Item::ItemError;
 	using PocketCore::Validation::Move::MoveError;
@@ -91,7 +89,7 @@ namespace PocketCore::Registry::Pokemon
 
 		const PokemonMeta *pokemonMeta{getPokemonMetadata(pokemonSpec.mPokemonID)};
 
-		if (pokemonMeta == nullptr)
+		if (pokemonMeta == nullptr || pokemonSpec.mPokemonID == NO_POKEMON_ID)
 		{
 			return std::unexpected{RegistryError::PokemonNotFound};
 		}
@@ -121,27 +119,14 @@ namespace PocketCore::Registry::Pokemon
 			return std::unexpected{PokemonError::MISSING_LEVEL};
 		}
 
-		const us pokemonEncounterLevel{
-			pokemonSpec.mLevel.has_value() ? pokemonSpec.mLevel.value()
-										   : std::visit(
-												 [&randomSources](const auto &policy) {
-													 using Policy = std::decay_t<decltype(policy)>;
+		const std::expected<us, PokemonError> pokemonLevelResult{getPokemonLevel(pokemonSpec.mLevel, encounterData, randomSources)};
 
-													 if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
-													 {
-														 return policy.mLevel;
-													 }
-													 else
-													 {
-														 const auto randomLevelValue = [&randomSources](us minimum, us maximum) -> us {
-															 return static_cast<us>(randomSources.mIndex.get()(minimum, maximum));
-														 };
+		if (!pokemonLevelResult.has_value())
+		{
+			return std::unexpected{pokemonLevelResult.error()};
+		}
 
-														 return randomLevelValue(policy.mMinLevel, policy.mMaxLevel);
-													 }
-												 },
-												 encounterData.mLevel),
-		};
+		const us pokemonLevel{pokemonLevelResult.value()};
 
 		std::array<NatureID, MAX_NATURES_PER_POKEMON> validNatureIDs{};
 		std::array<PokemonAbilityEntry, MAX_ABILITIES_PER_POKEMON> validAbilityEntries{};
@@ -180,7 +165,7 @@ namespace PocketCore::Registry::Pokemon
 
 		if (const std::expected<void, MoveError> error{
 				getValidPokemonMoves(pokemonSpec.mIDContext.mMoveIDs, validMoveIDs, *dependencyRegistries.mMoveRegistry, *learnsetMeta,
-									 encounterData, pokemonEncounterLevel),
+									 encounterData, pokemonLevel),
 			};
 			!error.has_value())
 		{
@@ -233,16 +218,8 @@ namespace PocketCore::Registry::Pokemon
 		}
 
 		return Pokemon{
-			*pokemonMeta,
-			moveMetas,
-			pokemonEncounterLevel,
-			validAbilityEntries,
-			validItemIDs,
-			validNatureIDs,
-			*dependencyRegistries.mNatureRegistry,
-			validIVs,
-			validEVs,
-			gender,
+			*pokemonMeta, moveMetas, pokemonLevel, validAbilityEntries, validItemIDs, validNatureIDs, *dependencyRegistries.mNatureRegistry,
+			validIVs,	  validEVs,	 gender,
 		};
 	}
 } // namespace PocketCore::Registry::Pokemon

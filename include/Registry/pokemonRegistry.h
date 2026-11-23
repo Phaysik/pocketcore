@@ -2,7 +2,7 @@
 	@brief Provides fixed-capacity storage and lookup for built-in and user-defined pokemons.
 	@date 11/23/2026
 	@since 0.11.6
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -210,7 +210,7 @@ namespace PocketCore::Registry::Pokemon
 		@note Lookup operations are O(n), where n is bounded by @ref MAX_POKEMON.
 		@date 11/23/2026
 		@since 0.11.6
-		@version 0.12.56
+		@version 0.12.57
 		@author Matthew Moore
 	*/
 	class PokemonRegistry : private FixedMetadataRegistry<PokemonMeta, PokemonID, MAX_POKEMON, &PokemonMeta::mPokemonID>
@@ -532,7 +532,7 @@ namespace PocketCore::Registry::Pokemon
 			   supplied index must identify an active encounter. The returned display name borrows species metadata storage, which must
 			   remain valid for the Pokemon's lifetime; instance arrays and resolved PP/stat values are copied.
 				@since 0.12.24
-				@version 0.12.56
+				@version 0.12.57
 			*/
 			ATTR_NODISCARD std::expected<Pokemon, PokemonInstantiationError> instantiate(
 				const PokemonSpec &pokemonSpec, const PokemonInstantiationDependencies &dependencyRegistries,

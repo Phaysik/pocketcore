@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.h
 	@brief Houses free functions that aide in handling pokemon.
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.28
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -267,6 +267,21 @@ namespace PocketCore::Pokemon
 	*/
 	ATTR_NODISCARD std::expected<PokemonGender, PokemonError> selectRandomGender(std::span<const PokemonGenderEntry> genderPool,
 																				 const BattleRandomSources &randomSources);
+
+	/*! @brief Validates an explicit Pokemon level or selects one from the encounter policy.
+		@details When @p pokemonLevel contains a value, that level takes precedence over the encounter data. Otherwise, a fixed-level
+		 encounter uses its configured level, while a variable-level encounter selects a level using @p randomSources. The selected level
+		 must be within the supported Pokemon level range.
+		@param[in] pokemonLevel Optional explicit level; an absent value requests selection from @p encounterData.
+		@param[in] encounterData Encounter level policy used when @p pokemonLevel is absent.
+		@param[in] randomSources Random sources used to select a level for variable-level encounters; not used for an explicit or fixed level.
+		@return The validated or selected level on success; otherwise, @ref PokemonError::INVALID_LEVEL.
+		@since 0.12.57
+		@version 0.12.57
+	*/
+	ATTR_NODISCARD std::expected<us, PokemonError> getPokemonLevel(const std::optional<us> &pokemonLevel,
+																   const PokemonEncounter &encounterData,
+																   const BattleRandomSources &randomSources);
 } // namespace PocketCore::Pokemon
 
 #endif

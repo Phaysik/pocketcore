@@ -1,8 +1,8 @@
 /*! @file pokemonHelpers.cpp
 	@brief Contains the function definitions for creating a Pokemon
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.28
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -19,6 +19,7 @@
 #include <span>
 #include <string_view>
 #include <unordered_set>
+#include <variant>
 #include <vector>
 
 #include "Ability/abilityID.h"
@@ -72,10 +73,12 @@ namespace PocketCore::Pokemon
 	using PocketCore::Configuration::MAX_IV_STAT_VALUE;
 	using PocketCore::Configuration::MAX_MOVES_PER_POKEMON;
 	using PocketCore::Configuration::MAX_NATURES_PER_POKEMON;
+	using PocketCore::Configuration::MAX_POKEMON_LEVEL;
 	using PocketCore::Configuration::MIN_ABILITIES_FROM_POOL_PER_POKEMON_ROLL;
 	using PocketCore::Configuration::MIN_ITEMS_FROM_POOL_PER_POKEMON_ROLL;
 	using PocketCore::Configuration::MIN_IV_STAT_VALUE;
 	using PocketCore::Configuration::MIN_NATURES_PER_POKEMON_ROLL;
+	using PocketCore::Configuration::MIN_POKEMON_LEVEL;
 	using PocketCore::Configuration::REGULAR_ABILITY_CHANCE;
 	using PocketCore::Core::ub;
 	using PocketCore::Core::us;
@@ -923,5 +926,51 @@ namespace PocketCore::Pokemon
 		}
 
 		return result;
+	}
+
+	ATTR_NODISCARD std::expected<us, PokemonError> getPokemonLevel(const std::optional<us> &pokemonLevel,
+																   const PokemonEncounter &encounterData,
+																   const BattleRandomSources &randomSources)
+	{
+		const auto isInvalidLevel{[](const us level) { return level < MIN_POKEMON_LEVEL || level > MAX_POKEMON_LEVEL; }};
+
+		if (pokemonLevel.has_value())
+		{
+			if (isInvalidLevel(pokemonLevel.value()))
+			{
+				return std::unexpected{PokemonError::INVALID_LEVEL};
+			}
+
+			return pokemonLevel.value();
+		}
+
+		const us encounterLevel{
+			std::visit(
+				[&randomSources](const auto &policy) {
+					using Policy = std::decay_t<decltype(policy)>;
+
+					if constexpr (std::is_same_v<Policy, SetLevelEncounter>)
+					{
+
+						return policy.mLevel;
+					}
+					else
+					{
+						const auto randomLevelValue = [&randomSources](us minimum, us maximum) -> us {
+							return static_cast<us>(randomSources.mIndex.get()(minimum, maximum));
+						};
+
+						return randomLevelValue(policy.mMinLevel, policy.mMaxLevel);
+					}
+				},
+				encounterData.mLevel),
+		};
+
+		if (isInvalidLevel(encounterLevel))
+		{
+			return std::unexpected{PokemonError::INVALID_LEVEL};
+		}
+
+		return encounterLevel;
 	}
 } // namespace PocketCore::Pokemon

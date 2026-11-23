@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/), and this project adheres to _vX.Y.Z_ versioning where _X_ represents an _edition_, _Y_ represents an _update_, and _Z_ represents an _addendum_.
 
+## [0.12.57] - 2026-11-xx
+
+## [0.12.56] - 2026-11-23
+
+### Added
+
+- Added `PokemonGenderEntry`, which pairs a `PokemonGender` with a selection chance and compares chances approximately, and `selectRandomGender()`, which draws a gender from a pool weighted by those chances. Non-finite and non-positive chances are ignored, chances are relative weights that need not sum to 1, and a pool with no usable weight returns the new `PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS`.
+- Added optional fixed calculated stats through `PokemonMeta::mFixedStats`. `Pokemon` copies them at construction and in `setSpecies()`, and each present value replaces the matching calculated stat after level, IV, EV, and nature calculation.
+- Added `MIN_POKEMON_LEVEL`/`MAX_POKEMON_LEVEL` (1–100) and `MIN_POKEMON_BASE_STAT_VALUE`/`MAX_POKEMON_BASE_STAT_VALUE` (1–255) configuration constants.
+- Added the Garchomp species and learnset, the Sand Tomb move, and the Sand Veil and Rough Skin abilities. Garchomp has no active encounters, and Sand Tomb, Sand Veil, and Rough Skin are registered without triggers.
+- Added per-species gender-pool constants: the starter families are 87.5% male and 12.5% female, Ditto is always genderless, and Garchomp is evenly split.
+- Added `docs/stat-formula.md`, which documents the Generation 9 stat formula `recomputeStats()` implements, its input bounds, its three rounding points, nature handling for HP and multiple natures, intermediate integer types, and a worked example.
+- Added stat-calculation coverage for IV, EV, and nature extremes, EV divisor boundaries, maximum reachable stats, a Bulbapedia reference example, and out-of-range base stats and levels in the constructors, setters, and `setSpecies()`. Also added fixed-stat, `selectRandomGender()`, `PokemonGenderEntry` equality, invalid-gender-pool instantiation, and new-catalog-entry coverage.
+
+### Changed
+
+- Changed `PokemonMeta::mGenderPool` from `std::array<PokemonGender, MAX_GENDERS>` to `std::array<PokemonGenderEntry, MAX_GENDERS>`. `PokemonRegistry::instantiate()` now selects an omitted gender through `selectRandomGender()` with the real-number random source instead of drawing a uniform index, and returns `NO_VALID_GENDER_ENTRY_WEIGHTS` when the species pool has no usable weight.
+- Reordered `PokemonMeta` members for designated initialization: `mGenderPool` now follows `mItemPool`, and `mName` and the new `mFixedStats` follow `mAbilityPool`.
+- Changed `Pokemon` to clamp base stats to 1–255 and levels to 1–100. Clamping applies in both constructors, `setSpecies()`, the base-stat setters, and `setLevel()`, and the level damage factor is derived from the clamped level. Fixed stats are clamped to the same 1–255 range.
+- Replaced `std::floor` in the EV, level-scaling, and level-damage-factor calculations with plain unsigned integer division. Results are unchanged.
+- Renumbered built-in ability and move IDs to accommodate the new entries.
+- Clarified the `setHealth()` Doxygen to state that current health never exceeds the calculated maximum.
+
+### Fixed
+
+- Fixed gender selection skewing toward male. Unfilled gender-pool slots defaulted to `PokemonGender::Male` and were selectable, so two-gender species rolled male two-thirds of the time and Ditto could roll male.
+- Fixed the `checkStats()` test helper combining its comparisons with `||` instead of `&&`, which let stat assertions pass when only one stat matched.
+
 ## [0.12.55] - 2026-11-13
 
 ### Added
@@ -2389,7 +2417,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 - Added Doxygen and Sphinx project documentation, including setup guidance and Make/dependency reference tables.
 - Added Google Test coverage for concepts, TypeRegistry, timer, contiguous sequence, logger, floating-point utilities, and overflow protection.
 
-[0.12.55]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.57]: https://github.com/Phaysik/pocketcore/commit/
+[0.12.56]: https://github.com/Phaysik/pocketcore/commit/c0dded35081c58d8596358bca4c964a683e92e01
+[0.12.55]: https://github.com/Phaysik/pocketcore/commit/0cd5b55394f1f1f59847edeb469eeea53abe4627
 [0.12.54]: https://github.com/Phaysik/pocketcore/commit/c4fc10ddfe5a961678ea4aebdc58440787ee966a
 [0.12.53]: https://github.com/Phaysik/pocketcore/commit/92b9bcff5122397faac8f469e7ccc0e28b7a34cc
 [0.12.52]: https://github.com/Phaysik/pocketcore/commit/f1015081b1b4c294940f579d1bee362c83c6e942

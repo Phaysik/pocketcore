@@ -1,8 +1,8 @@
 /*! @file pokemonValidation.test.cpp
 	@brief C++ file for running tests for the Pokemon validation functions.
-	@date 10/21/2026
+	@date 11/23/2026
 	@since 0.12.48
-	@version 0.12.51
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -92,6 +92,19 @@ SCENARIO("isValidPokemonIVArray")
 	GIVEN("an array with too many value")
 	{
 		std::vector<us> ivs{31, 31, 31, 31, 31, 31, 31};
+
+		std::expected<void, PokemonError> result{isValidPokemonIVArray(ivs)};
+
+		THEN("the IV array is not valid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == PokemonError::INVALID_IV_ARRAY));
+		}
+	}
+
+	GIVEN("an array with too little value")
+	{
+		std::vector<us> ivs{31, 31, 31, 31};
 
 		std::expected<void, PokemonError> result{isValidPokemonIVArray(ivs)};
 
@@ -197,6 +210,19 @@ SCENARIO("isValidPokemonEVArray")
 	GIVEN("an array with too many value")
 	{
 		std::vector<us> evs{31, 31, 31, 31, 31, 31, 31};
+
+		std::expected<void, PokemonError> result{isValidPokemonEVArray(evs)};
+
+		THEN("the EV isn't valid")
+		{
+			REQUIRE_FALSE(result.has_value());
+			CHECK((result.error() == PokemonError::INVALID_EV_ARRAY));
+		}
+	}
+
+	GIVEN("an array with too little value")
+	{
+		std::vector<us> evs{31, 31, 31, 31};
 
 		std::expected<void, PokemonError> result{isValidPokemonEVArray(evs)};
 
