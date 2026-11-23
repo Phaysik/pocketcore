@@ -1,6 +1,6 @@
 /*! @file pokemon.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.4.0
 	@version 0.12.56
 	@author Matthew Moore
@@ -1685,6 +1685,30 @@ SCENARIO("Pokemon")
 		}
 	}
 
+	GIVEN("fixed calculated stats")
+	{
+		Pokemon pokemon{
+			makePokemon({
+				.mMetadata = {
+					.mFixedStats = {1, 150, std::nullopt, 175},
+					.mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+				},
+				.mHealth = 1,
+				.mLevel = 50,
+			}),
+		};
+
+		WHEN("recomputing stats from a different level")
+		{
+			pokemon.setLevel(100);
+
+			THEN("fixed values remain constant while unspecified stats use the normal formula")
+			{
+				CHECK(checkStats(pokemon, 1, 1, 150, 205, 175, 205, 205));
+			}
+		}
+	}
+
 	GIVEN("get/set Pokemon ID")
 	{
 		Pokemon pokemon{
@@ -1726,6 +1750,23 @@ SCENARIO("Pokemon")
 				CHECK((pokemon.getPokemonID() == toPokemonID(BuiltinPokemonID::Bulbasaur)));
 
 				CHECK(checkStats(pokemon, 111, 111, 90, 95, 91, 97, 88));
+			}
+		}
+
+		WHEN("calling setSpecies with fixed calculated stats")
+		{
+			PokemonMeta meta{
+				.mFixedStats = {1, 150},
+				.mBaseStats = {.mMaxHealth = 200, .mAttack = 200, .mDefense = 200, .mSpAttack = 200, .mSpDefense = 200, .mSpeed = 200},
+				.mPokemonID = toPokemonID(BuiltinPokemonID::Bulbasaur),
+				.mLearnsetID = toLearnsetID(BuiltinLearnsetID::BulbasaurLearnset),
+			};
+
+			pokemon.setSpecies(meta);
+
+			THEN("the overrides replace the previous species values")
+			{
+				CHECK(checkStats(pokemon, 1, 1, 150, 95, 91, 97, 88));
 			}
 		}
 

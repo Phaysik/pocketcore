@@ -1,6 +1,6 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.3.0
 	@version 0.12.56
 	@author Matthew Moore
@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <expected>
 #include <functional>
+#include <optional>
 #include <ostream>
 #include <ranges>
 #include <span>
@@ -102,6 +103,8 @@ namespace PocketCore::Pokemon
 		 storage must remain valid for the lifetime of the Pokemon object. Indexed accessors and mutators require an index within the
 		 corresponding fixed-size array. When a stat input changes calculated maximum health, current health changes by the same amount
 		 to preserve missing health; a Pokemon with zero current health remains fainted, and a living Pokemon is never reduced below 1.
+			 Optional fixed-stat values in @ref PokemonMeta override the corresponding calculated stats after level, IV, EV, and nature
+			 calculations.
 		 Selected move IDs and current PP are runtime state. @ref PocketCore::Move::MoveMeta is the authoritative source of default and
 		 maximum PP. Construction with moves, @ref setMove, and @ref setMovesArrays copy each move's ID and maximum PP and initialize
 		 current PP from its default PP. The maximum-PP array is derived state, unchanged until the corresponding move is reassigned;
@@ -109,7 +112,7 @@ namespace PocketCore::Pokemon
 		 is always clamped to the slot's maximum PP; empty slots hold 0 current and 0 maximum PP.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 11/20/2026
+		@date 11/23/2026
 		@since 0.3.0
 		@version 0.12.56
 		@author Matthew Moore
@@ -147,8 +150,8 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{pokemonMeta.mName}, mEggGroupIDs(pokemonMeta.mEggGroupIDs), mTypeIDs{pokemonMeta.mTypeIDs},
-				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				: mName{pokemonMeta.mName}, mFixedStats(pokemonMeta.mFixedStats), mEggGroupIDs(pokemonMeta.mEggGroupIDs),
+				  mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
 				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				mMoveIDs.fill(NO_MOVE_ID);
@@ -190,8 +193,8 @@ namespace PocketCore::Pokemon
 									   const std::array<NatureID, MAX_NATURES_PER_POKEMON> &natureIDs, const NatureRegistry &natureRegistry,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonIVs,
 									   const std::array<us, POKEMON_STAT_COUNT> &pokemonEVs, const PokemonGender gender)
-				: mName{pokemonMeta.mName}, mEggGroupIDs(pokemonMeta.mEggGroupIDs), mTypeIDs{pokemonMeta.mTypeIDs},
-				  mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
+				: mName{pokemonMeta.mName}, mFixedStats(pokemonMeta.mFixedStats), mEggGroupIDs(pokemonMeta.mEggGroupIDs),
+				  mTypeIDs{pokemonMeta.mTypeIDs}, mAbilityEntries{abilityEntries}, mItemIDs{itemIDs}, mPokemonID(pokemonMeta.mPokemonID),
 				  mLearnsetID(pokemonMeta.mLearnsetID), mGender(gender)
 			{
 				assignMoves(moveMetas);
@@ -1010,6 +1013,7 @@ namespace PocketCore::Pokemon
 			{
 				mPokemonID = meta.mPokemonID;
 				mLearnsetID = meta.mLearnsetID;
+				mFixedStats = meta.mFixedStats;
 				updateBaseStats(meta.mBaseStats);
 				recomputeStats();
 			}
@@ -1120,11 +1124,12 @@ namespace PocketCore::Pokemon
 				mBaseStats.mSpeed = std::clamp(baseStats.mSpeed, MIN_POKEMON_BASE_STAT_VALUE, MAX_POKEMON_BASE_STAT_VALUE);
 			}
 
-			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, and nature multipliers.
+			/*! @brief Recomputes the Pokemon's calculated stats based on its base stats, IVs, EVs, level, nature multipliers, and fixed
+			   stats.
 				@details Owns the stat calculation formula. Constructors and public stat-input setters invoke this function after updating
-			   inputs so calculated stats are immediately consistent on return. Adjusts current health by the change in calculated maximum
-			   health, preserving the amount of missing health. A Pokemon with zero health stays fainted; a living Pokemon is never reduced
-			   below 1 health by a stat change.
+			   inputs so calculated stats are immediately consistent on return. Applies any fixed-stat overrides after nature multipliers,
+			   then adjusts current health by the change in calculated maximum health, preserving the amount of missing health. A Pokemon
+			   with zero health stays fainted; a living Pokemon is never reduced below 1 health by a stat change.
 				@since 0.12.23
 				@version 0.12.56
 			*/
@@ -1173,6 +1178,22 @@ namespace PocketCore::Pokemon
 						= static_cast<us>(mCalculatedStats.mSpDefense * natureMultiplier.at(toIndex(PokemonStat::SpecialDefense)));
 					mCalculatedStats.mSpeed = static_cast<us>(mCalculatedStats.mSpeed * natureMultiplier.at(toIndex(PokemonStat::Speed)));
 				}
+
+				const auto applyFixedStat = [this](const PokemonStat stat, us &calculatedStat) {
+					const std::optional<us> &fixedStat{mFixedStats.at(toIndex(stat))};
+
+					if (fixedStat.has_value())
+					{
+						calculatedStat = *fixedStat;
+					}
+				};
+
+				applyFixedStat(PokemonStat::Health, mCalculatedStats.mMaxHealth);
+				applyFixedStat(PokemonStat::Attack, mCalculatedStats.mAttack);
+				applyFixedStat(PokemonStat::Defense, mCalculatedStats.mDefense);
+				applyFixedStat(PokemonStat::SpecialAttack, mCalculatedStats.mSpAttack);
+				applyFixedStat(PokemonStat::SpecialDefense, mCalculatedStats.mSpDefense);
+				applyFixedStat(PokemonStat::Speed, mCalculatedStats.mSpeed);
 
 				if (mHealth > 0)
 				{
@@ -1304,6 +1325,9 @@ namespace PocketCore::Pokemon
 
 			/*! @brief The non-owning display name. */
 			std::string mName{};
+
+			/*! @brief The optional final calculated-stat overrides copied from species metadata. */
+			std::array<std::optional<us>, POKEMON_STAT_COUNT> mFixedStats{};
 
 			/*! @brief The base stats for the Pokemon species. */
 			PokemonStats mBaseStats{};

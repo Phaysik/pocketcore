@@ -1,6 +1,6 @@
 /*! @file pokemonRegistry.test.cpp
 	@brief C++ file for running tests for the PokemonRegistry.
-	@date 11/20/2026
+	@date 11/23/2026
 	@since 0.12.20
 	@version 0.12.56
 	@author Matthew Moore
@@ -145,7 +145,6 @@ SCENARIO("PokemonRegistry")
 						},
 					},
 				},
-				.mName = "Bulbasaur",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -157,6 +156,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Bulbasaur",
 				.mBaseStats = {
 					.mMaxHealth = 45,
 					.mAttack = 49,
@@ -180,7 +180,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
     			.mEncounters = {},
-				.mName = "Ivysaur",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -192,6 +191,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Ivysaur",
 				.mBaseStats = {
 					.mMaxHealth = 60,
 					.mAttack = 62,
@@ -215,7 +215,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 			    .mEncounters = {},
-				.mName = "Venusaur",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -227,6 +226,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Overgrow), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Chlorophyll), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Venusaur",
 				.mBaseStats = {
 					.mMaxHealth = 80,
 					.mAttack = 82,
@@ -261,7 +261,6 @@ SCENARIO("PokemonRegistry")
                 		},
                 	},
                 },
-				.mName = "Charmander",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -273,6 +272,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Charmander",
 				.mBaseStats = {
 					.mMaxHealth = 39,
 					.mAttack = 52,
@@ -296,7 +296,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 			    .mEncounters = {},
-				.mName = "Charmeleon",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -308,6 +307,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Charmeleon",
 				.mBaseStats = {
 					.mMaxHealth = 58,
 					.mAttack = 64,
@@ -331,7 +331,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = "Charizard",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -343,6 +342,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Blaze), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SolarPower), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Charizard",
 				.mBaseStats = {
 					.mMaxHealth = 78,
 					.mAttack = 84,
@@ -377,7 +377,6 @@ SCENARIO("PokemonRegistry")
                 		},
                 	},
                 },
-				.mName = "Squirtle",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -389,6 +388,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Squirtle",
 				.mBaseStats = {
 					.mMaxHealth = 44,
 					.mAttack = 48,
@@ -412,7 +412,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = "Wartortle",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -424,6 +423,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Wartortle",
 				.mBaseStats = {
 					.mMaxHealth = 59,
 					.mAttack = 63,
@@ -447,7 +447,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = "Blastoise",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -459,6 +458,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Torrent), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RainDish), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Blastoise",
 				.mBaseStats = {
 					.mMaxHealth = 79,
 					.mAttack = 83,
@@ -482,7 +482,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = "Ditto",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -493,6 +492,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Limber), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::Imposter), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Ditto",
 				.mBaseStats = {
 					.mMaxHealth = 48,
 					.mAttack = 48,
@@ -516,7 +516,6 @@ SCENARIO("PokemonRegistry")
 		{
 			PokemonMeta expected{
 				.mEncounters = {},
-				.mName = "Garchomp",
 				.mItemPool = {},
 				.mGenderPool = {
 				    {
@@ -528,6 +527,7 @@ SCENARIO("PokemonRegistry")
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::SandVeil), .mClassification = AbilityClassification::Standard},
 					{.mAbilityID = toAbilityID(BuiltinAbilityID::RoughSkin), .mClassification = AbilityClassification::Hidden},
 				},},
+				.mName = "Garchomp",
 				.mBaseStats = {
 					.mMaxHealth = 108,
 					.mAttack = 130,
