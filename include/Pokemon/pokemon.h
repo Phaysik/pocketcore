@@ -1184,7 +1184,7 @@ namespace PocketCore::Pokemon
 
 					if (fixedStat.has_value())
 					{
-						calculatedStat = *fixedStat;
+						calculatedStat = std::max(*fixedStat, MIN_POKEMON_BASE_STAT_VALUE);
 					}
 				};
 

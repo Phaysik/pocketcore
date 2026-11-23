@@ -260,8 +260,8 @@ namespace PocketCore::Pokemon
 		 entry is returned.
 		@param[in] genderPool Read-only, non-owning span of weighted gender entries borrowed for this call; no reference is retained.
 		@param[in] randomSources The random sources whose real-number generator draws the weighted selection.
-		@return The selected gender, or @ref PokemonGender::Genderless when @p genderPool is empty, contains no valid weights, or its
-		 total weight is non-finite.
+		@return The selected gender on success. Returns @ref PocketCore::Validation::Pokemon::PokemonError::NO_VALID_GENDER_ENTRY_WEIGHTS
+		 when the pool has no positive finite entry weights.
 		@since 0.12.56
 		@version 0.12.56
 	*/
