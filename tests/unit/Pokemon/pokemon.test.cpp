@@ -1707,6 +1707,44 @@ SCENARIO("Pokemon")
 				CHECK(checkStats(pokemon, 1, 1, 150, 205, 175, 205, 205));
 			}
 		}
+
+		WHEN("calling with a base stat of 0")
+		{
+			Pokemon statZero{
+    			makePokemon({
+    				.mMetadata = {
+    					.mFixedStats = {1, 0, std::nullopt, 175},
+    					.mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+    				},
+    				.mHealth = 1,
+    				.mLevel = 50,
+    			}),
+    		};
+
+			THEN("the fixed stat is clamped to 1 and fixed values remain constant while unspecified stats use the normal formula")
+			{
+				CHECK(checkStats(statZero, 1, 1, 1, 105, 175, 105, 105));
+			}
+		}
+
+		WHEN("calling with a base stat of 256")
+		{
+			Pokemon statOverMax{
+    			makePokemon({
+    				.mMetadata = {
+    					.mFixedStats = {1, 150, std::nullopt, 256},
+    					.mBaseStats = {.mMaxHealth = 100, .mAttack = 100, .mDefense = 100, .mSpAttack = 100, .mSpDefense = 100, .mSpeed = 100},
+    				},
+    				.mHealth = 1,
+    				.mLevel = 50,
+    			}),
+    		};
+
+			THEN("the fixed stat is clamped to 255 and fixed values remain constant while unspecified stats use the normal formula")
+			{
+				CHECK(checkStats(statOverMax, 1, 1, 150, 105, 255, 105, 105));
+			}
+		}
 	}
 
 	GIVEN("get/set Pokemon ID")
