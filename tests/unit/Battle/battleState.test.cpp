@@ -1,8 +1,8 @@
 /*! @file battleState.test.cpp
 	@brief C++ file for running tests for the BattleState.
-	@date 11/06/2026
+	@date 11/23/2026
 	@since 0.12.45
-	@version 0.12.54
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -985,10 +985,10 @@ SCENARIO("BattleSlot")
 					"    Item IDs: [7]\n"
 					"    Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"    Moves:\n"
-					"      [0] ID: 10, PP: 5/15\n"
-					"      [1] ID: 11, PP: 10/20\n"
-					"      [2] ID: 12, PP: 15/25\n"
-					"      [3] ID: 13, PP: 20/30\n"
+					"      [0] ID: 10, PP: 5/5\n"
+					"      [1] ID: 11, PP: 10/10\n"
+					"      [2] ID: 12, PP: 15/15\n"
+					"      [3] ID: 13, PP: 20/20\n"
 					"  }\n"
 					"  Stat Stages {\n"
 					"    Attack: 0\n"

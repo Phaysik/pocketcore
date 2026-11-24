@@ -1,8 +1,8 @@
 /*! @file pokemon.h
 	@brief Contains the pokemon
-	@date 11/23/2026
+	@date 11/24/2026
 	@since 0.3.0
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -112,9 +112,9 @@ namespace PocketCore::Pokemon
 		 is always clamped to the slot's maximum PP; empty slots hold 0 current and 0 maximum PP.
 		 @ref PocketCore::Learnset::LearnsetMeta defines learnable moves, while @ref PokemonMeta stores species data without move PP.
 		@warning A Pokemon does not own the registry objects passed to its status operations or used by formatting helpers.
-		@date 11/23/2026
+		@date 11/24/2026
 		@since 0.3.0
-		@version 0.12.56
+		@version 0.12.57
 		@author Matthew Moore
 	*/
 	class Pokemon
@@ -744,15 +744,15 @@ namespace PocketCore::Pokemon
 				@pre slotIndex < MAX_MOVES_PER_POKEMON; violation triggers an assertion.
 				@post @ref getCurrentPP(slotIndex) does not exceed @ref getMaxPP(slotIndex).
 				@since 0.3.0
-				@version 0.12.55
+				@version 0.12.57
 			*/
 			constexpr void setMove(const ub slotIndex, const MoveMeta &move)
 			{
 				assert(slotIndex < mMoveIDs.size());
 
 				mMoveIDs.at(slotIndex) = move.mMoveID;
-				mMaxPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : move.mPPMaxAmount;
-				mCurrentPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : std::clamp(move.mPPDefaultAmount, ub{0}, move.mPPMaxAmount);
+				mMaxPP.at(slotIndex) = move.mMoveID == NO_MOVE_ID ? 0 : std::clamp(move.mPPDefaultAmount, ub{0}, move.mPPMaxAmount);
+				mCurrentPP.at(slotIndex) = mMaxPP.at(slotIndex);
 			}
 
 			/*! @brief Sets one individual value (IV) slot for the Pokemon's base stats.

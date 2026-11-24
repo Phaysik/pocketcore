@@ -2,7 +2,7 @@
 	@brief C++ file for running tests for the PokemonRegistry.
 	@date 11/23/2026
 	@since 0.4.0
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -267,7 +267,7 @@ SCENARIO("Pokemon")
 				},
 			},
 		};
-		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{24, 56};
+		const std::array<ub, MAX_MOVES_PER_POKEMON> expectedMaxPP{15, 35};
 		const Pokemon pokemon{pokemonMeta, moveMetas, 100, {}, {}, {}, natureRegistry, {}, {}, PokemonGender::Male};
 
 		REQUIRE(std::ranges::equal(pokemon.getMaxPPArray(), expectedMaxPP));
@@ -358,7 +358,7 @@ SCENARIO("Pokemon")
 				THEN("the pokemon's move IDs, and PP amounts are properly updated")
 				{
 					CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
-					CHECK((pokemon.getMaxPP(0) == 5));
+					CHECK((pokemon.getMaxPP(0) == 2));
 					CHECK((pokemon.getCurrentPP(0) == 2));
 				}
 			}
@@ -367,14 +367,14 @@ SCENARIO("Pokemon")
 		GIVEN("current pp array")
 		{
 			Pokemon pokemon{
-				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 5}, {}}}}),
 			};
 
 			WHEN("calling getCurrentPPArray")
 			{
 				THEN("the current pps match")
 				{
-					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{0}, pokemon.getCurrentPPArray()));
+					CHECK(std::ranges::equal(std::array<ub, MAX_MOVES_PER_POKEMON>{5, 0, 0, 0}, pokemon.getCurrentPPArray()));
 				}
 			}
 
@@ -794,7 +794,7 @@ SCENARIO("Pokemon")
 					THEN("the pokemon's move is properly updated")
 					{
 						CHECK((pokemon.getMoveID(0) == toMoveID(BuiltinMoveID::Facade)));
-						CHECK((pokemon.getMaxPP(0) == 5));
+						CHECK((pokemon.getMaxPP(0) == 2));
 						CHECK((pokemon.getCurrentPP(0) == 2));
 					}
 				}
@@ -817,14 +817,14 @@ SCENARIO("Pokemon")
 		GIVEN("current pp array index")
 		{
 			Pokemon pokemon{
-				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 0}, {}}}}),
+				makePokemon({.mMoveMetas = {{{.mMoveID = toMoveID(BuiltinMoveID::Pound), .mPPMaxAmount = 5, .mPPDefaultAmount = 5}, {}}}}),
 			};
 
 			WHEN("calling getCurrentPP")
 			{
 				THEN("the current pp matches")
 				{
-					CHECK((0 == pokemon.getCurrentPP(0)));
+					CHECK((pokemon.getCurrentPP(0) == 5));
 				}
 			}
 
@@ -832,7 +832,7 @@ SCENARIO("Pokemon")
 			{
 				WHEN("calling with a current PP amount on an empty slot")
 				{
-					pokemon.setCurrentPP(1, 1);
+					pokemon.setCurrentPP(1, 5);
 
 					THEN("the pokemon's current pp is unchanged")
 					{
@@ -2360,10 +2360,10 @@ SCENARIO("Pokemon")
 					"  Item IDs: [7]\n"
 					"  Non-Volatile Status IDs: [20, 21, 22, 23, 24]\n"
 					"  Moves:\n"
-					"    [0] ID: 10, PP: 5/15\n"
-					"    [1] ID: 11, PP: 10/20\n"
-					"    [2] ID: 12, PP: 15/25\n"
-					"    [3] ID: 13, PP: 20/30\n"
+					"    [0] ID: 10, PP: 5/5\n"
+					"    [1] ID: 11, PP: 10/10\n"
+					"    [2] ID: 12, PP: 15/15\n"
+					"    [3] ID: 13, PP: 20/20\n"
 					"}",
 				};
 

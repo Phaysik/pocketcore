@@ -1,8 +1,8 @@
 /*! @file battleHelpers.test.cpp
 	@brief C++ file for running tests for the Battle helper functions.
-	@date 11/16/2026
+	@date 11/23/2026
 	@since 0.12.45
-	@version 0.12.56
+	@version 0.12.57
 	@author Matthew Moore
 */
 
@@ -2817,19 +2817,19 @@ SCENARIO("Battle free function")
 						"      [0]:\n"
 						"        ID: 1\n"
 						"        Name: Pound\n"
-						"        PP: 5/15\n"
+						"        PP: 5/5\n"
 						"      [1]:\n"
 						"        ID: 2\n"
 						"        Name: Karate Chop\n"
-						"        PP: 10/20\n"
+						"        PP: 10/10\n"
 						"      [2]:\n"
 						"        ID: 14\n"
 						"        Name: Facade\n"
-						"        PP: 15/25\n"
+						"        PP: 15/15\n"
 						"      [3]:\n"
 						"        ID: 15\n"
 						"        Name: Hydro Steam\n"
-						"        PP: 20/30\n"
+						"        PP: 20/20\n"
 						"  }\n"
 						"  Stat Stages {\n"
 						"    Attack: 0\n"
@@ -3048,19 +3048,19 @@ SCENARIO("Battle free function")
 						"      [0]:\n"
 						"        ID: 1\n"
 						"        Name: Pound\n"
-						"        PP: 5/15\n"
+						"        PP: 5/5\n"
 						"      [1]:\n"
 						"        ID: 2\n"
 						"        Name: Karate Chop\n"
-						"        PP: 10/20\n"
+						"        PP: 10/10\n"
 						"      [2]:\n"
 						"        ID: 14\n"
 						"        Name: Facade\n"
-						"        PP: 15/25\n"
+						"        PP: 15/15\n"
 						"      [3]:\n"
 						"        ID: 15\n"
 						"        Name: Hydro Steam\n"
-						"        PP: 20/30\n"
+						"        PP: 20/20\n"
 						"  }\n"
 						"  Stat Stages {\n"
 						"    Attack: 0\n"
